@@ -9,6 +9,9 @@ import loompy as lp
 from loompy import LoomConnection
 import hashlib
 import os
+import math
+import numpy as np
+import time
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
@@ -27,7 +30,12 @@ class SCopeSearch(SCope_pb2_grpc.SCopeSearchServicer):
     def add_loom_connection(self, partial_md5_hash, loom):
         self.active_loom_connections[partial_md5_hash] = loom
 
-    def load_loom_file(self, loom_file_path):
+    def load_loom_file(self, partial_md5_hash, loom_file_path):
+        loom = lp.connect(loom_file_path)
+        self.add_loom_connection(partial_md5_hash, loom)
+        return loom
+
+    def get_loom_connection(self, loom_file_path):
         if not os.path.exists(loom_file_path):
             raise ValueError('The file located at ' +
                              loom_file_path + ' does not exist.')
@@ -37,21 +45,28 @@ class SCopeSearch(SCope_pb2_grpc.SCopeSearchServicer):
         if partial_md5_hash in self.active_loom_connections:
             return self.active_loom_connections[partial_md5_hash]
         else:
-            loom = lp.connect(loom_file_path)
-            self.add_loom_connection(partial_md5_hash, loom)
-            return loom
+            print("Debug: loading the loom file from " + loom_file_path + "...")
+            return self.load_loom_file(partial_md5_hash, loom_file_path)
 
-    def Add(self, request, context):
-        return SCope_pb2.AddReply(n1=request.n1 + request.n2)
+    def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True):
+        loom = self.get_loom_connection(loom_file_path)
+        print("Debug: getting expression of " + gene_symbol + "...")
+        gene_expr = loom[loom.Gene == gene_symbol, :]
+        if log_transform:
+            print("Debug: log-transforming gene expression...")
+            return np.log2(gene_expr + 1)[0]
+        return gene_expr
 
-    def Substract(self, request, context):
-        return SCope_pb2.SubstractReply(n1=request.n1 - request.n2)
-
-    def Multiply(self, request, context):
-        return SCope_pb2.MultiplyReply(n1=request.n1 * request.n2)
-
-    def Divide(self, request, context):
-        return SCope_pb2.DivideReply(f1=request.n1 / request.n2)
+    def Query(self, request, context):
+        start_time = time.time()
+        if request.feature == "gene":
+            gene_expr = self.get_gene_expression(
+                loom_file_path=request.filepath, gene_symbol=request.entry, log_transform=request.logtransform)
+            reply = SCope_pb2.QueryReply(v=gene_expr)
+        else:
+            reply = []
+        print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
+        return reply
 
 
 def serve():
