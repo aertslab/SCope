@@ -21,53 +21,16 @@ option objc_class_prefix = "HLW";
 package scope;
 
 service SCopeSearch {
-
-rpc Add (AddRequest) returns (AddReply) {}
-rpc Substract (SubstractRequest) returns (SubstractReply) {}
-rpc Multiply (MultiplyRequest) returns (MultiplyReply) {}
-rpc Divide (DivideRequest) returns (DivideReply) {}
+rpc Query (QueryRequest) returns (QueryReply) {}
 }
 
-message AddRequest{
-
-int32 n1=1;
-int32 n2=2;
+message QueryRequest {
+string filepath=1;
+string entry=2;
+string feature=3;
+bool logtransform=4;
 }
 
-message AddReply{
-
-int32 n1=1;
-}
-
-message SubstractRequest{
-
-int32 n1=1;
-int32 n2=2;
-}
-
-message SubstractReply{
-
-int32 n1=1;
-}
-
-message MultiplyRequest{
-
-int32 n1=1;
-int32 n2=2;
-}
-
-message MultiplyReply{
-
-int32 n1=1;
-}
-
-message DivideRequest{
-
-int32 n1=1;
-int32 n2=2;
-}
-
-message DivideReply{
-
-float f1=1;
+message QueryReply{
+repeated float v=1;
 }
