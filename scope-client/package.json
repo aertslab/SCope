@@ -1,0 +1,60 @@
+{
+  "name": "scope-client",
+  "version": "0.0.1",
+  "description": "Visualization tool for single-cell datasets",
+  "main": "index.js",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development webpack-dev-server --hot",
+    "build": "cross-env NODE_ENV=production webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "single-cell",
+    "gene",
+    "regulatory",
+    "networks",
+    "visualization"
+  ],
+  "author": "M.D.W",
+  "license": "ISC",
+  "dependencies": {
+    "@types/google-protobuf": "^3.2.7",
+    "bundle-loader": "^0.5.5",
+    "file-loader": "^1.1.5",
+    "grpc-bus-websocket-client": "^0.3.1",
+    "grpc-caller": "^0.3.1",
+    "grpc-tools": "^1.6.6",
+    "grpc-web-client": "^0.3.1",
+    "msgpack": "^1.0.2",
+    "protobufjs": "^6.8.3",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-router-dom": "^4.2.2",
+    "scriptjs": "^2.5.8",
+    "semantic-ui-css": "^2.2.12",
+    "ts-protoc-gen": "^0.4.0",
+    "url-loader": "^0.6.2",
+    "zeromq": "^4.6.0",
+    "zerorpc": "^0.9.7"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "child_process": "^1.0.2",
+    "cross-env": "^5.1.1",
+    "css-loader": "^0.28.7",
+    "file-system": "^2.2.2",
+    "google-protobuf": "^3.5.0",
+    "grpc": "^1.7.2",
+    "grpc-loader": "^2.0.1",
+    "react-hot-loader": "^3.1.3",
+    "script-loader": "^0.7.2",
+    "semantic-ui-react": "^0.77.0",
+    "style-loader": "^0.19.0",
+    "webpack": "^3.9.1",
+    "webpack-dev-server": "^2.9.5",
+    "webpack-node-externals": "^1.6.0"
+  }
+}
