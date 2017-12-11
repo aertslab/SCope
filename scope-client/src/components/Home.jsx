@@ -1,17 +1,9 @@
 import React, { Component } from 'react';
-// import proto from './../proto/SCope.proto';
-import { Button } from 'semantic-ui-react'
-// import scope from '../../src/static/SCope-wp-bundle.js'; 
-// var grpc = require('grpc');
-// var protobuf = require("protobufjs/minimal");
-// require('script-loader!../../src/static/SCope-bundle.exec.js');
-// import * as bundle from '../../src/static/SCope-bundle.js';
-// var zerorpc = require("zerorpc");
-// var client = new zerorpc.Client();
-// import { SCope } from "../../src/proto/SCope_pb_service";
-// import { CellColorByFeaturesRequest, FeatureRequest } from "../../src/proto/SCope_pb";
-
-// import { grpc, Code, Metadata } from "grpc-web-client";
+import { Route } from 'react-router';
+import { Switch, Router } from 'react-router-dom'
+import { Sidebar, Segment, Button, Menu, Image, Icon, Header, Grid, Divider, Modal, Label } from 'semantic-ui-react'
+import QueryBox from './QueryBox'
+import FileReaderInput from 'react-file-reader-input';
 
 // https://github.com/styled-components/styled-components
 
@@ -19,66 +11,115 @@ export default class Home extends Component {
 
     constructor(props) {
         super(props);
-        let GBC = require("grpc-bus-websocket-client");
-        let params = {
-            lfp: "/home/luna.kuleuven.be/u0113561/Desktop/FlyBrainProject/FB_20170919_LD.loom"
-            , f: ["gene", "gene", "gene"]
-            , e: ["Gad1", "VGlut", "VAChT"]
-            , lte: true
+        this.state = {
+            visible: true
         };
-        new GBC("ws://localhost:8081/", 'src/proto/SCope.proto', { scope: { SCope: 'localhost:50052' } })
-            .connect()
-            .then(function (gbc) {
-                gbc.services.scope.SCope.getCellColorByFeatures(params, function (err, res) {
-                    console.log(res.v[0]);
-                });
+        this.GBC = require("grpc-bus-websocket-client");
+        this.gbwcCxn = new this.GBC("ws://localhost:8081/", 'src/proto/s.proto', { scope: { Main: 'localhost:50052' } }).connect()
+        // let params = {
+        //     lfp: "/home/luna.kuleuven.be/u0113561/Desktop/FlyBrainProject/FB_20170919_LD.loom"
+        //     , f: ["gene", "gene", "gene"]
+        //     , e: ["Gad1", "VGlut", "VAChT"]
+        //     , lte: true
+        // };
+        // new GBC("ws://localhost:8081/", 'src/proto/s.proto', { scope: { Main: 'localhost:50052' } })
+        //     .connect()
+        //     .then(function (gbc) {
+        //         gbc.services.scope.Main.getCellColorByFeatures(params, function (err, res) {
+        //             console.log(res.v[0]);
+        //         });
+        //     });
+    }
+
+    toggleVisibility = () => this.setState({ visible: !this.state.visible })
+
+    uploadLoomFile = (e, results) => {
+        results.forEach(result => {
+            const [e, file] = result;
+            console.log(file)
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://localhost:50051/');
+            xhr.upload.addEventListener('progress', function (e) {
+                console.log("Data uploaded: " + e.loaded + "/" + e.total)
+                // progress.value = e.loaded;
+                // progress.max = e.total;
             });
-        // console.log(SCope)
-        // console.log(CellColorByFeaturesRequest)
-        // const cellColorByFeaturesRequest = new CellColorByFeaturesRequest();
-        // cellColorByFeaturesRequest.setLfp("/home/luna.kuleuven.be/u0113561/Desktop/FlyBrainProject/FB_20170919_LD.loom");
-        // cellColorByFeaturesRequest.setFList(["gene", "gene", "gene"])
-        // cellColorByFeaturesRequest.setEList(["Gad1", "VGlut", "VAChT"])
-        // cellColorByFeaturesRequest.setLte(true)
-        // // console.log(cellColorByFeaturesRequest)
-        // grpc.unary(SCope.getCCByF, {
-        //     debug: true,// optional - enable to output events to console.log
-        //     request: cCByFRequest,
-        //     host: 'http://localhost:8081',
-        //     onEnd: res => {
-        //         console.log(res)
-        //         // const { status, statusMessage, headers, message, trailers } = res;
-        //         // console.log("Status:"+statusMessage)
-        //         // if (status === Code.OK && message) {
-        //         //     console.log("all ok. got book: ", message.toObject());
-        //         // }
-        //     }
-        // });
-        // client.connect("tcp://127.0.0.1:4242");
-        // //calls the method on the python object
-        // client.invoke("getCellColorByFeatures", "/home/luna.kuleuven.be/u0113561/Desktop/FlyBrainProject/FB_20170919_LD.loom"
-        // , "Gad1", "VGlut","VAChT", true, function(error, reply, streaming) {
-        //     if(error){
-        //         console.log("ERROR: ", error);
-        //     } else {
-        //         console.log(reply);
-        //     }
-        // });
-        // const SCope = protobuf
-        // const caller = require('grpc-caller')
-        // const PROTO_PATH = path.resolve(__dirname, '../proto/SCope.proto')
-        // console.log(proto);
-        // let PROTO_PATH = '../proto/SCope.proto';
-        // var grpc = require('grpc');
-        // let scope_proto = grpc.load(PROTO_PATH).scope;
-        // this.scope = new scope_proto.SCope('localhost:50050', grpc.credentials.createInsecure());
+
+            xhr.addEventListener('load', function () {
+                alert('Loom file successfully uploaded !');
+            });
+
+            var form = new FormData();
+            form.append('file', file);
+            console.log(file.name)
+            xhr.setRequestHeader("Content-Disposition", "attachment;filename=" + file.name)
+            xhr.send(form);
+        });
     }
 
     render() {
 
+        const header = { margin: 0 }
+        const title = { fontSize: 14, width: 150 }
+        const screenHeight = window.screen.availHeight
+        const mainHeight = screenHeight - 100
+
         return (
             <div>
-                <Button>Hellow Wooorld!!</Button>
+                <div style={header}>
+                    <Menu secondary attached="top">
+                        <Menu.Item onClick={() => this.setState({ visible: !this.state.visible })} style={{ width: 50 }} >
+                            <Icon name="sidebar" />
+                        </Menu.Item>
+                        <Menu.Item style={title}>
+                            <Icon name="leaf" /> SCope
+                        </Menu.Item>
+                        <Menu.Item>
+                            <QueryBox gbwccxn={this.gbwcCxn}/>
+                        </Menu.Item>
+                    </Menu>
+                    <Sidebar.Pushable style={{ minHeight: '96vh' }}>
+                        <Sidebar as={Grid} animation='push' width="thin" visible={this.state.visible}>
+                            <Menu vertical>
+                                <Menu.Item>
+                                    <Icon name='home' />Home
+                                </Menu.Item>
+                                <Menu.Item>
+                                    <Menu.Header>FCA DATASETS</Menu.Header>
+                                    <Menu.Menu>
+                                        <Menu.Item name='Fly Brain' />
+                                    </Menu.Menu>
+                                    <Divider hidden />
+                                    <Menu.Header>MY DATASETS</Menu.Header>
+                                    <Menu.Menu>
+                                        <Modal trigger={<Menu.Item><Icon name='attach' />Import .loom</Menu.Item>}>
+                                            <Modal.Header>Import a .loom file</Modal.Header>
+                                            <Modal.Content image>
+                                                <Modal.Description>
+                                                    <Label>Upload a File:</Label>
+                                                    <FileReaderInput as="binary" id="my-file-input"
+                                                        onChange={this.uploadLoomFile}>
+                                                        <Button>Select a file!</Button>
+                                                    </FileReaderInput>
+                                                    <Button>Upload!</Button>
+                                                </Modal.Description>
+                                            </Modal.Content>
+                                        </Modal>
+                                        <Menu.Item>
+                                            <Icon name='linkify' />Url .loom
+                                        </Menu.Item>
+                                    </Menu.Menu>
+                                </Menu.Item>
+                            </Menu>
+                        </Sidebar>
+                        <Sidebar.Pusher>
+                            <Segment basic>
+                                <Header as='h3'>Home</Header>
+                                {/* <Image src='/assets/images/wireframe/paragraph.png' /> */}
+                            </Segment>
+                        </Sidebar.Pusher>
+                    </Sidebar.Pushable>
+                </div>
             </div>
         );
     }
