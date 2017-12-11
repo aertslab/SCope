@@ -13,7 +13,7 @@ export default class Viewer extends Component {
 
     render() {
         return (
-            <div ref={(el) => this.viewerCanvas = el} id="gameCanvas"></div>
+            <div ref={(el) => this.viewer = el} id="viewer"></div>
         );
     }
 }
