@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 import time
 import json
+import glob
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
@@ -116,6 +117,10 @@ class SCope(s_pb2_grpc.MainServicer):
         # request content
         c = self.get_coordinates(request.lfp)
         return s_pb2.CoordinateReply(x=c["x"],y=c["y"])
+
+    def getMyLooms(self, request, context):
+        os.chdir("my-looms/")
+        return s_pb2.MyLoomListReply(l=glob.glob("*.loom"))
 
 
 def serve():

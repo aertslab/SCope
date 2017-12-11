@@ -20,6 +20,7 @@ service Main {
 rpc getCellColorByFeatures (CellColorByFeaturesRequest) returns (CellColorByFeaturesReply) {}
 rpc getFeatures (FeatureRequest) returns (FeatureReply) {}
 rpc getCoordinates (CoordinateRequest) returns (CoordinateReply) {}
+rpc getMyLooms (MyLoomListRequest) returns (MyLoomListReply) {}
 }
 
 message CellColorByFeaturesRequest {
@@ -50,4 +51,11 @@ message CoordinateReply {
 repeated float x=1;
 repeated float y=2;
 }
+
+message MyLoomListRequest {}
+
+message MyLoomListReply {
+repeated string l=1;
+}
+
 
