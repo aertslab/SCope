@@ -19,6 +19,7 @@ package scope;
 service Main {
 rpc getCellColorByFeatures (CellColorByFeaturesRequest) returns (CellColorByFeaturesReply) {}
 rpc getFeatures (FeatureRequest) returns (FeatureReply) {}
+rpc getCoordinates (CoordinateRequest) returns (CoordinateReply) {}
 }
 
 message CellColorByFeaturesRequest {
@@ -39,5 +40,14 @@ string q=2;
 
 message FeatureReply {
 repeated string v=1;
+}
+
+message CoordinateRequest {
+string lfp=1;
+}
+
+message CoordinateReply {
+repeated float x=1;
+repeated float y=2;
 }
 
