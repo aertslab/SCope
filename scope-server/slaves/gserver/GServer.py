@@ -2,8 +2,8 @@ from concurrent import futures
 import time
 
 import grpc
-import SCope_pb2
-import SCope_pb2_grpc
+import s_pb2
+import s_pb2_grpc
 
 import loompy as lp
 from loompy import LoomConnection
@@ -13,13 +13,14 @@ import math
 import numpy as np
 import pandas as pd
 import time
+import json
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 hexarr = np.vectorize('{:02x}'.format)
 
 
-class SCope(SCope_pb2_grpc.SCopeServicer):
+class SCope(s_pb2_grpc.MainServicer):
 
     def __init__(self):
         self.active_loom_connections = {}
@@ -65,9 +66,15 @@ class SCope(SCope_pb2_grpc.SCopeServicer):
         # Genes
         # Filter the genes by the query
         res = list(filter(lambda x: x.startswith(query), loom.Gene))
-        print("Debug: "+ str(len(res)) +" genes matching '"+ query +"'")
+        # res_json = json.dumps({"gene": {"name": "gene", "results": list(map(lambda x: {"title":x,"description":"","image":"", "price":""}, res))}}, ensure_ascii=False)
+        # print(res_json)
+        print("Debug: " + str(len(res)) + " genes matching '" + query + "'")
         return res
 
+    def get_coordinates(self, loom_file_path):
+        loom = self.get_loom_connection(loom_file_path)
+        return {"x": loom.col_attrs["_X"]
+              , "y": loom.col_attrs["_Y"]}
 
     def getCellColorByFeatures(self, request, context):
         # request content
@@ -90,23 +97,30 @@ class SCope(SCope_pb2_grpc.SCopeServicer):
             feature_2_val / (feature_2_val.max() * .8) * 255)
         feature_3_val_norm = np.round(
             feature_3_val / (feature_3_val.max() * .8) * 255)
-        rgb_df = pd.DataFrame(data={'red': feature_1_val_norm.astype('u1'), 'green': feature_2_val_norm.astype('u1'), 'blue': feature_3_val_norm.astype('u1')})
+        rgb_df = pd.DataFrame(data={'red': feature_1_val_norm.astype(
+            'u1'), 'green': feature_2_val_norm.astype('u1'), 'blue': feature_3_val_norm.astype('u1')})
         rgb_arr = rgb_df.as_matrix()
         # Convert to RGB to hexadecimal format
         hex_arr = hexarr(rgb_arr)
         hex_vec = np.core.defchararray.add(np.core.defchararray.add(
             hex_arr[:, 0], hex_arr[:, 1]), hex_arr[:, 2])
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        return SCope_pb2.CellColorByFeaturesReply(v=hex_vec)
+        return s_pb2.CellColorByFeaturesReply(v=hex_vec)
 
     def getFeatures(self, request, context):
         # request content
         #   - q   = query text
-        return SCope_pb2.FeatureReply(v=self.get_features(request.lfp, request.q))
+        return s_pb2.FeatureReply(v=self.get_features(request.lfp, request.q))
+
+    def getCoordinates(self, request, context):
+        # request content
+        c = self.get_coordinates(request.lfp)
+        return s_pb2.CoordinateReply(x=c["x"],y=c["y"])
+
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    SCope_pb2_grpc.add_SCopeServicer_to_server(SCope(), server)
+    s_pb2_grpc.add_MainServicer_to_server(SCope(), server)
     server.add_insecure_port('[::]:50052')
     print('Starting GServer on port 50052...')
     server.start()
