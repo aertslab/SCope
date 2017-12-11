@@ -24,6 +24,11 @@ class MainStub(object):
         request_serializer=s__pb2.FeatureRequest.SerializeToString,
         response_deserializer=s__pb2.FeatureReply.FromString,
         )
+    self.getCoordinates = channel.unary_unary(
+        '/scope.Main/getCoordinates',
+        request_serializer=s__pb2.CoordinateRequest.SerializeToString,
+        response_deserializer=s__pb2.CoordinateReply.FromString,
+        )
 
 
 class MainServicer(object):
@@ -44,6 +49,13 @@ class MainServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def getCoordinates(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_MainServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -56,6 +68,11 @@ def add_MainServicer_to_server(servicer, server):
           servicer.getFeatures,
           request_deserializer=s__pb2.FeatureRequest.FromString,
           response_serializer=s__pb2.FeatureReply.SerializeToString,
+      ),
+      'getCoordinates': grpc.unary_unary_rpc_method_handler(
+          servicer.getCoordinates,
+          request_deserializer=s__pb2.CoordinateRequest.FromString,
+          response_serializer=s__pb2.CoordinateReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
