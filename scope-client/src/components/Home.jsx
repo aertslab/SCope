@@ -16,19 +16,6 @@ export default class Home extends Component {
         };
         this.GBC = require("grpc-bus-websocket-client");
         this.gbwcCxn = new this.GBC("ws://localhost:8081/", 'src/proto/s.proto', { scope: { Main: 'localhost:50052' } }).connect()
-        // let params = {
-        //     lfp: "/home/luna.kuleuven.be/u0113561/Desktop/FlyBrainProject/FB_20170919_LD.loom"
-        //     , f: ["gene", "gene", "gene"]
-        //     , e: ["Gad1", "VGlut", "VAChT"]
-        //     , lte: true
-        // };
-        // new GBC("ws://localhost:8081/", 'src/proto/s.proto', { scope: { Main: 'localhost:50052' } })
-        //     .connect()
-        //     .then(function (gbc) {
-        //         gbc.services.scope.Main.getCellColorByFeatures(params, function (err, res) {
-        //             console.log(res.v[0]);
-        //         });
-        //     });
     }
 
     toggleVisibility = () => this.setState({ visible: !this.state.visible })
