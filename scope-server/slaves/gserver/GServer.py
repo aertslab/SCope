@@ -84,22 +84,38 @@ class SCope(s_pb2_grpc.MainServicer):
         #   - f     = features
         #   - lte   = log transform expression
         start_time = time.time()
-        # Get value of the given requested features (up to 3)
-        feature_1_val = self.get_gene_expression(
-            loom_file_path=request.lfp, gene_symbol=request.e[0], log_transform=request.lte)
-        feature_2_val = self.get_gene_expression(
-            loom_file_path=request.lfp, gene_symbol=request.e[1], log_transform=request.lte)
-        feature_3_val = self.get_gene_expression(
-            loom_file_path=request.lfp, gene_symbol=request.e[2], log_transform=request.lte)
-        # Normalize the value and convert to RGB values
-        feature_1_val_norm = np.round(
-            feature_1_val / (feature_1_val.max() * .8) * 255)
-        feature_2_val_norm = np.round(
-            feature_2_val / (feature_2_val.max() * .8) * 255)
-        feature_3_val_norm = np.round(
-            feature_3_val / (feature_3_val.max() * .8) * 255)
-        rgb_df = pd.DataFrame(data={'red': feature_1_val_norm.astype(
-            'u1'), 'green': feature_2_val_norm.astype('u1'), 'blue': feature_3_val_norm.astype('u1')})
+        n = 0
+        # Feature 1
+        if len(request.e[0]) > 0:
+            # Get value of the given requested feature
+            feature_1_val = self.get_gene_expression(
+                loom_file_path=request.lfp, gene_symbol=request.e[0], log_transform=request.lte)
+            # Normalize the value and convert to RGB values
+            feature_1_val_norm = np.round(
+                feature_1_val / (feature_1_val.max() * .8) * 255)
+            n = feature_1_val_norm.size
+        else:
+            feature_1_val_norm = 0
+        # Feature 2
+        if len(request.e[1]) > 0:
+            feature_2_val = self.get_gene_expression(
+                loom_file_path=request.lfp, gene_symbol=request.e[1], log_transform=request.lte)
+            feature_2_val_norm = np.round(
+                feature_2_val / (feature_2_val.max() * .8) * 255)
+        else:
+            feature_2_val_norm = np.zeros(n)
+        # Feature 3
+        if len(request.e[2]) > 0:
+            feature_3_val = self.get_gene_expression(
+                loom_file_path=request.lfp, gene_symbol=request.e[2], log_transform=request.lte)
+            feature_3_val_norm = np.round(
+                feature_3_val / (feature_3_val.max() * .8) * 255)
+        else:
+            feature_3_val_norm = np.zeros(n)
+        rgb_df = pd.DataFrame(data={'red': feature_1_val_norm.astype('u1')
+                                  , 'green': feature_2_val_norm.astype('u1')
+                                  , 'blue': feature_3_val_norm.astype('u1')})
+        rgb_df = rgb_df[['red','green','blue']]
         rgb_arr = rgb_df.as_matrix()
         # Convert to RGB to hexadecimal format
         hex_arr = hexarr(rgb_arr)
@@ -119,8 +135,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.CoordinateReply(x=c["x"],y=c["y"])
 
     def getMyLooms(self, request, context):
-        os.chdir("my-looms/")
-        return s_pb2.MyLoomListReply(l=glob.glob("*.loom"))
+        return s_pb2.MyLoomListReply(l=[f for f in os.listdir("my-looms/") if f.endswith('.loom')])
 
 
 def serve():
