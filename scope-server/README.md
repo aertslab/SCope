@@ -20,7 +20,7 @@ The gRPC service is defined by means of the protobuf file (.proto).
 
 The gRPC code is mode of 2 files: `*_pb2_grpc.py` and `*_pb2.py`. Those are generated using the following code:
 ```
-python -m grpc.tools.protoc  --python_out=. --grpc_python_out=. --proto_path=. SCope.proto
+python -m grpc.tools.protoc  --python_out=. --grpc_python_out=. --proto_path=. .proto
 ```
 
 ## G-Client
@@ -55,7 +55,7 @@ After GitHub conversation, to connect a Web application to gRPC server one need 
 - `grpc-web-proxy` from `grpc-web` GitHub repository was tried out but was not able to connect to the G-Server
 - `grpc-bus-websocket-client` from GitHub repository available at https://github.com/gabrielgrant/grpc-bus-websocket-proxy-server was finally the solution to the problem!
 
-## x Server
+## X-Server
 
 ### Install Proxy Server (GRPC-Bus WebSocket Proxy Server)
 

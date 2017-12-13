@@ -1,4 +1,4 @@
-# How to
+# SCope: Visualization of large-scale and high dimensional single cell RNA-seq data
 
 ## Launch
 
