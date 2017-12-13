@@ -2,7 +2,7 @@ const path = require('path')
 const webpack = require('webpack')
 
 let config = {
-    entry: './src/main.jsx',
+    entry: './src/main',
     output: {
         path: path.resolve(__dirname, 'assets'),
         filename: 'main.js',
@@ -14,7 +14,8 @@ let config = {
     module: {
         loaders: [{
             test: /\.(js|jsx)$/,
-            loader: ['react-hot-loader/webpack', 'babel-loader']
+            loader: ['react-hot-loader/webpack', 'babel-loader'],
+            exclude: /node_modules/
         },
         {
             test: /\.css$/,
