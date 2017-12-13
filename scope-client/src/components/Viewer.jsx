@@ -14,28 +14,37 @@ export default class Viewer extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            dataPoints: []
+            coord: {
+                x: [],
+                y: []
+            },
+            values: [],
         }
         this.w = parseInt(this.props.width);
         this.h = parseInt(this.props.height);
-        this.init()        
+        this.init()
         // Bind our animate and zoom functions
         this.update = this.update.bind(this);
         this.zoom = this.zoom.bind(this);
     }
 
     componentWillReceiveProps = (nextProps) => {
-        if(this.props.loom !== nextProps.loom) {
-            let query = { 
-                lfp: "/home/luna.kuleuven.be/u0113561/Desktop/FlyBrainProject/"+ nextProps.loom
+        if (this.props.loom !== nextProps.loom) {
+            let query = {
+                lfp: "/home/luna.kuleuven.be/u0113561/Desktop/FlyBrainProject/" + nextProps.loom
             };
             this.props.gbwccxn.then((gbc) => {
                 gbc.services.scope.Main.getCoordinates(query, (err, response) => {
                     // Empty the container if needed
-                    if(this.isContainterEmpty())
+                    if (this.isContainterEmpty())
                         this.emptyContainer()
-                    // Populate the container with the data
-                    this.initializedDataPoints(response)
+                    // Update the coordinates and remove all previous data points
+                    let c = {
+                        x: response.x,
+                        y: response.y
+                    }
+                    this.setState({ coord: c })
+                    this.initializedDataPoints()
                 });
             });
         }
@@ -43,21 +52,37 @@ export default class Viewer extends Component {
 
     shouldComponentUpdate = (nextProps, nextState) => {
         // Update the rendering only if feature is different 
-        if(this.props.feature === nextProps.feature)
+        if (this.props.feature === nextProps.feature)
             return false
         this.updateFeature(nextProps.feature)
         return true
+    }
+
+    componentDidMount() {
+        //Setup PIXI Canvas in componentDidMount
+        this.viewer.appendChild(this.renderer.view);
+        d3.select('#viewer').call(d3.zoom().scaleExtent([1, 8]).on("zoom", this.zoom))
     }
 
     render() {
         return (
             <Segment basic>
                 <Header as='h3'>Viewer</Header>
-                {/* {this.props.feature} */}
                 {/* <Image src='/assets/images/wireframe/paragraph.png' /> */}
                 <div ref={(el) => this.viewer = el} id="viewer"></div>
             </Segment>
         );
+    }
+
+    init = () => {
+        const v = d3.select('#viewer')
+        this.renderer = PIXI.autoDetectRenderer(this.w, this.h, { backgroundColor: 0xFFFFFF, antialias: true, view: v.node() });
+        this.stage = new PIXI.Container();
+        this.stage.width = this.w
+        this.stage.height = this.h
+        // Increase the maxSize if displaying more than 1500 (default) objects 
+        this.container = new PIXI.particles.ParticleContainer(200000, [false, true, false, false, true]);
+        this.stage.addChild(this.container);
     }
 
     zoom() {
@@ -72,91 +97,71 @@ export default class Viewer extends Component {
 
     isContainterEmpty = () => { return (this.container.children.length > 0) }
 
-    update = () => {
-        // if(c.x.length !== c.y.length)
-        //     throw "The coordinates does not have the same size."
-        // let dP = []
-        // for (let i = 0; i < c.x.length; ++i) {
-        //     let sprite = new PIXI.Sprite.fromImage("src/images/particle@2x.png");
-        //     const cx = c.x[i] * 15 + this.renderer.width / 2;
-        //     const cy = c.y[i] * 15 + this.renderer.height / 2;
-        //     sprite.position.x = cx;
-        //     sprite.position.y = cy;
-        //     sprite.scale.x = 2.5;
-        //     sprite.scale.y = 2.5;
-        //     sprite.color = "0x000000"
-        //     sprite.anchor = {x:.5, y:.5};
-        //     sprite.tint = sprite.color;
-        //     dP.push(sprite)
-        //     this.container.addChild(sprite);
-        // }
-        // this.setState({ dataPoints: dP })
-        // console.log("The coordinates have been loaded!")
-        // this.update();
+    makePoint = (x, y, c) => {
+        let sprite = new PIXI.Sprite.fromImage("src/images/particle@2x.png");
+        const cx = x * 15 + this.renderer.width / 2;
+        const cy = y * 15 + this.renderer.height / 2;
+        sprite.position.x = cx;
+        sprite.position.y = cy;
+        sprite.scale.x = 2.5;
+        sprite.scale.y = 2.5;
+        sprite.color = "0x"+c
+        sprite.anchor = { x: .5, y: .5 };
+        sprite.tint = sprite.color;
+        return sprite;
+    }
+
+    update() {
         this.renderer.render(this.stage);
         requestAnimationFrame(this.update);
     }
 
-    componentDidMount() {
-        //Setup PIXI Canvas in componentDidMount
-        this.viewer.appendChild(this.renderer.view);
-        d3.select('#viewer').call(d3.zoom().scaleExtent([1, 8]).on("zoom", this.zoom))
-    }
-
-    init = () => {
-        const v = d3.select('#viewer')
-        this.renderer = PIXI.autoDetectRenderer(this.w, this.h, {backgroundColor:0xFFFFFF, antialias: true, view: v.node() });
-        this.stage = new PIXI.Container();
-        this.stage.width = this.w
-        this.stage.height = this.h
-        // Increase the maxSize if displaying more than 1500 (default) objects 
-        this.container = new PIXI.particles.ParticleContainer(100000);
-        this.stage.addChild(this.container);
-    }
-
-    initializedDataPoints = (c) => {
-        if(c.x.length !== c.y.length)
+    initializedDataPoints = () => {
+        let c = this.state.coord
+        if (c.x.length !== c.y.length)
             throw "Coordinates does not have the same size."
-        let dP = []
         for (let i = 0; i < c.x.length; ++i) {
-            let sprite = new PIXI.Sprite.fromImage("src/images/particle@2x.png");
-            const cx = c.x[i] * 15 + this.renderer.width / 2;
-            const cy = c.y[i] * 15 + this.renderer.height / 2;
-            sprite.position.x = cx;
-            sprite.position.y = cy;
-            sprite.scale.x = 2.5;
-            sprite.scale.y = 2.5;
-            sprite.color = "0x000000"
-            sprite.anchor = {x:.5, y:.5};
-            sprite.tint = sprite.color;
-            dP.push(sprite)
-            this.container.addChild(sprite);
+            let point = this.makePoint(c.x[i], c.y[i], "000000")
+            this.container.addChild(point);
         }
-        this.setState({ dataPoints: dP })
         console.log("The coordinates have been loaded!")
-        this.update();
+        this.update()
     }
 
     updateFeature = (f) => {
-        let query = { lfp: "/home/luna.kuleuven.be/u0113561/Desktop/FlyBrainProject/"+ this.props.loom
-                    , f: ["gene","",""]
-                    , e: [f,"",""]
-                    , lte: true };
+        let query = {
+            lfp: "/home/luna.kuleuven.be/u0113561/Desktop/FlyBrainProject/" + this.props.loom
+            , f: ["gene", "", ""]
+            , e: [f, "", ""]
+            , lte: true
+        };
         this.props.gbwccxn.then((gbc) => {
             gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
-                this.updateDataPoints(response.v)
+                if(response !== null) {
+                    this.setState({ values: response.v })
+                    this.updateDataPoints()
+                }
             });
         });
     }
 
-    updateDataPoints = (c) => {
+    updateDataPoints = () => {
+        var t1 = performance.now();
         console.log("Rendering...")
-        // var dP = this.state.dataPoints
-        // for (let i = 0; i < dP.length; ++i) {
-        //     dP[i].color = "0x"+c[i]
-        //     dP[i].tint = dP[i].color;
-        // }
-        // this.setState({ dataPoints: dP })
+        let n = this.container.children.length
+        let c = this.state.coord
+        let v = this.state.values;
+        // Draw new data points
+        for (let i = 0; i < v.length; ++i) {
+            let point = this.makePoint(c.x[i], c.y[i], v[i])
+            this.container.addChildAt(point, n+i);
+        }
+        // Remove the first old data points (firstly rendered)
+        this.container.removeChildren(0, n)
+        this.update()
+        var t2 = performance.now();
+        let et = (t2 - t1).toPrecision(3)
+        console.log("Rendering took " + et + " milliseconds.")
     }
 
 }
