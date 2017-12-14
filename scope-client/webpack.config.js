@@ -1,12 +1,17 @@
 const path = require('path')
 const webpack = require('webpack')
+var WebpackGitHash = require('webpack-git-hash');
+var fs = require('fs')
+var pkg = require('./package.json')
 
 let config = {
-    entry: './src/main',
+    entry: './src/main.jsx',
     output: {
-        path: path.resolve(__dirname, 'assets'),
-        filename: 'main.js',
-        publicPath: '/assets/'
+        path: path.resolve('assets'),
+        // filename: 'main.js',
+        publicPath: '/assets/',
+        filename: pkg.name +'-'+ pkg.version +'.[githash].js',
+        chunkFilename: pkg.name +'-chunk.[githash].js'
     },
     resolve: {
         extensions: ['.js', '.jsx', '.css']
@@ -31,7 +36,16 @@ let config = {
             'process.env': {
                 NODE_ENV: JSON.stringify(process.env.NODE_ENV)
             }
+        }),
+        new WebpackGitHash({
+            cleanup: true,
+            callback: function(versionHash) {
+                var indexHtml = fs.readFileSync('./index.html', 'utf8');
+                indexHtml = indexHtml.replace(/src="\.\/assets\/.*\.js"/, 'src="./assets/'+ pkg.name +'-'+ pkg.version +'.' + versionHash + '.js"');
+                fs.writeFileSync('./index.html', indexHtml);
+            }
         })
+        
     ]
 }
 
