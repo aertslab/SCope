@@ -19,6 +19,11 @@ export default class Viewer extends Component {
                 y: []
             },
             values: [],
+            zoom: {
+                type: 'g',
+                k : 1,
+                transform : null
+            }
         }
         this.w = parseInt(this.props.width);
         this.h = parseInt(this.props.height);
@@ -59,7 +64,7 @@ export default class Viewer extends Component {
     }
 
     componentDidMount() {
-        //Setup PIXI Canvas in componentDidMount
+        // Setup PIXI Canvas in componentDidMount
         this.viewer.appendChild(this.renderer.view);
         d3.select('#viewer').call(d3.zoom().scaleExtent([1, 8]).on("zoom", this.zoom))
     }
@@ -68,7 +73,6 @@ export default class Viewer extends Component {
         return (
             <Segment basic>
                 <Header as='h3'>Viewer</Header>
-                {/* <Image src='/assets/images/wireframe/paragraph.png' /> */}
                 <div ref={(el) => this.viewer = el} id="viewer"></div>
             </Segment>
         );
@@ -85,13 +89,34 @@ export default class Viewer extends Component {
         this.stage.addChild(this.container);
     }
 
-    zoom() {
+    geometricZoom() {
         // https://bl.ocks.org/mwdchang/a88aa3f61f5a2243d15bb8a264aa432e
         this.container.position.x = d3.event.transform.x;
         this.container.position.y = d3.event.transform.y;
         this.container.scale.x = d3.event.transform.k;
         this.container.scale.y = d3.event.transform.k;
     }
+
+    semanticZoom() {
+        let t = d3.event.transform
+        this.container.position.x = t.x, this.container.position.y = t.y;
+        if(t.k !== this.state.zoom.k)
+            this.updateDataPoints(t);
+    }
+
+    isGeometricZoom() {
+        return this.state.zoom.type === "g";
+    }
+
+    zoom() {
+        if(this.isGeometricZoom()) {
+            this.geometricZoom()
+        } else {
+            this.semanticZoom()
+        }
+    }
+
+    // const context = d3.select('#viewer').node().firstChild.getContext('webgl');
 
     emptyContainer = () => { this.container.destroy(true) }
 
@@ -139,21 +164,23 @@ export default class Viewer extends Component {
             gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
                 if(response !== null) {
                     this.setState({ values: response.v })
-                    this.updateDataPoints()
+                    this.updateDataPoints(this.state.zoom.transform)
                 }
             });
         });
     }
 
-    updateDataPoints = () => {
+    updateDataPoints = (t) => {
+        var k = t === null ? 1 : t.k;
         var t1 = performance.now();
         console.log("Rendering...")
         let n = this.container.children.length
         let c = this.state.coord
         let v = this.state.values;
         // Draw new data points
-        for (let i = 0; i < v.length; ++i) {
-            let point = this.makePoint(c.x[i], c.y[i], v[i])
+        for (let i = 0; i < n; ++i) {
+            let p = t.apply([c.x[i], c.y[i]])
+            let point = this.makePoint(p[0], p[1], v[i])
             this.container.addChildAt(point, n+i);
         }
         // Remove the first old data points (firstly rendered)
@@ -162,6 +189,8 @@ export default class Viewer extends Component {
         var t2 = performance.now();
         let et = (t2 - t1).toPrecision(3)
         console.log("Rendering took " + et + " milliseconds.")
+        // Update the state
+        this.setState({ zoom: { k: k, transform: t } })
     }
 
 }
