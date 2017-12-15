@@ -79,6 +79,11 @@ export default class Viewer extends Component {
         );
     }
 
+    update() {
+        this.renderer.render(this.stage);
+        requestAnimationFrame(this.update);
+    }
+
     init = () => {
         const v = d3.select('#viewer')
         this.renderer = PIXI.autoDetectRenderer(this.w, this.h, { backgroundColor: 0xFFFFFF, antialias: true, view: v.node() });
@@ -91,32 +96,29 @@ export default class Viewer extends Component {
     }
 
     geometricZoom() {
-        // https://bl.ocks.org/mwdchang/a88aa3f61f5a2243d15bb8a264aa432e
         this.container.position.x = d3.event.transform.x;
         this.container.position.y = d3.event.transform.y;
         this.container.scale.x = d3.event.transform.k;
         this.container.scale.y = d3.event.transform.k;
     }
 
-    transformDataPoints(t) {
-        let dP = []
-        let c = this.state.coord
-        let n = this.container.children.length
+    transformDataPoints() {
+        let k = this.state.zoom.k, n = this.container.children.length
         for (let i = 0; i < n; ++i) {
-            let cx = (c.x[i] * 15 + this.renderer.width / 2) * t.k;
-            let cy = (c.y[i] * 15 + this.renderer.height / 2) * t.k;
+            let cx = this.state.coord.x[i] * 15 + this.renderer.width / 2;
+            let cy = this.state.coord.y[i] * 15 + this.renderer.height / 2;
             let p = this.state.dataPoints[i]
-            dP[i] = p.setTransform(cx, cy)
+            p.position.x = cx * k
+            p.position.y = cy * k
         }
-        this.update()
-        this.setState({ dataPoints: dP })
+        this.renderer.render(this.stage);
+        requestAnimationFrame(() => this.transformDataPoints()); // Important to transfer the state
     }
 
     semanticZoom() {
         let t = d3.event.transform
         this.container.position.x = t.x, this.container.position.y = t.y;
-        if(t.k !== this.state.zoom.k)
-            this.transformDataPoints(t);
+        this.setState({ zoom: { k: t.k } })
     }
 
     isGeometricZoom() {
@@ -130,8 +132,6 @@ export default class Viewer extends Component {
             this.semanticZoom()
         }
     }
-
-    // const context = d3.select('#viewer').node().firstChild.getContext('webgl');
 
     emptyContainer = () => { this.container.destroy(true) }
 
@@ -151,16 +151,11 @@ export default class Viewer extends Component {
         return sprite;
     }
 
-    update() {
-        this.renderer.render(this.stage);
-        requestAnimationFrame(this.update);
-    }
-
     initializedDataPoints = () => {
         let c = this.state.coord
         if (c.x.length !== c.y.length)
             throw "Coordinates does not have the same size."
-        let dP = []
+        let dP = [];
         for (let i = 0; i < c.x.length; ++i) {
             let point = this.makePoint(c.x[i], c.y[i], "000000")
             dP.push(point)
@@ -168,7 +163,31 @@ export default class Viewer extends Component {
         }
         this.setState({ dataPoints: dP })
         console.log("The coordinates have been loaded!")
+        // Start listening for events
+        this.transformDataPoints();
+    }
+
+    updateDataPoints = () => {
+        var t1 = performance.now();
+        console.log("Rendering...")
+        let pts = this.container.children; 
+        let n = pts.length, v = this.state.values;
+        // Draw new data points
+        let dP = []
+        for (let i = 0; i < n; ++i) {
+            let point = this.makePoint(pts[i].position.x, pts[i].position.y, v[i])
+            dP.push(point)
+            this.container.addChildAt(point, n+i);
+        }
+        // Remove the first old data points (firstly rendered)
+        this.container.removeChildren(0, n)
+        // Call for rendering
         this.update()
+        var t2 = performance.now();
+        let et = (t2 - t1).toPrecision(3)
+        console.log("Rendering took " + et + " milliseconds.")
+        // Update the state
+        this.setState({ dataPoints: dP })
     }
 
     updateFeature = (f) => {
@@ -182,32 +201,9 @@ export default class Viewer extends Component {
             gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
                 if(response !== null) {
                     this.setState({ values: response.v })
-                    this.updateDataPoints(this.state.zoom.transform)
+                    this.updateDataPoints()
                 }
             });
         });
     }
-
-    updateDataPoints = (t) => {
-        var k = t === null ? 1 : t.k;
-        var t1 = performance.now();
-        console.log("Rendering...")
-        let n = this.container.children.length, c = this.state.coord, v = this.state.values;
-        // Draw new data points
-        let dP = []
-        for (let i = 0; i < n; ++i) {
-            let point = this.makePoint(c.x[i], c.y[i], v[i])
-            dP.push(point)
-            this.container.addChildAt(point, n+i);
-        }
-        // Remove the first old data points (firstly rendered)
-        this.container.removeChildren(0, n)
-        this.update()
-        var t2 = performance.now();
-        let et = (t2 - t1).toPrecision(3)
-        console.log("Rendering took " + et + " milliseconds.")
-        // Update the state
-        this.setState({ dataPoints: dP, zoom: { k: k, transform: t } })
-    }
-
 }
