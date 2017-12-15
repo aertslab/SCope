@@ -20,10 +20,11 @@ export default class Viewer extends Component {
             },
             values: [],
             zoom: {
-                type: 'g',
+                type: 's',
                 k : 1,
                 transform : null
-            }
+            },
+            dataPoints: []
         }
         this.w = parseInt(this.props.width);
         this.h = parseInt(this.props.height);
@@ -36,7 +37,7 @@ export default class Viewer extends Component {
     componentWillReceiveProps = (nextProps) => {
         if (this.props.loom !== nextProps.loom) {
             let query = {
-                lfp: "/home/luna.kuleuven.be/u0113561/Desktop/FlyBrainProject/" + nextProps.loom
+                lfp: "my-looms/" + nextProps.loom
             };
             this.props.gbwccxn.then((gbc) => {
                 gbc.services.scope.Main.getCoordinates(query, (err, response) => {
@@ -97,11 +98,25 @@ export default class Viewer extends Component {
         this.container.scale.y = d3.event.transform.k;
     }
 
+    transformDataPoints(t) {
+        let dP = []
+        let c = this.state.coord
+        let n = this.container.children.length
+        for (let i = 0; i < n; ++i) {
+            let cx = (c.x[i] * 15 + this.renderer.width / 2) * t.k;
+            let cy = (c.y[i] * 15 + this.renderer.height / 2) * t.k;
+            let p = this.state.dataPoints[i]
+            dP[i] = p.setTransform(cx, cy)
+        }
+        this.update()
+        this.setState({ dataPoints: dP })
+    }
+
     semanticZoom() {
         let t = d3.event.transform
         this.container.position.x = t.x, this.container.position.y = t.y;
         if(t.k !== this.state.zoom.k)
-            this.updateDataPoints(t);
+            this.transformDataPoints(t);
     }
 
     isGeometricZoom() {
@@ -145,17 +160,20 @@ export default class Viewer extends Component {
         let c = this.state.coord
         if (c.x.length !== c.y.length)
             throw "Coordinates does not have the same size."
+        let dP = []
         for (let i = 0; i < c.x.length; ++i) {
             let point = this.makePoint(c.x[i], c.y[i], "000000")
+            dP.push(point)
             this.container.addChild(point);
         }
+        this.setState({ dataPoints: dP })
         console.log("The coordinates have been loaded!")
         this.update()
     }
 
     updateFeature = (f) => {
         let query = {
-            lfp: "/home/luna.kuleuven.be/u0113561/Desktop/FlyBrainProject/" + this.props.loom
+            lfp: "my-looms/" + this.props.loom
             , f: ["gene", "", ""]
             , e: [f, "", ""]
             , lte: true
@@ -174,13 +192,12 @@ export default class Viewer extends Component {
         var k = t === null ? 1 : t.k;
         var t1 = performance.now();
         console.log("Rendering...")
-        let n = this.container.children.length
-        let c = this.state.coord
-        let v = this.state.values;
+        let n = this.container.children.length, c = this.state.coord, v = this.state.values;
         // Draw new data points
+        let dP = []
         for (let i = 0; i < n; ++i) {
-            let p = t.apply([c.x[i], c.y[i]])
-            let point = this.makePoint(p[0], p[1], v[i])
+            let point = this.makePoint(c.x[i], c.y[i], v[i])
+            dP.push(point)
             this.container.addChildAt(point, n+i);
         }
         // Remove the first old data points (firstly rendered)
@@ -190,7 +207,7 @@ export default class Viewer extends Component {
         let et = (t2 - t1).toPrecision(3)
         console.log("Rendering took " + et + " milliseconds.")
         // Update the state
-        this.setState({ zoom: { k: k, transform: t } })
+        this.setState({ dataPoints: dP, zoom: { k: k, transform: t } })
     }
 
 }
