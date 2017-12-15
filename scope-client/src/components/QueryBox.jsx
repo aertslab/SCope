@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { Segment, Search, Label } from 'semantic-ui-react'
+import QuerySearch from './QuerySearch';
 
 export default class QueryBox extends React.Component {
 
@@ -31,7 +32,7 @@ export default class QueryBox extends React.Component {
         setTimeout(() => {
             if (this.state.value.length < 1) return this.resetComponent()
             let query = { 
-                lfp: "/home/luna.kuleuven.be/u0113561/Desktop/FlyBrainProject/FB_20170919_LD.loom"
+                lfp: 'my-looms/'+ this.props.loom
                 , q: this.state.value 
             };
             this.props.gbwccxn.then((gbc) => {
@@ -56,7 +57,7 @@ export default class QueryBox extends React.Component {
 
         return (
             <div>
-                <Search
+                <QuerySearch
                     category
                     loading={isLoading}
                     onResultSelect={this.handleResultSelect}
