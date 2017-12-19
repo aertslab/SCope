@@ -39,7 +39,10 @@ export default class Home extends Component {
         let query = {}
         this.gbwcCxn.then((gbc) => {
             gbc.services.scope.Main.getMyLooms(query, (err, response) => {
-                this.setState({ myLooms: response.l })
+                if(response !== null)
+                    this.setState({ myLooms: response.l })
+                else 
+                    console.log("No .loom files detected. You can import one via Import .loom link.")
             });
         });
     }
@@ -62,14 +65,10 @@ export default class Home extends Component {
             }
         });
 
-        // xhr.addEventListener('load', () => {
-        //     alert('Loom file,'+ f.name +', successfully uploaded !');
-        //     this.setState({ inputLoom: null })
-        // });
-
         let form = new FormData();
         form.append('file', f);
         xhr.setRequestHeader("Content-Disposition", "attachment;filename=" + f.name)
+        xhr.setRequestHeader("Content-Type", "application/x-hdf")
         xhr.send(form);
     }
 
@@ -94,7 +93,7 @@ export default class Home extends Component {
 
     selectFeature = (f) => {
         this.setState({slctdFeature: f})
-        console.log("Feature: "+f)
+        console.log("Feature selected: "+f)
     }
 
     render() {
@@ -105,14 +104,19 @@ export default class Home extends Component {
         const mainHeight = screenHeight - 100
         const sideBarWidth = 250
 
-        let myLooms = this.state.myLooms.map(
-            (l) => {
-                let icon = ""
-                if(l === this.state.activeLoom)
-                    icon = <Icon name="flag" />
-                return (<Menu.Item key={l} onClick={() => this.setActiveLoom(l)}>{l} {icon}</Menu.Item>)
-            }
-        )
+        let myLooms = () => {
+            if(this.state.myLooms.length > 0)
+                return this.state.myLooms.map(
+                    (l) => {
+                        let icon = ""
+                        if(l === this.state.activeLoom)
+                            icon = <Icon name="flag" />
+                        return (<Menu.Item key={l} onClick={() => this.setActiveLoom(l)}>{l} {icon}</Menu.Item>)
+                    }
+                )
+            else
+                return (<Menu.Item key="none">No .loom files</Menu.Item>)
+        }
 
         return (
             <div>
@@ -121,11 +125,11 @@ export default class Home extends Component {
                         <Menu.Item onClick={() => this.setState({ sideBarVisible: !this.state.sideBarVisible })} style={{ width: 50 }} >
                             <Icon name="sidebar" />
                         </Menu.Item>
-                        <Menu.Item style={title}>
+                        <Menu.Item style={title} style={{ width: 180 }}>
                             <Icon name="leaf" /> SCope
                         </Menu.Item>
                         <Menu.Item>
-                            <QueryBox gbwccxn={this.gbwcCxn} selectfeature={ this.selectFeature }/>
+                            <QueryBox gbwccxn={this.gbwcCxn} selectfeature={ this.selectFeature } loom={this.state.activeLoom} />
                         </Menu.Item>
                     </Menu>
                     <Sidebar.Pushable style={{ minHeight: '96vh' }}>
@@ -147,7 +151,7 @@ export default class Home extends Component {
                                     <Divider hidden />
                                     <Menu.Header>MY DATASETS</Menu.Header>
                                     <Menu.Menu>
-                                        { myLooms }
+                                        { myLooms() }
                                         <Modal trigger={<Menu.Item><Icon name='attach' />Import .loom</Menu.Item>}>
                                             <Modal.Header>Import a .loom file</Modal.Header>
                                             <Modal.Content image>
@@ -176,7 +180,12 @@ export default class Home extends Component {
                                 <Welcome/>
                             </ToggleDisplay>
                             <ToggleDisplay show={this.state.mainVisible["viewer"]}>
-                                <Viewer width={window.screen.availWidth - 400} height={window.screen.availHeight - 200} gbwccxn={this.gbwcCxn} loom={this.state.activeLoom} feature={this.state.slctdFeature}/>
+                                <Viewer width={window.screen.availWidth - 400} 
+                                        height={window.screen.availHeight - 200} 
+                                        maxp="200000"
+                                        gbwccxn={this.gbwcCxn} 
+                                        loom={this.state.activeLoom} 
+                                        feature={this.state.slctdFeature}/>
                             </ToggleDisplay>
                         </Sidebar.Pusher>
                     </Sidebar.Pushable>
