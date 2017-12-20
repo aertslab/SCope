@@ -28,6 +28,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def __init__(self):
         self.active_loom_connections = {}
+        self.loom_dir = os.path.join("data", "my-looms")
 
     @staticmethod
     def get_partial_md5_hash(file_path, last_n_kb):
@@ -37,6 +38,9 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def add_loom_connection(self, partial_md5_hash, loom):
         self.active_loom_connections[partial_md5_hash] = loom
+
+    def get_loom_filepath(self, loom_file_name):
+        return os.path.join(self.loom_dir, loom_file_name)
 
     def load_loom_file(self, partial_md5_hash, loom_file_path):
         loom = lp.connect(loom_file_path)
@@ -92,7 +96,7 @@ class SCope(s_pb2_grpc.MainServicer):
         if len(request.e[0]) > 0:
             # Get value of the given requested feature
             feature_1_val = self.get_gene_expression(
-                loom_file_path=request.lfp, gene_symbol=request.e[0], log_transform=request.lte)
+                loom_file_path=self.get_loom_filepath(request.lfp), gene_symbol=request.e[0], log_transform=request.lte)
             # Normalize the value and convert to RGB values
             feature_1_val_norm = np.round(
                 feature_1_val / (feature_1_val.max() * .8) * 255)
@@ -102,7 +106,7 @@ class SCope(s_pb2_grpc.MainServicer):
         # Feature 2
         if len(request.e[1]) > 0:
             feature_2_val = self.get_gene_expression(
-                loom_file_path=request.lfp, gene_symbol=request.e[1], log_transform=request.lte)
+                loom_file_path=self.get_loom_filepath(request.lfp), gene_symbol=request.e[1], log_transform=request.lte)
             feature_2_val_norm = np.round(
                 feature_2_val / (feature_2_val.max() * .8) * 255)
         else:
@@ -110,7 +114,7 @@ class SCope(s_pb2_grpc.MainServicer):
         # Feature 3
         if len(request.e[2]) > 0:
             feature_3_val = self.get_gene_expression(
-                loom_file_path=request.lfp, gene_symbol=request.e[2], log_transform=request.lte)
+                loom_file_path=self.get_loom_filepath(request.lfp), gene_symbol=request.e[2], log_transform=request.lte)
             feature_3_val_norm = np.round(
                 feature_3_val / (feature_3_val.max() * .8) * 255)
         else:
@@ -130,15 +134,15 @@ class SCope(s_pb2_grpc.MainServicer):
     def getFeatures(self, request, context):
         # request content
         #   - q   = query text
-        return s_pb2.FeatureReply(v=self.get_features(request.lfp, request.q))
+        return s_pb2.FeatureReply(v=self.get_features(self.get_loom_filepath(request.lfp), request.q))
 
     def getCoordinates(self, request, context):
         # request content
-        c = self.get_coordinates(request.lfp)
+        c = self.get_coordinates(self.get_loom_filepath(request.lfp))
         return s_pb2.CoordinateReply(x=c["x"],y=c["y"])
 
     def getMyLooms(self, request, context):
-        return s_pb2.MyLoomListReply(l=[f for f in os.listdir("my-looms/") if f.endswith('.loom')])
+        return s_pb2.MyLoomListReply(l=[f for f in os.listdir(self.loom_dir) if f.endswith('.loom')])
 
 
 def serve():
