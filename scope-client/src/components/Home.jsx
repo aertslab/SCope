@@ -15,27 +15,31 @@ export default class Home extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            sideBarVisible: true,
-            mainVisible: {"welcome":true, "viewer": false},
-            slctdFeature: "",
-            uploadLoomInput: null,
-            uploadProgress: 0,
-            myLooms: [],
-            activeLoom: null,
-            dataPoints: []
+        this.state = { sideBarVisible: true
+                     , mainVisible: {"welcome":true, "viewer": false}
+                     , slctdFeature: ""
+                     , uploadLoomModalOpen: false
+                     , uploadLoomInput: null
+                     , uploadProgress: 0
+                     , myLooms: []
+                     , activeLoom: null
+                     , dataPoints: []
         };
         this.GBC = require("grpc-bus-websocket-client");
         this.gbwcCxn = new this.GBC("ws://localhost:8081/", 'src/proto/s.proto', { scope: { Main: 'localhost:50052' } }).connect()
-        this.setMyLooms()
+        this.updateMyLooms()
         this.changeTo = this.changeTo.bind(this);
         this.selectFeature = this.selectFeature.bind(this);
         this.updateUploadProgress = this.updateUploadProgress.bind(this);
     }
 
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     toggleVisibility = () => this.setState({ sideBarVisible: !this.state.sideBarVisible })
 
-    setMyLooms = () => {
+    updateMyLooms = () => {
         let query = {}
         this.gbwcCxn.then((gbc) => {
             gbc.services.scope.Main.getMyLooms(query, (err, response) => {
@@ -61,14 +65,17 @@ export default class Home extends Component {
             this.updateUploadProgress(p)
             if(e.loaded == e.total) {
                 console.log('Loom file,'+ f.name +', successfully uploaded !');
-                this.setState({ inputLoom: null })
+                this.setState({ uploadLoomInput: null, updateUploadProgress: 0 })
+                this.handleOpenUploadLoomModal()
+                // Update the loom list
+                this.updateMyLooms()
             }
         });
 
         let form = new FormData();
         form.append('file', f);
         xhr.setRequestHeader("Content-Disposition", "attachment;filename=" + f.name)
-        xhr.setRequestHeader("Content-Type", "application/x-hdf")
+        // xhr.setRequestHeader("Content-Type", "application/x-hdf")
         xhr.send(form);
     }
 
@@ -96,6 +103,11 @@ export default class Home extends Component {
         console.log("Feature selected: "+f)
     }
 
+    handleOpenUploadLoomModal = () => {
+        this.setState({ uploadLoomModalOpen: !this.state.uploadLoomModalOpen })
+    }
+    
+
     render() {
 
         const header = { margin: 0 }
@@ -116,6 +128,23 @@ export default class Home extends Component {
                 )
             else
                 return (<Menu.Item key="none">No .loom files</Menu.Item>)
+        }
+
+        let progressBar = () => {
+            let tools = []
+            if(this.state.uploadProgress > 0) {
+                return (
+                    <Progress percent={this.state.uploadProgress} indicating progress></Progress>
+                )
+            }
+        }
+
+        let tools = () => {
+            let tools = []
+            if(this.state.activeLoom !== null) {
+                tools.push(<Menu.Item key='viewer' name='Viewer' onClick={() => this.changeTo('viewer')}/>);
+            }
+            return (tools)
         }
 
         return (
@@ -141,7 +170,7 @@ export default class Home extends Component {
                                 <Menu.Item>
                                     <Menu.Header>TOOLS</Menu.Header>
                                     <Menu.Menu>
-                                        <Menu.Item name='Viewer' onClick={() => this.changeTo('viewer')}/>
+                                        { tools() }
                                     </Menu.Menu>
                                     <Divider hidden />
                                     <Menu.Header>FCA DATASETS</Menu.Header>
@@ -152,7 +181,10 @@ export default class Home extends Component {
                                     <Menu.Header>MY DATASETS</Menu.Header>
                                     <Menu.Menu>
                                         { myLooms() }
-                                        <Modal trigger={<Menu.Item><Icon name='attach' />Import .loom</Menu.Item>}>
+                                        <Menu.Item onClick={() => this.handleOpenUploadLoomModal()}>
+                                            <Icon name='attach'/>Import .loom
+                                        </Menu.Item>
+                                        <Modal open={this.state.uploadLoomModalOpen} onClose={() => this.handleOpenUploadLoomModal()} closeIcon>
                                             <Modal.Header>Import a .loom file</Modal.Header>
                                             <Modal.Content image>
                                                 <Modal.Description>
@@ -162,9 +194,7 @@ export default class Home extends Component {
                                                         <Button>Select a file!</Button>
                                                     </FileReaderInput>
                                                     <Button onClick={this.uploadLoomFile}>Upload!</Button>
-                                                    <Progress percent={this.state.uploadProgress} indicating progress>
-                                                        The .loom file was successfully uploaded!
-                                                    </Progress>
+                                                    { progressBar() }
                                                 </Modal.Description>
                                             </Modal.Content>
                                         </Modal>
