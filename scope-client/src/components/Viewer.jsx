@@ -1,13 +1,8 @@
 import React, { Component } from 'react'
-// https://github.com/pixijs/pixi.js/issues/3204
 import * as PIXI from 'pixi.js'
 import * as d3 from 'd3';
 //
 import { Segment, Header } from 'semantic-ui-react'
-
-
-// Pixi.js Geometric Zooming: https://bl.ocks.org/pkerpedjiev/cf791db09ebcabaec0669362f4df1776
-// Pixi mouseover example: https://ugotsta.github.io/2015/06/21/Pixi-mouseover-example.html
 
 export default class Viewer extends Component {
 
@@ -24,10 +19,15 @@ export default class Viewer extends Component {
                 k : 1,
                 transform : null
             },
-            dataPoints: []
+            dataPoints: [],
+            lassoPoints: [],
+            mouse: {
+                down: false
+            }
         }
         this.w = parseInt(this.props.width);
         this.h = parseInt(this.props.height);
+        this.maxn = parseInt(this.props.maxp);
         this.init()
         // Bind our animate and zoom functions
         this.update = this.update.bind(this);
@@ -37,7 +37,7 @@ export default class Viewer extends Component {
     componentWillReceiveProps = (nextProps) => {
         if (this.props.loom !== nextProps.loom) {
             let query = {
-                lfp: "my-looms/" + nextProps.loom
+                lfp: nextProps.loom
             };
             this.props.gbwccxn.then((gbc) => {
                 gbc.services.scope.Main.getCoordinates(query, (err, response) => {
@@ -91,8 +91,34 @@ export default class Viewer extends Component {
         this.stage.width = this.w
         this.stage.height = this.h
         // Increase the maxSize if displaying more than 1500 (default) objects 
-        this.container = new PIXI.particles.ParticleContainer(200000, [false, true, false, false, true]);
+        this.container = new PIXI.particles.ParticleContainer(this.maxn, [false, true, false, false, true]);
         this.stage.addChild(this.container);
+        this.addLassoLayer()
+    }
+
+    addLassoLayer = () => {
+        this.lassoLayer = new PIXI.Container();
+        this.lassoLayer.width = this.w
+        this.lassoLayer.height = this.h
+        this.lassoLayer.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
+        this.lassoLayer.interactive = true;
+        this.lassoLayer.buttonMode = true;
+        this.lassoLayer.on("mousedown", (e) => {
+            // Init lasso Graphics
+            this.setState({ lassoPoints: [ ...this.state.lassoPoints, new PIXI.Point(e.data.global.x, e.data.global.y) ], mouse: { down: true } })
+            this.initLasso()
+        });
+        this.lassoLayer.on("mouseup", (e) => {
+            this.closeLasso()
+            this.setState({ lassoPoints: [], mouse: { down: false } })
+        });
+        this.lassoLayer.on("mousemove", (e) => {
+            if(this.state.mouse.down) {
+                this.setState({ lassoPoints: [ ...this.state.lassoPoints, new PIXI.Point(e.data.global.x, e.data.global.y) ] })
+                this.drawLasso()
+            }
+        });
+        this.stage.addChild(this.lassoLayer);
     }
 
     geometricZoom() {
@@ -126,11 +152,35 @@ export default class Viewer extends Component {
     }
 
     zoom() {
+        if(this.state.mouse.down)
+            return
         if(this.isGeometricZoom()) {
             this.geometricZoom()
         } else {
             this.semanticZoom()
         }
+    }
+
+    initLasso() {
+        this.lasso = new PIXI.Graphics();
+        this.lassoLayer.addChild(this.lasso);
+    }
+
+    drawLasso() {
+        this.lasso.clear();
+        this.lasso.lineStyle(2, "#000")
+        this.lasso.beginFill(0x8bc5ff, 0.4);
+        let lp = this.state.lassoPoints;
+        this.lasso.moveTo(lp[0].x,lp[0].y)
+        if(lp.length > 1) {
+            this.lasso.drawPolygon(this.state.lassoPoints)
+        }
+        this.lasso.endFill();
+    }
+
+    closeLasso() {
+        this.setState({ lassoPoints: [ ...this.state.lassoPoints, this.state.lassoPoints[0] ], mouse: { down: true } })
+        this.drawLasso()
     }
 
     emptyContainer = () => { this.container.destroy(true) }
@@ -192,7 +242,7 @@ export default class Viewer extends Component {
 
     updateFeature = (f) => {
         let query = {
-            lfp: "my-looms/" + this.props.loom
+            lfp: this.props.loom
             , f: ["gene", "", ""]
             , e: [f, "", ""]
             , lte: true
