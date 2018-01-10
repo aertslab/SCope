@@ -32,7 +32,7 @@ export default class QueryBox extends React.Component {
         setTimeout(() => {
             if (this.state.value.length < 1) return this.resetComponent()
             let query = { 
-                lfp: 'my-looms/'+ this.props.loom
+                lfp: this.props.loom
                 , q: this.state.value 
             };
             this.props.gbwccxn.then((gbc) => {
