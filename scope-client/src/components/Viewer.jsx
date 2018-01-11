@@ -106,11 +106,19 @@ export default class Viewer extends Component {
         this.lassoLayer.on("mousedown", (e) => {
             // Init lasso Graphics
             this.setState({ lassoPoints: [ ...this.state.lassoPoints, new PIXI.Point(e.data.global.x, e.data.global.y) ], mouse: { down: true } })
+            if (typeof this.lasso != "undefined") {
+                this.setState({ lassoPoints: [], mouse: { down: true } })
+                this.clearLasso()
+            }
             this.initLasso()
+
         });
         this.lassoLayer.on("mouseup", (e) => {
             this.closeLasso()
-            this.setState({ lassoPoints: [], mouse: { down: false } })
+            this.setState({ mouse: { down: false } })
+            // Clear the lasso
+            // this.lasso.clear()
+            this.getPointsInLasso()
         });
         this.lassoLayer.on("mousemove", (e) => {
             if(this.state.mouse.down) {
@@ -161,16 +169,33 @@ export default class Viewer extends Component {
         }
     }
 
+    getPointsInLasso() {
+        let pts = this.container.children, ptsInLasso = [], k = this.state.zoom.k
+        console.log(this.container)
+        if(pts.length < 2)
+            return
+        for (let i = 0; i < pts.length; ++i) {
+            // Calculate the position of the point in the lasso reference
+            let pointPosRelToLassoRef = this.lassoLayer.toLocal(pts[i], this.container)
+            if(this.lasso.containsPoint(pointPosRelToLassoRef)) {
+                ptsInLasso.push(i)
+            }
+        }
+        console.log("Number of selected points: "+ ptsInLasso.length)
+    }
+
     initLasso() {
         this.lasso = new PIXI.Graphics();
         this.lassoLayer.addChild(this.lasso);
     }
 
     drawLasso() {
-        this.lasso.clear();
+        let lp = this.state.lassoPoints;
+        if(lp.length < 2)
+            return
+        this.clearLasso();
         this.lasso.lineStyle(2, "#000")
         this.lasso.beginFill(0x8bc5ff, 0.4);
-        let lp = this.state.lassoPoints;
         this.lasso.moveTo(lp[0].x,lp[0].y)
         if(lp.length > 1) {
             this.lasso.drawPolygon(this.state.lassoPoints)
@@ -179,8 +204,12 @@ export default class Viewer extends Component {
     }
 
     closeLasso() {
-        this.setState({ lassoPoints: [ ...this.state.lassoPoints, this.state.lassoPoints[0] ], mouse: { down: true } })
+        this.setState({ lassoPoints: [ ...this.state.lassoPoints, this.state.lassoPoints[0] ] })
         this.drawLasso()
+    }
+
+    clearLasso() {
+        this.lasso.clear()
     }
 
     emptyContainer = () => { this.container.destroy(true) }
