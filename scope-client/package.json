@@ -1,6 +1,6 @@
 {
   "name": "scope-client",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "Visualization tool for single-cell datasets",
   "main": "index.js",
   "scripts": {
