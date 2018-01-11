@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import * as PIXI from 'pixi.js'
 import * as d3 from 'd3';
 //
-import { Segment, Header } from 'semantic-ui-react'
+import { Segment, Header, Icon, Menu } from 'semantic-ui-react'
 
 export default class Viewer extends Component {
 
@@ -14,16 +14,18 @@ export default class Viewer extends Component {
                 y: []
             },
             values: [],
+            dataPoints: [],
+            lassoPoints: [],
+            lassoSelections: [],
+            mouse: {
+                down: false
+            },
             zoom: {
                 type: 's',
                 k : 1,
                 transform : null
             },
-            dataPoints: [],
-            lassoPoints: [],
-            mouse: {
-                down: false
-            }
+            activeTool: 'lasso'
         }
         this.w = parseInt(this.props.width);
         this.h = parseInt(this.props.height);
@@ -58,9 +60,8 @@ export default class Viewer extends Component {
 
     shouldComponentUpdate = (nextProps, nextState) => {
         // Update the rendering only if feature is different 
-        if (this.props.feature === nextProps.feature)
-            return false
-        this.updateFeature(nextProps.feature)
+        if (this.props.feature !== nextProps.feature)
+            this.updateFeature(nextProps.feature)
         return true
     }
 
@@ -70,12 +71,27 @@ export default class Viewer extends Component {
         d3.select('#viewer').call(d3.zoom().scaleExtent([1, 8]).on("zoom", this.zoom))
     }
 
+    handleItemClick = (e, { name }) => this.setState({ activeTool: name })
+
     render() {
+
+        const { activeTool } = this.state
+
         return (
-            <Segment basic>
-                <Header as='h3'>Viewer</Header>
+            <div>
+                <Menu style={{position: "absolute", top: 0, left: 0, marginTop: 10, marginLeft: 10}}>
+                    <Menu.Item name='lasso' active={activeTool === 'lasso'} onClick={this.handleItemClick}>
+                        <div title="Lasso Tool" style={{ display: "block", width: 20, height: 20, backgroundImage: 'url("src/images/lasso.svg")', backgroundSize: "cover" }}></div>
+                    </Menu.Item>
+                    <Menu.Item name='s-zoom' active={activeTool === 's-zoom'} onClick={this.handleItemClick}>
+                        <div title="Semantic Zoom" style={{ display: "block", width: 20, height: 20, backgroundImage: 'url("src/images/expad-arrows.svg")', backgroundSize: "cover" }}></div>
+                    </Menu.Item>
+                    <Menu.Item name='g-zoom' active={activeTool === 'g-zoom'} onClick={this.handleItemClick}>
+                        <div title="Geometric Zoom" style={{ display: "block", width: 20, height: 20, backgroundImage: 'url("src/images/loupe.svg")', backgroundSize: "cover" }}></div>
+                    </Menu.Item>
+                </Menu>
                 <div ref={(el) => this.viewer = el} id="viewer"></div>
-            </Segment>
+            </div>
         );
     }
 
@@ -117,11 +133,10 @@ export default class Viewer extends Component {
             this.closeLasso()
             this.setState({ mouse: { down: false } })
             // Clear the lasso
-            // this.lasso.clear()
-            this.getPointsInLasso()
+            this.addLassoSelection(this.getPointsInLasso())
         });
         this.lassoLayer.on("mousemove", (e) => {
-            if(this.state.mouse.down) {
+            if(this.state.mouse.down & this.isLassoActive()) {
                 this.setState({ lassoPoints: [ ...this.state.lassoPoints, new PIXI.Point(e.data.global.x, e.data.global.y) ] })
                 this.drawLasso()
             }
@@ -155,23 +170,26 @@ export default class Viewer extends Component {
         this.setState({ zoom: { k: t.k } })
     }
 
-    isGeometricZoom() {
-        return this.state.zoom.type === "g";
+    isGeometricZoomActive() {
+        return this.state.activeTool === "g-zoom";
     }
 
     zoom() {
-        if(this.state.mouse.down)
+        if(this.state.mouse.down & this.isLassoActive())
             return
-        if(this.isGeometricZoom()) {
+        if(this.isGeometricZoomActive()) {
             this.geometricZoom()
         } else {
             this.semanticZoom()
         }
     }
 
+    addLassoSelection(lassoSelection) {
+        this.setState({ lassoSelections: [...this.state.lassoSelections, lassoSelection] })
+    }
+
     getPointsInLasso() {
         let pts = this.container.children, ptsInLasso = [], k = this.state.zoom.k
-        console.log(this.container)
         if(pts.length < 2)
             return
         for (let i = 0; i < pts.length; ++i) {
@@ -182,6 +200,11 @@ export default class Viewer extends Component {
             }
         }
         console.log("Number of selected points: "+ ptsInLasso.length)
+        return ptsInLasso
+    }
+
+    isLassoActive() {
+        return this.state.activeTool === "lasso";
     }
 
     initLasso() {
