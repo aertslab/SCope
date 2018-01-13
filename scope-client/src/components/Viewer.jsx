@@ -8,28 +8,29 @@ export default class Viewer extends Component {
 
     constructor(props) {
         super(props)
-        this.state = {
-            coord: {
-                x: [],
-                y: []
-            },
-            values: [],
-            dataPoints: [],
-            lassoPoints: [],
-            lassoSelections: [],
-            mouse: {
-                down: false
-            },
-            zoom: {
-                type: 's',
-                k : 1,
-                transform : null
-            },
-            activeTool: 'lasso'
+        this.state = { coord: { x: []
+                              , y: [] 
+                            }
+                     , values: []
+                     , dataPoints: []
+                     , lassoPoints: []
+                     , lassoSelections: []
+                     , mouse: { down: false }
+                     , zoom: { type: 's'
+                             , k : 1
+                             , transform : null
+                             }
+                     , activeTool: 's-zoom'
+                     , benchmark: { featureQuery: 0
+                                  , coordQuery: 0 }
         }
         this.w = parseInt(this.props.width);
         this.h = parseInt(this.props.height);
         this.maxn = parseInt(this.props.maxp);
+        // Cache
+        this.cache = {
+            pointTextures: {}
+        }
         this.init()
         // Bind our animate and zoom functions
         this.update = this.update.bind(this);
@@ -41,6 +42,7 @@ export default class Viewer extends Component {
             let query = {
                 lfp: nextProps.loom
             };
+            this.setState({ benchmark : { coordQuery: performance.now() } })
             this.props.gbwccxn.then((gbc) => {
                 gbc.services.scope.Main.getCoordinates(query, (err, response) => {
                     // Empty the container if needed
@@ -52,6 +54,7 @@ export default class Viewer extends Component {
                         y: response.y
                     }
                     this.setState({ coord: c })
+                    this.benchmark("Coordinates query", this.state.benchmark.coordQuery)
                     this.initializedDataPoints()
                 });
             });
@@ -152,11 +155,12 @@ export default class Viewer extends Component {
     }
 
     transformDataPoints() {
-        let k = this.state.zoom.k, n = this.container.children.length
+        let k = this.state.zoom.k, n = this.container.children.length, pts = this.container.children; 
         for (let i = 0; i < n; ++i) {
             let cx = this.state.coord.x[i] * 15 + this.renderer.width / 2;
             let cy = this.state.coord.y[i] * 15 + this.renderer.height / 2;
-            let p = this.state.dataPoints[i]
+            // let p = this.state.dataPoints[i]
+            let p = pts[i]
             p.position.x = cx * k
             p.position.y = cy * k
         }
@@ -239,18 +243,35 @@ export default class Viewer extends Component {
 
     isContainterEmpty = () => { return (this.container.children.length > 0) }
 
-    makePoint = (x, y, c) => {
-        let sprite = new PIXI.Sprite.fromImage("src/images/particle@2x.png");
+    setPointLocation(s, x, y) {
         const cx = x * 15 + this.renderer.width / 2;
         const cy = y * 15 + this.renderer.height / 2;
-        sprite.position.x = cx;
-        sprite.position.y = cy;
-        sprite.scale.x = 2.5;
-        sprite.scale.y = 2.5;
-        sprite.color = "0x"+c
-        sprite.anchor = { x: .5, y: .5 };
-        sprite.tint = sprite.color;
-        return sprite;
+        s.position.x = cx;
+        s.position.y = cy;
+        return s
+    }
+
+    makePointTexture = (c) => {
+        let s = new PIXI.Sprite.fromImage("src/images/particle@2x.png");
+        s.scale.x = 2.5;
+        s.scale.y = 2.5;
+        s.anchor = { x: .5, y: .5 };
+        // tint request a full 6 hexadecimal digits format  
+        if(c.length == 1)
+            s.tint = "0x"+Array(7).join(c)
+        else
+            s.tint = "0x"+Array(3).join(c[0]) + Array(3).join(c[1]) + Array(3).join(c[2])
+        return s;
+    }
+
+    getPointTexture(x, y, c) {
+        // let ts = this.cache.pointTextures
+        // if(ts.hasOwnProperty("#"+c))
+        //     return this.setPointLocation(ts["#"+c],x,y)
+        let n = this.setPointLocation(this.makePointTexture(c),x,y)
+        // ts["#"+c] = n
+        // this.cache.pointTextures = ts
+        return n
     }
 
     initializedDataPoints = () => {
@@ -259,11 +280,11 @@ export default class Viewer extends Component {
             throw "Coordinates does not have the same size."
         let dP = [];
         for (let i = 0; i < c.x.length; ++i) {
-            let point = this.makePoint(c.x[i], c.y[i], "000000")
-            dP.push(point)
+            let point = this.getPointTexture(c.x[i], c.y[i], "000000")
+            // dP.push(point)
             this.container.addChild(point);
         }
-        this.setState({ dataPoints: dP })
+        // this.setState({ dataPoints: dP })
         console.log("The coordinates have been loaded!")
         // Start listening for events
         this.transformDataPoints();
@@ -275,10 +296,10 @@ export default class Viewer extends Component {
         let pts = this.container.children; 
         let n = pts.length, v = this.state.values;
         // Draw new data points
-        let dP = []
+        // let dP = []
         for (let i = 0; i < n; ++i) {
-            let point = this.makePoint(pts[i].position.x, pts[i].position.y, v[i])
-            dP.push(point)
+            let point = this.getPointTexture(pts[i].position.x, pts[i].position.y, v[i])
+            // dP.push(point)
             this.container.addChildAt(point, n+i);
         }
         // Remove the first old data points (firstly rendered)
@@ -289,7 +310,7 @@ export default class Viewer extends Component {
         let et = (t2 - t1).toPrecision(3)
         console.log("Rendering took " + et + " milliseconds.")
         // Update the state
-        this.setState({ dataPoints: dP })
+        // this.setState({ dataPoints: dP })
     }
 
     updateFeature = (f) => {
@@ -299,13 +320,21 @@ export default class Viewer extends Component {
             , e: [f, "", ""]
             , lte: true
         };
+        this.setState({ benchmark : { geneQuery: performance.now() } })
         this.props.gbwccxn.then((gbc) => {
             gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
                 if(response !== null) {
                     this.setState({ values: response.v })
+                    this.benchmark("Feature query", this.state.benchmark.geneQuery)
                     this.updateDataPoints()
                 }
             });
         });
+    }
+
+    benchmark(msg,stateObj) {
+        var t2 = performance.now();
+        let et = (t2 - stateObj).toPrecision(3)
+        console.log(msg +" took " + et + " milliseconds.")
     }
 }
