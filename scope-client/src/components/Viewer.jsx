@@ -12,7 +12,6 @@ export default class Viewer extends Component {
                               , y: [] 
                             }
                      , values: []
-                     , dataPoints: []
                      , lassoPoints: []
                      , lassoSelections: []
                      , mouse: { down: false }
@@ -28,9 +27,9 @@ export default class Viewer extends Component {
         this.h = parseInt(this.props.height);
         this.maxn = parseInt(this.props.maxp);
         // Cache
-        this.cache = {
-            pointTextures: {}
-        }
+        this.cache = {}
+        // Graphics
+        this.graphics = { textures: { point: PIXI.Texture.fromImage("src/images/particle@2x.png") } }
         this.init()
         // Bind our animate and zoom functions
         this.update = this.update.bind(this);
@@ -159,7 +158,6 @@ export default class Viewer extends Component {
         for (let i = 0; i < n; ++i) {
             let cx = this.state.coord.x[i] * 15 + this.renderer.width / 2;
             let cy = this.state.coord.y[i] * 15 + this.renderer.height / 2;
-            // let p = this.state.dataPoints[i]
             let p = pts[i]
             p.position.x = cx * k
             p.position.y = cy * k
@@ -252,7 +250,7 @@ export default class Viewer extends Component {
     }
 
     makePointTexture = (c) => {
-        let s = new PIXI.Sprite.fromImage("src/images/particle@2x.png");
+        let s = new PIXI.Sprite(this.graphics.textures.point);
         s.scale.x = 2.5;
         s.scale.y = 2.5;
         s.anchor = { x: .5, y: .5 };
@@ -265,13 +263,7 @@ export default class Viewer extends Component {
     }
 
     getPointTexture(x, y, c) {
-        // let ts = this.cache.pointTextures
-        // if(ts.hasOwnProperty("#"+c))
-        //     return this.setPointLocation(ts["#"+c],x,y)
-        let n = this.setPointLocation(this.makePointTexture(c),x,y)
-        // ts["#"+c] = n
-        // this.cache.pointTextures = ts
-        return n
+        return this.setPointLocation(this.makePointTexture(c),x,y)
     }
 
     initializedDataPoints = () => {
@@ -281,10 +273,8 @@ export default class Viewer extends Component {
         let dP = [];
         for (let i = 0; i < c.x.length; ++i) {
             let point = this.getPointTexture(c.x[i], c.y[i], "000000")
-            // dP.push(point)
             this.container.addChild(point);
         }
-        // this.setState({ dataPoints: dP })
         console.log("The coordinates have been loaded!")
         // Start listening for events
         this.transformDataPoints();
@@ -296,10 +286,8 @@ export default class Viewer extends Component {
         let pts = this.container.children; 
         let n = pts.length, v = this.state.values;
         // Draw new data points
-        // let dP = []
         for (let i = 0; i < n; ++i) {
             let point = this.getPointTexture(pts[i].position.x, pts[i].position.y, v[i])
-            // dP.push(point)
             this.container.addChildAt(point, n+i);
         }
         // Remove the first old data points (firstly rendered)
@@ -309,8 +297,6 @@ export default class Viewer extends Component {
         var t2 = performance.now();
         let et = (t2 - t1).toPrecision(3)
         console.log("Rendering took " + et + " milliseconds.")
-        // Update the state
-        // this.setState({ dataPoints: dP })
     }
 
     updateFeature = (f) => {
