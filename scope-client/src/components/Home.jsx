@@ -24,6 +24,10 @@ export default class Home extends Component {
                      , myLooms: []
                      , activeLoom: null
                      , dataPoints: []
+                     , window: {
+                         innerWidth: 0,
+                         innerHeight: 0
+                     }
         };
         this.GBC = require("grpc-bus-websocket-client");
         this.gbwcCxn = new this.GBC("ws://localhost:8081/", 'src/proto/s.proto', { scope: { Main: 'localhost:50052' } }).connect()
@@ -75,7 +79,6 @@ export default class Home extends Component {
         let form = new FormData();
         form.append('file', f);
         xhr.setRequestHeader("Content-Disposition", "attachment;filename=" + f.name)
-        // xhr.setRequestHeader("Content-Type", "application/x-hdf")
         xhr.send(form);
     }
 
@@ -99,12 +102,19 @@ export default class Home extends Component {
     }
 
     selectFeature = (f) => {
-        this.setState({slctdFeature: f})
+        this.setState({ slctdFeature: f })
         console.log("Feature selected: "+f)
     }
 
     handleOpenUploadLoomModal = () => {
         this.setState({ uploadLoomModalOpen: !this.state.uploadLoomModalOpen })
+    }
+
+    componentDidMount() {
+        // window.addEventListener('resize', () => {
+        //     console.log(window.innerWidth)
+        //     this.setState({ window: { innerWidth: window.innerWidth, innerHeight: window.innerHeight } })
+        // });
     }
     
 
@@ -112,8 +122,6 @@ export default class Home extends Component {
 
         const header = { margin: 0 }
         const title = { fontSize: 14, width: 150 }
-        const screenHeight = window.screen.availHeight
-        const mainHeight = screenHeight - 100
         const sideBarWidth = 250
 
         let myLooms = () => {
@@ -155,10 +163,10 @@ export default class Home extends Component {
                             <Icon name="sidebar" />
                         </Menu.Item>
                         <Menu.Item style={title} style={{ width: 180 }}>
-                            <Icon name="leaf" /> SCope
+                            <Icon name="leaf" />SCope
                         </Menu.Item>
                         <Menu.Item>
-                            <QueryBox gbwccxn={this.gbwcCxn} selectfeature={ this.selectFeature } loom={this.state.activeLoom} />
+                            <QueryBox gbwccxn={this.gbwcCxn} homeref={this} loom={this.state.activeLoom} />
                         </Menu.Item>
                     </Menu>
                     <Sidebar.Pushable style={{ minHeight: '96vh' }}>
@@ -210,12 +218,12 @@ export default class Home extends Component {
                                 <Welcome/>
                             </ToggleDisplay>
                             <ToggleDisplay show={this.state.mainVisible["viewer"]}>
-                                <Viewer width={window.screen.availWidth - 400} 
-                                        height={window.screen.availHeight - 200} 
+                                <Viewer width={window.innerWidth - sideBarWidth} 
+                                        height={window.innerHeight} 
                                         maxp="200000"
                                         gbwccxn={this.gbwcCxn} 
                                         loom={this.state.activeLoom} 
-                                        feature={this.state.slctdFeature}/>
+                                        feature={this.state.slctdFeature} />
                             </ToggleDisplay>
                         </Sidebar.Pusher>
                     </Sidebar.Pushable>
