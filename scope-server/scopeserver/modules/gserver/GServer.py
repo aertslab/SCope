@@ -84,6 +84,11 @@ class SCope(s_pb2_grpc.MainServicer):
         return {"x": loom.col_attrs["_X"]
               , "y": loom.col_attrs["_Y"]}
 
+    def compressHexColor(self, a):
+        a = int(a, 16)
+        a_hex3d = hex(a>>20<<8|a>>8&240|a>>4&15)
+        return a_hex3d.replace("0x","")
+
     def getCellColorByFeatures(self, request, context):
         # request content
         #   - lfp   = .loom file path
@@ -128,8 +133,11 @@ class SCope(s_pb2_grpc.MainServicer):
         hex_arr = hexarr(rgb_arr)
         hex_vec = np.core.defchararray.add(np.core.defchararray.add(
             hex_arr[:, 0], hex_arr[:, 1]), hex_arr[:, 2])
+        to_hex_3d = np.vectorize(self.compressHexColor)
+        hex_3d_vec = to_hex_3d(hex_vec)
+        print(hex_3d_vec)
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        return s_pb2.CellColorByFeaturesReply(v=hex_vec)
+        return s_pb2.CellColorByFeaturesReply(v=hex_3d_vec)
 
     def getFeatures(self, request, context):
         # request content
