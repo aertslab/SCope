@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Route } from 'react-router';
 import { Switch, Router } from 'react-router-dom';
-import { Sidebar, Segment, Button, Menu, Image, Icon, Header, Grid, Divider, Modal, Label, Progress } from 'semantic-ui-react'
+import { Sidebar, Segment, Button, Menu, Image, Icon, Header, Grid, Divider, Modal, Label, Progress, Checkbox } from 'semantic-ui-react'
 import FileReaderInput from 'react-file-reader-input';
 import ToggleDisplay from 'react-toggle-display';
 // SCope imports
@@ -17,7 +17,9 @@ export default class Home extends Component {
         super(props);
         this.state = { sideBarVisible: true
                      , mainVisible: {"welcome":true, "viewer": false}
-                     , slctdFeature: ""
+                     , featureQuery: { i0: { type: "gene",value:"" }
+                                     , i1: { type: "gene", value: "" }
+                                     , i2: { type: "gene", value: "" } }
                      , uploadLoomModalOpen: false
                      , uploadLoomInput: null
                      , uploadProgress: 0
@@ -26,14 +28,16 @@ export default class Home extends Component {
                      , dataPoints: []
                      , window: {
                          innerWidth: 0,
-                         innerHeight: 0
+                         innerHeight: 0}
+                     , settings: {
+                        multiQueryOn: false
                      }
         };
         this.GBC = require("grpc-bus-websocket-client");
         this.gbwcCxn = new this.GBC("ws://localhost:8081/", 'src/proto/s.proto', { scope: { Main: 'localhost:50052' } }).connect()
         this.updateMyLooms()
         this.changeTo = this.changeTo.bind(this);
-        this.selectFeature = this.selectFeature.bind(this);
+        this.selectFeatureValue = this.selectFeatureValue.bind(this);
         this.updateUploadProgress = this.updateUploadProgress.bind(this);
     }
 
@@ -101,9 +105,9 @@ export default class Home extends Component {
         this.setState({ mainVisible: mv })
     }
 
-    selectFeature = (f) => {
-        this.setState({ slctdFeature: f })
-        console.log("Feature selected: "+f)
+    selectFeatureValue = (featureInputId, featureType, featureValue) => {
+        this.setState({ featureQuery: {...this.state.featureQuery, ...{ [featureInputId]: { type: featureType, value: featureValue } } } })
+        console.log("Feature value selected:"+ featureValue)
     }
 
     handleOpenUploadLoomModal = () => {
@@ -116,7 +120,6 @@ export default class Home extends Component {
         //     this.setState({ window: { innerWidth: window.innerWidth, innerHeight: window.innerHeight } })
         // });
     }
-    
 
     render() {
 
@@ -166,7 +169,7 @@ export default class Home extends Component {
                             <Icon name="leaf" />SCope
                         </Menu.Item>
                         <Menu.Item>
-                            <QueryBox gbwccxn={this.gbwcCxn} homeref={this} loom={this.state.activeLoom} />
+                            <QueryBox gbwccxn={this.gbwcCxn} homeref={this} loom={this.state.activeLoom} multiqueryon={this.state.settings.multiQueryOn.toString()}/>
                         </Menu.Item>
                     </Menu>
                     <Sidebar.Pushable style={{ minHeight: '96vh' }}>
@@ -210,6 +213,17 @@ export default class Home extends Component {
                                             <Icon name='linkify' />Url .loom
                                         </Menu.Item> */}
                                     </Menu.Menu>
+                                    <Divider hidden />
+                                    <Menu.Header>SETTINGS</Menu.Header>
+                                    <Menu.Menu>
+                                        <Menu.Item>
+                                            <div style={{display: 'inline-block', marginTop: 2}}>Multi query</div>
+                                            <Checkbox checked={this.state.settings.multiQueryOn} 
+                                                      toggle 
+                                                      style={{marginLeft: 5, float: 'right'}} 
+                                                      onChange={(e,d) => this.setState({ settings: { multiQueryOn: d.checked} })}/>
+                                        </Menu.Item>
+                                    </Menu.Menu>
                                 </Menu.Item>
                             </Menu>
                         </Sidebar>
@@ -223,7 +237,8 @@ export default class Home extends Component {
                                         maxp="200000"
                                         gbwccxn={this.gbwcCxn} 
                                         loom={this.state.activeLoom} 
-                                        feature={this.state.slctdFeature} />
+                                        featureQuery={this.state.featureQuery}
+                                        multiqueryon={this.state.settings.multiQueryOn.toString()} />
                             </ToggleDisplay>
                         </Sidebar.Pusher>
                     </Sidebar.Pushable>
