@@ -18,14 +18,8 @@ export default class QuerySearch extends Search {
             { key: 'annotation', text: 'annotation', value: 'annotation' }
         ]
 
-        let tag = () => {
-            if(this.props.multiqueryon == "true")
-                return <Label color={this.props.color} style={{position: 'relative', left: 10}}></Label>
-        }
-
         return (
             <div>
-                { tag() }
                 <Input iconPosition='left'
                        key={this.props.color} labelPosition='left' type='text' value={value} placeholder='Search...' action
                        onChange={this.handleSearchChange}

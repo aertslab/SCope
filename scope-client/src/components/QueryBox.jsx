@@ -14,18 +14,44 @@ export default class QueryBox extends React.Component {
     }
 
     render() {
+
+        let querySearchLabel = {
+            position: 'relative',
+            top: 1, 
+            left: 15, 
+            height: 38
+        }
+    
+        let noJitter = {
+            padding: 0
+        }
+
+        let hideLabel = () => {
+            if(this.isMultiQueryOn())
+                return "block"
+            return "none"
+        }
+
         let multiQueryInputs = [...Array((this.isMultiQueryOn() ? 3 : 1)).keys()].map((i) => {
             let key = "i"+ i
             return (
-                <Menu.Item key={key} style={{padding: 0}}>
-                    <QuerySearch key={key} color={this.colors[i]} {...this.props}/>
+                <Menu.Item key={key} style={noJitter}>
+                    <Menu secondary style={noJitter}>
+                        <Menu.Item style={{padding: 0, display: hideLabel()}}>
+                            <Label color={this.colors[i]} style={querySearchLabel}></Label>
+                        </Menu.Item>
+                        <Menu.Item style={noJitter}>
+                            <QuerySearch key={key} id={key} color={this.colors[i]} {...this.props}/>
+                        </Menu.Item>
+                    </Menu>
                 </Menu.Item>
             )
         })
+
         let searchButton = () => {
             if(this.isMultiQueryOn()) 
                 return (
-                    <Menu.Item style={{padding: 0}}>
+                    <Menu.Item style={noJitter}>
                         <Button type='submit' icon='search'></Button>
                     </Menu.Item>
                 )
