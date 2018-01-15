@@ -99,6 +99,7 @@ class SCope(s_pb2_grpc.MainServicer):
         n = 0
         # Feature 1
         if len(request.e[0]) > 0:
+            print("Feature 1 added")
             # Get value of the given requested feature
             feature_1_val = self.get_gene_expression(
                 loom_file_path=self.get_loom_filepath(request.lfp), gene_symbol=request.e[0], log_transform=request.lte)
@@ -110,6 +111,7 @@ class SCope(s_pb2_grpc.MainServicer):
             feature_1_val_norm = 0
         # Feature 2
         if len(request.e[1]) > 0:
+            print("Feature 2 added")
             feature_2_val = self.get_gene_expression(
                 loom_file_path=self.get_loom_filepath(request.lfp), gene_symbol=request.e[1], log_transform=request.lte)
             feature_2_val_norm = np.round(
@@ -118,6 +120,7 @@ class SCope(s_pb2_grpc.MainServicer):
             feature_2_val_norm = np.zeros(n)
         # Feature 3
         if len(request.e[2]) > 0:
+            print("Feature 3 added")
             feature_3_val = self.get_gene_expression(
                 loom_file_path=self.get_loom_filepath(request.lfp), gene_symbol=request.e[2], log_transform=request.lte)
             feature_3_val_norm = np.round(
@@ -133,11 +136,11 @@ class SCope(s_pb2_grpc.MainServicer):
         hex_arr = hexarr(rgb_arr)
         hex_vec = np.core.defchararray.add(np.core.defchararray.add(
             hex_arr[:, 0], hex_arr[:, 1]), hex_arr[:, 2])
-        to_hex_3d = np.vectorize(self.compressHexColor)
-        hex_3d_vec = to_hex_3d(hex_vec)
-        print(hex_3d_vec)
+        # Comress the color (not working as without)
+        # to_hex_3d = np.vectorize(self.compressHexColor)
+        # hex_3d_vec = to_hex_3d(hex_vec)
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        return s_pb2.CellColorByFeaturesReply(v=hex_3d_vec)
+        return s_pb2.CellColorByFeaturesReply(v=hex_vec)
 
     def getFeatures(self, request, context):
         # request content
