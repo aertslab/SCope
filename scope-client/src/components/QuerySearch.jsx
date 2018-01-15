@@ -23,7 +23,7 @@ export default class QuerySearch extends React.Component {
 
     handleResultSelect = (e, { result }) => {
         this.setState({ value: result.title })
-        this.props.homeref.selectFeature(result.title)
+        this.props.homeref.selectFeatureValue(this.props.id, "gene", result.title)
     }
 
     handleSearchChange = (e, { value }) => {
