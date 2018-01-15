@@ -31,8 +31,7 @@ export default class Viewer extends Component {
         // Graphics
         this.graphics = { textures: { point: PIXI.Texture.fromImage("src/images/particle@2x.png") } }
         this.init()
-        // Bind our animate and zoom functions
-        this.update = this.update.bind(this);
+        // Bind zoom function
         this.zoom = this.zoom.bind(this);
     }
 
@@ -62,8 +61,8 @@ export default class Viewer extends Component {
 
     shouldComponentUpdate = (nextProps, nextState) => {
         // Update the rendering only if feature is different 
-        if (this.props.feature !== nextProps.feature)
-            this.updateFeature(nextProps.feature)
+        if (this.props.featureQuery !== nextProps.featureQuery /*& this.props.multiqueryon === "false"*/)
+            this.queryFeature(nextProps.featureQuery)
         return true
     }
 
@@ -88,18 +87,13 @@ export default class Viewer extends Component {
                     <Menu.Item name='s-zoom' active={activeTool === 's-zoom'} onClick={this.handleItemClick}>
                         <div title="Semantic Zoom" style={{ display: "block", width: 20, height: 20, backgroundImage: 'url("src/images/expad-arrows.svg")', backgroundSize: "cover" }}></div>
                     </Menu.Item>
-                    <Menu.Item name='g-zoom' active={activeTool === 'g-zoom'} onClick={this.handleItemClick}>
+                    {/* <Menu.Item name='g-zoom' active={activeTool === 'g-zoom'} onClick={this.handleItemClick}>
                         <div title="Geometric Zoom" style={{ display: "block", width: 20, height: 20, backgroundImage: 'url("src/images/loupe.svg")', backgroundSize: "cover" }}></div>
-                    </Menu.Item>
+                    </Menu.Item> */}
                 </Menu>
                 <div ref={(el) => this.viewer = el} id="viewer"></div>
             </div>
         );
-    }
-
-    update() {
-        this.renderer.render(this.stage);
-        requestAnimationFrame(this.update);
     }
 
     init = () => {
@@ -124,12 +118,12 @@ export default class Viewer extends Component {
         this.lassoLayer.on("mousedown", (e) => {
             // Init lasso Graphics
             this.setState({ lassoPoints: [ ...this.state.lassoPoints, new PIXI.Point(e.data.global.x, e.data.global.y) ], mouse: { down: true } })
-            if (typeof this.lasso != "undefined") {
+            if (typeof this.lasso !== "undefined") {
                 this.setState({ lassoPoints: [], mouse: { down: true } })
                 this.clearLasso()
             }
+            console.log(this.state.mouse.down)
             this.initLasso()
-
         });
         this.lassoLayer.on("mouseup", (e) => {
             this.closeLasso()
@@ -138,6 +132,7 @@ export default class Viewer extends Component {
             this.addLassoSelection(this.getPointsInLasso())
         });
         this.lassoLayer.on("mousemove", (e) => {
+            // Bug in Firefox: this.state.mouse.down = false when left click pressed
             if(this.state.mouse.down & this.isLassoActive()) {
                 this.setState({ lassoPoints: [ ...this.state.lassoPoints, new PIXI.Point(e.data.global.x, e.data.global.y) ] })
                 this.drawLasso()
@@ -223,7 +218,7 @@ export default class Viewer extends Component {
         this.lasso.beginFill(0x8bc5ff, 0.4);
         this.lasso.moveTo(lp[0].x,lp[0].y)
         if(lp.length > 1) {
-            this.lasso.drawPolygon(this.state.lassoPoints)
+            this.lasso.drawPolygon(lp)
         }
         this.lasso.endFill();
     }
@@ -254,11 +249,15 @@ export default class Viewer extends Component {
         s.scale.x = 2.5;
         s.scale.y = 2.5;
         s.anchor = { x: .5, y: .5 };
+        s.tint = "0x"+ c
+        // Decompressing the color not working as without compression
         // tint request a full 6 hexadecimal digits format  
-        if(c.length == 1)
-            s.tint = "0x"+Array(7).join(c)
-        else
-            s.tint = "0x"+Array(3).join(c[0]) + Array(3).join(c[1]) + Array(3).join(c[2])
+        // if(c.length == 1)
+        //     s.tint = "0x"+ c.repeat(6)  
+        // else if(c.length == 2)
+        //     s.tint = "0x"+ c[0].repeat(3) + c[1].repeat(3)
+        // else
+        //     s.tint = "0x"+ c[0].repeat(2) + c[1].repeat(2) + c[2].repeat(2)
         return s;
     }
 
@@ -293,19 +292,20 @@ export default class Viewer extends Component {
         // Remove the first old data points (firstly rendered)
         this.container.removeChildren(0, n)
         // Call for rendering
-        this.update()
         var t2 = performance.now();
         let et = (t2 - t1).toPrecision(3)
         console.log("Rendering took " + et + " milliseconds.")
     }
 
-    updateFeature = (f) => {
+    queryFeature = (featureQuery) => {
+        console.log(featureQuery)
         let query = {
             lfp: this.props.loom
-            , f: ["gene", "", ""]
-            , e: [f, "", ""]
+            , f: [featureQuery.i0.type, featureQuery.i1.type, featureQuery.i2.type]
+            , e: [featureQuery.i0.value, featureQuery.i1.value, featureQuery.i2.value]
             , lte: true
         };
+        console.log(query)
         this.setState({ benchmark : { geneQuery: performance.now() } })
         this.props.gbwccxn.then((gbc) => {
             gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
