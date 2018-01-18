@@ -20,8 +20,7 @@ export default class Viewer extends Component {
                              , transform : null
                              }
                      , activeTool: 's-zoom'
-                     , benchmark: { featureQuery: 0
-                                  , coordQuery: 0 }
+                     , benchmark: { t1: 0, msg: "" }
         }
         this.w = parseInt(this.props.width);
         this.h = parseInt(this.props.height);
@@ -41,6 +40,7 @@ export default class Viewer extends Component {
                 lfp: nextProps.loom
             };
             this.setState({ benchmark : { coordQuery: performance.now() } })
+            this.startBenchmark("Query Coordinates")
             this.props.gbwccxn.then((gbc) => {
                 gbc.services.scope.Main.getCoordinates(query, (err, response) => {
                     // Empty the container if needed
@@ -52,7 +52,7 @@ export default class Viewer extends Component {
                         y: response.y
                     }
                     this.setState({ coord: c })
-                    this.benchmark("Coordinates query", this.state.benchmark.coordQuery)
+                    this.endBenchmark()
                     this.initializedDataPoints()
                 });
             });
@@ -122,14 +122,16 @@ export default class Viewer extends Component {
                 this.setState({ lassoPoints: [], mouse: { down: true } })
                 this.clearLasso()
             }
-            console.log(this.state.mouse.down)
             this.initLasso()
         });
         this.lassoLayer.on("mouseup", (e) => {
             this.closeLasso()
             this.setState({ mouse: { down: false } })
             // Clear the lasso
-            this.addLassoSelection(this.getPointsInLasso())
+            let lassoPoints = this.getPointsInLasso()
+            this.addLassoSelection(lassoPoints)
+            this.highlightPointsInLasso(lassoPoints)
+            this.clearLasso()
         });
         this.lassoLayer.on("mousemove", (e) => {
             // Bug in Firefox: this.state.mouse.down = false when left click pressed
@@ -183,6 +185,17 @@ export default class Viewer extends Component {
 
     addLassoSelection(lassoSelection) {
         this.setState({ lassoSelections: [...this.state.lassoSelections, lassoSelection] })
+    }
+
+    highlightPointsInLasso(lP) {
+        this.startBenchmark("Lasso Highlight")
+        let pts = this.container.children;
+        for (let i = 0; i < lP.length; ++i) {
+            let point = this.getPointTexture(pts[lP[i]].position.x, pts[lP[i]].position.y, "0000FF")
+            this.container.removeChildAt(lP[i]);
+            this.container.addChildAt(point, lP[i]);
+        }
+        this.endBenchmark()
     }
 
     getPointsInLasso() {
@@ -298,29 +311,31 @@ export default class Viewer extends Component {
     }
 
     queryFeature = (featureQuery) => {
-        console.log(featureQuery)
         let query = {
             lfp: this.props.loom
             , f: [featureQuery.i0.type, featureQuery.i1.type, featureQuery.i2.type]
             , e: [featureQuery.i0.value, featureQuery.i1.value, featureQuery.i2.value]
             , lte: true
         };
-        console.log(query)
-        this.setState({ benchmark : { geneQuery: performance.now() } })
+        this.startBenchmark("Query Feature")
         this.props.gbwccxn.then((gbc) => {
             gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
                 if(response !== null) {
                     this.setState({ values: response.v })
-                    this.benchmark("Feature query", this.state.benchmark.geneQuery)
+                    this.endBenchmark()
                     this.updateDataPoints()
                 }
             });
         });
     }
 
-    benchmark(msg,stateObj) {
+    startBenchmark(msg) {
+        this.setState({ benchmark: { t1: performance.now(), msg: msg } })
+    }
+
+    endBenchmark() {
         var t2 = performance.now();
-        let et = (t2 - stateObj).toPrecision(3)
-        console.log(msg +" took " + et + " milliseconds.")
+        let et = (t2 - this.state.benchmark.t1).toPrecision(3)
+        console.log("Benchmark - "+ this.state.benchmark.msg +": took " + et + " milliseconds.")
     }
 }
