@@ -1,9 +1,14 @@
 import React, { Component } from 'react';
 import { Route } from 'react-router';
 import { Switch, Router } from 'react-router-dom';
-import { Sidebar, Segment, Button, Menu, Image, Icon, Header, Grid, Divider, Modal, Label, Progress, Checkbox } from 'semantic-ui-react'
+import { Segment, Button, Menu, Image, Icon, Header, Grid, Divider, Modal, Label, Progress, Checkbox, Input } from 'semantic-ui-react'
 import FileReaderInput from 'react-file-reader-input';
 import ToggleDisplay from 'react-toggle-display';
+import SplitPane from 'react-split-pane';
+import styles from './styles.css';
+// import { Row } from 'react-flexbox-grid';
+import Sidebar from 'react-sidebar';
+
 // SCope imports
 import QueryBox from './QueryBox';
 import Welcome from './Welcome';
@@ -16,7 +21,7 @@ export default class Home extends Component {
     constructor(props) {
         super(props);
         this.state = { sideBarVisible: true
-                     , mainVisible: {"welcome":true, "viewer": false}
+                     , mainVisible: {"welcome":true, "sviewer": false, "rviewer": false}
                      , featureQuery: { i0: { type: "gene",value:"" }
                                      , i1: { type: "gene", value: "" }
                                      , i2: { type: "gene", value: "" } }
@@ -25,7 +30,6 @@ export default class Home extends Component {
                      , uploadProgress: 0
                      , myLooms: []
                      , activeLoom: null
-                     , dataPoints: []
                      , window: {
                          innerWidth: 0,
                          innerHeight: 0}
@@ -125,7 +129,14 @@ export default class Home extends Component {
 
         const header = { margin: 0 }
         const title = { fontSize: 14, width: 150 }
-        const sideBarWidth = 250
+        const leftSideBarWidth = 250, rightSidebarWidth = 200
+
+        let mainWidth = () => {
+            let w = window.innerWidth - rightSidebarWidth
+            if(this.state.sideBarVisible)
+                return w - leftSideBarWidth
+            return w
+        }
 
         let myLooms = () => {
             if(this.state.myLooms.length > 0)
@@ -153,11 +164,82 @@ export default class Home extends Component {
         let tools = () => {
             let tools = []
             if(this.state.activeLoom !== null) {
-                tools.push(<Menu.Item key='viewer' name='Viewer' onClick={() => this.changeTo('viewer')}/>);
+                tools.push(<Menu.Item key='sviewer' name='Simple Viewer' onClick={() => this.changeTo('sviewer')}/>);
+                tools.push(<Menu.Item key='rviewer' name='Regulon Viewer' onClick={() => this.changeTo('rviewer')}/>);
             }
             return (tools)
         }
 
+        let leftSidebarContent =  
+            <Menu vertical style={{width: leftSideBarWidth, height: '100%'}}>
+                <Menu.Item onClick={() => this.changeTo('welcome')}>
+                    <Icon name='home'/>Home
+                </Menu.Item>
+                <Menu.Item>
+                    <Menu.Header>TOOLS</Menu.Header>
+                    <Menu.Menu>
+                        { tools() }
+                    </Menu.Menu>
+                    <Divider hidden />
+                    <Menu.Header>FCA DATASETS</Menu.Header>
+                    <Menu.Menu>
+                        <Menu.Item name='Download' />
+                    </Menu.Menu>
+                    <Divider hidden />
+                    <Menu.Header>MY DATASETS</Menu.Header>
+                    <Menu.Menu>
+                        { myLooms() }
+                        <Menu.Item onClick={() => this.handleOpenUploadLoomModal()}>
+                            <Icon name='attach'/>Import .loom
+                        </Menu.Item>
+                        <Modal open={this.state.uploadLoomModalOpen} onClose={() => this.handleOpenUploadLoomModal()} closeIcon>
+                            <Modal.Header>Import a .loom file</Modal.Header>
+                            <Modal.Content image>
+                                <Modal.Description>
+                                    <Grid.Row>
+                                        <Input labelPosition='right'  type='text' placeholder={ this.state.uploadLoomInput != null ? this.state.uploadLoomInput.name : ""} action>
+                                            <Label>Upload a File</Label>
+                                            <input />
+                                            <FileReaderInput as="binary" id="my-file-input"
+                                                onChange={this.selectLoomFile}>
+                                                <Button>Select a file!</Button>
+                                            </FileReaderInput>
+                                        </Input>
+                                        {/* <Input style={{flex: 1}} label='Upload a File:' placeholder={ this.state.uploadLoomInput != null ? this.state.uploadLoomInput.name : ""} /> */}
+                                        <Button onClick={this.uploadLoomFile}>Upload!</Button>
+                                    </Grid.Row>
+                                    <Grid.Row>
+                                        { progressBar() }
+                                    </Grid.Row>
+                                </Modal.Description>
+                            </Modal.Content>
+                        </Modal>
+                        {/* <Menu.Item>
+                            <Icon name='linkify' />Url .loom
+                        </Menu.Item> */}
+                    </Menu.Menu>
+                    <Divider hidden />
+                    <Menu.Header>SETTINGS</Menu.Header>
+                    <Menu.Menu>
+                        <Menu.Item>
+                            <div style={{display: 'inline-block', marginTop: 2}}>Multi query</div>
+                            <Checkbox checked={this.state.settings.multiQueryOn} 
+                                    toggle 
+                                    style={{marginLeft: 5, float: 'right'}} 
+                                    onChange={(e,d) => this.setState({ settings: { multiQueryOn: d.checked} })}/>
+                        </Menu.Item>
+                    </Menu.Menu>
+                </Menu.Item>
+            </Menu>
+
+        let rightSidebarContent = 
+            <Menu vertical style={{height: '100%'}}>
+                <Menu.Item>
+                    <Menu.Header>CELL SELECTIONS</Menu.Header>
+                    <Icon name='home'/>Home
+                </Menu.Item>
+            </Menu>
+        
         return (
             <div>
                 <div style={header}>
@@ -169,79 +251,56 @@ export default class Home extends Component {
                             <Icon name="leaf" />SCope
                         </Menu.Item>
                         <Menu.Item>
-                            <QueryBox gbwccxn={this.gbwcCxn} homeref={this} loom={this.state.activeLoom} multiqueryon={this.state.settings.multiQueryOn.toString()}/>
+                            <QueryBox gbwccxn={this.gbwcCxn} 
+                                      homeref={this} 
+                                      loom={this.state.activeLoom} 
+                                      multiqueryon={this.state.settings.multiQueryOn.toString()}/>
                         </Menu.Item>
                     </Menu>
-                    <Sidebar.Pushable style={{ minHeight: '96vh' }}>
-                        <Sidebar as={Grid} style={{width: sideBarWidth}} animation='push' visible={this.state.sideBarVisible}>
-                            <Menu vertical style={{width: sideBarWidth}}>
-                                <Menu.Item onClick={() => this.changeTo('welcome')}>
-                                    <Icon name='home'/>Home
-                                </Menu.Item>
-                                <Menu.Item>
-                                    <Menu.Header>TOOLS</Menu.Header>
-                                    <Menu.Menu>
-                                        { tools() }
-                                    </Menu.Menu>
-                                    <Divider hidden />
-                                    <Menu.Header>FCA DATASETS</Menu.Header>
-                                    <Menu.Menu>
-                                        {/* <Menu.Item name='Fly Brain' /> */}
-                                    </Menu.Menu>
-                                    <Divider hidden />
-                                    <Menu.Header>MY DATASETS</Menu.Header>
-                                    <Menu.Menu>
-                                        { myLooms() }
-                                        <Menu.Item onClick={() => this.handleOpenUploadLoomModal()}>
-                                            <Icon name='attach'/>Import .loom
-                                        </Menu.Item>
-                                        <Modal open={this.state.uploadLoomModalOpen} onClose={() => this.handleOpenUploadLoomModal()} closeIcon>
-                                            <Modal.Header>Import a .loom file</Modal.Header>
-                                            <Modal.Content image>
-                                                <Modal.Description>
-                                                    <Label>Upload a File:</Label>{ this.state.uploadLoomInput != null ? this.state.uploadLoomInput.name : ""}
-                                                    <FileReaderInput as="binary" id="my-file-input"
-                                                        onChange={this.selectLoomFile}>
-                                                        <Button>Select a file!</Button>
-                                                    </FileReaderInput>
-                                                    <Button onClick={this.uploadLoomFile}>Upload!</Button>
-                                                    { progressBar() }
-                                                </Modal.Description>
-                                            </Modal.Content>
-                                        </Modal>
-                                        {/* <Menu.Item>
-                                            <Icon name='linkify' />Url .loom
-                                        </Menu.Item> */}
-                                    </Menu.Menu>
-                                    <Divider hidden />
-                                    <Menu.Header>SETTINGS</Menu.Header>
-                                    <Menu.Menu>
-                                        <Menu.Item>
-                                            <div style={{display: 'inline-block', marginTop: 2}}>Multi query</div>
-                                            <Checkbox checked={this.state.settings.multiQueryOn} 
-                                                      toggle 
-                                                      style={{marginLeft: 5, float: 'right'}} 
-                                                      onChange={(e,d) => this.setState({ settings: { multiQueryOn: d.checked} })}/>
-                                        </Menu.Item>
-                                    </Menu.Menu>
-                                </Menu.Item>
-                            </Menu>
-                        </Sidebar>
-                        <Sidebar.Pusher>
-                            <ToggleDisplay show={this.state.mainVisible["welcome"]}>
-                                <Welcome/>
-                            </ToggleDisplay>
-                            <ToggleDisplay show={this.state.mainVisible["viewer"]}>
-                                <Viewer width={window.innerWidth - sideBarWidth} 
+                    <Sidebar sidebar={leftSidebarContent}
+                        styles={{root: {top: 64}}}
+                        open={this.state.sideBarVisible}
+                        docked={this.state.sideBarVisible}>
+                        <Sidebar sidebar={rightSidebarContent}
+                            styles={{sidebar: {width: 200, overflow: 'hidden'}, content: {overflow: 'hidden'}}}
+                            open={true}
+                            docked={true}
+                            pullRight={true}
+                            shadow={true}>
+                            <div style={{padding: 10}}>
+                                <ToggleDisplay show={this.state.mainVisible["welcome"]}>
+                                    <Welcome/>
+                                </ToggleDisplay>
+                                <ToggleDisplay show={this.state.mainVisible["sviewer"]}> 
+                                    <Viewer width={mainWidth()} 
                                         height={window.innerHeight} 
                                         maxp="200000"
                                         gbwccxn={this.gbwcCxn} 
                                         loom={this.state.activeLoom} 
                                         featureQuery={this.state.featureQuery}
                                         multiqueryon={this.state.settings.multiQueryOn.toString()} />
-                            </ToggleDisplay>
-                        </Sidebar.Pusher>
-                    </Sidebar.Pushable>
+                                </ToggleDisplay>
+                                <ToggleDisplay show={this.state.mainVisible["rviewer"]}>
+                                    <Segment basic style={{width: mainWidth(), height: window.innerHeight-70}}>
+                                        <SplitPane split="vertical" percentage defaultSize="50%">
+                                            <div>
+                                                <SplitPane split="horizontal" percentage defaultSize="50%">
+                                                    <div>TOP LEFT</div>
+                                                    <div>BOTTOM LEFT</div>
+                                                </SplitPane>
+                                            </div>
+                                            <div>
+                                                <SplitPane split="horizontal" percentage defaultSize="50%">
+                                                <div>TOP RIGHT</div>
+                                                <div>BOTTOM RIGHT</div>
+                                                </SplitPane>
+                                            </div>
+                                        </SplitPane>
+                                    </Segment>
+                                </ToggleDisplay>
+                            </div>
+                        </Sidebar>
+                    </Sidebar>
                 </div>
             </div>
         );
