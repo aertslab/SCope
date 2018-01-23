@@ -13,6 +13,7 @@ import Sidebar from 'react-sidebar';
 import QueryBox from './QueryBox';
 import Welcome from './Welcome';
 import Viewer from './Viewer';
+import GridColumn from 'semantic-ui-react/dist/commonjs/collections/Grid/GridColumn';
 
 // https://github.com/styled-components/styled-components
 
@@ -25,6 +26,7 @@ export default class Home extends Component {
                      , featureQuery: { i0: { type: "gene",value:"" }
                                      , i1: { type: "gene", value: "" }
                                      , i2: { type: "gene", value: "" } }
+                     , lassoSelections: []
                      , uploadLoomModalOpen: false
                      , uploadLoomInput: null
                      , uploadProgress: 0
@@ -109,6 +111,25 @@ export default class Home extends Component {
         this.setState({ mainVisible: mv })
     }
 
+    getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '';
+        for (var i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    addLassoSelection(lassoPoints) {
+        let lassoSelection = {
+            id: this.state.lassoSelections.length == 0 ? 0: this.state.lassoSelections.length
+            , color: this.getRandomColor()
+            , points: lassoPoints
+        }
+        this.setState({ lassoSelections: [...this.state.lassoSelections, lassoSelection] })
+        return lassoSelection
+    }
+
     selectFeatureValue = (featureInputId, featureType, featureValue) => {
         this.setState({ featureQuery: {...this.state.featureQuery, ...{ [featureInputId]: { type: featureType, value: featureValue } } } })
         console.log("Feature value selected:"+ featureValue)
@@ -129,7 +150,7 @@ export default class Home extends Component {
 
         const header = { margin: 0 }
         const title = { fontSize: 14, width: 150 }
-        const leftSideBarWidth = 250, rightSidebarWidth = 200
+        const leftSideBarWidth = 250, rightSidebarWidth = 300
 
         let mainWidth = () => {
             let w = window.innerWidth - rightSidebarWidth
@@ -168,6 +189,34 @@ export default class Home extends Component {
                 tools.push(<Menu.Item key='rviewer' name='Regulon Viewer' onClick={() => this.changeTo('rviewer')}/>);
             }
             return (tools)
+        }
+
+        let lassoSelections = () => {
+            if(this.state.lassoSelections.length == 0)
+                return (<Grid><Grid.Column>No user's lasso selections"</Grid.Column></Grid>)
+            return (this.state.lassoSelections.map((lS) => {
+                    <Grid key={lS.id}>
+                        <Grid.Column style={{width: 20, marginLeft: 5, marginRight: 5, padding: 2}}>                       
+                            <Checkbox/>
+                        </Grid.Column>
+                        <Grid.Column style={{width: 95, padding: 2}}>
+                            Home
+                        </Grid.Column>
+                        <Grid.Column style={{width: 100, padding: 2}}>
+                            <Input
+                                size='mini'
+                                style={{width: 75, height: 10}}
+                                label={{ style: {backgroundColor: '#'+lS.color } }}
+                                labelPosition='right'
+                                placeholder={'#'+lS.color}
+                            />
+                        </Grid.Column>
+                        <Grid.Column style={{padding: 2}}>
+                            <Icon name='home' style={{display: 'inline'}}/>
+                            <Icon name='trash' style={{display: 'inline'}}/>
+                            <Icon name='download' style={{display: 'inline'}}/>
+                        </Grid.Column>
+                    </Grid>}))
         }
 
         let leftSidebarContent =  
@@ -224,19 +273,19 @@ export default class Home extends Component {
                         <Menu.Item>
                             <div style={{display: 'inline-block', marginTop: 2}}>Multi query</div>
                             <Checkbox checked={this.state.settings.multiQueryOn} 
-                                    toggle 
-                                    style={{marginLeft: 5, float: 'right'}} 
-                                    onChange={(e,d) => this.setState({ settings: { multiQueryOn: d.checked} })}/>
+                                      toggle 
+                                      style={{marginLeft: 5, float: 'right'}} 
+                                      onChange={(e,d) => this.setState({ settings: { multiQueryOn: d.checked} })}/>
                         </Menu.Item>
                     </Menu.Menu>
                 </Menu.Item>
             </Menu>
 
         let rightSidebarContent = 
-            <Menu vertical style={{height: '100%'}}>
+            <Menu vertical style={{width: rightSidebarWidth, height: '100%'}}>
                 <Menu.Item>
-                    <Menu.Header>CELL SELECTIONS</Menu.Header>
-                    <Icon name='home'/>Home
+                    <Menu.Header style={{marginBottom: 25}}>CELL SELECTIONS</Menu.Header>
+                    { lassoSelections() }
                 </Menu.Item>
             </Menu>
         
@@ -262,7 +311,7 @@ export default class Home extends Component {
                         open={this.state.sideBarVisible}
                         docked={this.state.sideBarVisible}>
                         <Sidebar sidebar={rightSidebarContent}
-                            styles={{sidebar: {width: 200, overflow: 'hidden'}, content: {overflow: 'hidden'}}}
+                            styles={{sidebar: {overflow: 'hidden'}, content: {overflow: 'hidden'}}}
                             open={true}
                             docked={true}
                             pullRight={true}
@@ -275,7 +324,7 @@ export default class Home extends Component {
                                     <Viewer width={mainWidth()} 
                                         height={window.innerHeight} 
                                         maxp="200000"
-                                        gbwccxn={this.gbwcCxn} 
+                                        homeref={this} 
                                         loom={this.state.activeLoom} 
                                         featureQuery={this.state.featureQuery}
                                         multiqueryon={this.state.settings.multiQueryOn.toString()} />

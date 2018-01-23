@@ -13,7 +13,6 @@ export default class Viewer extends Component {
                             }
                      , values: []
                      , lassoPoints: []
-                     , lassoSelections: []
                      , mouse: { down: false }
                      , zoom: { type: 's'
                              , k : 1
@@ -41,7 +40,7 @@ export default class Viewer extends Component {
             };
             this.setState({ benchmark : { coordQuery: performance.now() } })
             this.startBenchmark("Query Coordinates")
-            this.props.gbwccxn.then((gbc) => {
+            this.props.homeref.gbwcCxn.then((gbc) => {
                 gbc.services.scope.Main.getCoordinates(query, (err, response) => {
                     // Empty the container if needed
                     if (this.isContainterEmpty())
@@ -106,7 +105,7 @@ export default class Viewer extends Component {
         this.container = new PIXI.particles.ParticleContainer(this.maxn, [false, true, false, false, true]);
         this.stage.addChild(this.container);
         this.addLassoLayer()
-    }
+    }      
 
     addLassoLayer = () => {
         this.lassoLayer = new PIXI.Container();
@@ -127,11 +126,13 @@ export default class Viewer extends Component {
         this.lassoLayer.on("mouseup", (e) => {
             this.closeLasso()
             this.setState({ mouse: { down: false } })
-            // Clear the lasso
             let lassoPoints = this.getPointsInLasso()
-            this.addLassoSelection(lassoPoints)
-            this.highlightPointsInLasso(lassoPoints)
-            this.clearLasso()
+            if(lassoPoints.length > 1) {
+                let lS = this.props.homeref.addLassoSelection(lassoPoints)
+                this.highlightPointsInLasso()
+                // Clear the lasso
+                this.clearLasso()
+            }
         });
         this.lassoLayer.on("mousemove", (e) => {
             // Bug in Firefox: this.state.mouse.down = false when left click pressed
@@ -183,18 +184,16 @@ export default class Viewer extends Component {
         }
     }
 
-    addLassoSelection(lassoSelection) {
-        this.setState({ lassoSelections: [...this.state.lassoSelections, lassoSelection] })
-    }
-
-    highlightPointsInLasso(lP) {
+    highlightPointsInLasso() {
         this.startBenchmark("Lasso Highlight")
         let pts = this.container.children;
-        for (let i = 0; i < lP.length; ++i) {
-            let point = this.getPointTexture(pts[lP[i]].position.x, pts[lP[i]].position.y, "0000FF")
-            this.container.removeChildAt(lP[i]);
-            this.container.addChildAt(point, lP[i]);
-        }
+        this.props.homeref.state.lassoSelections.forEach((e) => {
+            for (let i = 0; i < e.points.length; ++i) {
+                let point = this.getPointTexture(pts[e.points[i]].position.x, pts[e.points[i]].position.y, e.color)
+                this.container.removeChildAt(e.points[i]);
+                this.container.addChildAt(point, e.points[i]);
+            }
+        })
         this.endBenchmark()
     }
 
@@ -318,7 +317,7 @@ export default class Viewer extends Component {
             , lte: true
         };
         this.startBenchmark("Query Feature")
-        this.props.gbwccxn.then((gbc) => {
+        this.props.homeref.gbwcCxn.then((gbc) => {
             gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
                 if(response !== null) {
                     this.setState({ values: response.v })
