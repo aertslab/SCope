@@ -95,103 +95,51 @@ export default class Viewer extends Component {
         );
     }
 
-    init = () => {
-        const v = d3.select('#viewer')
-        this.renderer = PIXI.autoDetectRenderer(this.w, this.h, { backgroundColor: 0xFFFFFF, antialias: true, view: v.node() });
-        this.stage = new PIXI.Container();
-        this.stage.width = this.w
-        this.stage.height = this.h
-        // Increase the maxSize if displaying more than 1500 (default) objects 
-        this.container = new PIXI.particles.ParticleContainer(this.maxn, [false, true, false, false, true]);
-        this.stage.addChild(this.container);
-        this.addLassoLayer()
-    }      
-
-    addLassoLayer = () => {
-        this.lassoLayer = new PIXI.Container();
-        this.lassoLayer.width = this.w
-        this.lassoLayer.height = this.h
-        this.lassoLayer.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
-        this.lassoLayer.interactive = true;
-        this.lassoLayer.buttonMode = true;
-        this.lassoLayer.on("mousedown", (e) => {
-            // Init lasso Graphics
-            this.setState({ lassoPoints: [ ...this.state.lassoPoints, new PIXI.Point(e.data.global.x, e.data.global.y) ], mouse: { down: true } })
-            if (typeof this.lasso !== "undefined") {
-                this.setState({ lassoPoints: [], mouse: { down: true } })
-                this.clearLasso()
-            }
-            this.initLasso()
-        });
-        this.lassoLayer.on("mouseup", (e) => {
-            this.closeLasso()
-            this.setState({ mouse: { down: false } })
-            let lassoPoints = this.getPointsInLasso()
-            if(lassoPoints.length > 1) {
-                let lS = this.props.homeref.addLassoSelection(lassoPoints)
-                this.highlightPointsInLasso()
-                // Clear the lasso
-                this.clearLasso()
-            }
-        });
-        this.lassoLayer.on("mousemove", (e) => {
-            // Bug in Firefox: this.state.mouse.down = false when left click pressed
-            if(this.state.mouse.down & this.isLassoActive()) {
-                this.setState({ lassoPoints: [ ...this.state.lassoPoints, new PIXI.Point(e.data.global.x, e.data.global.y) ] })
-                this.drawLasso()
-            }
-        });
-        this.stage.addChild(this.lassoLayer);
+    makePointTexture = (c) => {
+        let s = new PIXI.Sprite(this.graphics.textures.point);
+        s.scale.x = 2.5;
+        s.scale.y = 2.5;
+        s.anchor = { x: .5, y: .5 };
+        s.tint = "0x"+ c
+        // Decompressing the color not working as without compression
+        // tint request a full 6 hexadecimal digits format  
+        // if(c.length == 1)
+        //     s.tint = "0x"+ c.repeat(6)  
+        // else if(c.length == 2)
+        //     s.tint = "0x"+ c[0].repeat(3) + c[1].repeat(3)
+        // else
+        //     s.tint = "0x"+ c[0].repeat(2) + c[1].repeat(2) + c[2].repeat(2)
+        return s;
     }
 
-    geometricZoom() {
-        this.container.position.x = d3.event.transform.x;
-        this.container.position.y = d3.event.transform.y;
-        this.container.scale.x = d3.event.transform.k;
-        this.container.scale.y = d3.event.transform.k;
+    setPointLocation(s, x, y) {
+        const cx = x * 15 + this.renderer.width / 2;
+        const cy = y * 15 + this.renderer.height / 2;
+        s.position.x = cx;
+        s.position.y = cy;
+        return s
     }
 
-    transformDataPoints() {
-        let k = this.state.zoom.k, n = this.container.children.length, pts = this.container.children; 
-        for (let i = 0; i < n; ++i) {
-            let cx = this.state.coord.x[i] * 15 + this.renderer.width / 2;
-            let cy = this.state.coord.y[i] * 15 + this.renderer.height / 2;
-            let p = pts[i]
-            p.position.x = cx * k
-            p.position.y = cy * k
-        }
-        this.renderer.render(this.stage);
-        requestAnimationFrame(() => this.transformDataPoints()); // Important to transfer the state
+    getPointTexture(x, y, c) {
+        return this.setPointLocation(this.makePointTexture(c),x,y)
     }
 
-    semanticZoom() {
-        let t = d3.event.transform
-        this.container.position.x = t.x, this.container.position.y = t.y;
-        this.setState({ zoom: { k: t.k } })
-    }
-
-    isGeometricZoomActive() {
-        return this.state.activeTool === "g-zoom";
-    }
-
-    zoom() {
-        if(this.state.mouse.down & this.isLassoActive())
-            return
-        if(this.isGeometricZoomActive()) {
-            this.geometricZoom()
-        } else {
-            this.semanticZoom()
-        }
+    updatePointColor(i,x,y,c) {
+        let point = this.getPointTexture(x, y, c)
+        this.container.removeChildAt(i);
+        this.container.addChildAt(point, i);
     }
 
     highlightPointsInLasso() {
         this.startBenchmark("Lasso Highlight")
         let pts = this.container.children;
         this.props.homeref.state.lassoSelections.forEach((e) => {
-            for (let i = 0; i < e.points.length; ++i) {
-                let point = this.getPointTexture(pts[e.points[i]].position.x, pts[e.points[i]].position.y, e.color)
-                this.container.removeChildAt(e.points[i]);
-                this.container.addChildAt(point, e.points[i]);
+            if(e.selected)
+                for (let i = 0; i < e.points.length; ++i)
+                    this.updatePointColor(e.points[i],pts[e.points[i]].position.x,pts[e.points[i]].position.y,e.color)
+            else {
+                for (let i = 0; i < e.points.length; ++i)
+                    this.updatePointColor(e.points[i],pts[e.points[i]].position.x,pts[e.points[i]].position.y,"000000");
             }
         })
         this.endBenchmark()
@@ -244,38 +192,98 @@ export default class Viewer extends Component {
         this.lasso.clear()
     }
 
+    addLassoLayer = () => {
+        this.lassoLayer = new PIXI.Container();
+        this.lassoLayer.width = this.w
+        this.lassoLayer.height = this.h
+        this.lassoLayer.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
+        this.lassoLayer.interactive = true;
+        this.lassoLayer.buttonMode = true;
+        this.lassoLayer.on("mousedown", (e) => {
+            // Init lasso Graphics
+            this.setState({ lassoPoints: [ ...this.state.lassoPoints, new PIXI.Point(e.data.global.x, e.data.global.y) ], mouse: { down: true } })
+            if (typeof this.lasso !== "undefined") {
+                this.setState({ lassoPoints: [], mouse: { down: true } })
+                this.clearLasso()
+            }
+            this.initLasso()
+        });
+        this.lassoLayer.on("mouseup", (e) => {
+            this.closeLasso()
+            this.setState({ mouse: { down: false } })
+            let lassoPoints = this.getPointsInLasso()
+            if(lassoPoints.length > 1) {
+                let lS = this.props.homeref.addLassoSelection(lassoPoints)
+                this.highlightPointsInLasso()
+                // Clear the lasso
+                this.clearLasso()
+            }
+        });
+        this.lassoLayer.on("mousemove", (e) => {
+            // Bug in Firefox: this.state.mouse.down = false when left click pressed
+            if(this.state.mouse.down & this.isLassoActive()) {
+                this.setState({ lassoPoints: [ ...this.state.lassoPoints, new PIXI.Point(e.data.global.x, e.data.global.y) ] })
+                this.drawLasso()
+            }
+        });
+        this.stage.addChild(this.lassoLayer);
+    }
+
+    init = () => {
+        const v = d3.select('#viewer')
+        this.renderer = PIXI.autoDetectRenderer(this.w, this.h, { backgroundColor: 0xFFFFFF, antialias: true, view: v.node() });
+        this.stage = new PIXI.Container();
+        this.stage.width = this.w
+        this.stage.height = this.h
+        // Increase the maxSize if displaying more than 1500 (default) objects 
+        this.container = new PIXI.particles.ParticleContainer(this.maxn, [false, true, false, false, true]);
+        this.stage.addChild(this.container);
+        this.addLassoLayer()
+    }
+
+    geometricZoom() {
+        this.container.position.x = d3.event.transform.x;
+        this.container.position.y = d3.event.transform.y;
+        this.container.scale.x = d3.event.transform.k;
+        this.container.scale.y = d3.event.transform.k;
+    }
+
+    transformDataPoints() {
+        let k = this.state.zoom.k, n = this.container.children.length, pts = this.container.children; 
+        for (let i = 0; i < n; ++i) {
+            let cx = this.state.coord.x[i] * 10 + this.renderer.width / 2;
+            let cy = this.state.coord.y[i] * 10 + this.renderer.height / 2 - 100;
+            let p = pts[i]
+            p.position.x = cx * k
+            p.position.y = cy * k
+        }
+        this.renderer.render(this.stage);
+        requestAnimationFrame(() => this.transformDataPoints()); // Important to transfer the state
+    }
+
+    semanticZoom() {
+        let t = d3.event.transform
+        this.container.position.x = t.x, this.container.position.y = t.y;
+        this.setState({ zoom: { k: t.k } })
+    }
+
+    isGeometricZoomActive() {
+        return this.state.activeTool === "g-zoom";
+    }
+
+    zoom() {
+        if(this.state.mouse.down & this.isLassoActive())
+            return
+        if(this.isGeometricZoomActive()) {
+            this.geometricZoom()
+        } else {
+            this.semanticZoom()
+        }
+    }
+
     emptyContainer = () => { this.container.destroy(true) }
 
     isContainterEmpty = () => { return (this.container.children.length > 0) }
-
-    setPointLocation(s, x, y) {
-        const cx = x * 15 + this.renderer.width / 2;
-        const cy = y * 15 + this.renderer.height / 2;
-        s.position.x = cx;
-        s.position.y = cy;
-        return s
-    }
-
-    makePointTexture = (c) => {
-        let s = new PIXI.Sprite(this.graphics.textures.point);
-        s.scale.x = 2.5;
-        s.scale.y = 2.5;
-        s.anchor = { x: .5, y: .5 };
-        s.tint = "0x"+ c
-        // Decompressing the color not working as without compression
-        // tint request a full 6 hexadecimal digits format  
-        // if(c.length == 1)
-        //     s.tint = "0x"+ c.repeat(6)  
-        // else if(c.length == 2)
-        //     s.tint = "0x"+ c[0].repeat(3) + c[1].repeat(3)
-        // else
-        //     s.tint = "0x"+ c[0].repeat(2) + c[1].repeat(2) + c[2].repeat(2)
-        return s;
-    }
-
-    getPointTexture(x, y, c) {
-        return this.setPointLocation(this.makePointTexture(c),x,y)
-    }
 
     initializedDataPoints = () => {
         let c = this.state.coord

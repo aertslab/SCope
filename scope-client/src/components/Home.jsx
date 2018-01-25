@@ -6,14 +6,12 @@ import FileReaderInput from 'react-file-reader-input';
 import ToggleDisplay from 'react-toggle-display';
 import SplitPane from 'react-split-pane';
 import styles from './styles.css';
-// import { Row } from 'react-flexbox-grid';
 import Sidebar from 'react-sidebar';
 
 // SCope imports
 import QueryBox from './QueryBox';
 import Welcome from './Welcome';
 import Viewer from './Viewer';
-import GridColumn from 'semantic-ui-react/dist/commonjs/collections/Grid/GridColumn';
 
 // https://github.com/styled-components/styled-components
 
@@ -120,11 +118,30 @@ export default class Home extends Component {
         return color;
     }
 
+    selectLassoSelection(id) {
+        let lassoSelections = this.state.lassoSelections.map((lS) => {
+            if(lS.id == id)
+                lS.selected = !lS.selected
+            return lS
+        })
+        this.setState({ lassoSelections: lassoSelections })
+        this.viewer.highlightPointsInLasso()
+    }
+
+    unSelectAllLassoSelections() {
+        let lassoSelections = this.state.lassoSelections.map((lS) => {
+            lS.selected = false
+            return lS
+        })
+        this.setState({ lassoSelections: lassoSelections })
+    }
+
     addLassoSelection(lassoPoints) {
-        let lassoSelection = {
-            id: this.state.lassoSelections.length == 0 ? 0: this.state.lassoSelections.length
-            , color: this.getRandomColor()
-            , points: lassoPoints
+        this.unSelectAllLassoSelections()
+        let lassoSelection = { id: this.state.lassoSelections.length == 0 ? 0: this.state.lassoSelections.length
+                             , selected: true
+                             , color: this.getRandomColor()
+                             , points: lassoPoints
         }
         this.setState({ lassoSelections: [...this.state.lassoSelections, lassoSelection] })
         return lassoSelection
@@ -193,14 +210,14 @@ export default class Home extends Component {
 
         let lassoSelections = () => {
             if(this.state.lassoSelections.length == 0)
-                return (<Grid><Grid.Column>No user's lasso selections"</Grid.Column></Grid>)
+                return (<Grid><Grid.Column>No user's lasso selections</Grid.Column></Grid>)
             return (this.state.lassoSelections.map((lS) => {
-                    <Grid key={lS.id}>
+                    return (<Grid key={lS.id}>
                         <Grid.Column style={{width: 20, marginLeft: 5, marginRight: 5, padding: 2}}>                       
-                            <Checkbox/>
+                            <Checkbox checked={lS.selected} onChange={(e,d) => this.selectLassoSelection(lS.id)}/>
                         </Grid.Column>
-                        <Grid.Column style={{width: 95, padding: 2}}>
-                            Home
+                        <Grid.Column style={{width: 110, padding: 2}}>
+                            {"Selection "+ lS.id}
                         </Grid.Column>
                         <Grid.Column style={{width: 100, padding: 2}}>
                             <Input
@@ -212,11 +229,11 @@ export default class Home extends Component {
                             />
                         </Grid.Column>
                         <Grid.Column style={{padding: 2}}>
-                            <Icon name='home' style={{display: 'inline'}}/>
+                            <Icon name='eye' style={{display: 'inline'}}/>
                             <Icon name='trash' style={{display: 'inline'}}/>
                             <Icon name='download' style={{display: 'inline'}}/>
                         </Grid.Column>
-                    </Grid>}))
+                    </Grid>)}))
         }
 
         let leftSidebarContent =  
@@ -324,7 +341,8 @@ export default class Home extends Component {
                                     <Viewer width={mainWidth()} 
                                         height={window.innerHeight} 
                                         maxp="200000"
-                                        homeref={this} 
+                                        homeref={this}
+                                        ref={instance => { this.viewer = instance; }}
                                         loom={this.state.activeLoom} 
                                         featureQuery={this.state.featureQuery}
                                         multiqueryon={this.state.settings.multiQueryOn.toString()} />
