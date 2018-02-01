@@ -14,7 +14,7 @@ python scope-server/scopeserver/__init__.py
 - Install
 ```
 cd scope-client
-npm install scope-client
+npm install
 ```
 
 - Run development version
