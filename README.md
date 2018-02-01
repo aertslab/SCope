@@ -1,4 +1,4 @@
-# SCope: Visualization of large-scale and high dimensional single cell RNA-seq data
+# SCope: Visualization of large-scale and high dimensional single cell data
 
 ## Launch
 
@@ -13,7 +13,8 @@ python scope-server/scopeserver/__init__.py
 
 - Install
 ```
-npm install
+cd scope-client
+npm install scope-client
 ```
 
 - Run development version
