@@ -3,12 +3,23 @@
 ## Launch
 
 ### Server
+
+#### Data Server (DS)
 ```
-python Server/Server.py
+python scope-server/scopeserver/__init__.py
 ```
 
 ### Client
+
+- Install
 ```
-node Client/Client.js
+npm install
 ```
-NOTE: Run from SCope root directory other wise if run from within Client directory `TypeError: Cannot read property 'ns' of null` arises!
+
+- Run development version
+```
+cd scope-client
+npm run dev
+```
+
+NOTE: Run from SCope root directory otherwise if run from within Client directory `TypeError: Cannot read property 'ns' of null` arises!
