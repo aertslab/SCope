@@ -1,0 +1,30 @@
+# See https://help.github.com/ignore-files/ for more about ignoring files.
+
+# vscode settings
+/.vscode
+/.deprecated
+
+/**/*lock.json
+*.pptx
+*.save
+
+# .gitignore
+yarn.lock
+SCope.code-workspace
+
+#scope-client/assets
+scope-client/node_modules
+scope-client/test
+scope-client/HOWTO.md 
+scope-client/REFERENCES.md
+scope-client/RELEASES.md
+TODO.md 
+
+# Server
+scope-server/scope_server.egg-info
+scope-server/scopeserver/data/my-looms
+scope-server/scopeserver/modules/xserver/node_modules
+scope-server/scopeserver/modules/xserver/__pycache__
+scope-server/scopeserver/modules/pserver/__pycache__
+scope-server/scopeserver/modules/gserver/__pycache__
+scope-server/test
