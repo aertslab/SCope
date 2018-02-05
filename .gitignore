@@ -4,6 +4,9 @@
 /.vscode
 /.deprecated
 
+# pycache
+**/__pycache__
+
 /**/*lock.json
 *.pptx
 *.save
@@ -15,16 +18,13 @@ SCope.code-workspace
 #scope-client/assets
 scope-client/node_modules
 scope-client/test
-scope-client/HOWTO.md 
+scope-client/HOWTO.md
 scope-client/REFERENCES.md
 scope-client/RELEASES.md
-TODO.md 
+TODO.md
 
 # Server
 scope-server/scope_server.egg-info
 scope-server/scopeserver/data/my-looms
 scope-server/scopeserver/modules/xserver/node_modules
-scope-server/scopeserver/modules/xserver/__pycache__
-scope-server/scopeserver/modules/pserver/__pycache__
-scope-server/scopeserver/modules/gserver/__pycache__
 scope-server/test

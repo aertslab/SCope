@@ -1,6 +1,6 @@
-from modules.gserver import GServer as gs
-from modules.pserver import PServer as ps
-from modules.xserver import XServer as xs
+from scopeserver.modules.gserver import GServer as gs
+from scopeserver.modules.pserver import PServer as ps
+from scopeserver.modules.xserver import XServer as xs
 
 import threading
 import sys
