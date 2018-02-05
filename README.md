@@ -5,6 +5,12 @@
 ### Server
 
 #### Data Server (DS)
+
+```
+cd scope-server/scopeserver/modules/xserver
+npm install
+```
+
 ```
 python scope-server/scopeserver/__init__.py
 ```

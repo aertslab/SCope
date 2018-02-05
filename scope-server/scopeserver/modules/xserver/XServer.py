@@ -1,10 +1,14 @@
 import subprocess
+import os.path
+
 
 def subprocess_cmd(command):
-    process = subprocess.Popen(command,stdout=subprocess.PIPE, shell=True)
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
     proc_stdout = process.communicate()[0].strip()
+
 
 def run():
     # Note that you have to specify path to script
     print('Starting XServer on port 8081...')
-    subprocess_cmd('cd modules/xserver; node server.js')
+    cwd = os.path.dirname(__file__)
+    subprocess_cmd('cd {0}; node server.js'.format(cwd))
