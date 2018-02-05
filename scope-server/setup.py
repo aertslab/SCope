@@ -1,6 +1,10 @@
 from setuptools import setup
 
 setup(name='scope-server',
+      entry_points={'console_scripts': [
+                        'scope-server = scopeserver:run'
+                        ]
+                    },
       version='0.0.1',
       description='Server for the SCope software',
       url='',

@@ -195,7 +195,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-   
+
     @check_auth
     def do_OPTIONS(self):
         self.send_response(200, "ok")
@@ -322,7 +322,8 @@ class ThreadedHTTPServer(socketserver.ThreadingMixIn,
             httpserver.HTTPServer.handle_error(self, request, client_address)
 
 
-def run(hostname='',
+def run(run_event,
+        hostname='',
         port=50051,
         templates=None,
         localisations=None,
@@ -368,7 +369,9 @@ def run(hostname='',
             ciphers=permitted_ciphers,
             server_side=True)
     print('Starting PServer on port '+ str(port) +'...')
-    httpd.serve_forever()
+    while run_event.is_set():
+        httpd.handle_request()
+    # httpd.serve_forever()
 
 def main():
     try:

@@ -152,17 +152,18 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.MyLoomListReply(l=[f for f in os.listdir(self.loom_dir) if f.endswith('.loom')])
 
 
-def serve():
+def serve(run_event):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     s_pb2_grpc.add_MainServicer_to_server(SCope(), server)
     server.add_insecure_port('[::]:50052')
     print('Starting GServer on port 50052...')
+
     server.start()
-    try:
-        while True:
-            time.sleep(_ONE_DAY_IN_SECONDS)
-    except KeyboardInterrupt:
-        server.stop(0)
+
+    while run_event.is_set():
+        time.sleep(0.1)
+
+    server.stop(0)
 
 
 if __name__ == '__main__':
