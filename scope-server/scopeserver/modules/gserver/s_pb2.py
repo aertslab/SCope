@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='s.proto',
   package='scope',
   syntax='proto3',
-  serialized_pb=_b('\n\x07s.proto\x12\x05scope\"L\n\x1a\x43\x65llColorByFeaturesRequest\x12\x0b\n\x03lfp\x18\x01 \x01(\t\x12\t\n\x01\x65\x18\x02 \x03(\t\x12\t\n\x01\x66\x18\x03 \x03(\t\x12\x0b\n\x03lte\x18\x04 \x01(\x08\"%\n\x18\x43\x65llColorByFeaturesReply\x12\t\n\x01v\x18\x01 \x03(\t\"(\n\x0e\x46\x65\x61tureRequest\x12\x0b\n\x03lfp\x18\x01 \x01(\t\x12\t\n\x01q\x18\x02 \x01(\t\"\x19\n\x0c\x46\x65\x61tureReply\x12\t\n\x01v\x18\x01 \x03(\t\" \n\x11\x43oordinateRequest\x12\x0b\n\x03lfp\x18\x01 \x01(\t\"\'\n\x0f\x43oordinateReply\x12\t\n\x01x\x18\x01 \x03(\x02\x12\t\n\x01y\x18\x02 \x03(\x02\"\x13\n\x11MyLoomListRequest\"\x1c\n\x0fMyLoomListReply\x12\t\n\x01l\x18\x01 \x03(\t2\xab\x02\n\x04Main\x12^\n\x16getCellColorByFeatures\x12!.scope.CellColorByFeaturesRequest\x1a\x1f.scope.CellColorByFeaturesReply\"\x00\x12;\n\x0bgetFeatures\x12\x15.scope.FeatureRequest\x1a\x13.scope.FeatureReply\"\x00\x12\x44\n\x0egetCoordinates\x12\x18.scope.CoordinateRequest\x1a\x16.scope.CoordinateReply\"\x00\x12@\n\ngetMyLooms\x12\x18.scope.MyLoomListRequest\x1a\x16.scope.MyLoomListReply\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\x07s.proto\x12\x05scope\"Y\n\x1a\x43\x65llColorByFeaturesRequest\x12\x0b\n\x03lfp\x18\x01 \x01(\t\x12\t\n\x01\x65\x18\x02 \x03(\t\x12\t\n\x01\x66\x18\x03 \x03(\t\x12\x0b\n\x03lte\x18\x04 \x01(\x08\x12\x0b\n\x03\x63pm\x18\x05 \x01(\x08\"%\n\x18\x43\x65llColorByFeaturesReply\x12\t\n\x01v\x18\x01 \x03(\t\"(\n\x0e\x46\x65\x61tureRequest\x12\x0b\n\x03lfp\x18\x01 \x01(\t\x12\t\n\x01q\x18\x02 \x01(\t\"\x19\n\x0c\x46\x65\x61tureReply\x12\t\n\x01v\x18\x01 \x03(\t\" \n\x11\x43oordinateRequest\x12\x0b\n\x03lfp\x18\x01 \x01(\t\"\'\n\x0f\x43oordinateReply\x12\t\n\x01x\x18\x01 \x03(\x02\x12\t\n\x01y\x18\x02 \x03(\x02\"\x13\n\x11MyLoomListRequest\"\x1c\n\x0fMyLoomListReply\x12\t\n\x01l\x18\x01 \x03(\t2\xab\x02\n\x04Main\x12^\n\x16getCellColorByFeatures\x12!.scope.CellColorByFeaturesRequest\x1a\x1f.scope.CellColorByFeaturesReply\"\x00\x12;\n\x0bgetFeatures\x12\x15.scope.FeatureRequest\x1a\x13.scope.FeatureReply\"\x00\x12\x44\n\x0egetCoordinates\x12\x18.scope.CoordinateRequest\x1a\x16.scope.CoordinateReply\"\x00\x12@\n\ngetMyLooms\x12\x18.scope.MyLoomListRequest\x1a\x16.scope.MyLoomListReply\"\x00\x62\x06proto3')
 )
 
 
@@ -38,28 +38,35 @@ _CELLCOLORBYFEATURESREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='e', full_name='scope.CellColorByFeaturesRequest.e', index=1,
       number=2, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='f', full_name='scope.CellColorByFeaturesRequest.f', index=2,
       number=3, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='lte', full_name='scope.CellColorByFeaturesRequest.lte', index=3,
       number=4, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='cpm', full_name='scope.CellColorByFeaturesRequest.cpm', index=4,
+      number=5, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -73,7 +80,7 @@ _CELLCOLORBYFEATURESREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=18,
-  serialized_end=94,
+  serialized_end=107,
 )
 
 
@@ -90,7 +97,7 @@ _CELLCOLORBYFEATURESREPLY = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -103,8 +110,8 @@ _CELLCOLORBYFEATURESREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=96,
-  serialized_end=133,
+  serialized_start=109,
+  serialized_end=146,
 )
 
 
@@ -121,14 +128,14 @@ _FEATUREREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='q', full_name='scope.FeatureRequest.q', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -141,8 +148,8 @@ _FEATUREREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=135,
-  serialized_end=175,
+  serialized_start=148,
+  serialized_end=188,
 )
 
 
@@ -159,7 +166,7 @@ _FEATUREREPLY = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -172,8 +179,8 @@ _FEATUREREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=177,
-  serialized_end=202,
+  serialized_start=190,
+  serialized_end=215,
 )
 
 
@@ -190,7 +197,7 @@ _COORDINATEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -203,8 +210,8 @@ _COORDINATEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=204,
-  serialized_end=236,
+  serialized_start=217,
+  serialized_end=249,
 )
 
 
@@ -221,14 +228,14 @@ _COORDINATEREPLY = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='y', full_name='scope.CoordinateReply.y', index=1,
       number=2, type=2, cpp_type=6, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -241,8 +248,8 @@ _COORDINATEREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=238,
-  serialized_end=277,
+  serialized_start=251,
+  serialized_end=290,
 )
 
 
@@ -265,8 +272,8 @@ _MYLOOMLISTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=279,
-  serialized_end=298,
+  serialized_start=292,
+  serialized_end=311,
 )
 
 
@@ -283,7 +290,7 @@ _MYLOOMLISTREPLY = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -296,8 +303,8 @@ _MYLOOMLISTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=300,
-  serialized_end=328,
+  serialized_start=313,
+  serialized_end=341,
 )
 
 DESCRIPTOR.message_types_by_name['CellColorByFeaturesRequest'] = _CELLCOLORBYFEATURESREQUEST
@@ -374,8 +381,8 @@ _MAIN = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=331,
-  serialized_end=630,
+  serialized_start=344,
+  serialized_end=643,
   methods=[
   _descriptor.MethodDescriptor(
     name='getCellColorByFeatures',

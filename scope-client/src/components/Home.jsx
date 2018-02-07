@@ -33,9 +33,10 @@ export default class Home extends Component {
                      , window: {
                          innerWidth: 0,
                          innerHeight: 0}
-                     , settings: {
-                        multiQueryOn: false
-                     }
+                     , multiQueryOn: false
+                     , logTransform: true
+                     , cpmNormalise: false
+
         };
         this.GBC = require("grpc-bus-websocket-client");
         this.gbwcCxn = new this.GBC("ws://localhost:8081/", 'src/proto/s.proto', { scope: { Main: 'localhost:50052' } }).connect()
@@ -57,8 +58,8 @@ export default class Home extends Component {
             gbc.services.scope.Main.getMyLooms(query, (err, response) => {
                 if(response !== null)
                     this.setState({ myLooms: response.l })
-                else 
-                    console.log("No .loom files detected. You can import one via Import .loom link.")
+                else
+                    console.log("No .loom fileqs detected. You can import one via Import .loom link.")
             });
         });
     }
@@ -213,7 +214,7 @@ export default class Home extends Component {
                 return (<Grid><Grid.Column>No user's lasso selections</Grid.Column></Grid>)
             return (this.state.lassoSelections.map((lS) => {
                     return (<Grid key={lS.id}>
-                        <Grid.Column style={{width: 20, marginLeft: 5, marginRight: 5, padding: 2}}>                       
+                        <Grid.Column style={{width: 20, marginLeft: 5, marginRight: 5, padding: 2}}>
                             <Checkbox checked={lS.selected} onChange={(e,d) => this.selectLassoSelection(lS.id)}/>
                         </Grid.Column>
                         <Grid.Column style={{width: 110, padding: 2}}>
@@ -236,7 +237,7 @@ export default class Home extends Component {
                     </Grid>)}))
         }
 
-        let leftSidebarContent =  
+        let leftSidebarContent =
             <Menu vertical style={{width: leftSideBarWidth, height: '100%'}}>
                 <Menu.Item onClick={() => this.changeTo('welcome')}>
                     <Icon name='home'/>Home
@@ -289,23 +290,37 @@ export default class Home extends Component {
                     <Menu.Menu>
                         <Menu.Item>
                             <div style={{display: 'inline-block', marginTop: 2}}>Multi query</div>
-                            <Checkbox checked={this.state.settings.multiQueryOn} 
-                                      toggle 
-                                      style={{marginLeft: 5, float: 'right'}} 
-                                      onChange={(e,d) => this.setState({ settings: { multiQueryOn: d.checked} })}/>
+                            <Checkbox checked={this.state.multiQueryOn}
+                                      toggle
+                                      style={{marginLeft: 5, float: 'right'}}
+                                      onChange={(e,d) => this.setState({ multiQueryOn: d.checked} )}/>
+                        </Menu.Item>
+                        <Menu.Item>
+                            <div style={{display: 'inline-block', marginTop: 2}}>Log Transform</div>
+                            <Checkbox checked={this.state.logTransform}
+                                      toggle
+                                      style={{marginLeft: 5, float: 'right'}}
+                                      onChange={(e,d) => this.setState({ logTransform: d.checked} )}/>
+                        </Menu.Item>
+                        <Menu.Item>
+                            <div style={{display: 'inline-block', marginTop: 2}}>CPM Normalise</div>
+                            <Checkbox checked={this.state.cpmNormalise}
+                                      toggle
+                                      style={{marginLeft: 5, float: 'right'}}
+                                      onChange={(e,d) => this.setState({ cpmNormalise: d.checked} )}/>
                         </Menu.Item>
                     </Menu.Menu>
                 </Menu.Item>
             </Menu>
 
-        let rightSidebarContent = 
+        let rightSidebarContent =
             <Menu vertical style={{width: rightSidebarWidth, height: '100%'}}>
                 <Menu.Item>
                     <Menu.Header style={{marginBottom: 25}}>CELL SELECTIONS</Menu.Header>
                     { lassoSelections() }
                 </Menu.Item>
             </Menu>
-        
+
         return (
             <div>
                 <div style={header}>
@@ -317,10 +332,10 @@ export default class Home extends Component {
                             <Icon name="leaf" />SCope
                         </Menu.Item>
                         <Menu.Item>
-                            <QueryBox gbwccxn={this.gbwcCxn} 
-                                      homeref={this} 
-                                      loom={this.state.activeLoom} 
-                                      multiqueryon={this.state.settings.multiQueryOn.toString()}/>
+                            <QueryBox gbwccxn={this.gbwcCxn}
+                                      homeref={this}
+                                      loom={this.state.activeLoom}
+                                      multiqueryon={this.state.multiQueryOn.toString()}/>
                         </Menu.Item>
                     </Menu>
                     <Sidebar sidebar={leftSidebarContent}
@@ -337,15 +352,17 @@ export default class Home extends Component {
                                 <ToggleDisplay show={this.state.mainVisible["welcome"]}>
                                     <Welcome/>
                                 </ToggleDisplay>
-                                <ToggleDisplay show={this.state.mainVisible["sviewer"]}> 
-                                    <Viewer width={mainWidth()} 
-                                        height={window.innerHeight} 
+                                <ToggleDisplay show={this.state.mainVisible["sviewer"]}>
+                                    <Viewer width={mainWidth()}
+                                        height={window.innerHeight}
                                         maxp="200000"
                                         homeref={this}
                                         ref={instance => { this.viewer = instance; }}
-                                        loom={this.state.activeLoom} 
+                                        loom={this.state.activeLoom}
                                         featureQuery={this.state.featureQuery}
-                                        multiqueryon={this.state.settings.multiQueryOn.toString()} />
+                                        multiqueryon={this.state.multiQueryOn.toString()}
+                                        logtransform={this.state.logTransform}
+                                        cpmnormalise={this.state.cpmNormalise} />
                                 </ToggleDisplay>
                                 <ToggleDisplay show={this.state.mainVisible["rviewer"]}>
                                     <Segment basic style={{width: mainWidth(), height: window.innerHeight-70}}>
@@ -373,4 +390,3 @@ export default class Home extends Component {
         );
     }
 }
-
