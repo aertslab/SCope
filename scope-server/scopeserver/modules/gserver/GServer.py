@@ -59,12 +59,14 @@ class SCope(s_pb2_grpc.MainServicer):
     def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True, cpm_normalise=False):
         loom = self.get_loom_connection(loom_file_path)
         print("Debug: getting expression of " + gene_symbol + "...")
-        gene_expr = loom[loom.Gene == gene_symbol, :][0]
+        print(log_transform, cpm_normalise)
+        gene_expr = loom[loom.ra.Gene == gene_symbol, :][0]
         if log_transform:
             print("Debug: log-transforming gene expression...")
             gene_expr = np.log2(gene_expr + 1)
         if cpm_normalise:
-            print("Debug: CPM normalising gene expression... NOT YET IMPLEMENTED")
+            print("Debug: CPM normalising gene expression...")
+            gene_expr = gene_expr / loom.ca.nUMI
             gene_expr = gene_expr
         return gene_expr
 
@@ -72,7 +74,7 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(loom_file_path)
         # Genes
         # Filter the genes by the query
-        res = list(filter(lambda x: x.startswith(query), loom.Gene))
+        res = list(filter(lambda x: x.startswith(query), loom.ra.Gene))
         # res_json = json.dumps({"gene": {"name": "gene", "results": list(map(lambda x: {"title":x,"description":"","image":"", "price":""}, res))}}, ensure_ascii=False)
         # print(res_json)
         print("Debug: " + str(len(res)) + " genes matching '" + query + "'")
@@ -101,7 +103,7 @@ class SCope(s_pb2_grpc.MainServicer):
             print("Feature 1 added")
             # Get value of the given requested feature
             feature_1_val = self.get_gene_expression(
-                loom_file_path=self.get_loom_filepath(request.lfp), gene_symbol=request.e[0], log_transform=request.lte)
+                loom_file_path=self.get_loom_filepath(request.lfp), gene_symbol=request.e[0], log_transform=request.lte, cpm_normalise=request.cpm)
             # Normalize the value and convert to RGB values
             feature_1_val_norm = np.round(
                 feature_1_val / (feature_1_val.max() * .8) * 255)
@@ -112,7 +114,7 @@ class SCope(s_pb2_grpc.MainServicer):
         if len(request.e[1]) > 0:
             print("Feature 2 added")
             feature_2_val = self.get_gene_expression(
-                loom_file_path=self.get_loom_filepath(request.lfp), gene_symbol=request.e[1], log_transform=request.lte)
+                loom_file_path=self.get_loom_filepath(request.lfp), gene_symbol=request.e[1], log_transform=request.lte, cpm_normalise=request.cpm)
             feature_2_val_norm = np.round(
                 feature_2_val / (feature_2_val.max() * .8) * 255)
         else:
@@ -121,7 +123,7 @@ class SCope(s_pb2_grpc.MainServicer):
         if len(request.e[2]) > 0:
             print("Feature 3 added")
             feature_3_val = self.get_gene_expression(
-                loom_file_path=self.get_loom_filepath(request.lfp), gene_symbol=request.e[2], log_transform=request.lte)
+                loom_file_path=self.get_loom_filepath(request.lfp), gene_symbol=request.e[2], log_transform=request.lte, cpm_normalise=request.cpm)
             feature_3_val_norm = np.round(
                 feature_3_val / (feature_3_val.max() * .8) * 255)
         else:
