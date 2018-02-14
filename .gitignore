@@ -28,3 +28,4 @@ scope-server/scopeserver/modules/xserver/__pycache__
 scope-server/scopeserver/modules/pserver/__pycache__
 scope-server/scopeserver/modules/gserver/__pycache__
 scope-server/test
+scope-server/data/my-looms

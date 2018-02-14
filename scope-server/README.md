@@ -64,6 +64,3 @@ git clone https://github.com/gabrielgrant/grpc-bus-websocket-proxy-server.git
 mv grpc-bus-websocket-proxy-server/* .
 npm install
 ```
-
-
-
