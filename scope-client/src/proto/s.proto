@@ -18,43 +18,59 @@ package scope;
 
 service Main {
 rpc getCellColorByFeatures (CellColorByFeaturesRequest) returns (CellColorByFeaturesReply) {}
+rpc getCellAUCValuesByFeatures (CellAUCValuesByFeaturesRequest) returns (CellAUCValuesByFeaturesReply) {}
 rpc getFeatures (FeatureRequest) returns (FeatureReply) {}
-rpc getCoordinates (CoordinateRequest) returns (CoordinateReply) {}
-rpc getMyLooms (MyLoomListRequest) returns (MyLoomListReply) {}
+rpc getCoordinates (CoordinatesRequest) returns (CoordinatesReply) {}
+rpc getMyLooms (MyLoomsRequest) returns (MyLoomsReply) {}
 }
 
+
 message CellColorByFeaturesRequest {
-string lfp=1;
-repeated string e=2;
-repeated string f=3;
-bool lte=4;
-bool cpm=5;
+string loomFilePath=1;
+repeated string feature=2;
+repeated string featureType=3;
+bool hasLogTranform=4;
+bool hasCpmTranform=5;
 }
 
 message CellColorByFeaturesReply{
-repeated string v=1;
+repeated string color=1;
 }
 
+message CellAUCValuesByFeaturesRequest {
+string loomFilePath=1;
+repeated string feature=2;
+repeated string featureType=3;
+}
+
+message CellAUCValuesByFeaturesReply{
+repeated string value=1;
+}
+
+// lfr = foomfilepath
+// q = query
+// featuteType
+
 message FeatureRequest {
-string lfp=1;
-string q=2;
+string loomFilePath=1;
+string query=2;
 }
 
 message FeatureReply {
-repeated string v=1;
+repeated string feature=1;
 }
 
-message CoordinateRequest {
-string lfp=1;
+message CoordinatesRequest {
+string loomFilePath=1;
 }
 
-message CoordinateReply {
+message CoordinatesReply {
 repeated float x=1;
 repeated float y=2;
 }
 
-message MyLoomListRequest {}
+message MyLoomsRequest {}
 
-message MyLoomListReply {
-repeated string l=1;
+message MyLoomsReply {
+repeated string loomFilePath=1;
 }
