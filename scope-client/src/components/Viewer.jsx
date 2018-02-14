@@ -9,7 +9,7 @@ export default class Viewer extends Component {
     constructor(props) {
         super(props)
         this.state = { coord: { x: []
-                              , y: [] 
+                              , y: []
                             }
                      , values: []
                      , lassoPoints: []
@@ -59,7 +59,7 @@ export default class Viewer extends Component {
     }
 
     shouldComponentUpdate = (nextProps, nextState) => {
-        // Update the rendering only if feature is different 
+        // Update the rendering only if feature is different
         if (this.props.featureQuery !== nextProps.featureQuery /*& this.props.multiqueryon === "false"*/)
             this.queryFeature(nextProps.featureQuery)
         return true
@@ -102,9 +102,9 @@ export default class Viewer extends Component {
         s.anchor = { x: .5, y: .5 };
         s.tint = "0x"+ c
         // Decompressing the color not working as without compression
-        // tint request a full 6 hexadecimal digits format  
+        // tint request a full 6 hexadecimal digits format
         // if(c.length == 1)
-        //     s.tint = "0x"+ c.repeat(6)  
+        //     s.tint = "0x"+ c.repeat(6)
         // else if(c.length == 2)
         //     s.tint = "0x"+ c[0].repeat(3) + c[1].repeat(3)
         // else
@@ -235,7 +235,7 @@ export default class Viewer extends Component {
         this.stage = new PIXI.Container();
         this.stage.width = this.w
         this.stage.height = this.h
-        // Increase the maxSize if displaying more than 1500 (default) objects 
+        // Increase the maxSize if displaying more than 1500 (default) objects
         this.container = new PIXI.particles.ParticleContainer(this.maxn, [false, true, false, false, true]);
         this.stage.addChild(this.container);
         this.addLassoLayer()
@@ -249,7 +249,7 @@ export default class Viewer extends Component {
     }
 
     transformDataPoints() {
-        let k = this.state.zoom.k, n = this.container.children.length, pts = this.container.children; 
+        let k = this.state.zoom.k, n = this.container.children.length, pts = this.container.children;
         for (let i = 0; i < n; ++i) {
             let cx = this.state.coord.x[i] * 10 + this.renderer.width / 2;
             let cy = this.state.coord.y[i] * 10 + this.renderer.height / 2 - 100;
@@ -302,7 +302,7 @@ export default class Viewer extends Component {
     updateDataPoints = () => {
         var t1 = performance.now();
         console.log("Rendering...")
-        let pts = this.container.children; 
+        let pts = this.container.children;
         let n = pts.length, v = this.state.values;
         // Draw new data points
         for (let i = 0; i < n; ++i) {
@@ -318,11 +318,13 @@ export default class Viewer extends Component {
     }
 
     queryFeature = (featureQuery) => {
+        console.log(this.props)
         let query = {
             lfp: this.props.loom
             , f: [featureQuery.i0.type, featureQuery.i1.type, featureQuery.i2.type]
             , e: [featureQuery.i0.value, featureQuery.i1.value, featureQuery.i2.value]
-            , lte: true
+            , lte: this.props.logtransform
+            , cpm: this.props.cpm
         };
         this.startBenchmark("Query Feature")
         this.props.homeref.gbwcCxn.then((gbc) => {

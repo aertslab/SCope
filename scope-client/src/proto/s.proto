@@ -28,6 +28,7 @@ string lfp=1;
 repeated string e=2;
 repeated string f=3;
 bool lte=4;
+bool cpm=5;
 }
 
 message CellColorByFeaturesReply{
@@ -57,5 +58,3 @@ message MyLoomListRequest {}
 message MyLoomListReply {
 repeated string l=1;
 }
-
-

@@ -1,12 +1,8 @@
 from concurrent import futures
 import time
-
-import sys
-sys.path.append("/home/luna.kuleuven.be/u0113561/stack/Max/Documents/Projects/Programming/SCope/scope-server/scopeserver/modules/gserver")
-
 import grpc
-import s_pb2
-import s_pb2_grpc
+from scopeserver.modules.gserver import s_pb2
+from scopeserver.modules.gserver import s_pb2_grpc
 
 import loompy as lp
 from loompy import LoomConnection
@@ -60,13 +56,16 @@ class SCope(s_pb2_grpc.MainServicer):
             print("Debug: loading the loom file from " + loom_file_path + "...")
             return self.load_loom_file(partial_md5_hash, loom_file_path)
 
-    def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True):
+    def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True, cpm_normalise=False):
         loom = self.get_loom_connection(loom_file_path)
         print("Debug: getting expression of " + gene_symbol + "...")
-        gene_expr = loom[loom.Gene == gene_symbol, :]
+        gene_expr = loom[loom.Gene == gene_symbol, :][0]
         if log_transform:
             print("Debug: log-transforming gene expression...")
-            return np.log2(gene_expr + 1)[0]
+            gene_expr = np.log2(gene_expr + 1)
+        if cpm_normalise:
+            print("Debug: CPM normalising gene expression... NOT YET IMPLEMENTED")
+            gene_expr = gene_expr
         return gene_expr
 
     def get_features(self, loom_file_path, query):
@@ -156,17 +155,18 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.MyLoomListReply(l=[f for f in os.listdir(self.loom_dir) if f.endswith('.loom')])
 
 
-def serve():
+def serve(run_event):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     s_pb2_grpc.add_MainServicer_to_server(SCope(), server)
     server.add_insecure_port('[::]:50052')
     print('Starting GServer on port 50052...')
+
     server.start()
-    try:
-        while True:
-            time.sleep(_ONE_DAY_IN_SECONDS)
-    except KeyboardInterrupt:
-        server.stop(0)
+
+    while run_event.is_set():
+        time.sleep(0.1)
+
+    server.stop(0)
 
 
 if __name__ == '__main__':
