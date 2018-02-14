@@ -324,7 +324,7 @@ export default class Viewer extends Component {
             , f: [featureQuery.i0.type, featureQuery.i1.type, featureQuery.i2.type]
             , e: [featureQuery.i0.value, featureQuery.i1.value, featureQuery.i2.value]
             , lte: this.props.logtransform
-            , cpm: this.props.cpm
+            , cpm: this.props.cpmnormalise
         };
         this.startBenchmark("Query Feature")
         this.props.homeref.gbwcCxn.then((gbc) => {

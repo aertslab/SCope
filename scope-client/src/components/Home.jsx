@@ -59,7 +59,7 @@ export default class Home extends Component {
                 if(response !== null)
                     this.setState({ myLooms: response.l })
                 else
-                    console.log("No .loom fileqs detected. You can import one via Import .loom link.")
+                    console.log("No .loom files detected. You can import one via Import .loom link.")
             });
         });
     }
