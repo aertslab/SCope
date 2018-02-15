@@ -97,55 +97,26 @@ class SCope(s_pb2_grpc.MainServicer):
         #   - f     = features
         #   - lte   = log transform expression
         start_time = time.time()
-        n = 0
-        # Feature 1
-        if len(request.feature[0]) > 0:
-            print("Feature 1 added")
-            # Get value of the given requested feature
-            feature_1_val = self.get_gene_expression(
-                loom_file_path=self.get_loom_filepath(request.loomFilePath), gene_symbol=request.feature[0], log_transform=request.hasLogTranform, cpm_normalise=request.hasCpmTranform)
-            # Normalize the value and convert to RGB values
-            feature_1_val_norm = np.round(
-                feature_1_val / (feature_1_val.max() * .8) * 255)
-            n = feature_1_val_norm.size
-        else:
-            feature_1_val_norm = 0
-        # Feature 2
-        if len(request.feature[1]) > 0:
-            print("Feature 2 added")
-            feature_2_val = self.get_gene_expression(
-                loom_file_path=self.get_loom_filepath(request.loomFilePath), gene_symbol=request.feature[1], log_transform=request.hasLogTranform, cpm_normalise=request.hasCpmTranform)
-            feature_2_val_norm = np.round(
-                feature_2_val / (feature_2_val.max() * .8) * 255)
-        else:
-            feature_2_val_norm = np.zeros(n)
-        # Feature 3
-        if len(request.feature[2]) > 0:
-            print("Feature 3 added")
-            feature_3_val = self.get_gene_expression(
-                loom_file_path=self.get_loom_filepath(request.loomFilePath), gene_symbol=request.feature[2], log_transform=request.hasLogTranform, cpm_normalise=request.hasCpmTranform)
-            feature_3_val_norm = np.round(
-                feature_3_val / (feature_3_val.max() * .8) * 255)
-        else:
-            feature_3_val_norm = np.zeros(n)
-        rgb_df = pd.DataFrame(data={'red': feature_1_val_norm.astype('u1')
-                                  , 'green': feature_2_val_norm.astype('u1')
-                                  , 'blue': feature_3_val_norm.astype('u1')})
-        rgb_df = rgb_df[['red','green','blue']]
-        rgb_arr = rgb_df.as_matrix()
-        # Convert to RGB to hexadecimal format
-        hex_arr = hexarr(rgb_arr)
-        hex_vec = np.core.defchararray.add(np.core.defchararray.add(
-            hex_arr[:, 0], hex_arr[:, 1]), hex_arr[:, 2])
-        # Comress the color (not working as without)
-        # to_hex_3d = np.vectorize(self.compressHexColor)
-        # hex_3d_vec = to_hex_3d(hex_vec)
+        loomFilePath = self.get_loom_filepath(request.loomFilePath)
+
+        normFeatures = []
+        for feature in request.feature:
+            if feature != '':
+                vals = self.get_gene_expression(
+                    loom_file_path=loomFilePath, gene_symbol=feature, log_transform=request.hasLogTranform, cpm_normalise=request.hasCpmTranform)
+                normFeatures.append(np.round(vals / (vals.max() * .8) * 255))
+            else:
+                normFeatures.append(np.zeros(len(normFeatures[0])))
+
+        hex_vec = ["%02x%02x%02x" % (int(r), int(g), int(b)) for r, g, b in zip(normFeatures[0], normFeatures[1], normFeatures[2])]
+
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
         return s_pb2.CellColorByFeaturesReply(color=hex_vec)
 
+    def getCellAUCValuesByFeatures(self, request, context):
+        return None
+
     def getFeatures(self, request, context):
-        # request content
-        #   - q   = query text
         return s_pb2.FeatureReply(feature=self.get_features(self.get_loom_filepath(request.loomFilePath), request.query))
 
     def getCoordinates(self, request, context):
