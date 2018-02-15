@@ -12,4 +12,9 @@ setup(name='scope-server',
       author_email='mdewaegeneer@gmail.com',
       license='Apache 2.0',
       packages=['scopeserver'],
+      install_requires=[
+          'grpcio',
+          'loompy',
+          'pandas'
+      ],
       zip_safe=False)
