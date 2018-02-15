@@ -99,11 +99,11 @@ class SCope(s_pb2_grpc.MainServicer):
         start_time = time.time()
         n = 0
         # Feature 1
-        if len(request.e[0]) > 0:
+        if len(request.feature[0]) > 0:
             print("Feature 1 added")
             # Get value of the given requested feature
             feature_1_val = self.get_gene_expression(
-                loom_file_path=self.get_loom_filepath(request.loomFilePath), gene_symbol=request.e[0], log_transform=request.hasLogTranform, cpm_normalise=request.hasCpmTranform)
+                loom_file_path=self.get_loom_filepath(request.loomFilePath), gene_symbol=request.feature[0], log_transform=request.hasLogTranform, cpm_normalise=request.hasCpmTranform)
             # Normalize the value and convert to RGB values
             feature_1_val_norm = np.round(
                 feature_1_val / (feature_1_val.max() * .8) * 255)
@@ -111,19 +111,19 @@ class SCope(s_pb2_grpc.MainServicer):
         else:
             feature_1_val_norm = 0
         # Feature 2
-        if len(request.e[1]) > 0:
+        if len(request.feature[1]) > 0:
             print("Feature 2 added")
             feature_2_val = self.get_gene_expression(
-                loom_file_path=self.get_loom_filepath(request.loomFilePath), gene_symbol=request.e[1], log_transform=request.hasLogTranform, cpm_normalise=request.hasCpmTranform)
+                loom_file_path=self.get_loom_filepath(request.loomFilePath), gene_symbol=request.feature[1], log_transform=request.hasLogTranform, cpm_normalise=request.hasCpmTranform)
             feature_2_val_norm = np.round(
                 feature_2_val / (feature_2_val.max() * .8) * 255)
         else:
             feature_2_val_norm = np.zeros(n)
         # Feature 3
-        if len(request.e[2]) > 0:
+        if len(request.feature[2]) > 0:
             print("Feature 3 added")
             feature_3_val = self.get_gene_expression(
-                loom_file_path=self.get_loom_filepath(request.loomFilePath), gene_symbol=request.e[2], log_transform=request.hasLogTranform, cpm_normalise=request.hasCpmTranform)
+                loom_file_path=self.get_loom_filepath(request.loomFilePath), gene_symbol=request.feature[2], log_transform=request.hasLogTranform, cpm_normalise=request.hasCpmTranform)
             feature_3_val_norm = np.round(
                 feature_3_val / (feature_3_val.max() * .8) * 255)
         else:
@@ -141,12 +141,12 @@ class SCope(s_pb2_grpc.MainServicer):
         # to_hex_3d = np.vectorize(self.compressHexColor)
         # hex_3d_vec = to_hex_3d(hex_vec)
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        return s_pb2.CellColorByFeaturesReply(v=hex_vec)
+        return s_pb2.CellColorByFeaturesReply(color=hex_vec)
 
     def getFeatures(self, request, context):
         # request content
         #   - q   = query text
-        return s_pb2.FeatureReply(v=self.get_features(self.get_loom_filepath(request.loomFilePath), request.query))
+        return s_pb2.FeatureReply(feature=self.get_features(self.get_loom_filepath(request.loomFilePath), request.query))
 
     def getCoordinates(self, request, context):
         # request content

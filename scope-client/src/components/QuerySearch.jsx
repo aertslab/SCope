@@ -30,15 +30,15 @@ export default class QuerySearch extends React.Component {
         this.setState({ isLoading: true, value })
         setTimeout(() => {
             if (this.state.value.length < 1) return this.resetComponent()
-            let query = { 
+            let query = {
                 loomFilePath: this.props.loom
-                , query: this.state.value 
+                , query: this.state.value
             };
             this.props.gbwccxn.then((gbc) => {
                 gbc.services.scope.Main.getFeatures(query, (err, response) => {
                     // Subset the top results
                     if(response !== null) {
-                        let res_top = response.v.slice(0, 10).map((x) => {
+                        let res_top = response.feature.slice(0, 10).map((x) => {
                             return {"title": x}
                         });
                         let res = {"gene":{"name":"gene","results":res_top}}

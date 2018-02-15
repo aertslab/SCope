@@ -321,8 +321,8 @@ export default class Viewer extends Component {
         console.log(this.props)
         let query = {
             loomFilePath: this.props.loom
-            , feature: [featureQuery.i0.type, featureQuery.i1.type, featureQuery.i2.type]
-            , featureType: [featureQuery.i0.value, featureQuery.i1.value, featureQuery.i2.value]
+            , featureType: [featureQuery.i0.type, featureQuery.i1.type, featureQuery.i2.type]
+            , feature: [featureQuery.i0.value, featureQuery.i1.value, featureQuery.i2.value]
             , hasLogTranform: this.props.logtransform
             , hasCpmTranform: this.props.cpmnormalise
         };
@@ -330,7 +330,7 @@ export default class Viewer extends Component {
         this.props.homeref.gbwcCxn.then((gbc) => {
             gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
                 if(response !== null) {
-                    this.setState({ values: response.v })
+                    this.setState({ values: response.color })
                     this.endBenchmark()
                     this.updateDataPoints()
                 }
