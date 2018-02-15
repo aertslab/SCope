@@ -31,8 +31,8 @@ export default class QuerySearch extends React.Component {
         setTimeout(() => {
             if (this.state.value.length < 1) return this.resetComponent()
             let query = { 
-                lfp: this.props.loom
-                , q: this.state.value 
+                loomFilePath: this.props.loom
+                , query: this.state.value 
             };
             this.props.gbwccxn.then((gbc) => {
                 gbc.services.scope.Main.getFeatures(query, (err, response) => {
