@@ -103,7 +103,7 @@ class SCope(s_pb2_grpc.MainServicer):
             print("Feature 1 added")
             # Get value of the given requested feature
             feature_1_val = self.get_gene_expression(
-                loom_file_path=self.get_loom_filepath(request.lfp), gene_symbol=request.e[0], log_transform=request.lte, cpm_normalise=request.cpm)
+                loom_file_path=self.get_loom_filepath(request.loomFilePath), gene_symbol=request.e[0], log_transform=request.hasLogTranform, cpm_normalise=request.hasCpmTranform)
             # Normalize the value and convert to RGB values
             feature_1_val_norm = np.round(
                 feature_1_val / (feature_1_val.max() * .8) * 255)
@@ -114,7 +114,7 @@ class SCope(s_pb2_grpc.MainServicer):
         if len(request.e[1]) > 0:
             print("Feature 2 added")
             feature_2_val = self.get_gene_expression(
-                loom_file_path=self.get_loom_filepath(request.lfp), gene_symbol=request.e[1], log_transform=request.lte, cpm_normalise=request.cpm)
+                loom_file_path=self.get_loom_filepath(request.loomFilePath), gene_symbol=request.e[1], log_transform=request.hasLogTranform, cpm_normalise=request.hasCpmTranform)
             feature_2_val_norm = np.round(
                 feature_2_val / (feature_2_val.max() * .8) * 255)
         else:
@@ -123,7 +123,7 @@ class SCope(s_pb2_grpc.MainServicer):
         if len(request.e[2]) > 0:
             print("Feature 3 added")
             feature_3_val = self.get_gene_expression(
-                loom_file_path=self.get_loom_filepath(request.lfp), gene_symbol=request.e[2], log_transform=request.lte, cpm_normalise=request.cpm)
+                loom_file_path=self.get_loom_filepath(request.loomFilePath), gene_symbol=request.e[2], log_transform=request.hasLogTranform, cpm_normalise=request.hasCpmTranform)
             feature_3_val_norm = np.round(
                 feature_3_val / (feature_3_val.max() * .8) * 255)
         else:
@@ -146,11 +146,11 @@ class SCope(s_pb2_grpc.MainServicer):
     def getFeatures(self, request, context):
         # request content
         #   - q   = query text
-        return s_pb2.FeatureReply(v=self.get_features(self.get_loom_filepath(request.lfp), request.q))
+        return s_pb2.FeatureReply(v=self.get_features(self.get_loom_filepath(request.loomFilePath), request.query))
 
     def getCoordinates(self, request, context):
         # request content
-        c = self.get_coordinates(self.get_loom_filepath(request.lfp))
+        c = self.get_coordinates(self.get_loom_filepath(request.loomFilePath))
         return s_pb2.CoordinateReply(x=c["x"],y=c["y"])
 
     def getMyLooms(self, request, context):
