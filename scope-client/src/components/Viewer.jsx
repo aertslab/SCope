@@ -36,7 +36,7 @@ export default class Viewer extends Component {
     componentWillReceiveProps = (nextProps) => {
         if (this.props.loom !== nextProps.loom) {
             let query = {
-                lfp: nextProps.loom
+                loomFilePath: nextProps.loom
             };
             this.setState({ benchmark : { coordQuery: performance.now() } })
             this.startBenchmark("Query Coordinates")
@@ -320,11 +320,11 @@ export default class Viewer extends Component {
     queryFeature = (featureQuery) => {
         console.log(this.props)
         let query = {
-            lfp: this.props.loom
-            , f: [featureQuery.i0.type, featureQuery.i1.type, featureQuery.i2.type]
-            , e: [featureQuery.i0.value, featureQuery.i1.value, featureQuery.i2.value]
-            , lte: this.props.logtransform
-            , cpm: this.props.cpmnormalise
+            loomFilePath: this.props.loom
+            , feature: [featureQuery.i0.type, featureQuery.i1.type, featureQuery.i2.type]
+            , featureType: [featureQuery.i0.value, featureQuery.i1.value, featureQuery.i2.value]
+            , hasLogTranform: this.props.logtransform
+            , hasCpmTranform: this.props.cpmnormalise
         };
         this.startBenchmark("Query Feature")
         this.props.homeref.gbwcCxn.then((gbc) => {
