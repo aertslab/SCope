@@ -151,10 +151,10 @@ class SCope(s_pb2_grpc.MainServicer):
     def getCoordinates(self, request, context):
         # request content
         c = self.get_coordinates(self.get_loom_filepath(request.loomFilePath))
-        return s_pb2.CoordinateReply(x=c["x"],y=c["y"])
+        return s_pb2.CoordinatesReply(x=c["x"],y=c["y"])
 
     def getMyLooms(self, request, context):
-        return s_pb2.MyLoomListReply(l=[f for f in os.listdir(self.loom_dir) if f.endswith('.loom')])
+        return s_pb2.MyLoomsReply(l=[f for f in os.listdir(self.loom_dir) if f.endswith('.loom')])
 
 
 def serve(run_event):
