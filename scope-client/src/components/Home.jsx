@@ -57,7 +57,7 @@ export default class Home extends Component {
         this.gbwcCxn.then((gbc) => {
             gbc.services.scope.Main.getMyLooms(query, (err, response) => {
                 if(response !== null)
-                    this.setState({ myLooms: response.l })
+                    this.setState({ myLooms: response.loomFilePath })
                 else
                     console.log("No .loom files detected. You can import one via Import .loom link.")
             });
