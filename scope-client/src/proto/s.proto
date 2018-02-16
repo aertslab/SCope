@@ -44,7 +44,7 @@ repeated string featureType=3;
 }
 
 message CellAUCValuesByFeaturesReply{
-repeated string value=1;
+repeated string regulon=1;
 }
 
 // lfr = foomfilepath

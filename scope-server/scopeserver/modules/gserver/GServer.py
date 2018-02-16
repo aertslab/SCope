@@ -70,6 +70,11 @@ class SCope(s_pb2_grpc.MainServicer):
             gene_expr = gene_expr
         return gene_expr
 
+    def get_auc_values(self, loom_file_path, regulon):
+        loom = self.get_loom_connection(loom_file_path)
+        print("Debug: getting AUC values for {0} ...".format(regulon))
+        return loom.ca.RegulonsAUC[regulon]
+
     def get_features(self, loom_file_path, query):
         loom = self.get_loom_connection(loom_file_path)
         # Genes
@@ -80,15 +85,16 @@ class SCope(s_pb2_grpc.MainServicer):
         print("Debug: " + str(len(res)) + " genes matching '" + query + "'")
         return res
 
-    def get_coordinates(self, loom_file_path):
+    def get_coordinates(self, loom_file_path, EmbeddingName='Embedding'):
         loom = self.get_loom_connection(loom_file_path)
-        return {"x": loom.col_attrs["_X"]
-              , "y": loom.col_attrs["_Y"]}
+        embedding = loom.ca[EmbeddingName]
+        return {"x": embedding["_X"],
+                "y": embedding["_Y"]}
 
     def compressHexColor(self, a):
         a = int(a, 16)
-        a_hex3d = hex(a>>20<<8|a>>8&240|a>>4&15)
-        return a_hex3d.replace("0x","")
+        a_hex3d = hex(a >> 20 << 8 | a >> 8 & 240 | a >> 4 & 15)
+        return a_hex3d.replace("0x", "")
 
     def getCellColorByFeatures(self, request, context):
         # request content
@@ -114,7 +120,17 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.CellColorByFeaturesReply(color=hex_vec)
 
     def getCellAUCValuesByFeatures(self, request, context):
-        return None
+        start_time = time.time()
+        loomFilePath = self.get_loom_filepath(request.loomFilePath)
+        regulons = []
+        for feature in request.feature:
+            if feature != '':
+                regulons.append(self.get_auc_values(loom_file_path=loomFilePath, regulon=request.feature))
+        print("Debug: {0} seconds elapsed ---".format(time.time() - start_time))
+
+        hex_vec = ["%02x%02x%02x" % (int(r), int(g), int(b)) for r, g, b in zip(regulons[0], regulons[1], regulons[2])]
+
+        return s_pb2.CellAUCValuesByFeaturesReply(regulon=hex_vec)
 
     def getFeatures(self, request, context):
         return s_pb2.FeatureReply(feature=self.get_features(self.get_loom_filepath(request.loomFilePath), request.query))
@@ -122,7 +138,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def getCoordinates(self, request, context):
         # request content
         c = self.get_coordinates(self.get_loom_filepath(request.loomFilePath))
-        return s_pb2.CoordinatesReply(x=c["x"],y=c["y"])
+        return s_pb2.CoordinatesReply(x=c["x"], y=c["y"])
 
     def getMyLooms(self, request, context):
         return s_pb2.MyLoomsReply(loomFilePath=[f for f in os.listdir(self.loom_dir) if f.endswith('.loom')])
