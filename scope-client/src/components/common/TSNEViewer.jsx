@@ -2,13 +2,13 @@ import React, { Component } from 'react'
 import * as PIXI from 'pixi.js'
 import * as d3 from 'd3';
 import {  Menu, Grid,  Checkbox, Input, Icon  } from 'semantic-ui-react'
-import { BackendAPI } from './API' 
+import { BackendAPI } from './API'
 
 export default class TSNEViewer extends Component {
 
     constructor(props) {
         super(props)
-        this.state = { 
+        this.state = {
             type: 'gene',
             thresholds: [0, 0, 0],
             coord : {
@@ -17,18 +17,18 @@ export default class TSNEViewer extends Component {
             },
             lassoPoints: [],
             lassoSelections: [],
-            mouse: { 
-                down: false 
+            mouse: {
+                down: false
             },
-            zoom: { 
+            zoom: {
                 type: 's',
                 k : 1,
                 transform : null
             },
             activeTool: 's-zoom',
-            benchmark: { 
-                t1: 0, 
-                msg: "" 
+            benchmark: {
+                t1: 0,
+                msg: ""
             }
         }
         this.w = parseInt(this.props.width);
@@ -110,7 +110,7 @@ export default class TSNEViewer extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        if (this.props.loomFile != nextProps.loomFile) {            
+        if (this.props.loomFile != nextProps.loomFile) {
             this.getPoints(nextProps.loomFile, () => {
                 this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile, nextProps.thresholds);
             });
@@ -154,7 +154,7 @@ export default class TSNEViewer extends Component {
     handleItemClick(e, tool) {
         console.log("Active tool ", tool.name);
         this.setState({ activeTool: tool.name });
-    } 
+    }
 
     makePointSprite(c) {
         let s = new PIXI.Sprite(this.texture);
@@ -341,7 +341,7 @@ export default class TSNEViewer extends Component {
     semanticZoom() {
         let t = d3.event.transform
         this.container.position.x = t.x, this.container.position.y = t.y;
-        if (this.state.zoom.k != t.k) {            
+        if (this.state.zoom.k != t.k) {
             this.setState({ zoom: { k: t.k } });
             this.transformDataPoints();
         }
@@ -402,7 +402,7 @@ export default class TSNEViewer extends Component {
         }
         this.endBenchmark();
         console.log("The coordinates have been loaded! ")
-        this.transformDataPoints();       
+        this.transformDataPoints();
         //requestAnimationFrame(() => this.renderer.render(this.stage)); // Important to transfer the state
     }
 
@@ -420,7 +420,7 @@ export default class TSNEViewer extends Component {
         }
         this.endBenchmark();
         this.renderer.render(this.stage);
-        
+
     }
 
     getFeatureColors(features, loomFile, thresholds) {

@@ -2,7 +2,7 @@ import _ from 'lodash'
 import React, { Component } from 'react'
 import { Header, Grid } from 'semantic-ui-react'
 import FeatureSearchBox from '../common/FeatureSearchBox'
-import { BackendAPI } from '../common/API' 
+import { BackendAPI } from '../common/API'
 import TSNEViewer from '../common/TSNEViewer'
 import AUCThreshold from '../common/AUCThreshold'
 

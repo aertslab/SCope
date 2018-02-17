@@ -11,12 +11,12 @@ class API {
 				0: {type: 'gene', value: ''},
 				1: {type: 'gene', value: ''},
 				2: {type: 'gene', value: ''}
-			}, 
+			},
 			'regulon': {
 				0: {type: 'regulon', value: ''},
 				1: {type: 'regulon', value: ''},
 				2: {type: 'regulon', value: ''}
-			}, 
+			},
 		};
 		this.featureChangeListeners = [];
 

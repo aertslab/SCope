@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Header, Grid } from 'semantic-ui-react'
-import { BackendAPI } from '../common/API' 
+import { BackendAPI } from '../common/API'
 import FeatureSearchBox from '../common/FeatureSearchBox'
 import TSNEViewer from '../common/TSNEViewer'
 
@@ -13,7 +13,7 @@ export default class Expression extends Component {
         }
         console.log('features', this.state.activeFeatures);
         BackendAPI.onActiveLoomChange((loom) => {
-            this.setState({activeLoom: loom});    
+            this.setState({activeLoom: loom});
         });
         BackendAPI.onActiveFeaturesChange((features) => {
             this.setState({activeFeatures: features});
@@ -46,7 +46,7 @@ export default class Expression extends Component {
                                 <TSNEViewer width="1000" height="800" loomFile={activeLoom} activeFeatures={activeFeatures} />
                             </Grid.Column>
                         </Grid.Row>
-                    </Grid>                        
+                    </Grid>
                 </div>
             </div>
         );

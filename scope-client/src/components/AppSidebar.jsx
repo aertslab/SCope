@@ -48,9 +48,9 @@ export default class AppSidebar extends Component {
 								<Grid.Row>
 									<Grid.Column width={13}>
 										<FileReaderInput as="binary" id="my-file-input" onChange={this.selectLoomFile.bind(this)}>
-											<Input 
+											<Input
 												label="File to be uploaded:" labelPosition='left' action="Select a file..." fluid
-												placeholder={ this.state.uploadLoomFile ? this.state.uploadLoomFile.name : ""} 
+												placeholder={ this.state.uploadLoomFile ? this.state.uploadLoomFile.name : ""}
 											/>
 										</FileReaderInput>
 									</Grid.Column>
@@ -137,7 +137,7 @@ export default class AppSidebar extends Component {
 
 		let form = new FormData();
 		form.append('file', file);
-		
+
 		let xhr = new XMLHttpRequest();
 		xhr.open('POST', 'http://localhost:50051/');
 		xhr.upload.addEventListener('progress', (event) => {
