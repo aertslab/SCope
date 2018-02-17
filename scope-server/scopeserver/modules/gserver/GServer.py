@@ -70,25 +70,61 @@ class SCope(s_pb2_grpc.MainServicer):
             gene_expr = gene_expr
         return gene_expr
 
+    def get_auc_values(self, loom_file_path, regulon):
+        loom = self.get_loom_connection(loom_file_path)
+        print("Debug: getting AUC values for {0} ...".format(regulon))
+        return loom.ca.RegulonsAUC[regulon]
+
     def get_features(self, loom_file_path, query):
         loom = self.get_loom_connection(loom_file_path)
         # Genes
         # Filter the genes by the query
-        res = list(filter(lambda x: x.startswith(query), loom.ra.Gene))
+
+        # Allow caps innsensitive searching, minor slowdown
+        start_time = time.time()
+        res = []
+        resF = []
+        regulonList = list(loom.ra.Regulons.dtype.names)
+        origSpace = list(loom.ra.Gene) + regulonList
+        searchSpace = [x.casefold() for x in loom.ra.Gene] + [x.casefold() for x in regulonList]
+        fType = ['gene' for x in loom.ra.Gene] + ['regulon' for x in regulonList]
+
+        for n, x in enumerate(searchSpace):
+            if query.casefold() in x:
+                res.append(origSpace[n])
+                resF.append(fType[n])
+        for n, r in enumerate(res):
+            if r.startswith(query) or query in r:
+                r = res.pop(n)
+                res = [r] + res
+                f = resF.pop(n)
+                resF = [f] + resF
+        for r in res:
+            if r == query:
+                r = res.pop(n)
+                res = [r] + res
+                f = resF.pop(n)
+                resF = [f] + resF
+
+        # res = list(filter(lambda x: x.startswith(query), loom.ra.Gene))
         # res_json = json.dumps({"gene": {"name": "gene", "results": list(map(lambda x: {"title":x,"description":"","image":"", "price":""}, res))}}, ensure_ascii=False)
         # print(res_json)
         print("Debug: " + str(len(res)) + " genes matching '" + query + "'")
-        return res
+        print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
 
-    def get_coordinates(self, loom_file_path):
+        return {'feature': res,
+                'featureType': resF}
+
+    def get_coordinates(self, loom_file_path, EmbeddingName='Embedding'):
         loom = self.get_loom_connection(loom_file_path)
-        return {"x": loom.col_attrs["_X"]
-              , "y": loom.col_attrs["_Y"]}
+        embedding = loom.ca[EmbeddingName]
+        return {"x": embedding["_X"],
+                "y": embedding["_Y"]}
 
     def compressHexColor(self, a):
         a = int(a, 16)
-        a_hex3d = hex(a>>20<<8|a>>8&240|a>>4&15)
-        return a_hex3d.replace("0x","")
+        a_hex3d = hex(a >> 20 << 8 | a >> 8 & 240 | a >> 4 & 15)
+        return a_hex3d.replace("0x", "")
 
     def getCellColorByFeatures(self, request, context):
         # request content
@@ -97,64 +133,43 @@ class SCope(s_pb2_grpc.MainServicer):
         #   - f     = features
         #   - lte   = log transform expression
         start_time = time.time()
-        n = 0
-        # Feature 1
-        if len(request.e[0]) > 0:
-            print("Feature 1 added")
-            # Get value of the given requested feature
-            feature_1_val = self.get_gene_expression(
-                loom_file_path=self.get_loom_filepath(request.lfp), gene_symbol=request.e[0], log_transform=request.lte, cpm_normalise=request.cpm)
-            # Normalize the value and convert to RGB values
-            feature_1_val_norm = np.round(
-                feature_1_val / (feature_1_val.max() * .8) * 255)
-            n = feature_1_val_norm.size
-        else:
-            feature_1_val_norm = 0
-        # Feature 2
-        if len(request.e[1]) > 0:
-            print("Feature 2 added")
-            feature_2_val = self.get_gene_expression(
-                loom_file_path=self.get_loom_filepath(request.lfp), gene_symbol=request.e[1], log_transform=request.lte, cpm_normalise=request.cpm)
-            feature_2_val_norm = np.round(
-                feature_2_val / (feature_2_val.max() * .8) * 255)
-        else:
-            feature_2_val_norm = np.zeros(n)
-        # Feature 3
-        if len(request.e[2]) > 0:
-            print("Feature 3 added")
-            feature_3_val = self.get_gene_expression(
-                loom_file_path=self.get_loom_filepath(request.lfp), gene_symbol=request.e[2], log_transform=request.lte, cpm_normalise=request.cpm)
-            feature_3_val_norm = np.round(
-                feature_3_val / (feature_3_val.max() * .8) * 255)
-        else:
-            feature_3_val_norm = np.zeros(n)
-        rgb_df = pd.DataFrame(data={'red': feature_1_val_norm.astype('u1')
-                                  , 'green': feature_2_val_norm.astype('u1')
-                                  , 'blue': feature_3_val_norm.astype('u1')})
-        rgb_df = rgb_df[['red','green','blue']]
-        rgb_arr = rgb_df.as_matrix()
-        # Convert to RGB to hexadecimal format
-        hex_arr = hexarr(rgb_arr)
-        hex_vec = np.core.defchararray.add(np.core.defchararray.add(
-            hex_arr[:, 0], hex_arr[:, 1]), hex_arr[:, 2])
-        # Comress the color (not working as without)
-        # to_hex_3d = np.vectorize(self.compressHexColor)
-        # hex_3d_vec = to_hex_3d(hex_vec)
+        loomFilePath = self.get_loom_filepath(request.loomFilePath)
+        features = []
+        for n, feature in enumerate(request.feature):
+            if request.featureType[n] == 'gene':
+                if feature != '':
+                    vals = self.get_gene_expression(
+                        loom_file_path=loomFilePath, gene_symbol=feature, log_transform=request.hasLogTranform, cpm_normalise=request.hasCpmTranform)
+                    features.append(np.round(vals / (vals.max() * .8) * 255))
+                else:
+                    features.append(np.zeros(len(features[0])))
+            elif request.featureType[n] == 'regulon':
+                if feature != '':
+                    vals = self.get_auc_values(loom_file_path=loomFilePath, regulon=feature)
+                    features.append(np.round(vals / (vals.max() * .8) * 255))
+                else:
+                    features.append(np.zeros(len(features[0])))
+
+        hex_vec = ["%02x%02x%02x" % (int(r), int(g), int(b)) for r, g, b in zip(features[0], features[1], features[2])]
+
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        return s_pb2.CellColorByFeaturesReply(v=hex_vec)
+        return s_pb2.CellColorByFeaturesReply(color=hex_vec)
+
+    def getCellAUCValuesByFeatures(self, request, context):
+        loomFilePath = self.get_loom_filepath(request.loomFilePath)
+        return s_pb2.CellAUCValuesByFeaturesReply(regulon=self.get_auc_values(loom_file_path=loomFilePath, regulon=request.feature))
 
     def getFeatures(self, request, context):
-        # request content
-        #   - q   = query text
-        return s_pb2.FeatureReply(v=self.get_features(self.get_loom_filepath(request.lfp), request.q))
+        f = self.get_features(self.get_loom_filepath(request.loomFilePath), request.query)
+        return s_pb2.FeatureReply(feature=f['feature'], featureType=f['featureType'])
 
     def getCoordinates(self, request, context):
         # request content
-        c = self.get_coordinates(self.get_loom_filepath(request.lfp))
-        return s_pb2.CoordinateReply(x=c["x"],y=c["y"])
+        c = self.get_coordinates(self.get_loom_filepath(request.loomFilePath))
+        return s_pb2.CoordinatesReply(x=c["x"], y=c["y"])
 
     def getMyLooms(self, request, context):
-        return s_pb2.MyLoomListReply(l=[f for f in os.listdir(self.loom_dir) if f.endswith('.loom')])
+        return s_pb2.MyLoomsReply(loomFilePath=[f for f in os.listdir(self.loom_dir) if f.endswith('.loom')])
 
 
 def serve(run_event):
