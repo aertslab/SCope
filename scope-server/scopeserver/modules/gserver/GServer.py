@@ -80,6 +80,7 @@ class SCope(s_pb2_grpc.MainServicer):
         # Genes
         # Filter the genes by the query
 
+        # Allow caps innsensitive searching, minor slowdown
         start_time = time.time()
         res = []
         resF = []
