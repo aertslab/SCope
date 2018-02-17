@@ -23,7 +23,7 @@ export default class QuerySearch extends React.Component {
 
     handleResultSelect = (e, { result }) => {
         this.setState({ value: result.title })
-        this.props.homeref.selectFeatureValue(this.props.id, "gene", result.title)
+        this.props.homeref.selectFeatureValue(this.props.id, result.type, result.title)
     }
 
     handleSearchChange = (e, { value }) => {
@@ -38,10 +38,27 @@ export default class QuerySearch extends React.Component {
                 gbc.services.scope.Main.getFeatures(query, (err, response) => {
                     // Subset the top results
                     if(response !== null) {
-                        let res_top = response.feature.slice(0, 10).map((x) => {
-                            return {"title": x}
-                        });
-                        let res = {"gene":{"name":"gene","results":res_top}}
+                        var gene_top = []
+                        var reg_top = []
+                        for (var i = 0; i < 10; i++) {
+                            if (response.featureType[i] == 'gene') {
+                                gene_top.push({"title": response.feature[i],
+                                               "type": response.featureType[i]});
+                            } else if (response.featureType[i] == 'regulon') {
+                                reg_top.push({"title": response.feature[i],
+                                               "type": response.featureType[i]});
+                            }
+
+                        };
+                        if (gene_top.length != 0 && reg_top.length != 0) {
+                          var res = {"gene":{"name":"genes","results":gene_top},
+                                     "regulons":{"name":"regulons","results":reg_top}}
+                        } else if (gene_top.length == 0) {
+
+                          var res = {"regulons":{"name":"regulons","results":reg_top}}
+                        } else {
+                          var res = {"gene":{"name":"genes","results":gene_top}}
+                        }
                         this.setState({
                             isLoading: false,
                             results: res,

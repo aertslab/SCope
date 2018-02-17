@@ -58,6 +58,7 @@ string query=2;
 
 message FeatureReply {
 repeated string feature=1;
+repeated string featureType=2;
 }
 
 message CoordinatesRequest {

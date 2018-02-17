@@ -79,11 +79,40 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(loom_file_path)
         # Genes
         # Filter the genes by the query
-        res = list(filter(lambda x: x.startswith(query), loom.ra.Gene))
+
+        start_time = time.time()
+        res = []
+        resF = []
+        regulonList = list(loom.ra.Regulons.dtype.names)
+        origSpace = list(loom.ra.Gene) + regulonList
+        searchSpace = [x.casefold() for x in loom.ra.Gene] + [x.casefold() for x in regulonList]
+        fType = ['gene' for x in loom.ra.Gene] + ['regulon' for x in regulonList]
+
+        for n, x in enumerate(searchSpace):
+            if query.casefold() in x:
+                res.append(origSpace[n])
+                resF.append(fType[n])
+        for n, r in enumerate(res):
+            if r.startswith(query) or query in r:
+                r = res.pop(n)
+                res = [r] + res
+                f = resF.pop(n)
+                resF = [f] + resF
+        for r in res:
+            if r == query:
+                r = res.pop(n)
+                res = [r] + res
+                f = resF.pop(n)
+                resF = [f] + resF
+
+        # res = list(filter(lambda x: x.startswith(query), loom.ra.Gene))
         # res_json = json.dumps({"gene": {"name": "gene", "results": list(map(lambda x: {"title":x,"description":"","image":"", "price":""}, res))}}, ensure_ascii=False)
         # print(res_json)
         print("Debug: " + str(len(res)) + " genes matching '" + query + "'")
-        return res
+        print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
+
+        return {'feature': res,
+                'featureType': resF}
 
     def get_coordinates(self, loom_file_path, EmbeddingName='Embedding'):
         loom = self.get_loom_connection(loom_file_path)
@@ -113,9 +142,10 @@ class SCope(s_pb2_grpc.MainServicer):
                     features.append(np.round(vals / (vals.max() * .8) * 255))
                 else:
                     features.append(np.zeros(len(features[0])))
-            elif request.featureType == 'regulon':
+            elif request.featureType[n] == 'regulon':
                 if feature != '':
-                    features.append(self.get_auc_values(loom_file_path=loomFilePath, regulon=request.feature))
+                    vals = self.get_auc_values(loom_file_path=loomFilePath, regulon=feature)
+                    features.append(np.round(vals / (vals.max() * .8) * 255))
                 else:
                     features.append(np.zeros(len(features[0])))
 
@@ -129,7 +159,8 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.CellAUCValuesByFeaturesReply(regulon=self.get_auc_values(loom_file_path=loomFilePath, regulon=request.feature))
 
     def getFeatures(self, request, context):
-        return s_pb2.FeatureReply(feature=self.get_features(self.get_loom_filepath(request.loomFilePath), request.query))
+        f = self.get_features(self.get_loom_filepath(request.loomFilePath), request.query)
+        return s_pb2.FeatureReply(feature=f['feature'], featureType=f['featureType'])
 
     def getCoordinates(self, request, context):
         # request content
