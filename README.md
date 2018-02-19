@@ -6,11 +6,6 @@
 
 - Install
 ```
-cd scope-server/scopeserver/modules/xserver
-npm install
-```
-
-```
 cd scope-server
 python setup.py develop
 ```
@@ -33,5 +28,3 @@ npm install
 cd scope-client
 npm run dev
 ```
-
-NOTE: Run from SCope root directory otherwise if run from within Client directory `TypeError: Cannot read property 'ns' of null` arises!
