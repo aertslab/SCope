@@ -56,6 +56,10 @@ class SCope(s_pb2_grpc.MainServicer):
             print("Debug: loading the loom file from " + loom_file_path + "...")
             return self.load_loom_file(partial_md5_hash, loom_file_path)
 
+    def get_nb_cells(self, loom_file_path):
+        loom = self.get_loom_connection(loom_file_path)
+        return loom.shape[1]
+
     def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True, cpm_normalise=False):
         loom = self.get_loom_connection(loom_file_path)
         print("Debug: getting expression of " + gene_symbol + "...")
@@ -73,7 +77,9 @@ class SCope(s_pb2_grpc.MainServicer):
     def get_auc_values(self, loom_file_path, regulon):
         loom = self.get_loom_connection(loom_file_path)
         print("Debug: getting AUC values for {0} ...".format(regulon))
-        return loom.ca.RegulonsAUC[regulon]
+        if regulon in loom.ca.RegulonsAUC.dtype.names:
+            return loom.ca.RegulonsAUC[regulon]
+        return []
 
     def get_features(self, loom_file_path, query):
         loom = self.get_loom_connection(loom_file_path)
@@ -134,6 +140,7 @@ class SCope(s_pb2_grpc.MainServicer):
         #   - lte   = log transform expression
         start_time = time.time()
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
+        n_cells = self.get_nb_cells(loomFilePath)
         features = []
         for n, feature in enumerate(request.feature):
             if request.featureType[n] == 'gene':
@@ -142,15 +149,18 @@ class SCope(s_pb2_grpc.MainServicer):
                         loom_file_path=loomFilePath, gene_symbol=feature, log_transform=request.hasLogTranform, cpm_normalise=request.hasCpmTranform)
                     features.append(np.round(vals / (vals.max() * .8) * 255))
                 else:
-                    features.append(np.zeros(len(features[0])))
+                    features.append(np.zeros(n_cells))
             elif request.featureType[n] == 'regulon':
                 if feature != '':
                     vals = self.get_auc_values(loom_file_path=loomFilePath, regulon=feature)
                     features.append(np.round(vals / (vals.max() * .8) * 255))
                 else:
-                    features.append(np.zeros(len(features[0])))
+                    features.append(np.zeros(n_cells))
 
-        hex_vec = ["%02x%02x%02x" % (int(r), int(g), int(b)) for r, g, b in zip(features[0], features[1], features[2])]
+        if len(features) > 0:
+            hex_vec = ["%02x%02x%02x" % (int(r), int(g), int(b)) for r, g, b in zip(features[0], features[1], features[2])]
+        else:
+            hex_vec = []
 
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
         return s_pb2.CellColorByFeaturesReply(color=hex_vec)
