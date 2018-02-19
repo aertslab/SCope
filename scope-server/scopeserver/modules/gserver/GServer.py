@@ -157,7 +157,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getCellAUCValuesByFeatures(self, request, context):
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
-        return s_pb2.CellAUCValuesByFeaturesReply(regulon=self.get_auc_values(loom_file_path=loomFilePath, regulon=request.feature))
+        return s_pb2.CellAUCValuesByFeaturesReply(value=self.get_auc_values(loom_file_path=loomFilePath, regulon=request.feature[0]))
 
     def getFeatures(self, request, context):
         f = self.get_features(self.get_loom_filepath(request.loomFilePath), request.query)
