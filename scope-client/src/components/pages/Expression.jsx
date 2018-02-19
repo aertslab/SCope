@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import { Header } from 'semantic-ui-react'
+import { Header, Grid } from 'semantic-ui-react'
 import { BackendAPI } from '../common/API' 
-import FeatureSearchBar from '../common/FeatureSearchBar'
+import FeatureSearchBox from '../common/FeatureSearchBox'
 import TSNEViewer from '../common/TSNEViewer'
 
 export default class Expression extends Component {
@@ -29,8 +29,24 @@ export default class Expression extends Component {
                 </div>
                 <div style={{display: activeLoom != null ? 'block' : 'none'}}>
                     Select up to three genes to be displayed on tSNE <br />
-                    <FeatureSearchBar type="gene" locked="1" activeFeatures={activeFeatures} />
-                    <TSNEViewer width="1000" height="800" loomFile={activeLoom} activeFeatures={activeFeatures} />
+                    <Grid>
+                        <Grid.Row columns="4">
+                            <Grid.Column>
+                                <FeatureSearchBox field="0" color="red" type="gene" locked="1" value={activeFeatures[0].value} />
+                            </Grid.Column>
+                            <Grid.Column>
+                                <FeatureSearchBox field="1" color="green" type="gene" locked="1" value={activeFeatures[1].value} />
+                            </Grid.Column>
+                            <Grid.Column>
+                                <FeatureSearchBox field="2" color="blue" type="gene" locked="1" value={activeFeatures[2].value} />
+                            </Grid.Column>
+                        </Grid.Row>
+                        <Grid.Row columns="1">
+                            <Grid.Column>
+                                <TSNEViewer width="1000" height="800" loomFile={activeLoom} activeFeatures={activeFeatures} />
+                            </Grid.Column>
+                        </Grid.Row>
+                    </Grid>                        
                 </div>
             </div>
         );

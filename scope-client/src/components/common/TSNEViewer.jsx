@@ -9,6 +9,8 @@ export default class TSNEViewer extends Component {
     constructor(props) {
         super(props)
         this.state = { 
+            type: 'gene',
+            thresholds: [0, 0, 0],
             coord : {
                 x: [],
                 y: []
@@ -102,7 +104,7 @@ export default class TSNEViewer extends Component {
     componentWillMount() {
         if (this.props.loomFile != null) {
             this.getPoints(this.props.loomFile, () => {
-                this.getFeatureColors(this.props.activeFeatures, this.props.loomFile);
+                this.getFeatureColors(this.props.activeFeatures, this.props.loomFile, this.props.thresholds);
             });
         }
     }
@@ -110,10 +112,10 @@ export default class TSNEViewer extends Component {
     componentWillReceiveProps(nextProps) {
         if (this.props.loomFile != nextProps.loomFile) {            
             this.getPoints(nextProps.loomFile, () => {
-                this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile);
+                this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile, nextProps.thresholds);
             });
         } else {
-            this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile);
+            this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile, nextProps.thresholds);
         }
     }
 
@@ -420,16 +422,21 @@ export default class TSNEViewer extends Component {
         
     }
 
-    getFeatureColors(features, loomFile) {
+    getFeatureColors(features, loomFile, thresholds) {
+        if (thresholds == null) {
+            thresholds = this.state.thresholds;
+        }
         this.startBenchmark("Getting point feature colors")
         let settings = BackendAPI.getSettings();
         let query = {
             loomFilePath: loomFile,
             featureType: [features[0].type, features[1].type, features[2].type],
             feature: [features[0].value, features[1].value, features[2].value],
+            //threshold: thresholds,
             hasLogTranform: settings.hasLogTransform,
             hasCpmTranform: settings.hasCpmNormalization
         };
+        console.log('q', query);
         BackendAPI.getConnection().then((gbc) => {
             gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
                 if(response !== null) {
