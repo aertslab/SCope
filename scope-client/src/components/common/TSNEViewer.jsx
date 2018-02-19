@@ -107,6 +107,9 @@ export default class TSNEViewer extends Component {
                 this.getFeatureColors(this.props.activeFeatures, this.props.loomFile, this.props.thresholds);
             });
         }
+        if (this.props.activeFeatures != null) {
+            this.getFeatureColors(this.props.activeFeatures);
+        }
     }
 
     componentWillReceiveProps(nextProps) {
