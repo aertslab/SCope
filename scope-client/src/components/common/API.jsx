@@ -2,7 +2,10 @@ class API {
 	constructor() {
 		this.GBC = require("grpc-bus-websocket-client");
 		this.GBCConnection = new this.GBC("ws://localhost:8081/", 'src/proto/s.proto', { scope: { Main: 'localhost:50052' } }).connect();
+
 		this.activeLoom = null;
+		this.activeLoomChangeListeners = [];
+
 		this.features = {
 			'gene': {
 				0: {type: 'gene', value: ''},
@@ -16,9 +19,12 @@ class API {
 			}, 
 		};
 		this.featureChangeListeners = [];
-		this.activeLoomChangeListeners = [];
-		this.hasLogTranform = true;
-		this.hasCpmTranform = true;
+
+		this.settings = {
+			hasLogTransform: true,
+			hasCpmNormalization: true
+		}
+		this.settingsChangeListeners = [];
 	}
 
 	getConnection() {
@@ -58,6 +64,20 @@ class API {
 	}
 
 
+	getSettings() {
+		return this.settings;
+	}
+
+	setSetting(key, value) {
+		this.settings[key] = value;
+		this.settingsChangeListeners.forEach((listener) => {
+			listener(this.settings);
+		})
+	}
+
+	onSettingsChange(listener) {
+		this.settingsChangeListeners.push(listener);
+	}
 
 }
 

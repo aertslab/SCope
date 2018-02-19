@@ -33,6 +33,9 @@ export default class TSNEViewer extends Component {
         this.h = parseInt(this.props.height);
         this.maxn = 200000;
         this.texture = PIXI.Texture.fromImage("src/images/particle@2x.png");
+        BackendAPI.onSettingsChange(() => {
+            this.getFeatureColors(this.props.activeFeatures, this.props.loomFile);
+        })
     }
 
     render() {
@@ -98,25 +101,26 @@ export default class TSNEViewer extends Component {
 
     componentWillMount() {
         if (this.props.loomFile != null) {
-            this.getPoints(this.props.loomFile);
-        }
-        if (this.props.activeFeatures != null) {
-            this.getFeatureColors(this.props.activeFeatures);
+            this.getPoints(this.props.loomFile, () => {
+                this.getFeatureColors(this.props.activeFeatures, this.props.loomFile);
+            });
         }
     }
 
     componentWillReceiveProps(nextProps) {
         if (this.props.loomFile != nextProps.loomFile) {            
-            this.getPoints(nextProps.loomFile);
-        }
-        if (Object.is(this.props.activeFeatures, nextProps.activeFeatures)) {
-            this.getFeatureColors(nextProps.activeFeatures);
+            this.getPoints(nextProps.loomFile, () => {
+                this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile);
+            });
+        } else {
+            this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile);
         }
     }
 
     componentDidMount() {
         this.initGraphics();
     }
+
 
 /*
     shouldComponentUpdate = (nextProps, nextState) => {
@@ -361,7 +365,8 @@ export default class TSNEViewer extends Component {
         //this.transformDataPoints();
     }
 
-    getPoints(loomFile) {
+    getPoints(loomFile, callback) {
+        console.log('loom:', loomFile);
         let query = {
             loomFilePath: loomFile
         };
@@ -377,6 +382,7 @@ export default class TSNEViewer extends Component {
                 this.setState({ coord: c })
                 this.endBenchmark()
                 this.initializeDataPoints()
+                callback()
             });
         });
     }
@@ -414,14 +420,15 @@ export default class TSNEViewer extends Component {
         
     }
 
-    getFeatureColors(features) {
+    getFeatureColors(features, loomFile) {
         this.startBenchmark("Getting point feature colors")
+        let settings = BackendAPI.getSettings();
         let query = {
-            loomFilePath: this.props.loomFile,
+            loomFilePath: loomFile,
             featureType: [features[0].type, features[1].type, features[2].type],
             feature: [features[0].value, features[1].value, features[2].value],
-            hasLogTranform: true, //this.props.logtransform
-            hasCpmTranform: true //, this.props.cpmnormalise
+            hasLogTranform: settings.hasLogTransform,
+            hasCpmTranform: settings.hasCpmNormalization
         };
         BackendAPI.getConnection().then((gbc) => {
             gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
@@ -429,6 +436,7 @@ export default class TSNEViewer extends Component {
                     this.endBenchmark()
                     this.updateDataPoints(response.color)
                 } else {
+                    this.endBenchmark()
                     this.resetDataPoints()
                 }
             });

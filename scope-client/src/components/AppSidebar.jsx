@@ -11,7 +11,8 @@ export default class AppSidebar extends Component {
 			uploadLoomFile: null,
 			uploadLoomModalOpened: false,
 			uploadLoomProgress: 0,
-			myLooms: []
+			myLooms: [],
+			settings: BackendAPI.getSettings()
 		}
 		this.updateMyLooms();
 	}
@@ -32,10 +33,10 @@ export default class AppSidebar extends Component {
 					<Menu.Header>SETTINGS</Menu.Header>
 					<Menu.Menu>
 						<Menu.Item>
-							<Checkbox toggle label="Log transform"/>
+							<Checkbox toggle label="Log transform" checked={this.state.settings.hasLogTransform} onChange={this.toggleLogTransform.bind(this)} />
 						</Menu.Item>
 						<Menu.Item>
-							<Checkbox toggle label="CPM normalize"/>
+							<Checkbox toggle label="CPM normalize" checked={this.state.settings.hasCpmNormalization} onChange={this.toggleCpmNormization.bind(this)} />
 						</Menu.Item>
 					</Menu.Menu>
 				</Menu.Item>
@@ -107,6 +108,16 @@ export default class AppSidebar extends Component {
 
 	toggleUploadLoomModal(event) {
 		this.setState({ uploadLoomModalOpened: !this.state.uploadLoomModalOpened })
+	}
+
+	toggleCpmNormization() {
+		BackendAPI.setSetting('hasCpmNormalization', !this.state.settings.hasCpmNormalization);
+		this.setState({settings: BackendAPI.getSettings()});
+	}
+
+	toggleLogTransform() {
+		BackendAPI.setSetting('hasLogTransform', !this.state.settings.hasLogTransform);
+		this.setState({settings: BackendAPI.getSettings()});
 	}
 
 	selectLoomFile(event, selection) {
