@@ -31,7 +31,7 @@ export default class FeatureSearchBar extends React.Component {
 						<Label color={this.colors[i]} style={querySearchLabel}></Label>
 					</Menu.Item>
 					<Menu.Item style={noPadding}>
-						<FeatureSearchBox key={i} id={i} color={this.colors[i]} type={type} locked={locked} />
+						<FeatureSearchBox key={i} id={i} color={this.colors[i]} type={type} locked={locked} value={this.props.activeFeatures[i].value} />
 					</Menu.Item>
 				</Menu>
 			</Menu.Item>

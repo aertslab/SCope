@@ -78,8 +78,8 @@ export default class AppSidebar extends Component {
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getMyLooms(query, (error, response) => {
 				if (response !== null) {
-					console.log("Loaded .loom files: " + response.l.length);
-					this.setState({ myLooms: response.l });
+					console.log("Loaded .loom files: " + response.loomFilePath.length);
+					this.setState({ myLooms: response.loomFilePath });
 				} else {
 					console.log("No .loom files detected. You can import one via Import .loom link.");
 				}

@@ -8,15 +8,20 @@ export default class Regulon extends Component {
     constructor() {
         super();
         this.state = {
-            activeLoom: BackendAPI.getActiveLoom()
+            activeLoom: BackendAPI.getActiveLoom(),
+            activeFeatures: BackendAPI.getActiveFeatures('regulon')
         }
+        console.log('features', this.state.activeFeatures);
         BackendAPI.onActiveLoomChange((loom) => {
             this.setState({activeLoom: loom});
+        });
+        BackendAPI.onActiveFeaturesChange((features) => {
+            this.setState({activeFeatures: features});
         });
     }
 
     render() {
-        const { activeLoom } = this.state;
+        const { activeLoom, activeFeatures } = this.state;
         return (
             <div>
                 <div style={{display: activeLoom == null ? 'block' : 'none'}}>
@@ -24,8 +29,8 @@ export default class Regulon extends Component {
                 </div>
                 <div style={{display: activeLoom != null ? 'block' : 'none'}}>
                     Select up to three regulons to be displayed on tSNE <br />
-                    <FeatureSearchBar type="regulon" locked="1" />
-                    <TSNEViewer width="600" height="600" loomFile={activeLoom}/>
+                    <FeatureSearchBar type="regulon" locked="1" activeFeatures={activeFeatures} />
+                    <TSNEViewer width="1000" height="800" loomFile={activeLoom} activeFeatures={activeFeatures} />
                 </div>
             </div>
         );

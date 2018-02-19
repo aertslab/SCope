@@ -9,13 +9,13 @@ export default class Expression extends Component {
         super();
         this.state = {
             activeLoom: BackendAPI.getActiveLoom(),
-            activeFeatures: BackendAPI.getActiveFeatures()
+            activeFeatures: BackendAPI.getActiveFeatures('gene')
         }
+        console.log('features', this.state.activeFeatures);
         BackendAPI.onActiveLoomChange((loom) => {
             this.setState({activeLoom: loom});    
         });
         BackendAPI.onActiveFeaturesChange((features) => {
-            console.log('feature changed', features)
             this.setState({activeFeatures: features});
         });
     }
@@ -29,7 +29,7 @@ export default class Expression extends Component {
                 </div>
                 <div style={{display: activeLoom != null ? 'block' : 'none'}}>
                     Select up to three genes to be displayed on tSNE <br />
-                    <FeatureSearchBar type="gene" locked="1" />
+                    <FeatureSearchBar type="gene" locked="1" activeFeatures={activeFeatures} />
                     <TSNEViewer width="1000" height="800" loomFile={activeLoom} activeFeatures={activeFeatures} />
                 </div>
             </div>

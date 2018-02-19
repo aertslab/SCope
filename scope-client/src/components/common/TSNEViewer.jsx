@@ -100,15 +100,16 @@ export default class TSNEViewer extends Component {
         if (this.props.loomFile != null) {
             this.getPoints(this.props.loomFile);
         }
+        if (this.props.activeFeatures != null) {
+            this.getFeatureColors(this.props.activeFeatures);
+        }
     }
 
     componentWillReceiveProps(nextProps) {
         if (this.props.loomFile != nextProps.loomFile) {            
             this.getPoints(nextProps.loomFile);
         }
-        console.log('props updated');
         if (Object.is(this.props.activeFeatures, nextProps.activeFeatures)) {
-            console.log('new features');
             this.getFeatureColors(nextProps.activeFeatures);
         }
     }
@@ -190,6 +191,7 @@ export default class TSNEViewer extends Component {
         for (let i = 0; i < e.points.length; ++i)
             this.updatePointColor(e.points[i],pts[e.points[i]].position.x,pts[e.points[i]].position.y,e.color)
         this.endBenchmark();
+        this.clearLasso();
         this.transformDataPoints();
     }
 
@@ -361,7 +363,7 @@ export default class TSNEViewer extends Component {
 
     getPoints(loomFile) {
         let query = {
-            lfp: loomFile
+            loomFilePath: loomFile
         };
         this.startBenchmark("Getting point coordinates")
         BackendAPI.getConnection().then((gbc) => {
@@ -415,17 +417,19 @@ export default class TSNEViewer extends Component {
     getFeatureColors(features) {
         this.startBenchmark("Getting point feature colors")
         let query = {
-            lfp: this.props.loomFile,
-            f: [features[0].type, features[1].type, features[2].type],
-            e: [features[0].value, features[1].value, features[2].value],
-            lte: true, //this.props.logtransform
-            cpm: true //, this.props.cpmnormalise
+            loomFilePath: this.props.loomFile,
+            featureType: [features[0].type, features[1].type, features[2].type],
+            feature: [features[0].value, features[1].value, features[2].value],
+            hasLogTranform: true, //this.props.logtransform
+            hasCpmTranform: true //, this.props.cpmnormalise
         };
         BackendAPI.getConnection().then((gbc) => {
             gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
                 if(response !== null) {
                     this.endBenchmark()
-                    this.updateDataPoints(response.v)
+                    this.updateDataPoints(response.color)
+                } else {
+                    this.resetDataPoints()
                 }
             });
         });
@@ -438,6 +442,22 @@ export default class TSNEViewer extends Component {
         // Draw new data points
         for (let i = 0; i < n; ++i) {
             let point = this.getTexturedColorPoint(pts[i].position.x, pts[i].position.y, v[i])
+            this.container.addChildAt(point, n+i);
+        }
+        // Remove the first old data points (firstly rendered)
+        this.container.removeChildren(0, n)
+        this.endBenchmark();
+        // Call for rendering
+        this.transformDataPoints();
+    }
+
+    resetDataPoints() {
+        this.startBenchmark("Resetting point colors")
+        let pts = this.container.children;
+        let n = pts.length;
+        // Draw new data points
+        for (let i = 0; i < n; ++i) {
+            let point = this.getTexturedColorPoint(pts[i].position.x, pts[i].position.y, '000000')
             this.container.addChildAt(point, n+i);
         }
         // Remove the first old data points (firstly rendered)
