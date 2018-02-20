@@ -27,10 +27,10 @@ export default class AUCThreshold extends Component {
 
 	render() {
 		const { field } = this.props;
-		const handle = (props) => {
+		let handle = (props) => {
 			const { value, ...restProps } = props;
 			return (
-				<Handle value={value} {...restProps} onMouseUp={this.handleUpdateTSNE.bind(this)} />
+				<Handle value={this.state.selected} {...restProps} onMouseUp={this.handleUpdateTSNE.bind(this)} />
 			);
 		};
 
@@ -38,13 +38,13 @@ export default class AUCThreshold extends Component {
 			<div>
 				<svg id={"thresholdSVG" + field} width="400" height="150" ></svg>
 				<p>AUC threshold: <b>{this.state.selected.toFixed(4)}</b> (matched points: {this.state.matched} / {this.state.total})</p>
-				<Slider min={this.state.min} max={this.state.max} step="0.0001" handle={handle} onChange={this.handleThresholdChange.bind(this)} />
+				<Slider min={this.state.min} max={this.state.max} step={0.0001} handle={handle} onChange={this.handleThresholdChange.bind(this)} />
 			</div>
 		);
 	}
 
 	handleUpdateTSNE() {
-		this.props.onThresholdChange(0, this.state.selected);
+		this.props.onThresholdChange(this.props.field, this.state.selected);
 	}
 
 	handleThresholdChange(value) {
@@ -67,7 +67,9 @@ export default class AUCThreshold extends Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		this.getCellAUCValues(nextProps.feature, nextProps.loomFile);
+		if ((this.props.feature != nextProps.feature) || (this.props.loomFile != nextProps.loomFile)) {
+			this.getCellAUCValues(nextProps.feature, nextProps.loomFile);
+		}
 	}
 
 	componentDidMount() {
@@ -80,7 +82,6 @@ export default class AUCThreshold extends Component {
 			featureType: feature.type,
 			feature: feature.value
 		};
-		console.log(query);
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getCellAUCValuesByFeatures(query, (err, response) => {
 				if(response !== null) {
@@ -102,7 +103,7 @@ export default class AUCThreshold extends Component {
 			max = d3.max(points),
 			g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-		this.setState({ max: max, width: width, height: height, total: points.length, points: points });
+		this.setState({ max: max, width: width, height: height, total: points.length, points: points, matched: points.length, selected: 0 });
 
 		var x = d3.scaleLinear()
 			.domain([0, max])

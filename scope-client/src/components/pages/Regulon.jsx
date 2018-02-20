@@ -27,12 +27,12 @@ export default class Regulon extends Component {
     render() {
         const { activeLoom, activeFeatures, thresholds, colors } = this.state;
         let featureSearch = _.times(3, i => (
-            <Grid.Column>
+            <Grid.Column key={i}>
                 <FeatureSearchBox field={i} color={colors[i]} type="regulon" locked="1" value={activeFeatures[i].value} />
             </Grid.Column>
         ));
         let featureThreshold = _.times(3, i => (
-            <Grid.Column>
+            <Grid.Column key={i}>
                 <AUCThreshold field={i} color={colors[i]} loomFile={activeLoom} feature={activeFeatures[i]} onThresholdChange={this.onThresholdChange.bind(this)} />
             </Grid.Column>
         ));
@@ -63,6 +63,7 @@ export default class Regulon extends Component {
 
     onThresholdChange(idx, threshold) {
         let thresholds = this.state.thresholds;
+        console.log('thresh', idx, threshold);
         thresholds[idx] = threshold;
         this.setState({thresholds: thresholds});
     }
