@@ -47,10 +47,6 @@ message CellAUCValuesByFeaturesReply{
   repeated float value=1;
 }
 
-// lfr = foomfilepath
-// q = query
-// featuteType
-
 message FeatureRequest {
   string loomFilePath=1;
   string query=2;
@@ -70,8 +66,45 @@ message CoordinatesReply {
   repeated float y=2;
 }
 
+message Clustering {
+  string id=1;
+  string name=2;
+  repeated string clusters=3;
+}
+
+message Annotation {
+  string name=1;
+  string values=2;
+}
+
+message CellMetaData {
+  repeated Clustering clusterings=1;
+  repeated Annotation annotations=2;
+}
+
+message AUCThreshold {
+  string name=1;
+  float threshold=2;
+}
+
+message Regulon {
+  string name=1;
+  int32 nGenes=2;
+  repeated AUCThreshold autoThresholds=3
+}
+
+message RegulonMetaData {
+  repeated Regulon regulons=1;
+}
+
 message MyLoomsRequest {}
 
+message MyLoom {
+  string loomFilePath=1;
+  CellMetaData cellMetaData=2;
+  RegulonMetaData regulonMetaData=3;
+}
+
 message MyLoomsReply {
-  repeated string loomFilePath=1;
+  repeated MyLoom myLooms=1;
 }
