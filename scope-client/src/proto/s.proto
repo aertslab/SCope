@@ -17,34 +17,34 @@ syntax = "proto3";
 package scope;
 
 service Main {
-rpc getCellColorByFeatures (CellColorByFeaturesRequest) returns (CellColorByFeaturesReply) {}
-rpc getCellAUCValuesByFeatures (CellAUCValuesByFeaturesRequest) returns (CellAUCValuesByFeaturesReply) {}
-rpc getFeatures (FeatureRequest) returns (FeatureReply) {}
-rpc getCoordinates (CoordinatesRequest) returns (CoordinatesReply) {}
-rpc getMyLooms (MyLoomsRequest) returns (MyLoomsReply) {}
+  rpc getCellColorByFeatures (CellColorByFeaturesRequest) returns (CellColorByFeaturesReply) {}
+  rpc getCellAUCValuesByFeatures (CellAUCValuesByFeaturesRequest) returns (CellAUCValuesByFeaturesReply) {}
+  rpc getFeatures (FeatureRequest) returns (FeatureReply) {}
+  rpc getCoordinates (CoordinatesRequest) returns (CoordinatesReply) {}
+  rpc getMyLooms (MyLoomsRequest) returns (MyLoomsReply) {}
 }
 
 
 message CellColorByFeaturesRequest {
-string loomFilePath=1;
-repeated string feature=2;
-repeated string featureType=3;
-bool hasLogTranform=4;
-bool hasCpmTranform=5;
+  string loomFilePath=1;
+  repeated string feature=2;
+  repeated string featureType=3;
+  bool hasLogTranform=4;
+  bool hasCpmTranform=5;
 }
 
-message CellColorByFeaturesReply{
-repeated string color=1;
+message CellColorByFeaturesReply {
+  repeated string color=1;
 }
 
 message CellAUCValuesByFeaturesRequest {
-string loomFilePath=1;
-repeated string feature=2;
-repeated string featureType=3;
+  string loomFilePath=1;
+  repeated string feature=2;
+  repeated string featureType=3;
 }
 
 message CellAUCValuesByFeaturesReply{
-repeated float value=1;
+  repeated float value=1;
 }
 
 // lfr = foomfilepath
@@ -52,26 +52,26 @@ repeated float value=1;
 // featuteType
 
 message FeatureRequest {
-string loomFilePath=1;
-string query=2;
+  string loomFilePath=1;
+  string query=2;
 }
 
 message FeatureReply {
-repeated string feature=1;
-repeated string featureType=2;
+  repeated string feature=1;
+  repeated string featureType=2;
 }
 
 message CoordinatesRequest {
-string loomFilePath=1;
+  string loomFilePath=1;
 }
 
 message CoordinatesReply {
-repeated float x=1;
-repeated float y=2;
+  repeated float x=1;
+  repeated float y=2;
 }
 
 message MyLoomsRequest {}
 
 message MyLoomsReply {
-repeated string loomFilePath=1;
+  repeated string loomFilePath=1;
 }
