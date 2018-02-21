@@ -63,7 +63,6 @@ class SCope(s_pb2_grpc.MainServicer):
     def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True, cpm_normalise=False):
         loom = self.get_loom_connection(loom_file_path)
         print("Debug: getting expression of " + gene_symbol + "...")
-        print(log_transform, cpm_normalise)
         gene_expr = loom[loom.ra.Gene == gene_symbol, :][0]
         if log_transform:
             print("Debug: log-transforming gene expression...")
@@ -127,6 +126,32 @@ class SCope(s_pb2_grpc.MainServicer):
         return {"x": embedding["_X"],
                 "y": embedding["_Y"]}
 
+    def get_file_metadata(self, loom_file_path):
+        loom = self.get_loom_connection(loom_file_path)
+        meta = {}
+        if hasattr(loom.ca, "RegulonsAUC"):
+            meta['hasRegulonsAUC'] = True
+        else:
+            meta['hasRegulonsAUC'] = False
+        if hasattr(loom.ca, "SeuratClusterings"):
+            meta['hasSeuratClusterings'] = True
+        else:
+            meta['hasSeuratClusterings'] = False
+        if hasattr(loom.ca, "Embeddings_X"):
+            meta['hasExtraEmbeddings'] = True
+        else:
+            meta['hasExtraEmbeddings'] = False
+        if hasattr(loom.ra, "GeneSets"):
+            meta['hasGeneSets'] = True
+        else:
+            meta['hasGeneSets'] = False
+        try:
+            meta = json.loads(loom.attr['MetaData'])
+            meta['hasGlobalMeta'] = True
+        except (KeyError, AttributeError):
+            meta['hasGlobalMeta'] = False
+        return meta
+
     def compressHexColor(self, a):
         a = int(a, 16)
         a_hex3d = hex(a >> 20 << 8 | a >> 8 & 240 | a >> 4 & 15)
@@ -156,7 +181,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     vals = self.get_gene_expression(
                         loom_file_path=loomFilePath, gene_symbol=feature, log_transform=request.hasLogTranform, cpm_normalise=request.hasCpmTranform)
                     vmax = self.getVmax(vals)
-                    vals = np.round(vals / vmax) * 255
+                    vals = np.round((vals / vmax) * 255)
                     features.append([x if x <= 255 else 255 for x in vals])
                 else:
                     features.append(np.zeros(n_cells))
@@ -167,11 +192,12 @@ class SCope(s_pb2_grpc.MainServicer):
                     if request.threshold > 0.0:
                         if request.scaleThresholded:
                             vals = ([auc if auc >= request.threshold else 0 for auc in vals])
-                            vals = np.round(vals / vmax) * 255
+                            vals = np.round((vals / vmax) * 255)
                             features.append([x if x <= 255 else 255 for x in vals])
                         else:
                             features.append([255 if auc >= request.threshold else 0 for auc in vals])
                     else:
+                        vals = np.round((vals / vmax) * 255)
                         features.append([x if x <= 255 else 255 for x in vals])
                 else:
                     features.append(np.zeros(n_cells))
@@ -201,9 +227,33 @@ class SCope(s_pb2_grpc.MainServicer):
         my_looms = []
         for f in os.listdir(self.loom_dir):
             if f.endswith('.loom'):
+                loom = self.get_loom_connection(self.get_loom_filepath(f))
+                fileMeta = self.get_file_metadata(self.get_loom_filepath(f))
+                if fileMeta['hasGlobalMeta']:
+                    meta = json.loads(loom.attr['MetaData'])
+                    annotations = meta['annotations']
+                    clusterings = meta['clusterings']
+                else:
+                    annotations = []
+                    clusterings = []
+                if fileMeta['hasRegulonsAUC']:
+                    regulons = []
+                    for regulon in loom.ca.RegulonsAUC.dtype.names:
+                        regulons.append({
+                            "name": regulon,
+                            "nGenes": int(regulon.rstrip('g)').split('(')[-1]),
+                            "autoThresholds": [{
+                                "name": "placeHolder",
+                                "threshold": 0.10
+                                 }]
+                        })
+                else:
+                    regulons = []
+                print(regulons)
                 my_looms.append(s_pb2.MyLoom(loomFilePath=f,
-                                             cellMetaData=s_pb2.CellMetaData(annotations=[], clusterings=[]),
-                                             regulonMetaData=s_pb2.RegulonMetaData(regulons=[])))
+                                             cellMetaData=s_pb2.CellMetaData(annotations=annotations, clusterings=clusterings),
+                                             regulonMetaData=s_pb2.RegulonMetaData(regulons=regulons),
+                                             fileMetaData=fileMeta))
         return s_pb2.MyLoomsReply(myLooms=my_looms)
 
 
