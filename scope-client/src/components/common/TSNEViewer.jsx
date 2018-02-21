@@ -15,6 +15,7 @@ export default class TSNEViewer extends Component {
                 x: [],
                 y: []
             },
+            colors: [],
             lassoPoints: [],
             lassoSelections: [],
             mouse: { 
@@ -26,10 +27,7 @@ export default class TSNEViewer extends Component {
                 transform : null
             },
             activeTool: 's-zoom',
-            benchmark: { 
-                t1: 0, 
-                msg: "" 
-            }
+            benchmark: {}
         }
         this.w = parseInt(this.props.width);
         this.h = parseInt(this.props.height);
@@ -45,17 +43,20 @@ export default class TSNEViewer extends Component {
         const { activeTool } = this.state
 
         let lassoSelections = () => {
-            if(this.state.lassoSelections.length == 0)
-                return (<Grid><Grid.Column>No user's lasso selections</Grid.Column></Grid>)
+            if(this.state.lassoSelections.length == 0) {
+                return (
+                    <Grid>
+                        <Grid.Column>No user's lasso selections</Grid.Column>
+                    </Grid>
+                );
+            }
             return (this.state.lassoSelections.map((lS) => {
-                    return (<Grid key={lS.id}>
-                        <Grid.Column style={{width: 20, marginLeft: 5, marginRight: 5, padding: 2}}>
-                            <Checkbox checked={lS.selected} onChange={(e,d) => this.selectLassoSelection(lS.id)}/>
-                        </Grid.Column>
-                        <Grid.Column style={{width: 110, padding: 2}}>
+                return (
+                    <Grid key={lS.id} columns={3}>
+                        <Grid.Column>
                             {"Selection "+ lS.id}
                         </Grid.Column>
-                        <Grid.Column style={{width: 100, padding: 2}}>
+                        <Grid.Column>
                             <Input
                                 size='mini'
                                 style={{width: 75, height: 10}}
@@ -64,12 +65,14 @@ export default class TSNEViewer extends Component {
                                 placeholder={'#'+lS.color}
                             />
                         </Grid.Column>
-                        <Grid.Column style={{padding: 2}}>
-                            <Icon name='eye' style={{display: 'inline'}}/>
-                            <Icon name='trash' style={{display: 'inline'}}/>
-                            <Icon name='download' style={{display: 'inline'}}/>
+                        <Grid.Column>
+                            <Icon name='eye' style={{display: 'inline'}} onClick={(e,d) => this.selectLassoSelection(lS.id)} style={{opacity: lS.selected ? 1 : .5 }}/>
+                            <Icon name='trash' style={{display: 'inline'}} onClick={(e,d) => this.removeLassoSelection(lS.id)} />
+                            <Icon name='download' style={{display: 'inline'}} onClick={(e,d) => this.downloadLassoSelection(lS.id)} />
                         </Grid.Column>
-                    </Grid>)}))
+                    </Grid>
+                )
+            }))
         }
 
         return (
@@ -93,7 +96,7 @@ export default class TSNEViewer extends Component {
                 <Grid.Column width={10}>
                     <canvas id="viewer" style={{width: 100+'%'}}></canvas>
                 </Grid.Column>
-                <Grid.Column width={2}>
+                <Grid.Column width={3}>
                     {lassoSelections()}
                 </Grid.Column>
                 </Grid.Row>
@@ -191,33 +194,33 @@ export default class TSNEViewer extends Component {
         this.container.addChildAt(point, i);
     }
 
-    highlightPointsInLasso() {
-        this.startBenchmark("Lasso Highlight")
+    highlightPointsInLasso(lS) {
+        this.startBenchmark("highlightPointsInLasso")
         let pts = this.container.children;
-        let e = this.state.lassoSelections[this.state.lassoSelections.length-1];
-        for (let i = 0; i < e.points.length; ++i)
-            this.updatePointColor(e.points[i],pts[e.points[i]].position.x,pts[e.points[i]].position.y,e.color)
-        this.endBenchmark();
-        this.clearLasso();
-        this.transformDataPoints();
+        for (let i = 0; i < lS.points.length; ++i) {
+            let idx = lS.points[i];
+            let pt = pts[idx];
+            this.updatePointColor(idx, pt.position.x, pt.position.y, lS.selected ? lS.color : this.state.colors[idx])
+        }
+        this.endBenchmark("highlightPointsInLasso");
+        this.transformPoints(lS.points);
     }
 
     selectLassoSelection(id) {
-        let lassoSelections = this.state.lassoSelections.map((lS) => {
-            if(lS.id == id)
-                lS.selected = !lS.selected
-            return lS
-        })
-        this.setState({ lassoSelections: lassoSelections })
-        this.viewer.highlightPointsInLasso()
+        let selections = this.state.lassoSelections;
+        let lS = selections[id];
+        lS.selected = !lS.selected;
+        this.setState({ lassoSelections: selections });
+        this.highlightPointsInLasso(lS);
     }
 
-    unSelectAllLassoSelections() {
-        let lassoSelections = this.state.lassoSelections.map((lS) => {
-            lS.selected = false
-            return lS
-        })
-        this.setState({ lassoSelections: lassoSelections })
+    removeLassoSelection(id) {
+        let selections = this.state.lassoSelections;
+        let lS = selections[id];
+        lS.selected = false;
+        this.highlightPointsInLasso(lS);
+        selections.splice(id, 1);
+        this.setState({ lassoSelections: selections });
     }
 
     getPointsInLasso() {
@@ -261,7 +264,8 @@ export default class TSNEViewer extends Component {
     }
 
     clearLasso() {
-        this.lasso.clear()
+        this.lasso.clear();
+        this.renderer.render(this.stage);
     }
 
     addLassoLayer() {
@@ -285,12 +289,10 @@ export default class TSNEViewer extends Component {
             this.setState({ mouse: { down: false } })
             let lassoPoints = this.getPointsInLasso()
             if(lassoPoints.length > 1) {
-
-                let lS = this.addLassoSelection(lassoPoints)
-
-                this.highlightPointsInLasso()
+                let lS = this.addLassoSelection(lassoPoints);
+                this.clearLasso();
+                this.highlightPointsInLasso(lS);
                 // Clear the lasso
-                this.clearLasso()
             }
         });
         this.lassoLayer.on("mousemove", (e) => {
@@ -313,22 +315,13 @@ export default class TSNEViewer extends Component {
     }
 
     addLassoSelection(lassoPoints) {
-        this.unSelectAllLassoSelections()
-        let lassoSelection = { id: this.state.lassoSelections.length == 0 ? 0: this.state.lassoSelections.length
+        let lassoSelection = { id: this.state.lassoSelections.length
                              , selected: true
                              , color: this.getRandomColor()
                              , points: lassoPoints
         }
         this.setState({ lassoSelections: [...this.state.lassoSelections, lassoSelection] })
         return lassoSelection
-    }
-
-    unSelectAllLassoSelections() {
-        let lassoSelections = this.state.lassoSelections.map((lS) => {
-            lS.selected = false
-            return lS
-        })
-        this.setState({ lassoSelections: lassoSelections })
     }
 
     geometricZoom() {
@@ -345,7 +338,7 @@ export default class TSNEViewer extends Component {
             this.setState({ zoom: { k: t.k } });
             this.transformDataPoints();
         }
-        this.renderer.render(this.stage)
+        requestAnimationFrame(() => {this.renderer.render(this.stage)})
     }
 
     isLassoActive() {
@@ -373,7 +366,7 @@ export default class TSNEViewer extends Component {
         let query = {
             loomFilePath: loomFile
         };
-        this.startBenchmark("Getting point coordinates")
+        this.startBenchmark("getPoints")
         BackendAPI.getConnection().then((gbc) => {
             gbc.services.scope.Main.getCoordinates(query, (err, response) => {
                 // Update the coordinates and remove all previous data points
@@ -383,7 +376,7 @@ export default class TSNEViewer extends Component {
                     y: response.y
                 }
                 this.setState({ coord: c })
-                this.endBenchmark()
+                this.endBenchmark("getPoints")
                 this.initializeDataPoints()
                 callback()
             });
@@ -391,7 +384,7 @@ export default class TSNEViewer extends Component {
     }
 
     initializeDataPoints() {
-        this.startBenchmark("Initializing data points")
+        this.startBenchmark("initializeDataPoints")
         let c = this.state.coord
         if (c.x.length !== c.y.length)
             throw "Coordinates does not have the same size."
@@ -400,34 +393,39 @@ export default class TSNEViewer extends Component {
             let point = this.getTexturedColorPoint(c.x[i], c.y[i], "000000")
             this.container.addChild(point);
         }
-        this.endBenchmark();
+        this.endBenchmark("initializeDataPoints");
         console.log("The coordinates have been loaded! ")
         this.transformDataPoints();       
-        //requestAnimationFrame(() => this.renderer.render(this.stage)); // Important to transfer the state
     }
 
     transformDataPoints() {
-        this.startBenchmark("Transforming data points")
-        let k = this.state.zoom.k, n = this.container.children.length, pts = this.container.children;
+        this.transformPoints(_.range(this.container.children.length))
+    }
+
+    transformPoints(indexes) {
+        this.startBenchmark("transformPoints"+indexes.length)
+        let k = this.state.zoom.k;
+        let coordX = this.state.coord.x;
+        let coordY = this.state.coord.y;
         let cx = this.renderer.width / 2;
         let cy = this.renderer.height / 2; // - 100
-        for (let i = 0; i < n; ++i) {
-            let x = this.state.coord.x[i] * 10 + cx;
-            let y = this.state.coord.y[i] * 10 + cy;
-            let p = pts[i];
+        for (let i = 0, n = indexes.length; i < n; ++i) {
+            let idx = indexes[i];
+            let p = this.container.children[idx]
+            let x = coordX[idx] * 10 + cx;
+            let y = coordY[idx] * 10 + cy;
             p.position.x = x * k
             p.position.y = y * k
         }
-        this.endBenchmark();
         this.renderer.render(this.stage);
-        
+        this.endBenchmark("transformPoints"+indexes.length);
     }
 
     getFeatureColors(features, loomFile, thresholds) {
         if (thresholds == null) {
             thresholds = this.state.thresholds;
         }
-        this.startBenchmark("Getting point feature colors")
+        this.startBenchmark("getFeatureColors")
         let settings = BackendAPI.getSettings();
         let query = {
             loomFilePath: loomFile,
@@ -440,11 +438,10 @@ export default class TSNEViewer extends Component {
         console.log('q', query);
         BackendAPI.getConnection().then((gbc) => {
             gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
+                this.endBenchmark("getFeatureColors")
                 if(response !== null) {
-                    this.endBenchmark()
                     this.updateDataPoints(response.color)
                 } else {
-                    this.endBenchmark()
                     this.resetDataPoints()
                 }
             });
@@ -452,7 +449,8 @@ export default class TSNEViewer extends Component {
     }
 
     updateDataPoints(v) {
-        this.startBenchmark("Rendering point colors")
+        this.setState({colors: v});
+        this.startBenchmark("updateDataPoints")
         let pts = this.container.children;
         let n = pts.length;
         // Draw new data points
@@ -462,13 +460,13 @@ export default class TSNEViewer extends Component {
         }
         // Remove the first old data points (firstly rendered)
         this.container.removeChildren(0, n)
-        this.endBenchmark();
+        this.endBenchmark("updateDataPoints");
         // Call for rendering
         this.transformDataPoints();
     }
 
     resetDataPoints() {
-        this.startBenchmark("Resetting point colors")
+        this.startBenchmark("resetDataPoints")
         let pts = this.container.children;
         let n = pts.length;
         // Draw new data points
@@ -478,18 +476,22 @@ export default class TSNEViewer extends Component {
         }
         // Remove the first old data points (firstly rendered)
         this.container.removeChildren(0, n)
-        this.endBenchmark();
+        this.endBenchmark("resetDataPoints");
         // Call for rendering
         this.transformDataPoints();
     }
 
     startBenchmark(msg) {
-        this.setState({ benchmark: { t1: performance.now(), msg: msg } })
+        //console.log("Starting benchmark - "+ msg)
+        let benchmark = this.state.benchmark;
+        benchmark[msg] = { t1: performance.now(), msg: msg };
+        this.setState({ benchmark: benchmark })
     }
 
-    endBenchmark() {
+    endBenchmark(msg) {
         var t2 = performance.now();
-        let et = (t2 - this.state.benchmark.t1).toFixed(3)
-        console.log("Benchmark - "+ this.state.benchmark.msg +": took " + et + " milliseconds.")
+        let benchmark = this.state.benchmark[msg];
+        let et = (t2 - benchmark.t1).toFixed(3)
+        console.log("Benchmark - "+ benchmark.msg +": took " + et + " milliseconds.")
     }
 }
