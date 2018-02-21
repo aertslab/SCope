@@ -31,6 +31,8 @@ message CellColorByFeaturesRequest {
   repeated string featureType=3;
   bool hasLogTranform=4;
   bool hasCpmTranform=5;
+  float threshold=6;
+  bool binaryCol=7;
 }
 
 message CellColorByFeaturesReply {
@@ -96,7 +98,7 @@ message AUCThreshold {
 message Regulon {
   string name=1;
   int32 nGenes=2;
-  repeated AUCThreshold autoThresholds=3
+  repeated AUCThreshold autoThresholds=3;
 }
 
 message RegulonMetaData {

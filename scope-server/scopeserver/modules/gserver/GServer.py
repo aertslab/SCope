@@ -132,6 +132,14 @@ class SCope(s_pb2_grpc.MainServicer):
         a_hex3d = hex(a >> 20 << 8 | a >> 8 & 240 | a >> 4 & 15)
         return a_hex3d.replace("0x", "")
 
+    def getVmax(self, vals):
+        vmax = np.percentile(vals, 99)
+        if vmax == 0 and max(vals) != 0:
+            vmax = max(vals)
+        if vmax < 10:
+            vmax = max(vals)
+        return vmax
+
     def getCellColorByFeatures(self, request, context):
         # request content
         #   - lfp   = .loom file path
@@ -147,13 +155,24 @@ class SCope(s_pb2_grpc.MainServicer):
                 if feature != '':
                     vals = self.get_gene_expression(
                         loom_file_path=loomFilePath, gene_symbol=feature, log_transform=request.hasLogTranform, cpm_normalise=request.hasCpmTranform)
-                    features.append(np.round(vals / (vals.max() * .8) * 255))
+                    vmax = self.getVmax(vals)
+                    vals = np.round(vals / vmax) * 255
+                    features.append([x if x <= 255 else 255 for x in vals])
                 else:
                     features.append(np.zeros(n_cells))
             elif request.featureType[n] == 'regulon':
                 if feature != '':
                     vals = self.get_auc_values(loom_file_path=loomFilePath, regulon=feature)
-                    features.append(np.round(vals / (vals.max() * .8) * 255))
+                    vmax = self.getVmax(vals)
+                    if request.threshold > 0.0:
+                        if request.scaleThresholded:
+                            vals = ([auc if auc >= request.threshold else 0 for auc in vals])
+                            vals = np.round(vals / vmax) * 255
+                            features.append([x if x <= 255 else 255 for x in vals])
+                        else:
+                            features.append([255 if auc >= request.threshold else 0 for auc in vals])
+                    else:
+                        features.append([x if x <= 255 else 255 for x in vals])
                 else:
                     features.append(np.zeros(n_cells))
 
@@ -179,7 +198,13 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.CoordinatesReply(x=c["x"], y=c["y"])
 
     def getMyLooms(self, request, context):
-        return s_pb2.MyLoomsReply(loomFilePath=[f for f in os.listdir(self.loom_dir) if f.endswith('.loom')])
+        my_looms = []
+        for f in os.listdir(self.loom_dir):
+            if f.endswith('.loom'):
+                my_looms.append(s_pb2.MyLoom(loomFilePath=f,
+                                             cellMetaData=s_pb2.CellMetaData(annotations=[], clusterings=[]),
+                                             regulonMetaData=s_pb2.RegulonMetaData(regulons=[])))
+        return s_pb2.MyLoomsReply(myLooms=my_looms)
 
 
 def serve(run_event):
