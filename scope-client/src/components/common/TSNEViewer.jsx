@@ -140,6 +140,7 @@ export default class TSNEViewer extends Component {
         this.stage = new PIXI.Container();
         this.stage.width = this.w
         this.stage.height = this.h
+        this.renderer.render(this.stage);
         // Increase the maxSize if displaying more than 1500 (default) objects
         this.container = new PIXI.particles.ParticleContainer(this.maxn, [false, true, false, false, true]);
         this.stage.addChild(this.container);
