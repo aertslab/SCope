@@ -100,7 +100,7 @@ export default class Viewer extends Component {
         this.addLassoLayer()
         // Setup PIXI Canvas in componentDidMount
         //this.viewer.appendChild(this.renderer.view);
-        v.call(d3.zoom().scaleExtent([1, 8]).on("zoom", this.zoom.bind(this)));
+        v.call(d3.zoom().scaleExtent([-1, 10]).on("zoom", this.zoom.bind(this)));
     }
 
     makePointSprite(c) {
