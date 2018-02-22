@@ -78,9 +78,9 @@ export default class AppSidebar extends Component {
 		let query = {};
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getMyLooms(query, (error, response) => {
-				if (response !== null) {
-					console.log("Loaded .loom files: " + response.loomFilePath.length);
-					this.setState({ myLooms: response.loomFilePath });
+				if (response !== null) {					
+					console.log("Loaded .loom files: ", response.myLooms);
+					this.setState({ myLooms: response.myLooms });
 				} else {
 					console.log("No .loom files detected. You can import one via Import .loom link.");
 				}
@@ -92,17 +92,16 @@ export default class AppSidebar extends Component {
 
 	myLooms() {
 		if(this.state.myLooms.length > 0) {
-			return this.state.myLooms.map(
-				(loomFile) => {
-					let icon = <Icon name="radio" />
-					if (loomFile === this.state.activeLoom) {
-						icon = <Icon name="selected radio" />
-					}
-					return (
-						<Menu.Item active={loomFile === this.state.activeLoom} key={loomFile} onClick={() => this.setActiveLoom(loomFile)}>{icon} {loomFile}</Menu.Item>
-					)
+			return this.state.myLooms.map((loomFile) => {
+				let icon = <Icon name="radio" />
+				let active = loomFile.loomFilePath === this.state.activeLoom;
+				if (active) {
+					icon = <Icon name="selected radio" />
 				}
-			)
+				return (
+					<Menu.Item active={active} key={loomFile.loomFilePath} onClick={() => this.setActiveLoom(loomFile.loomFilePath)}>{icon} {loomFile.loomFilePath}</Menu.Item>
+				)
+			});
 		}
 	}
 

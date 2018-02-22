@@ -177,8 +177,8 @@ export default class Viewer extends Component {
                 this.drawLasso()
             }
         });
-        this.stage.addChild(this.lassoLayer);
         this.stage.addChild(this.selectionsLayer);
+        this.stage.addChild(this.lassoLayer);
     }
 
     drawLasso() {
