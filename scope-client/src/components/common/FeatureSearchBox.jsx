@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { Segment, Search, Label, Menu, Button } from 'semantic-ui-react'
 import FeatureSearchInput from './FeatureSearchInput';
-import { BackendAPI } from './API' 
+import { BackendAPI } from './API'
 
 export default class FeatureSearch extends React.Component {
 
@@ -28,9 +28,9 @@ export default class FeatureSearch extends React.Component {
 		this.setState({ isLoading: true, value })
 		setTimeout(() => {
 			if (this.state.value.length < 1) return this.resetComponent()
-			let query = { 
+			let query = {
 				loomFilePath: BackendAPI.getActiveLoom(),
-				query: this.state.value 
+				query: this.state.value
 			};
 			BackendAPI.getConnection().then((gbc) => {
 				gbc.services.scope.Main.getFeatures(query, (err, response) => {
@@ -80,11 +80,11 @@ export default class FeatureSearch extends React.Component {
 		const { type, locked, field, color } = this.props
 		let querySearchLabel = {
 			position: 'relative',
-			top: 1, 
-			left: 15, 
+			top: 1,
+			left: 15,
 			height: 38
 		}
-	
+
 		let noPadding = {
 			padding: 0
 		}

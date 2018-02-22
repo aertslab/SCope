@@ -17,61 +17,111 @@ syntax = "proto3";
 package scope;
 
 service Main {
-rpc getCellColorByFeatures (CellColorByFeaturesRequest) returns (CellColorByFeaturesReply) {}
-rpc getCellAUCValuesByFeatures (CellAUCValuesByFeaturesRequest) returns (CellAUCValuesByFeaturesReply) {}
-rpc getFeatures (FeatureRequest) returns (FeatureReply) {}
-rpc getCoordinates (CoordinatesRequest) returns (CoordinatesReply) {}
-rpc getMyLooms (MyLoomsRequest) returns (MyLoomsReply) {}
+  rpc getCellColorByFeatures (CellColorByFeaturesRequest) returns (CellColorByFeaturesReply) {}
+  rpc getCellAUCValuesByFeatures (CellAUCValuesByFeaturesRequest) returns (CellAUCValuesByFeaturesReply) {}
+  rpc getFeatures (FeatureRequest) returns (FeatureReply) {}
+  rpc getCoordinates (CoordinatesRequest) returns (CoordinatesReply) {}
+  rpc getMyLooms (MyLoomsRequest) returns (MyLoomsReply) {}
 }
 
 
 message CellColorByFeaturesRequest {
-string loomFilePath=1;
-repeated string feature=2;
-repeated string featureType=3;
-bool hasLogTranform=4;
-bool hasCpmTranform=5;
+  string loomFilePath=1;
+  repeated string feature=2;
+  repeated string featureType=3;
+  bool hasLogTranform=4;
+  bool hasCpmTranform=5;
+  float threshold=6;
+  bool scaleThresholded=7;
 }
 
-message CellColorByFeaturesReply{
-repeated string color=1;
+message CellColorByFeaturesReply {
+  repeated string color=1;
 }
 
 message CellAUCValuesByFeaturesRequest {
-string loomFilePath=1;
-repeated string feature=2;
-repeated string featureType=3;
+  string loomFilePath=1;
+  repeated string feature=2;
+  repeated string featureType=3;
 }
 
 message CellAUCValuesByFeaturesReply{
-repeated float value=1;
+  repeated float value=1;
 }
 
-// lfr = foomfilepath
-// q = query
-// featuteType
-
 message FeatureRequest {
-string loomFilePath=1;
-string query=2;
+  string loomFilePath=1;
+  string query=2;
 }
 
 message FeatureReply {
-repeated string feature=1;
-repeated string featureType=2;
+  repeated string feature=1;
+  repeated string featureType=2;
 }
 
 message CoordinatesRequest {
-string loomFilePath=1;
+  string loomFilePath=1;
 }
 
 message CoordinatesReply {
-repeated float x=1;
-repeated float y=2;
+  repeated float x=1;
+  repeated float y=2;
+}
+
+message Annotation {
+  string name=1;
+  string values=2;
+}
+
+message Embedding {
+  int32 id=1;
+  string name=2;
+}
+
+message Clustering {
+  string id=1;
+  string name=2;
+  repeated string clusters=3;
+}
+
+message CellMetaData {
+  repeated Annotation annotations=1;
+  repeated Embedding embeddings=2;
+  repeated Clustering clusterings=3;
+}
+
+message AUCThreshold {
+  string name=1;
+  float threshold=2;
+}
+
+message Regulon {
+  string name=1;
+  int32 nGenes=2;
+  repeated AUCThreshold autoThresholds=3;
+}
+
+message RegulonMetaData {
+  repeated Regulon regulons=1;
+}
+
+message FileMetaData {
+  bool hasRegulonsAUC=1;
+  bool hasGeneSets=2;
+  bool hasSeuratClusterings=3;
+  bool hasExtraEmbeddings=4;
+  bool hasGlobalMeta=5;
 }
 
 message MyLoomsRequest {}
 
+message MyLoom {
+  string loomFilePath=1;
+  CellMetaData cellMetaData=2;
+  RegulonMetaData regulonMetaData=3;
+  FileMetaData fileMetaData=4;
+}
+
 message MyLoomsReply {
-repeated string loomFilePath=1;
+  repeated MyLoom myLooms=1;
 }

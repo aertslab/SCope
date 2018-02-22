@@ -2,13 +2,13 @@ import React, { Component } from 'react'
 import * as PIXI from 'pixi.js'
 import * as d3 from 'd3';
 import {  Menu, Grid,  Checkbox, Input, Icon  } from 'semantic-ui-react'
-import { BackendAPI } from './API' 
+import { BackendAPI } from './API'
 
 export default class Viewer extends Component {
 
     constructor(props) {
         super(props)
-        this.state = { 
+        this.state = {
             type: 'gene',
             thresholds: [0, 0, 0],
             coord : {
@@ -18,10 +18,10 @@ export default class Viewer extends Component {
             colors: [],
             lassoPoints: [],
             lassoSelections: BackendAPI.getViewerSelections(),
-            mouse: { 
-                down: false 
+            mouse: {
+                down: false
             },
-            zoom: { 
+            zoom: {
                 type: 's',
                 k : 1,
                 transform : null
@@ -58,10 +58,13 @@ export default class Viewer extends Component {
                 this.getFeatureColors(this.props.activeFeatures, this.props.loomFile, this.props.thresholds);
             });
         }
+        if (this.props.activeFeatures != null) {
+            this.getFeatureColors(this.props.activeFeatures);
+        }
     }
 
     componentWillReceiveProps(nextProps) {
-        if (this.props.loomFile != nextProps.loomFile) {            
+        if (this.props.loomFile != nextProps.loomFile) {
             this.getPoints(nextProps.loomFile, () => {
                 this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile, nextProps.thresholds);
             });

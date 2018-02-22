@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='s.proto',
   package='scope',
   syntax='proto3',
-  serialized_pb=_b('\n\x07s.proto\x12\x05scope\"\x88\x01\n\x1a\x43\x65llColorByFeaturesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x02 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x03 \x03(\t\x12\x16\n\x0ehasLogTranform\x18\x04 \x01(\x08\x12\x16\n\x0ehasCpmTranform\x18\x05 \x01(\x08\")\n\x18\x43\x65llColorByFeaturesReply\x12\r\n\x05\x63olor\x18\x01 \x03(\t\"\\\n\x1e\x43\x65llAUCValuesByFeaturesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x02 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x03 \x03(\t\"-\n\x1c\x43\x65llAUCValuesByFeaturesReply\x12\r\n\x05value\x18\x01 \x03(\x02\"5\n\x0e\x46\x65\x61tureRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\r\n\x05query\x18\x02 \x01(\t\"4\n\x0c\x46\x65\x61tureReply\x12\x0f\n\x07\x66\x65\x61ture\x18\x01 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x02 \x03(\t\"*\n\x12\x43oordinatesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\"(\n\x10\x43oordinatesReply\x12\t\n\x01x\x18\x01 \x03(\x02\x12\t\n\x01y\x18\x02 \x03(\x02\"\x10\n\x0eMyLoomsRequest\"$\n\x0cMyLoomsReply\x12\x14\n\x0cloomFilePath\x18\x01 \x03(\t2\x93\x03\n\x04Main\x12^\n\x16getCellColorByFeatures\x12!.scope.CellColorByFeaturesRequest\x1a\x1f.scope.CellColorByFeaturesReply\"\x00\x12j\n\x1agetCellAUCValuesByFeatures\x12%.scope.CellAUCValuesByFeaturesRequest\x1a#.scope.CellAUCValuesByFeaturesReply\"\x00\x12;\n\x0bgetFeatures\x12\x15.scope.FeatureRequest\x1a\x13.scope.FeatureReply\"\x00\x12\x46\n\x0egetCoordinates\x12\x19.scope.CoordinatesRequest\x1a\x17.scope.CoordinatesReply\"\x00\x12:\n\ngetMyLooms\x12\x15.scope.MyLoomsRequest\x1a\x13.scope.MyLoomsReply\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\x07s.proto\x12\x05scope\"\xb5\x01\n\x1a\x43\x65llColorByFeaturesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x02 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x03 \x03(\t\x12\x16\n\x0ehasLogTranform\x18\x04 \x01(\x08\x12\x16\n\x0ehasCpmTranform\x18\x05 \x01(\x08\x12\x11\n\tthreshold\x18\x06 \x01(\x02\x12\x18\n\x10scaleThresholded\x18\x07 \x01(\x08\")\n\x18\x43\x65llColorByFeaturesReply\x12\r\n\x05\x63olor\x18\x01 \x03(\t\"\\\n\x1e\x43\x65llAUCValuesByFeaturesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x02 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x03 \x03(\t\"-\n\x1c\x43\x65llAUCValuesByFeaturesReply\x12\r\n\x05value\x18\x01 \x03(\x02\"5\n\x0e\x46\x65\x61tureRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\r\n\x05query\x18\x02 \x01(\t\"4\n\x0c\x46\x65\x61tureReply\x12\x0f\n\x07\x66\x65\x61ture\x18\x01 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x02 \x03(\t\"*\n\x12\x43oordinatesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\"(\n\x10\x43oordinatesReply\x12\t\n\x01x\x18\x01 \x03(\x02\x12\t\n\x01y\x18\x02 \x03(\x02\"*\n\nAnnotation\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06values\x18\x02 \x01(\t\"%\n\tEmbedding\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\"8\n\nClustering\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x10\n\x08\x63lusters\x18\x03 \x03(\t\"\x84\x01\n\x0c\x43\x65llMetaData\x12&\n\x0b\x61nnotations\x18\x01 \x03(\x0b\x32\x11.scope.Annotation\x12$\n\nembeddings\x18\x02 \x03(\x0b\x32\x10.scope.Embedding\x12&\n\x0b\x63lusterings\x18\x03 \x03(\x0b\x32\x11.scope.Clustering\"/\n\x0c\x41UCThreshold\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x11\n\tthreshold\x18\x02 \x01(\x02\"T\n\x07Regulon\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06nGenes\x18\x02 \x01(\x05\x12+\n\x0e\x61utoThresholds\x18\x03 \x03(\x0b\x32\x13.scope.AUCThreshold\"3\n\x0fRegulonMetaData\x12 \n\x08regulons\x18\x01 \x03(\x0b\x32\x0e.scope.Regulon\"\x8c\x01\n\x0c\x46ileMetaData\x12\x16\n\x0ehasRegulonsAUC\x18\x01 \x01(\x08\x12\x13\n\x0bhasGeneSets\x18\x02 \x01(\x08\x12\x1c\n\x14hasSeuratClusterings\x18\x03 \x01(\x08\x12\x1a\n\x12hasExtraEmbeddings\x18\x04 \x01(\x08\x12\x15\n\rhasGlobalMeta\x18\x05 \x01(\x08\"\x10\n\x0eMyLoomsRequest\"\xa5\x01\n\x06MyLoom\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12)\n\x0c\x63\x65llMetaData\x18\x02 \x01(\x0b\x32\x13.scope.CellMetaData\x12/\n\x0fregulonMetaData\x18\x03 \x01(\x0b\x32\x16.scope.RegulonMetaData\x12)\n\x0c\x66ileMetaData\x18\x04 \x01(\x0b\x32\x13.scope.FileMetaData\".\n\x0cMyLoomsReply\x12\x1e\n\x07myLooms\x18\x01 \x03(\x0b\x32\r.scope.MyLoom2\x93\x03\n\x04Main\x12^\n\x16getCellColorByFeatures\x12!.scope.CellColorByFeaturesRequest\x1a\x1f.scope.CellColorByFeaturesReply\"\x00\x12j\n\x1agetCellAUCValuesByFeatures\x12%.scope.CellAUCValuesByFeaturesRequest\x1a#.scope.CellAUCValuesByFeaturesReply\"\x00\x12;\n\x0bgetFeatures\x12\x15.scope.FeatureRequest\x1a\x13.scope.FeatureReply\"\x00\x12\x46\n\x0egetCoordinates\x12\x19.scope.CoordinatesRequest\x1a\x17.scope.CoordinatesReply\"\x00\x12:\n\ngetMyLooms\x12\x15.scope.MyLoomsRequest\x1a\x13.scope.MyLoomsReply\"\x00\x62\x06proto3')
 )
 
 
@@ -67,6 +67,20 @@ _CELLCOLORBYFEATURESREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='threshold', full_name='scope.CellColorByFeaturesRequest.threshold', index=5,
+      number=6, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='scaleThresholded', full_name='scope.CellColorByFeaturesRequest.scaleThresholded', index=6,
+      number=7, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -80,7 +94,7 @@ _CELLCOLORBYFEATURESREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=19,
-  serialized_end=155,
+  serialized_end=200,
 )
 
 
@@ -110,8 +124,8 @@ _CELLCOLORBYFEATURESREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=157,
-  serialized_end=198,
+  serialized_start=202,
+  serialized_end=243,
 )
 
 
@@ -155,8 +169,8 @@ _CELLAUCVALUESBYFEATURESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=200,
-  serialized_end=292,
+  serialized_start=245,
+  serialized_end=337,
 )
 
 
@@ -186,8 +200,8 @@ _CELLAUCVALUESBYFEATURESREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=294,
-  serialized_end=339,
+  serialized_start=339,
+  serialized_end=384,
 )
 
 
@@ -224,8 +238,8 @@ _FEATUREREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=341,
-  serialized_end=394,
+  serialized_start=386,
+  serialized_end=439,
 )
 
 
@@ -262,8 +276,8 @@ _FEATUREREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=396,
-  serialized_end=448,
+  serialized_start=441,
+  serialized_end=493,
 )
 
 
@@ -293,8 +307,8 @@ _COORDINATESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=450,
-  serialized_end=492,
+  serialized_start=495,
+  serialized_end=537,
 )
 
 
@@ -331,8 +345,347 @@ _COORDINATESREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=494,
-  serialized_end=534,
+  serialized_start=539,
+  serialized_end=579,
+)
+
+
+_ANNOTATION = _descriptor.Descriptor(
+  name='Annotation',
+  full_name='scope.Annotation',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='name', full_name='scope.Annotation.name', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='values', full_name='scope.Annotation.values', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=581,
+  serialized_end=623,
+)
+
+
+_EMBEDDING = _descriptor.Descriptor(
+  name='Embedding',
+  full_name='scope.Embedding',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='id', full_name='scope.Embedding.id', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='name', full_name='scope.Embedding.name', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=625,
+  serialized_end=662,
+)
+
+
+_CLUSTERING = _descriptor.Descriptor(
+  name='Clustering',
+  full_name='scope.Clustering',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='id', full_name='scope.Clustering.id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='name', full_name='scope.Clustering.name', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='clusters', full_name='scope.Clustering.clusters', index=2,
+      number=3, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=664,
+  serialized_end=720,
+)
+
+
+_CELLMETADATA = _descriptor.Descriptor(
+  name='CellMetaData',
+  full_name='scope.CellMetaData',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='annotations', full_name='scope.CellMetaData.annotations', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='embeddings', full_name='scope.CellMetaData.embeddings', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='clusterings', full_name='scope.CellMetaData.clusterings', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=723,
+  serialized_end=855,
+)
+
+
+_AUCTHRESHOLD = _descriptor.Descriptor(
+  name='AUCThreshold',
+  full_name='scope.AUCThreshold',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='name', full_name='scope.AUCThreshold.name', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='threshold', full_name='scope.AUCThreshold.threshold', index=1,
+      number=2, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=857,
+  serialized_end=904,
+)
+
+
+_REGULON = _descriptor.Descriptor(
+  name='Regulon',
+  full_name='scope.Regulon',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='name', full_name='scope.Regulon.name', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='nGenes', full_name='scope.Regulon.nGenes', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='autoThresholds', full_name='scope.Regulon.autoThresholds', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=906,
+  serialized_end=990,
+)
+
+
+_REGULONMETADATA = _descriptor.Descriptor(
+  name='RegulonMetaData',
+  full_name='scope.RegulonMetaData',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='regulons', full_name='scope.RegulonMetaData.regulons', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=992,
+  serialized_end=1043,
+)
+
+
+_FILEMETADATA = _descriptor.Descriptor(
+  name='FileMetaData',
+  full_name='scope.FileMetaData',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='hasRegulonsAUC', full_name='scope.FileMetaData.hasRegulonsAUC', index=0,
+      number=1, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='hasGeneSets', full_name='scope.FileMetaData.hasGeneSets', index=1,
+      number=2, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='hasSeuratClusterings', full_name='scope.FileMetaData.hasSeuratClusterings', index=2,
+      number=3, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='hasExtraEmbeddings', full_name='scope.FileMetaData.hasExtraEmbeddings', index=3,
+      number=4, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='hasGlobalMeta', full_name='scope.FileMetaData.hasGlobalMeta', index=4,
+      number=5, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1046,
+  serialized_end=1186,
 )
 
 
@@ -355,8 +708,60 @@ _MYLOOMSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=536,
-  serialized_end=552,
+  serialized_start=1188,
+  serialized_end=1204,
+)
+
+
+_MYLOOM = _descriptor.Descriptor(
+  name='MyLoom',
+  full_name='scope.MyLoom',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='loomFilePath', full_name='scope.MyLoom.loomFilePath', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='cellMetaData', full_name='scope.MyLoom.cellMetaData', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='regulonMetaData', full_name='scope.MyLoom.regulonMetaData', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='fileMetaData', full_name='scope.MyLoom.fileMetaData', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1207,
+  serialized_end=1372,
 )
 
 
@@ -368,8 +773,8 @@ _MYLOOMSREPLY = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.MyLoomsReply.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=3,
+      name='myLooms', full_name='scope.MyLoomsReply.myLooms', index=0,
+      number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -386,10 +791,19 @@ _MYLOOMSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=554,
-  serialized_end=590,
+  serialized_start=1374,
+  serialized_end=1420,
 )
 
+_CELLMETADATA.fields_by_name['annotations'].message_type = _ANNOTATION
+_CELLMETADATA.fields_by_name['embeddings'].message_type = _EMBEDDING
+_CELLMETADATA.fields_by_name['clusterings'].message_type = _CLUSTERING
+_REGULON.fields_by_name['autoThresholds'].message_type = _AUCTHRESHOLD
+_REGULONMETADATA.fields_by_name['regulons'].message_type = _REGULON
+_MYLOOM.fields_by_name['cellMetaData'].message_type = _CELLMETADATA
+_MYLOOM.fields_by_name['regulonMetaData'].message_type = _REGULONMETADATA
+_MYLOOM.fields_by_name['fileMetaData'].message_type = _FILEMETADATA
+_MYLOOMSREPLY.fields_by_name['myLooms'].message_type = _MYLOOM
 DESCRIPTOR.message_types_by_name['CellColorByFeaturesRequest'] = _CELLCOLORBYFEATURESREQUEST
 DESCRIPTOR.message_types_by_name['CellColorByFeaturesReply'] = _CELLCOLORBYFEATURESREPLY
 DESCRIPTOR.message_types_by_name['CellAUCValuesByFeaturesRequest'] = _CELLAUCVALUESBYFEATURESREQUEST
@@ -398,7 +812,16 @@ DESCRIPTOR.message_types_by_name['FeatureRequest'] = _FEATUREREQUEST
 DESCRIPTOR.message_types_by_name['FeatureReply'] = _FEATUREREPLY
 DESCRIPTOR.message_types_by_name['CoordinatesRequest'] = _COORDINATESREQUEST
 DESCRIPTOR.message_types_by_name['CoordinatesReply'] = _COORDINATESREPLY
+DESCRIPTOR.message_types_by_name['Annotation'] = _ANNOTATION
+DESCRIPTOR.message_types_by_name['Embedding'] = _EMBEDDING
+DESCRIPTOR.message_types_by_name['Clustering'] = _CLUSTERING
+DESCRIPTOR.message_types_by_name['CellMetaData'] = _CELLMETADATA
+DESCRIPTOR.message_types_by_name['AUCThreshold'] = _AUCTHRESHOLD
+DESCRIPTOR.message_types_by_name['Regulon'] = _REGULON
+DESCRIPTOR.message_types_by_name['RegulonMetaData'] = _REGULONMETADATA
+DESCRIPTOR.message_types_by_name['FileMetaData'] = _FILEMETADATA
 DESCRIPTOR.message_types_by_name['MyLoomsRequest'] = _MYLOOMSREQUEST
+DESCRIPTOR.message_types_by_name['MyLoom'] = _MYLOOM
 DESCRIPTOR.message_types_by_name['MyLoomsReply'] = _MYLOOMSREPLY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -458,12 +881,75 @@ CoordinatesReply = _reflection.GeneratedProtocolMessageType('CoordinatesReply', 
   ))
 _sym_db.RegisterMessage(CoordinatesReply)
 
+Annotation = _reflection.GeneratedProtocolMessageType('Annotation', (_message.Message,), dict(
+  DESCRIPTOR = _ANNOTATION,
+  __module__ = 's_pb2'
+  # @@protoc_insertion_point(class_scope:scope.Annotation)
+  ))
+_sym_db.RegisterMessage(Annotation)
+
+Embedding = _reflection.GeneratedProtocolMessageType('Embedding', (_message.Message,), dict(
+  DESCRIPTOR = _EMBEDDING,
+  __module__ = 's_pb2'
+  # @@protoc_insertion_point(class_scope:scope.Embedding)
+  ))
+_sym_db.RegisterMessage(Embedding)
+
+Clustering = _reflection.GeneratedProtocolMessageType('Clustering', (_message.Message,), dict(
+  DESCRIPTOR = _CLUSTERING,
+  __module__ = 's_pb2'
+  # @@protoc_insertion_point(class_scope:scope.Clustering)
+  ))
+_sym_db.RegisterMessage(Clustering)
+
+CellMetaData = _reflection.GeneratedProtocolMessageType('CellMetaData', (_message.Message,), dict(
+  DESCRIPTOR = _CELLMETADATA,
+  __module__ = 's_pb2'
+  # @@protoc_insertion_point(class_scope:scope.CellMetaData)
+  ))
+_sym_db.RegisterMessage(CellMetaData)
+
+AUCThreshold = _reflection.GeneratedProtocolMessageType('AUCThreshold', (_message.Message,), dict(
+  DESCRIPTOR = _AUCTHRESHOLD,
+  __module__ = 's_pb2'
+  # @@protoc_insertion_point(class_scope:scope.AUCThreshold)
+  ))
+_sym_db.RegisterMessage(AUCThreshold)
+
+Regulon = _reflection.GeneratedProtocolMessageType('Regulon', (_message.Message,), dict(
+  DESCRIPTOR = _REGULON,
+  __module__ = 's_pb2'
+  # @@protoc_insertion_point(class_scope:scope.Regulon)
+  ))
+_sym_db.RegisterMessage(Regulon)
+
+RegulonMetaData = _reflection.GeneratedProtocolMessageType('RegulonMetaData', (_message.Message,), dict(
+  DESCRIPTOR = _REGULONMETADATA,
+  __module__ = 's_pb2'
+  # @@protoc_insertion_point(class_scope:scope.RegulonMetaData)
+  ))
+_sym_db.RegisterMessage(RegulonMetaData)
+
+FileMetaData = _reflection.GeneratedProtocolMessageType('FileMetaData', (_message.Message,), dict(
+  DESCRIPTOR = _FILEMETADATA,
+  __module__ = 's_pb2'
+  # @@protoc_insertion_point(class_scope:scope.FileMetaData)
+  ))
+_sym_db.RegisterMessage(FileMetaData)
+
 MyLoomsRequest = _reflection.GeneratedProtocolMessageType('MyLoomsRequest', (_message.Message,), dict(
   DESCRIPTOR = _MYLOOMSREQUEST,
   __module__ = 's_pb2'
   # @@protoc_insertion_point(class_scope:scope.MyLoomsRequest)
   ))
 _sym_db.RegisterMessage(MyLoomsRequest)
+
+MyLoom = _reflection.GeneratedProtocolMessageType('MyLoom', (_message.Message,), dict(
+  DESCRIPTOR = _MYLOOM,
+  __module__ = 's_pb2'
+  # @@protoc_insertion_point(class_scope:scope.MyLoom)
+  ))
+_sym_db.RegisterMessage(MyLoom)
 
 MyLoomsReply = _reflection.GeneratedProtocolMessageType('MyLoomsReply', (_message.Message,), dict(
   DESCRIPTOR = _MYLOOMSREPLY,
@@ -480,8 +966,8 @@ _MAIN = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=593,
-  serialized_end=996,
+  serialized_start=1423,
+  serialized_end=1826,
   methods=[
   _descriptor.MethodDescriptor(
     name='getCellColorByFeatures',
