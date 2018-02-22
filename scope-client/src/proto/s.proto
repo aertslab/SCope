@@ -61,6 +61,7 @@ message FeatureReply {
 
 message CoordinatesRequest {
   string loomFilePath=1;
+  int32 coordinatesID=2;
 }
 
 message CoordinatesReply {

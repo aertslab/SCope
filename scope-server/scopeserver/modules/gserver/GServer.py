@@ -120,11 +120,18 @@ class SCope(s_pb2_grpc.MainServicer):
         return {'feature': res,
                 'featureType': resF}
 
-    def get_coordinates(self, loom_file_path, EmbeddingName='Embedding'):
+    def get_coordinates(self, loom_file_path, coordinatesID=-1):
         loom = self.get_loom_connection(loom_file_path)
-        embedding = loom.ca[EmbeddingName]
-        return {"x": embedding["_X"],
-                "y": embedding["_Y"]}
+        if coordinatesID == -1:
+            embedding = loom.ca['Embedding']
+            x = embedding['_X']
+            y = embedding['_Y']
+        else:
+            x = loom.ca.Embeddings_X["coordinatesID"]
+            y = loom.ca.Embeddings_Y["coordinatesID"]
+        print(x, y)
+        return {"x": x,
+                "y": y}
 
     def get_file_metadata(self, loom_file_path):
         loom = self.get_loom_connection(loom_file_path)
@@ -218,7 +225,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getCoordinates(self, request, context):
         # request content
-        c = self.get_coordinates(self.get_loom_filepath(request.loomFilePath))
+        c = self.get_coordinates(self.get_loom_filepath(request.loomFilePath), coordinatesID=request.coordinatesID)
         return s_pb2.CoordinatesReply(x=c["x"], y=c["y"])
 
     def getMyLooms(self, request, context):
