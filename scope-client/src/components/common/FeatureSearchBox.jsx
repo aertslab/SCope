@@ -1,5 +1,5 @@
-import React, { Component, PropTypes } from 'react'
-import { Segment, Search, Label, Menu, Button } from 'semantic-ui-react'
+import React, { Component } from 'react'
+import { Label, Menu } from 'semantic-ui-react'
 import FeatureSearchInput from './FeatureSearchInput';
 import { BackendAPI } from './API'
 
@@ -12,6 +12,44 @@ export default class FeatureSearch extends React.Component {
 			results: [],
 			value: props.value
 		};
+	}
+
+	render() {
+
+		const { isLoading, value, results } = this.state
+		const { type, locked, field, color } = this.props
+		let querySearchLabel = {
+			position: 'relative',
+			top: 1,
+			left: 15,
+			height: 38
+		}
+
+		let noPadding = {
+			padding: 0
+		}
+
+		return (
+			<Menu.Item key={field} style={noPadding}>
+				<Menu secondary style={noPadding}>
+					<Menu.Item style={{padding: 0, display: 'block'}}>
+						<Label color={color} style={querySearchLabel}></Label>
+					</Menu.Item>
+					<Menu.Item style={noPadding}>
+						<FeatureSearchInput
+							category
+							loading={isLoading}
+							onResultSelect={this.handleResultSelect.bind(this)}
+							onSearchChange={this.handleSearchChange.bind(this)}
+							results={results}
+							value={value}
+							type={type}
+							locked={locked}
+						/>
+					</Menu.Item>
+				</Menu>
+			</Menu.Item>
+		);
 	}
 
 	resetComponent() {
@@ -72,44 +110,6 @@ export default class FeatureSearch extends React.Component {
 				});
 			});
 		}, 200)
-	}
-
-	render() {
-
-		const { isLoading, value, results } = this.state
-		const { type, locked, field, color } = this.props
-		let querySearchLabel = {
-			position: 'relative',
-			top: 1,
-			left: 15,
-			height: 38
-		}
-
-		let noPadding = {
-			padding: 0
-		}
-
-		return (
-			<Menu.Item key={field} style={noPadding}>
-				<Menu secondary style={noPadding}>
-					<Menu.Item style={{padding: 0, display: 'block'}}>
-						<Label color={color} style={querySearchLabel}></Label>
-					</Menu.Item>
-					<Menu.Item style={noPadding}>
-						<FeatureSearchInput
-							category
-							loading={isLoading}
-							onResultSelect={this.handleResultSelect.bind(this)}
-							onSearchChange={this.handleSearchChange.bind(this)}
-							results={results}
-							value={value}
-							type={type}
-							locked={locked}
-						/>
-					</Menu.Item>
-				</Menu>
-			</Menu.Item>
-		);
 	}
 
 }

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Sidebar, Menu, Icon, Button, Divider, Modal, Checkbox, Grid, Input, Label, Progress } from 'semantic-ui-react';
+import { Sidebar, Menu, Icon, Button, Divider, Modal, Checkbox, Grid, Input, Progress } from 'semantic-ui-react';
 import FileReaderInput from 'react-file-reader-input';
 import { BackendAPI } from './common/API';
 

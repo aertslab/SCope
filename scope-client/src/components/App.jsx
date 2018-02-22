@@ -32,7 +32,7 @@ export default class App extends Component {
 	}
 
 	togglePage(page) {		
-		console.log(page);
+		console.log("Switching to page", page);
 		BackendAPI.clearViewerSelections();
 		this.setState({currentPage: page});
 	}

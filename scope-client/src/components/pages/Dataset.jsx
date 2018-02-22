@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { Header, Grid } from 'semantic-ui-react'
 import { BackendAPI } from '../common/API'
 import ReactJson from 'react-json-view'
 
@@ -11,10 +10,9 @@ export default class Dataset extends Component {
             activeLoom: BackendAPI.getActiveLoom(),
             metadata: BackendAPI.getActiveLoomMetadata()
         }
-        BackendAPI.onActiveLoomChange((loom, metadata) => {
-            console.log('activeLoom changed', metadata);
+        this.activeLoomListener = (loom, metadata) => {
             this.setState({activeLoom: loom, metadata: metadata});
-        });
+        };
     }
 
     render() {
@@ -30,5 +28,14 @@ export default class Dataset extends Component {
                 </div>
             </div>
         );
+    }
+
+    componentWillMount() {
+        BackendAPI.onActiveLoomChange(this.activeLoomListener);
+
+    }
+
+    componentWillUnmount() {
+        BackendAPI.removeActiveLoomChange(this.activeLoomListener);
     }
 }

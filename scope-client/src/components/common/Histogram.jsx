@@ -2,8 +2,7 @@ import 'rc-slider/assets/index.css';
 import 'rc-tooltip/assets/bootstrap.css';
 import * as d3 from 'd3';
 import React, { Component } from 'react'
-import Slider, { Range } from 'rc-slider';
-import Tooltip from 'rc-tooltip';
+import Slider from 'rc-slider';
 import { BackendAPI } from './API'; 
 
 const Handle = Slider.Handle;
@@ -15,7 +14,7 @@ export default class AUCThreshold extends Component {
 		this.state = {
 			min: 0,
 			max: 1,
-			selected: 0,
+			selected: props.value,
 			width: 0,
 			height: 0,
 			matched: 0,
@@ -26,21 +25,33 @@ export default class AUCThreshold extends Component {
 
 	render() {
 		const { field, feature } = this.props;
+		const { min, max, selected, matched, total } = this.state;
 		let handle = (props) => {
+			// TODO: memory leak!?
 			const { value, ...restProps } = props;
 			return (
-				<Handle value={this.state.selected} {...restProps} />
+				<Handle value={value} {...restProps} />
 			);
 		};
-		console.log(feature);
 		return (
 			<div>
-				<svg id={"thresholdSVG" + field} width="400" height="150" ></svg>
-				<p>AUC threshold: <b>{this.state.selected.toFixed(4)}</b> (matched points: {this.state.matched} / {this.state.total})</p>
-				<Slider disabled={feature.value == ''} min={this.state.min} max={this.state.max} step={0.0001} handle={handle} onChange={this.handleThresholdChange.bind(this)}  onAfterChange={this.handleUpdateTSNE.bind(this)}/>
+				<svg id={"thresholdSVG" + field} style={{width: 100+'%'}} height="150" ></svg>
+				<p>AUC threshold: <b>{selected.toFixed(4)}</b> (matched points: {matched} / {total})</p>
+				<Slider disabled={feature.value == ''} value={selected} min={min} max={max} step={0.0001} handle={handle} onChange={this.handleThresholdChange.bind(this)}  onAfterChange={this.handleUpdateTSNE.bind(this)} />
 			</div>
 		);
 	}
+
+	componentWillReceiveProps(nextProps) {
+		if ((this.props.feature != nextProps.feature) || (this.props.loomFile != nextProps.loomFile)) {
+			this.getCellAUCValues(nextProps.feature, nextProps.loomFile);
+		}
+	}
+
+	componentDidMount() {
+		this.getCellAUCValues(this.props.feature, this.props.loomFile);
+	}
+
 
 	handleUpdateTSNE() {
 		this.props.onThresholdChange(this.props.field, this.state.selected);
@@ -65,16 +76,6 @@ export default class AUCThreshold extends Component {
 		this.setState({selected: value, matched: matched});
 	}
 
-	componentWillReceiveProps(nextProps) {
-		if ((this.props.feature != nextProps.feature) || (this.props.loomFile != nextProps.loomFile)) {
-			this.getCellAUCValues(nextProps.feature, nextProps.loomFile);
-		}
-	}
-
-	componentDidMount() {
-		this.getCellAUCValues(this.props.feature, this.props.loomFile);
-	}
-
 	getCellAUCValues(feature, loomFile) {
 		let query = {
 			loomFilePath: loomFile,
@@ -85,6 +86,7 @@ export default class AUCThreshold extends Component {
 			gbc.services.scope.Main.getCellAUCValuesByFeatures(query, (err, response) => {
 				if(response !== null) {
 					this.renderAUCGraph(response.value)
+					this.handleThresholdChange(this.props.value);
 				} else {
 					this.renderAUCGraph([])
 				}
@@ -95,6 +97,8 @@ export default class AUCThreshold extends Component {
 	renderAUCGraph(points) {
 		var formatCount = d3.format(",.0f");
 		var svg = d3.select("#thresholdSVG"+this.props.field);
+		var width = svg.node().getBoundingClientRect().width
+		svg.attr('width', width);
 		svg.selectAll("*").remove();
 		var margin = {top: 10, right: 10, bottom: 30, left: 40},
 			width = +svg.attr("width") - margin.left - margin.right,

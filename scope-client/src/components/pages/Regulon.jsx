@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
-import { Header, Grid } from 'semantic-ui-react'
+import { Grid } from 'semantic-ui-react'
 import FeatureSearchBox from '../common/FeatureSearchBox'
 import { BackendAPI } from '../common/API'
 import Viewer from '../common/Viewer'
@@ -9,25 +9,25 @@ import ViewerToolbar from '../common/ViewerToolbar'
 import Histogram from '../common/Histogram'
 
 export default class Regulon extends Component {
+
     constructor() {
         super();
         this.state = {
             activeLoom: BackendAPI.getActiveLoom(),
             activeFeatures: BackendAPI.getActiveFeatures('regulon'),
             geneFeatures: this.getGeneFeatures(BackendAPI.getActiveFeatures('regulon')),
-            thresholds: [0, 0, 0],
+            thresholds: BackendAPI.getThresholds(),
             colors: ["red", "green", "blue"]
         };
-        console.log('features', this.state.activeFeatures);
-        BackendAPI.onActiveLoomChange((loom) => {
+        this.activeLoomListener = (loom) => {
             this.setState({activeLoom: loom});
-        });
-        BackendAPI.onActiveFeaturesChange((features, i) => {
+        };
+        this.activeFeaturesListener = (features, i) => {
             let thresholds = this.state.thresholds;
             let geneFeatures = this.getGeneFeatures(features);
             //if (features[i].threshold) thresholds[i] = features[i].threshold;
             this.setState({activeFeatures: features, thresholds: thresholds, geneFeatures: geneFeatures});
-        });
+        };
     }
 
     render() {
@@ -39,7 +39,7 @@ export default class Regulon extends Component {
         ));
         let featureThreshold = _.times(3, i => (
             <Grid.Column key={i}>
-                <Histogram field={i} color={colors[i]} loomFile={activeLoom} feature={activeFeatures[i]} onThresholdChange={this.onThresholdChange.bind(this)} />
+                <Histogram field={i} color={colors[i]} loomFile={activeLoom} feature={activeFeatures[i]} onThresholdChange={this.onThresholdChange.bind(this)} value={thresholds[i]} />
             </Grid.Column>
         ));
 
@@ -81,6 +81,16 @@ export default class Regulon extends Component {
         );
     }
 
+    componentWillMount() {
+        BackendAPI.onActiveLoomChange(this.activeLoomListener);
+        BackendAPI.onActiveFeaturesChange(this.activeFeaturesListener);
+    }
+
+    componentWillUnmount() {
+        BackendAPI.removeActiveLoomChange(this.activeLoomListener);
+        BackendAPI.removeActiveFeaturesChange(this.activeFeaturesListener);
+    }
+
     getGeneFeatures(features) {
         let geneFeatures = {};
         _.times(3, (i) => {
@@ -94,6 +104,7 @@ export default class Regulon extends Component {
         let thresholds = this.state.thresholds;
         console.log('thresh', idx, threshold);
         thresholds[idx] = threshold;
+        BackendAPI.setThresholds(thresholds);
         this.setState({thresholds: thresholds});
     }
 

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Segment, Header } from 'semantic-ui-react';
+import { Segment } from 'semantic-ui-react';
 import Welcome from './pages/Welcome';
 import Dataset from './pages/Dataset';
 import Expression from './pages/Expression';

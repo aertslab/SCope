@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import * as PIXI from 'pixi.js'
 import * as d3 from 'd3';
-import {  Menu, Grid,  Checkbox, Input, Icon  } from 'semantic-ui-react'
 import { BackendAPI } from './API'
 
 export default class Viewer extends Component {
@@ -33,17 +32,16 @@ export default class Viewer extends Component {
         this.h = parseInt(this.props.height);
         this.maxn = 200000;
         this.texture = PIXI.Texture.fromImage("src/images/particle@2x.png");
-        BackendAPI.onSettingsChange(() => {
+        this.settingsListener = () => {
             this.getFeatureColors(this.props.activeFeatures, this.props.loomFile);
-        });
-        BackendAPI.onViewerToolChange((tool) => {
+        }
+        this.viewerToolListener = (tool) => {
             this.setState({activeTool: tool});
-        });
-        BackendAPI.onViewerSelectionsChange((selections) => {
-            console.log('lassoSelections', selections);
+        }
+        this.viewerSelectionListener = (selections) => {
             this.setState({lassoSelections: selections});
             this.repaintLassoSelections();
-        });
+        }
     }
 
     render() {
@@ -53,6 +51,9 @@ export default class Viewer extends Component {
     }
 
     componentWillMount() {
+        BackendAPI.onSettingsChange(this.settingsListener);
+        BackendAPI.onViewerToolChange(this.viewerToolListener);
+        BackendAPI.onViewerSelectionsChange(this.viewerSelectionListener);
         if (this.props.loomFile != null) {
             this.getPoints(this.props.loomFile, () => {
                 this.getFeatureColors(this.props.activeFeatures, this.props.loomFile, this.props.thresholds);
@@ -74,17 +75,24 @@ export default class Viewer extends Component {
     }
 
     componentDidMount() {
+        console.log("Initializing Viewer ", this.props.name);
         this.initGraphics();
     }
 
-/*
-    shouldComponentUpdate = (nextProps, nextState) => {
-        // Update the rendering only if feature is different
-        if (this.props.activeFeatures !== nextProps.activeFeatures)
-            this.queryFeature(nextProps.activeFeatures)
-        return true
+    componentWillUnmount() {
+        console.log("Destroying Viewer ", this.props.name);
+        BackendAPI.removeSettingsChange(this.settingsListener);
+        BackendAPI.removeViewerToolChange(this.viewerToolListener);
+        BackendAPI.removeViewerSelectionsChange(this.viewerSelectionListener);
+        this.container.removeChildren();
+        this.container.destroy();
+        this.lassoLayer.removeChildren();
+        this.lassoLayer.destroy();
+        this.selectionsLayer.removeChildren();
+        this.selectionsLayer.destroy();
+        this.renderer.destroy();
+        this.stage.destroy();
     }
-*/
 
     initGraphics() {
         const v = d3.select('#viewer'+this.props.name)
@@ -139,7 +147,6 @@ export default class Viewer extends Component {
         this.container.removeChildAt(i);
         this.container.addChildAt(point, i);
     }
-
 
     addLassoLayer() {
         this.lassoLayer = new PIXI.Container();
@@ -206,7 +213,6 @@ export default class Viewer extends Component {
         this.renderer.render(this.stage);
     }
 
-
     getPointsInLasso() {
         let pts = this.container.children, ptsInLasso = [], k = this.state.zoom.k
         if(pts.length < 2)
@@ -218,7 +224,6 @@ export default class Viewer extends Component {
                 ptsInLasso.push(i)
             }
         }
-        console.log("Number of selected points: "+ ptsInLasso.length)
         return ptsInLasso
     }
 
@@ -301,7 +306,6 @@ export default class Viewer extends Component {
     }
 
     getPoints(loomFile, callback) {
-        console.log('loom:', loomFile);
         let query = {
             loomFilePath: loomFile,
             coordinatesID: -1
@@ -340,7 +344,6 @@ export default class Viewer extends Component {
         this.endBenchmark("initializeDataPoints");
         this.transformDataPoints();
     }
-
 
     transformDataPoints() {
         this.transformPoints(this.container);
@@ -382,7 +385,6 @@ export default class Viewer extends Component {
             threshold: thresholds,
             scaleThresholded: this.props.scale
         };
-        console.log(query);
         BackendAPI.getConnection().then((gbc) => {
             gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
                 this.endBenchmark("getFeatureColors")

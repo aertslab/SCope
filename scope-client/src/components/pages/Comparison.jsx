@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { Header, Grid } from 'semantic-ui-react'
 import { BackendAPI } from '../common/API'
 
 export default class Comparison extends Component {
@@ -9,13 +8,12 @@ export default class Comparison extends Component {
             activeLoom: BackendAPI.getActiveLoom(),
             activeFeatures: BackendAPI.getActiveFeatures('gene')
         }
-        console.log('features', this.state.activeFeatures);
-        BackendAPI.onActiveLoomChange((loom) => {
+        this.activeLoomListener = (loom) => {
             this.setState({activeLoom: loom});
-        });
-        BackendAPI.onActiveFeaturesChange((features) => {
+        };
+        this.activeFeaturesListener = (features) => {
             this.setState({activeFeatures: features});
-        });
+        }
     }
 
     render() {
@@ -29,5 +27,15 @@ export default class Comparison extends Component {
                 </div>
             </div>
         );
+    }
+
+    componentWillMount() {
+        BackendAPI.onActiveLoomChange(this.activeLoomListener);
+        BackendAPI.onActiveFeaturesChange(this.activeFeaturesListener);
+    }
+
+    componentWillUnmount() {
+        BackendAPI.removeActiveLoomChange(this.activeLoomListener);
+        BackendAPI.removeActiveFeaturesChange(this.activeFeaturesListener);
     }
 }

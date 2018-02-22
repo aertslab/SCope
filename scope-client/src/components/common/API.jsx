@@ -19,6 +19,7 @@ class API {
 				2: {type: 'regulon', value: ''}
 			},
 		};
+		this.thresholds = [0, 0, 0];
 		this.featureChangeListeners = [];
 
 		this.settings = {
@@ -68,6 +69,14 @@ class API {
 		this.activeLoomChangeListeners.push(listener);
 	}
 
+	removeActiveLoomChange(listener) {
+		let i = this.activeLoomChangeListeners.indexOf(listener);
+		if (i > -1) {
+			this.activeLoomChangeListeners.splice(i, 1);
+		}
+	}
+
+
 
 	getActiveFeatures(type) {
 		return this.features[type];
@@ -96,6 +105,20 @@ class API {
 		this.featureChangeListeners.push(listener);
 	}
 
+	removeActiveFeaturesChange(listener) {
+		let i = this.featureChangeListeners.indexOf(listener);
+		if (i > -1) {
+			this.featureChangeListeners.splice(i, 1);
+		}
+	}
+
+	getThresholds() {
+		return this.thresholds;
+	}
+
+	setThresholds(thresholds) {
+		this.thresholds = thresholds;
+	}
 
 	getSettings() {
 		return this.settings;
@@ -111,7 +134,13 @@ class API {
 	onSettingsChange(listener) {
 		this.settingsChangeListeners.push(listener);
 	}
-
+	
+	removeSettingsChange(listener) {
+		let i = this.settingsChangeListeners.indexOf(listener)
+		if (i > -1) {
+			this.settingsChangeListeners.splice(i, 1);
+		}
+	};
 	
 	getViewerTool() {
 		return this.viewerTool;
@@ -128,7 +157,14 @@ class API {
 		this.viewerToolChangeListeners.push(listener);
 	}
 
+	removeViewerToolChange(listener) {
+		let i = this.viewerToolChangeListeners.indexOf(listener)
+		if (i > -1) {
+			this.viewerToolChangeListeners.splice(i, 1);
+		}
+	};
 	
+
 	getViewerSelections() {
 		return this.viewerSelections;
 	}
@@ -157,6 +193,13 @@ class API {
 	onViewerSelectionsChange(listener) {
 		this.viewerSelectionsChangeListeners.push(listener);
 	}
+
+	removeViewerSelectionsChange(listener) {
+		let i = this.viewerSelectionsChangeListeners.indexOf(listener)
+		if (i > -1) {
+			this.viewerSelectionsChangeListeners.splice(i, 1);
+		}
+	};
 
 	clearViewerSelections() {
 		this.viewerSelections = [];

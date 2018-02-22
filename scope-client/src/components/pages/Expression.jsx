@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Header, Grid } from 'semantic-ui-react'
+import { Grid } from 'semantic-ui-react'
 import { BackendAPI } from '../common/API'
 import FeatureSearchBox from '../common/FeatureSearchBox'
 import Viewer from '../common/Viewer'
@@ -13,13 +13,12 @@ export default class Expression extends Component {
             activeLoom: BackendAPI.getActiveLoom(),
             activeFeatures: BackendAPI.getActiveFeatures('gene')
         }
-        console.log('features', this.state.activeFeatures);
-        BackendAPI.onActiveLoomChange((loom) => {
+        this.activeLoomListener = (loom) => {
             this.setState({activeLoom: loom});
-        });
-        BackendAPI.onActiveFeaturesChange((features) => {
+        };
+        this.activeFeaturesListener = (features) => {
             this.setState({activeFeatures: features});
-        });
+        }
     }
 
     render() {
@@ -58,6 +57,16 @@ export default class Expression extends Component {
                 </div>
             </div>
         );
+    }
+
+    componentWillMount() {
+        BackendAPI.onActiveLoomChange(this.activeLoomListener);
+        BackendAPI.onActiveFeaturesChange(this.activeFeaturesListener);
+    }
+
+    componentWillUnmount() {
+        BackendAPI.removeActiveLoomChange(this.activeLoomListener);
+        BackendAPI.removeActiveFeaturesChange(this.activeFeaturesListener);
     }
 
 }

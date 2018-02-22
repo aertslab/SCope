@@ -1,6 +1,6 @@
 import _ from 'lodash'
-import React, { Component, PropTypes } from 'react'
-import { Segment, Search, Label, Menu, Button } from 'semantic-ui-react'
+import React, { Component } from 'react'
+import { Label, Menu } from 'semantic-ui-react'
 import FeatureSearchBox from '../common/FeatureSearchBox';
 
 export default class FeatureSearchBar extends React.Component {

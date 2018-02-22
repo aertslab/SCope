@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Segment, Header } from 'semantic-ui-react'
+import { Header } from 'semantic-ui-react'
 
 export default class Welcome extends Component {
 

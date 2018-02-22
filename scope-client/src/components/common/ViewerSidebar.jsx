@@ -10,9 +10,9 @@ export default class ViewerSidebar extends Component {
         this.state = {
             lassoSelections: BackendAPI.getViewerSelections()
         }
-        BackendAPI.onViewerSelectionsChange((selections) => {
+        this.selectionsListener = (selections) => {
             this.setState({lassoSelections: selections});
-        });
+        }
     }
 
     render() {
@@ -51,6 +51,14 @@ export default class ViewerSidebar extends Component {
         }
 
         return lassoSelections();
+    }
+
+    componentWillMount() {
+        BackendAPI.onViewerSelectionsChange(this.selectionsListener);
+    }
+
+    componentWillUnmount() {
+        BackendAPI.removeViewerSelectionsChange(this.selectionsListener);
     }
 
     toggleLassoSelection(id) {

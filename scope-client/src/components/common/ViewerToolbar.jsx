@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
-import { Header, Grid, Menu } from 'semantic-ui-react'
+import {  Menu } from 'semantic-ui-react'
 import { BackendAPI } from '../common/API' 
 
 export default class ViewerToolbar extends Component {
