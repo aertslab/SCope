@@ -120,11 +120,18 @@ class SCope(s_pb2_grpc.MainServicer):
         return {'feature': res,
                 'featureType': resF}
 
-    def get_coordinates(self, loom_file_path, EmbeddingName='Embedding'):
+    def get_coordinates(self, loom_file_path, coordinatesID=-1):
         loom = self.get_loom_connection(loom_file_path)
-        embedding = loom.ca[EmbeddingName]
-        return {"x": embedding["_X"],
-                "y": embedding["_Y"]}
+        if coordinatesID == -1:
+            embedding = loom.ca['Embedding']
+            x = embedding['_X']
+            y = embedding['_Y']
+        else:
+            x = loom.ca.Embeddings_X["coordinatesID"]
+            y = loom.ca.Embeddings_Y["coordinatesID"]
+        print(x, y)
+        return {"x": x,
+                "y": y}
 
     def get_file_metadata(self, loom_file_path):
         loom = self.get_loom_connection(loom_file_path)
@@ -146,7 +153,7 @@ class SCope(s_pb2_grpc.MainServicer):
         else:
             meta['hasGeneSets'] = False
         try:
-            meta = json.loads(loom.attr['MetaData'])
+            metaData = json.loads(loom.attrs.MetaData)
             meta['hasGlobalMeta'] = True
         except (KeyError, AttributeError):
             meta['hasGlobalMeta'] = False
@@ -173,6 +180,8 @@ class SCope(s_pb2_grpc.MainServicer):
         #   - lte   = log transform expression
         start_time = time.time()
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
+        if not os.path.isfile(loomFilePath):
+            return
         n_cells = self.get_nb_cells(loomFilePath)
         features = []
         for n, feature in enumerate(request.feature):
@@ -189,16 +198,12 @@ class SCope(s_pb2_grpc.MainServicer):
                 if feature != '':
                     vals = self.get_auc_values(loom_file_path=loomFilePath, regulon=feature)
                     vmax = self.getVmax(vals)
-                    if request.threshold > 0.0:
-                        if request.scaleThresholded:
-                            vals = ([auc if auc >= request.threshold else 0 for auc in vals])
-                            vals = np.round((vals / vmax) * 255)
-                            features.append([x if x <= 255 else 255 for x in vals])
-                        else:
-                            features.append([255 if auc >= request.threshold else 0 for auc in vals])
-                    else:
+                    if request.scaleThresholded:
+                        vals = ([auc if auc >= request.threshold[n] else 0 for auc in vals])
                         vals = np.round((vals / vmax) * 255)
                         features.append([x if x <= 255 else 255 for x in vals])
+                    else:
+                        features.append([255 if auc >= request.threshold[n] else 0 for auc in vals])
                 else:
                     features.append(np.zeros(n_cells))
 
@@ -220,7 +225,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getCoordinates(self, request, context):
         # request content
-        c = self.get_coordinates(self.get_loom_filepath(request.loomFilePath))
+        c = self.get_coordinates(self.get_loom_filepath(request.loomFilePath), coordinatesID=request.coordinatesID)
         return s_pb2.CoordinatesReply(x=c["x"], y=c["y"])
 
     def getMyLooms(self, request, context):
@@ -229,12 +234,15 @@ class SCope(s_pb2_grpc.MainServicer):
             if f.endswith('.loom'):
                 loom = self.get_loom_connection(self.get_loom_filepath(f))
                 fileMeta = self.get_file_metadata(self.get_loom_filepath(f))
+                print(fileMeta)
                 if fileMeta['hasGlobalMeta']:
-                    meta = json.loads(loom.attr['MetaData'])
+                    meta = json.loads(loom.attrs.MetaData)
                     annotations = meta['annotations']
+                    embeddings = meta['embeddings']
                     clusterings = meta['clusterings']
                 else:
                     annotations = []
+                    embeddings = []
                     clusterings = []
                 if fileMeta['hasRegulonsAUC']:
                     regulons = []
@@ -249,9 +257,8 @@ class SCope(s_pb2_grpc.MainServicer):
                         })
                 else:
                     regulons = []
-                print(regulons)
                 my_looms.append(s_pb2.MyLoom(loomFilePath=f,
-                                             cellMetaData=s_pb2.CellMetaData(annotations=annotations, clusterings=clusterings),
+                                             cellMetaData=s_pb2.CellMetaData(annotations=annotations, embeddings=embeddings, clusterings=clusterings),
                                              regulonMetaData=s_pb2.RegulonMetaData(regulons=regulons),
                                              fileMetaData=fileMeta))
         return s_pb2.MyLoomsReply(myLooms=my_looms)
