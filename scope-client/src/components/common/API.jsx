@@ -3,6 +3,7 @@ class API {
 		this.GBC = require("grpc-bus-websocket-client");
 		this.GBCConnection = new this.GBC("ws://localhost:8081/", 'src/proto/s.proto', { scope: { Main: 'localhost:50052' } }).connect();
 
+		this.loomFiles = [];
 		this.activeLoom = null;
 		this.activeLoomChangeListeners = [];
 
@@ -42,14 +43,22 @@ class API {
 		return this.activeLoom;
 	}
 
-	setLoomFiles(files) {
-		this.loomFiles = files;
+	getActiveLoomMetadata() {
+		return this.loomFiles[this.activeLoom];
+	}
+
+	setLoomFiles(files) {		
+		this.loomFiles = {};
+		files.map((file) => {
+			this.loomFiles[file.loomFilePath] = file;
+		});
 	}
 
 	setActiveLoom(loom) {
 		this.activeLoom = loom;
+		let file = this.loomFiles[this.activeLoom];
 		this.activeLoomChangeListeners.forEach((listener) => {
-			listener(this.activeLoom);
+			listener(this.activeLoom, file);
 		})
 	}
 

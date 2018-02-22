@@ -303,18 +303,23 @@ export default class Viewer extends Component {
     getPoints(loomFile, callback) {
         console.log('loom:', loomFile);
         let query = {
-            loomFilePath: loomFile
+            loomFilePath: loomFile,
+            coordinatesID: 1
         };
         this.startBenchmark("getPoints")
         BackendAPI.getConnection().then((gbc) => {
             gbc.services.scope.Main.getCoordinates(query, (err, response) => {
                 // Update the coordinates and remove all previous data points
-                this.container.removeChildren();
-                let c = {
-                    x: response.x,
-                    y: response.y
+                if (response) {
+                    this.container.removeChildren();
+                    let c = {
+                        x: response.x,
+                        y: response.y
+                    }
+                    this.setState({ coord: c })
+                } else {
+                    console.log('Could not get the coordinates - empty response!')
                 }
-                this.setState({ coord: c })
                 this.endBenchmark("getPoints")
                 this.initializeDataPoints()
                 callback()
@@ -374,7 +379,7 @@ export default class Viewer extends Component {
             feature: [features[0].value, features[1].value, features[2].value],
             hasLogTranform: settings.hasLogTransform,
             hasCpmTranform: settings.hasCpmNormalization,
-            threshold: thresholds[0],
+            threshold: thresholds,
             scaleThresholded: this.props.scale
         };
         console.log(query);

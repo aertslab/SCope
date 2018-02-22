@@ -34,6 +34,7 @@
     "react-file-reader-input": "^1.1.4",
     "react-flex-layout": "^0.9.6",
     "react-flexbox-grid": "^2.0.0",
+    "react-json-view": "^1.16.0",
     "react-router-dom": "^4.2.2",
     "react-sidebar": "^2.3.2",
     "react-split-pane": "^0.1.74",
