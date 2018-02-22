@@ -146,7 +146,7 @@ class SCope(s_pb2_grpc.MainServicer):
         else:
             meta['hasGeneSets'] = False
         try:
-            meta = json.loads(loom.attr['MetaData'])
+            metaData = json.loads(loom.attrs.MetaData)
             meta['hasGlobalMeta'] = True
         except (KeyError, AttributeError):
             meta['hasGlobalMeta'] = False
@@ -173,6 +173,8 @@ class SCope(s_pb2_grpc.MainServicer):
         #   - lte   = log transform expression
         start_time = time.time()
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
+        if not os.path.isfile(loomFilePath):
+            return
         n_cells = self.get_nb_cells(loomFilePath)
         features = []
         for n, feature in enumerate(request.feature):
@@ -229,12 +231,15 @@ class SCope(s_pb2_grpc.MainServicer):
             if f.endswith('.loom'):
                 loom = self.get_loom_connection(self.get_loom_filepath(f))
                 fileMeta = self.get_file_metadata(self.get_loom_filepath(f))
+                print(fileMeta)
                 if fileMeta['hasGlobalMeta']:
-                    meta = json.loads(loom.attr['MetaData'])
+                    meta = json.loads(loom.attrs.MetaData)
                     annotations = meta['annotations']
+                    embeddings = meta['embeddings']
                     clusterings = meta['clusterings']
                 else:
                     annotations = []
+                    embeddings = []
                     clusterings = []
                 if fileMeta['hasRegulonsAUC']:
                     regulons = []
@@ -249,9 +254,8 @@ class SCope(s_pb2_grpc.MainServicer):
                         })
                 else:
                     regulons = []
-                print(regulons)
                 my_looms.append(s_pb2.MyLoom(loomFilePath=f,
-                                             cellMetaData=s_pb2.CellMetaData(annotations=annotations, clusterings=clusterings),
+                                             cellMetaData=s_pb2.CellMetaData(annotations=annotations, embeddings=embeddings, clusterings=clusterings),
                                              regulonMetaData=s_pb2.RegulonMetaData(regulons=regulons),
                                              fileMetaData=fileMeta))
         return s_pb2.MyLoomsReply(myLooms=my_looms)
