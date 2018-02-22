@@ -31,7 +31,7 @@ message CellColorByFeaturesRequest {
   repeated string featureType=3;
   bool hasLogTranform=4;
   bool hasCpmTranform=5;
-  float threshold=6;
+  repeated float threshold=6;
   bool scaleThresholded=7;
 }
 

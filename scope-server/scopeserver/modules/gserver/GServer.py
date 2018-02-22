@@ -191,16 +191,12 @@ class SCope(s_pb2_grpc.MainServicer):
                 if feature != '':
                     vals = self.get_auc_values(loom_file_path=loomFilePath, regulon=feature)
                     vmax = self.getVmax(vals)
-                    if request.threshold > 0.0:
-                        if request.scaleThresholded:
-                            vals = ([auc if auc >= request.threshold else 0 for auc in vals])
-                            vals = np.round((vals / vmax) * 255)
-                            features.append([x if x <= 255 else 255 for x in vals])
-                        else:
-                            features.append([255 if auc >= request.threshold else 0 for auc in vals])
-                    else:
+                    if request.scaleThresholded:
+                        vals = ([auc if auc >= request.threshold[n] else 0 for auc in vals])
                         vals = np.round((vals / vmax) * 255)
                         features.append([x if x <= 255 else 255 for x in vals])
+                    else:
+                        features.append([255 if auc >= request.threshold[n] else 0 for auc in vals])
                 else:
                     features.append(np.zeros(n_cells))
 
