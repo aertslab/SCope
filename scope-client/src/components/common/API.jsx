@@ -25,6 +25,12 @@ class API {
 			hasCpmNormalization: true
 		}
 		this.settingsChangeListeners = [];
+
+		this.viewerTool = 's-zoom';
+		this.viewerToolChangeListeners = [];
+
+		this.viewerSelections = [];
+		this.viewerSelectionsChangeListeners = [];
 	}
 
 	getConnection() {
@@ -77,6 +83,56 @@ class API {
 
 	onSettingsChange(listener) {
 		this.settingsChangeListeners.push(listener);
+	}
+
+	
+	getViewerTool() {
+		return this.viewerTool;
+	}
+
+	setViewerTool(tool) {
+		this.viewerTool = tool;
+		this.viewerToolChangeListeners.forEach((listener) => {
+			listener(this.viewerTool);
+		})
+	}
+
+	onViewerToolChange(listener) {
+		this.viewerToolChangeListeners.push(listener);
+	}
+
+	
+	getViewerSelections() {
+		return this.viewerSelections;
+	}
+
+	addViewerSelection(selection) {
+		this.viewerSelections.push(selection);
+		this.viewerSelectionsChangeListeners.forEach((listener) => {
+			listener(this.viewerSelections);
+		});
+	}
+
+	toggleLassoSelection(index) {
+		this.viewerSelections[index].selected = !this.viewerSelections[index].selected;
+		this.viewerSelectionsChangeListeners.forEach((listener) => {
+			listener(this.viewerSelections);
+		});
+	}
+
+	removeViewerSelection(index) {
+		this.viewerSelections.splice(index, 1);
+		this.viewerSelectionsChangeListeners.forEach((listener) => {
+			listener(this.viewerSelections);
+		});
+	}
+
+	onViewerSelectionsChange(listener) {
+		this.viewerSelectionsChangeListeners.push(listener);
+	}
+
+	clearViewerSelections() {
+		this.viewerSelections = [];
 	}
 
 }

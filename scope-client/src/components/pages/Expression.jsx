@@ -2,7 +2,9 @@ import React, { Component } from 'react'
 import { Header, Grid } from 'semantic-ui-react'
 import { BackendAPI } from '../common/API' 
 import FeatureSearchBox from '../common/FeatureSearchBox'
-import TSNEViewer from '../common/TSNEViewer'
+import Viewer from '../common/Viewer'
+import ViewerToolbar from '../common/ViewerToolbar'
+import ViewerSidebar from '../common/ViewerSidebar'
 
 export default class Expression extends Component {
     constructor() {
@@ -41,9 +43,15 @@ export default class Expression extends Component {
                                 <FeatureSearchBox field="2" color="blue" type="gene" locked="1" value={activeFeatures[2].value} />
                             </Grid.Column>
                         </Grid.Row>
-                        <Grid.Row columns="1">
-                            <Grid.Column>
-                                <TSNEViewer width="1000" height="800" loomFile={activeLoom} activeFeatures={activeFeatures} />
+                        <Grid.Row columns="3">
+                            <Grid.Column width={1}>
+                                <ViewerToolbar />
+                            </Grid.Column>
+                            <Grid.Column width={10}>
+                                <Viewer name="expr" width="1000" height="800" loomFile={activeLoom} activeFeatures={activeFeatures} />
+                            </Grid.Column>
+                            <Grid.Column width={3}>
+                                <ViewerSidebar />
                             </Grid.Column>
                         </Grid.Row>
                     </Grid>                        

@@ -3,6 +3,7 @@ import { Sidebar, Segment } from 'semantic-ui-react';
 import AppHeader from './AppHeader';
 import AppSidebar from './AppSidebar';
 import AppContent from './AppContent';
+import { BackendAPI } from './common/API';
 
 export default class App extends Component {
 	constructor() {
@@ -32,6 +33,7 @@ export default class App extends Component {
 
 	togglePage(page) {		
 		console.log(page);
+		BackendAPI.clearViewerSelections();
 		this.setState({currentPage: page});
 	}
 

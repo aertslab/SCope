@@ -1,8 +1,7 @@
 import 'rc-slider/assets/index.css';
 import 'rc-tooltip/assets/bootstrap.css';
-import React, { Component } from 'react'
 import * as d3 from 'd3';
-//import {  Menu, Grid,  Checkbox, Input, Icon  } from 'semantic-ui-react'
+import React, { Component } from 'react'
 import Slider, { Range } from 'rc-slider';
 import Tooltip from 'rc-tooltip';
 import { BackendAPI } from './API'; 

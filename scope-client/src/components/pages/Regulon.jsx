@@ -3,8 +3,10 @@ import React, { Component } from 'react'
 import { Header, Grid } from 'semantic-ui-react'
 import FeatureSearchBox from '../common/FeatureSearchBox'
 import { BackendAPI } from '../common/API' 
-import TSNEViewer from '../common/TSNEViewer'
-import AUCThreshold from '../common/AUCThreshold'
+import Viewer from '../common/Viewer'
+import ViewerSidebar from '../common/ViewerSidebar'
+import ViewerToolbar from '../common/ViewerToolbar'
+import Histogram from '../common/Histogram'
 
 export default class Regulon extends Component {
     constructor() {
@@ -33,7 +35,7 @@ export default class Regulon extends Component {
         ));
         let featureThreshold = _.times(3, i => (
             <Grid.Column key={i}>
-                <AUCThreshold field={i} color={colors[i]} loomFile={activeLoom} feature={activeFeatures[i]} onThresholdChange={this.onThresholdChange.bind(this)} />
+                <Histogram field={i} color={colors[i]} loomFile={activeLoom} feature={activeFeatures[i]} onThresholdChange={this.onThresholdChange.bind(this)} />
             </Grid.Column>
         ));
 
@@ -50,9 +52,19 @@ export default class Regulon extends Component {
                         <Grid.Row columns="4">
                             {featureThreshold}
                         </Grid.Row>
-                        <Grid.Row columns="1">
-                            <Grid.Column>
-                                <TSNEViewer width="1000" height="600" loomFile={activeLoom} activeFeatures={activeFeatures} thresholds={thresholds} />
+                        <Grid.Row columns="4">
+                            <Grid.Column width={1}>
+                                <ViewerToolbar />
+                            </Grid.Column>
+                            <Grid.Column width={6}>
+                                <Viewer name="reg" width="700" height="600" loomFile={activeLoom} activeFeatures={activeFeatures} thresholds={thresholds} />
+                            </Grid.Column>
+                            <Grid.Column width={4}>
+                                <Viewer name="auc" width="400" height="400" loomFile={activeLoom} activeFeatures={activeFeatures} thresholds={thresholds} />
+                                <Viewer name="expr" width="400" height="400" loomFile={activeLoom} activeFeatures={activeFeatures} thresholds={thresholds} />
+                            </Grid.Column>
+                            <Grid.Column width={3}>
+                                <ViewerSidebar />
                             </Grid.Column>
                         </Grid.Row>
                     </Grid>

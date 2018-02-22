@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 import {  Menu, Grid,  Checkbox, Input, Icon  } from 'semantic-ui-react'
 import { BackendAPI } from './API' 
 
-export default class TSNEViewer extends Component {
+export default class Viewer extends Component {
 
     constructor(props) {
         super(props)
@@ -17,7 +17,7 @@ export default class TSNEViewer extends Component {
             },
             colors: [],
             lassoPoints: [],
-            lassoSelections: [],
+            lassoSelections: BackendAPI.getViewerSelections(),
             mouse: { 
                 down: false 
             },
@@ -26,7 +26,7 @@ export default class TSNEViewer extends Component {
                 k : 1,
                 transform : null
             },
-            activeTool: 's-zoom',
+            activeTool: BackendAPI.getViewerTool(),
             benchmark: {}
         }
         this.w = parseInt(this.props.width);
@@ -35,72 +35,20 @@ export default class TSNEViewer extends Component {
         this.texture = PIXI.Texture.fromImage("src/images/particle@2x.png");
         BackendAPI.onSettingsChange(() => {
             this.getFeatureColors(this.props.activeFeatures, this.props.loomFile);
-        })
+        });
+        BackendAPI.onViewerToolChange((tool) => {
+            this.setState({activeTool: tool});
+        });
+        BackendAPI.onViewerSelectionsChange((selections) => {
+            console.log('lassoSelections', selections);
+            this.setState({lassoSelections: selections});
+            this.repaintLassoSelections();
+        });
     }
 
     render() {
-
-        const { activeTool } = this.state
-
-        let lassoSelections = () => {
-            if(this.state.lassoSelections.length == 0) {
-                return (
-                    <Grid>
-                        <Grid.Column>No user's lasso selections</Grid.Column>
-                    </Grid>
-                );
-            }
-            return (this.state.lassoSelections.map((lS) => {
-                return (
-                    <Grid key={lS.id} columns={3}>
-                        <Grid.Column>
-                            {"Selection "+ lS.id}
-                        </Grid.Column>
-                        <Grid.Column>
-                            <Input
-                                size='mini'
-                                style={{width: 75, height: 10}}
-                                label={{ style: {backgroundColor: '#'+lS.color } }}
-                                labelPosition='right'
-                                placeholder={'#'+lS.color}
-                            />
-                        </Grid.Column>
-                        <Grid.Column>
-                            <Icon name='eye' style={{display: 'inline'}} onClick={(e,d) => this.selectLassoSelection(lS.id)} style={{opacity: lS.selected ? 1 : .5 }}/>
-                            <Icon name='trash' style={{display: 'inline'}} onClick={(e,d) => this.removeLassoSelection(lS.id)} />
-                            <Icon name='download' style={{display: 'inline'}} onClick={(e,d) => this.downloadLassoSelection(lS.id)} />
-                        </Grid.Column>
-                    </Grid>
-                )
-            }))
-        }
-
         return (
-            <Grid>
-                <Grid.Row>
-                <Grid.Column width={1}>
-                    <Menu style={{position: "relative", top: 0, left: 0}} vertical fluid>
-                        <Menu.Item name='lasso' active={activeTool === 'lasso'} onClick={this.handleItemClick.bind(this)}>
-                            <div title="Lasso Tool" style={{ display: "block", width: 20, height: 20, backgroundImage: 'url("src/images/lasso.svg")', backgroundSize: "cover" }}></div>
-                        </Menu.Item>
-                        <Menu.Item name='s-zoom' active={activeTool === 's-zoom'} onClick={this.handleItemClick.bind(this)}>
-                            <div title="Semantic Zoom" style={{ display: "block", width: 20, height: 20, backgroundImage: 'url("src/images/expad-arrows.svg")', backgroundSize: "cover" }}></div>
-                        </Menu.Item>
-                        {/*
-                        <Menu.Item name='g-zoom' active={activeTool === 'g-zoom'} onClick={this.handleItemClick.bind(this)}>
-                            <div title="Geometric Zoom" style={{ display: "block", width: 20, height: 20, backgroundImage: 'url("src/images/loupe.svg")', backgroundSize: "cover" }}></div>
-                        </Menu.Item>
-                        */}
-                    </Menu>
-                </Grid.Column>
-                <Grid.Column width={10}>
-                    <canvas id="viewer" style={{width: 100+'%'}}></canvas>
-                </Grid.Column>
-                <Grid.Column width={3}>
-                    {lassoSelections()}
-                </Grid.Column>
-                </Grid.Row>
-            </Grid>
+            <canvas id={"viewer"+this.props.name} style={{width: 100+'%'}}></canvas>
         );
     }
 
@@ -126,7 +74,6 @@ export default class TSNEViewer extends Component {
         this.initGraphics();
     }
 
-
 /*
     shouldComponentUpdate = (nextProps, nextState) => {
         // Update the rendering only if feature is different
@@ -137,7 +84,7 @@ export default class TSNEViewer extends Component {
 */
 
     initGraphics() {
-        const v = d3.select('#viewer')
+        const v = d3.select('#viewer'+this.props.name)
         this.w = v.node().getBoundingClientRect().width;
         this.renderer = PIXI.autoDetectRenderer(this.w, this.h, { backgroundColor: 0xFFFFFF, antialias: true, view: v.node() });
         this.stage = new PIXI.Container();
@@ -152,12 +99,6 @@ export default class TSNEViewer extends Component {
         //this.viewer.appendChild(this.renderer.view);
         v.call(d3.zoom().scaleExtent([1, 8]).on("zoom", this.zoom.bind(this)));
     }
-
-
-    handleItemClick(e, tool) {
-        console.log("Active tool ", tool.name);
-        this.setState({ activeTool: tool.name });
-    } 
 
     makePointSprite(c) {
         let s = new PIXI.Sprite(this.texture);
@@ -181,11 +122,13 @@ export default class TSNEViewer extends Component {
         const cy = y * 15 + this.renderer.height / 2;
         s.position.x = cx;
         s.position.y = cy;
+        s.blendMode = PIXI.BLEND_MODES.OVERLAY;
+        s._originalData = {x: x, y: y};
         return s;
     }
 
     getTexturedColorPoint(x, y, c) {
-        return this.getPointAtLocation(this.makePointSprite(c), x, y)
+        return this.getPointAtLocation(this.makePointSprite(c), x, y);
     }
 
     updatePointColor(i, x, y, c) {
@@ -194,53 +137,45 @@ export default class TSNEViewer extends Component {
         this.container.addChildAt(point, i);
     }
 
-    highlightPointsInLasso(lS) {
-        this.startBenchmark("highlightPointsInLasso")
-        let pts = this.container.children;
-        for (let i = 0; i < lS.points.length; ++i) {
-            let idx = lS.points[i];
-            let pt = pts[idx];
-            this.updatePointColor(idx, pt.position.x, pt.position.y, lS.selected ? lS.color : this.state.colors[idx])
-        }
-        this.endBenchmark("highlightPointsInLasso");
-        this.transformPoints(lS.points);
-    }
 
-    selectLassoSelection(id) {
-        let selections = this.state.lassoSelections;
-        let lS = selections[id];
-        lS.selected = !lS.selected;
-        this.setState({ lassoSelections: selections });
-        this.highlightPointsInLasso(lS);
-    }
-
-    removeLassoSelection(id) {
-        let selections = this.state.lassoSelections;
-        let lS = selections[id];
-        lS.selected = false;
-        this.highlightPointsInLasso(lS);
-        selections.splice(id, 1);
-        this.setState({ lassoSelections: selections });
-    }
-
-    getPointsInLasso() {
-        let pts = this.container.children, ptsInLasso = [], k = this.state.zoom.k
-        if(pts.length < 2)
-            return
-        for (let i = 0; i < pts.length; ++i) {
-            // Calculate the position of the point in the lasso reference
-            let pointPosRelToLassoRef = this.lassoLayer.toLocal(pts[i], this.container)
-            if(this.lasso.containsPoint(pointPosRelToLassoRef)) {
-                ptsInLasso.push(i)
+    addLassoLayer() {
+        this.lassoLayer = new PIXI.Container();
+        this.lassoLayer.width = this.w;
+        this.lassoLayer.height = this.h;
+        this.selectionsLayer = new PIXI.Container();
+        this.selectionsLayer.width = this.w;
+        this.selectionsLayer.height = this.h;
+        this.lassoLayer.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
+        this.lassoLayer.interactive = true;
+        this.lassoLayer.buttonMode = true;
+        this.lassoLayer.on("mousedown", (e) => {
+            // Init lasso Graphics
+            this.setState({ lassoPoints: [ ...this.state.lassoPoints, new PIXI.Point(e.data.global.x, e.data.global.y) ], mouse: { down: true } })
+            if (typeof this.lasso !== "undefined") {
+                this.setState({ lassoPoints: [], mouse: { down: true } })
+                this.clearLasso()
             }
-        }
-        console.log("Number of selected points: "+ ptsInLasso.length)
-        return ptsInLasso
-    }
-
-    initLasso() {
-        this.lasso = new PIXI.Graphics();
-        this.lassoLayer.addChild(this.lasso);
+            this.lasso = new PIXI.Graphics();
+            this.lassoLayer.addChild(this.lasso);
+        });
+        this.lassoLayer.on("mouseup", (e) => {
+            this.closeLasso()
+            this.setState({ mouse: { down: false } })
+            let lassoPoints = this.getPointsInLasso()
+            if(lassoPoints.length > 1) {
+                this.addLassoSelection(lassoPoints);
+                this.clearLasso();
+            }
+        });
+        this.lassoLayer.on("mousemove", (e) => {
+            // Bug in Firefox: this.state.mouse.down = false when left click pressed
+            if(this.state.mouse.down & this.isLassoActive()) {
+                this.setState({ lassoPoints: [ ...this.state.lassoPoints, new PIXI.Point(e.data.global.x, e.data.global.y) ] })
+                this.drawLasso()
+            }
+        });
+        this.stage.addChild(this.lassoLayer);
+        this.stage.addChild(this.selectionsLayer);
     }
 
     drawLasso() {
@@ -268,41 +203,51 @@ export default class TSNEViewer extends Component {
         this.renderer.render(this.stage);
     }
 
-    addLassoLayer() {
-        this.lassoLayer = new PIXI.Container();
-        this.lassoLayer.width = this.w
-        this.lassoLayer.height = this.h
-        this.lassoLayer.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
-        this.lassoLayer.interactive = true;
-        this.lassoLayer.buttonMode = true;
-        this.lassoLayer.on("mousedown", (e) => {
-            // Init lasso Graphics
-            this.setState({ lassoPoints: [ ...this.state.lassoPoints, new PIXI.Point(e.data.global.x, e.data.global.y) ], mouse: { down: true } })
-            if (typeof this.lasso !== "undefined") {
-                this.setState({ lassoPoints: [], mouse: { down: true } })
-                this.clearLasso()
+
+    getPointsInLasso() {
+        let pts = this.container.children, ptsInLasso = [], k = this.state.zoom.k
+        if(pts.length < 2)
+            return
+        for (let i = 0; i < pts.length; ++i) {
+            // Calculate the position of the point in the lasso reference
+            let pointPosRelToLassoRef = this.lassoLayer.toLocal(pts[i], this.container)
+            if(this.lasso.containsPoint(pointPosRelToLassoRef)) {
+                ptsInLasso.push(i)
             }
-            this.initLasso()
-        });
-        this.lassoLayer.on("mouseup", (e) => {
-            this.closeLasso()
-            this.setState({ mouse: { down: false } })
-            let lassoPoints = this.getPointsInLasso()
-            if(lassoPoints.length > 1) {
-                let lS = this.addLassoSelection(lassoPoints);
-                this.clearLasso();
-                this.highlightPointsInLasso(lS);
-                // Clear the lasso
-            }
-        });
-        this.lassoLayer.on("mousemove", (e) => {
-            // Bug in Firefox: this.state.mouse.down = false when left click pressed
-            if(this.state.mouse.down & this.isLassoActive()) {
-                this.setState({ lassoPoints: [ ...this.state.lassoPoints, new PIXI.Point(e.data.global.x, e.data.global.y) ] })
-                this.drawLasso()
-            }
-        });
-        this.stage.addChild(this.lassoLayer);
+        }
+        console.log("Number of selected points: "+ ptsInLasso.length)
+        return ptsInLasso
+    }
+
+    addLassoSelection(lassoPoints) {
+        let lassoSelection = { 
+            id: this.state.lassoSelections.length,
+            selected: true,
+            color: this.getRandomColor(),
+            points: lassoPoints
+        }
+        BackendAPI.addViewerSelection(lassoSelection);
+    }
+
+    repaintLassoSelections() {
+        this.selectionsLayer.removeChildren();
+        this.state.lassoSelections.forEach((lS) => {
+            if (lS.selected) this.highlightPointsInLasso(lS);
+        })
+        this.transformLassoPoints();
+    }
+
+    highlightPointsInLasso(lS) {
+        this.startBenchmark("highlightPointsInLasso")
+        let pts = this.container.children;
+        for (let i = 0; i < lS.points.length; ++i) {
+            let idx = lS.points[i];
+            let x = this.state.coord.x[idx];
+            let y = this.state.coord.y[idx];
+            let point = this.getTexturedColorPoint(x, y, lS.color);
+            this.selectionsLayer.addChild(point);
+        }
+        this.endBenchmark("highlightPointsInLasso");
     }
 
     getRandomColor() {
@@ -312,16 +257,6 @@ export default class TSNEViewer extends Component {
           color += letters[Math.floor(Math.random() * 16)];
         }
         return color;
-    }
-
-    addLassoSelection(lassoPoints) {
-        let lassoSelection = { id: this.state.lassoSelections.length
-                             , selected: true
-                             , color: this.getRandomColor()
-                             , points: lassoPoints
-        }
-        this.setState({ lassoSelections: [...this.state.lassoSelections, lassoSelection] })
-        return lassoSelection
     }
 
     geometricZoom() {
@@ -334,6 +269,7 @@ export default class TSNEViewer extends Component {
     semanticZoom() {
         let t = d3.event.transform
         this.container.position.x = t.x, this.container.position.y = t.y;
+        this.selectionsLayer.position.x = t.x, this.selectionsLayer.position.y = t.y;
         if (this.state.zoom.k != t.k) {            
             this.setState({ zoom: { k: t.k } });
             this.transformDataPoints();
@@ -394,31 +330,33 @@ export default class TSNEViewer extends Component {
             this.container.addChild(point);
         }
         this.endBenchmark("initializeDataPoints");
-        console.log("The coordinates have been loaded! ")
-        this.transformDataPoints();       
+        this.transformDataPoints();
     }
+
 
     transformDataPoints() {
-        this.transformPoints(_.range(this.container.children.length))
+        this.transformPoints(this.container);
+        this.transformPoints(this.selectionsLayer);
     }
 
-    transformPoints(indexes) {
-        this.startBenchmark("transformPoints"+indexes.length)
+    transformLassoPoints() {
+        this.transformPoints(this.selectionsLayer);
+    }
+
+    transformPoints(container) {
+        this.startBenchmark("transformPoints");
         let k = this.state.zoom.k;
-        let coordX = this.state.coord.x;
-        let coordY = this.state.coord.y;
         let cx = this.renderer.width / 2;
         let cy = this.renderer.height / 2; // - 100
-        for (let i = 0, n = indexes.length; i < n; ++i) {
-            let idx = indexes[i];
-            let p = this.container.children[idx]
-            let x = coordX[idx] * 10 + cx;
-            let y = coordY[idx] * 10 + cy;
+        for (let i = 0, n = container.children.length; i < n; ++i) {
+            let p = container.children[i];
+            let x = p._originalData.x * 10 + cx;
+            let y = p._originalData.y * 10 + cy;
             p.position.x = x * k
             p.position.y = y * k
         }
         this.renderer.render(this.stage);
-        this.endBenchmark("transformPoints"+indexes.length);
+        this.endBenchmark("transformPoints");
     }
 
     getFeatureColors(features, loomFile, thresholds) {
@@ -440,7 +378,8 @@ export default class TSNEViewer extends Component {
             gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
                 this.endBenchmark("getFeatureColors")
                 if(response !== null) {
-                    this.updateDataPoints(response.color)
+                    this.setState({colors: response.color});
+                    this.updateDataPoints(response.color);
                 } else {
                     this.resetDataPoints()
                 }
@@ -449,19 +388,15 @@ export default class TSNEViewer extends Component {
     }
 
     updateDataPoints(v) {
-        this.setState({colors: v});
         this.startBenchmark("updateDataPoints")
         let pts = this.container.children;
         let n = pts.length;
-        // Draw new data points
         for (let i = 0; i < n; ++i) {
-            let point = this.getTexturedColorPoint(pts[i].position.x, pts[i].position.y, v[i])
+            let point = this.getTexturedColorPoint(pts[i]._originalData.x, pts[i]._originalData.y, v[i])
             this.container.addChildAt(point, n+i);
         }
-        // Remove the first old data points (firstly rendered)
         this.container.removeChildren(0, n)
         this.endBenchmark("updateDataPoints");
-        // Call for rendering
         this.transformDataPoints();
     }
 
@@ -471,7 +406,7 @@ export default class TSNEViewer extends Component {
         let n = pts.length;
         // Draw new data points
         for (let i = 0; i < n; ++i) {
-            let point = this.getTexturedColorPoint(pts[i].position.x, pts[i].position.y, '000000')
+            let point = this.getTexturedColorPoint(pts[i]._originalData.x, pts[i]._originalData.y, '000000')
             this.container.addChildAt(point, n+i);
         }
         // Remove the first old data points (firstly rendered)
