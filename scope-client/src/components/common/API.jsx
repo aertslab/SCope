@@ -49,9 +49,11 @@ class API {
 
 	setLoomFiles(files) {		
 		this.loomFiles = {};
-		files.map((file) => {
+		Object.keys(files).map((i) => {
+			let file = files[i];
 			this.loomFiles[file.loomFilePath] = file;
 		});
+		console.log(this.loomFiles);
 	}
 
 	setActiveLoom(loom) {
@@ -73,17 +75,16 @@ class API {
 
 	setActiveFeature(featureId, featureType, featureValue) {
 		let threshold = 0;
-		if (featureType == 'regulon') {
-			this.loomFiles.map((file) => {
-				if ((file.loomFilePath == this.activeLoom) && (file.fileMetaData.hasRegulonsAUC)) {
-					file.regulonMetaData.regulons.map((reg) => {
-						if (reg.name == featureValue) {
-							threshold = reg.autoThresholds[0].threshold;
-							console.log('set threshold', featureValue, threshold)
-						}
-					})
-				}
-			})
+		if (featureType == 'regulon') {			
+			let file = this.loomFiles[this.activeLoom];
+			if (file.fileMetaData.hasRegulonsAUC) {
+				file.regulonMetaData.regulons.map((reg) => {
+					if (reg.name == featureValue) {
+						threshold = reg.autoThresholds[0].threshold;
+						console.log('set threshold', featureValue, threshold)
+					}
+				})
+			}			
 		}
 		this.features[featureType][featureId] = { type: featureType, value: featureValue, threshold: threshold }
 		this.featureChangeListeners.forEach((listener) => {

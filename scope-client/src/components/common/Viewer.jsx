@@ -125,7 +125,7 @@ export default class Viewer extends Component {
         const cy = y * 15 + this.renderer.height / 2;
         s.position.x = cx;
         s.position.y = cy;
-        s.blendMode = PIXI.BLEND_MODES.OVERLAY;
+        s.blendMode = PIXI.BLEND_MODES.SCREEN;
         s._originalData = {x: x, y: y};
         return s;
     }
@@ -304,7 +304,7 @@ export default class Viewer extends Component {
         console.log('loom:', loomFile);
         let query = {
             loomFilePath: loomFile,
-            coordinatesID: 1
+            coordinatesID: -1
         };
         this.startBenchmark("getPoints")
         BackendAPI.getConnection().then((gbc) => {
