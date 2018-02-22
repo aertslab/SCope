@@ -29,7 +29,7 @@ export default class AUCThreshold extends Component {
 		let handle = (props) => {
 			const { value, ...restProps } = props;
 			return (
-				<Handle value={this.state.selected} {...restProps} onMouseUp={this.handleUpdateTSNE.bind(this)} />
+				<Handle value={this.state.selected} {...restProps} />
 			);
 		};
 
@@ -37,7 +37,7 @@ export default class AUCThreshold extends Component {
 			<div>
 				<svg id={"thresholdSVG" + field} width="400" height="150" ></svg>
 				<p>AUC threshold: <b>{this.state.selected.toFixed(4)}</b> (matched points: {this.state.matched} / {this.state.total})</p>
-				<Slider min={this.state.min} max={this.state.max} step={0.0001} handle={handle} onChange={this.handleThresholdChange.bind(this)} />
+				<Slider min={this.state.min} max={this.state.max} step={0.0001} handle={handle} onChange={this.handleThresholdChange.bind(this)}  onAfterChange={this.handleUpdateTSNE.bind(this)}/>
 			</div>
 		);
 	}

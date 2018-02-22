@@ -372,11 +372,12 @@ export default class Viewer extends Component {
             loomFilePath: loomFile,
             featureType: [features[0].type, features[1].type, features[2].type],
             feature: [features[0].value, features[1].value, features[2].value],
-            //threshold: thresholds,
             hasLogTranform: settings.hasLogTransform,
-            hasCpmTranform: settings.hasCpmNormalization
+            hasCpmTranform: settings.hasCpmNormalization,
+            threshold: thresholds[0],
+            scaleThresholded: this.props.scale
         };
-        console.log('q', query);
+        console.log(query);
         BackendAPI.getConnection().then((gbc) => {
             gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
                 this.endBenchmark("getFeatureColors")

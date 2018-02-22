@@ -42,6 +42,10 @@ class API {
 		return this.activeLoom;
 	}
 
+	setLoomFiles(files) {
+		this.loomFiles = files;
+	}
+
 	setActiveLoom(loom) {
 		this.activeLoom = loom;
 		this.activeLoomChangeListeners.forEach((listener) => {
@@ -59,9 +63,22 @@ class API {
 	}
 
 	setActiveFeature(featureId, featureType, featureValue) {
-		this.features[featureType][featureId] = { type: featureType, value: featureValue }
+		let threshold = 0;
+		if (featureType == 'regulon') {
+			this.loomFiles.map((file) => {
+				if ((file.loomFilePath == this.activeLoom) && (file.fileMetaData.hasRegulonsAUC)) {
+					file.regulonMetaData.regulons.map((reg) => {
+						if (reg.name == featureValue) {
+							threshold = reg.autoThresholds[0].threshold;
+							console.log('set threshold', featureValue, threshold)
+						}
+					})
+				}
+			})
+		}
+		this.features[featureType][featureId] = { type: featureType, value: featureValue, threshold: threshold }
 		this.featureChangeListeners.forEach((listener) => {
-			listener(this.features[featureType]);
+			listener(this.features[featureType], featureId);
 		})
 	}
 

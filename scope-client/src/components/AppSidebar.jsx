@@ -81,6 +81,7 @@ export default class AppSidebar extends Component {
 				if (response !== null) {					
 					console.log("Loaded .loom files: ", response.myLooms);
 					this.setState({ myLooms: response.myLooms });
+					BackendAPI.setLoomFiles(response.myLooms);
 				} else {
 					console.log("No .loom files detected. You can import one via Import .loom link.");
 				}
