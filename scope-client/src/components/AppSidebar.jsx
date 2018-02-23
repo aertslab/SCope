@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Sidebar, Menu, Icon, Button, Divider, Modal, Checkbox, Grid, Input, Progress } from 'semantic-ui-react';
+import { Sidebar, Menu, Icon, Button, Divider, Modal, Checkbox, Dropdown, Grid, Input, Progress } from 'semantic-ui-react';
 import FileReaderInput from 'react-file-reader-input';
 import { BackendAPI } from './common/API';
 
@@ -8,9 +8,13 @@ export default class AppSidebar extends Component {
 		super();
 		this.state = {
 			activeLoom: null,
+			activeCoordinates: {},
 			uploadLoomFile: null,
 			uploadLoomModalOpened: false,
 			uploadLoomProgress: 0,
+			metadata: {
+				fileMetaData: {}
+			},
 			myLooms: [],
 			settings: BackendAPI.getSettings()
 		}
@@ -18,6 +22,7 @@ export default class AppSidebar extends Component {
 	}
 
 	render () {
+		const { activeCoordinates } = this.state;
 		return (
 			<Sidebar as={Menu} animation="push" visible={this.props.visible} vertical>
 				<Menu.Item>
@@ -31,7 +36,16 @@ export default class AppSidebar extends Component {
 						</Menu.Menu>
 					<Divider />
 					<Menu.Header>SETTINGS</Menu.Header>
-					<Menu.Menu>
+					<Menu.Menu style={{display: this.state.metadata.fileMetaData.hasExtraEmbeddings ? 'block' : 'none'}}>
+						<Menu.Item>
+						<Dropdown placeholder="Select coordinates ID" selection labeled fluid  text={activeCoordinates.name} >
+							<Dropdown.Menu>
+								{this.myLoomCoordinates()}
+							</Dropdown.Menu>
+						</Dropdown>
+						</Menu.Item>
+					</Menu.Menu>
+					<Menu.Menu style={{display: this.props.currentPage == 'expression' ? 'block' : 'none'}}>
 						<Menu.Item>
 							<Checkbox toggle label="Log transform" checked={this.state.settings.hasLogTransform} onChange={this.toggleLogTransform.bind(this)} />
 						</Menu.Item>
@@ -78,7 +92,7 @@ export default class AppSidebar extends Component {
 		let query = {};
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getMyLooms(query, (error, response) => {
-				if (response !== null) {					
+				if (response !== null) {
 					console.log("Loaded .loom files: ", response.myLooms);
 					this.setState({ myLooms: response.myLooms });
 					BackendAPI.setLoomFiles(response.myLooms);
@@ -102,6 +116,17 @@ export default class AppSidebar extends Component {
 				return (
 					<Menu.Item active={active} key={loomFile.loomFilePath} onClick={() => this.setActiveLoom(loomFile.loomFilePath)}>{icon} {loomFile.loomFilePath}</Menu.Item>
 				)
+			});
+		}
+	}
+
+	myLoomCoordinates() {
+		const { activeCoordinates } = this.state;
+		if (this.state.metadata.cellMetaData) {
+			return this.state.metadata.cellMetaData.embeddings.map((coords) => {
+				return (
+					<Dropdown.Item key={coords.id} text={coords.name} value={coords.id} active={activeCoordinates.id == coords.id} onClick={this.setActiveCoordinates.bind(this)} />
+				);
 			});
 		}
 	}
@@ -156,8 +181,19 @@ export default class AppSidebar extends Component {
 	}
 
 	setActiveLoom(l) {
-		this.setState({ activeLoom: l})
+		BackendAPI.setActiveCoordinates(-1);
 		BackendAPI.setActiveLoom(l);
-		console.log(l +" is now active!")
+		let metadata = BackendAPI.getActiveLoomMetadata();
+		this.setState({ activeLoom: l, metadata: metadata})
+		if (metadata.fileMetaData.hasExtraEmbeddings) {
+			this.setState({ activeCoordinates: metadata.cellMetaData.embeddings[0] });
+		} else {
+			this.setState({ activeCoordinates: { id: -1, name: '' }});
+		}
+	}
+
+	setActiveCoordinates(evt, coords) {
+		BackendAPI.setActiveCoordinates(coords.value);
+		this.setState({ activeCoordinates: { id: coords.value, name: coords.text }});
 	}
 }

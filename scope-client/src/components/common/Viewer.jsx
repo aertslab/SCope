@@ -59,7 +59,7 @@ export default class Viewer extends Component {
         BackendAPI.onViewerSelectionsChange(this.viewerSelectionListener);
         BackendAPI.onViewerTransformChange(this.viewerTransformListener);
         if (this.props.loomFile != null) {
-            this.getPoints(this.props.loomFile, () => {
+            this.getPoints(this.props.loomFile, this.props.activeCoordinates, () => {
                 this.getFeatureColors(this.props.activeFeatures, this.props.loomFile, this.props.thresholds);
             });
         }
@@ -69,8 +69,8 @@ export default class Viewer extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        if (this.props.loomFile != nextProps.loomFile) {
-            this.getPoints(nextProps.loomFile, () => {
+        if (this.props.loomFile != nextProps.loomFile || this.props.activeCoordinates != nextProps.activeCoordinates) {
+            this.getPoints(nextProps.loomFile, nextProps.activeCoordinates, () => {
                 this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile, nextProps.thresholds);
             });
         } else {
@@ -323,16 +323,18 @@ export default class Viewer extends Component {
         }
     }
 
-    getPoints(loomFile, callback) {
+    getPoints(loomFile, coordinates, callback) {
         let query = {
             loomFilePath: loomFile,
-            coordinatesID: -1
+            coordinatesID: parseInt(coordinates)
         };
+        console.log('getPoints', query);
         this.startBenchmark("getPoints")
         BackendAPI.getConnection().then((gbc) => {
             gbc.services.scope.Main.getCoordinates(query, (err, response) => {
                 // Update the coordinates and remove all previous data points
                 if (response) {
+                    console.log(response);
                     this.container.removeChildren();
                     let c = {
                         x: response.x,

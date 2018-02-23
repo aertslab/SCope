@@ -18,7 +18,7 @@ export default class App extends Component {
 			<Segment style={{minHeight: window.innerHeight}}>
 				<AppHeader toggleSidebar={this.toggleSidebar.bind(this)} togglePage={this.togglePage.bind(this)} currentPage={this.state.currentPage} />
 				<Sidebar.Pushable>
-          			<AppSidebar visible={this.state.isSidebarVisible} />
+          			<AppSidebar currentPage={this.state.currentPage} visible={this.state.isSidebarVisible} />
           			<Sidebar.Pusher>
           				<AppContent currentPage={this.state.currentPage} />
           			</Sidebar.Pusher>

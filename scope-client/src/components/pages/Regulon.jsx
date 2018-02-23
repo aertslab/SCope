@@ -14,13 +14,14 @@ export default class Regulon extends Component {
         super();
         this.state = {
             activeLoom: BackendAPI.getActiveLoom(),
+            activeCoordinates: BackendAPI.getActiveCoordinates(),
             activeFeatures: BackendAPI.getActiveFeatures('regulon'),
             geneFeatures: this.getGeneFeatures(BackendAPI.getActiveFeatures('regulon')),
             thresholds: BackendAPI.getThresholds(),
             colors: ["red", "green", "blue"]
         };
-        this.activeLoomListener = (loom) => {
-            this.setState({activeLoom: loom});
+        this.activeLoomListener = (loom, coordinates) => {
+            this.setState({activeLoom: loom, activeCoordinates: coordinates});
         };
         this.activeFeaturesListener = (features, i) => {
             let thresholds = this.state.thresholds;
@@ -31,7 +32,7 @@ export default class Regulon extends Component {
     }
 
     render() {
-        const { activeLoom, activeFeatures, thresholds, colors, geneFeatures } = this.state;
+        const { activeLoom, activeCoordinates, activeFeatures, thresholds, colors, geneFeatures } = this.state;
         let featureSearch = _.times(3, i => (
             <Grid.Column key={i}>
                 <FeatureSearchBox field={i} color={colors[i]} type="regulon" locked="1" value={activeFeatures[i].value} />
@@ -62,14 +63,14 @@ export default class Regulon extends Component {
                             </Grid.Column>
                             <Grid.Column width={6}>
                                 Regulon AUC values
-                                <Viewer name="reg" width="700" height="600" loomFile={activeLoom} activeFeatures={activeFeatures} thresholds={thresholds} scale={true} />
+                                <Viewer name="reg" width="700" height="600" loomFile={activeLoom} activeFeatures={activeFeatures} thresholds={thresholds} scale={true} activeCoordinates={activeCoordinates} />
                             </Grid.Column>
                             <Grid.Column width={4}>
                                 Cells passing thresholds
-                                <Viewer name="auc" width="400" height="400" loomFile={activeLoom} activeFeatures={activeFeatures} thresholds={thresholds} scale={false} />
+                                <Viewer name="auc" width="400" height="400" loomFile={activeLoom} activeFeatures={activeFeatures} thresholds={thresholds} scale={false} activeCoordinates={activeCoordinates} />
                                 <br /><br />
                                 Expression levels
-                                <Viewer name="expr" width="400" height="400" loomFile={activeLoom} activeFeatures={geneFeatures} thresholds={thresholds} />
+                                <Viewer name="expr" width="400" height="400" loomFile={activeLoom} activeFeatures={geneFeatures} thresholds={thresholds} activeCoordinates={activeCoordinates} />
                             </Grid.Column>
                             <Grid.Column width={3}>
                                 <ViewerSidebar />
@@ -102,7 +103,6 @@ export default class Regulon extends Component {
 
     onThresholdChange(idx, threshold) {
         let thresholds = this.state.thresholds;
-        console.log('thresh', idx, threshold);
         thresholds[idx] = threshold;
         BackendAPI.setThresholds(thresholds);
         this.setState({thresholds: thresholds});

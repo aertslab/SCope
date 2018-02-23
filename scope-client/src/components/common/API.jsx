@@ -5,6 +5,7 @@ class API {
 
 		this.loomFiles = [];
 		this.activeLoom = null;
+		this.activeCoordinates = -1;
 		this.activeLoomChangeListeners = [];
 
 		this.features = {
@@ -42,9 +43,12 @@ class API {
 		return this.GBCConnection;
 	}
 
-
 	getActiveLoom() {
 		return this.activeLoom;
+	}
+
+	getActiveCoordinates() {
+		return this.activeCoordinates;
 	}
 
 	getActiveLoomMetadata() {
@@ -62,9 +66,15 @@ class API {
 
 	setActiveLoom(loom) {
 		this.activeLoom = loom;
-		let file = this.loomFiles[this.activeLoom];
 		this.activeLoomChangeListeners.forEach((listener) => {
-			listener(this.activeLoom, file);
+			listener(this.activeLoom, this.activeCoordinates);
+		})
+	}
+
+	setActiveCoordinates(coords) {
+		this.activeCoordinates = coords;
+		this.activeLoomChangeListeners.forEach((listener) => {
+			listener(this.activeLoom, this.activeCoordinates);
 		})
 	}
 

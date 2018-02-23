@@ -11,10 +11,12 @@ export default class Expression extends Component {
         super();
         this.state = {
             activeLoom: BackendAPI.getActiveLoom(),
+            activeCoordinates: BackendAPI.getActiveCoordinates(),
             activeFeatures: BackendAPI.getActiveFeatures('gene')
         }
-        this.activeLoomListener = (loom) => {
-            this.setState({activeLoom: loom});
+        this.activeLoomListener = (loom, coordinates) => {
+            console.log('loom change', loom, coordinates);
+            this.setState({activeLoom: loom, activeCoordinates: coordinates});
         };
         this.activeFeaturesListener = (features) => {
             this.setState({activeFeatures: features});
@@ -22,7 +24,7 @@ export default class Expression extends Component {
     }
 
     render() {
-        const { activeLoom, activeFeatures } = this.state;
+        const { activeLoom, activeFeatures, activeCoordinates } = this.state;
         return (
             <div>
                 <div style={{display: activeLoom == null ? 'block' : 'none'}}>
@@ -47,7 +49,7 @@ export default class Expression extends Component {
                                 <ViewerToolbar />
                             </Grid.Column>
                             <Grid.Column width={10}>
-                                <Viewer name="expr" width="1000" height="800" loomFile={activeLoom} activeFeatures={activeFeatures} />
+                                <Viewer name="expr" width="1000" height="800" loomFile={activeLoom} activeFeatures={activeFeatures} activeCoordinates={activeCoordinates} />
                             </Grid.Column>
                             <Grid.Column width={3}>
                                 <ViewerSidebar />
