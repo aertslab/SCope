@@ -33,6 +33,9 @@ class API {
 
 		this.viewerSelections = [];
 		this.viewerSelectionsChangeListeners = [];
+
+		this.viewerTransform = {};
+		this.viewerTransformChangeListeners = [];
 	}
 
 	getConnection() {
@@ -203,6 +206,24 @@ class API {
 
 	clearViewerSelections() {
 		this.viewerSelections = [];
+	}
+
+	setViewerTransform(transform) {
+		this.viewerTransform = transform
+		this.viewerTransformChangeListeners.forEach((listener) => {
+			listener(this.viewerTransform);
+		})
+	}
+
+	onViewerTransformChange(listener) {
+		this.viewerTransformChangeListeners.push(listener);
+	}
+
+	removeViewerTransformChange(listener) {
+		let i = this.viewerTransformChangeListeners.indexOf(listener)
+		if (i > -1) {
+			this.viewerTransformChangeListeners.splice(i, 1);
+		}
 	}
 
 }

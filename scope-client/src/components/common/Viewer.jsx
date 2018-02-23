@@ -21,9 +21,9 @@ export default class Viewer extends Component {
                 down: false
             },
             zoom: {
-                type: 's',
-                k : 1,
-                transform : null
+                x: 0,
+                y: 0,
+                k: 1
             },
             activeTool: BackendAPI.getViewerTool(),
             benchmark: {}
@@ -42,6 +42,9 @@ export default class Viewer extends Component {
             this.setState({lassoSelections: selections});
             this.repaintLassoSelections();
         }
+        this.viewerTransformListener = (t) => {
+            this.onViewerTransformChange(t);
+        }
     }
 
     render() {
@@ -54,6 +57,7 @@ export default class Viewer extends Component {
         BackendAPI.onSettingsChange(this.settingsListener);
         BackendAPI.onViewerToolChange(this.viewerToolListener);
         BackendAPI.onViewerSelectionsChange(this.viewerSelectionListener);
+        BackendAPI.onViewerTransformChange(this.viewerTransformListener);
         if (this.props.loomFile != null) {
             this.getPoints(this.props.loomFile, () => {
                 this.getFeatureColors(this.props.activeFeatures, this.props.loomFile, this.props.thresholds);
@@ -84,6 +88,7 @@ export default class Viewer extends Component {
         BackendAPI.removeSettingsChange(this.settingsListener);
         BackendAPI.removeViewerToolChange(this.viewerToolListener);
         BackendAPI.removeViewerSelectionsChange(this.viewerSelectionListener);
+        BackendAPI.removeViewerTransformChange(this.viewerTransformListener);
         this.container.removeChildren();
         this.container.destroy();
         this.lassoLayer.removeChildren();
@@ -95,12 +100,12 @@ export default class Viewer extends Component {
     }
 
     initGraphics() {
-        const v = d3.select('#viewer'+this.props.name)
-        this.w = v.node().getBoundingClientRect().width;
-        this.renderer = PIXI.autoDetectRenderer(this.w, this.h, { backgroundColor: 0xFFFFFF, antialias: true, view: v.node() });
+        this.zoomSelection = d3.select('#viewer'+this.props.name);
+        this.w = this.zoomSelection.node().getBoundingClientRect().width;
+        this.renderer = PIXI.autoDetectRenderer(this.w, this.h, { backgroundColor: 0xFFFFFF, antialias: true, view: this.zoomSelection.node() });
         this.stage = new PIXI.Container();
-        this.stage.width = this.w
-        this.stage.height = this.h
+        this.stage.width = this.w;
+        this.stage.height = this.h;
         this.renderer.render(this.stage);
         // Increase the maxSize if displaying more than 1500 (default) objects
         this.container = new PIXI.particles.ParticleContainer(this.maxn, [false, true, false, false, true]);
@@ -108,7 +113,8 @@ export default class Viewer extends Component {
         this.addLassoLayer()
         // Setup PIXI Canvas in componentDidMount
         //this.viewer.appendChild(this.renderer.view);
-        v.call(d3.zoom().scaleExtent([-1, 10]).on("zoom", this.zoom.bind(this)));
+        this.zoomBehaviour = d3.zoom().scaleExtent([-1, 10]).on("zoom", this.zoom.bind(this));
+        this.zoomSelection.call(this.zoomBehaviour);
     }
 
     makePointSprite(c) {
@@ -200,7 +206,9 @@ export default class Viewer extends Component {
             this.lasso.drawPolygon(lp)
         }
         this.lasso.endFill();
-        this.renderer.render(this.stage);
+        requestAnimationFrame(() => {
+            this.renderer.render(this.stage);
+        });
     }
 
     closeLasso() {
@@ -214,7 +222,9 @@ export default class Viewer extends Component {
     }
 
     getPointsInLasso() {
-        let pts = this.container.children, ptsInLasso = [], k = this.state.zoom.k
+        let pts = this.container.children,
+            ptsInLasso = [], 
+            k = this.state.zoom.k;
         if(pts.length < 2)
             return
         for (let i = 0; i < pts.length; ++i) {
@@ -267,42 +277,50 @@ export default class Viewer extends Component {
         return color;
     }
 
-    geometricZoom() {
-        this.container.position.x = d3.event.transform.x;
-        this.container.position.y = d3.event.transform.y;
-        this.container.scale.x = d3.event.transform.k;
-        this.container.scale.y = d3.event.transform.k;
-    }
-
-    semanticZoom() {
-        let t = d3.event.transform
-        this.container.position.x = t.x, this.container.position.y = t.y;
-        this.selectionsLayer.position.x = t.x, this.selectionsLayer.position.y = t.y;
-        if (this.state.zoom.k != t.k) {            
-            this.setState({ zoom: { k: t.k } });
-            this.transformDataPoints();
-        }
-        requestAnimationFrame(() => {this.renderer.render(this.stage)})
-    }
-
     isLassoActive() {
         return this.state.activeTool === "lasso";
-    }
-
-    isGeometricZoomActive() {
-        return this.state.activeTool === "g-zoom";
     }
 
     zoom() {
         if (this.state.mouse.down && this.isLassoActive()) {
             return
         }
-        if (this.isGeometricZoomActive()) {
-            this.geometricZoom()
+
+        let t1 = d3.event.transform,
+            t0 = this.state.zoom,
+            dx = (t1.x - t0.x) / (this.renderer.width / 2), 
+            dy = (t1.y - t0.y) / (this.renderer.height / 2);
+        
+        this.container.position.x = t1.x;
+        this.container.position.y = t1.y;
+        this.selectionsLayer.position.x = t1.x;
+        this.selectionsLayer.position.y = t1.y;
+        this.setState({zoom: {x: t1.x, y: t1.y, k: t1.k}})
+        
+        if (t0.k != t1.k) {            
+            // on zoom
+            this.transformDataPoints();
         } else {
-            this.semanticZoom()
+            // on move
+            requestAnimationFrame(() => {
+                this.renderer.render(this.stage);
+            });
         }
-        //this.transformDataPoints();
+
+        // notify other viewers only for genuine zoom transforms
+        if (!t1.receivedFromListener) BackendAPI.setViewerTransform({k: t1.k, dx: dx, dy: dy, src: this.props.name});
+    }
+
+    onViewerTransformChange(t) {
+        // only for all zoom events of other components
+        if (t.src != this.props.name) {
+            let k = this.state.zoom.t,
+                x = this.state.zoom.x + t.dx * (this.renderer.width / 2),
+                y = this.state.zoom.y + t.dy * (this.renderer.height / 2),
+                transform = d3.zoomIdentity.translate(x, y).scale(t.k);
+            transform.receivedFromListener = true;
+            this.zoomBehaviour.transform(this.zoomSelection, transform);
+        }
     }
 
     getPoints(loomFile, callback) {
@@ -320,6 +338,9 @@ export default class Viewer extends Component {
                         x: response.x,
                         y: response.y
                     }
+                    let min = this.renderer.width / (d3.max(response.x) - d3.min(response.x));
+                    let max = this.renderer.height / (d3.max(response.y) - d3.min(response.y));
+                    this.scalingFactor = Math.floor(d3.min([min, max])) - 1;
                     this.setState({ coord: c })
                 } else {
                     console.log('Could not get the coordinates - empty response!')
@@ -358,15 +379,17 @@ export default class Viewer extends Component {
         this.startBenchmark("transformPoints");
         let k = this.state.zoom.k;
         let cx = this.renderer.width / 2;
-        let cy = this.renderer.height / 2; // - 100
+        let cy = this.renderer.height / 2; // - 100        
         for (let i = 0, n = container.children.length; i < n; ++i) {
             let p = container.children[i];
-            let x = p._originalData.x * 10 + cx;
-            let y = p._originalData.y * 10 + cy;
-            p.position.x = x * k
-            p.position.y = y * k
+            let x = p._originalData.x * this.scalingFactor + cx;
+            let y = p._originalData.y * this.scalingFactor + cy;
+            p.position.x = x * k;
+            p.position.y = y * k;
         }
-        this.renderer.render(this.stage);
+        requestAnimationFrame(() => {
+            this.renderer.render(this.stage);
+        });
         this.endBenchmark("transformPoints");
     }
 
