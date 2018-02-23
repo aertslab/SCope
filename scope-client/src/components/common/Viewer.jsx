@@ -139,7 +139,7 @@ export default class Viewer extends Component {
         const cy = y * 15 + this.renderer.height / 2;
         s.position.x = cx;
         s.position.y = cy;
-        s.blendMode = PIXI.BLEND_MODES.SCREEN;
+        s.blendMode = PIXI.BLEND_MODES.ADD;
         s._originalData = {x: x, y: y};
         return s;
     }

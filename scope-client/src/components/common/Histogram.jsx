@@ -85,7 +85,7 @@ export default class AUCThreshold extends Component {
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getCellAUCValuesByFeatures(query, (err, response) => {
 				if(response !== null) {
-					this.renderAUCGraph(response.value)
+					this.renderAUCGraph(feature, response.value);
 					this.handleThresholdChange(this.props.value);
 				} else {
 					this.renderAUCGraph([])
@@ -94,7 +94,7 @@ export default class AUCThreshold extends Component {
 		});
 	}
 
-	renderAUCGraph(points) {
+	renderAUCGraph(feature, points) {
 		var formatCount = d3.format(",.0f");
 		var svg = d3.select("#thresholdSVG"+this.props.field);
 		var width = svg.node().getBoundingClientRect().width
@@ -134,16 +134,17 @@ export default class AUCThreshold extends Component {
 			.attr("height", function(d) { return height - y(d.length); })
 			.attr("stroke", "#000")
 			.attr("fill", this.props.color)
-			.attr("opacity", .6);
+			.attr("opacity", .5);
 
 		g.append("g")
 			.attr("class", "threshold")
 			.append("line")
-			.attr("stroke", "red")
-			.attr("x0", 0)
+			.attr("stroke", this.props.color)
+			.attr("stroke-width", "3px")
 			.attr("x1", 0)
-			.attr("y0", 0)
-			.attr("y1", height);
+			.attr("x2", 0)
+			.attr("y1", 0)
+			.attr("y2", height);
 
 		g.append("g")
 			.attr("class", "axis axis--x")
@@ -154,6 +155,36 @@ export default class AUCThreshold extends Component {
 			.attr("class", "axis axis--y")
 			.attr("transform", "translate(0, 0)")
 			.call(d3.axisLeft(y));    
+
+		let metadata = BackendAPI.getActiveLoomMetadata();
+		let component = this;
+		if (metadata.fileMetaData.hasRegulonsAUC) {
+			let gt = g.append("g")
+				.attr("class", "autoThresholds");
+			metadata.regulonMetaData.regulons.map((regulon) => {
+				if (regulon.name == feature.value) {
+					regulon.autoThresholds.map((t) => {
+						let tx = x(t.threshold);
+						gt.append("text")
+							.style("cursor", "pointer")
+							.attr("text-anchor", "middle")
+							.attr("transform", "translate("+tx+",5)")
+							.text(t.name)
+							.on('click', function() {
+								component.handleThresholdChange(t.threshold);
+							})
+							.append('title')
+							.text(t.name);
+						gt.append("line")
+							.attr("stroke", "blue")
+							.attr("x1", tx)
+							.attr("x2", tx)
+							.attr("y1", 10)
+							.attr("y2", height);
+					});
+				}
+			})
+		}
 
 	}
 
