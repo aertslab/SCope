@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Sidebar, Menu, Icon, Button, Divider, Modal, Checkbox, Dropdown, Grid, Input, Progress } from 'semantic-ui-react';
+import { Sidebar, Menu, Icon, Image, Button, Divider, Modal, Checkbox, Dropdown, Grid, Input, Progress } from 'semantic-ui-react';
 import FileReaderInput from 'react-file-reader-input';
 import { BackendAPI } from './common/API';
 
@@ -22,7 +22,9 @@ export default class AppSidebar extends Component {
 	}
 
 	render () {
-		const { activeCoordinates } = this.state;
+		const { activeCoordinates, metadata } = this.state;
+		let showCoordinatesSelection = metadata.fileMetaData.hasExtraEmbeddings && (this.props.currentPage == 'expression' || this.props.currentPage == 'regulon') ? true : false;
+		let showTransforms = this.props.currentPage == 'expression' ? true : false;
 		return (
 			<Sidebar as={Menu} animation="push" visible={this.props.visible} vertical>
 				<Menu.Item>
@@ -35,8 +37,8 @@ export default class AppSidebar extends Component {
 							{this.myLooms()}
 						</Menu.Menu>
 					<Divider />
-					<Menu.Header>SETTINGS</Menu.Header>
-					<Menu.Menu style={{display: this.state.metadata.fileMetaData.hasExtraEmbeddings ? 'block' : 'none'}}>
+					<Menu.Header style={{display:  showTransforms || showCoordinatesSelection ? 'block' : 'none'}} >SETTINGS</Menu.Header>
+					<Menu.Menu style={{display: showCoordinatesSelection ? 'block' : 'none'}}>
 						<Menu.Item>
 						<Dropdown placeholder="Select coordinates ID" selection labeled fluid  text={activeCoordinates.name} >
 							<Dropdown.Menu>
@@ -45,13 +47,19 @@ export default class AppSidebar extends Component {
 						</Dropdown>
 						</Menu.Item>
 					</Menu.Menu>
-					<Menu.Menu style={{display: this.props.currentPage == 'expression' ? 'block' : 'none'}}>
+					<Menu.Menu style={{display:  showTransforms ? 'block' : 'none'}}>
 						<Menu.Item>
 							<Checkbox toggle label="Log transform" checked={this.state.settings.hasLogTransform} onChange={this.toggleLogTransform.bind(this)} />
 						</Menu.Item>
 						<Menu.Item>
 							<Checkbox toggle label="CPM normalize" checked={this.state.settings.hasCpmNormalization} onChange={this.toggleCpmNormization.bind(this)} />
 						</Menu.Item>
+					</Menu.Menu>
+					<Divider />
+					<Menu.Menu className="logos">
+						<Image src='src/images/kuleuven.png' size="small" centered href="http://kuleuven.be" />
+						<br /><br />
+						<Image src='src/images/vib.png' size="small" centered href="http://vib.be" />
 					</Menu.Menu>
 				</Menu.Item>
 				<Modal open={this.state.uploadLoomModalOpened} onClose={this.toggleUploadLoomModal.bind(this)} closeIcon>

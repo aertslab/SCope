@@ -21,10 +21,11 @@ export default class AUCThreshold extends Component {
 			total: 0,
 			points: []
 		}
+		console.log('height', props.height);
 	}
 
 	render() {
-		const { field, feature } = this.props;
+		const { field, feature, height } = this.props;
 		const { min, max, selected, matched, total } = this.state;
 		let handle = (props) => {
 			// TODO: memory leak!?
@@ -35,8 +36,8 @@ export default class AUCThreshold extends Component {
 		};
 		return (
 			<div>
-				<svg id={"thresholdSVG" + field} style={{width: 100+'%'}} height="150" ></svg>
-				<p>AUC threshold: <b>{selected.toFixed(4)}</b> (matched points: {matched} / {total})</p>
+				<svg id={"thresholdSVG" + field} style={{width: 100+'%'}} height={height} ></svg>
+				<div className="auc">AUC threshold: <b>{selected.toFixed(4)}</b> (matched points: {matched} / {total})</div>
 				<Slider disabled={feature.value == ''} value={selected} min={min} max={max} step={0.0001} handle={handle} onChange={this.handleThresholdChange.bind(this)}  onAfterChange={this.handleUpdateTSNE.bind(this)} />
 			</div>
 		);
@@ -88,7 +89,7 @@ export default class AUCThreshold extends Component {
 					this.renderAUCGraph(feature, response.value);
 					this.handleThresholdChange(this.props.value);
 				} else {
-					this.renderAUCGraph([])
+					this.renderAUCGraph('', [])
 				}
 			});
 		});
@@ -97,7 +98,7 @@ export default class AUCThreshold extends Component {
 	renderAUCGraph(feature, points) {
 		var formatCount = d3.format(",.0f");
 		var svg = d3.select("#thresholdSVG"+this.props.field);
-		var width = svg.node().getBoundingClientRect().width
+		var width = svg.node().getBoundingClientRect().width;
 		svg.attr('width', width);
 		svg.selectAll("*").remove();
 		var margin = {top: 10, right: 10, bottom: 30, left: 40},
@@ -107,6 +108,21 @@ export default class AUCThreshold extends Component {
 			g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 		this.setState({ max: max, width: width, height: height, total: points.length, points: points, matched: points.length, selected: 0 });
+
+		if (points.length == 0) {
+			svg.append("text")
+				.text("Select a regulon to see AUC histogram")
+				.attr("text-anchor","middle")
+				.attr("transform","translate("+width/2+","+height/2+")");
+			svg.append("svg:image")
+				.attr('x', width * 0.1)
+				.attr('y', height * 0.1)
+				.attr('width', width*0.8)
+				.attr('height', height)
+				.style('opacity', .3)
+				.attr("xlink:href", "src/images/histogram.png")
+			return
+		}
 
 		var x = d3.scaleLinear()
 			.domain([0, max])

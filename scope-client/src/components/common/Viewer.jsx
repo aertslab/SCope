@@ -49,7 +49,7 @@ export default class Viewer extends Component {
 
     render() {
         return (
-            <canvas id={"viewer"+this.props.name} style={{width: 100+'%'}}></canvas>
+            <canvas id={"viewer"+this.props.name} style={{width: 100+'%', height: this.props.height-1+'px'}}></canvas>
         );
     }
 
@@ -69,13 +69,16 @@ export default class Viewer extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        if (this.props.loomFile != nextProps.loomFile || this.props.activeCoordinates != nextProps.activeCoordinates) {
+        if (nextProps.height != this.props.height) {
+            console.log('new dimentions');
+        } else if (this.props.loomFile != nextProps.loomFile || this.props.activeCoordinates != nextProps.activeCoordinates) {
             this.getPoints(nextProps.loomFile, nextProps.activeCoordinates, () => {
                 this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile, nextProps.thresholds);
             });
         } else {
             this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile, nextProps.thresholds);
         }
+        console.log(nextProps);
     }
 
     componentDidMount() {

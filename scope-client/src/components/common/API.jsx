@@ -37,6 +37,9 @@ class API {
 
 		this.viewerTransform = {};
 		this.viewerTransformChangeListeners = [];
+
+		this.sidebarVisible = true;
+		this.sidebarListeners = [];
 	}
 
 	getConnection() {
@@ -233,6 +236,29 @@ class API {
 		let i = this.viewerTransformChangeListeners.indexOf(listener)
 		if (i > -1) {
 			this.viewerTransformChangeListeners.splice(i, 1);
+		}
+	}
+
+
+	getSidebarVisible() {
+		return this.sidebarVisible;
+	}
+
+	setSidebarVisible(state) {
+		this.sidebarVisible = state;
+		this.sidebarListeners.forEach((listener) => {
+			listener(this.sidebarVisible);
+		})
+	}
+
+	onSidebarVisibleChange(listener) {
+		this.sidebarListeners.push(listener);
+	}
+
+	removeSidebarVisibleChange(listener) {
+		let i = this.sidebarListeners.indexOf(listener)
+		if (i > -1) {
+			this.sidebarListeners.splice(i, 1);
 		}
 	}
 

@@ -12,7 +12,8 @@ export default class Expression extends Component {
         this.state = {
             activeLoom: BackendAPI.getActiveLoom(),
             activeCoordinates: BackendAPI.getActiveCoordinates(),
-            activeFeatures: BackendAPI.getActiveFeatures('gene')
+            activeFeatures: BackendAPI.getActiveFeatures('gene'),
+            sidebar: BackendAPI.getSidebarVisible()
         }
         this.activeLoomListener = (loom, coordinates) => {
             console.log('loom change', loom, coordinates);
@@ -21,26 +22,30 @@ export default class Expression extends Component {
         this.activeFeaturesListener = (features) => {
             this.setState({activeFeatures: features});
         }
+        this.sidebarVisibleListener = (state) => {
+            this.setState({sidebar: state});
+            this.forceUpdate();
+        }
     }
 
     render() {
-        const { activeLoom, activeFeatures, activeCoordinates } = this.state;
+        this.height = window.innerHeight - 200;
+        const { activeLoom, activeFeatures, activeCoordinates, sidebar } = this.state;
         return (
             <div>
                 <div style={{display: activeLoom == null ? 'block' : 'none'}}>
                     Select the dataset to be analyzed
                 </div>
                 <div style={{display: activeLoom != null ? 'block' : 'none'}}>
-                    Select up to three genes to be displayed on tSNE <br />
                     <Grid>
-                        <Grid.Row columns="4">
-                            <Grid.Column>
+                        <Grid.Row columns="3">
+                            <Grid.Column width={sidebar ? 4 : 5}>
                                 <FeatureSearchBox field="0" color="red" type="gene" locked="1" value={activeFeatures[0].value} />
                             </Grid.Column>
-                            <Grid.Column>
+                            <Grid.Column width={sidebar ? 4 : 5}>
                                 <FeatureSearchBox field="1" color="green" type="gene" locked="1" value={activeFeatures[1].value} />
                             </Grid.Column>
-                            <Grid.Column>
+                            <Grid.Column width={sidebar ? 4 : 5}>
                                 <FeatureSearchBox field="2" color="blue" type="gene" locked="1" value={activeFeatures[2].value} />
                             </Grid.Column>
                         </Grid.Row>
@@ -48,10 +53,12 @@ export default class Expression extends Component {
                             <Grid.Column width={1}>
                                 <ViewerToolbar />
                             </Grid.Column>
-                            <Grid.Column width={10}>
-                                <Viewer name="expr" width="1000" height="800" loomFile={activeLoom} activeFeatures={activeFeatures} activeCoordinates={activeCoordinates} />
+                            <Grid.Column width={sidebar ? 10 : 12}>
+                                <b>Expression levels</b>
+                                <Viewer name="expr" height={this.height} loomFile={activeLoom} activeFeatures={activeFeatures} activeCoordinates={activeCoordinates} />
                             </Grid.Column>
                             <Grid.Column width={3}>
+                                <b>Cell selections</b><hr />
                                 <ViewerSidebar />
                             </Grid.Column>
                         </Grid.Row>
@@ -64,11 +71,14 @@ export default class Expression extends Component {
     componentWillMount() {
         BackendAPI.onActiveLoomChange(this.activeLoomListener);
         BackendAPI.onActiveFeaturesChange(this.activeFeaturesListener);
+        BackendAPI.onSidebarVisibleChange(this.sidebarVisibleListener);
     }
 
     componentWillUnmount() {
         BackendAPI.removeActiveLoomChange(this.activeLoomListener);
         BackendAPI.removeActiveFeaturesChange(this.activeFeaturesListener);
+        BackendAPI.removeSidebarVisibleChange(this.sidebarVisibleListener);
     }
+
 
 }

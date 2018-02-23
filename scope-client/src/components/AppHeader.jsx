@@ -1,12 +1,20 @@
 import React, { Component } from 'react';
 import { Icon, Button, Menu } from 'semantic-ui-react';
+import { BackendAPI } from './common/API';
 
 export default class AppHeader extends Component {
+	constructor() {
+		super();
+		this.state = {
+			sidebar: true
+		}
+	}
+
 	render() {
 		return (
-			<Menu secondary attached="top">
+			<Menu secondary attached="top" style={{backgroud: 'blue'}} className="vib" inverted>
 				<Menu.Item>
-					<Icon name="sidebar" onClick={this.toggleSidebar.bind(this)} />
+					<Icon name="sidebar" onClick={this.toggleSidebar.bind(this)} style={{cursor: 'pointer'}} title="Toggle sidebar" />
 				</Menu.Item>
 				<Menu.Item>					
 					<Button basic onClick={this.selectWelcomeTab.bind(this)} active={this.props.currentPage == 'welcome'}>
@@ -42,6 +50,9 @@ export default class AppHeader extends Component {
 
 	toggleSidebar() {
 		this.props.toggleSidebar();
+		let state = !this.state.sidebar;
+		BackendAPI.setSidebarVisible(state);
+		this.setState({sidebar: state});
 	}
 
 	selectWelcomeTab(e) {
