@@ -135,8 +135,9 @@ class SCope(s_pb2_grpc.MainServicer):
             x = embedding['_X']
             y = embedding['_Y']
         else:
-            x = loom.ca.Embeddings_X[coordinatesID]
-            y = loom.ca.Embeddings_Y[coordinatesID]
+            print(loom.ca.Embeddings_X.dtype.names)
+            x = loom.ca.Embeddings_X[str(coordinatesID)]
+            y = loom.ca.Embeddings_Y[str(coordinatesID)]
         print(x, y)
         return {"x": x,
                 "y": y}
