@@ -5,6 +5,7 @@ class API {
 
 		this.loomFiles = [];
 		this.activeLoom = null;
+		this.activeCoordinates = -1;
 		this.activeLoomChangeListeners = [];
 
 		this.features = {
@@ -33,15 +34,24 @@ class API {
 
 		this.viewerSelections = [];
 		this.viewerSelectionsChangeListeners = [];
+
+		this.viewerTransform = {};
+		this.viewerTransformChangeListeners = [];
+
+		this.sidebarVisible = true;
+		this.sidebarListeners = [];
 	}
 
 	getConnection() {
 		return this.GBCConnection;
 	}
 
-
 	getActiveLoom() {
 		return this.activeLoom;
+	}
+
+	getActiveCoordinates() {
+		return this.activeCoordinates;
 	}
 
 	getActiveLoomMetadata() {
@@ -59,9 +69,15 @@ class API {
 
 	setActiveLoom(loom) {
 		this.activeLoom = loom;
-		let file = this.loomFiles[this.activeLoom];
 		this.activeLoomChangeListeners.forEach((listener) => {
-			listener(this.activeLoom, file);
+			listener(this.activeLoom, this.activeCoordinates);
+		})
+	}
+
+	setActiveCoordinates(coords) {
+		this.activeCoordinates = coords;
+		this.activeLoomChangeListeners.forEach((listener) => {
+			listener(this.activeLoom, this.activeCoordinates);
 		})
 	}
 
@@ -203,6 +219,47 @@ class API {
 
 	clearViewerSelections() {
 		this.viewerSelections = [];
+	}
+
+	setViewerTransform(transform) {
+		this.viewerTransform = transform
+		this.viewerTransformChangeListeners.forEach((listener) => {
+			listener(this.viewerTransform);
+		})
+	}
+
+	onViewerTransformChange(listener) {
+		this.viewerTransformChangeListeners.push(listener);
+	}
+
+	removeViewerTransformChange(listener) {
+		let i = this.viewerTransformChangeListeners.indexOf(listener)
+		if (i > -1) {
+			this.viewerTransformChangeListeners.splice(i, 1);
+		}
+	}
+
+
+	getSidebarVisible() {
+		return this.sidebarVisible;
+	}
+
+	setSidebarVisible(state) {
+		this.sidebarVisible = state;
+		this.sidebarListeners.forEach((listener) => {
+			listener(this.sidebarVisible);
+		})
+	}
+
+	onSidebarVisibleChange(listener) {
+		this.sidebarListeners.push(listener);
+	}
+
+	removeSidebarVisibleChange(listener) {
+		let i = this.sidebarListeners.indexOf(listener)
+		if (i > -1) {
+			this.sidebarListeners.splice(i, 1);
+		}
 	}
 
 }

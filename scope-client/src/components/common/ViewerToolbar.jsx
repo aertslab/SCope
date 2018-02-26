@@ -14,7 +14,7 @@ export default class ViewerToolbar extends Component {
     render() {
         const { activeTool } = this.state;
         return (
-            <Menu style={{position: "relative", top: 0, left: 0}} vertical fluid>
+            <Menu style={{position: "relative", top: 0, left: 0}} vertical fluid className="toolbar" >
                 <Menu.Item name='lasso' active={activeTool === 'lasso'} onClick={this.handleItemClick.bind(this)}>
                     <div title="Lasso Tool" style={{ display: "block", width: 20, height: 20, backgroundImage: 'url("src/images/lasso.svg")', backgroundSize: "cover" }}></div>
                 </Menu.Item>

@@ -92,10 +92,10 @@ export default class FeatureSearch extends React.Component {
 						regulons = regulons.slice(0, 10)
 						let res = [];
 						if (this.props.type == 'gene') {
-							res = {"gene": {"name": this.props.type, "results":genes}}
+							res = genes.length ? {"gene": {"name": this.props.type, "results":genes}} : [];
 						}
 						if (this.props.type == 'regulon') {
-							res = {"regulon": {"name": this.props.type, "results":regulons}}
+							res = regulons.length ? {"regulon": {"name": this.props.type, "results":regulons}} : [];
 						}
 						this.setState({
 							isLoading: false,

@@ -14,13 +14,15 @@ export default class Regulon extends Component {
         super();
         this.state = {
             activeLoom: BackendAPI.getActiveLoom(),
+            activeCoordinates: BackendAPI.getActiveCoordinates(),
             activeFeatures: BackendAPI.getActiveFeatures('regulon'),
             geneFeatures: this.getGeneFeatures(BackendAPI.getActiveFeatures('regulon')),
             thresholds: BackendAPI.getThresholds(),
+            sidebar: BackendAPI.getSidebarVisible(),
             colors: ["red", "green", "blue"]
         };
-        this.activeLoomListener = (loom) => {
-            this.setState({activeLoom: loom});
+        this.activeLoomListener = (loom, coordinates) => {
+            this.setState({activeLoom: loom, activeCoordinates: coordinates});
         };
         this.activeFeaturesListener = (features, i) => {
             let thresholds = this.state.thresholds;
@@ -28,18 +30,23 @@ export default class Regulon extends Component {
             //if (features[i].threshold) thresholds[i] = features[i].threshold;
             this.setState({activeFeatures: features, thresholds: thresholds, geneFeatures: geneFeatures});
         };
+        this.sidebarVisibleListener = (state) => {
+            this.setState({sidebar: state});
+            this.forceUpdate();
+        }
+        this.height = (window.innerHeight - 160) / 4;
     }
 
     render() {
-        const { activeLoom, activeFeatures, thresholds, colors, geneFeatures } = this.state;
+        const { activeLoom, activeCoordinates, activeFeatures, thresholds, colors, geneFeatures, sidebar } = this.state;
         let featureSearch = _.times(3, i => (
-            <Grid.Column key={i}>
+            <Grid.Column key={i}  width={sidebar ? 4 : 5}>
                 <FeatureSearchBox field={i} color={colors[i]} type="regulon" locked="1" value={activeFeatures[i].value} />
             </Grid.Column>
         ));
         let featureThreshold = _.times(3, i => (
-            <Grid.Column key={i}>
-                <Histogram field={i} color={colors[i]} loomFile={activeLoom} feature={activeFeatures[i]} onThresholdChange={this.onThresholdChange.bind(this)} value={thresholds[i]} />
+            <Grid.Column key={i} width={sidebar ? 4 : 5}>
+                <Histogram field={i} height={this.height - 50} color={colors[i]} loomFile={activeLoom} feature={activeFeatures[i]} onThresholdChange={this.onThresholdChange.bind(this)} value={thresholds[i]} />
             </Grid.Column>
         ));
 
@@ -50,28 +57,28 @@ export default class Regulon extends Component {
                 </div>
                 <div style={{display: activeLoom != null ? 'block' : 'none'}}>
                     <Grid>
-                        <Grid.Row columns="4">
+                        <Grid.Row columns="3">
                             {featureSearch}
                         </Grid.Row>
-                        <Grid.Row columns="4">
+                        <Grid.Row columns="3">
                             {featureThreshold}
                         </Grid.Row>
                         <Grid.Row columns="4">
                             <Grid.Column width={1}>
                                 <ViewerToolbar />
                             </Grid.Column>
-                            <Grid.Column width={6}>
-                                Regulon AUC values
-                                <Viewer name="reg" width="700" height="600" loomFile={activeLoom} activeFeatures={activeFeatures} thresholds={thresholds} scale={true} />
+                            <Grid.Column width={sidebar ? 6 : 7}>
+                                <b>Regulon AUC values</b>
+                                <Viewer name="reg" height={3 * this.height - 15} loomFile={activeLoom} activeFeatures={activeFeatures} thresholds={thresholds} scale={true} activeCoordinates={activeCoordinates} />
                             </Grid.Column>
-                            <Grid.Column width={4}>
-                                Cells passing thresholds
-                                <Viewer name="auc" width="400" height="400" loomFile={activeLoom} activeFeatures={activeFeatures} thresholds={thresholds} scale={false} />
-                                <br /><br />
-                                Expression levels
-                                <Viewer name="expr" width="400" height="400" loomFile={activeLoom} activeFeatures={geneFeatures} thresholds={thresholds} />
+                            <Grid.Column width={sidebar ? 4 : 5}>
+                                <b>Cells passing thresholds</b>
+                                <Viewer name="auc" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={activeFeatures} thresholds={thresholds} scale={false} activeCoordinates={activeCoordinates} />
+                                <b>Expression levels</b>
+                                <Viewer name="expr" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={geneFeatures} thresholds={thresholds} activeCoordinates={activeCoordinates} />
                             </Grid.Column>
                             <Grid.Column width={3}>
+                                <b>Cell selections</b><hr />
                                 <ViewerSidebar />
                             </Grid.Column>
                         </Grid.Row>
@@ -84,11 +91,13 @@ export default class Regulon extends Component {
     componentWillMount() {
         BackendAPI.onActiveLoomChange(this.activeLoomListener);
         BackendAPI.onActiveFeaturesChange(this.activeFeaturesListener);
+        BackendAPI.onSidebarVisibleChange(this.sidebarVisibleListener);
     }
 
     componentWillUnmount() {
         BackendAPI.removeActiveLoomChange(this.activeLoomListener);
         BackendAPI.removeActiveFeaturesChange(this.activeFeaturesListener);
+        BackendAPI.removeSidebarVisibleChange(this.sidebarVisibleListener)
     }
 
     getGeneFeatures(features) {
@@ -102,7 +111,6 @@ export default class Regulon extends Component {
 
     onThresholdChange(idx, threshold) {
         let thresholds = this.state.thresholds;
-        console.log('thresh', idx, threshold);
         thresholds[idx] = threshold;
         BackendAPI.setThresholds(thresholds);
         this.setState({thresholds: thresholds});
