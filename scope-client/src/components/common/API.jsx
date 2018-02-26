@@ -70,14 +70,14 @@ class API {
 	setActiveLoom(loom) {
 		this.activeLoom = loom;
 		this.activeLoomChangeListeners.forEach((listener) => {
-			listener(this.activeLoom, this.activeCoordinates);
+			listener(this.activeLoom, this.loomFiles[this.activeLoom], this.activeCoordinates);
 		})
 	}
 
 	setActiveCoordinates(coords) {
 		this.activeCoordinates = coords;
 		this.activeLoomChangeListeners.forEach((listener) => {
-			listener(this.activeLoom, this.activeCoordinates);
+			listener(this.activeLoom,  this.loomFiles[this.activeLoom], this.activeCoordinates);
 		})
 	}
 
