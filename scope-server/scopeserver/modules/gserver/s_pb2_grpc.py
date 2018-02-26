@@ -24,6 +24,11 @@ class MainStub(object):
         request_serializer=s__pb2.CellAUCValuesByFeaturesRequest.SerializeToString,
         response_deserializer=s__pb2.CellAUCValuesByFeaturesReply.FromString,
         )
+    self.getCellMetaData = channel.unary_unary(
+        '/scope.Main/getCellMetaData',
+        request_serializer=s__pb2.CellMetaDataRequest.SerializeToString,
+        response_deserializer=s__pb2.CellMetaDataReply.FromString,
+        )
     self.getFeatures = channel.unary_unary(
         '/scope.Main/getFeatures',
         request_serializer=s__pb2.FeatureRequest.SerializeToString,
@@ -53,6 +58,13 @@ class MainServicer(object):
     raise NotImplementedError('Method not implemented!')
 
   def getCellAUCValuesByFeatures(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def getCellMetaData(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -92,6 +104,11 @@ def add_MainServicer_to_server(servicer, server):
           servicer.getCellAUCValuesByFeatures,
           request_deserializer=s__pb2.CellAUCValuesByFeaturesRequest.FromString,
           response_serializer=s__pb2.CellAUCValuesByFeaturesReply.SerializeToString,
+      ),
+      'getCellMetaData': grpc.unary_unary_rpc_method_handler(
+          servicer.getCellMetaData,
+          request_deserializer=s__pb2.CellMetaDataRequest.FromString,
+          response_serializer=s__pb2.CellMetaDataReply.SerializeToString,
       ),
       'getFeatures': grpc.unary_unary_rpc_method_handler(
           servicer.getFeatures,
