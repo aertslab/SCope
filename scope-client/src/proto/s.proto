@@ -19,6 +19,7 @@ package scope;
 service Main {
   rpc getCellColorByFeatures (CellColorByFeaturesRequest) returns (CellColorByFeaturesReply) {}
   rpc getCellAUCValuesByFeatures (CellAUCValuesByFeaturesRequest) returns (CellAUCValuesByFeaturesReply) {}
+  rpc getCellMetaData (CellMetaDataRequest) returns (CellMetaDataReply) {}
   rpc getFeatures (FeatureRequest) returns (FeatureReply) {}
   rpc getCoordinates (CoordinatesRequest) returns (CoordinatesReply) {}
   rpc getMyLooms (MyLoomsRequest) returns (MyLoomsReply) {}
@@ -52,6 +53,18 @@ message CellAUCValuesByFeaturesReply{
 message FeatureRequest {
   string loomFilePath=1;
   string query=2;
+}
+
+message CellMetaDataRequest {
+  string loomFilePath=1;
+  repeated int32 cellIndices=2; // List of cell indices to return, empty list = all cells
+  repeated string selectedGenes=3; // List of genes to return epxression values for
+  bool hasLogTranform=4;
+  bool hasCpmTranform=5;
+  repeated string selectedRegulons=6; // As above, for regulons and AUC values
+  repeated int32 clusterings=7; // IDs of clustering values to return per cell
+  repeated string annotations=8; // String name of annotations to return (from global metadata)
+
 }
 
 message FeatureReply {
@@ -118,6 +131,25 @@ message FileMetaData {
   bool hasSeuratClusterings=3;
   bool hasExtraEmbeddings=4;
   bool hasGlobalMeta=5;
+}
+
+message FeatureValues {
+  repeated float features=1;
+}
+
+message CellAnnotations {
+  repeated string annotations=1;
+}
+
+message CellClusters {
+  repeated int32 clusters=1;
+}
+
+message CellMetaDataReply {
+  repeated CellClusters clusterIDs=1;
+  repeated FeatureValues geneExpression=2;
+  repeated FeatureValues aucValues=3;
+  repeated CellAnnotations annotations=4;
 }
 
 message MyLoomsRequest {}

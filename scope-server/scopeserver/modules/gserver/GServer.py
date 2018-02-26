@@ -80,6 +80,14 @@ class SCope(s_pb2_grpc.MainServicer):
             return loom.ca.RegulonsAUC[regulon]
         return []
 
+    def get_clusterIDs(self, loom_file_path, clusterID):
+        loom = self.get_loom_connection(loom_file_path)
+        return loom.ca.Clusterings[str(clusterID)]
+
+    def get_annotation(self, loom_file_path, annoName):
+        loom = self.get_loom_connection(loom_file_path)
+        return loom.ca[annoName]
+
     def get_features(self, loom_file_path, query):
         loom = self.get_loom_connection(loom_file_path)
         # Genes
@@ -218,6 +226,38 @@ class SCope(s_pb2_grpc.MainServicer):
     def getCellAUCValuesByFeatures(self, request, context):
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
         return s_pb2.CellAUCValuesByFeaturesReply(value=self.get_auc_values(loom_file_path=loomFilePath, regulon=request.feature[0]))
+
+    def getCellMetaData(self, request, context):
+        loomFilePath = self.get_loom_filepath(request.loomFilePath)
+        if len(request.cellIndices) == 0:
+            request.cellIndices = list(range(self.get_nb_cells(loomFilePath)))
+        cellClusters = []
+        for cluster in request.clusterings:
+            if cluster != '':
+                cellClusters.append(self.get_clusterIDs(loom_file_path=loomFilePath,
+                                                        clusterID=cluster)[request.cellIndices])
+        geneExp = []
+        for gene in request.selectedGenes:
+            if gene != '':
+                geneExp.append(self.get_gene_expression(loom_file_path=loomFilePath,
+                                                        gene_symbol=gene,
+                                                        log_transform=request.hasLogTranform,
+                                                        cpm_normalise=request.hasCpmTranform)[request.cellIndices])
+        aucVals = []
+        for regulon in request.selectedRegulons:
+            if regulon != '':
+                aucVals.append(self.get_auc_values(loom_file_path=loomFilePath,
+                                                   regulon=regulon)[request.cellIndices])
+        annotations = []
+        for anno in request.annotations:
+            if anno != '':
+                annotations.append(self.get_annotation(loom_file_path=loomFilePath,
+                                                       annoName=anno)[request.cellIndices])
+
+        return s_pb2.CellMetaDataReply(clusterIDs=s_pb2.CellClusters(clusters=list(zip(*cellClusters))),
+                                       geneExpression=s_pb2.FeatureValues(features=list(zip(*geneExp))),
+                                       aucValues=s_pb2.FeatureValues(features=list(zip(*aucVals))),
+                                       annotations=s_pb2.CellAnnotations(annotations=list(zip(*annotations))))
 
     def getFeatures(self, request, context):
         f = self.get_features(self.get_loom_filepath(request.loomFilePath), request.query)
