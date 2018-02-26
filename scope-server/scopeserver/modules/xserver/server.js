@@ -1,7 +1,7 @@
 var util = require('util')
 
 var WebSocketServer = require('ws').Server
-var wss = new WebSocketServer({ port: 8081 });
+var wss = new WebSocketServer({ port: process.argv[2] });
 
 var grpcBus = require('grpc-bus');
 var protobuf = require("protobufjs");

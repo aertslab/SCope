@@ -6,6 +6,10 @@ var pkg = require('./package.json')
 
 let config = {
     entry: './src/main.jsx',
+    devServer: {
+      host: '0.0.0.0',
+      port: 8080
+    },
     output: {
         path: path.resolve('assets'),
         // filename: 'main.js',
@@ -45,7 +49,7 @@ let config = {
                 fs.writeFileSync('./index.html', indexHtml);
             }
         })
-        
+
     ]
 }
 
