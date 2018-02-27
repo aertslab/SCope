@@ -254,7 +254,7 @@ class SCope(s_pb2_grpc.MainServicer):
                         vals = np.round((vals / vmax) * 255)
                         features.append([x if x <= 255 else 255 for x in vals])
                     else:
-                        features.append([255 if auc >= request.threshold[n] else 0 for auc in vals])
+                        features.append([225 if auc >= request.threshold[n] else 0 for auc in vals])
                 else:
                     features.append(np.zeros(n_cells))
 
