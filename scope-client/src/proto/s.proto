@@ -22,6 +22,7 @@ service Main {
   rpc getCellMetaData (CellMetaDataRequest) returns (CellMetaDataReply) {}
   rpc getFeatures (FeatureRequest) returns (FeatureReply) {}
   rpc getCoordinates (CoordinatesRequest) returns (CoordinatesReply) {}
+  rpc getRegulonMetaData (RegulonMetaDataRequest) returns (RegulonMetaDataReply) {}
   rpc getMyLooms (MyLoomsRequest) returns (MyLoomsReply) {}
 }
 
@@ -120,13 +121,9 @@ message AUCThreshold {
 }
 
 message Regulon {
-  string name=1;
-  int32 nGenes=2;
-  repeated AUCThreshold autoThresholds=3;
-}
-
-message RegulonMetaData {
-  repeated Regulon regulons=1;
+  repeated string genes=1;
+  repeated AUCThreshold autoThresholds=2;
+  string defaultThreshold=3;
 }
 
 message FileMetaData {
@@ -156,13 +153,21 @@ message CellMetaDataReply {
   repeated CellAnnotations annotations=4;
 }
 
+message RegulonMetaDataRequest {
+  string loomFilePath=1;
+  string regulon=2;
+}
+
+message RegulonMetaDataReply {
+  Regulon regulonMeta=1;
+}
+
 message MyLoomsRequest {}
 
 message MyLoom {
   string loomFilePath=1;
   CellMetaData cellMetaData=2;
-  RegulonMetaData regulonMetaData=3;
-  FileMetaData fileMetaData=4;
+  FileMetaData fileMetaData=3;
 }
 
 message MyLoomsReply {

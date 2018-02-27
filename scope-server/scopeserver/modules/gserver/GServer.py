@@ -313,6 +313,23 @@ class SCope(s_pb2_grpc.MainServicer):
                                  annotation=request.annotation)
         return s_pb2.CoordinatesReply(x=c["x"], y=c["y"])
 
+    def getRegulonMetaData(self, request, context):
+        loom = self.get_loom_filepath(request.loomFilePath)
+        regulonGenes = loom.ra.Gene[loom.ra.Regulons[request.regulon] == 1]
+        metaData = json.loads(loom.attrs.MetaData)
+        for regulon in metaData['regulonThresholds']:
+            if regulon['regulon'] == request.regulon:
+                autoThresholds = []
+                for threshold in regulon['allThresholds'].keys():
+                    autoThresholds.append({"name": threshold, "threshold": regulon['allThresholds'][threshold]})
+                defaultThreshold = regulon['defaultThresholdName']
+        regulon = {"genes": regulonGenes,
+                   "autoThresholds": autoThresholds,
+                   "defaultThreshold": defaultThreshold
+                   }
+
+        return s_pb2.RegulonMetaDataReply(regulon=regulon)
+
     def getMyLooms(self, request, context):
         my_looms = []
         for f in os.listdir(self.loom_dir):
@@ -329,22 +346,10 @@ class SCope(s_pb2_grpc.MainServicer):
                     annotations = []
                     embeddings = []
                     clusterings = []
-                if fileMeta['hasRegulonsAUC']:
-                    regulons = []
-                    for regulon in loom.ca.RegulonsAUC.dtype.names:
-                        regulons.append({
-                            "name": regulon,
-                            "nGenes": int(regulon.rstrip('g)').split('(')[-1]),
-                            "autoThresholds": [{
-                                "name": "placeHolder",
-                                "threshold": 0.10
-                                 }]
-                        })
-                else:
-                    regulons = []
                 my_looms.append(s_pb2.MyLoom(loomFilePath=f,
-                                             cellMetaData=s_pb2.CellMetaData(annotations=annotations, embeddings=embeddings, clusterings=clusterings),
-                                             regulonMetaData=s_pb2.RegulonMetaData(regulons=regulons),
+                                             cellMetaData=s_pb2.CellMetaData(annotations=annotations,
+                                                                             embeddings=embeddings,
+                                                                             clusterings=clusterings),
                                              fileMetaData=fileMeta))
         return s_pb2.MyLoomsReply(myLooms=my_looms)
 
