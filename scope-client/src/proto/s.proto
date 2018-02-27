@@ -34,10 +34,13 @@ message CellColorByFeaturesRequest {
   bool hasCpmTranform=5;
   repeated float threshold=6;
   bool scaleThresholded=7;
+  repeated Annotation annotation=8;
+  float vmax=9;
 }
 
 message CellColorByFeaturesReply {
   repeated string color=1;
+  float vmax=2;
 }
 
 message CellAUCValuesByFeaturesRequest {
@@ -75,6 +78,7 @@ message FeatureReply {
 message CoordinatesRequest {
   string loomFilePath=1;
   int32 coordinatesID=2;
+  repeated Annotation annotation=3;
 }
 
 message CoordinatesReply {

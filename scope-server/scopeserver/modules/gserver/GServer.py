@@ -60,7 +60,7 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(loom_file_path)
         return loom.shape[1]
 
-    def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True, cpm_normalise=False):
+    def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True, cpm_normalise=False, annotation=''):
         loom = self.get_loom_connection(loom_file_path)
         print("Debug: getting expression of " + gene_symbol + "...")
         gene_expr = loom[loom.ra.Gene == gene_symbol, :][0]
@@ -71,13 +71,28 @@ class SCope(s_pb2_grpc.MainServicer):
             print("Debug: CPM normalising gene expression...")
             gene_expr = gene_expr / loom.ca.nUMI
             gene_expr = gene_expr
+        if len(annotation) > 0:
+            cellIndices = set()
+            for n, annoName in enumerate(annotation):
+                for annotationValue in annotation[n]:
+                    [cellIndices.add(x) for x in np.where(loom.ca[annoName] == annotationValue)]
+            cellIndices = sorted(list(cellIndices))
+            gene_expr = gene_expr[cellIndices]
         return gene_expr
 
-    def get_auc_values(self, loom_file_path, regulon):
+    def get_auc_values(self, loom_file_path, regulon, annotation=''):
         loom = self.get_loom_connection(loom_file_path)
         print("Debug: getting AUC values for {0} ...".format(regulon))
         if regulon in loom.ca.RegulonsAUC.dtype.names:
-            return loom.ca.RegulonsAUC[regulon]
+            vals = loom.ca.RegulonsAUC[regulon]
+            if len(annotation) > 0:
+                cellIndices = set()
+                for n, annoName in enumerate(annotation):
+                    for annotationValue in annotation[n]:
+                        [cellIndices.add(x) for x in np.where(loom.ca[annoName] == annotationValue)]
+                cellIndices = sorted(list(cellIndices))
+                vals = vals[cellIndices]
+            return vals
         return []
 
     def get_clusterIDs(self, loom_file_path, clusterID):
@@ -129,7 +144,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return {'feature': res,
                 'featureType': resF}
 
-    def get_coordinates(self, loom_file_path, coordinatesID=-1):
+    def get_coordinates(self, loom_file_path, coordinatesID=-1, annotation=''):
         loom = self.get_loom_connection(loom_file_path)
         dims = 0
         if coordinatesID == -1:
@@ -142,15 +157,23 @@ class SCope(s_pb2_grpc.MainServicer):
                     if 'tSNE'.casefold() in ca.casefold():
                         if dims == 0:
                             x = loom.ca[ca]
-                            dims +=1
+                            dims += 1
                             continue
                         if dims == 1:
                             y = loom.ca[ca]
-                            dims +=1
+                            dims += 1
                             continue
         else:
             x = loom.ca.Embeddings_X[str(coordinatesID)]
             y = loom.ca.Embeddings_Y[str(coordinatesID)]
+        if len(annotation) > 0:
+            cellIndices = set()
+            for n, annoName in enumerate(annotation):
+                for annotationValue in annotation[n]:
+                    [cellIndices.add(x) for x in np.where(loom.ca[annoName] == annotationValue)]
+            cellIndices = sorted(list(cellIndices))
+            x = x[cellIndices]
+            y = y[cellIndices]
         return {"x": x,
                 "y": y}
 
@@ -194,11 +217,6 @@ class SCope(s_pb2_grpc.MainServicer):
         return vmax
 
     def getCellColorByFeatures(self, request, context):
-        # request content
-        #   - lfp   = .loom file path
-        #   - e     = entries
-        #   - f     = features
-        #   - lte   = log transform expression
         start_time = time.time()
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
         if not os.path.isfile(loomFilePath):
@@ -209,16 +227,28 @@ class SCope(s_pb2_grpc.MainServicer):
             if request.featureType[n] == 'gene':
                 if feature != '':
                     vals = self.get_gene_expression(
-                        loom_file_path=loomFilePath, gene_symbol=feature, log_transform=request.hasLogTranform, cpm_normalise=request.hasCpmTranform)
-                    vmax = self.getVmax(vals)
+                        loom_file_path=loomFilePath,
+                        gene_symbol=feature,
+                        log_transform=request.hasLogTranform,
+                        cpm_normalise=request.hasCpmTranform,
+                        annotation=request.annotation)
+                    if request.vmax != 0.0:
+                        vmax = request.vmax
+                    else:
+                        vmax = self.getVmax(vals)
                     vals = np.round((vals / vmax) * 255)
                     features.append([x if x <= 255 else 255 for x in vals])
                 else:
                     features.append(np.zeros(n_cells))
             elif request.featureType[n] == 'regulon':
                 if feature != '':
-                    vals = self.get_auc_values(loom_file_path=loomFilePath, regulon=feature)
-                    vmax = self.getVmax(vals)
+                    vals = self.get_auc_values(loom_file_path=loomFilePath,
+                                               regulon=feature,
+                                               annotation=request.annotation)
+                    if request.vmax != 0.0:
+                        vmax = request.vmax
+                    else:
+                        vmax = self.getVmax(vals)
                     if request.scaleThresholded:
                         vals = ([auc if auc >= request.threshold[n] else 0 for auc in vals])
                         vals = np.round((vals / vmax) * 255)
@@ -234,7 +264,7 @@ class SCope(s_pb2_grpc.MainServicer):
             hex_vec = []
 
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        return s_pb2.CellColorByFeaturesReply(color=hex_vec)
+        return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax)
 
     def getCellAUCValuesByFeatures(self, request, context):
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
@@ -278,7 +308,9 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getCoordinates(self, request, context):
         # request content
-        c = self.get_coordinates(self.get_loom_filepath(request.loomFilePath), coordinatesID=request.coordinatesID)
+        c = self.get_coordinates(self.get_loom_filepath(request.loomFilePath),
+                                 coordinatesID=request.coordinatesID,
+                                 annotation=request.annotation)
         return s_pb2.CoordinatesReply(x=c["x"], y=c["y"])
 
     def getMyLooms(self, request, context):
