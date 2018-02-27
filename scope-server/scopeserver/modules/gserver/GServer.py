@@ -219,6 +219,8 @@ class SCope(s_pb2_grpc.MainServicer):
     def getCellColorByFeatures(self, request, context):
         start_time = time.time()
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
+        loom = self.get_loom_filepath(request.loomFilePath)
+        metaData = json.loads(loom.attrs.MetaData)
         if not os.path.isfile(loomFilePath):
             return
         n_cells = self.get_nb_cells(loomFilePath)
@@ -257,6 +259,15 @@ class SCope(s_pb2_grpc.MainServicer):
                         features.append([225 if auc >= request.threshold[n] else 0 for auc in vals])
                 else:
                     features.append(np.zeros(n_cells))
+            elif request.featureType[n].startswith('Clustering '):
+                for clustering in metaData['clusterings']:
+                    if clustering['name'] == request.featureType[n].lstrip('Clustering '):
+                        clusteringID = str(clustering['id'])
+                        for cluster in clustering['clusters']:
+                            if request.feature[n] == cluster['description']:
+                                clusterID = int(cluster['id'])
+                cellIndices = loom.ca.Clusterings[clusteringID] == clusterID
+                features.append([225 if x else 0 for x in cellIndices])
 
         if len(features) > 0:
             hex_vec = ["%02x%02x%02x" % (int(r), int(g), int(b)) for r, g, b in zip(features[0], features[1], features[2])]
