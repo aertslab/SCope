@@ -189,6 +189,7 @@ export default class AUCThreshold extends Component {
 							.text(t.name)
 							.on('click', function() {
 								component.handleThresholdChange(t.threshold);
+								component.handleUpdateTSNE();
 							})
 							.append('title')
 							.text(t.name);
