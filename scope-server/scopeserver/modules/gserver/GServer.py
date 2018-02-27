@@ -97,7 +97,10 @@ class SCope(s_pb2_grpc.MainServicer):
         start_time = time.time()
         res = []
         resF = []
-        regulonList = list(loom.ra.Regulons.dtype.names)
+        try:
+            regulonList = list(loom.ra.Regulons.dtype.names)
+        except AttributeError:
+            regulonList = []
         origSpace = list(loom.ra.Gene) + regulonList
         searchSpace = [x.casefold() for x in loom.ra.Gene] + [x.casefold() for x in regulonList]
         fType = ['gene' for x in loom.ra.Gene] + ['regulon' for x in regulonList]
@@ -130,10 +133,23 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def get_coordinates(self, loom_file_path, coordinatesID=-1):
         loom = self.get_loom_connection(loom_file_path)
+        dims = 0
         if coordinatesID == -1:
-            embedding = loom.ca['Embedding']
-            x = embedding['_X']
-            y = embedding['_Y']
+            try:
+                embedding = loom.ca['Embedding']
+                x = embedding['_X']
+                y = embedding['_Y']
+            except AttributeError:
+                for ca in loom.ca:
+                    if 'tSNE'.casefold() in ca.casefold():
+                        if dims == 0:
+                            x = loom.ca[ca]
+                            dims +=1
+                            continue
+                        if dims == 1:
+                            y = loom.ca[ca]
+                            dims +=1
+                            continue
         else:
             x = loom.ca.Embeddings_X[str(coordinatesID)]
             y = loom.ca.Embeddings_Y[str(coordinatesID)]
