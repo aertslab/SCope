@@ -23,7 +23,7 @@ export default class AppSidebar extends Component {
 
 	render () {
 		const { activeCoordinates, metadata } = this.state;
-		let showCoordinatesSelection = metadata.fileMetaData.hasExtraEmbeddings && (this.props.currentPage == 'expression' || this.props.currentPage == 'regulon') ? true : false;
+		let showCoordinatesSelection = metadata.fileMetaData.hasExtraEmbeddings && (['expression', 'regulon', 'comparison'].indexOf(this.props.currentPage) != -1) ? true : false;
 		let showTransforms = this.props.currentPage == 'expression' ? true : false;
 		return (
 			<Sidebar as={Menu} animation="push" visible={this.props.visible} vertical>
@@ -40,7 +40,7 @@ export default class AppSidebar extends Component {
 					<Menu.Header style={{display:  showTransforms || showCoordinatesSelection ? 'block' : 'none'}} >SETTINGS</Menu.Header>
 					<Menu.Menu style={{display: showCoordinatesSelection ? 'block' : 'none'}}>
 						<Menu.Item>
-						<Dropdown placeholder="Select coordinates ID" selection labeled fluid  text={activeCoordinates.name} >
+						<Dropdown placeholder="Select coordinates ID" labeled fluid  text={activeCoordinates.name} >
 							<Dropdown.Menu>
 								{this.myLoomCoordinates()}
 							</Dropdown.Menu>
@@ -101,7 +101,7 @@ export default class AppSidebar extends Component {
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getMyLooms(query, (error, response) => {
 				if (response !== null) {
-					console.log("Loaded .loom files: ", response.myLooms);
+					console.log("updateMyLooms", response.myLooms);
 					this.setState({ myLooms: response.myLooms });
 					BackendAPI.setLoomFiles(response.myLooms);
 				} else {
@@ -189,6 +189,7 @@ export default class AppSidebar extends Component {
 	}
 
 	setActiveLoom(l) {
+		console.log('setActiveLoom', l);
 		BackendAPI.setActiveCoordinates(-1);
 		BackendAPI.setActiveLoom(l);
 		let metadata = BackendAPI.getActiveLoomMetadata();

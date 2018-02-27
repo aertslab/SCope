@@ -19,6 +19,11 @@ class API {
 				1: {type: 'regulon', value: ''},
 				2: {type: 'regulon', value: ''}
 			},
+			'all': {
+				0: {type: '', value: ''},
+				1: {type: '', value: ''},
+				2: {type: '', value: ''}
+			}
 		};
 		this.thresholds = [0, 0, 0];
 		this.featureChangeListeners = [];
@@ -64,7 +69,6 @@ class API {
 			let file = files[i];
 			this.loomFiles[file.loomFilePath] = file;
 		});
-		console.log(this.loomFiles);
 	}
 
 	setActiveLoom(loom) {
@@ -222,7 +226,7 @@ class API {
 	}
 
 	setViewerTransform(transform) {
-		this.viewerTransform = transform
+		this.viewerTransform = transform;
 		this.viewerTransformChangeListeners.forEach((listener) => {
 			listener(this.viewerTransform);
 		})

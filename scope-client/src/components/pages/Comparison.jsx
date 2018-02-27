@@ -1,6 +1,7 @@
+import _ from 'lodash'
 import React, { Component } from 'react'
 import { BackendAPI } from '../common/API'
-import { Accordion, Grid, Form, Icon } from 'semantic-ui-react'
+import { Accordion, Grid, Form, Icon, Button } from 'semantic-ui-react'
 import FeatureSearchBox from '../common/FeatureSearchBox'
 import Viewer from '../common/Viewer'
 import ViewerSidebar from '../common/ViewerSidebar'
@@ -13,9 +14,10 @@ export default class Comparison extends Component {
             activeLoom: BackendAPI.getActiveLoom(),
             activeCoordinates: BackendAPI.getActiveCoordinates(),
             metadata: BackendAPI.getActiveLoomMetadata(),
-            activeFeatures: BackendAPI.getActiveFeatures('gene'),
+            activeFeatures: BackendAPI.getActiveFeatures('all'),
             activeAnnotation: -1,
-            activeClustering: -1
+            activeClustering: -1,
+            annotationIDs: []
         }
         this.activeLoomListener = (loom, metadata, coordinates) => {
             this.setState({activeLoom: loom, activeCoordinates: coordinates, metadata: metadata});
@@ -27,15 +29,15 @@ export default class Comparison extends Component {
     }
 
     render() {
-        const { activeLoom, activeFeatures, metadata, activeCoordinates, activeAnnotation, activeClustering } = this.state;
+        const { activeLoom, activeFeatures, metadata, activeCoordinates, activeAnnotation, activeClustering, annotationIDs } = this.state;
 
         let annotationTabs = () => {
-            if (metadata.cellMetaData && metadata.cellMetaData.annotations) {
+            if (metadata && metadata.cellMetaData && metadata.cellMetaData.annotations) {
                 let annotations = metadata.cellMetaData.annotations;
                 return annotations.map((annotation, annotationID) => {
                     return (
                         <span key={annotationID}>
-                        <Accordion.Title active={activeAnnotation === annotationID} index={annotationID} onClick={this.changeAnnotation.bind(this)}>
+                        <Accordion.Title active={activeAnnotation === annotationID} index={annotationID} onClick={this.selectAnnotationGroup.bind(this)}>
                             <Icon name="dropdown" />
                             {annotation.name}
                         </Accordion.Title>
@@ -44,11 +46,12 @@ export default class Comparison extends Component {
                                 <Form.Group grouped>
                                     {annotation.values.map((value, valueID)=> {
                                         return (
-                                            <Form.Checkbox label={value} name={"annotationValue"+annotationID} type="checkbox" value={valueID} key={valueID} />
+                                            <Form.Checkbox checked={annotationIDs.indexOf(value) !=-1} label={value} name={'annotation-'+annotationID+'-'+valueID} type="checkbox" value={valueID} key={valueID} onClick={this.changeAnnotation.bind(this)} />
                                         );
                                     })}
                                 </Form.Group>
                             </Form>
+                            <span style={{float: 'right'}}><a onClick={this.selectAllAnotations.bind(this)}>all</a> - <a onClick={this.selectNoAnotations.bind(this)}>none</a></span>
                         </Accordion.Content>
                         </span>
                     );
@@ -57,7 +60,7 @@ export default class Comparison extends Component {
         };
 
         let clusteringTabs = () => {
-            if (metadata.cellMetaData && metadata.cellMetaData.clusterings) {
+            if (metadata && metadata.cellMetaData && metadata.cellMetaData.clusterings) {
                 let clusterings = metadata.cellMetaData.clusterings;
                 return clusterings.map((clustering, clusteringID) => {
                     return (
@@ -83,6 +86,34 @@ export default class Comparison extends Component {
             }
         };
 
+        let columns = 1;
+        while (annotationIDs.length > columns * columns) {
+            columns++;
+        }
+        let rows = columns;
+        while (columns * (rows - 1) >= annotationIDs.length) {
+            rows --;
+        }
+        console.log('number of columns', columns, 'rows', rows);
+
+        let viewers = (
+            <Grid>
+            {_.times(rows, i => (
+                <Grid.Row columns={columns} key={i}>
+                    {_.times(columns, (j) => {
+                        if ((columns * i + j ) < annotationIDs.length)
+                        return (
+                            <Grid.Column key={j}>
+                                <b>{metadata.cellMetaData.annotations[activeAnnotation].name} {annotationIDs[columns * i + j]}</b>
+                                <Viewer name={"comp"+(columns * i + j)} height={this.height / rows} loomFile={activeLoom} activeFeatures={activeFeatures} activeCoordinates={activeCoordinates} />
+                            </Grid.Column>
+                        );
+                    })}
+                </Grid.Row>
+            ))}
+            </Grid>
+        );
+
         return (
             <div>
                 <div style={{display: activeLoom == null ? 'block' : 'none'}}>
@@ -107,16 +138,16 @@ export default class Comparison extends Component {
                                 <Accordion styled>
                                 {annotationTabs()}
                                 </Accordion>
+                                {/*
+                                <br />
                                 <Accordion styled>
                                 {clusteringTabs()}
                                 </Accordion>
+                                */}
                                 <ViewerToolbar />
                             </Grid.Column>
-                            <Grid.Column width={6}>
-                                <Viewer name="comp1" height={this.height} loomFile={activeLoom} activeFeatures={activeFeatures} activeCoordinates={activeCoordinates} />
-                            </Grid.Column>
-                            <Grid.Column width={6}>
-                                <Viewer name="comp2" height={this.height} loomFile={activeLoom} activeFeatures={activeFeatures} activeCoordinates={activeCoordinates} />
+                            <Grid.Column width={12}>
+                                {viewers}
                             </Grid.Column>
                         </Grid.Row>
                     </Grid>
@@ -135,10 +166,34 @@ export default class Comparison extends Component {
         BackendAPI.removeActiveFeaturesChange(this.activeFeaturesListener);
     }
 
-    changeAnnotation(e, props) {
+    selectAnnotationGroup(e, props) {
         const { index } = props;
         const { activeAnnotation } = this.state;
-        this.setState({activeAnnotation : activeAnnotation == index ? -1 : index});
+        this.setState({activeAnnotation : activeAnnotation == index ? -1 : index, annotationIDs: []});
+    }
+
+    selectAllAnotations() {
+        const { activeAnnotation, metadata } = this.state;
+        let annotationIDs = [];
+        metadata.cellMetaData.annotations[activeAnnotation].values.map((value, valueID) => {
+            annotationIDs.push(value);
+        });
+        this.setState({annotationIDs: annotationIDs});
+    }
+
+    selectNoAnotations() {
+        this.setState({annotationIDs: []});
+    }
+
+    changeAnnotation(e, props) {
+        console.log('changeAnnotation', props);
+        let annotationIDs = this.state.annotationIDs;
+        if (props.checked) {
+            annotationIDs.push(props.label);
+        } else {
+            annotationIDs.splice(annotationIDs.indexOf(props.label), 1);
+        }
+        this.setState({annotationIDs: annotationIDs});
     }
 
     changeClustering(e, props) {

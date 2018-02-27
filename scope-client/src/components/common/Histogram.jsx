@@ -31,6 +31,7 @@ export default class AUCThreshold extends Component {
 			// TODO: memory leak!?
 			const { value, ...restProps } = props;
 			return (
+				// TODO: Received `false` for a non-boolean attribute `dragging`.
 				<Handle value={value} {...restProps} />
 			);
 		};

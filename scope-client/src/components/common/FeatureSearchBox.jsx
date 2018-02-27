@@ -58,8 +58,9 @@ export default class FeatureSearch extends React.Component {
 	}
 
 	handleResultSelect(e, { result }) {
+		console.log(result);
 		this.setState({ value: result.title })
-		BackendAPI.setActiveFeature(this.props.field, this.props.type, result.title);
+		BackendAPI.setActiveFeature(this.props.field, result.type, result.title);
 	}
 
 	handleSearchChange(e, { value }) {
