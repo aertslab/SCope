@@ -1,7 +1,7 @@
 class API {
 	constructor() {
 		this.GBC = require("grpc-bus-websocket-client");
-		this.GBCConnection = new this.GBC("ws://localhost:8081/", 'src/proto/s.proto', { scope: { Main: 'localhost:50052' } }).connect();
+		this.GBCConnection = new this.GBC("ws://" + BACKEND.host + ":" + BACKEND.WSport + "/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + BACKEND.RPCport } }).connect();
 
 		this.loomFiles = [];
 		this.activeLoom = null;

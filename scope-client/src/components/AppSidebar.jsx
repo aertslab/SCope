@@ -172,7 +172,7 @@ export default class AppSidebar extends Component {
 		form.append('file', file);
 
 		let xhr = new XMLHttpRequest();
-		xhr.open('POST', 'http://localhost:50051/');
+		xhr.open("POST", "http://" + BACKEND.host + ":" + BACKEND.XHRport + "/");
 		xhr.upload.addEventListener('progress', (event) => {
 			console.log("Data uploaded: " + event.loaded + "/" + event.total);
 			let progress = (event.loaded / event.total * 100).toPrecision(1);
