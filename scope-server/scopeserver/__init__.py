@@ -26,9 +26,13 @@ def run():
     run_event = threading.Event()
     run_event.set()
 
-    t1 = threading.Thread(target=gs.serve, args=(run_event,))
-    t2 = threading.Thread(target=ps.run, args=(run_event,))
-    t3 = threading.Thread(target=xs.run, args=(run_event,))
+    gPort = 50052
+    pPort = 50051
+    xPort = 8081
+
+    t1 = threading.Thread(target=gs.serve, args=(run_event,), kwargs={'port': gPort})
+    t2 = threading.Thread(target=ps.run, args=(run_event,), kwargs={'port': pPort})
+    t3 = threading.Thread(target=xs.run, args=(run_event,), kwargs={'port': xPort})
     t1.start()
     t2.start()
     t3.start()
@@ -41,7 +45,7 @@ def run():
         run_event.clear()
         t1.join()
         try:
-            urlopen('http://127.0.0.1:50051/')
+            urlopen('http://127.0.0.1:{0}/'.format(pPort))
         except http.client.RemoteDisconnected:
             pass
         t2.join()

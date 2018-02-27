@@ -135,10 +135,8 @@ class SCope(s_pb2_grpc.MainServicer):
             x = embedding['_X']
             y = embedding['_Y']
         else:
-            print(loom.ca.Embeddings_X.dtype.names)
             x = loom.ca.Embeddings_X[str(coordinatesID)]
             y = loom.ca.Embeddings_Y[str(coordinatesID)]
-        print(x, y)
         return {"x": x,
                 "y": y}
 
@@ -305,11 +303,11 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.MyLoomsReply(myLooms=my_looms)
 
 
-def serve(run_event):
+def serve(run_event, port=50052):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     s_pb2_grpc.add_MainServicer_to_server(SCope(), server)
-    server.add_insecure_port('[::]:50052')
-    print('Starting GServer on port 50052...')
+    server.add_insecure_port('[::]:{0}'.format(port))
+    print('Starting GServer on port {0}...'.format(port))
 
     server.start()
 
