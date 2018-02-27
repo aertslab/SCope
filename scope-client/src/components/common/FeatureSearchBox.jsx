@@ -58,8 +58,9 @@ export default class FeatureSearch extends React.Component {
 	}
 
 	handleResultSelect(e, { result }) {
+		console.log(result);
 		this.setState({ value: result.title })
-		BackendAPI.setActiveFeature(this.props.field, this.props.type, result.title);
+		BackendAPI.setActiveFeature(this.props.field, result.type, result.title);
 	}
 
 	handleSearchChange(e, { value }) {
@@ -88,14 +89,14 @@ export default class FeatureSearch extends React.Component {
 								});
 							}
 						};
-						genes = genes.slice(0, 10)
-						regulons = regulons.slice(0, 10)
+						genes = {"name": "gene", "results": genes.slice(0, 10)}
+						regulons = {"name": "regulon", "results": regulons.slice(0, 10)}
 						let res = [];
-						if (this.props.type == 'gene') {
-							res = genes.length ? {"gene": {"name": this.props.type, "results":genes}} : [];
+						if (genes['results'].length && (this.props.type == 'all' || this.props.type == 'gene')) {
+							res.push(genes);
 						}
-						if (this.props.type == 'regulon') {
-							res = regulons.length ? {"regulon": {"name": this.props.type, "results":regulons}} : [];
+						if (regulons['results'].length && (this.props.type == 'all' || this.props.type == 'regulon')) {
+							res.push(regulons);
 						}
 						this.setState({
 							isLoading: false,

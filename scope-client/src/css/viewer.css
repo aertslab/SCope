@@ -1,0 +1,12 @@
+.menu.toolbar {
+	max-width: 55px;
+}
+canvas {
+	border: 1px solid black;
+}
+.auc {
+	text-align: center;
+}
+.row {
+	padding-bottom: 0px !important;
+}

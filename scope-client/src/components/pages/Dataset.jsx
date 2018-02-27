@@ -10,7 +10,7 @@ export default class Dataset extends Component {
             activeLoom: BackendAPI.getActiveLoom(),
             metadata: BackendAPI.getActiveLoomMetadata()
         }
-        this.activeLoomListener = (loom, metadata) => {
+        this.activeLoomListener = (loom, metadata, coordinates) => {
             this.setState({activeLoom: loom, metadata: metadata});
         };
     }

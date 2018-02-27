@@ -37,13 +37,11 @@ export default class AppHeader extends Component {
 						Regulon
 					</Button>
 				</Menu.Item>
-				{/*
 				<Menu.Item>
 					<Button basic onClick={this.selectComparisonTab.bind(this)} active={this.props.currentPage == 'comparison'}>
 						Compare
 					</Button>
 				</Menu.Item>
-			*/}
 			</Menu>
 		);
 	}

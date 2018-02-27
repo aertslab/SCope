@@ -21,7 +21,7 @@ export default class Regulon extends Component {
             sidebar: BackendAPI.getSidebarVisible(),
             colors: ["red", "green", "blue"]
         };
-        this.activeLoomListener = (loom, coordinates) => {
+        this.activeLoomListener = (loom, metadata, coordinates) => {
             this.setState({activeLoom: loom, activeCoordinates: coordinates});
         };
         this.activeFeaturesListener = (features, i) => {

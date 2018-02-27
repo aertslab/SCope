@@ -1,0 +1,14 @@
+.item {
+	min-height: 100%;
+}
+.menu.logos {
+	text-align: center;
+	position: absolute;
+	bottom: 50px;
+	left: 10%;
+	right: 10%;
+	margin-top: 50px;
+	margin-bottom: 50px;
+	padding-bottom: 50px;
+}
+

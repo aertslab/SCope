@@ -1,0 +1,26 @@
+/*
+VIB colours:
+  orange: #ff681e;
+  violet: #5a2a82;
+  green: #3abbba;
+  blue: #1b2944;
+*/
+
+.ui.secondary.vib.inverted.menu {
+	color: white;
+	background-color: #1b2944;
+}
+
+.ui.basic.active.button {
+	background-color: #ff681e !important;
+	color: white !important;
+}
+
+.ui.basic.button {
+	color: white !important;
+}
+
+.ui.basic.button:hover {
+	background-color: #ff681e !important;
+	color: white !important;
+}

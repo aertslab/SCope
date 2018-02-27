@@ -41,6 +41,14 @@ let config = {
                 NODE_ENV: JSON.stringify(process.env.NODE_ENV)
             }
         }),
+        new webpack.DefinePlugin({
+            BACKEND: JSON.stringify({
+                host: "127.0.0.1",
+                WSport: "8081",
+                XHRport: "50051",
+                RPCport: "50052"
+            })
+        }),
         new WebpackGitHash({
             cleanup: false,
             callback: function(versionHash) {

@@ -1,7 +1,7 @@
 class API {
 	constructor() {
 		this.GBC = require("grpc-bus-websocket-client");
-		this.GBCConnection = new this.GBC("ws://localhost:8081/", 'src/proto/s.proto', { scope: { Main: 'localhost:50052' } }).connect();
+		this.GBCConnection = new this.GBC("ws://" + BACKEND.host + ":" + BACKEND.WSport + "/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + BACKEND.RPCport } }).connect();
 
 		this.loomFiles = [];
 		this.activeLoom = null;
@@ -19,6 +19,11 @@ class API {
 				1: {type: 'regulon', value: ''},
 				2: {type: 'regulon', value: ''}
 			},
+			'all': {
+				0: {type: '', value: ''},
+				1: {type: '', value: ''},
+				2: {type: '', value: ''}
+			}
 		};
 		this.thresholds = [0, 0, 0];
 		this.featureChangeListeners = [];
@@ -64,20 +69,19 @@ class API {
 			let file = files[i];
 			this.loomFiles[file.loomFilePath] = file;
 		});
-		console.log(this.loomFiles);
 	}
 
 	setActiveLoom(loom) {
 		this.activeLoom = loom;
 		this.activeLoomChangeListeners.forEach((listener) => {
-			listener(this.activeLoom, this.activeCoordinates);
+			listener(this.activeLoom, this.loomFiles[this.activeLoom], this.activeCoordinates);
 		})
 	}
 
 	setActiveCoordinates(coords) {
 		this.activeCoordinates = coords;
 		this.activeLoomChangeListeners.forEach((listener) => {
-			listener(this.activeLoom, this.activeCoordinates);
+			listener(this.activeLoom,  this.loomFiles[this.activeLoom], this.activeCoordinates);
 		})
 	}
 
@@ -222,7 +226,7 @@ class API {
 	}
 
 	setViewerTransform(transform) {
-		this.viewerTransform = transform
+		this.viewerTransform = transform;
 		this.viewerTransformChangeListeners.forEach((listener) => {
 			listener(this.viewerTransform);
 		})

@@ -15,7 +15,7 @@ export default class Expression extends Component {
             activeFeatures: BackendAPI.getActiveFeatures('gene'),
             sidebar: BackendAPI.getSidebarVisible()
         }
-        this.activeLoomListener = (loom, coordinates) => {
+        this.activeLoomListener = (loom, metadata, coordinates) => {
             console.log('loom change', loom, coordinates);
             this.setState({activeLoom: loom, activeCoordinates: coordinates});
         };
@@ -26,10 +26,10 @@ export default class Expression extends Component {
             this.setState({sidebar: state});
             this.forceUpdate();
         }
+        this.height = window.innerHeight - 200;
     }
 
     render() {
-        this.height = window.innerHeight - 200;
         const { activeLoom, activeFeatures, activeCoordinates, sidebar } = this.state;
         return (
             <div>
