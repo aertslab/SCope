@@ -44,6 +44,11 @@ class MainStub(object):
         request_serializer=s__pb2.RegulonMetaDataRequest.SerializeToString,
         response_deserializer=s__pb2.RegulonMetaDataReply.FromString,
         )
+    self.getMarkerGenes = channel.unary_unary(
+        '/scope.Main/getMarkerGenes',
+        request_serializer=s__pb2.MarkerGenesRequest.SerializeToString,
+        response_deserializer=s__pb2.MarkerGenesReply.FromString,
+        )
     self.getMyLooms = channel.unary_unary(
         '/scope.Main/getMyLooms',
         request_serializer=s__pb2.MyLoomsRequest.SerializeToString,
@@ -97,6 +102,13 @@ class MainServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def getMarkerGenes(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def getMyLooms(self, request, context):
     # missing associated documentation comment in .proto file
     pass
@@ -136,6 +148,11 @@ def add_MainServicer_to_server(servicer, server):
           servicer.getRegulonMetaData,
           request_deserializer=s__pb2.RegulonMetaDataRequest.FromString,
           response_serializer=s__pb2.RegulonMetaDataReply.SerializeToString,
+      ),
+      'getMarkerGenes': grpc.unary_unary_rpc_method_handler(
+          servicer.getMarkerGenes,
+          request_deserializer=s__pb2.MarkerGenesRequest.FromString,
+          response_serializer=s__pb2.MarkerGenesReply.SerializeToString,
       ),
       'getMyLooms': grpc.unary_unary_rpc_method_handler(
           servicer.getMyLooms,

@@ -330,6 +330,11 @@ class SCope(s_pb2_grpc.MainServicer):
 
         return s_pb2.RegulonMetaDataReply(regulon=regulon)
 
+    def getMarkerGenes(self, request, context):
+        loom = self.get_loom_filepath(request.loomFilePath)
+        genes = loom.ra.Gene[loom.ra["ClusteringMarkers_{0}".format(request.clusteringID)][request.clusterID] == 1]
+        return(s_pb2.MarkerGenesReply(genes=genes))
+
     def getMyLooms(self, request, context):
         my_looms = []
         for f in os.listdir(self.loom_dir):

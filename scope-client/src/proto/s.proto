@@ -23,6 +23,7 @@ service Main {
   rpc getFeatures (FeatureRequest) returns (FeatureReply) {}
   rpc getCoordinates (CoordinatesRequest) returns (CoordinatesReply) {}
   rpc getRegulonMetaData (RegulonMetaDataRequest) returns (RegulonMetaDataReply) {}
+  rpc getMarkerGenes (MarkerGenesRequest) returns (MarkerGenesReply) {}
   rpc getMyLooms (MyLoomsRequest) returns (MyLoomsReply) {}
 }
 
@@ -160,6 +161,16 @@ message RegulonMetaDataRequest {
 
 message RegulonMetaDataReply {
   Regulon regulonMeta=1;
+}
+
+message MarkerGenesRequest {
+  string loomFilePath=1;
+  int32 clusteringID=2;
+  int32 clusterID=3;
+}
+
+message MarkerGenesReply {
+  repeated string genes=1;
 }
 
 message MyLoomsRequest {}
