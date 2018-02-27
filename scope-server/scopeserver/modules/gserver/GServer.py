@@ -110,24 +110,22 @@ class SCope(s_pb2_grpc.MainServicer):
                 res.append(origSpace[n])
                 resF.append(fType[n])
         for n, r in enumerate(res):
-            if r.startswith(query) or query in r:
+            if r.casefold().startswith(query.casefold()) or query in r:
                 r = res.pop(n)
                 res = [r] + res
                 f = resF.pop(n)
                 resF = [f] + resF
-        for r in res:
-            if r == query:
+        for n, r in enumerate(res):
+            if r == query or r.casefold() == query.casefold():
                 r = res.pop(n)
                 res = [r] + res
                 f = resF.pop(n)
                 resF = [f] + resF
-
         # res = list(filter(lambda x: x.startswith(query), loom.ra.Gene))
         # res_json = json.dumps({"gene": {"name": "gene", "results": list(map(lambda x: {"title":x,"description":"","image":"", "price":""}, res))}}, ensure_ascii=False)
         # print(res_json)
         print("Debug: " + str(len(res)) + " genes matching '" + query + "'")
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-
         return {'feature': res,
                 'featureType': resF}
 
