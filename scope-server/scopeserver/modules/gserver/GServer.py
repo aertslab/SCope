@@ -97,7 +97,7 @@ class SCope(s_pb2_grpc.MainServicer):
             gene_expr = gene_expr / loom.ca.nUMI
             gene_expr = gene_expr
         if len(annotation) > 0:
-            cellIndices = self.get_anno_cells(annotation)
+            cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation)
             gene_expr = gene_expr[cellIndices]
         return gene_expr
 
@@ -107,7 +107,7 @@ class SCope(s_pb2_grpc.MainServicer):
         if regulon in loom.ca.RegulonsAUC.dtype.names:
             vals = loom.ca.RegulonsAUC[regulon]
             if len(annotation) > 0:
-                cellIndices = self.get_anno_cells(annotation)
+                cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation)
                 vals = vals[cellIndices]
             return vals
         return []
@@ -199,7 +199,7 @@ class SCope(s_pb2_grpc.MainServicer):
             x = loom.ca.Embeddings_X[str(coordinatesID)]
             y = loom.ca.Embeddings_Y[str(coordinatesID)]
         if len(annotation) > 0:
-            cellIndices = self.get_anno_cells(annotation)
+            cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation)
             x = x[cellIndices]
             y = y[cellIndices]
         return {"x": x,
@@ -247,7 +247,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def getCellColorByFeatures(self, request, context):
         start_time = time.time()
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
-        loom = self.get_loom_filepath(request.loomFilePath)
+        loom = self.get_loom_connection(loomFilePath)
         metaData = json.loads(loom.attrs.MetaData)
         if not os.path.isfile(loomFilePath):
             return
