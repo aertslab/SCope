@@ -72,11 +72,7 @@ class SCope(s_pb2_grpc.MainServicer):
             gene_expr = gene_expr / loom.ca.nUMI
             gene_expr = gene_expr
         if len(annotation) > 0:
-            cellIndices = set()
-            for n, annoName in enumerate(annotation):
-                for annotationValue in annotation[n]:
-                    [cellIndices.add(x) for x in np.where(loom.ca[annoName] == annotationValue)]
-            cellIndices = sorted(list(cellIndices))
+            cellIndices = self.get_anno_cells(annotation)
             gene_expr = gene_expr[cellIndices]
         return gene_expr
 
@@ -86,11 +82,7 @@ class SCope(s_pb2_grpc.MainServicer):
         if regulon in loom.ca.RegulonsAUC.dtype.names:
             vals = loom.ca.RegulonsAUC[regulon]
             if len(annotation) > 0:
-                cellIndices = set()
-                for n, annoName in enumerate(annotation):
-                    for annotationValue in annotation[n]:
-                        [cellIndices.add(x) for x in np.where(loom.ca[annoName] == annotationValue)]
-                cellIndices = sorted(list(cellIndices))
+                cellIndices = self.get_anno_cells(annotation)
                 vals = vals[cellIndices]
             return vals
         return []
@@ -116,6 +108,7 @@ class SCope(s_pb2_grpc.MainServicer):
             regulonList = list(loom.ra.Regulons.dtype.names)
         except AttributeError:
             regulonList = []
+
         origSpace = list(loom.ra.Gene) + regulonList
         searchSpace = [x.casefold() for x in loom.ra.Gene] + [x.casefold() for x in regulonList]
         fType = ['gene' for x in loom.ra.Gene] + ['regulon' for x in regulonList]
@@ -144,6 +137,20 @@ class SCope(s_pb2_grpc.MainServicer):
         return {'feature': res,
                 'featureType': resF}
 
+    def get_anno_cells(self, loom_file_path, annotations):
+        loom = self.get_loom_connection(loom_file_path)
+        cellIndices = set()
+        for anno in annotations:
+            annoName = annotations['name']
+            if annoName.startswith("Clustering_"):
+                clusteringID = str(annoName.split('_')[1])
+                for annotationValue in annotations['values']:
+                    [cellIndices.add(x) for x in np.where(loom.ca.Clusterings[clusteringID] == annotationValue)]
+            else:
+                for annotationValue in annotations['values']:
+                    [cellIndices.add(x) for x in np.where(loom.ca[annoName] == annotationValue)]
+        return sorted(list(cellIndices))
+
     def get_coordinates(self, loom_file_path, coordinatesID=-1, annotation=''):
         loom = self.get_loom_connection(loom_file_path)
         dims = 0
@@ -167,11 +174,7 @@ class SCope(s_pb2_grpc.MainServicer):
             x = loom.ca.Embeddings_X[str(coordinatesID)]
             y = loom.ca.Embeddings_Y[str(coordinatesID)]
         if len(annotation) > 0:
-            cellIndices = set()
-            for n, annoName in enumerate(annotation):
-                for annotationValue in annotation[n]:
-                    [cellIndices.add(x) for x in np.where(loom.ca[annoName] == annotationValue)]
-            cellIndices = sorted(list(cellIndices))
+            cellIndices = self.get_anno_cells(annotation)
             x = x[cellIndices]
             y = y[cellIndices]
         return {"x": x,
