@@ -166,14 +166,14 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(loom_file_path)
         cellIndices = set()
         for anno in annotations:
-            annoName = annotations['name']
+            annoName = anno.name
             if annoName.startswith("Clustering_"):
                 clusteringID = str(annoName.split('_')[1])
-                for annotationValue in annotations['values']:
-                    [cellIndices.add(x) for x in np.where(loom.ca.Clusterings[clusteringID] == annotationValue)]
+                for annotationValue in anno.values:
+                    [cellIndices.add(x) for x in np.where(loom.ca.Clusterings[clusteringID] == annotationValue)[0]]
             else:
-                for annotationValue in annotations['values']:
-                    [cellIndices.add(x) for x in np.where(loom.ca[annoName] == annotationValue)]
+                for annotationValue in anno.values:
+                    [cellIndices.add(x) for x in np.where(loom.ca[annoName] == annotationValue)[0]]
         return sorted(list(cellIndices))
 
     def get_coordinates(self, loom_file_path, coordinatesID=-1, annotation=''):
