@@ -21,7 +21,6 @@ export default class AUCThreshold extends Component {
 			total: 0,
 			points: []
 		}
-		console.log('height', props.height);
 	}
 
 	render() {

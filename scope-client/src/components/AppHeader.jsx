@@ -3,6 +3,7 @@ import { Icon, Button, Menu } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
 
 export default class AppHeader extends Component {
+
 	constructor() {
 		super();
 		this.state = {
@@ -12,33 +13,33 @@ export default class AppHeader extends Component {
 
 	render() {
 		return (
-			<Menu secondary attached="top" style={{backgroud: 'blue'}} className="vib" inverted>
+			<Menu secondary attached="top" className="vib" inverted>
 				<Menu.Item>
-					<Icon name="sidebar" onClick={this.toggleSidebar.bind(this)} style={{cursor: 'pointer'}} title="Toggle sidebar" />
+					<Icon name="sidebar" onClick={this.toggleSidebar.bind(this)} className="pointer" title="Toggle sidebar" />
 				</Menu.Item>
-				<Menu.Item>					
-					<Button basic onClick={this.selectWelcomeTab.bind(this)} active={this.props.currentPage == 'welcome'}>
+				<Menu.Item>
+					<Button basic onClick={this.selectTab.bind(this)} active={this.props.currentPage == 'welcome'} page='welcome'>
 						<Icon name="home" />
 						SCope
 					</Button>
 				</Menu.Item>
 				<Menu.Item>
-					<Button basic onClick={this.selectDatasetTab.bind(this)} active={this.props.currentPage == 'dataset'}>
+					<Button basic onClick={this.selectTab.bind(this)} active={this.props.currentPage == 'dataset'} page='dataset'>
 						Dataset info
 					</Button>
 				</Menu.Item>
 				<Menu.Item>
-					<Button basic onClick={this.selectExpressionTab.bind(this)} active={this.props.currentPage == 'expression'}>
+					<Button basic onClick={this.selectTab.bind(this)} active={this.props.currentPage == 'expression'} page='expression'>
 						Gene expression
 					</Button>
 				</Menu.Item>
 				<Menu.Item>
-					<Button basic onClick={this.selectRegulonTab.bind(this)} active={this.props.currentPage == 'regulon'}>
+					<Button basic onClick={this.selectTab.bind(this)} active={this.props.currentPage == 'regulon'} page='regulon'>
 						Regulon
 					</Button>
 				</Menu.Item>
 				<Menu.Item>
-					<Button basic onClick={this.selectComparisonTab.bind(this)} active={this.props.currentPage == 'comparison'}>
+					<Button basic onClick={this.selectTab.bind(this)} active={this.props.currentPage == 'comparison'} page='comparison'>
 						Compare
 					</Button>
 				</Menu.Item>
@@ -46,36 +47,16 @@ export default class AppHeader extends Component {
 		);
 	}
 
+	selectTab(evt, btn) {
+		evt.preventDefault();
+		this.props.togglePage(btn.page);
+	}
+
 	toggleSidebar() {
 		this.props.toggleSidebar();
 		let state = !this.state.sidebar;
 		BackendAPI.setSidebarVisible(state);
 		this.setState({sidebar: state});
-	}
-
-	selectWelcomeTab(e) {
-		e.preventDefault();
-		this.props.togglePage("welcome");
-	}
-
-	selectExpressionTab(e){
-		e.preventDefault();
-		this.props.togglePage("expression");
-	}
-
-	selectRegulonTab(e){
-		e.preventDefault();
-		this.props.togglePage("regulon");
-	}
-
-	selectDatasetTab(e){
-		e.preventDefault();
-		this.props.togglePage("dataset");
-	}
-
-	selectComparisonTab(e){
-		e.preventDefault();
-		this.props.togglePage("comparison");
 	}
 
 }

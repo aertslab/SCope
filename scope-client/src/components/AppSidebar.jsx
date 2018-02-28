@@ -4,27 +4,29 @@ import FileReaderInput from 'react-file-reader-input';
 import { BackendAPI } from './common/API';
 
 export default class AppSidebar extends Component {
+
 	constructor() {
 		super();
+
 		this.state = {
-			activeLoom: null,
-			activeCoordinates: {},
+			activeLoom: BackendAPI.getActiveLoom(),
+			activeCoordinates: BackendAPI.getActiveCoordinates(),
+			metadata: BackendAPI.getActiveLoomMetadata(),
+			settings: BackendAPI.getSettings(),
+			myLooms: [],
 			uploadLoomFile: null,
 			uploadLoomModalOpened: false,
 			uploadLoomProgress: 0,
-			metadata: {
-				fileMetaData: {}
-			},
-			myLooms: [],
-			settings: BackendAPI.getSettings()
 		}
 		this.updateMyLooms();
 	}
 
 	render () {
-		const { activeCoordinates, metadata } = this.state;
-		let showCoordinatesSelection = metadata.fileMetaData.hasExtraEmbeddings && (['expression', 'regulon', 'comparison'].indexOf(this.props.currentPage) != -1) ? true : false;
+
+		const { activeCoordinates, metadata, settings } = this.state;
+		let showCoordinatesSelection = metadata && metadata.fileMetaData.hasExtraEmbeddings && (['expression', 'regulon', 'comparison'].indexOf(this.props.currentPage) != -1) ? true : false;
 		let showTransforms = this.props.currentPage == 'expression' ? true : false;
+
 		return (
 			<Sidebar as={Menu} animation="push" visible={this.props.visible} vertical>
 				<Menu.Item>
@@ -49,10 +51,10 @@ export default class AppSidebar extends Component {
 					</Menu.Menu>
 					<Menu.Menu style={{display:  showTransforms ? 'block' : 'none'}}>
 						<Menu.Item>
-							<Checkbox toggle label="Log transform" checked={this.state.settings.hasLogTransform} onChange={this.toggleLogTransform.bind(this)} />
+							<Checkbox toggle label="Log transform" checked={settings.hasLogTransform} onChange={this.toggleLogTransform.bind(this)} />
 						</Menu.Item>
 						<Menu.Item>
-							<Checkbox toggle label="CPM normalize" checked={this.state.settings.hasCpmNormalization} onChange={this.toggleCpmNormization.bind(this)} />
+							<Checkbox toggle label="CPM normalize" checked={settings.hasCpmNormalization} onChange={this.toggleCpmNormization.bind(this)} />
 						</Menu.Item>
 					</Menu.Menu>
 					<Divider />
@@ -101,7 +103,7 @@ export default class AppSidebar extends Component {
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getMyLooms(query, (error, response) => {
 				if (response !== null) {
-					console.log("updateMyLooms", response.myLooms);
+					if (DEBUG) console.log("updateMyLooms", response.myLooms);
 					this.setState({ myLooms: response.myLooms });
 					BackendAPI.setLoomFiles(response.myLooms);
 				} else {
@@ -129,9 +131,9 @@ export default class AppSidebar extends Component {
 	}
 
 	myLoomCoordinates() {
-		const { activeCoordinates } = this.state;
-		if (this.state.metadata.cellMetaData) {
-			return this.state.metadata.cellMetaData.embeddings.map((coords) => {
+		const { activeCoordinates, metadata } = this.state;
+		if (metadata && metadata.cellMetaData) {
+			return metadata.cellMetaData.embeddings.map((coords) => {
 				return (
 					<Dropdown.Item key={coords.id} text={coords.name} value={coords.id} active={activeCoordinates.id == coords.id} onClick={this.setActiveCoordinates.bind(this)} />
 				);
@@ -162,7 +164,7 @@ export default class AppSidebar extends Component {
 
 	uploadLoomFile() {
 		let file = this.state.uploadLoomFile
-		console.log(">", file)
+		if (DEBUG) console.log(">", file)
 		if (file == null) {
 			alert("Please select a .loom file first")
 			return
@@ -174,11 +176,11 @@ export default class AppSidebar extends Component {
 		let xhr = new XMLHttpRequest();
 		xhr.open("POST", "http://" + BACKEND.host + ":" + BACKEND.XHRport + "/");
 		xhr.upload.addEventListener('progress', (event) => {
-			console.log("Data uploaded: " + event.loaded + "/" + event.total);
+			if (DEBUG) console.log("Data uploaded: " + event.loaded + "/" + event.total);
 			let progress = (event.loaded / event.total * 100).toPrecision(1);
 			this.setState({ uploadLoomProgress: progress });
 			if (event.loaded == event.total) {
-				console.log('Loom file '+ file.name +' successfully uploaded !');
+				if (DEBUG) console.log('Loom file '+ file.name +' successfully uploaded !');
 				this.setState({ uploadLoomFile: null, uploadLoomProgress: 0 })
 				this.updateMyLooms()
 				this.toggleUploadLoomModal()
@@ -189,7 +191,7 @@ export default class AppSidebar extends Component {
 	}
 
 	setActiveLoom(l) {
-		console.log('setActiveLoom', l);
+		if (DEBUG) console.log('setActiveLoom', l);
 		BackendAPI.setActiveCoordinates(-1);
 		BackendAPI.setActiveLoom(l);
 		let metadata = BackendAPI.getActiveLoomMetadata();

@@ -42,6 +42,9 @@ let config = {
             }
         }),
         new webpack.DefinePlugin({
+            DEBUG: false
+        }),
+        new webpack.DefinePlugin({
             BACKEND: JSON.stringify({
                 host: "127.0.0.1",
                 WSport: "8081",

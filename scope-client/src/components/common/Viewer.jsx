@@ -89,7 +89,7 @@ export default class Viewer extends Component {
     }
 
     resizeContainer() {
-        console.log(this.props.name, 'new dimensions', this.w, this.h);
+        if (DEBUG) console.log(this.props.name, 'new dimensions', this.w, this.h);
         this.forceUpdate();
         this.renderer.resize(this.w, this.h);
         this.renderer.reset();
@@ -100,7 +100,7 @@ export default class Viewer extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        console.log('componentWillReceiveProps', nextProps);
+        if (DEBUG) console.log('componentWillReceiveProps', nextProps);
         if (this.h != nextProps.height) {
             this.h = nextProps.height;
             this.resizeContainer();
@@ -123,7 +123,7 @@ export default class Viewer extends Component {
     }
 
     initGraphics() {
-        console.log("Initializing Viewer ", this.props.name);
+        if (DEBUG) console.log("Initializing Viewer ", this.props.name);
         this.renderer = PIXI.autoDetectRenderer(this.w, this.h, { backgroundColor: 0xFFFFFF, antialias: true, view: this.zoomSelection.node() });
         this.stage = new PIXI.Container();
         this.stage.width = this.w;
@@ -132,12 +132,12 @@ export default class Viewer extends Component {
         this.container = new PIXI.particles.ParticleContainer(this.maxn, [false, true, false, false, true]);
         this.stage.addChild(this.container);
         this.addLassoLayer();
-        this.zoomBehaviour = d3.zoom().scaleExtent([-1, 10]).on("zoom", this.zoom);
+        this.zoomBehaviour = d3.zoom().scaleExtent([-1, 10]).on("zoom", this.zoom.bind(this));
         this.zoomSelection.call(this.zoomBehaviour);
     }
 
     destroyGraphics() {
-        console.log("Destroying Viewer ", this.props.name);
+        if (DEBUG) console.log("Destroying Viewer ", this.props.name);
         this.container.removeChildren();
         this.container.destroy();
         this.lassoLayer.removeChildren();
@@ -312,9 +312,8 @@ export default class Viewer extends Component {
         return this.state.activeTool === "lasso";
     }
 
-    zoom = () => {
-        //d3.event.sourceEvent.preventDefault();
-        //console.log(a,b,c, d, );
+    zoom() {
+        // TODO: bug with first move when lasso active
         if (this.state.mouse.down && this.isLassoActive()) {
             return
         }
@@ -361,12 +360,12 @@ export default class Viewer extends Component {
             loomFilePath: loomFile,
             coordinatesID: parseInt(coordinates)
         };
-        console.log('getPoints', query);
+        if (DEBUG) console.log('getPoints', query);
         this.startBenchmark("getPoints")
         BackendAPI.getConnection().then((gbc) => {
             gbc.services.scope.Main.getCoordinates(query, (err, response) => {
                 // Update the coordinates and remove all previous data points
-                console.log('getPoints', response);
+                if (DEBUG) console.log('getPoints', response);
                 if (response) {
                     this.container.removeChildren();
                     let c = {
@@ -451,10 +450,10 @@ export default class Viewer extends Component {
             threshold: thresholds,
             scaleThresholded: this.props.scale
         };
-        console.log('getFeatureColors', query);
+        if (DEBUG) console.log('getFeatureColors', query);
         BackendAPI.getConnection().then((gbc) => {
             gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
-                console.log('getFeatureColors', response);
+                if (DEBUG) console.log('getFeatureColors', response);
                 this.endBenchmark("getFeatureColors")
                 if(response !== null) {
                     this.setState({colors: response.color});
@@ -497,7 +496,6 @@ export default class Viewer extends Component {
     }
 
     startBenchmark(msg) {
-        //console.log("Starting benchmark - "+ msg)
         let benchmark = this.state.benchmark;
         benchmark[msg] = { t1: performance.now(), msg: msg };
         this.setState({ benchmark: benchmark })
@@ -507,6 +505,6 @@ export default class Viewer extends Component {
         var t2 = performance.now();
         let benchmark = this.state.benchmark[msg];
         let et = (t2 - benchmark.t1).toFixed(3)
-        console.log(this.props.name + ": benchmark - "+ benchmark.msg +": took " + et + " milliseconds.")
+        if (DEBUG) console.log(this.props.name + ": benchmark - "+ benchmark.msg +": took " + et + " milliseconds.")
     }
 }

@@ -110,7 +110,6 @@ class API {
 				file.regulonMetaData.regulons.map((reg) => {
 					if (reg.name == featureValue) {
 						threshold = reg.autoThresholds[0].threshold;
-						console.log('set threshold', featureValue, threshold)
 					}
 				})
 			}			
@@ -196,13 +195,6 @@ class API {
 		});
 	}
 
-	toggleLassoSelection(index) {
-		this.viewerSelections[index].selected = !this.viewerSelections[index].selected;
-		this.viewerSelectionsChangeListeners.forEach((listener) => {
-			listener(this.viewerSelections);
-		});
-	}
-
 	removeViewerSelection(index) {
 		this.viewerSelections.splice(index, 1);
 		this.viewerSelectionsChangeListeners.forEach((listener) => {
@@ -224,6 +216,16 @@ class API {
 	clearViewerSelections() {
 		this.viewerSelections = [];
 	}
+
+
+
+	toggleLassoSelection(index) {
+		this.viewerSelections[index].selected = !this.viewerSelections[index].selected;
+		this.viewerSelectionsChangeListeners.forEach((listener) => {
+			listener(this.viewerSelections);
+		});
+	}
+
 
 	setViewerTransform(transform) {
 		this.viewerTransform = transform;

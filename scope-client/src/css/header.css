@@ -9,6 +9,7 @@ VIB colours:
 .ui.secondary.vib.inverted.menu {
 	color: white;
 	background-color: #1b2944;
+	margin-top: 0px;
 }
 
 .ui.basic.active.button {
@@ -23,4 +24,7 @@ VIB colours:
 .ui.basic.button:hover {
 	background-color: #ff681e !important;
 	color: white !important;
+}
+.pointer {
+	cursor: pointer;
 }
