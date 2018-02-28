@@ -70,8 +70,10 @@ export default class FeatureSearch extends React.Component {
 				loomFilePath: BackendAPI.getActiveLoom(),
 				query: this.state.value
 			};
+			if (DEBUG) console.log("handleSearchChange", query);
 			BackendAPI.getConnection().then((gbc) => {
 				gbc.services.scope.Main.getFeatures(query, (err, response) => {
+					if (DEBUG) console.log("handleSearchChange", response);
 					if (response != null) {
 						var genes = []
 						var regulons = []

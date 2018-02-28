@@ -21,6 +21,7 @@ export default class AUCThreshold extends Component {
 			total: 0,
 			points: []
 		}
+		this.metadata = null;
 	}
 
 	render() {
@@ -83,14 +84,25 @@ export default class AUCThreshold extends Component {
 			featureType: feature.type,
 			feature: feature.value
 		};
+		let regulonQuery = {
+			loomFilePath: query.loomFilePath,
+			regulon: query.feature
+		}
 		BackendAPI.getConnection().then((gbc) => {
-			gbc.services.scope.Main.getCellAUCValuesByFeatures(query, (err, response) => {
-				if(response !== null) {
-					this.renderAUCGraph(feature, response.value);
-					this.handleThresholdChange(this.props.value);
-				} else {
-					this.renderAUCGraph('', [])
-				}
+			if (DEBUG) console.log('getCellAUCValues', regulonQuery);
+			gbc.services.scope.Main.getRegulonMetaData(regulonQuery, (regulonErr, regulonResponse) => {
+				this.metadata = regulonResponse;
+				if (DEBUG) console.log('getCellAUCValues', regulonResponse);
+				if (DEBUG) console.log('getCellAUCValues', query);
+				gbc.services.scope.Main.getCellAUCValuesByFeatures(query, (err, response) => {
+					if (DEBUG) console.log('getCellAUCValues', response);
+					if(response !== null) {
+						this.renderAUCGraph(feature, response.value);
+						this.handleThresholdChange(this.props.value);
+					} else {
+						this.renderAUCGraph('', [])
+					}
+				});
 			});
 		});
 	}
@@ -172,37 +184,36 @@ export default class AUCThreshold extends Component {
 			.attr("transform", "translate(0, 0)")
 			.call(d3.axisLeft(y));    
 
-		let metadata = BackendAPI.getActiveLoomMetadata();
 		let component = this;
-		if (metadata.fileMetaData.hasRegulonsAUC) {
+		if (this.metadata) {
+			//TODO: anything to do with this.metadata.genes ?
 			let gt = g.append("g")
 				.attr("class", "autoThresholds");
-			metadata.regulonMetaData.regulons.map((regulon) => {
-				if (regulon.name == feature.value) {
-					regulon.autoThresholds.map((t) => {
-						let tx = x(t.threshold);
-						gt.append("text")
-							.style("cursor", "pointer")
-							.attr("text-anchor", "middle")
-							.attr("transform", "translate("+tx+",5)")
-							.text(t.name)
-							.on('click', function() {
-								component.handleThresholdChange(t.threshold);
-								component.handleUpdateTSNE();
-							})
-							.append('title')
-							.text(t.name);
-						gt.append("line")
-							.attr("stroke", "blue")
-							.attr("x1", tx)
-							.attr("x2", tx)
-							.attr("y1", 10)
-							.attr("y2", height);
-					});
+			this.metadata.autoThresholds.map((t) => {
+				let tx = x(t.threshold);
+				gt.append("text")
+					.style("cursor", "pointer")
+					.attr("text-anchor", "middle")
+					.attr("transform", "translate("+tx+",5)")
+					.text(t.name)
+					.on('click', function() {
+						component.handleThresholdChange(t.threshold);
+						component.handleUpdateTSNE();
+					})
+					.append('title')
+					.text(t.name);
+				gt.append("line")
+					.attr("stroke", "blue")
+					.attr("x1", tx)
+					.attr("x2", tx)
+					.attr("y1", 10)
+					.attr("y2", height);
+				if (t.name == this.metadata.defaultThreshold) {
+					component.handleThresholdChange(t.threshold);
+					component.handleUpdateTSNE();
 				}
-			})
+			});
 		}
-
 	}
 
 }

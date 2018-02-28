@@ -103,18 +103,7 @@ class API {
 	}
 
 	setActiveFeature(featureId, featureType, featureValue) {
-		let threshold = 0;
-		if (featureType == 'regulon') {			
-			let file = this.loomFiles[this.activeLoom];
-			if (file.fileMetaData.hasRegulonsAUC) {
-				file.regulonMetaData.regulons.map((reg) => {
-					if (reg.name == featureValue) {
-						threshold = reg.autoThresholds[0].threshold;
-					}
-				})
-			}			
-		}
-		this.features[featureType][featureId] = { type: featureType, value: featureValue, threshold: threshold }
+		this.features[featureType][featureId] = { type: featureType, value: featureValue, threshold: 0 }
 		this.featureChangeListeners.forEach((listener) => {
 			listener(this.features[featureType], featureId);
 		})

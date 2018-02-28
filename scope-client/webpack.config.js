@@ -42,7 +42,7 @@ let config = {
             }
         }),
         new webpack.DefinePlugin({
-            DEBUG: false
+            DEBUG: true
         }),
         new webpack.DefinePlugin({
             BACKEND: JSON.stringify({

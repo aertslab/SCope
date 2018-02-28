@@ -100,14 +100,19 @@ export default class Comparison extends Component {
             <Grid>
             {_.times(rows, i => (
                 <Grid.Row columns={columns} key={i}>
-                    {_.times(columns, (j) => {
-                        if ((columns * i + j ) < annotationIDs.length)
-                        return (
-                            <Grid.Column key={j}>
-                                <b>{metadata.cellMetaData.annotations[activeAnnotation].name} {annotationIDs[columns * i + j]}</b>
-                                <Viewer name={"comp"+(columns * i + j)} height={this.height / rows} loomFile={activeLoom} activeFeatures={activeFeatures} activeCoordinates={activeCoordinates} />
-                            </Grid.Column>
-                        );
+                    {_.times(columns, (j) => {                        
+                        if ((columns * i + j ) < annotationIDs.length) {
+                            let a = {
+                                name: metadata.cellMetaData.annotations[activeAnnotation].name,
+                                value: annotationIDs[columns * i + j]
+                            }
+                            return (
+                                <Grid.Column key={j}>
+                                    <b>{a.name} {a.value}</b>
+                                    <Viewer name={"comp"+(columns * i + j)} height={this.height / rows} loomFile={activeLoom} activeFeatures={activeFeatures} activeCoordinates={activeCoordinates} annotation={a} />
+                                </Grid.Column>
+                            );
+                        }
                     })}
                 </Grid.Row>
             ))}
