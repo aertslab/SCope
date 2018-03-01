@@ -43,6 +43,11 @@ export default class AppHeader extends Component {
 						Compare
 					</Button>
 				</Menu.Item>
+				<Menu.Item>
+					<Button basic onClick={this.selectTab.bind(this)} active={this.props.currentPage == 'dndcompare'} page='dndcompare'>
+						DND Compare 
+					</Button>
+				</Menu.Item>
 			</Menu>
 		);
 	}

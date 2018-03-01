@@ -18,13 +18,12 @@ export default class AppSidebar extends Component {
 			uploadLoomModalOpened: false,
 			uploadLoomProgress: 0,
 		}
-		this.updateMyLooms();
 	}
 
 	render () {
 
 		const { activeCoordinates, metadata, settings } = this.state;
-		let showCoordinatesSelection = metadata && metadata.fileMetaData.hasExtraEmbeddings && (['expression', 'regulon', 'comparison'].indexOf(this.props.currentPage) != -1) ? true : false;
+		let showCoordinatesSelection = metadata && metadata.fileMetaData.hasExtraEmbeddings && (['expression', 'regulon', 'comparison', 'dndcompare'].indexOf(this.props.currentPage) != -1) ? true : false;
 		let showTransforms = this.props.currentPage == 'expression' ? true : false;
 
 		return (
@@ -96,6 +95,10 @@ export default class AppSidebar extends Component {
 				</Modal>
 			</Sidebar>
 		);
+	}
+
+	componentDidMount() {
+		this.updateMyLooms();
 	}
 
 	updateMyLooms() {

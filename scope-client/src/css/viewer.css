@@ -21,3 +21,13 @@ body:before{
     height:100%;
     display:block;
 }
+
+.dropContainer {
+	text-align: center;
+	background: #eee;
+}
+
+.dropContainer p {
+	position: relative;
+	top:50%;
+}
