@@ -40,7 +40,7 @@ class API {
 		this.viewerSelections = [];
 		this.viewerSelectionsChangeListeners = [];
 
-		this.viewerTransform = {};
+		this.viewerTransform = null;
 		this.viewerTransformChangeListeners = [];
 
 		this.sidebarVisible = true;
@@ -221,6 +221,10 @@ class API {
 		this.viewerTransformChangeListeners.forEach((listener) => {
 			listener(this.viewerTransform);
 		})
+	}
+
+	getViewerTransform() {
+		return this.viewerTransform;
 	}
 
 	onViewerTransformChange(listener) {

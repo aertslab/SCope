@@ -16,10 +16,11 @@ export default class Expression extends Component {
             sidebar: BackendAPI.getSidebarVisible()
         }
         this.activeLoomListener = (loom, metadata, coordinates) => {
-            console.log('loom change', loom, coordinates);
+            if (DEBUG) console.log('activeLoomListener', loom, metadata, coordinates);
             this.setState({activeLoom: loom, activeCoordinates: coordinates});
         };
-        this.activeFeaturesListener = (features) => {
+        this.activeFeaturesListener = (features, featureID) => {
+            if (DEBUG) console.log('activeFeaturesListener', features, featureID);
             this.setState({activeFeatures: features});
         }
         this.sidebarVisibleListener = (state) => {

@@ -4,13 +4,13 @@ import * as d3 from 'd3';
 import { BackendAPI } from './API'
 import ReactResizeDetector from 'react-resize-detector';
 
-
 export default class Viewer extends Component {
 
 	constructor(props) {
 		super(props)
 		this.state = {
-			thresholds: [0, 0, 0],
+			activeThresholds: [],
+			activeFeatures: {},
 			coord : {
 				x: [],
 				y: []
@@ -25,10 +25,10 @@ export default class Viewer extends Component {
 			benchmark: {}
 		}
 		this.zoomTransform = {
-				x: 0,
-				y: 0,
-				k: 1
-			};
+			x: 0,
+			y: 0,
+			k: 1
+		};
 		this.w = parseInt(this.props.width);
 		this.h = parseInt(this.props.height);
 		// Increase the maxSize if displaying more than 1500 (default) objects
@@ -70,10 +70,50 @@ export default class Viewer extends Component {
 		this.w = this.zoomSelection.node().getBoundingClientRect().width;
 		this.initGraphics();
 		if (this.props.loomFile != null) {
-			this.getPoints(this.props.loomFile, this.props.activeCoordinates, () => {
-				this.getFeatureColors(this.props.activeFeatures, this.props.loomFile, this.props.thresholds);
+			this.getPoints(this.props.loomFile, this.props.activeCoordinates, this.props.activeAnnotations, () => {
+				this.getFeatureColors(this.props.activeFeatures, this.props.loomFile, this.props.thresholds, this.props.activeAnnotations);
+				let t = BackendAPI.getViewerTransform();
+				if (t) {
+					let initialTransform = d3.zoomTransform(d3.select('#viewer' + t.src).node());
+					initialTransform.src = 'init';
+					initialTransform.receivedFromListener = true;
+					this.zoomBehaviour.transform(this.zoomSelection, initialTransform);					
+				}
 			});
 		}
+	}
+
+	componentWillReceiveProps(nextProps) {
+		// TODO: dirty hack
+		if (DEBUG) console.log(nextProps.name, 'componentWillReceiveProps', JSON.stringify(nextProps.activeAnnotations), JSON.stringify(this.state.activeAnnotations));
+		
+		if (this.h != nextProps.height) {
+			console.log('resizing');
+			this.h = nextProps.height;
+			this.resizeContainer();
+		}
+		
+		if (this.props.loomFile != nextProps.loomFile || this.props.activeCoordinates != nextProps.activeCoordinates || 
+			(JSON.stringify(nextProps.activeAnnotations) != JSON.stringify(this.state.activeAnnotations)) ) {
+				console.log('changing');
+				this.getPoints(nextProps.loomFile, nextProps.activeCoordinates, nextProps.activeAnnotations, () => {
+					this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile, nextProps.thresholds, nextProps.activeAnnotations);
+				});
+		} else if (
+			(JSON.stringify(nextProps.activeFeatures) != JSON.stringify(this.state.activeFeatures)) ||
+			(JSON.stringify(nextProps.thresholds) != JSON.stringify(this.state.activeThresholds))
+			) {
+				console.log('features');
+				this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile, nextProps.thresholds);
+		}
+	}
+
+	componentWillUnmount() {
+		BackendAPI.removeSettingsChange(this.settingsListener);
+		BackendAPI.removeViewerToolChange(this.viewerToolListener);
+		BackendAPI.removeViewerSelectionsChange(this.viewerSelectionListener);
+		BackendAPI.removeViewerTransformChange(this.viewerTransformListener);
+		this.destroyGraphics();
 	}
 /*
 	shouldComponentUpdate(nextProps, nextState) {
@@ -99,28 +139,6 @@ export default class Viewer extends Component {
 		this.updateDataPoints();
 	}
 
-	componentWillReceiveProps(nextProps) {
-		if (DEBUG) console.log('componentWillReceiveProps', nextProps);
-		if (this.h != nextProps.height) {
-			this.h = nextProps.height;
-			this.resizeContainer();
-		}
-		if (this.props.loomFile != nextProps.loomFile || this.props.activeCoordinates != nextProps.activeCoordinates) {
-			this.getPoints(nextProps.loomFile, nextProps.activeCoordinates, () => {
-				this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile, nextProps.thresholds);
-			});
-		} else {
-			this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile, nextProps.thresholds);
-		}
-	}
-
-	componentWillUnmount() {
-		BackendAPI.removeSettingsChange(this.settingsListener);
-		BackendAPI.removeViewerToolChange(this.viewerToolListener);
-		BackendAPI.removeViewerSelectionsChange(this.viewerSelectionListener);
-		BackendAPI.removeViewerTransformChange(this.viewerTransformListener);
-		this.destroyGraphics();
-	}
 
 	initGraphics() {
 		if (DEBUG) console.log("Initializing Viewer ", this.props.name);
@@ -331,6 +349,7 @@ export default class Viewer extends Component {
 
 		if (t0.k != t1.k) {
 			// on zoom
+			// TODO: memory leak: increase in unnecessary listeners
 			this.transformDataPoints();
 		} else {
 			// on move
@@ -345,7 +364,7 @@ export default class Viewer extends Component {
 
 	onViewerTransformChange(t) {
 		// only for all zoom events of other components
-		if (t.src != this.props.name) {
+		if ((t.src != this.props.name)&&(t.src != 'init')) {
 			let k = this.zoomTransform.t,
 				x = this.zoomTransform.x + t.dx * (this.renderer.width / 2),
 				y = this.zoomTransform.y + t.dy * (this.renderer.height / 2),
@@ -355,18 +374,22 @@ export default class Viewer extends Component {
 		}
 	}
 
-	getPoints(loomFile, coordinates, callback) {
-		let annotations = [];
-		if (this.props.annotation) {
-			annotations.push({
-				name: this.props.annotation.name,
-				values: [this.props.annotation.value]
+	getPoints(loomFile, coordinates, annotations, callback) {
+		let queryAnnotations = []
+		if (annotations) {
+			this.setState({activeAnnotations: Object.assign({}, annotations)});
+			Object.keys(annotations).map((name) => {
+				queryAnnotations.push({
+					name: name,
+					values: annotations[name]
+				});
 			});
 		}
+		
 		let query = {
 			loomFilePath: loomFile,
 			coordinatesID: parseInt(coordinates),
-			annotation: annotations
+			annotation: queryAnnotations
 		};
 		if (DEBUG) console.log('getPoints', query);
 		this.startBenchmark("getPoints")
@@ -439,21 +462,25 @@ export default class Viewer extends Component {
 		this.endBenchmark("transformPoints");
 	}
 
-	getFeatureColors(features, loomFile, thresholds) {
+	getFeatureColors(features, loomFile, thresholds, annotations) {		
 		if (thresholds == null) {
 			thresholds = [0, 0, 0];
 		}
+		this.setState({activeFeatures: Object.assign({}, features), activeThresholds: thresholds.slice(0)});
 		if (features[0].value.length + features[1].value.length + features[2].value.length == 0) {
 			// prevent empty requests
 			return this.resetDataPoints();
 		}
 		this.startBenchmark("getFeatureColors")
 		let settings = BackendAPI.getSettings();
-		let annotations = [];
-		if (this.props.annotation) {
-			annotations.push({
-				name: this.props.annotation.name,
-				values: [this.props.annotation.value]
+
+		let queryAnnotations = []
+		if (annotations) {
+			Object.keys(annotations).map((name) => {
+				queryAnnotations.push({
+					name: name,
+					values: annotations[name]
+				});
 			});
 		}
 		let query = {
@@ -464,7 +491,7 @@ export default class Viewer extends Component {
 			hasCpmTranform: settings.hasCpmNormalization,
 			threshold: thresholds,
 			scaleThresholded: this.props.scale,
-			annotation: annotations
+			annotation: queryAnnotations
 			// vmax: float
 		};
 		if (DEBUG) console.log('getFeatureColors', query);
@@ -492,7 +519,9 @@ export default class Viewer extends Component {
 			let point = this.getTexturedColorPoint(pts[i]._originalData.x, pts[i]._originalData.y, v[i])
 			this.container.addChildAt(point, n+i);
 		}
-		this.container.removeChildren(0, n)
+		this.container.removeChildren(0, n).map((p) => {
+			p.destroy();
+		})
 		this.endBenchmark("updateDataPoints");
 		this.transformDataPoints();
 	}
