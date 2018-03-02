@@ -14,6 +14,8 @@ import pandas as pd
 import time
 import json
 import glob
+import zlib
+import base64
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "bf9360", "1d331a", "79baf2", "deb6f2",
@@ -81,6 +83,9 @@ class SCope(s_pb2_grpc.MainServicer):
             print("Debug: loading the loom file from " + loom_file_path + "...")
             return self.load_loom_file(partial_md5_hash, loom_file_path)
 
+    def decompress_meta(self, meta):
+        return json.loads(zlib.decompress(base64.b64decode(meta.encode('ascii'))).decode('ascii'))
+
     def get_nb_cells(self, loom_file_path):
         loom = self.get_loom_connection(loom_file_path)
         return loom.shape[1]
@@ -122,7 +127,11 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def get_features(self, loom_file_path, query):
         loom = self.get_loom_connection(loom_file_path)
-        metaData = json.loads(loom.attrs.MetaData)
+        try:
+            metaData = json.loads(loom.attrs.MetaData)
+        except:
+            metaData = self.decompress_meta(loom.attrs.MetaData)
+
         # Genes
         # Filter the genes by the query
 
@@ -240,7 +249,10 @@ class SCope(s_pb2_grpc.MainServicer):
         else:
             meta['hasGeneSets'] = False
         try:
-            metaData = json.loads(loom.attrs.MetaData)
+            try:
+                metaData = json.loads(loom.attrs.MetaData)
+            except:
+                metaData = self.decompress_meta(loom.attrs.MetaData)
             meta['hasGlobalMeta'] = True
         except (KeyError, AttributeError):
             meta['hasGlobalMeta'] = False
@@ -263,7 +275,10 @@ class SCope(s_pb2_grpc.MainServicer):
         start_time = time.time()
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
         loom = self.get_loom_connection(loomFilePath)
-        metaData = json.loads(loom.attrs.MetaData)
+        try:
+            metaData = json.loads(loom.attrs.MetaData)
+        except:
+            metaData = self.decompress_meta(loom.attrs.MetaData)
         if not os.path.isfile(loomFilePath):
             return
         n_cells = self.get_nb_cells(loomFilePath)
@@ -386,7 +401,10 @@ class SCope(s_pb2_grpc.MainServicer):
     def getRegulonMetaData(self, request, context):
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
         regulonGenes = loom.ra.Gene[loom.ra.Regulons[request.regulon] == 1]
-        metaData = json.loads(loom.attrs.MetaData)
+        try:
+            metaData = json.loads(loom.attrs.MetaData)
+        except:
+            metaData = self.decompress_meta(loom.attrs.MetaData)
         for regulon in metaData['regulonThresholds']:
             if regulon['regulon'] == request.regulon:
                 autoThresholds = []
@@ -413,7 +431,10 @@ class SCope(s_pb2_grpc.MainServicer):
                 fileMeta = self.get_file_metadata(self.get_loom_filepath(f))
                 print(fileMeta)
                 if fileMeta['hasGlobalMeta']:
-                    meta = json.loads(loom.attrs.MetaData)
+                    try:
+                        meta = json.loads(loom.attrs.MetaData)
+                    except:
+                        meta = self.decompress_meta(loom.attrs.MetaData)
                     annotations = meta['annotations']
                     embeddings = meta['embeddings']
                     clusterings = meta['clusterings']
