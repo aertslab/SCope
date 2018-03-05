@@ -1,11 +1,14 @@
 import React, { Component } from 'react'
 import { DropTarget } from 'react-dnd'
 import Viewer from '../common/Viewer'
+import Annotation from '../common/Annotation'
 import { Label, Icon } from 'semantic-ui-react'
 
 const targetBehaviour = {
-    drop(props, monitor) {
-        props.onDrop(monitor.getItem(), props.name)
+    drop(props, monitor, component) {
+        let item = monitor.getItem();
+        let dropped = props.onDrop(item, props.name);
+        return {dropped: dropped};
     },
 }
 
@@ -30,27 +33,6 @@ class AnnotationContainer extends Component {
             backgroundColor = 'darkkhaki';
         }
 
-        let annotationTags = () => {
-            if (activeAnnotations) {
-                return Object.keys(activeAnnotations).map((name, i) => {
-                    return activeAnnotations[name].map((value, j) => {
-                        return (
-                            <Label key={j}>
-                                {name} {value}
-                                <Icon name='delete' onClick={() => {
-                                    this.handleRemove(name, value);
-                                }} />                                
-                            </Label>
-                        );
-                    });
-                });
-            } else {
-                return (
-                    <b>&nbsp;</b>
-                );
-            }
-        }
-
         let viewer = () => {
             if (activeAnnotations && Object.keys(activeAnnotations).length) {
                 return (
@@ -70,7 +52,6 @@ class AnnotationContainer extends Component {
 
         return connectDropTarget(
             <div>
-                {annotationTags()}
                 {viewer()}
             </div>,
         )
