@@ -23,9 +23,9 @@ export default class AppSidebar extends Component {
 	render () {
 
 		const { activeCoordinates, metadata, settings } = this.state;
-		let showCoordinatesSelection = metadata && metadata.fileMetaData.hasExtraEmbeddings && (['expression', 'regulon', 'comparison', 'dndcompare'].indexOf(this.props.currentPage) != -1) ? true : false;
-		let showTransforms = this.props.currentPage == 'expression' ? true : false;
-
+		let showTransforms = metadata && (['welcome','dataset'].indexOf(this.props.currentPage) == -1) ? true : false;
+		let showCoordinatesSelection = showTransforms && metadata.fileMetaData.hasExtraEmbeddings ? true : false;
+		
 		return (
 			<Sidebar as={Menu} animation="push" visible={this.props.visible} vertical>
 				<Menu.Item>
@@ -40,6 +40,7 @@ export default class AppSidebar extends Component {
 					<Divider />
 					<Menu.Header style={{display:  showTransforms || showCoordinatesSelection ? 'block' : 'none'}} >SETTINGS</Menu.Header>
 					<Menu.Menu style={{display: showCoordinatesSelection ? 'block' : 'none'}}>
+						<Menu.Item>Coordinates</Menu.Item>
 						<Menu.Item>
 						<Dropdown placeholder="Select coordinates ID" labeled fluid  text={activeCoordinates.name} >
 							<Dropdown.Menu>
@@ -49,6 +50,7 @@ export default class AppSidebar extends Component {
 						</Menu.Item>
 					</Menu.Menu>
 					<Menu.Menu style={{display:  showTransforms ? 'block' : 'none'}}>
+						<Menu.Item>Gene expression</Menu.Item>
 						<Menu.Item>
 							<Checkbox toggle label="Log transform" checked={settings.hasLogTransform} onChange={this.toggleLogTransform.bind(this)} />
 						</Menu.Item>

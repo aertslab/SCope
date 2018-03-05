@@ -17,7 +17,7 @@ class API {
 
 		this.settings = {
 			hasLogTransform: true,
-			hasCpmNormalization: true
+			hasCpmNormalization: false
 		}
 		this.settingsChangeListeners = [];
 
