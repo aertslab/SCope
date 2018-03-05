@@ -17,15 +17,17 @@ export default class Dataset extends Component {
 
     render() {
         const { activeLoom, metadata } = this.state;
+
+        if (!activeLoom) return (
+            <div>
+                Select the dataset to be analyzed
+            </div>
+        )
+
         return (
             <div>
-                <div style={{display: activeLoom == null ? 'block' : 'none'}}>
-                    Select the dataset to be analyzed
-                </div>
-                <div style={{display: activeLoom != null ? 'block' : 'none'}}>
-                    Active loom file: <b>{activeLoom}</b><br /><br />
-                    <ReactJson src={metadata} collapsed={2} />
-                </div>
+                Active loom file: <b>{activeLoom}</b><br /><br />
+                <ReactJson src={metadata} collapsed={2} />
             </div>
         );
     }

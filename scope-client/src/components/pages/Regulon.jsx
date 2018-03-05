@@ -49,41 +49,40 @@ export default class Regulon extends Component {
             </Grid.Column>
         ));
 
-        return (
+        if (!activeLoom) return (
             <div>
-                <div style={{display: activeLoom == null ? 'block' : 'none'}}>
-                    Select the dataset to be analyzed
-                </div>
-                <div style={{display: activeLoom != null ? 'block' : 'none'}}>
-                    <Grid>
-                        <Grid.Row columns="3">
-                            {featureSearch}
-                        </Grid.Row>
-                        <Grid.Row columns="3">
-                            {featureThreshold}
-                        </Grid.Row>
-                        <Grid.Row columns="4">
-                            <Grid.Column width={1}>
-                                <ViewerToolbar />
-                            </Grid.Column>
-                            <Grid.Column width={sidebar ? 6 : 7}>
-                                <b>Regulon AUC values</b>
-                                <Viewer name="reg" height={3 * this.height - 15} loomFile={activeLoom} activeFeatures={activeFeatures} scale={true} activeCoordinates={activeCoordinates} />
-                            </Grid.Column>
-                            <Grid.Column width={sidebar ? 4 : 5}>
-                                <b>Cells passing thresholds</b>
-                                <Viewer name="auc" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={activeFeatures} scale={false} activeCoordinates={activeCoordinates} />
-                                <b>Expression levels</b>
-                                <Viewer name="expr" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={geneFeatures} activeCoordinates={activeCoordinates} />
-                            </Grid.Column>
-                            <Grid.Column width={3}>
-                                <b>Cell selections</b><hr />
-                                <ViewerSidebar />
-                            </Grid.Column>
-                        </Grid.Row>
-                    </Grid>
-                </div>
+                Select the dataset to be analyzed
             </div>
+        )
+
+        return (
+            <Grid>
+                <Grid.Row columns="3">
+                    {featureSearch}
+                </Grid.Row>
+                <Grid.Row columns="3">
+                    {featureThreshold}
+                </Grid.Row>
+                <Grid.Row columns="4">
+                    <Grid.Column width={1}>
+                        <ViewerToolbar />
+                    </Grid.Column>
+                    <Grid.Column width={sidebar ? 6 : 7}>
+                        <b>Regulon AUC values</b>
+                        <Viewer name="reg" height={3 * this.height - 15} loomFile={activeLoom} activeFeatures={activeFeatures} scale={true} activeCoordinates={activeCoordinates} />
+                    </Grid.Column>
+                    <Grid.Column width={sidebar ? 4 : 5}>
+                        <b>Cells passing thresholds</b>
+                        <Viewer name="auc" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={activeFeatures} scale={false} activeCoordinates={activeCoordinates} />
+                        <b>Expression levels</b>
+                        <Viewer name="expr" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={geneFeatures} activeCoordinates={activeCoordinates} />
+                    </Grid.Column>
+                    <Grid.Column width={3}>
+                        <b>Cell selections</b><hr />
+                        <ViewerSidebar />
+                    </Grid.Column>
+                </Grid.Row>
+            </Grid>
         );
     }
 

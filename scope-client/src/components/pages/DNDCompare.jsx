@@ -136,40 +136,39 @@ class DNDCompare extends Component {
             </Grid.Column>
         ));
 
-        return (
+        if (!activeLoom) return (
             <div>
-                <div style={{display: activeLoom == null ? 'block' : 'none'}}>
-                    Select the dataset to be analyzed
-                </div>
-                <div style={{display: activeLoom != null ? 'block' : 'none'}}>
-                    <Grid>
-                        <Grid.Row columns="4">
-                            <Grid.Column width={2} >
-                                Number of displays:
-                                <Dropdown selection options={this.displayConf} defaultValue={4} onChange={this.displayNumberChanged.bind(this)}/>
-                            </Grid.Column>
-                            {featureSearch}
-                        </Grid.Row>
-                        <Grid.Row columns={3}>
-                            <Grid.Column width={2}>
-                                <Accordion styled>
-                                {annotationTabs()}
-                                </Accordion>
-                                {/*
-                                <br />
-                                <Accordion styled>
-                                {clusteringTabs()}
-                                </Accordion>
-                                */}
-                                <ViewerToolbar />
-                            </Grid.Column>
-                            <Grid.Column width={12}>
-                                {viewers()}
-                            </Grid.Column>
-                        </Grid.Row>
-                    </Grid>
-                </div>
+                Select the dataset to be analyzed
             </div>
+        );
+
+        return (
+            <Grid>
+                <Grid.Row columns="4">
+                    <Grid.Column width={2} >
+                        Number of displays:
+                        <Dropdown selection options={this.displayConf} defaultValue={4} onChange={this.displayNumberChanged.bind(this)}/>
+                    </Grid.Column>
+                    {featureSearch}
+                </Grid.Row>
+                <Grid.Row columns={3}>
+                    <Grid.Column width={2}>
+                        <Accordion styled>
+                        {annotationTabs()}
+                        </Accordion>
+                        {/*
+                        <br />
+                        <Accordion styled>
+                        {clusteringTabs()}
+                        </Accordion>
+                        */}
+                        <ViewerToolbar />
+                    </Grid.Column>
+                    <Grid.Column width={12}>
+                        {viewers()}
+                    </Grid.Column>
+                </Grid.Row>
+            </Grid>
         );
     }
 
