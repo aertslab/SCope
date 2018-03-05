@@ -22,12 +22,11 @@ export default class FeatureSearchInput extends Search {
 					   key={color} labelPosition='left' value={value} placeholder='Search...' 
 					   onChange={this.handleSearchChange}
 					   onBlur={this.handleBlur}
-					   onChange={this.handleSearchChange}
 					   onFocus={this.handleFocus}
 					   onClick={this.handleInputClick}>
 					<Icon name='search' />
 					<input data-mqi={color} />
-					<Select options={options} defaultValue={type} className='icon' disabled={locked == 1 ? true : false} onChange={this.handleTypeChange.bind(this)} />
+					<Select options={options} defaultValue={type} className='icon' disabled={locked == 1 ? true : false} onChange={this.handleTypeChange.bind(this)} tabIndex={-1} />
 				</Input>
 			</div>
 		)

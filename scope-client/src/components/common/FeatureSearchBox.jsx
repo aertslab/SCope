@@ -11,6 +11,7 @@ export default class FeatureSearch extends React.Component {
 			isLoading: false,
 			results: [],
 			value: props.value,
+			selection: null,
 			type: props.type
 		};
 	}
@@ -43,6 +44,8 @@ export default class FeatureSearch extends React.Component {
 							onResultSelect={this.handleResultSelect.bind(this)}
 							onSearchChange={this.handleSearchChange.bind(this)}
 							handleTypeChange={this.handleTypeChange.bind(this)}
+							onSelectionChange={this.handleSelectionChange.bind(this)}
+							onBlur={this.handleBlur.bind(this)}
 							results={results}
 							options={options}
 							value={value}
@@ -56,18 +59,31 @@ export default class FeatureSearch extends React.Component {
 	}
 
 	resetComponent() {
-		this.setState({ isLoading: false, results: [], value: '' })
+		this.setState({ isLoading: false, results: [], value: '', selection: null })
 		BackendAPI.setActiveFeature(this.props.field, this.state.type, '', '', 0);
 	}
 
 	handleResultSelect(e, { result }) {
+		if (DEBUG) console.log('handleResultSelect', e, result);
 		this.setState({ value: result.title })
 		BackendAPI.setActiveFeature(this.props.field, this.state.type, result.type, result.title, 0);
 	}
 
 	handleTypeChange(type) {
-		console.log(type);
 		this.setState({type: type});
+	}
+
+	handleSelectionChange(e, { result }) {
+		this.setState({selection: result})
+	}
+
+	handleBlur(e) {
+		let selection = this.state.selection;
+		if (DEBUG) console.log('handleBlur', e, selection);
+		if (selection) {
+			this.setState({ value: selection.title })
+			BackendAPI.setActiveFeature(this.props.field, this.state.type, selection.type, selection.title, 0);
+		}
 	}
 
 	handleSearchChange(e, { value }) {
