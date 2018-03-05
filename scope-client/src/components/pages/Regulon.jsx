@@ -12,23 +12,22 @@ export default class Regulon extends Component {
 
     constructor() {
         super();
+        let features = BackendAPI.getActiveFeatures();
         this.state = {
             activeLoom: BackendAPI.getActiveLoom(),
             activeCoordinates: BackendAPI.getActiveCoordinates(),
-            activeFeatures: BackendAPI.getActiveFeatures('regulon'),
-            geneFeatures: this.getGeneFeatures(BackendAPI.getActiveFeatures('regulon')),
-            thresholds: BackendAPI.getThresholds(),
+            activeFeatures: features,
+            geneFeatures: this.getGeneFeatures(features),
             sidebar: BackendAPI.getSidebarVisible(),
-            colors: ["red", "green", "blue"]
+            colors: BackendAPI.getColors()
         };
         this.activeLoomListener = (loom, metadata, coordinates) => {
             this.setState({activeLoom: loom, activeCoordinates: coordinates});
         };
-        this.activeFeaturesListener = (features, i) => {
-            let thresholds = this.state.thresholds;
+        this.activeFeaturesListener = (features) => {
+            //let thresholds = this.state.thresholds;
             let geneFeatures = this.getGeneFeatures(features);
-            //if (features[i].threshold) thresholds[i] = features[i].threshold;
-            this.setState({activeFeatures: features, thresholds: thresholds, geneFeatures: geneFeatures});
+            this.setState({activeFeatures: features, geneFeatures: geneFeatures});
         };
         this.sidebarVisibleListener = (state) => {
             this.setState({sidebar: state});
@@ -38,15 +37,15 @@ export default class Regulon extends Component {
     }
 
     render() {
-        const { activeLoom, activeCoordinates, activeFeatures, thresholds, colors, geneFeatures, sidebar } = this.state;
+        const { activeLoom, activeCoordinates, activeFeatures, colors, geneFeatures, sidebar } = this.state;
         let featureSearch = _.times(3, i => (
             <Grid.Column key={i}  width={sidebar ? 4 : 5}>
-                <FeatureSearchBox field={i} color={colors[i]} type="regulon" locked="1" value={activeFeatures[i].value} />
+                <FeatureSearchBox field={i} color={colors[i]} type="regulon" locked="1" value={activeFeatures[i] ? activeFeatures[i].feature : ''} />
             </Grid.Column>
         ));
         let featureThreshold = _.times(3, i => (
             <Grid.Column key={i} width={sidebar ? 4 : 5}>
-                <Histogram field={i} height={this.height - 50} color={colors[i]} loomFile={activeLoom} feature={activeFeatures[i]} onThresholdChange={this.onThresholdChange.bind(this)} value={thresholds[i]} />
+                <Histogram field={i} height={this.height - 50} color={colors[i]} loomFile={activeLoom} feature={activeFeatures[i]} onThresholdChange={this.onThresholdChange.bind(this)} />
             </Grid.Column>
         ));
 
@@ -69,13 +68,13 @@ export default class Regulon extends Component {
                             </Grid.Column>
                             <Grid.Column width={sidebar ? 6 : 7}>
                                 <b>Regulon AUC values</b>
-                                <Viewer name="reg" height={3 * this.height - 15} loomFile={activeLoom} activeFeatures={activeFeatures} thresholds={thresholds} scale={true} activeCoordinates={activeCoordinates} />
+                                <Viewer name="reg" height={3 * this.height - 15} loomFile={activeLoom} activeFeatures={activeFeatures} scale={true} activeCoordinates={activeCoordinates} />
                             </Grid.Column>
                             <Grid.Column width={sidebar ? 4 : 5}>
                                 <b>Cells passing thresholds</b>
-                                <Viewer name="auc" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={activeFeatures} thresholds={thresholds} scale={false} activeCoordinates={activeCoordinates} />
+                                <Viewer name="auc" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={activeFeatures} scale={false} activeCoordinates={activeCoordinates} />
                                 <b>Expression levels</b>
-                                <Viewer name="expr" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={geneFeatures} thresholds={thresholds} activeCoordinates={activeCoordinates} />
+                                <Viewer name="expr" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={geneFeatures} activeCoordinates={activeCoordinates} />
                             </Grid.Column>
                             <Grid.Column width={3}>
                                 <b>Cell selections</b><hr />
@@ -90,30 +89,35 @@ export default class Regulon extends Component {
 
     componentWillMount() {
         BackendAPI.onActiveLoomChange(this.activeLoomListener);
-        BackendAPI.onActiveFeaturesChange(this.activeFeaturesListener);
+        BackendAPI.onActiveFeaturesChange('regulon', this.activeFeaturesListener);
         BackendAPI.onSidebarVisibleChange(this.sidebarVisibleListener);
     }
 
     componentWillUnmount() {
         BackendAPI.removeActiveLoomChange(this.activeLoomListener);
-        BackendAPI.removeActiveFeaturesChange(this.activeFeaturesListener);
+        BackendAPI.removeActiveFeaturesChange('regulon', this.activeFeaturesListener);
         BackendAPI.removeSidebarVisibleChange(this.sidebarVisibleListener)
     }
 
     getGeneFeatures(features) {
-        let geneFeatures = {};
-        _.times(3, (i) => {
-            let v = features[i].value.split('_');
-            geneFeatures[i] = {type:'gene', value: v[0]}
-        });
+        let geneFeatures = [];
+        features.map((f, i) => {
+            let feature = Object.assign({}, f);
+            if (feature && feature.feature) {
+                feature.featureType = 'gene';
+                feature.feature = feature.feature.split('_')[0];
+            }
+            geneFeatures.push(feature);
+        })
+        if (DEBUG) console.log('getGeneFeatures', features, geneFeatures);
         return geneFeatures;
     }
 
     onThresholdChange(idx, threshold) {
-        let thresholds = this.state.thresholds;
-        thresholds[idx] = threshold;
-        BackendAPI.setThresholds(thresholds);
-        this.setState({thresholds: thresholds});
+        let feature = this.state.activeFeatures[idx];
+        BackendAPI.setActiveFeature(idx, feature.type, feature.featureType, feature.feature, threshold);
+//        BackendAPI.setThresholds(thresholds);
+  //      this.setState({thresholds: thresholds});
     }
 
 }

@@ -4,29 +4,16 @@ class API {
 		this.GBCConnection = new this.GBC("ws://" + BACKEND.host + ":" + BACKEND.WSport + "/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + BACKEND.RPCport } }).connect();
 
 		this.loomFiles = [];
+		this.activePage = 'welcome';
 		this.activeLoom = null;
 		this.activeCoordinates = -1;
 		this.activeLoomChangeListeners = [];
 
-		this.features = {
-			'gene': {
-				0: {type: 'gene', value: ''},
-				1: {type: 'gene', value: ''},
-				2: {type: 'gene', value: ''}
-			},
-			'regulon': {
-				0: {type: 'regulon', value: ''},
-				1: {type: 'regulon', value: ''},
-				2: {type: 'regulon', value: ''}
-			},
-			'all': {
-				0: {type: '', value: ''},
-				1: {type: '', value: ''},
-				2: {type: '', value: ''}
-			}
-		};
+		this.features = {};
+		this.emptyFeature = {type: '', featureType: '', feature: '', threshold: 0};
+		
 		this.thresholds = [0, 0, 0];
-		this.featureChangeListeners = [];
+		this.featureChangeListeners = {};
 
 		this.settings = {
 			hasLogTransform: true,
@@ -45,6 +32,8 @@ class API {
 
 		this.sidebarVisible = true;
 		this.sidebarListeners = [];
+
+		this.colors = ["red", "green", "blue"];
 	}
 
 	getConnection() {
@@ -97,27 +86,39 @@ class API {
 	}
 
 
-
-	getActiveFeatures(type) {
-		return this.features[type];
+	getActiveFeatures() {
+		console.log('getActiveFeatures', this.activePage);
+		return this.features[this.activePage] ? this.features[this.activePage] : [];
 	}
 
-	setActiveFeature(featureId, featureType, featureValue) {
-		this.features[featureType][featureId] = { type: featureType, value: featureValue, threshold: 0 }
-		this.featureChangeListeners.forEach((listener) => {
-			listener(this.features[featureType], featureId);
+	setActiveFeature(id, type, featureType, feature, threshold) {
+		let page = this.activePage;
+		let selectedFeatures = this.features[page] || [this.emptyFeature, this.emptyFeature, this.emptyFeature];
+		selectedFeatures[id] = {type: type, featureType: featureType ? featureType : '', feature: feature ? feature : '', threshold: threshold};
+		this.features[page] = selectedFeatures;
+		(this.featureChangeListeners[page] || []).forEach((listener) => {
+			listener(selectedFeatures);
 		})
 	}
 
-	onActiveFeaturesChange(listener) {
-		this.featureChangeListeners.push(listener);
+	onActiveFeaturesChange(page, listener) {
+		if (!this.featureChangeListeners[page]) this.featureChangeListeners[page] = [];
+		this.featureChangeListeners[page].push(listener);
 	}
 
-	removeActiveFeaturesChange(listener) {
-		let i = this.featureChangeListeners.indexOf(listener);
+	removeActiveFeaturesChange(page, listener) {
+		let i = this.featureChangeListeners[page].indexOf(listener);
 		if (i > -1) {
-			this.featureChangeListeners.splice(i, 1);
+			this.featureChangeListeners[page].splice(i, 1);
 		}
+	}
+
+	getActivePage() {
+		return this.activePage;		
+	}
+
+	setActivePage(page) {
+		return this.activePage = page;
 	}
 
 	getThresholds() {
@@ -259,6 +260,10 @@ class API {
 		if (i > -1) {
 			this.sidebarListeners.splice(i, 1);
 		}
+	}
+	
+	getColors() {
+		return this.colors;
 	}
 
 }

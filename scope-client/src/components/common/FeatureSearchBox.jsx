@@ -10,14 +10,15 @@ export default class FeatureSearch extends React.Component {
 		this.state = {
 			isLoading: false,
 			results: [],
-			value: props.value
+			value: props.value,
+			type: props.type
 		};
 	}
 
 	render() {
 
-		const { isLoading, value, results } = this.state
-		const { type, locked, field, color } = this.props
+		const { isLoading, value, results, type } = this.state
+		const { locked, field, color, options } = this.props
 		let querySearchLabel = {
 			position: 'relative',
 			top: 1,
@@ -41,7 +42,9 @@ export default class FeatureSearch extends React.Component {
 							loading={isLoading}
 							onResultSelect={this.handleResultSelect.bind(this)}
 							onSearchChange={this.handleSearchChange.bind(this)}
+							handleTypeChange={this.handleTypeChange.bind(this)}
 							results={results}
+							options={options}
 							value={value}
 							type={type}
 							locked={locked}
@@ -54,12 +57,17 @@ export default class FeatureSearch extends React.Component {
 
 	resetComponent() {
 		this.setState({ isLoading: false, results: [], value: '' })
-		BackendAPI.setActiveFeature(this.props.field, this.props.type, '');
+		BackendAPI.setActiveFeature(this.props.field, this.state.type, '', '', 0);
 	}
 
 	handleResultSelect(e, { result }) {
 		this.setState({ value: result.title })
-		BackendAPI.setActiveFeature(this.props.field, result.type, result.title);
+		BackendAPI.setActiveFeature(this.props.field, this.state.type, result.type, result.title, 0);
+	}
+
+	handleTypeChange(type) {
+		console.log(type);
+		this.setState({type: type});
 	}
 
 	handleSearchChange(e, { value }) {
@@ -75,39 +83,59 @@ export default class FeatureSearch extends React.Component {
 				gbc.services.scope.Main.getFeatures(query, (err, response) => {
 					if (DEBUG) console.log("handleSearchChange", response);
 					if (response != null) {
-						var genes = []
-						var regulons = []
+						let res = [], genes = [], regulons = [], clusters = {};
+            			let metadata = BackendAPI.getActiveLoomMetadata();
+						let type = this.state.type;
+
 						for (var i = 0; i < response.feature.length; i++) {
-							if (response.featureType[i] == 'gene') {
-								genes.push({
-									"title": response.feature[i],
-									"type": response.featureType[i]
-								});
-							} else if (response.featureType[i] == 'regulon') {
-								regulons.push({
-									"title": response.feature[i],
-									"type": response.featureType[i]
-								});
+							let f = response.feature[i];
+							let ft = response.featureType[i];
+							if (ft == 'gene') {
+								genes.push({ "title": f, "type": ft });
+							} else if (ft == 'regulon') {
+								regulons.push({ "title": f, "type": ft });
+							} else if (ft.indexOf('Clustering:') == 0) {
+								if (!clusters[ft]) clusters[ft] = [];
+								clusters[ft].push({ "title": f, "type": ft });
+							} else if (ft.indexOf('cluster#') == 0) {
+								let cid = ft.split('#')[1], name = '';
+            					activeMetadata.cellMetaData.clusterings.map((c, i) => {
+            						if (c.id == cid) {
+            							name = c.name;
+            						}
+            					})
+								if (!clusters[ft]) clusters[ft] = {name: name, results: []};
+								clusters[ft].push({ "title": f, "type": ft });
 							}
 						};
+
 						genes = {"name": "gene", "results": genes.slice(0, 10)}
 						regulons = {"name": "regulon", "results": regulons.slice(0, 10)}
-						let res = [];
-						if (genes['results'].length && (this.props.type == 'all' || this.props.type == 'gene')) {
+
+						if (genes['results'].length && (type == 'all' || type == 'gene')) {
 							res.push(genes);
 						}
-						if (regulons['results'].length && (this.props.type == 'all' || this.props.type == 'regulon')) {
+						if (regulons['results'].length && (type == 'all' || type == 'regulon')) {
 							res.push(regulons);
 						}
+						if (type == 'all' || type == 'cluster') {
+							Object.keys(clusters).map((ft) => {
+								res.push({"name": ft, "results": clusters[ft].slice(0, 10)})
+							});
+						}
+
 						this.setState({
 							isLoading: false,
 							results: res,
 						})
+
 					} else {
+
 						this.setState({
 							isLoading: false,
 							results: [],
 						})
+
 					}
 				});
 			});

@@ -14,7 +14,8 @@ export default class Comparison extends Component {
             activeLoom: BackendAPI.getActiveLoom(),
             activeCoordinates: BackendAPI.getActiveCoordinates(),
             metadata: BackendAPI.getActiveLoomMetadata(),
-            activeFeatures: BackendAPI.getActiveFeatures('all'),
+            activeFeatures: BackendAPI.getActiveFeatures(),
+            colors: BackendAPI.getColors(),
             activeAnnotation: -1,
             activeClustering: -1,
             annotationIDs: []
@@ -29,7 +30,7 @@ export default class Comparison extends Component {
     }
 
     render() {
-        const { activeLoom, activeFeatures, metadata, activeCoordinates, activeAnnotation, activeClustering, annotationIDs } = this.state;
+        const { activeLoom, activeFeatures, metadata, activeCoordinates, activeAnnotation, activeClustering, annotationIDs, colors } = this.state;
 
         let annotationTabs = () => {
             if (metadata && metadata.cellMetaData && metadata.cellMetaData.annotations) {
@@ -58,7 +59,7 @@ export default class Comparison extends Component {
                 })
             }
         };
-
+/*
         let clusteringTabs = () => {
             if (metadata && metadata.cellMetaData && metadata.cellMetaData.clusterings) {
                 let clusterings = metadata.cellMetaData.clusterings;
@@ -85,7 +86,7 @@ export default class Comparison extends Component {
                 })
             }
         };
-
+*/
         let columns = 1;
         while (annotationIDs.length > columns * columns) {
             columns++;
@@ -121,6 +122,12 @@ export default class Comparison extends Component {
             </Grid>
         );
 
+        let featureSearch = _.times(3, i => (
+            <Grid.Column width={4} key={i}>
+                <FeatureSearchBox field={i} color={colors[i]} type='all' value={activeFeatures[i] ? activeFeatures[i].feature : ''} />
+            </Grid.Column>
+        ));
+
         return (
             <div>
                 <div style={{display: activeLoom == null ? 'block' : 'none'}}>
@@ -130,15 +137,7 @@ export default class Comparison extends Component {
                     <Grid>
                         <Grid.Row columns="4">
                             <Grid.Column width={2} />
-                            <Grid.Column width={4}>
-                                <FeatureSearchBox field="0" color="red" type="all" value={activeFeatures[0].value} />
-                            </Grid.Column>
-                            <Grid.Column width={4}>
-                                <FeatureSearchBox field="1" color="green" type="all" value={activeFeatures[1].value} />
-                            </Grid.Column>
-                            <Grid.Column width={4}>
-                                <FeatureSearchBox field="2" color="blue" type="all" value={activeFeatures[2].value} />
-                            </Grid.Column>
+                            {featureSearch}
                         </Grid.Row>
                         <Grid.Row columns={3}>
                             <Grid.Column width={2}>
@@ -165,12 +164,12 @@ export default class Comparison extends Component {
 
     componentWillMount() {
         BackendAPI.onActiveLoomChange(this.activeLoomListener);
-        BackendAPI.onActiveFeaturesChange(this.activeFeaturesListener);
+        BackendAPI.onActiveFeaturesChange('comparison', this.activeFeaturesListener);
     }
 
     componentWillUnmount() {
         BackendAPI.removeActiveLoomChange(this.activeLoomListener);
-        BackendAPI.removeActiveFeaturesChange(this.activeFeaturesListener);
+        BackendAPI.removeActiveFeaturesChange('comparison', this.activeFeaturesListener);
     }
 
     selectAnnotationGroup(e, props) {

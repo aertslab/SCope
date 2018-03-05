@@ -467,7 +467,8 @@ export default class Viewer extends Component {
 			thresholds = [0, 0, 0];
 		}
 		this.setState({activeFeatures: Object.assign({}, features), activeThresholds: thresholds.slice(0)});
-		if (features[0].value.length + features[1].value.length + features[2].value.length == 0) {
+
+		if (!features || (features.length == 0)) {
 			// prevent empty requests
 			return this.resetDataPoints();
 		}
@@ -483,13 +484,14 @@ export default class Viewer extends Component {
 				});
 			});
 		}
+
 		let query = {
 			loomFilePath: loomFile,
-			featureType: [features[0].type, features[1].type, features[2].type],
-			feature: [features[0].value, features[1].value, features[2].value],
+			featureType: features.map((f) => {return f.featureType}),
+			feature: features.map((f) => {return f.feature}),
 			hasLogTranform: settings.hasLogTransform,
 			hasCpmTranform: settings.hasCpmNormalization,
-			threshold: thresholds,
+			threshold: features.map((f) => {return f.threshold}),
 			scaleThresholded: this.props.scale,
 			annotation: queryAnnotations
 			// vmax: float

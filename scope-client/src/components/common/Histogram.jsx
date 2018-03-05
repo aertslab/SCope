@@ -7,14 +7,15 @@ import { BackendAPI } from './API';
 
 const Handle = Slider.Handle;
 
-export default class AUCThreshold extends Component {
+export default class Histogram extends Component {
 
 	constructor(props) {
 		super(props);
+		console.log('Histogram', props);
 		this.state = {
 			min: 0,
 			max: 1,
-			selected: props.value,
+			selected: props.feature ? props.feature.threshold : 0,
 			width: 0,
 			height: 0,
 			matched: 0,
@@ -27,6 +28,7 @@ export default class AUCThreshold extends Component {
 	render() {
 		const { field, feature, height } = this.props;
 		const { min, max, selected, matched, total } = this.state;
+		let enabled =( feature && feature.feature.length );
 		let handle = (props) => {
 			// TODO: memory leak!?
 			const { value, ...restProps } = props;
@@ -39,7 +41,7 @@ export default class AUCThreshold extends Component {
 			<div>
 				<svg id={"thresholdSVG" + field} style={{width: 100+'%'}} height={height} ></svg>
 				<div className="auc">AUC threshold: <b>{selected.toFixed(4)}</b> (matched points: {matched} / {total})</div>
-				<Slider disabled={feature.value == ''} value={selected} min={min} max={max} step={0.0001} handle={handle} onChange={this.handleThresholdChange.bind(this)}  onAfterChange={this.handleUpdateTSNE.bind(this)} />
+				<Slider disabled={!enabled} value={selected} min={min} max={max} step={0.0001} handle={handle} onChange={this.handleThresholdChange.bind(this)}  onAfterChange={this.handleUpdateTSNE.bind(this)} />
 			</div>
 		);
 	}
@@ -60,6 +62,8 @@ export default class AUCThreshold extends Component {
 	}
 
 	handleThresholdChange(value) {
+		value = value || 0;
+		if (DEBUG) console.log('handleThresholdChange', value);
 		var x = d3.scaleLinear()
 			.domain([0, this.state.max])
 			.rangeRound([0, this.state.width]);
@@ -79,26 +83,27 @@ export default class AUCThreshold extends Component {
 	}
 
 	getCellAUCValues(feature, loomFile) {
+		if (!feature) return this.renderAUCGraph('', []);
 		let query = {
 			loomFilePath: loomFile,
-			featureType: feature.type,
-			feature: feature.value
+			featureType: feature.featureType,
+			feature: feature.feature
 		};
 		let regulonQuery = {
 			loomFilePath: query.loomFilePath,
 			regulon: query.feature
 		}
 		BackendAPI.getConnection().then((gbc) => {
-			if (DEBUG) console.log('getCellAUCValues', regulonQuery);
+			if (DEBUG) console.log('getRegulonMetaData', regulonQuery);
 			gbc.services.scope.Main.getRegulonMetaData(regulonQuery, (regulonErr, regulonResponse) => {
 				this.metadata = regulonResponse;
-				if (DEBUG) console.log('getCellAUCValues', regulonResponse);
-				if (DEBUG) console.log('getCellAUCValues', query);
+				if (DEBUG) console.log('getRegulonMetaData', regulonResponse);
+				if (DEBUG) console.log('getCellAUCValuesByFeatures', query);
 				gbc.services.scope.Main.getCellAUCValuesByFeatures(query, (err, response) => {
-					if (DEBUG) console.log('getCellAUCValues', response);
+					if (DEBUG) console.log('getCellAUCValuesByFeatures', response);
 					if(response !== null) {
 						this.renderAUCGraph(feature, response.value);
-						this.handleThresholdChange(this.props.value);
+						this.handleThresholdChange(this.props.feature.threshold);
 					} else {
 						this.renderAUCGraph('', [])
 					}

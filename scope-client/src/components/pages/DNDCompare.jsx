@@ -22,7 +22,8 @@ class DNDCompare extends Component {
             activeLoom: BackendAPI.getActiveLoom(),
             activeCoordinates: BackendAPI.getActiveCoordinates(),
             metadata: BackendAPI.getActiveLoomMetadata(),
-            activeFeatures: BackendAPI.getActiveFeatures('all'),
+            activeFeatures: BackendAPI.getActiveFeatures(),
+            colors: BackendAPI.getColors(),
             activeAnnotation: -1,
             activeClustering: -1,
             viewerAnnotations: [],
@@ -45,7 +46,7 @@ class DNDCompare extends Component {
     }
 
     render() {
-        const { lastDroppedItem, activeLoom, activeThresholds, activeFeatures, viewerAnnotations, metadata, activeCoordinates, activeAnnotation, activeClustering, annotationIDs, columns, rows } = this.state;
+        const { lastDroppedItem, activeLoom, activeThresholds, activeFeatures, viewerAnnotations, metadata, activeCoordinates, activeAnnotation, activeClustering, annotationIDs, columns, rows, colors } = this.state;
 
         let annotationTabs = () => {
             if (metadata && metadata.cellMetaData && metadata.cellMetaData.annotations) {
@@ -129,6 +130,12 @@ class DNDCompare extends Component {
             );
         }
 
+        let featureSearch = _.times(3, i => (
+            <Grid.Column width={4} key={i}>
+                <FeatureSearchBox field={i} color={colors[i]} type='all' value={activeFeatures[i] ? activeFeatures[i].feature : ''} />
+            </Grid.Column>
+        ));
+
         return (
             <div>
                 <div style={{display: activeLoom == null ? 'block' : 'none'}}>
@@ -141,15 +148,7 @@ class DNDCompare extends Component {
                                 Number of displays:
                                 <Dropdown selection options={this.displayConf} defaultValue={4} onChange={this.displayNumberChanged.bind(this)}/>
                             </Grid.Column>
-                            <Grid.Column width={4}>
-                                <FeatureSearchBox field="0" color="red" type="all" value={activeFeatures[0].value} />
-                            </Grid.Column>
-                            <Grid.Column width={4}>
-                                <FeatureSearchBox field="1" color="green" type="all" value={activeFeatures[1].value} />
-                            </Grid.Column>
-                            <Grid.Column width={4}>
-                                <FeatureSearchBox field="2" color="blue" type="all" value={activeFeatures[2].value} />
-                            </Grid.Column>
+                            {featureSearch}
                         </Grid.Row>
                         <Grid.Row columns={3}>
                             <Grid.Column width={2}>
@@ -226,12 +225,12 @@ class DNDCompare extends Component {
 
     componentWillMount() {
         BackendAPI.onActiveLoomChange(this.activeLoomListener);
-        BackendAPI.onActiveFeaturesChange(this.activeFeaturesListener);
+        BackendAPI.onActiveFeaturesChange('dndcompare', this.activeFeaturesListener);
     }
 
     componentWillUnmount() {
         BackendAPI.removeActiveLoomChange(this.activeLoomListener);
-        BackendAPI.removeActiveFeaturesChange(this.activeFeaturesListener);
+        BackendAPI.removeActiveFeaturesChange('dndcompare', this.activeFeaturesListener);
     }
 
     selectAnnotationGroup(e, props) {

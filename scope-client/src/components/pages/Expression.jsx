@@ -12,12 +12,14 @@ export default class Expression extends Component {
         this.state = {
             activeLoom: BackendAPI.getActiveLoom(),
             activeCoordinates: BackendAPI.getActiveCoordinates(),
-            activeFeatures: BackendAPI.getActiveFeatures('gene'),
-            sidebar: BackendAPI.getSidebarVisible()
+            activeMetadata: BackendAPI.getActiveLoomMetadata(),
+            activeFeatures: BackendAPI.getActiveFeatures('expression'),
+            sidebar: BackendAPI.getSidebarVisible(),
+            colors: BackendAPI.getColors()
         }
         this.activeLoomListener = (loom, metadata, coordinates) => {
             if (DEBUG) console.log('activeLoomListener', loom, metadata, coordinates);
-            this.setState({activeLoom: loom, activeCoordinates: coordinates});
+            this.setState({activeLoom: loom, activeCoordinates: coordinates, activeMetadata: metadata});
         };
         this.activeFeaturesListener = (features, featureID) => {
             if (DEBUG) console.log('activeFeaturesListener', features, featureID);
@@ -31,7 +33,19 @@ export default class Expression extends Component {
     }
 
     render() {
-        const { activeLoom, activeFeatures, activeCoordinates, sidebar } = this.state;
+        const { activeLoom, activeFeatures, activeCoordinates, sidebar, activeMetadata, colors } = this.state;
+        let featureSearch = _.times(3, i => (
+            <Grid.Column width={sidebar ? 4 : 5} key={i}>
+                <FeatureSearchBox field={i} color={colors[i]} type='all' value={activeFeatures[i] ? activeFeatures[i].feature : ''} />
+            </Grid.Column>
+        ));
+        /*
+        if (activeMetadata && activeMetadata.cellMetaData && activeMetadata.cellMetaData.clusterings) {
+            activeMetadata.cellMetaData.clusterings.map((c, i) => {
+                options.push({ key: 'cluster#'+c.id, text: "clustering"+c.name, value: 'cluster#'+c.id })
+            })
+        }
+        */
         return (
             <div>
                 <div style={{display: activeLoom == null ? 'block' : 'none'}}>
@@ -40,15 +54,7 @@ export default class Expression extends Component {
                 <div style={{display: activeLoom != null ? 'block' : 'none'}}>
                     <Grid>
                         <Grid.Row columns="3">
-                            <Grid.Column width={sidebar ? 4 : 5}>
-                                <FeatureSearchBox field="0" color="red" type="gene" locked="1" value={activeFeatures[0].value} />
-                            </Grid.Column>
-                            <Grid.Column width={sidebar ? 4 : 5}>
-                                <FeatureSearchBox field="1" color="green" type="gene" locked="1" value={activeFeatures[1].value} />
-                            </Grid.Column>
-                            <Grid.Column width={sidebar ? 4 : 5}>
-                                <FeatureSearchBox field="2" color="blue" type="gene" locked="1" value={activeFeatures[2].value} />
-                            </Grid.Column>
+                            {featureSearch}
                         </Grid.Row>
                         <Grid.Row columns="3">
                             <Grid.Column width={1}>
@@ -71,13 +77,13 @@ export default class Expression extends Component {
 
     componentWillMount() {
         BackendAPI.onActiveLoomChange(this.activeLoomListener);
-        BackendAPI.onActiveFeaturesChange(this.activeFeaturesListener);
+        BackendAPI.onActiveFeaturesChange('expression', this.activeFeaturesListener);
         BackendAPI.onSidebarVisibleChange(this.sidebarVisibleListener);
     }
 
     componentWillUnmount() {
         BackendAPI.removeActiveLoomChange(this.activeLoomListener);
-        BackendAPI.removeActiveFeaturesChange(this.activeFeaturesListener);
+        BackendAPI.removeActiveFeaturesChange('expression', this.activeFeaturesListener);
         BackendAPI.removeSidebarVisibleChange(this.sidebarVisibleListener);
     }
 

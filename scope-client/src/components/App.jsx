@@ -12,7 +12,7 @@ export default class App extends Component {
 		super();
 		this.state = {
 			isSidebarVisible: true,
-			currentPage: "welcome"
+			currentPage: BackendAPI.getActivePage()
 		}
 	}
 
@@ -37,8 +37,9 @@ export default class App extends Component {
 
 	togglePage(page) {
 		if (DEBUG) console.log("togglePage", page);
-		BackendAPI.clearViewerSelections();
 		this.setState({currentPage: page});
+		BackendAPI.setActivePage(page);
+		BackendAPI.clearViewerSelections();
 	}
 
 	onResize() {
