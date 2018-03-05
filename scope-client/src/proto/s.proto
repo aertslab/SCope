@@ -130,7 +130,7 @@ message Regulon {
 message FileMetaData {
   bool hasRegulonsAUC=1;
   bool hasGeneSets=2;
-  bool hasSeuratClusterings=3;
+  bool hasClusterings=3;
   bool hasExtraEmbeddings=4;
   bool hasGlobalMeta=5;
 }
