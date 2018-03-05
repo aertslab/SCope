@@ -73,9 +73,9 @@ export default class Regulon extends Component {
                     </Grid.Column>
                     <Grid.Column width={sidebar ? 4 : 5}>
                         <b>Cells passing thresholds</b>
-                        <Viewer name="auc" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={activeFeatures} scale={false} activeCoordinates={activeCoordinates} />
+                        <Viewer name="auc" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={activeFeatures} scale={false} activeCoordinates={activeCoordinates} thresholds={true} />
                         <b>Expression levels</b>
-                        <Viewer name="expr" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={geneFeatures} activeCoordinates={activeCoordinates} />
+                        <Viewer name="expr" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={geneFeatures} activeCoordinates={activeCoordinates} settings={true}/>
                     </Grid.Column>
                     <Grid.Column width={3}>
                         <b>Cell selections</b><hr />
@@ -115,8 +115,6 @@ export default class Regulon extends Component {
     onThresholdChange(idx, threshold) {
         let feature = this.state.activeFeatures[idx];
         BackendAPI.setActiveFeature(idx, feature.type, feature.featureType, feature.feature, threshold);
-//        BackendAPI.setThresholds(thresholds);
-  //      this.setState({thresholds: thresholds});
     }
 
 }

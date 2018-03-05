@@ -12,7 +12,6 @@ class API {
 		this.features = {};
 		this.emptyFeature = {type: '', featureType: '', feature: '', threshold: 0};
 		
-		this.thresholds = [0, 0, 0];
 		this.featureChangeListeners = {};
 
 		this.settings = {
@@ -119,14 +118,6 @@ class API {
 
 	setActivePage(page) {
 		return this.activePage = page;
-	}
-
-	getThresholds() {
-		return this.thresholds;
-	}
-
-	setThresholds(thresholds) {
-		this.thresholds = thresholds;
 	}
 
 	getSettings() {

@@ -9,8 +9,7 @@ export default class Viewer extends Component {
 	constructor(props) {
 		super(props)
 		this.state = {
-			activeThresholds: [],
-			activeFeatures: {},
+			activeFeatures: [],
 			coord : {
 				x: [],
 				y: []
@@ -34,8 +33,10 @@ export default class Viewer extends Component {
 		// Increase the maxSize if displaying more than 1500 (default) objects
 		this.maxn = 200000;
 		this.texture = PIXI.Texture.fromImage("src/images/particle@2x.png");
-		this.settingsListener = () => {
-			this.getFeatureColors(this.props.activeFeatures, this.props.loomFile);
+		this.settingsListener = (settings) => {
+			if (this.props.settings) {
+				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations);
+			}
 		}
 		this.viewerToolListener = (tool) => {
 			this.setState({activeTool: tool});
@@ -84,27 +85,31 @@ export default class Viewer extends Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		// TODO: dirty hack
-		if (DEBUG) console.log(nextProps.name, 'componentWillReceiveProps', JSON.stringify(nextProps.activeAnnotations), JSON.stringify(this.state.activeAnnotations));
-		
+		// TODO: dirty hacks
 		if (this.h != nextProps.height) {
-			console.log('resizing');
+			if (DEBUG) console.log(nextProps.name, 'changing size');
 			this.h = nextProps.height;
 			this.resizeContainer();
 		}
 		
 		if (this.props.loomFile != nextProps.loomFile || this.props.activeCoordinates != nextProps.activeCoordinates || 
 			(JSON.stringify(nextProps.activeAnnotations) != JSON.stringify(this.state.activeAnnotations)) ) {
-				console.log('changing');
+				if (DEBUG) console.log(nextProps.name, 'changing points');
 				this.getPoints(nextProps.loomFile, nextProps.activeCoordinates, nextProps.activeAnnotations, () => {
 					this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile, nextProps.thresholds, nextProps.activeAnnotations);
 				});
-		} else if (
-			(JSON.stringify(nextProps.activeFeatures) != JSON.stringify(this.state.activeFeatures)) ||
-			(JSON.stringify(nextProps.thresholds) != JSON.stringify(this.state.activeThresholds))
-			) {
-				console.log('features');
+		} else if ((this.getJSONFeatures(nextProps, 'feature') != this.getJSONFeatures(this.state, 'feature')) || 
+			(nextProps.thresholds && (this.getJSONFeatures(nextProps, 'threshold') != this.getJSONFeatures(this.state, 'threshold')))) {
+				if (DEBUG) console.log(nextProps.name, 'changing colors');
 				this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile, nextProps.thresholds);
+		}
+	}
+
+	getJSONFeatures(props, field) {
+		if (props.activeFeatures) {
+			return JSON.stringify(props.activeFeatures.map((f) => {return f[field]}));
+		} else {
+			return null;
 		}
 	}
 
@@ -463,10 +468,8 @@ export default class Viewer extends Component {
 	}
 
 	getFeatureColors(features, loomFile, thresholds, annotations) {		
-		if (thresholds == null) {
-			thresholds = [0, 0, 0];
-		}
-		this.setState({activeFeatures: Object.assign({}, features), activeThresholds: thresholds.slice(0)});
+
+		this.setState({activeFeatures: JSON.parse(JSON.stringify(features))});
 
 		if (!features || (features.length == 0)) {
 			// prevent empty requests
@@ -491,7 +494,7 @@ export default class Viewer extends Component {
 			feature: features.map((f) => {return f.feature}),
 			hasLogTranform: settings.hasLogTransform,
 			hasCpmTranform: settings.hasCpmNormalization,
-			threshold: features.map((f) => {return f.threshold}),
+			threshold: thresholds ? features.map((f) => {return f.threshold}) : [0, 0, 0],
 			scaleThresholded: this.props.scale,
 			annotation: queryAnnotations
 			// vmax: float
