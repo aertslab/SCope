@@ -129,7 +129,7 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(loom_file_path)
         try:
             metaData = json.loads(loom.attrs.MetaData)
-        except:
+        except ValueError:
             metaData = self.decompress_meta(loom.attrs.MetaData)
 
         # Genes
@@ -236,10 +236,10 @@ class SCope(s_pb2_grpc.MainServicer):
             meta['hasRegulonsAUC'] = True
         else:
             meta['hasRegulonsAUC'] = False
-        if hasattr(loom.ca, "SeuratClusterings"):
-            meta['hasSeuratClusterings'] = True
+        if hasattr(loom.ca, "Clusterings"):
+            meta['hasClusterings'] = True
         else:
-            meta['hasSeuratClusterings'] = False
+            meta['hasClusterings'] = False
         if hasattr(loom.ca, "Embeddings_X"):
             meta['hasExtraEmbeddings'] = True
         else:
@@ -251,7 +251,7 @@ class SCope(s_pb2_grpc.MainServicer):
         try:
             try:
                 metaData = json.loads(loom.attrs.MetaData)
-            except:
+            except ValueError:
                 metaData = self.decompress_meta(loom.attrs.MetaData)
             meta['hasGlobalMeta'] = True
         except (KeyError, AttributeError):
@@ -277,7 +277,7 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(loomFilePath)
         try:
             metaData = json.loads(loom.attrs.MetaData)
-        except:
+        except ValueError:
             metaData = self.decompress_meta(loom.attrs.MetaData)
         if not os.path.isfile(loomFilePath):
             return
@@ -403,7 +403,7 @@ class SCope(s_pb2_grpc.MainServicer):
         regulonGenes = loom.ra.Gene[loom.ra.Regulons[request.regulon] == 1]
         try:
             metaData = json.loads(loom.attrs.MetaData)
-        except:
+        except ValueError:
             metaData = self.decompress_meta(loom.attrs.MetaData)
         for regulon in metaData['regulonThresholds']:
             if regulon['regulon'] == request.regulon:
@@ -429,11 +429,10 @@ class SCope(s_pb2_grpc.MainServicer):
             if f.endswith('.loom'):
                 loom = self.get_loom_connection(self.get_loom_filepath(f))
                 fileMeta = self.get_file_metadata(self.get_loom_filepath(f))
-                print(fileMeta)
                 if fileMeta['hasGlobalMeta']:
                     try:
                         meta = json.loads(loom.attrs.MetaData)
-                    except:
+                    except ValueError:
                         meta = self.decompress_meta(loom.attrs.MetaData)
                     annotations = meta['annotations']
                     embeddings = meta['embeddings']
