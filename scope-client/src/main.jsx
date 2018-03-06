@@ -5,6 +5,7 @@ import 'semantic-ui-css/semantic.min.css';
 import './css/header.css';
 import './css/sidebar.css';
 import './css/viewer.css';
+import './css/features.css';
 import { BrowserRouter } from 'react-router-dom'
 import { AppContainer } from 'react-hot-loader'
 
