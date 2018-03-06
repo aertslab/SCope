@@ -16,13 +16,14 @@ export default class Regulon extends Component {
             activeLoom: BackendAPI.getActiveLoom(),
             activeCoordinates: BackendAPI.getActiveCoordinates(),
             activeFeatures: BackendAPI.getActiveFeatures(),
+            regulonMetadata: [],
             sidebar: BackendAPI.getSidebarVisible(),
             colors: BackendAPI.getColors()
         };
         this.activeLoomListener = (loom, metadata, coordinates) => {
             this.setState({activeLoom: loom, activeCoordinates: coordinates});
         };
-        this.activeFeaturesListener = (features) => {
+        this.activeFeaturesListener = (features, featureID) => {
             this.setState({activeFeatures: features});
         };
         this.sidebarVisibleListener = (state) => {
