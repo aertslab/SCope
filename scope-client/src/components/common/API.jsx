@@ -99,10 +99,10 @@ class API {
 		return this.features[this.activePage] ? this.features[this.activePage] : [];
 	}
 
-	setActiveFeature(id, type, featureType, feature, threshold, vmax) {
+	setActiveFeature(id, type, featureType, feature, threshold, metadata) {
 		let page = this.activePage;
 		let selectedFeatures = this.features[page] || [this.emptyFeature, this.emptyFeature, this.emptyFeature];
-		selectedFeatures[id] = {type: type, featureType: featureType ? featureType : '', feature: feature ? feature : '', threshold: threshold};
+		selectedFeatures[id] = {type: type, featureType: featureType ? featureType : '', feature: feature ? feature : '', threshold: threshold, metadata: metadata};
 		this.features[page] = selectedFeatures;
 		(this.featureChangeListeners[page] || []).forEach((listener) => {
 			listener(selectedFeatures, id);

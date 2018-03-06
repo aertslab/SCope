@@ -22,7 +22,6 @@ export default class Histogram extends Component {
 			total: 0,
 			points: []
 		}
-		this.metadata = null;
 	}
 
 	render() {
@@ -47,7 +46,7 @@ export default class Histogram extends Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		if ((this.props.feature != nextProps.feature) || (this.props.loomFile != nextProps.loomFile)) {
+		if ((JSON.stringify(this.props.feature) != JSON.stringify(nextProps.feature)) || (this.props.loomFile != nextProps.loomFile)) {
 			this.getCellAUCValues(nextProps.feature, nextProps.loomFile);
 		}
 	}
@@ -83,36 +82,28 @@ export default class Histogram extends Component {
 	}
 
 	getCellAUCValues(feature, loomFile) {
-		if (!feature) return this.renderAUCGraph('', []);
+		if (!feature || (feature.feature.length == 0)) return this.renderAUCGraph('', []);
 		let query = {
 			loomFilePath: loomFile,
 			featureType: feature.featureType,
 			feature: feature.feature
 		};
-		let regulonQuery = {
-			loomFilePath: query.loomFilePath,
-			regulon: query.feature
-		}
 		BackendAPI.getConnection().then((gbc) => {
-			if (DEBUG) console.log('getRegulonMetaData', regulonQuery);
-			gbc.services.scope.Main.getRegulonMetaData(regulonQuery, (regulonErr, regulonResponse) => {
-				this.metadata = regulonResponse;
-				if (DEBUG) console.log('getRegulonMetaData', regulonResponse);
-				if (DEBUG) console.log('getCellAUCValuesByFeatures', query);
-				gbc.services.scope.Main.getCellAUCValuesByFeatures(query, (err, response) => {
-					if (DEBUG) console.log('getCellAUCValuesByFeatures', response);
-					if(response !== null) {
-						this.renderAUCGraph(feature, response.value);
-						this.handleThresholdChange(this.props.feature.threshold);
-					} else {
-						this.renderAUCGraph('', [])
-					}
-				});
+			if (DEBUG) console.log('getCellAUCValuesByFeatures', query);
+			gbc.services.scope.Main.getCellAUCValuesByFeatures(query, (err, response) => {
+				if (DEBUG) console.log('getCellAUCValuesByFeatures', response);
+				if(response !== null) {
+					this.renderAUCGraph(feature, response.value);
+					this.handleThresholdChange(this.props.feature.threshold);
+				} else {
+					this.renderAUCGraph('', [])
+				}
 			});
 		});
 	}
 
 	renderAUCGraph(feature, points) {
+		console.log('renderAUCGraph', feature, points);
 		var formatCount = d3.format(",.0f");
 		var svg = d3.select("#thresholdSVG"+this.props.field);
 		var width = svg.node().getBoundingClientRect().width;
@@ -190,11 +181,10 @@ export default class Histogram extends Component {
 			.call(d3.axisLeft(y));    
 
 		let component = this;
-		if (this.metadata) {
-			//TODO: anything to do with this.metadata.genes ?
+		if (feature.metadata) {
 			let gt = g.append("g")
 				.attr("class", "autoThresholds");
-			this.metadata.autoThresholds.map((t) => {
+			feature.metadata.autoThresholds.map((t) => {
 				let tx = x(t.threshold);
 				gt.append("text")
 					.style("cursor", "pointer")
@@ -213,10 +203,6 @@ export default class Histogram extends Component {
 					.attr("x2", tx)
 					.attr("y1", 10)
 					.attr("y2", height);
-				if (t.name == this.metadata.defaultThreshold) {
-					component.handleThresholdChange(t.threshold);
-					component.handleUpdateTSNE();
-				}
 			});
 		}
 	}

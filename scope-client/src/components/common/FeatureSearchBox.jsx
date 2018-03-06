@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Label, Menu } from 'semantic-ui-react'
+import { Label, Menu, Icon, Popup, Image } from 'semantic-ui-react'
 import FeatureSearchInput from './FeatureSearchInput';
 import { BackendAPI } from './API'
 
@@ -12,13 +12,14 @@ export default class FeatureSearch extends React.Component {
 			results: [],
 			value: props.value,
 			selection: null,
-			type: props.type
+			type: props.type,
+			metadata: null
 		};
 	}
 
 	render() {
 
-		const { isLoading, value, results, type } = this.state
+		const { isLoading, value, results, type, metadata } = this.state
 		const { locked, field, color, options } = this.props
 		let querySearchLabel = {
 			position: 'relative',
@@ -29,6 +30,22 @@ export default class FeatureSearch extends React.Component {
 
 		let noPadding = {
 			padding: 0
+		}
+
+		let popup = () => {
+			if (metadata)  {
+				let image = <Image src={'http://motifcollections.aertslab.org/v8/logos/'+metadata.motifName} size='huge'/>
+				return (
+					<Menu.Item>
+						<Popup
+							size='huge'
+							trigger={<Icon name="help circle" />}
+							position='bottom left'
+							content={image}
+							/>
+					</Menu.Item>
+				)
+			}
 		}
 
 		return (
@@ -53,6 +70,7 @@ export default class FeatureSearch extends React.Component {
 							locked={locked}
 						/>
 					</Menu.Item>
+					{popup()}
 				</Menu>
 			</Menu.Item>
 		);
@@ -65,12 +83,36 @@ export default class FeatureSearch extends React.Component {
 		}, 50);
 	}
 
+	updateFeature(feature, featureType) {
+		this.setState({ value: feature, selection: null })
+		if (featureType == 'regulon') {
+			let regulonQuery = {
+				loomFilePath: BackendAPI.getActiveLoom(),
+				regulon: feature
+			}
+			BackendAPI.getConnection().then((gbc) => {
+				gbc.services.scope.Main.getRegulonMetaData(regulonQuery, (regulonErr, regulonResponse) => {
+					console.log('getRegulonMetaData', regulonResponse);
+					let metadata = regulonResponse.regulonMeta;
+					let threshold = 0;
+					metadata.autoThresholds.map((t) => {
+						if (t.name == metadata.defaultThreshold) threshold = t.threshold;
+					})
+					this.setState({metadata: metadata});
+					BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, threshold, metadata);
+				});
+			});
+		} else {
+			setTimeout(() => {
+				this.setState({metadata: null});
+				BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0);
+			}, 50);
+		}
+	}
+
 	handleResultSelect(e, { result }) {
 		if (DEBUG) console.log('handleResultSelect', e, result);
-		this.setState({ value: result.title, selection: null })
-		setTimeout(() => {
-			BackendAPI.setActiveFeature(this.props.field, this.state.type, result.type, result.title, 0);
-		}, 50);
+		this.updateFeature(result.title, result.type);
 	}
 
 	handleTypeChange(type) {
@@ -88,10 +130,7 @@ export default class FeatureSearch extends React.Component {
 		let selection = this.state.selection;
 		if (DEBUG) console.log('handleBlur', e, selection);
 		if (selection) {
-			this.setState({ value: selection.title, selection: null })
-			setTimeout(() => {
-				BackendAPI.setActiveFeature(this.props.field, this.state.type, selection.type, selection.title, 0);
-			}, 50);
+			this.updateFeature(selection.title, selection.type)
 		}
 	}
 
@@ -109,7 +148,7 @@ export default class FeatureSearch extends React.Component {
 					if (DEBUG) console.log("handleSearchChange", response);
 					if (response != null) {
 						let res = [], genes = [], regulons = [], clusters = {};
-            			let metadata = BackendAPI.getActiveLoomMetadata();
+						let metadata = BackendAPI.getActiveLoomMetadata();
 						let type = this.state.type;
 
 						for (var i = 0; i < response.feature.length; i++) {
@@ -124,11 +163,11 @@ export default class FeatureSearch extends React.Component {
 								clusters[ft].push({ "title": f, "type": ft });
 							} else if (ft.indexOf('cluster#') == 0) {
 								let cid = ft.split('#')[1], name = '';
-            					activeMetadata.cellMetaData.clusterings.map((c, i) => {
-            						if (c.id == cid) {
-            							name = c.name;
-            						}
-            					})
+								activeMetadata.cellMetaData.clusterings.map((c, i) => {
+									if (c.id == cid) {
+										name = c.name;
+									}
+								})
 								if (!clusters[ft]) clusters[ft] = {name: name, results: []};
 								clusters[ft].push({ "title": f, "type": ft });
 							}

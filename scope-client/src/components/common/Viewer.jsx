@@ -104,8 +104,8 @@ export default class Viewer extends Component {
 
 	componentWillReceiveProps(nextProps) {
 		// TODO: dirty hacks
-		if (this.h != nextProps.height) {
-			if (DEBUG) console.log(nextProps.name, 'changing size');
+		if (parseInt(this.h) != parseInt(nextProps.height)) {
+			if (DEBUG) console.log(nextProps.name, 'changing size', this.h, nextProps.height);
 			this.h = nextProps.height;
 			this.resizeContainer();
 		}
