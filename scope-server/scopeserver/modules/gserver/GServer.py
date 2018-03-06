@@ -305,9 +305,9 @@ class SCope(s_pb2_grpc.MainServicer):
                         cpm_normalise=request.hasCpmTranform,
                         annotation=request.annotation)
                     if request.vmax[n] != 0.0:
-                        vmax[n] = request.vmax[n]
+                        vmax.append(request.vmax[n])
                     else:
-                        vmax[n] = self.getVmax(vals)
+                        vmax.append(self.getVmax(vals))
                     vals = np.round((vals / vmax[n]) * 255)
                     features.append([x if x <= 255 else 255 for x in vals])
                 else:
@@ -318,9 +318,9 @@ class SCope(s_pb2_grpc.MainServicer):
                                                regulon=feature,
                                                annotation=request.annotation)
                     if request.vmax[n] != 0.0:
-                        vmax[n] = request.vmax[n]
+                        vmax.append(request.vmax[n])
                     else:
-                        vmax[n] = self.getVmax(vals)
+                        vmax.append(self.getVmax(vals))
                     if request.scaleThresholded:
                         vals = ([auc if auc >= request.threshold[n] else 0 for auc in vals])
                         vals = np.round((vals / vmax[n]) * 255)
@@ -330,7 +330,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 else:
                     features.append(np.zeros(n_cells))
             elif request.featureType[n].startswith('Clustering: '):
-                vmax[n] = 0
+                vmax.append(0)
                 for clustering in metaData['clusterings']:
                     if clustering['name'] == request.featureType[n].lstrip('Clustering: '):
                         clusteringID = str(clustering['id'])
