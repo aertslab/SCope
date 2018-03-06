@@ -58,6 +58,7 @@ export default class Viewer extends Component {
 		}
         this.activeFeaturesListener = (features, featureID) => {
         	if ((this.getJSONFeatures(features, 'feature') != this.getJSONFeatures(this.state.activeFeatures, 'feature')) || 
+        		(this.getJSONFeatures(features, 'featureType') != this.getJSONFeatures(this.state.activeFeatures, 'featureType')) ||
 				(this.props.thresholds && (this.getJSONFeatures(features, 'threshold') != this.getJSONFeatures(this.state.activeFeatures, 'threshold')))) {
 				if (DEBUG) console.log(this.props.name, 'changing colors');
 				this.getFeatureColors(features, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, this.state.customScale, featureID);
