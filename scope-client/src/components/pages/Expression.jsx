@@ -64,7 +64,15 @@ export default class Expression extends Component {
                     </Grid.Column>
                     <Grid.Column width={sidebar ? 10 : 12}>
                         <b>Expression levels</b>
-                        <Viewer name="expr" height={this.height} loomFile={activeLoom} activeFeatures={activeFeatures} activeCoordinates={activeCoordinates} customScale={true} />
+                        <Viewer 
+                            name="expr" 
+                            height={this.height} 
+                            loomFile={activeLoom} 
+                            activeFeatures={activeFeatures} 
+                            activeCoordinates={activeCoordinates} 
+                            customScale={true} 
+                            settings={true}
+                        />
                     </Grid.Column>
                     <Grid.Column width={3}>
                         <b>Cell selections</b><hr />

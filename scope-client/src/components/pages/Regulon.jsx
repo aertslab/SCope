@@ -69,13 +69,35 @@ export default class Regulon extends Component {
                     </Grid.Column>
                     <Grid.Column width={sidebar ? 6 : 7}>
                         <b>Regulon AUC values</b>
-                        <Viewer name="reg" height={3 * this.height - 15} loomFile={activeLoom} activeFeatures={activeFeatures} scale={true} activeCoordinates={activeCoordinates} />
+                        <Viewer 
+                            name="reg" 
+                            height={3 * this.height - 15} 
+                            loomFile={activeLoom} 
+                            activeFeatures={activeFeatures} 
+                            activeCoordinates={activeCoordinates}
+                            scale={true} 
+                        />
                     </Grid.Column>
                     <Grid.Column width={sidebar ? 4 : 5}>
                         <b>Cells passing thresholds</b>
-                        <Viewer name="auc" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={activeFeatures} scale={false} activeCoordinates={activeCoordinates} thresholds={true} />
+                        <Viewer 
+                            name="auc" 
+                            height={3 * this.height / 2 - 15} 
+                            loomFile={activeLoom} 
+                            activeFeatures={activeFeatures}                             
+                            activeCoordinates={activeCoordinates} 
+                            thresholds={true} 
+                        />
                         <b>Expression levels</b>
-                        <Viewer name="expr" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={geneFeatures} activeCoordinates={activeCoordinates} settings={true} customScale={true} />
+                        <Viewer 
+                            name="expr" 
+                            height={3 * this.height / 2 - 15} 
+                            loomFile={activeLoom} 
+                            activeFeatures={geneFeatures} 
+                            activeCoordinates={activeCoordinates} 
+                            settings={true} 
+                            customScale={true} 
+                        />
                     </Grid.Column>
                     <Grid.Column width={3}>
                         <b>Cell selections</b><hr />

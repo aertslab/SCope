@@ -112,7 +112,15 @@ export default class Comparison extends Component {
                             return (
                                 <Grid.Column key={j}>
                                     <b>{a.name} {a.value}</b>
-                                    <Viewer name={"comp"+(columns * i + j)} height={this.height / rows} loomFile={activeLoom} activeFeatures={activeFeatures} activeCoordinates={activeCoordinates} activeAnnotations={annotations} customScale={true} />
+                                    <Viewer 
+                                        name={"comp"+(columns * i + j)} 
+                                        height={this.height / rows} 
+                                        loomFile={activeLoom} 
+                                        activeFeatures={activeFeatures} 
+                                        activeCoordinates={activeCoordinates} 
+                                        activeAnnotations={annotations} 
+                                        customScale={true} 
+                                    />
                                 </Grid.Column>
                             );
                         }

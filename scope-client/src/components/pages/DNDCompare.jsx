@@ -138,6 +138,7 @@ class DNDCompare extends Component {
 											activeAnnotations={viewerAnnotations[name]}
 											thresholds={activeThresholds}
 											customScale={true}
+											settings={true}
 											/>
 									</Grid.Column>
 								);
