@@ -517,12 +517,8 @@ export default class Viewer extends Component {
 				this.endBenchmark("getFeatureColors")
 				if(response !== null) {
 					this.setState({colors: response.color});
-					let vmax = [];
-					_.times(3, i => {
-						vmax[i] = response.vmax;
-					});
 					if (this.props.customScale && !scale) {
-						BackendAPI.setFeaturesScale(vmax);
+						BackendAPI.setFeaturesScale(response.vmax);
 					}
 					this.updateDataPoints();
 				} else {
