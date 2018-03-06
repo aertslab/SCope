@@ -37,7 +37,7 @@ message CellColorByFeaturesRequest {
   repeated float threshold=6;
   bool scaleThresholded=7;
   repeated Annotation annotation=8;
-  float vmax=9;
+  repeated float vmax=9;
 }
 
 message CellColorByFeaturesReply {

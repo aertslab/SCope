@@ -293,8 +293,8 @@ class SCope(s_pb2_grpc.MainServicer):
                         log_transform=request.hasLogTranform,
                         cpm_normalise=request.hasCpmTranform,
                         annotation=request.annotation)
-                    if request.vmax != 0.0:
-                        vmax = request.vmax
+                    if request.vmax[n] != 0.0:
+                        vmax = request.vmax[n]
                     else:
                         vmax = self.getVmax(vals)
                     vals = np.round((vals / vmax) * 255)
@@ -306,8 +306,8 @@ class SCope(s_pb2_grpc.MainServicer):
                     vals = self.get_auc_values(loom_file_path=loomFilePath,
                                                regulon=feature,
                                                annotation=request.annotation)
-                    if request.vmax != 0.0:
-                        vmax = request.vmax
+                    if request.vmax[n] != 0.0:
+                        vmax = request.vmax[n]
                     else:
                         vmax = self.getVmax(vals)
                     if request.scaleThresholded:
@@ -331,8 +331,9 @@ class SCope(s_pb2_grpc.MainServicer):
                             else:
                                 interval = int(16581375 / numClusters)
                                 hex_vec = [hex(I)[2:].zfill(6) for I in range(0, numClusters, interval)]
-                            cellIndices = self.get_anno_cells(loom_file_path=loomFilePath, annotations=request.annotation)
-                            hex_vec = np.array(hex_vec)[cellIndices]
+                            if len(request.annotation) > 0:
+                                cellIndices = self.get_anno_cells(loom_file_path=loomFilePath, annotations=request.annotation)
+                                hex_vec = np.array(hex_vec)[cellIndices]
                             return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=0)
                         else:
                             for cluster in clustering['clusters']:
@@ -340,8 +341,9 @@ class SCope(s_pb2_grpc.MainServicer):
                                     clusterID = int(cluster['id'])
                 clusterIndices = loom.ca.Clusterings[clusteringID] == clusterID
                 clusterCol = np.array([225 if x else 0 for x in clusterIndices])
-                cellIndices = self.get_anno_cells(loom_file_path=loomFilePath, annotations=request.annotation)
-                clusterCol = clusterCol[cellIndices]
+                if len(request.annotation) > 0:
+                    cellIndices = self.get_anno_cells(loom_file_path=loomFilePath, annotations=request.annotation)
+                    clusterCol = clusterCol[cellIndices]
                 features.append(clusterCol)
             else:
                 features.append(np.zeros(n_cells))
