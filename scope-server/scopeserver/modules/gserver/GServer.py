@@ -306,8 +306,8 @@ class SCope(s_pb2_grpc.MainServicer):
                     vals = self.get_auc_values(loom_file_path=loomFilePath,
                                                regulon=feature,
                                                annotation=request.annotation)
-                    if request.vmax != 0.0:
-                        vmax = request.vmax
+                    if request.vmax[n] != 0.0:
+                        vmax = request.vmax[n]
                     else:
                         vmax = self.getVmax(vals)
                     if request.scaleThresholded:
