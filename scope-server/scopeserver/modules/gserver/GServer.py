@@ -16,6 +16,7 @@ import json
 import glob
 import zlib
 import base64
+from functools import lru_cache
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "bf9360", "1d331a", "79baf2", "deb6f2",
@@ -125,20 +126,15 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(loom_file_path)
         return loom.ca[annoName]
 
-    def get_features(self, loom_file_path, query):
+    @lru_cache(maxsize=32)
+    def build_searchspace(self, loom_file_path):
         loom = self.get_loom_connection(loom_file_path)
         try:
             metaData = json.loads(loom.attrs.MetaData)
         except ValueError:
             metaData = self.decompress_meta(loom.attrs.MetaData)
 
-        # Genes
-        # Filter the genes by the query
-
-        # Allow caps innsensitive searching, minor slowdown
-        start_time = time.time()
-        res = []
-        resF = []
+        searchSpace = {}
         try:
             regulonList = list(loom.ra.Regulons.dtype.names)
         except AttributeError:
@@ -160,6 +156,19 @@ class SCope(s_pb2_grpc.MainServicer):
         searchSpace += [x.casefold() for x in allClusters]
         origSpace += allClusters
         fType = ['gene' for x in loom.ra.Gene] + ['regulon' for x in regulonList] + allClustersfType
+
+        return origSpace, searchSpace, fType
+
+    def get_features(self, loom_file_path, query):
+
+        origSpace, searchSpace, fType = self.build_searchspace(loom_file_path)
+        # Filter the genes by the query
+
+        # Allow caps innsensitive searching, minor slowdown
+        start_time = time.time()
+        res = []
+        resF = []
+
         print("Debug: %s seconds elapsed making search space ---" % (time.time() - start_time))
 
         for n, x in enumerate(searchSpace):
@@ -272,6 +281,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return vmax
 
     def getCellColorByFeatures(self, request, context):
+        print(request)
         start_time = time.time()
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
         loom = self.get_loom_connection(loomFilePath)
@@ -284,6 +294,7 @@ class SCope(s_pb2_grpc.MainServicer):
         n_cells = self.get_nb_cells(loomFilePath)
         features = []
         hex_vec = []
+        vmax = []
         for n, feature in enumerate(request.feature):
             if request.featureType[n] == 'gene':
                 if feature != '':
@@ -294,10 +305,10 @@ class SCope(s_pb2_grpc.MainServicer):
                         cpm_normalise=request.hasCpmTranform,
                         annotation=request.annotation)
                     if request.vmax[n] != 0.0:
-                        vmax = request.vmax[n]
+                        vmax[n] = request.vmax[n]
                     else:
-                        vmax = self.getVmax(vals)
-                    vals = np.round((vals / vmax) * 255)
+                        vmax[n] = self.getVmax(vals)
+                    vals = np.round((vals / vmax[n]) * 255)
                     features.append([x if x <= 255 else 255 for x in vals])
                 else:
                     features.append(np.zeros(n_cells))
@@ -307,19 +318,19 @@ class SCope(s_pb2_grpc.MainServicer):
                                                regulon=feature,
                                                annotation=request.annotation)
                     if request.vmax[n] != 0.0:
-                        vmax = request.vmax[n]
+                        vmax[n] = request.vmax[n]
                     else:
-                        vmax = self.getVmax(vals)
+                        vmax[n] = self.getVmax(vals)
                     if request.scaleThresholded:
                         vals = ([auc if auc >= request.threshold[n] else 0 for auc in vals])
-                        vals = np.round((vals / vmax) * 255)
+                        vals = np.round((vals / vmax[n]) * 255)
                         features.append([x if x <= 255 else 255 for x in vals])
                     else:
                         features.append([225 if auc >= request.threshold[n] else 0 for auc in vals])
                 else:
                     features.append(np.zeros(n_cells))
             elif request.featureType[n].startswith('Clustering: '):
-                vmax = 0
+                vmax[n] = 0
                 for clustering in metaData['clusterings']:
                     if clustering['name'] == request.featureType[n].lstrip('Clustering: '):
                         clusteringID = str(clustering['id'])
@@ -334,7 +345,7 @@ class SCope(s_pb2_grpc.MainServicer):
                             if len(request.annotation) > 0:
                                 cellIndices = self.get_anno_cells(loom_file_path=loomFilePath, annotations=request.annotation)
                                 hex_vec = np.array(hex_vec)[cellIndices]
-                            return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=0)
+                            return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax)
                         else:
                             for cluster in clustering['clusters']:
                                 if request.feature[n] == cluster['description']:
