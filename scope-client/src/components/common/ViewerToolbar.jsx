@@ -21,8 +21,12 @@ export default class ViewerToolbar extends Component {
 		this.activeFeaturesListener = (features) => {
 			this.setState({activeFeatures: features});
 		}
-		this.featuresScaleListener = (featuresScale, customScale) => {
-			this.setState({featuresScale: featuresScale, customScale: [0, 0, 0]});
+		this.featuresScaleListener = (featuresScale, updateID) => {
+			console.log('featuresScaleListener', featuresScale, updateID);
+			let customScale = this.state.customScale;
+			if (updateID != null) customScale[updateID] = 0;
+			else customScale = [0, 0, 0]
+			this.setState({featuresScale: featuresScale, customScale: customScale});
 		}
 	}
 
@@ -30,7 +34,7 @@ export default class ViewerToolbar extends Component {
 		const { activeTool, activeFeatures, colors, featuresScale, customScale } = this.state;
 		const createSliderWithTooltip = Slider.createSliderWithTooltip;
 		const TooltipSlider = createSliderWithTooltip(Slider);
-		console.log('render', featuresScale, customScale);
+
 		let levels = false;
 		let sliders = _.times(3, i => {
 				let val = customScale[i] ? customScale[i] : featuresScale[i];
@@ -46,8 +50,11 @@ export default class ViewerToolbar extends Component {
 							onAfterChange={(v) => {
 								this.handleUpdateScale(i, v);
 							}}
-							min={0.01}
-							step={0.01} 
+							min={featuresScale[i]/1000}
+							step={featuresScale[i]/1000} 
+							tipFormatter={(v) => {
+								return v.toFixed(3);
+							}}
 						/>
 					);
 				}

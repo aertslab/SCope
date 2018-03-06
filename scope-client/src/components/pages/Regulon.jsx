@@ -12,12 +12,10 @@ export default class Regulon extends Component {
 
     constructor() {
         super();
-        let features = BackendAPI.getActiveFeatures();
         this.state = {
             activeLoom: BackendAPI.getActiveLoom(),
             activeCoordinates: BackendAPI.getActiveCoordinates(),
-            activeFeatures: features,
-            geneFeatures: this.getGeneFeatures(features),
+            activeFeatures: BackendAPI.getActiveFeatures(),
             sidebar: BackendAPI.getSidebarVisible(),
             colors: BackendAPI.getColors()
         };
@@ -25,9 +23,7 @@ export default class Regulon extends Component {
             this.setState({activeLoom: loom, activeCoordinates: coordinates});
         };
         this.activeFeaturesListener = (features) => {
-            //let thresholds = this.state.thresholds;
-            let geneFeatures = this.getGeneFeatures(features);
-            this.setState({activeFeatures: features, geneFeatures: geneFeatures});
+            this.setState({activeFeatures: features});
         };
         this.sidebarVisibleListener = (state) => {
             this.setState({sidebar: state});
@@ -93,8 +89,9 @@ export default class Regulon extends Component {
                             name="expr" 
                             height={3 * this.height / 2 - 15} 
                             loomFile={activeLoom} 
-                            activeFeatures={geneFeatures} 
+                            activeFeatures={activeFeatures} 
                             activeCoordinates={activeCoordinates} 
+                            genes={true}
                             settings={true} 
                             customScale={true} 
                         />
@@ -118,20 +115,6 @@ export default class Regulon extends Component {
         BackendAPI.removeActiveLoomChange(this.activeLoomListener);
         BackendAPI.removeActiveFeaturesChange('regulon', this.activeFeaturesListener);
         BackendAPI.removeSidebarVisibleChange(this.sidebarVisibleListener)
-    }
-
-    getGeneFeatures(features) {
-        let geneFeatures = [];
-        features.map((f, i) => {
-            let feature = Object.assign({}, f);
-            if (feature && feature.feature) {
-                feature.featureType = 'gene';
-                feature.feature = feature.feature.split('_')[0];
-            }
-            geneFeatures.push(feature);
-        })
-        if (DEBUG) console.log('getGeneFeatures', features, geneFeatures);
-        return geneFeatures;
     }
 
     onThresholdChange(idx, threshold) {

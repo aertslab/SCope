@@ -13,7 +13,7 @@ export default class Expression extends Component {
             activeLoom: BackendAPI.getActiveLoom(),
             activeCoordinates: BackendAPI.getActiveCoordinates(),
             activeMetadata: BackendAPI.getActiveLoomMetadata(),
-            activeFeatures: BackendAPI.getActiveFeatures('expression'),
+            activeFeatures: BackendAPI.getActiveFeatures(),
             sidebar: BackendAPI.getSidebarVisible(),
             colors: BackendAPI.getColors()
         }
@@ -21,10 +21,6 @@ export default class Expression extends Component {
             if (DEBUG) console.log('activeLoomListener', loom, metadata, coordinates);
             this.setState({activeLoom: loom, activeCoordinates: coordinates, activeMetadata: metadata});
         };
-        this.activeFeaturesListener = (features, featureID) => {
-            if (DEBUG) console.log('activeFeaturesListener', features, featureID);
-            this.setState({activeFeatures: features});
-        }
         this.sidebarVisibleListener = (state) => {
             this.setState({sidebar: state});
             this.forceUpdate();
@@ -39,13 +35,6 @@ export default class Expression extends Component {
                 <FeatureSearchBox field={i} color={colors[i]} type='all' value={activeFeatures[i] ? activeFeatures[i].feature : ''} />
             </Grid.Column>
         ));
-        /*
-        if (activeMetadata && activeMetadata.cellMetaData && activeMetadata.cellMetaData.clusterings) {
-            activeMetadata.cellMetaData.clusterings.map((c, i) => {
-                options.push({ key: 'cluster#'+c.id, text: "clustering"+c.name, value: 'cluster#'+c.id })
-            })
-        }
-        */
 
         if (!activeLoom) return (
             <div>
@@ -85,15 +74,12 @@ export default class Expression extends Component {
 
     componentWillMount() {
         BackendAPI.onActiveLoomChange(this.activeLoomListener);
-        BackendAPI.onActiveFeaturesChange('expression', this.activeFeaturesListener);
         BackendAPI.onSidebarVisibleChange(this.sidebarVisibleListener);
     }
 
     componentWillUnmount() {
         BackendAPI.removeActiveLoomChange(this.activeLoomListener);
-        BackendAPI.removeActiveFeaturesChange('expression', this.activeFeaturesListener);
         BackendAPI.removeSidebarVisibleChange(this.sidebarVisibleListener);
     }
-
 
 }

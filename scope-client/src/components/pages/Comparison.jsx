@@ -120,6 +120,7 @@ export default class Comparison extends Component {
                                         activeCoordinates={activeCoordinates} 
                                         activeAnnotations={annotations} 
                                         customScale={true} 
+                                        settings={true}
                                     />
                                 </Grid.Column>
                             );
@@ -153,12 +154,7 @@ export default class Comparison extends Component {
                         <Accordion styled>
                         {annotationTabs()}
                         </Accordion>
-                        {/*
                         <br />
-                        <Accordion styled>
-                        {clusteringTabs()}
-                        </Accordion>
-                        */}
                         <ViewerToolbar />
                     </Grid.Column>
                     <Grid.Column width={12}>
@@ -171,12 +167,12 @@ export default class Comparison extends Component {
 
     componentWillMount() {
         BackendAPI.onActiveLoomChange(this.activeLoomListener);
-        BackendAPI.onActiveFeaturesChange('comparison', this.activeFeaturesListener);
+        //BackendAPI.onActiveFeaturesChange('comparison', this.activeFeaturesListener);
     }
 
     componentWillUnmount() {
         BackendAPI.removeActiveLoomChange(this.activeLoomListener);
-        BackendAPI.removeActiveFeaturesChange('comparison', this.activeFeaturesListener);
+        //BackendAPI.removeActiveFeaturesChange('comparison', this.activeFeaturesListener);
     }
 
     selectAnnotationGroup(e, props) {

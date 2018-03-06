@@ -256,12 +256,12 @@ class DNDCompare extends Component {
 
 	componentWillMount() {
 		BackendAPI.onActiveLoomChange(this.activeLoomListener);
-		BackendAPI.onActiveFeaturesChange('dndcompare', this.activeFeaturesListener);
+		//BackendAPI.onActiveFeaturesChange('dndcompare', this.activeFeaturesListener);
 	}
 
 	componentWillUnmount() {
 		BackendAPI.removeActiveLoomChange(this.activeLoomListener);
-		BackendAPI.removeActiveFeaturesChange('dndcompare', this.activeFeaturesListener);
+		//BackendAPI.removeActiveFeaturesChange('dndcompare', this.activeFeaturesListener);
 	}
 
 	selectAnnotationGroup(e, props) {

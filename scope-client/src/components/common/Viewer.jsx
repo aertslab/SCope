@@ -9,7 +9,7 @@ export default class Viewer extends Component {
 	constructor(props) {
 		super(props)
 		this.state = {
-			activeFeatures: [],
+			activeFeatures: BackendAPI.getActiveFeatures(),
 			coord : {
 				x: [],
 				y: []
@@ -22,6 +22,7 @@ export default class Viewer extends Component {
 			},
 			activeTool: BackendAPI.getViewerTool(),
 			customScale: BackendAPI.getCustomScale(),
+			activePage: BackendAPI.getActivePage(),
 			benchmark: {}
 		}
 		this.zoomTransform = {
@@ -55,6 +56,13 @@ export default class Viewer extends Component {
 				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, scale);
 			}
 		}
+        this.activeFeaturesListener = (features, featureID) => {
+        	if ((this.getJSONFeatures(features, 'feature') != this.getJSONFeatures(this.state.activeFeatures, 'feature')) || 
+				(this.props.thresholds && (this.getJSONFeatures(features, 'threshold') != this.getJSONFeatures(this.state.activeFeatures, 'threshold')))) {
+				if (DEBUG) console.log(this.props.name, 'changing colors');
+				this.getFeatureColors(features, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, this.state.customScale, featureID);
+		    }
+		}
 	}
 
 	render() {
@@ -72,6 +80,7 @@ export default class Viewer extends Component {
 		BackendAPI.onViewerSelectionsChange(this.viewerSelectionListener);
 		BackendAPI.onViewerTransformChange(this.viewerTransformListener);
 		BackendAPI.onCustomScaleChange(this.customScaleListener);
+        BackendAPI.onActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
 	}
 
 	componentDidMount() {
@@ -104,18 +113,14 @@ export default class Viewer extends Component {
 			(JSON.stringify(nextProps.activeAnnotations) != JSON.stringify(this.state.activeAnnotations)) ) {
 				if (DEBUG) console.log(nextProps.name, 'changing points');
 				this.getPoints(nextProps.loomFile, nextProps.activeCoordinates, nextProps.activeAnnotations, () => {
-					this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile, nextProps.thresholds, nextProps.activeAnnotations);
+					this.getFeatureColors(this.state.activeFeatures, nextProps.loomFile, this.props.thresholds, this.state.activeAnnotations);
 				});
-		} else if ((this.getJSONFeatures(nextProps, 'feature') != this.getJSONFeatures(this.state, 'feature')) || 
-			(nextProps.thresholds && (this.getJSONFeatures(nextProps, 'threshold') != this.getJSONFeatures(this.state, 'threshold')))) {
-				if (DEBUG) console.log(nextProps.name, 'changing colors');
-				this.getFeatureColors(nextProps.activeFeatures, nextProps.loomFile, nextProps.thresholds);
-		}
+		} 
 	}
 
-	getJSONFeatures(props, field) {
-		if (props.activeFeatures) {
-			return JSON.stringify(props.activeFeatures.map((f) => {return f[field]}));
+	getJSONFeatures(features, field) {
+		if (features) {
+			return JSON.stringify(features.map((f) => {return f[field]}));
 		} else {
 			return null;
 		}
@@ -127,6 +132,7 @@ export default class Viewer extends Component {
 		BackendAPI.removeViewerSelectionsChange(this.viewerSelectionListener);
 		BackendAPI.removeViewerTransformChange(this.viewerTransformListener);
 		BackendAPI.removeCustomScaleChange(this.customScaleListener);
+        BackendAPI.removeActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
 		this.destroyGraphics();
 	}
 /*
@@ -476,8 +482,7 @@ export default class Viewer extends Component {
 		this.endBenchmark("transformPoints");
 	}
 
-	getFeatureColors(features, loomFile, thresholds, annotations, scale) {		
-
+	getFeatureColors(features, loomFile, thresholds, annotations, scale, updateID) {		
 		this.setState({activeFeatures: JSON.parse(JSON.stringify(features))});
 
 		if (!features || (features.length == 0)) {
@@ -499,8 +504,8 @@ export default class Viewer extends Component {
 
 		let query = {
 			loomFilePath: loomFile,
-			featureType: features.map((f) => {return f.featureType}),
-			feature: features.map((f) => {return f.feature}),
+			featureType: features.map((f) => {return this.props.genes ? 'gene' : f.featureType}),
+			feature: features.map((f) => {return this.props.genes ? f.feature.split('_')[0] : f.feature}),
 			hasLogTranform: settings.hasLogTransform,
 			hasCpmTranform: settings.hasCpmNormalization,
 			threshold: thresholds ? features.map((f) => {return f.threshold}) : [0, 0, 0],
@@ -508,17 +513,22 @@ export default class Viewer extends Component {
 			annotation: queryAnnotations,
 			vmax: [0, 0, 0]
 		};
-		console.log('using custom scale', scale);
-		if (scale) query['vmax'] = scale;
-		if (DEBUG) console.log('getFeatureColors', query);
+		if (this.props.customScale && scale)  {
+			scale[updateID] = 0;
+			query['vmax'] = scale;
+		}
+		if (DEBUG) console.log(this.props.name, 'getFeatureColors', query);
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
-				if (DEBUG) console.log('getFeatureColors', response);
+				if (DEBUG) console.log(this.props.name, 'getFeatureColors', response);
 				this.endBenchmark("getFeatureColors")
 				if(response !== null) {
 					this.setState({colors: response.color});
-					if (this.props.customScale && !scale) {
-						BackendAPI.setFeaturesScale(response.vmax);
+					if (this.props.customScale) {
+						if (updateID != null)
+							BackendAPI.setFeatureScale(updateID, response.vmax[updateID]);
+						else if (!scale)
+							BackendAPI.setFeatureScales(response.vmax);
 					}
 					this.updateDataPoints();
 				} else {

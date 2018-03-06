@@ -105,7 +105,7 @@ class API {
 		selectedFeatures[id] = {type: type, featureType: featureType ? featureType : '', feature: feature ? feature : '', threshold: threshold};
 		this.features[page] = selectedFeatures;
 		(this.featureChangeListeners[page] || []).forEach((listener) => {
-			listener(selectedFeatures);
+			listener(selectedFeatures, id);
 		})
 	}
 
@@ -127,10 +127,17 @@ class API {
 		return this.maxValues;
 	}
 
-	setFeaturesScale(maxValues) {
+	setFeatureScales(maxValues) {
 		this.maxValues = maxValues;
 		this.maxValuesChangeListeners.forEach((listener) => {
-			listener(this.maxValues);
+			listener(this.maxValues, null);
+		})
+	}
+	
+	setFeatureScale(id, value) {
+		this.maxValues[id] = value;
+		this.maxValuesChangeListeners.forEach((listener) => {
+			listener(this.maxValues, id);
 		})
 	}
 
@@ -175,7 +182,9 @@ class API {
 	}
 
 	setActivePage(page) {
-		return this.activePage = page;
+		this.maxValues = [];
+		this.customValues = [0, 0, 0];
+		this.activePage = page;
 	}
 
 	

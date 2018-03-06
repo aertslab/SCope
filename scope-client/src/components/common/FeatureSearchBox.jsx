@@ -60,13 +60,17 @@ export default class FeatureSearch extends React.Component {
 
 	resetComponent() {
 		this.setState({ isLoading: false, results: [], value: '', selection: null })
-		BackendAPI.setActiveFeature(this.props.field, this.state.type, '', '', 0);
+		setTimeout(() => {
+			BackendAPI.setActiveFeature(this.props.field, this.state.type, '', '', 0);
+		}, 50);
 	}
 
 	handleResultSelect(e, { result }) {
 		if (DEBUG) console.log('handleResultSelect', e, result);
-		this.setState({ value: result.title })
-		BackendAPI.setActiveFeature(this.props.field, this.state.type, result.type, result.title, 0);
+		this.setState({ value: result.title, selection: null })
+		setTimeout(() => {
+			BackendAPI.setActiveFeature(this.props.field, this.state.type, result.type, result.title, 0);
+		}, 50);
 	}
 
 	handleTypeChange(type) {
@@ -74,15 +78,20 @@ export default class FeatureSearch extends React.Component {
 	}
 
 	handleSelectionChange(e, { result }) {
+		console.log('handleSelectionChange', e, result);
+		e.preventDefault();
 		this.setState({selection: result})
 	}
 
 	handleBlur(e) {
+		e.preventDefault();
 		let selection = this.state.selection;
 		if (DEBUG) console.log('handleBlur', e, selection);
 		if (selection) {
-			this.setState({ value: selection.title })
-			BackendAPI.setActiveFeature(this.props.field, this.state.type, selection.type, selection.title, 0);
+			this.setState({ value: selection.title, selection: null })
+			setTimeout(() => {
+				BackendAPI.setActiveFeature(this.props.field, this.state.type, selection.type, selection.title, 0);
+			}, 50);
 		}
 	}
 
