@@ -125,6 +125,7 @@ message Regulon {
   repeated string genes=1;
   repeated AUCThreshold autoThresholds=2;
   string defaultThreshold=3;
+  string motifName=4; 
 }
 
 message FileMetaData {

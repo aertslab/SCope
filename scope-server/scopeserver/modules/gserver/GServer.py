@@ -424,9 +424,13 @@ class SCope(s_pb2_grpc.MainServicer):
                 for threshold in regulon['allThresholds'].keys():
                     autoThresholds.append({"name": threshold, "threshold": regulon['allThresholds'][threshold]})
                 defaultThreshold = regulon['defaultThresholdName']
+                motifName = os.path.basename(regulon['motifData'])
+                break
+
         regulon = {"genes": regulonGenes,
                    "autoThresholds": autoThresholds,
-                   "defaultThreshold": defaultThreshold
+                   "defaultThreshold": defaultThreshold,
+                   "motifName": motifName
                    }
 
         return s_pb2.RegulonMetaDataReply(regulonMeta=regulon)
