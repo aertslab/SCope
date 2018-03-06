@@ -505,11 +505,11 @@ export default class Viewer extends Component {
 			hasCpmTranform: settings.hasCpmNormalization,
 			threshold: thresholds ? features.map((f) => {return f.threshold}) : [0, 0, 0],
 			scaleThresholded: this.props.scale,
-			annotation: queryAnnotations
-			// vmax: float
+			annotation: queryAnnotations,
+			vmax: [0, 0, 0]
 		};
 		console.log('using custom scale', scale);
-		if (scale) query['vmax'] = scale[0];
+		if (scale) query['vmax'] = scale;
 		if (DEBUG) console.log('getFeatureColors', query);
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {

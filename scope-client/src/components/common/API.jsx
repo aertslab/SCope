@@ -36,7 +36,7 @@ class API {
 
 		this.maxValues = [];
 		this.maxValuesChangeListeners = [];
-		this.customValues = null;
+		this.customValues = [0, 0, 0];
 		this.customValuesChangeListeners = [];
 	}
 

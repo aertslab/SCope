@@ -14,7 +14,7 @@ export default class ViewerToolbar extends Component {
 			activeFeatures: BackendAPI.getActiveFeatures(),
 			activePage: BackendAPI.getActivePage(),
 			featuresScale: BackendAPI.getFeaturesScale(),
-			customScale: [],
+			customScale: BackendAPI.getCustomScale(),
 			colors: BackendAPI.getColors(),
 
 		}
@@ -22,7 +22,7 @@ export default class ViewerToolbar extends Component {
 			this.setState({activeFeatures: features});
 		}
 		this.featuresScaleListener = (featuresScale, customScale) => {
-			this.setState({featuresScale: featuresScale, customScale: []});
+			this.setState({featuresScale: featuresScale, customScale: [0, 0, 0]});
 		}
 	}
 
@@ -46,6 +46,7 @@ export default class ViewerToolbar extends Component {
 							onAfterChange={(v) => {
 								this.handleUpdateScale(i, v);
 							}}
+							min={0.01}
 							step={0.01} 
 						/>
 					);
@@ -92,9 +93,6 @@ export default class ViewerToolbar extends Component {
 		if (DEBUG) console.log("handleUpdateScale", slider, value);
 		let scale = this.state.customScale;
 		scale[slider] = value;
-		_.times(3, i => {
-			scale[i] = value;	
-		})		
 		BackendAPI.setCustomScale(scale);
 		this.setState({customScale: scale});
 	}
