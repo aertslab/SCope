@@ -33,30 +33,21 @@ class API {
 		this.sidebarListeners = [];
 
 		this.colors = ["red", "green", "blue"];
+
+		this.maxValues = [];
+		this.maxValuesChangeListeners = [];
+		this.customValues = null;
+		this.customValuesChangeListeners = [];
 	}
 
 	getConnection() {
 		return this.GBCConnection;
 	}
 
+
+
 	getActiveLoom() {
 		return this.activeLoom;
-	}
-
-	getActiveCoordinates() {
-		return this.activeCoordinates;
-	}
-
-	getActiveLoomMetadata() {
-		return this.loomFiles[this.activeLoom];
-	}
-
-	setLoomFiles(files) {		
-		this.loomFiles = {};
-		Object.keys(files).map((i) => {
-			let file = files[i];
-			this.loomFiles[file.loomFilePath] = file;
-		});
 	}
 
 	setActiveLoom(loom) {
@@ -73,6 +64,10 @@ class API {
 		})
 	}
 
+	getActiveLoomMetadata() {
+		return this.loomFiles[this.activeLoom];
+	}
+
 	onActiveLoomChange(listener) {
 		this.activeLoomChangeListeners.push(listener);
 	}
@@ -84,13 +79,27 @@ class API {
 		}
 	}
 
+	getActiveCoordinates() {
+		return this.activeCoordinates;
+	}
+
+
+
+	setLoomFiles(files) {		
+		this.loomFiles = {};
+		Object.keys(files).map((i) => {
+			let file = files[i];
+			this.loomFiles[file.loomFilePath] = file;
+		});
+	}
+
+
 
 	getActiveFeatures() {
-		console.log('getActiveFeatures', this.activePage);
 		return this.features[this.activePage] ? this.features[this.activePage] : [];
 	}
 
-	setActiveFeature(id, type, featureType, feature, threshold) {
+	setActiveFeature(id, type, featureType, feature, threshold, vmax) {
 		let page = this.activePage;
 		let selectedFeatures = this.features[page] || [this.emptyFeature, this.emptyFeature, this.emptyFeature];
 		selectedFeatures[id] = {type: type, featureType: featureType ? featureType : '', feature: feature ? feature : '', threshold: threshold};
@@ -112,6 +121,55 @@ class API {
 		}
 	}
 
+
+	
+	getFeaturesScale() {
+		return this.maxValues;
+	}
+
+	setFeaturesScale(maxValues) {
+		this.maxValues = maxValues;
+		this.maxValuesChangeListeners.forEach((listener) => {
+			listener(this.maxValues);
+		})
+	}
+
+	onFeaturesScaleChange(listener) {
+		this.maxValuesChangeListeners.push(listener);
+	}
+
+	removeFeaturesScaleChange(listener) {
+		let i = this.maxValuesChangeListeners.indexOf(listener)
+		if (i > -1) {
+			this.maxValuesChangeListeners.splice(i, 1);
+		}
+	}
+
+
+	getCustomScale() {
+		return this.customValues;
+	}
+
+	setCustomScale(scale) {
+		this.customValues = scale;
+		this.customValuesChangeListeners.forEach((listener) => {
+			listener(this.customValues);
+		})
+	}
+
+	onCustomScaleChange(listener) {
+		this.customValuesChangeListeners.push(listener);
+	}
+
+	removeCustomScaleChange(listener) {
+		let i = this.customValuesChangeListeners.indexOf(listener)
+		if (i > -1) {
+			this.customValuesChangeListeners.splice(i, 1);
+		}
+	}
+
+
+	
 	getActivePage() {
 		return this.activePage;		
 	}
@@ -119,6 +177,8 @@ class API {
 	setActivePage(page) {
 		return this.activePage = page;
 	}
+
+	
 
 	getSettings() {
 		return this.settings;
@@ -142,6 +202,8 @@ class API {
 		}
 	};
 	
+	
+
 	getViewerTool() {
 		return this.viewerTool;
 	}
@@ -165,6 +227,7 @@ class API {
 	};
 	
 
+	
 	getViewerSelections() {
 		return this.viewerSelections;
 	}
@@ -208,6 +271,7 @@ class API {
 	}
 
 
+	
 	setViewerTransform(transform) {
 		this.viewerTransform = transform;
 		this.viewerTransformChangeListeners.forEach((listener) => {
@@ -231,6 +295,7 @@ class API {
 	}
 
 
+	
 	getSidebarVisible() {
 		return this.sidebarVisible;
 	}
@@ -253,6 +318,8 @@ class API {
 		}
 	}
 	
+	
+
 	getColors() {
 		return this.colors;
 	}

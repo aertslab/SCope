@@ -21,6 +21,7 @@ export default class Viewer extends Component {
 				down: false
 			},
 			activeTool: BackendAPI.getViewerTool(),
+			customScale: BackendAPI.getCustomScale(),
 			benchmark: {}
 		}
 		this.zoomTransform = {
@@ -48,6 +49,11 @@ export default class Viewer extends Component {
 		this.viewerTransformListener = (t) => {
 			this.onViewerTransformChange(t);
 		}
+		this.customScaleListener = (scale) => {
+			console.log('viewer custom scale', scale);
+			this.setState({customScale: scale});
+			this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, scale);
+		}
 	}
 
 	render() {
@@ -64,6 +70,7 @@ export default class Viewer extends Component {
 		BackendAPI.onViewerToolChange(this.viewerToolListener);
 		BackendAPI.onViewerSelectionsChange(this.viewerSelectionListener);
 		BackendAPI.onViewerTransformChange(this.viewerTransformListener);
+		BackendAPI.onCustomScaleChange(this.customScaleListener);
 	}
 
 	componentDidMount() {
@@ -118,6 +125,7 @@ export default class Viewer extends Component {
 		BackendAPI.removeViewerToolChange(this.viewerToolListener);
 		BackendAPI.removeViewerSelectionsChange(this.viewerSelectionListener);
 		BackendAPI.removeViewerTransformChange(this.viewerTransformListener);
+		BackendAPI.removeCustomScaleChange(this.customScaleListener);
 		this.destroyGraphics();
 	}
 /*
@@ -467,7 +475,7 @@ export default class Viewer extends Component {
 		this.endBenchmark("transformPoints");
 	}
 
-	getFeatureColors(features, loomFile, thresholds, annotations) {		
+	getFeatureColors(features, loomFile, thresholds, annotations, scale) {		
 
 		this.setState({activeFeatures: JSON.parse(JSON.stringify(features))});
 
@@ -499,6 +507,8 @@ export default class Viewer extends Component {
 			annotation: queryAnnotations
 			// vmax: float
 		};
+		console.log('using custom scale', scale);
+		if (scale) query['vmax'] = scale[0];
 		if (DEBUG) console.log('getFeatureColors', query);
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
@@ -506,7 +516,11 @@ export default class Viewer extends Component {
 				this.endBenchmark("getFeatureColors")
 				if(response !== null) {
 					this.setState({colors: response.color});
-					this.setState({vmax: response.vmax});
+					let vmax = [];
+					_.times(3, i => {
+						vmax[i] = response.vmax;
+					});
+					if (!scale)	BackendAPI.setFeaturesScale(vmax);
 					this.updateDataPoints();
 				} else {
 					this.resetDataPoints();
