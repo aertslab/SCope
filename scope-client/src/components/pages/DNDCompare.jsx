@@ -27,7 +27,7 @@ class DNDCompare extends Component {
 			activeAnnotation: -1,
 			activeClustering: -1,
 			viewerAnnotations: [],
-			activeThresholds: [0,0,0]
+			activeThresholds: [0, 0, 0]
 		}
 		this.activeLoomListener = (loom, metadata, coordinates) => {
 			this.setState({activeLoom: loom, activeCoordinates: coordinates, metadata: metadata});
@@ -137,6 +137,7 @@ class DNDCompare extends Component {
 											activeCoordinates={activeCoordinates}
 											activeAnnotations={viewerAnnotations[name]}
 											thresholds={activeThresholds}
+											customScale={true}
 											/>
 									</Grid.Column>
 								);
@@ -173,8 +174,9 @@ class DNDCompare extends Component {
 						<Accordion styled>
 						{annotationTabs()}
 						</Accordion>
-						{/*
 						<br />
+						{/*
+
 						<Accordion styled>
 						{clusteringTabs()}
 						</Accordion>
