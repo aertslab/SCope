@@ -129,71 +129,66 @@ class SCope(s_pb2_grpc.MainServicer):
     @lru_cache(maxsize=32)
     def build_searchspace(self, loom_file_path):
         loom = self.get_loom_connection(loom_file_path)
+        meta = True
         try:
             metaData = json.loads(loom.attrs.MetaData)
         except ValueError:
             metaData = self.decompress_meta(loom.attrs.MetaData)
+        except AttributeError:
+            meta = False
+        print(metaData)
+
+        def add_element(searchSpace, elements, elementName):
+            print(elements)
+            if type(elements) != str:
+                for element in elements:
+                    searchSpace[(element.casefold(), elementName)] = element
+            else:
+                searchSpace[(elements.casefold(), elementName)] = elements
+            return searchSpace
 
         searchSpace = {}
+        searchSpace = add_element(searchSpace, loom.ra.Gene, 'gene')
+        searchSpace = add_element(searchSpace, loom.ra.Regulons.dtype.names, 'regulon')
         try:
-            regulonList = list(loom.ra.Regulons.dtype.names)
+            searchSpace = add_element(searchSpace, loom.ra.Regulons.dtype.names, 'regulon')
         except AttributeError:
-            regulonList = []
+            pass  # No regulons in file
 
-        origSpace = list(loom.ra.Gene) + regulonList
-        searchSpace = [x.casefold() for x in loom.ra.Gene]
-        searchSpace += [x.casefold() for x in regulonList]
-
-        allClusters = []
-        allClustersfType = []
-        for clustering in metaData['clusterings']:
-            for cluster in clustering['clusters']:
-                allClustersfType.append('Clustering: {0}'.format(clustering['name']))
-                allClusters.append(cluster['description'])
-            allClustersfType.append('Clustering: {0}'.format(clustering['name']))
-            allClusters.append('All Clusters')
-
-        searchSpace += [x.casefold() for x in allClusters]
-        origSpace += allClusters
-        fType = ['gene' for x in loom.ra.Gene] + ['regulon' for x in regulonList] + allClustersfType
-
-        return origSpace, searchSpace, fType
+        if meta:
+            for clustering in metaData['clusterings']:
+                allClusters = ['All Clusters']
+                for cluster in clustering['clusters']:
+                    allClusters.append(cluster['description'])
+                searchSpace = add_element(searchSpace, allClusters, 'Clustering: {0}'.format(clustering['name']))
+        return searchSpace
 
     def get_features(self, loom_file_path, query):
 
-        origSpace, searchSpace, fType = self.build_searchspace(loom_file_path)
+        searchSpace = self.build_searchspace(loom_file_path)
         # Filter the genes by the query
 
         # Allow caps innsensitive searching, minor slowdown
         start_time = time.time()
         res = []
-        resF = []
 
         print("Debug: %s seconds elapsed making search space ---" % (time.time() - start_time))
+        queryCF = query.casefold()
+        res = [x for x in searchSpace.keys() if queryCF in x[0]]
 
-        for n, x in enumerate(searchSpace):
-            if query.casefold() in x:
-                res.append(origSpace[n])
-                resF.append(fType[n])
         for n, r in enumerate(res):
-            if r.casefold().startswith(query.casefold()) or query in r:
+            if r[0].startswith(queryCF) or query in r[0]:
                 r = res.pop(n)
                 res = [r] + res
-                f = resF.pop(n)
-                resF = [f] + resF
         for n, r in enumerate(res):
-            if r == query or r.casefold() == query.casefold():
+            if r[0] == query or r[0] == queryCF:
                 r = res.pop(n)
                 res = [r] + res
-                f = resF.pop(n)
-                resF = [f] + resF
-        # res = list(filter(lambda x: x.startswith(query), loom.ra.Gene))
-        # res_json = json.dumps({"gene": {"name": "gene", "results": list(map(lambda x: {"title":x,"description":"","image":"", "price":""}, res))}}, ensure_ascii=False)
-        # print(res_json)
+
         print("Debug: " + str(len(res)) + " genes matching '" + query + "'")
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        return {'feature': res,
-                'featureType': resF}
+        return {'feature': [searchSpace[r] for r in res],
+                'featureType': [r[1] for r in res]}
 
     def get_anno_cells(self, loom_file_path, annotations):
         loom = self.get_loom_connection(loom_file_path)
