@@ -293,8 +293,8 @@ class SCope(s_pb2_grpc.MainServicer):
                         log_transform=request.hasLogTranform,
                         cpm_normalise=request.hasCpmTranform,
                         annotation=request.annotation)
-                    if request.vmax != 0.0:
-                        vmax = request.vmax
+                    if request.vmax[n] != 0.0:
+                        vmax = request.vmax[n]
                     else:
                         vmax = self.getVmax(vals)
                     vals = np.round((vals / vmax) * 255)
