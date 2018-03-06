@@ -75,7 +75,7 @@ export default class Regulon extends Component {
                         <b>Cells passing thresholds</b>
                         <Viewer name="auc" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={activeFeatures} scale={false} activeCoordinates={activeCoordinates} thresholds={true} />
                         <b>Expression levels</b>
-                        <Viewer name="expr" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={geneFeatures} activeCoordinates={activeCoordinates} settings={true}/>
+                        <Viewer name="expr" height={3 * this.height / 2 - 15} loomFile={activeLoom} activeFeatures={geneFeatures} activeCoordinates={activeCoordinates} settings={true} customScale={true} />
                     </Grid.Column>
                     <Grid.Column width={3}>
                         <b>Cell selections</b><hr />

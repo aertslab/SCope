@@ -50,9 +50,10 @@ export default class Viewer extends Component {
 			this.onViewerTransformChange(t);
 		}
 		this.customScaleListener = (scale) => {
-			console.log('viewer custom scale', scale);
-			this.setState({customScale: scale});
-			this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, scale);
+			if (this.props.customScale) {
+				this.setState({customScale: scale});
+				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, scale);
+			}
 		}
 	}
 
@@ -520,7 +521,9 @@ export default class Viewer extends Component {
 					_.times(3, i => {
 						vmax[i] = response.vmax;
 					});
-					if (!scale)	BackendAPI.setFeaturesScale(vmax);
+					if (this.props.customScale && !scale) {
+						BackendAPI.setFeaturesScale(vmax);
+					}
 					this.updateDataPoints();
 				} else {
 					this.resetDataPoints();
