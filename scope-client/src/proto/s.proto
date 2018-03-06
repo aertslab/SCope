@@ -42,7 +42,7 @@ message CellColorByFeaturesRequest {
 
 message CellColorByFeaturesReply {
   repeated string color=1;
-  float vmax=2;
+  repeated float vmax=2;
 }
 
 message CellAUCValuesByFeaturesRequest {
