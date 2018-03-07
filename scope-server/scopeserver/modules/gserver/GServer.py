@@ -17,6 +17,7 @@ import glob
 import zlib
 import base64
 from functools import lru_cache
+from itertools import compress
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "bf9360", "1d331a", "79baf2", "deb6f2",
@@ -433,7 +434,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getMarkerGenes(self, request, context):
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
-        genes = loom.ra.Gene[loom.ra["ClusteringMarkers_{0}".format(request.clusteringID)][request.clusterID] == 1]
+        genes = loom.ra.Gene[loom.ra["ClusterMarkers_{0}".format(request.clusteringID)][request.clusterID] == 1]
         return(s_pb2.MarkerGenesReply(genes=genes))
 
     def getMyLooms(self, request, context):
@@ -461,6 +462,19 @@ class SCope(s_pb2_grpc.MainServicer):
                                              fileMetaData=fileMeta))
         return s_pb2.MyLoomsReply(myLooms=my_looms)
 
+    def translateLassoSelection(self, request, context):
+        src_loom = self.get_loom_filepath(request.srcLoomFilePath)
+        dest_loom = self.get_loom_filepath(request.destLoomFilePath)
+        src_cell_ids = [src_loom.col_attrs['CellID'][i] for i in request.cellIndices]
+        src_fast_index = set(src_cell_ids)
+        dest_mask = [x in src_fast_index for x in dest_loom.col_attrs['CellID']]
+        dest_cell_indices = list(compress(range(len(dest_mask)), dest_mask))
+        return s_pb2.TranslateLassoSelectionReply(cellIndices=dest_cell_indices)
+    
+    def getCellIDs(self, request, context):
+        loom = self.get_loom_filepath(request.loomFilePath)
+        cell_ids = [loom.col_attrs['CellID'][i] for i in request.cellIndices]
+        return s_pb2.CellIDsReply(cellIds=cell_ids)
 
 def serve(run_event, port=50052):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

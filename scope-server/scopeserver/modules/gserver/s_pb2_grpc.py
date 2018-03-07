@@ -54,6 +54,16 @@ class MainStub(object):
         request_serializer=s__pb2.MyLoomsRequest.SerializeToString,
         response_deserializer=s__pb2.MyLoomsReply.FromString,
         )
+    self.translateLassoSelection = channel.unary_unary(
+        '/scope.Main/translateLassoSelection',
+        request_serializer=s__pb2.TranslateLassoSelectionRequest.SerializeToString,
+        response_deserializer=s__pb2.TranslateLassoSelectionReply.FromString,
+        )
+    self.getCellIDs = channel.unary_unary(
+        '/scope.Main/getCellIDs',
+        request_serializer=s__pb2.CellIDsRequest.SerializeToString,
+        response_deserializer=s__pb2.CellIDsReply.FromString,
+        )
 
 
 class MainServicer(object):
@@ -116,6 +126,20 @@ class MainServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def translateLassoSelection(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def getCellIDs(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_MainServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -158,6 +182,16 @@ def add_MainServicer_to_server(servicer, server):
           servicer.getMyLooms,
           request_deserializer=s__pb2.MyLoomsRequest.FromString,
           response_serializer=s__pb2.MyLoomsReply.SerializeToString,
+      ),
+      'translateLassoSelection': grpc.unary_unary_rpc_method_handler(
+          servicer.translateLassoSelection,
+          request_deserializer=s__pb2.TranslateLassoSelectionRequest.FromString,
+          response_serializer=s__pb2.TranslateLassoSelectionReply.SerializeToString,
+      ),
+      'getCellIDs': grpc.unary_unary_rpc_method_handler(
+          servicer.getCellIDs,
+          request_deserializer=s__pb2.CellIDsRequest.FromString,
+          response_serializer=s__pb2.CellIDsReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
