@@ -79,7 +79,7 @@ export default class FeatureSearch extends React.Component {
 	resetComponent() {
 		this.setState({ isLoading: false, results: [], value: '', selection: null })
 		setTimeout(() => {
-			BackendAPI.setActiveFeature(this.props.field, this.state.type, '', '', 0);
+			BackendAPI.setActiveFeature(this.props.field, this.state.type, '', '', 0, null);
 		}, 50);
 	}
 
@@ -91,6 +91,7 @@ export default class FeatureSearch extends React.Component {
 				regulon: feature
 			}
 			BackendAPI.getConnection().then((gbc) => {
+				console.log('getRegulonMetaData', regulonQuery);
 				gbc.services.scope.Main.getRegulonMetaData(regulonQuery, (regulonErr, regulonResponse) => {
 					console.log('getRegulonMetaData', regulonResponse);
 					let metadata = regulonResponse ? regulonResponse.regulonMeta : null;
@@ -107,7 +108,7 @@ export default class FeatureSearch extends React.Component {
 		} else {
 			setTimeout(() => {
 				this.setState({metadata: null});
-				BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0);
+				BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, null);
 			}, 50);
 		}
 	}

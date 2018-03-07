@@ -120,7 +120,7 @@ export default class Regulon extends Component {
 
     onThresholdChange(idx, threshold) {
         let feature = this.state.activeFeatures[idx];
-        BackendAPI.setActiveFeature(idx, feature.type, feature.featureType, feature.feature, threshold);
+        BackendAPI.setActiveFeature(idx, feature.type, feature.featureType, feature.feature, threshold, feature.metadata);
     }
 
 }
