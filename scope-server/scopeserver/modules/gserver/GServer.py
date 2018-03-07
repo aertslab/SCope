@@ -290,7 +290,7 @@ class SCope(s_pb2_grpc.MainServicer):
         n_cells = self.get_nb_cells(loomFilePath)
         features = []
         hex_vec = []
-        vmax = []
+        vmax = np.zeros(3)
         for n, feature in enumerate(request.feature):
             if request.featureType[n] == 'gene':
                 if feature != '':
@@ -301,9 +301,9 @@ class SCope(s_pb2_grpc.MainServicer):
                         cpm_normalise=request.hasCpmTranform,
                         annotation=request.annotation)
                     if request.vmax[n] != 0.0:
-                        vmax.append(request.vmax[n])
+                        vmax[n] = request.vmax[n]
                     else:
-                        vmax.append(self.getVmax(vals))
+                        vmax[n] = self.getVmax(vals)
                     vals = np.round((vals / vmax[n]) * 255)
                     features.append([x if x <= 255 else 255 for x in vals])
                 else:
@@ -314,9 +314,9 @@ class SCope(s_pb2_grpc.MainServicer):
                                                regulon=feature,
                                                annotation=request.annotation)
                     if request.vmax[n] != 0.0:
-                        vmax.append(request.vmax[n])
+                        vmax[n] = request.vmax[n]
                     else:
-                        vmax.append(self.getVmax(vals))
+                        vmax[n] = self.getVmax(vals)
                     if request.scaleThresholded:
                         vals = ([auc if auc >= request.threshold[n] else 0 for auc in vals])
                         vals = np.round((vals / vmax[n]) * 255)
@@ -465,15 +465,15 @@ class SCope(s_pb2_grpc.MainServicer):
     def translateLassoSelection(self, request, context):
         src_loom = self.get_loom_filepath(request.srcLoomFilePath)
         dest_loom = self.get_loom_filepath(request.destLoomFilePath)
-        src_cell_ids = [src_loom.col_attrs['CellID'][i] for i in request.cellIndices]
+        src_cell_ids = [src_loom.ca['CellID'][i] for i in request.cellIndices]
         src_fast_index = set(src_cell_ids)
-        dest_mask = [x in src_fast_index for x in dest_loom.col_attrs['CellID']]
+        dest_mask = [x in src_fast_index for x in dest_loom.ca['CellID']]
         dest_cell_indices = list(compress(range(len(dest_mask)), dest_mask))
         return s_pb2.TranslateLassoSelectionReply(cellIndices=dest_cell_indices)
     
     def getCellIDs(self, request, context):
         loom = self.get_loom_filepath(request.loomFilePath)
-        cell_ids = [loom.col_attrs['CellID'][i] for i in request.cellIndices]
+        cell_ids = [loom.ca['CellID'][i] for i in request.cellIndices]
         return s_pb2.CellIDsReply(cellIds=cell_ids)
 
 def serve(run_event, port=50052):
