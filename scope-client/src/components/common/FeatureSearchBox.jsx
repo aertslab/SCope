@@ -93,11 +93,13 @@ export default class FeatureSearch extends React.Component {
 			BackendAPI.getConnection().then((gbc) => {
 				gbc.services.scope.Main.getRegulonMetaData(regulonQuery, (regulonErr, regulonResponse) => {
 					console.log('getRegulonMetaData', regulonResponse);
-					let metadata = regulonResponse.regulonMeta;
+					let metadata = regulonResponse ? regulonResponse.regulonMeta : null;
 					let threshold = 0;
-					metadata.autoThresholds.map((t) => {
-						if (t.name == metadata.defaultThreshold) threshold = t.threshold;
-					})
+					if (metadata) {
+						metadata.autoThresholds.map((t) => {
+							if (t.name == metadata.defaultThreshold) threshold = t.threshold;
+						})
+					}
 					this.setState({metadata: metadata});
 					BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, threshold, metadata);
 				});

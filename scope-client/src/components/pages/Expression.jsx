@@ -61,6 +61,7 @@ export default class Expression extends Component {
                             activeCoordinates={activeCoordinates} 
                             customScale={true} 
                             settings={true}
+                            scale={true}
                         />
                     </Grid.Column>
                     <Grid.Column width={3}>

@@ -201,6 +201,7 @@ export default class AppSidebar extends Component {
 		BackendAPI.setActiveLoom(l);
 		let metadata = BackendAPI.getActiveLoomMetadata();
 		this.setState({ activeLoom: l, metadata: metadata})
+		this.props.handleLoomChange(metadata);
 		if (metadata.fileMetaData.hasExtraEmbeddings) {
 			this.setState({ activeCoordinates: metadata.cellMetaData.embeddings[0] });
 		} else {

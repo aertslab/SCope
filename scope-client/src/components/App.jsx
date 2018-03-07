@@ -12,7 +12,8 @@ export default class App extends Component {
 		super();
 		this.state = {
 			isSidebarVisible: true,
-			currentPage: BackendAPI.getActivePage()
+			currentPage: BackendAPI.getActivePage(),
+			metadata: BackendAPI.getActiveLoomMetadata(),
 		}
 	}
 
@@ -20,15 +21,20 @@ export default class App extends Component {
 		return (
 			<Segment className="parentView">
 				<ReactResizeDetector handleHeight skipOnMount onResize={this.onResize.bind(this)} />
-				<AppHeader toggleSidebar={this.toggleSidebar.bind(this)} togglePage={this.togglePage.bind(this)} currentPage={this.state.currentPage} />
+				<AppHeader toggleSidebar={this.toggleSidebar.bind(this)} togglePage={this.togglePage.bind(this)} currentPage={this.state.currentPage} metadata={this.state.metadata} />
 				<Sidebar.Pushable>
-					<AppSidebar currentPage={this.state.currentPage} visible={this.state.isSidebarVisible} />
+					<AppSidebar currentPage={this.state.currentPage} visible={this.state.isSidebarVisible} handleLoomChange={this.handleLoomChange.bind(this)} />
 					<Sidebar.Pusher>
 						<AppContent currentPage={this.state.currentPage} />
 					</Sidebar.Pusher>
 				</Sidebar.Pushable>
 			</Segment>
 		);
+	}
+
+
+	handleLoomChange(meta) {
+		this.setState({metadata: meta})
 	}
 
 	toggleSidebar() {

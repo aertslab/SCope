@@ -8,11 +8,17 @@ export default class ViewerSidebar extends Component {
     constructor() {
         super();
         this.state = {
+            activePage: BackendAPI.getActivePage(),
             lassoSelections: BackendAPI.getViewerSelections()
         }
-        this.selectionsListener = (selections) => {
-            this.setState({lassoSelections: selections});
+        this.featuresListener = (features) => {
+
         }
+        this.selectionsListener = (selections) => {
+            //getCellMetaData 
+            this.getMetadata(selections);
+            this.setState({lassoSelections: selections});
+        }        
     }
 
     render() {
@@ -55,10 +61,12 @@ export default class ViewerSidebar extends Component {
 
     componentWillMount() {
         BackendAPI.onViewerSelectionsChange(this.selectionsListener);
+        BackendAPI.onActiveFeaturesChange(this.state.activePage, this.featuresListener);
     }
 
     componentWillUnmount() {
         BackendAPI.removeViewerSelectionsChange(this.selectionsListener);
+        BackendAPI.removeActiveFeaturesChange(this.state.activePage, this.featuresListener);
     }
 
     toggleLassoSelection(id) {
@@ -67,6 +75,38 @@ export default class ViewerSidebar extends Component {
 
     removeLassoSelection(id) {
         BackendAPI.removeViewerSelection(id);
+    }
+
+    getMetadata(selections) {
+        let settings = BackendAPI.getSettings();
+        let loomFilePath = BackendAPI.getActiveLoom();
+        let coordinates = BackendAPI.getActiveCoordinates();
+        let features = BackendAPI.getActiveFeatures();
+        let selectedGenes = [];
+        let selectedRegulons = [];
+        features.map(f => {
+            if (f.featureType == 'gene') selectedGenes.push(f.feature);
+            if (f.featureType == 'regulon') selectedRegulons.push(f.feature);
+        })
+        selections.map(s => {
+            console.log('selectionsListener', s, );
+            let query = {
+                loomFilePath: loomFilePath,
+                cellIndices: s.points,
+                hasLogTranform: settings.hasLogTransform,
+                hasCpmTranform: settings.hasCpmNormalization,
+                selectedGenes: selectedGenes,    // List of genes to return epxression values for
+                selectedRegulons: selectedRegulons, // As above, for regulons and AUC values
+                clusterings: [], // IDs of clustering values to return per cell
+                annotations: []  // String name of annotations to return (from global metadata)
+            }
+            console.log('getCellMetaData', query);
+            BackendAPI.getConnection().then((gbc) => {
+                gbc.services.scope.Main.getCellMetaData(query, (err, response) => {
+                    console.log('getCellMetaData', response);
+                });
+            });
+        });
     }
 
 }
