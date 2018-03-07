@@ -12,12 +12,11 @@ export default class ViewerSidebar extends Component {
             lassoSelections: BackendAPI.getViewerSelections()
         }
         this.featuresListener = (features) => {
-
+            this.getMetadata(this.state.lassoSelections);
         }
         this.selectionsListener = (selections) => {
-            //getCellMetaData 
-            this.getMetadata(selections);
             this.setState({lassoSelections: selections});
+            this.getMetadata(selections);
         }        
     }
 
@@ -84,12 +83,37 @@ export default class ViewerSidebar extends Component {
         let features = BackendAPI.getActiveFeatures();
         let selectedGenes = [];
         let selectedRegulons = [];
+        let selectedClusters = [];
+        let metadata = BackendAPI.getActiveLoomMetadata();
         features.map(f => {
             if (f.featureType == 'gene') selectedGenes.push(f.feature);
             if (f.featureType == 'regulon') selectedRegulons.push(f.feature);
+            if (f.featureType.indexOf('Clustering:') == 0) {
+                metadata.cellMetaData.clusterings.map( clustering => {
+                    if (f.featureType.indexOf(clustering.name) != -1) {
+                        clustering.clusters.map(c => {
+                            if (c.description == f.feature) {
+                                selectedClusters.push({clusteringID: clustering.id, clusterID: c.id});
+                            }
+                        })                        
+                    }
+                })
+            }
+        })
+        selectedClusters.map(c => {
+            let query = {
+                loomFilePath: loomFilePath,
+                clusteringID: c.clusteringID,
+                clusterID: c.clusterID
+            }
+            console.log('getMarkerGenes', query);
+            BackendAPI.getConnection().then((gbc) => {
+                gbc.services.scope.Main.getMarkerGenes(query, (err, response) => {
+                    console.log('getMarkerGenes', response);
+                });
+            });
         })
         selections.map(s => {
-            console.log('selectionsListener', s, );
             let query = {
                 loomFilePath: loomFilePath,
                 cellIndices: s.points,
