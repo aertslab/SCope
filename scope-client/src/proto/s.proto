@@ -26,6 +26,7 @@ service Main {
   rpc getMarkerGenes (MarkerGenesRequest) returns (MarkerGenesReply) {}
   rpc getMyLooms (MyLoomsRequest) returns (MyLoomsReply) {}
   rpc translateLassoSelection (TranslateLassoSelectionRequest) returns (TranslateLassoSelectionReply) {}
+  rpc getCellIDs (CellIDsRequest) returns (CellIDsReply) {}
 }
 
 
@@ -195,4 +196,13 @@ message TranslateLassoSelectionRequest {
 
 message TranslateLassoSelectionReply {
   repeated int32 cellIndices=1;
+}
+
+message CellIDsRequest {
+  string loomFilePath=1;
+  repeated int32 cellIndices=2;
+}
+
+message CellIDsReply {
+  repeated string cellIds=1;
 }

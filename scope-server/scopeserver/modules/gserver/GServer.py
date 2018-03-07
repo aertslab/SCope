@@ -469,7 +469,12 @@ class SCope(s_pb2_grpc.MainServicer):
         src_fast_index = set(src_cell_ids)
         dest_mask = [x in src_fast_index for x in dest_loom.col_attrs['CellID']]
         dest_cell_indices = list(compress(range(len(dest_mask)), dest_mask))
-        return s_pb2.translateLassoSelection(cellIndices=dest_cell_indices)
+        return s_pb2.TranslateLassoSelectionReply(cellIndices=dest_cell_indices)
+    
+    def getCellIDs(self, request, context):
+        loom = self.get_loom_filepath(request.loomFilePath)
+        cell_ids = [loom.col_attrs['CellID'][i] for i in request.cellIndices]
+        return s_pb2.CellIDsReply(cellIds=cell_ids)
 
 def serve(run_event, port=50052):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
