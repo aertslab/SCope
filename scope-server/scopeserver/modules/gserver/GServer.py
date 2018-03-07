@@ -17,6 +17,7 @@ import glob
 import zlib
 import base64
 from functools import lru_cache
+from itertools import compress
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "bf9360", "1d331a", "79baf2", "deb6f2",
@@ -461,6 +462,14 @@ class SCope(s_pb2_grpc.MainServicer):
                                              fileMetaData=fileMeta))
         return s_pb2.MyLoomsReply(myLooms=my_looms)
 
+    def translateLassoSelection(self, request, context):
+        src_loom = self.get_loom_filepath(request.srcLoomFilePath)
+        dest_loom = self.get_loom_filepath(request.destLoomFilePath)
+        src_cell_ids = [src_loom.col_attrs['CellID'][i] for i in request.cellIndices]
+        src_fast_index = set(src_cell_ids)
+        dest_mask = [x in src_fast_index for x in dest_loom.col_attrs['CellID']]
+        dest_cell_indices = list(compress(range(len(dest_mask)), dest_mask))
+        return s_pb2.translateLassoSelection(cellIndices=dest_cell_indices)
 
 def serve(run_event, port=50052):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

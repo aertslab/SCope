@@ -25,6 +25,7 @@ service Main {
   rpc getRegulonMetaData (RegulonMetaDataRequest) returns (RegulonMetaDataReply) {}
   rpc getMarkerGenes (MarkerGenesRequest) returns (MarkerGenesReply) {}
   rpc getMyLooms (MyLoomsRequest) returns (MyLoomsReply) {}
+  rpc translateLassoSelection (TranslateLassoSelectionRequest) returns (TranslateLassoSelectionReply) {}
 }
 
 
@@ -184,4 +185,14 @@ message MyLoom {
 
 message MyLoomsReply {
   repeated MyLoom myLooms=1;
+}
+
+message TranslateLassoSelectionRequest {
+  string srcLoomFilePath=1;
+  string destLoomFilePath=2;
+  repeated int32 cellIndices=3;
+}
+
+message TranslateLassoSelectionReply {
+  repeated int32 cellIndices=1;
 }
