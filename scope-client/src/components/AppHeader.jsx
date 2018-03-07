@@ -12,55 +12,83 @@ export default class AppHeader extends Component {
 	}
 
 	render() {
-		const { metadata } = this.props;
-
+		const { metadata, currentPage, togglePage } = this.props;
+		console.log(currentPage);
 		let infoTab = () => {
 			if (metadata) return (
 				<Menu.Item>
-					<Button basic onClick={this.selectTab.bind(this)} active={this.props.currentPage == 'dataset'} page='dataset'>
+					<Button basic onClick={this.selectTab.bind(this)} active={currentPage == 'dataset'} page='dataset'>
 						Dataset info
 					</Button>
 				</Menu.Item>
 			);
+			else if (currentPage == 'dataset') {
+				togglePage('welcome');
+			}
 		}
 		let geneTab = () => {
 			if (metadata) return (
 				<Menu.Item>
-					<Button basic onClick={this.selectTab.bind(this)} active={this.props.currentPage == 'expression'} page='expression'>
+					<Button basic onClick={this.selectTab.bind(this)} active={currentPage == 'expression'} page='expression'>
 						Gene expression
 					</Button>
 				</Menu.Item>
 			);
+			else if (currentPage == 'expression') {
+				togglePage('welcome');
+			}
 		}
 
 		let regulonTab = () => {
 			if (metadata && metadata.fileMetaData.hasRegulonsAUC) return (
 				<Menu.Item>
-					<Button basic onClick={this.selectTab.bind(this)} active={this.props.currentPage == 'regulon'} page='regulon'>
+					<Button basic onClick={this.selectTab.bind(this)} active={currentPage == 'regulon'} page='regulon'>
 						Regulon
 					</Button>
 				</Menu.Item>
 			);
+			else if (currentPage == 'regulon') {
+				togglePage('welcome');
+			}
 		}
 
 		let compare1Tab = () => {
 			if (metadata && metadata.cellMetaData && metadata.cellMetaData.annotations.length) return (
 				<Menu.Item>
-					<Button basic onClick={this.selectTab.bind(this)} active={this.props.currentPage == 'comparison'} page='comparison'>
+					<Button basic onClick={this.selectTab.bind(this)} active={currentPage == 'comparison'} page='comparison'>
 						Compare
 					</Button>
 				</Menu.Item>
 			);
+			else if (currentPage == 'comparison') {
+				togglePage('welcome');
+			}
+		}
+
+		let compare1DNDTab = () => {
+			if (metadata && metadata.cellMetaData && metadata.cellMetaData.annotations.length) return (
+				<Menu.Item>
+					<Button basic onClick={this.selectTab.bind(this)} active={currentPage == 'dndcompare'} page='dndcompare'>
+						DND Compare
+					</Button>
+				</Menu.Item>
+			);
+			else if (currentPage == 'dndcompare') {
+				togglePage('welcome');
+			}
 		}
 
 		let compare2Tab = () => {
 			if (metadata && metadata.cellMetaData && metadata.cellMetaData.annotations.length) return (
 				<Menu.Item>
-					<Button basic onClick={this.selectTab.bind(this)} active={this.props.currentPage == 'dndcompare'} page='dndcompare'>
-						DND Compare 
+					<Button basic onClick={this.selectTab.bind(this)} active={currentPage == 'compare2'} page='compare2'>
+						Compare 2
 					</Button>
 				</Menu.Item>
 			);
+			else if (currentPage == 'compare2') {
+				togglePage('welcome');
+			}
 		}
 
 
@@ -70,7 +98,7 @@ export default class AppHeader extends Component {
 					<Icon name="sidebar" onClick={this.toggleSidebar.bind(this)} className="pointer" title="Toggle sidebar" />
 				</Menu.Item>
 				<Menu.Item>
-					<Button basic onClick={this.selectTab.bind(this)} active={this.props.currentPage == 'welcome'} page='welcome'>
+					<Button basic onClick={this.selectTab.bind(this)} active={currentPage == 'welcome'} page='welcome'>
 						<Icon name="home" />
 						SCope
 					</Button>
@@ -79,12 +107,13 @@ export default class AppHeader extends Component {
 				{geneTab()}
 				{regulonTab()}
 				{compare1Tab()}
-				{compare2Tab()}
+				{compare1DNDTab()}
 			</Menu>
 		);
 	}
 
-	componentWillReceiveProps() {
+	componentWillReceiveProps(nextProps) {
+		this.props = nextProps;
 		this.forceUpdate();
 	}
 

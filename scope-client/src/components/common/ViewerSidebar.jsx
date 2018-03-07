@@ -9,6 +9,7 @@ export default class ViewerSidebar extends Component {
 		super();
 		this.state = {
 			activePage: BackendAPI.getActivePage(),
+			modalID: null,
 			lassoSelections: BackendAPI.getViewerSelections()
 		}
 		this.selectionsListener = (selections) => {
@@ -45,7 +46,11 @@ export default class ViewerSidebar extends Component {
 							&nbsp;
 							<Icon name='trash' title='remove this selection' style={{display: 'inline'}} onClick={(e,d) => this.removeLassoSelection(lS.id)} className="pointer"  />
 							&nbsp;
-							<Metadata selectionId={i} />
+							<Icon name='search' title='show metadata for this selection' style={{display: 'inline'}} onClick={(e,d) => {
+								console.log('setting modalID', i)
+								this.setState({modalID: i});								
+								this.forceUpdate();
+							}} className="pointer"  />
 						</Grid.Column>
 					</Grid.Row>
 				)
@@ -53,9 +58,16 @@ export default class ViewerSidebar extends Component {
 		}
 
 		return (
-			<Grid>
-				{lassoSelections()}
-			</Grid>
+			<div>
+				<Grid>
+					{lassoSelections()}
+				</Grid>
+				<Metadata selectionId={this.state.modalID} onClose={() =>{
+					console.log('setting modalID', null)
+					this.setState({modalID: null});								
+					this.forceUpdate();
+				}} />
+			</div>
 		);
 	}
 
