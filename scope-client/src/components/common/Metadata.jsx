@@ -11,13 +11,14 @@ export default class Metadata extends Component {
 			loading: false,
 			annotation: null,
 			clustering: null,
+			cellIDs: null,
 			metadata : null
 		}
 	}
 
 	render() {
 		const { selectedGenes, selectedRegulons, selectedClusters } = this.getParsedFeatures();
-		const { metadata, selectionId } = this.state;
+		const { metadata, selectionId, cellIDs } = this.state;
 		let selections = BackendAPI.getViewerSelections();
 		let selection = selections[selectionId];
 		let loomMetadata = BackendAPI.getActiveLoomMetadata();
@@ -45,7 +46,7 @@ export default class Metadata extends Component {
 			if (metadata) {
 				return (
 					<Table.Row key={j} textAlign='center' >
-						<Table.Cell>{p}</Table.Cell>
+						<Table.Cell>{cellIDs ? cellIDs[j] : p}</Table.Cell>
 						<Table.Cell>{metadata.geneExpression[0] ? metadata.geneExpression[0].features[j] : ''}</Table.Cell>
 						<Table.Cell>{metadata.geneExpression[1] ? metadata.geneExpression[1].features[j] : ''}</Table.Cell>
 						<Table.Cell>{metadata.geneExpression[2] ? metadata.geneExpression[2].features[j] : ''}</Table.Cell>
@@ -129,7 +130,7 @@ export default class Metadata extends Component {
 							let data = [];
 							selection.points.map((p,i) => {
 								let cellData = {};
-								cellData['cellID'] = p;
+								cellData['cellID'] = cellIDs ? cellIDs[i] : p;
 								if (metadata) {
 									selectedGenes.map((g, j) => {
 										cellData[g]	= metadata.geneExpression[j].features[i];
@@ -198,11 +199,19 @@ export default class Metadata extends Component {
 			clusterings: this.state.clustering ? [this.state.clustering] : [],
 			annotations: this.state.annotation ? [this.state.annotation] : []
 		}
-		if (DEBUG) console.log('getCellMetaData', query);
+		let queryCells = {
+			loomFilePath: loomFilePath,
+			cellIndices: selections[this.state.selectionId].points,
+		}
 		BackendAPI.getConnection().then((gbc) => {
-			gbc.services.scope.Main.getCellMetaData(query, (err, response) => {
-				if (DEBUG) console.log('getCellMetaData', response);
-				this.setState({loading: false, metadata: response, selection: selections[this.state.selectionId]});
+			if (DEBUG) console.log('getCellIDs', queryCells);
+			gbc.services.scope.Main.getCellIDs(queryCells, (cellsErr, cellsResponse) => {
+				if (DEBUG) console.log('getCellIDs', cellsResponse);
+				if (DEBUG) console.log('getCellMetaData', query);
+				gbc.services.scope.Main.getCellMetaData(query, (err, response) => {
+					if (DEBUG) console.log('getCellMetaData', response);
+					this.setState({loading: false, metadata: response, selection: selections[this.state.selectionId], cellIDs: cellsResponse});
+				});
 			});
 		});
 	}
