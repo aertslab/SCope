@@ -8,11 +8,15 @@ export default class ViewerSidebar extends Component {
     constructor() {
         super();
         this.state = {
+            activePage: BackendAPI.getActivePage(),
             lassoSelections: BackendAPI.getViewerSelections()
+        }
+        this.featuresListener = (features) => {
+
         }
         this.selectionsListener = (selections) => {
             //getCellMetaData 
-            this.getMetadata();
+            this.getMetadata(selections);
             this.setState({lassoSelections: selections});
         }        
     }
@@ -57,10 +61,12 @@ export default class ViewerSidebar extends Component {
 
     componentWillMount() {
         BackendAPI.onViewerSelectionsChange(this.selectionsListener);
+        BackendAPI.onActiveFeaturesChange(this.state.activePage, this.featuresListener);
     }
 
     componentWillUnmount() {
         BackendAPI.removeViewerSelectionsChange(this.selectionsListener);
+        BackendAPI.removeActiveFeaturesChange(this.state.activePage, this.featuresListener);
     }
 
     toggleLassoSelection(id) {
@@ -71,7 +77,7 @@ export default class ViewerSidebar extends Component {
         BackendAPI.removeViewerSelection(id);
     }
 
-    getMetadata() {
+    getMetadata(selections) {
         let settings = BackendAPI.getSettings();
         let loomFilePath = BackendAPI.getActiveLoom();
         let coordinates = BackendAPI.getActiveCoordinates();
