@@ -36,12 +36,14 @@ export default class FeatureSearch extends React.Component {
 			if (metadata)  {
 				let image = <Image src={'http://motifcollections.aertslab.org/v8/logos/'+metadata.motifName} size='huge'/>
 				return (
+					<Menu.Item>
 						<Popup
 							size='huge'
 							trigger={<Icon name="help circle" />}
 							position='bottom left'
 							content={image}
 							/>
+					</Menu.Item>
 				)
 			}
 		}
