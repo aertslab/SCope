@@ -367,6 +367,7 @@ class SCope(s_pb2_grpc.MainServicer):
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
         if len(request.cellIndices) == 0:
             request.cellIndices = list(range(self.get_nb_cells(loomFilePath)))
+
         cellClusters = []
         for cluster in request.clusterings:
             if cluster != '':
@@ -390,10 +391,10 @@ class SCope(s_pb2_grpc.MainServicer):
                 annotations.append(self.get_annotation(loom_file_path=loomFilePath,
                                                        annoName=anno)[request.cellIndices])
 
-        return s_pb2.CellMetaDataReply(clusterIDs=s_pb2.CellClusters(clusters=list(zip(*cellClusters))),
-                                       geneExpression=s_pb2.FeatureValues(features=list(zip(*geneExp))),
-                                       aucValues=s_pb2.FeatureValues(features=list(zip(*aucVals))),
-                                       annotations=s_pb2.CellAnnotations(annotations=list(zip(*annotations))))
+        return s_pb2.CellMetaDataReply(clusterIDs=[s_pb2.CellClusters(clusters=x) for x in cellClusters],
+                                       geneExpression=[s_pb2.FeatureValues(features=x) for x in geneExp],
+                                       aucValues=[s_pb2.FeatureValues(features=x) for x in aucVals],
+                                       annotations=[s_pb2.CellAnnotations(annotations=x) for x in annotations])
 
     def getFeatures(self, request, context):
         f = self.get_features(self.get_loom_filepath(request.loomFilePath), request.query)
