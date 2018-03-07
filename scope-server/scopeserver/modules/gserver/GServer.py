@@ -463,8 +463,8 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.MyLoomsReply(myLooms=my_looms)
 
     def translateLassoSelection(self, request, context):
-        src_loom = self.get_loom_filepath(request.srcLoomFilePath)
-        dest_loom = self.get_loom_filepath(request.destLoomFilePath)
+        src_loom = self.get_loom_connection(self.get_loom_filepath(request.srcLoomFilePath))
+        dest_loom = self.get_loom_connection(self.get_loom_filepath(request.destLoomFilePath))
         src_cell_ids = [src_loom.ca['CellID'][i] for i in request.cellIndices]
         src_fast_index = set(src_cell_ids)
         dest_mask = [x in src_fast_index for x in dest_loom.ca['CellID']]
@@ -472,7 +472,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.TranslateLassoSelectionReply(cellIndices=dest_cell_indices)
     
     def getCellIDs(self, request, context):
-        loom = self.get_loom_filepath(request.loomFilePath)
+        loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
         cell_ids = [loom.ca['CellID'][i] for i in request.cellIndices]
         return s_pb2.CellIDsReply(cellIds=cell_ids)
 
