@@ -41,6 +41,11 @@ export default class Viewer extends Component {
 			}
 		}
 		this.viewerToolListener = (tool) => {
+			if (tool == 'lasso') {
+				this.zoomSelection.on('.zoom', null);
+			} else {
+				this.zoomSelection.call(this.zoomBehaviour);
+			}
 			this.setState({activeTool: tool});
 		}
 		this.viewerSelectionListener = (selections) => {
@@ -255,7 +260,7 @@ export default class Viewer extends Component {
 		});
 		this.lassoLayer.on("mousemove", (e) => {
 			// Bug in Firefox: this.state.mouse.down = false when left click pressed
-			if(this.state.mouse.down & this.isLassoActive()) {
+			if(this.state.mouse.down & (this.state.activeTool == "lasso")) {
 				this.setState({ lassoPoints: [ ...this.state.lassoPoints, new PIXI.Point(e.data.global.x, e.data.global.y) ] })
 				this.drawLasso()
 			}
@@ -347,16 +352,7 @@ export default class Viewer extends Component {
 		return color;
 	}
 
-	isLassoActive() {
-		return this.state.activeTool === "lasso";
-	}
-
-	zoom() {
-		// TODO: bug with first move when lasso active
-		if (this.state.mouse.down && this.isLassoActive()) {
-			return
-		}
-
+	zoom(e) {
 		let t1 = d3.event.transform,
 			t0 = this.zoomTransform,
 			dx = (t1.x - t0.x) / (this.renderer.width / 2),
