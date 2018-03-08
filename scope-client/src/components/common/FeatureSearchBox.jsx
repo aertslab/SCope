@@ -157,13 +157,14 @@ export default class FeatureSearch extends React.Component {
 						for (var i = 0; i < response.feature.length; i++) {
 							let f = response.feature[i];
 							let ft = response.featureType[i];
+							let d = response.featureDescription[i];
 							if (ft == 'gene') {
-								genes.push({ "title": f, "type": ft });
+								genes.push({ "title": f, "type": ft, "description": d });
 							} else if (ft == 'regulon') {
-								regulons.push({ "title": f, "type": ft });
+								regulons.push({ "title": f, "type": ft, "description": d });
 							} else if (ft.indexOf('Clustering:') == 0) {
 								if (!clusters[ft]) clusters[ft] = [];
-								clusters[ft].push({ "title": f, "type": ft });
+								clusters[ft].push({ "title": f, "type": ft, "description": d });
 							} else if (ft.indexOf('cluster#') == 0) {
 								let cid = ft.split('#')[1], name = '';
 								activeMetadata.cellMetaData.clusterings.map((c, i) => {
@@ -172,7 +173,7 @@ export default class FeatureSearch extends React.Component {
 									}
 								})
 								if (!clusters[ft]) clusters[ft] = {name: name, results: []};
-								clusters[ft].push({ "title": f, "type": ft });
+								clusters[ft].push({ "title": f, "type": ft, "description": d });
 							}
 						};
 
