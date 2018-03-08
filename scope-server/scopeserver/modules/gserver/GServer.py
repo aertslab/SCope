@@ -189,7 +189,8 @@ class SCope(s_pb2_grpc.MainServicer):
         print("Debug: " + str(len(res)) + " genes matching '" + query + "'")
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
         return {'feature': [searchSpace[r] for r in res],
-                'featureType': [r[1] for r in res]}
+                'featureType': [r[1] for r in res],
+                'featureDescription': [searchSpace[r] for r in res]}
 
     def get_anno_cells(self, loom_file_path, annotations):
         loom = self.get_loom_connection(loom_file_path)
