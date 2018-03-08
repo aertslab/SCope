@@ -326,7 +326,6 @@ class SCope(s_pb2_grpc.MainServicer):
                 else:
                     features.append(np.zeros(n_cells))
             elif request.featureType[n].startswith('Clustering: '):
-                vmax.append(0)
                 for clustering in metaData['clusterings']:
                     if clustering['name'] == request.featureType[n].lstrip('Clustering: '):
                         clusteringID = str(clustering['id'])
@@ -470,7 +469,7 @@ class SCope(s_pb2_grpc.MainServicer):
         dest_mask = [x in src_fast_index for x in dest_loom.ca['CellID']]
         dest_cell_indices = list(compress(range(len(dest_mask)), dest_mask))
         return s_pb2.TranslateLassoSelectionReply(cellIndices=dest_cell_indices)
-    
+
     def getCellIDs(self, request, context):
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
         cell_ids = [loom.ca['CellID'][i] for i in request.cellIndices]
