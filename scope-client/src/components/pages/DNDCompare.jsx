@@ -15,7 +15,9 @@ class DNDCompare extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			loomFiles: BackendAPI.getLoomFiles(),
 			activeLoom: BackendAPI.getActiveLoom(),
+			multiLoom: [BackendAPI.getActiveLoom()],
 			activeCoordinates: BackendAPI.getActiveCoordinates(),
 			metadata: BackendAPI.getActiveLoomMetadata(),
 			activeFeatures: BackendAPI.getActiveFeatures(),
@@ -48,7 +50,12 @@ class DNDCompare extends Component {
 		this.configurationConf = [
 			{ text: 'simple', value: 'simple' },
 			{ text: 'cross-reference', value: 'cross' },
+			{ text: 'multi-dataset', value: 'multi' },
 		]
+		this.loomConf = [];
+		Object.keys(this.state.loomFiles).map(l => {
+			this.loomConf.push({text: l, value: l});
+		});
 	}
 
 	render() {
@@ -102,8 +109,8 @@ class DNDCompare extends Component {
 					<Grid.Row columns={columns} key={i}>
 						{_.times(columns, (j) => {
 								let name = "comp"+(columns * i + j);
-								let annotationDropContainerHorizontal, annotationDropContainerVertical;
-								if ((this.state.configuration == 'simple') || (i == 0)) {
+								let annotationDropContainerHorizontal, annotationDropContainerVertical, datasetSelector;
+								if ((this.state.configuration == 'simple') || ((this.state.configuration == 'cross') && (i == 0))) {
 									annotationDropContainerHorizontal = (
 										<AnnotationDropContainer 
 											activeAnnotations={this.state.configuration == 'cross' ? crossAnnotations['horizontal'][j] : viewerAnnotations[name]} 
@@ -116,22 +123,32 @@ class DNDCompare extends Component {
 										/>
 									)
 								}
-								if ((this.state.configuration == 'cross') && (j == 0)) {
+								if (((this.state.configuration == 'cross') || (this.state.configuration == 'multi')) && (j == 0)) {
 									annotationDropContainerVertical = (
 										<AnnotationDropContainer 
 											activeAnnotations={crossAnnotations['vertical'][i]} 
 											viewerName={name} 
 											position={i}
-											orientation={this.state.configuration == 'cross' ? 'vertical' : null}
+											orientation='vertical'
 											height={this.height / rows}
 											onDrop={this.handleDrop.bind(this)}
 											onRemove={this.handleRemove.bind(this)}
 										/>
 									)
 								}
-								let va = this.state.configuration == 'cross' ? this.getCrossAnnotations(i, j): viewerAnnotations[name];
+								if ((this.state.configuration == 'multi') && (i == 0)) {
+									datasetSelector = (
+										<Dropdown inline options={this.loomConf} disabled={j==0} defaultValue={this.state.multiLoom[j]} placeholder="select a dataset" onChange={(proxy, select) => {
+											let ml = this.state.multiLoom;
+											ml[j] = select.value;
+											this.setState({multiLoom: ml});
+										}}/>
+									)
+								}
+								let va = this.state.configuration == 'simple' ? viewerAnnotations[name] : this.getCrossAnnotations(i, j);
 								return (
 									<Grid.Column key={j}>
+										{datasetSelector}
 										{annotationDropContainerHorizontal}
 										{annotationDropContainerVertical}
 										<ViewerDropContainer
@@ -141,7 +158,7 @@ class DNDCompare extends Component {
 											onRemove={this.handleRemove.bind(this)}
 											name={name}
 											height={this.height / rows}
-											loomFile={activeLoom}
+											loomFile={this.state.configuration == 'multi' ? this.state.multiLoom[j] : activeLoom}
 											activeFeatures={activeFeatures}
 											activeCoordinates={activeCoordinates}
 											activeAnnotations={va}
@@ -217,8 +234,7 @@ class DNDCompare extends Component {
 				let va = annotations[viewer][name];
 				if (va && va.indexOf(value) != -1) selected = true;
 			})
-		} 
-		if (this.state.configuration == 'cross') {
+		} else {
 			let annotations = this.state.crossAnnotations;
 			Object.keys(annotations).map(orientation => {
 				annotations[orientation].map(annotation => {
@@ -244,7 +260,7 @@ class DNDCompare extends Component {
 			annotations[viewer][item.name] = selectedAnnotations;
 			this.setState({ viewerAnnotations : annotations});
 			return true;
-		} else if (this.state.configuration == 'cross') {
+		} else {
 			let annotations = this.state.crossAnnotations;
 			if (!annotations[orientation][position]) annotations[orientation][position] = {};
 			let selectedAnnotations = (annotations[orientation][position][item.name] || []).slice(0);
@@ -277,7 +293,7 @@ class DNDCompare extends Component {
 			} else {
 				console.log('Annotation cannot be found', viewer, name, remove);
 			}
-		} else if (this.state.configuration == 'cross') {
+		} else {
 			let cross = this.state.crossAnnotations;
 			let annotations = cross[orientation][position] || {};
 			let selectedAnnotations = (annotations[name] || []).slice(0);

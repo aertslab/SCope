@@ -84,6 +84,9 @@ class API {
 	}
 
 
+	getLoomFiles() {
+		return this.loomFiles;
+	}
 
 	setLoomFiles(files) {		
 		this.loomFiles = {};
