@@ -4,7 +4,6 @@ import { DragSource } from 'react-dnd'
 
 const sourceBehaviour = {
     beginDrag(props) {
-        console.log('begin drag', props)
         return {
             name: props.name,
             value: props.value,
@@ -20,6 +19,7 @@ const sourceBehaviour = {
 }
 
 class Annotation extends Component {
+
     render() {
         const { src, name, value, isDropped, isDragging, connectDragSource, label } = this.props
         const opacity = isDragging ? 0.4 : 1
@@ -38,14 +38,11 @@ class Annotation extends Component {
 
         return connectDragSource(
             <div>
-                <Menu.Item active={isDropped} name={value} onClick={this.handleClick.bind(this)} ></Menu.Item>
+                <Menu.Item as='a' active={isDropped} name={value}  />
             </div>,
         )
     }
 
-    handleClick() {
-
-    }
 }
 
 export default DragSource('Annotation', sourceBehaviour, (connect, monitor) => ({

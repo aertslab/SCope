@@ -1,33 +1,31 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
-import { BackendAPI } from '../common/API'
+import { DragDropContext } from 'react-dnd'
+import HTML5Backend, { NativeTypes } from 'react-dnd-html5-backend'
 import { Accordion, Grid, Menu, Icon, Dropdown } from 'semantic-ui-react'
+import { BackendAPI } from '../common/API'
+import Annotation from '../common/Annotation'
 import FeatureSearchBox from '../common/FeatureSearchBox'
 import ViewerSidebar from '../common/ViewerSidebar'
 import ViewerToolbar from '../common/ViewerToolbar'
-
-import { DragDropContext } from 'react-dnd'
-import HTML5Backend, { NativeTypes } from 'react-dnd-html5-backend'
-import Annotation from '../common/Annotation'
-import AnnotationContainer from '../common/AnnotationContainer'
+import AnnotationDropContainer from '../common/AnnotationDropContainer'
+import ViewerDropContainer from '../common/ViewerDropContainer'
 
 class DNDCompare extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			lastDroppedItem: null,
-			droppedBoxNames: [],
-			columns: 2,
-			rows: 2,
 			activeLoom: BackendAPI.getActiveLoom(),
 			activeCoordinates: BackendAPI.getActiveCoordinates(),
 			metadata: BackendAPI.getActiveLoomMetadata(),
 			activeFeatures: BackendAPI.getActiveFeatures(),
 			colors: BackendAPI.getColors(),
 			activeAnnotation: -1,
-			activeClustering: -1,
-			viewerAnnotations: [],
-			activeThresholds: [0, 0, 0]
+			columns: 2,
+			rows: 2,
+			viewerAnnotations: {},
+			crossAnnotations: {'horizontal': [], 'vertical': []},
+			configuration: 'simple',
 		}
 		this.activeLoomListener = (loom, metadata, coordinates) => {
 			this.setState({activeLoom: loom, activeCoordinates: coordinates, metadata: metadata});
@@ -43,10 +41,18 @@ class DNDCompare extends Component {
 			{ text: '6', value: 6 },
 			{ text: '9', value: 9 }
 		]
+		this.superpositionConf = [
+			{ text: 'AND', value: 'AND' },
+			{ text: 'OR', value: 'OR' }
+		]
+		this.configurationConf = [
+			{ text: 'simple', value: 'simple' },
+			{ text: 'cross-reference', value: 'cross' },
+		]
 	}
 
 	render() {
-		const { lastDroppedItem, activeLoom, activeThresholds, activeFeatures, viewerAnnotations, metadata, activeCoordinates, activeAnnotation, activeClustering, annotationIDs, columns, rows, colors } = this.state;
+		const { activeLoom, activeThresholds, activeFeatures, viewerAnnotations, crossAnnotations, metadata, activeCoordinates, activeAnnotation, annotationIDs, columns, rows, colors } = this.state;
 
 		let annotationTabs = () => {
 			if (metadata && metadata.cellMetaData && metadata.cellMetaData.annotations) {
@@ -72,32 +78,7 @@ class DNDCompare extends Component {
 				})
 			}
 		};
-/*
-		let clusteringTabs = () => {
-			if (metadata && metadata.cellMetaData && metadata.cellMetaData.clusterings) {
-				let clusterings = metadata.cellMetaData.clusterings;
-				return clusterings.map((clustering, clusteringID) => {
-					return (
-						<span key={clusteringID}>
-						<Accordion.Title active={activeClustering === clusteringID} index={clusteringID} onClick={this.changeClustering.bind(this)}>
-							<Icon name="dropdown" />
-							{clustering.name}
-						</Accordion.Title>
-						<Accordion.Content active={activeClustering == clusteringID}>
-							<Menu vertical secondary>
-									{clustering.clusters.map((value, valueID)=> {
-										return (
-											<Menu.Item label={value.description} name={"clusteringValue"+clusteringID} type="checkbox" value={value.id} key={value.id} />
-										);
-									})}
-							</Menu>
-						</Accordion.Content>
-						</span>
-					);
-				})
-			}
-		};
-*/
+
 		let annotationTags = (viewerName) => {
 			if (viewerAnnotations[viewerName]) {
 				return Object.keys(viewerAnnotations[viewerName]).map((name, i) => {
@@ -121,13 +102,41 @@ class DNDCompare extends Component {
 					<Grid.Row columns={columns} key={i}>
 						{_.times(columns, (j) => {
 								let name = "comp"+(columns * i + j);
+								let annotationDropContainerHorizontal, annotationDropContainerVertical;
+								if ((this.state.configuration == 'simple') || (i == 0)) {
+									annotationDropContainerHorizontal = (
+										<AnnotationDropContainer 
+											activeAnnotations={this.state.configuration == 'cross' ? crossAnnotations['horizontal'][j] : viewerAnnotations[name]} 
+											viewerName={name} 
+											orientation={this.state.configuration == 'cross' ? 'horizontal' : null}
+											position={j}
+											height={this.height / rows}
+											onDrop={this.handleDrop.bind(this)}
+											onRemove={this.handleRemove.bind(this)}
+										/>
+									)
+								}
+								if ((this.state.configuration == 'cross') && (j == 0)) {
+									annotationDropContainerVertical = (
+										<AnnotationDropContainer 
+											activeAnnotations={crossAnnotations['vertical'][i]} 
+											viewerName={name} 
+											position={i}
+											orientation={this.state.configuration == 'cross' ? 'vertical' : null}
+											height={this.height / rows}
+											onDrop={this.handleDrop.bind(this)}
+											onRemove={this.handleRemove.bind(this)}
+										/>
+									)
+								}
+								let va = this.state.configuration == 'cross' ? this.getCrossAnnotations(i, j): viewerAnnotations[name];
 								return (
 									<Grid.Column key={j}>
-										{annotationTags(name)}
-										<AnnotationContainer
+										{annotationDropContainerHorizontal}
+										{annotationDropContainerVertical}
+										<ViewerDropContainer
+											active={this.state.configuration == 'simple' ? true :false}
 											key={columns * i + j}
-											accepts='DNDProperty'
-											lastDroppedItem={lastDroppedItem}
 											onDrop={this.handleDrop.bind(this)}
 											onRemove={this.handleRemove.bind(this)}
 											name={name}
@@ -135,11 +144,11 @@ class DNDCompare extends Component {
 											loomFile={activeLoom}
 											activeFeatures={activeFeatures}
 											activeCoordinates={activeCoordinates}
-											activeAnnotations={viewerAnnotations[name]}
-											thresholds={activeThresholds}
+											activeAnnotations={va}
 											customScale={true}
 											settings={true}
-											/>
+											scale={true}
+										/>
 									</Grid.Column>
 								);
 						})}
@@ -165,8 +174,14 @@ class DNDCompare extends Component {
 			<Grid>
 				<Grid.Row columns="4">
 					<Grid.Column width={2} >
-						Number of displays:
-						<Dropdown selection options={this.displayConf} defaultValue={4} onChange={this.displayNumberChanged.bind(this)}/>
+						Number of displays: &nbsp;
+						<Dropdown inline options={this.displayConf} defaultValue={4} onChange={this.displayNumberChanged.bind(this)}/>
+						<br />
+						Superposition: &nbsp;
+						<Dropdown inline disabled options={this.superpositionConf} defaultValue={'OR'} onChange={this.superpositionChanged.bind(this)}/>
+						<br />
+						Configuration: &nbsp;
+						<Dropdown inline options={this.configurationConf} defaultValue={'simple'} onChange={this.configurationChanged.bind(this)}/>
 					</Grid.Column>
 					{featureSearch}
 				</Grid.Row>
@@ -176,12 +191,6 @@ class DNDCompare extends Component {
 						{annotationTabs()}
 						</Accordion>
 						<br />
-						{/*
-
-						<Accordion styled>
-						{clusteringTabs()}
-						</Accordion>
-						*/}
 						<ViewerToolbar />
 					</Grid.Column>
 					<Grid.Column width={12}>
@@ -192,53 +201,102 @@ class DNDCompare extends Component {
 		);
 	}
 
+	componentWillMount() {
+		BackendAPI.onActiveLoomChange(this.activeLoomListener);
+	}
+
+	componentWillUnmount() {
+		BackendAPI.removeActiveLoomChange(this.activeLoomListener);
+	}
+
 	isDropped(name, value) {
-		let annotations = this.state.viewerAnnotations;
 		let selected = false;
-		Object.keys(annotations).map((viewer) => {
-			let va = annotations[viewer][name];
-			if (va && va.indexOf(value) != -1) selected = true;
-		})
-		if (DEBUG) console.log('isDropped', name, value, selected);
+		if (this.state.configuration == 'simple') {
+			let annotations = this.state.viewerAnnotations;
+			Object.keys(annotations).map(viewer => {
+				let va = annotations[viewer][name];
+				if (va && va.indexOf(value) != -1) selected = true;
+			})
+		} 
+		if (this.state.configuration == 'cross') {
+			let annotations = this.state.crossAnnotations;
+			Object.keys(annotations).map(orientation => {
+				annotations[orientation].map(annotation => {
+					let va = annotation[name];
+					if (va && va.indexOf(value) != -1) selected = true;
+				})
+			})
+		}
 		return selected;
 	}
 
-	handleDrop(item, viewer) {
-		if (DEBUG) console.log('handleDrop', item, viewer);
-		let annotations = this.state.viewerAnnotations;
-		if (!annotations[viewer]) annotations[viewer] = {};
-		let selectedAnnotations = (annotations[viewer][item.name] || []).slice(0);
-		if (selectedAnnotations.indexOf(item.value) != -1) {
-			alert('This annotation is already shown in that viewer');
-			return false;
+	handleDrop(item, viewer, orientation, position) {
+		if (DEBUG) console.log('handleDrop', item, viewer, orientation, position);
+		if (this.state.configuration == 'simple') {
+			let annotations = this.state.viewerAnnotations;
+			if (!annotations[viewer]) annotations[viewer] = {};
+			let selectedAnnotations = (annotations[viewer][item.name] || []).slice(0);
+			if (selectedAnnotations.indexOf(item.value) != -1) {
+				alert('This annotation is already shown in that viewer');
+				return false;
+			}
+			selectedAnnotations.push(item.value);
+			annotations[viewer][item.name] = selectedAnnotations;
+			this.setState({ viewerAnnotations : annotations});
+			return true;
+		} else if (this.state.configuration == 'cross') {
+			let annotations = this.state.crossAnnotations;
+			if (!annotations[orientation][position]) annotations[orientation][position] = {};
+			let selectedAnnotations = (annotations[orientation][position][item.name] || []).slice(0);
+			if (selectedAnnotations.indexOf(item.value) != -1) {
+				alert('This annotation is already shown in that viewer');
+				return false;
+			}
+			selectedAnnotations.push(item.value);
+			annotations[orientation][position][item.name] = selectedAnnotations;
+			this.setState({ crossAnnotations : annotations});
+			return true;
 		}
-		selectedAnnotations.push(item.value);
-		annotations[viewer][item.name] = selectedAnnotations;
-		this.setState({ viewerAnnotations : annotations});
-		return true;
 	}
 
-	handleRemove(viewer, name, value) {
-		if (DEBUG) console.log('handleRemove', viewer, name, value);
-		let annotations = this.state.viewerAnnotations;
-		if (!annotations[viewer]) return;
-		let selectedAnnotations = (annotations[viewer][name] || []).slice(0);
-		let idx = selectedAnnotations.indexOf(value);
-		if (idx != -1) {
-			selectedAnnotations.splice(idx, 1);
-			if (selectedAnnotations.length == 0) {
-				delete(annotations[viewer][name]);
+	handleRemove(viewer, name, value, orientation, position) {
+		if (DEBUG) console.log('handleRemove', viewer, name, value, orientation, position);
+		if (this.state.configuration == 'simple') {
+			let annotations = this.state.viewerAnnotations;
+			if (!annotations[viewer]) return;
+			let selectedAnnotations = (annotations[viewer][name] || []).slice(0);
+			let idx = selectedAnnotations.indexOf(value);
+			if (idx != -1) {
+				selectedAnnotations.splice(idx, 1);
+				if (selectedAnnotations.length == 0) {
+					delete(annotations[viewer][name]);
+				} else {
+					annotations[viewer][name] = selectedAnnotations;
+				}
+				this.setState({ viewerAnnotations : annotations});
 			} else {
-				annotations[viewer][name] = selectedAnnotations;
+				console.log('Annotation cannot be found', viewer, name, remove);
 			}
-			this.setState({ viewerAnnotations : annotations});
-		} else {
-			console.log('Annotation cannot be found', viewer, name, remove);
+		} else if (this.state.configuration == 'cross') {
+			let cross = this.state.crossAnnotations;
+			let annotations = cross[orientation][position] || {};
+			let selectedAnnotations = (annotations[name] || []).slice(0);
+			let idx = selectedAnnotations.indexOf(value);
+			if (idx != -1) {
+				selectedAnnotations.splice(idx, 1);
+				if (selectedAnnotations.length == 0) {
+					delete(cross[orientation][position][name]);
+				} else {
+					cross[orientation][position][name] = selectedAnnotations;
+				}
+				this.setState({ crossAnnotations : cross});
+			} else {
+				console.log('Annotation cannot be found', viewer, name, remove);
+			}
 		}
 	}
 
 	displayNumberChanged(proxy, selection) {
-		console.log('displayNumberChanged', selection.value);
 		setTimeout(() => {
 			if (selection.value == 1) {
 				this.setState({columns: 1, rows: 1});
@@ -254,28 +312,45 @@ class DNDCompare extends Component {
 		}, 100);
 	}
 
-	componentWillMount() {
-		BackendAPI.onActiveLoomChange(this.activeLoomListener);
-		//BackendAPI.onActiveFeaturesChange('dndcompare', this.activeFeaturesListener);
+	superpositionChanged(proxy, selection) {
+		setTimeout(() => {
+		}, 100);
 	}
 
-	componentWillUnmount() {
-		BackendAPI.removeActiveLoomChange(this.activeLoomListener);
-		//BackendAPI.removeActiveFeaturesChange('dndcompare', this.activeFeaturesListener);
+	configurationChanged(proxy, selection) {
+		setTimeout(() => {
+			this.setState({configuration: selection.value});
+		}, 100);
 	}
+
 
 	selectAnnotationGroup(e, props) {
 		const { index } = props;
 		const { activeAnnotation } = this.state;
 		this.setState({activeAnnotation : activeAnnotation == index ? -1 : index, annotationIDs: []});
 	}
-/*
-	changeClustering(e, props) {
-		const { index } = props;
-		const { activeClustering } = this.state;
-		this.setState({activeClustering : activeClustering == index ? -1 : index});
+
+	getCrossAnnotations(i, j) {
+		let annotations = {}, cross = this.state.crossAnnotations;		
+		if (cross['horizontal'][j]) {
+			Object.keys(cross['horizontal'][j]).map(a => {
+				annotations[a] = annotations[a] || [];
+				cross['horizontal'][j][a].map(v => {
+					if (annotations[a].indexOf(v) == -1) annotations[a].push(v);
+				})
+			})
+		}
+		if (cross['vertical'][i]) {
+			Object.keys(cross['vertical'][i]).map(a => {
+				annotations[a] = annotations[a] || [];
+				cross['vertical'][i][a].map(v => {
+					if (annotations[a].indexOf(v) == -1) annotations[a].push(v);
+				})
+			})
+		}
+		return annotations;
 	}
-*/
+
 }
 
 export default DragDropContext(HTML5Backend)(DNDCompare);

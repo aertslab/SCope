@@ -69,7 +69,7 @@ export default class AppHeader extends Component {
 			if (metadata && metadata.cellMetaData && metadata.cellMetaData.annotations.length) return (
 				<Menu.Item>
 					<Button basic onClick={this.selectTab.bind(this)} active={currentPage == 'dndcompare'} page='dndcompare'>
-						DND Compare
+						Compare
 					</Button>
 				</Menu.Item>
 			);
@@ -106,7 +106,6 @@ export default class AppHeader extends Component {
 				{infoTab()}
 				{geneTab()}
 				{regulonTab()}
-				{compare1Tab()}
 				{compare1DNDTab()}
 			</Menu>
 		);
