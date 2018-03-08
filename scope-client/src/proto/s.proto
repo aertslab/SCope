@@ -77,6 +77,7 @@ message CellMetaDataRequest {
 message FeatureReply {
   repeated string feature=1;
   repeated string featureType=2;
+  repeated string featureDescription=3;
 }
 
 message CoordinatesRequest {
@@ -127,7 +128,7 @@ message Regulon {
   repeated string genes=1;
   repeated AUCThreshold autoThresholds=2;
   string defaultThreshold=3;
-  string motifName=4; 
+  string motifName=4;
 }
 
 message FileMetaData {
