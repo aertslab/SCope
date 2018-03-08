@@ -399,7 +399,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getFeatures(self, request, context):
         f = self.get_features(self.get_loom_filepath(request.loomFilePath), request.query)
-        return s_pb2.FeatureReply(feature=f['feature'], featureType=f['featureType'])
+        return s_pb2.FeatureReply(feature=f['feature'], featureType=f['featureType'], featureDescription=f['featureDescription'])
 
     def getCoordinates(self, request, context):
         # request content
