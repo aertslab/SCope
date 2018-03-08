@@ -162,6 +162,7 @@ class DNDCompare extends Component {
 											activeFeatures={activeFeatures}
 											activeCoordinates={activeCoordinates}
 											activeAnnotations={va}
+											onScaleChange={this.onScaleChange.bind(this)}
 											customScale={true}
 											settings={true}
 											scale={true}
@@ -365,6 +366,10 @@ class DNDCompare extends Component {
 			})
 		}
 		return annotations;
+	}
+
+	onScaleChange() {
+		
 	}
 
 }

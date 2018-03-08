@@ -245,6 +245,7 @@ class API {
 	}
 
 	addViewerSelection(selection) {
+		if (DEBUG) console.log('addViewerSelection', selection)
 		this.viewerSelections.push(selection);
 		this.viewerSelectionsChangeListeners.forEach((listener) => {
 			listener(this.viewerSelections);
