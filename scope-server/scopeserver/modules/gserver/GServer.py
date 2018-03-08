@@ -5,15 +5,10 @@ from scopeserver.modules.gserver import s_pb2
 from scopeserver.modules.gserver import s_pb2_grpc
 
 import loompy as lp
-from loompy import LoomConnection
 import hashlib
 import os
-import math
 import numpy as np
-import pandas as pd
-import time
 import json
-import glob
 import zlib
 import base64
 from functools import lru_cache
