@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import * as PIXI from 'pixi.js'
 import * as d3 from 'd3';
 import { BackendAPI } from './API'
+import { Dimmer, Loader } from 'semantic-ui-react'
 import ReactResizeDetector from 'react-resize-detector';
 
 export default class Viewer extends Component {
@@ -20,6 +21,7 @@ export default class Viewer extends Component {
 			mouse: {
 				down: false
 			},
+			loading: true,
 			activeTool: BackendAPI.getViewerTool(),
 			customScale: BackendAPI.getCustomScale(),
 			activePage: BackendAPI.getActivePage(),
@@ -37,6 +39,7 @@ export default class Viewer extends Component {
 		this.texture = PIXI.Texture.fromImage("src/images/particle@2x.png");
 		this.settingsListener = (settings) => {
 			if (this.props.settings) {
+				this.setState({loading: true});
 				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations);
 			}
 		}
@@ -51,7 +54,7 @@ export default class Viewer extends Component {
 		}
 		this.customScaleListener = (scale) => {
 			if (this.props.customScale) {
-				this.setState({customScale: scale});
+				this.setState({customScale: scale, loading: true});
 				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, scale);
 			}
 		}
@@ -59,6 +62,7 @@ export default class Viewer extends Component {
         	if ((this.getJSONFeatures(features, 'feature') != this.getJSONFeatures(this.state.activeFeatures, 'feature')) || 
         		(this.getJSONFeatures(features, 'featureType') != this.getJSONFeatures(this.state.activeFeatures, 'featureType')) ||
 				(this.props.thresholds && (this.getJSONFeatures(features, 'threshold') != this.getJSONFeatures(this.state.activeFeatures, 'threshold')))) {
+				this.setState({loading: true});
 				if (DEBUG) console.log(this.props.name, 'changing colors');
 				this.getFeatureColors(features, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, this.state.customScale, featureID);
 		    }
@@ -68,8 +72,12 @@ export default class Viewer extends Component {
 	render() {
 		return (
 			<div>
-				<canvas id={"viewer"+this.props.name} style={{width: 100+'%', height: this.props.height-1+'px'}} ></canvas>
+				<canvas id={"viewer"+this.props.name} style={{width: 100+'%', height: this.props.height-1+'px'}} >
+				</canvas>
 				<ReactResizeDetector handleWidth skipOnMount onResize={this.onResize.bind(this)} />
+				<Dimmer active={this.state.loading} inverted>
+					<Loader inverted>Loading</Loader>
+				</Dimmer>
 			</div>
 		);
 	}
@@ -111,6 +119,7 @@ export default class Viewer extends Component {
 		
 		if (this.props.loomFile != nextProps.loomFile || this.props.activeCoordinates != nextProps.activeCoordinates || 
 			(JSON.stringify(nextProps.activeAnnotations) != JSON.stringify(this.state.activeAnnotations)) ) {
+				this.setState({loading: true});
 				if (DEBUG) console.log(nextProps.name, 'changing points');
 				this.getPoints(nextProps.loomFile, nextProps.activeCoordinates, nextProps.activeAnnotations, () => {
 					this.getFeatureColors(this.state.activeFeatures, nextProps.loomFile, this.props.thresholds, this.state.activeAnnotations);
@@ -511,6 +520,7 @@ export default class Viewer extends Component {
 	transformDataPoints() {
 		this.transformPoints(this.container);
 		this.transformPoints(this.selectionsLayer);
+		this.setState({loading: false});
 	}
 
 	transformLassoPoints() {
