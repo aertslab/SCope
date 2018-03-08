@@ -137,10 +137,8 @@ class SCope(s_pb2_grpc.MainServicer):
             metaData = self.decompress_meta(loom.attrs.MetaData)
         except AttributeError:
             meta = False
-        print(metaData)
 
         def add_element(searchSpace, elements, elementName):
-            print(elements)
             if type(elements) != str:
                 for element in elements:
                     searchSpace[(element.casefold(), elementName)] = element
