@@ -26,9 +26,9 @@ class AnnotationDropContainer extends Component {
 						);
 					});
 				});
-			} else if (orientation) {
+			} else if (orientation != 'both') {
 				return (
-					<div className="dropRow" style={{width: orientation == 'vertical' ? height + 'px' : 'auto'}}>
+					<div className="dropRow dropContainer" style={{width: orientation == 'vertical' ? height + 'px' : 'auto'}}>
 						<b>Drag and drop here the annotations to cross-reference.</b>
 					</div>
 				)

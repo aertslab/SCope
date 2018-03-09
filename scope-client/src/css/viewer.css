@@ -22,9 +22,16 @@ body:before{
     display:block;
 }
 
-.dropContainer, .dropRow {
-	text-align: center;
+.emptyDropContainer {
+	border: 1px solid black;
+}
+
+.fullDropContainer, .dropRow {
 	background: #eee;
+}
+
+.dropContainer {
+	text-align: center;
 	min-height: 30px;
 	padding-top: 5px;
 }

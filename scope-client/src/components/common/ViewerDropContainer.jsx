@@ -5,7 +5,7 @@ import Viewer from '../common/Viewer'
 const targetBehaviour = {
 	drop(props, monitor, component) {
 		let item = monitor.getItem();
-		let dropped = props.onDrop(item, props.name);
+		let dropped = props.onDrop(item, props.name, props.orientation, props.position);
 		return {dropped: dropped};
 	},
 }
@@ -13,18 +13,30 @@ const targetBehaviour = {
 class ViewerDropContainer extends Component {
 
 	render() {
-		const { isOver, canDrop, connectDropTarget, active, activeAnnotations, height, ...props } = this.props;
+		const { isOver, canDrop, loomFile, connectDropTarget, active, activeAnnotations, height, ...props } = this.props;
 
 		let container = () => {
-			if (!active || (activeAnnotations && Object.keys(activeAnnotations).length)) {
+			if ((loomFile && activeAnnotations && Object.keys(activeAnnotations).length)) {
 				return (
-					<Viewer height={height} activeAnnotations={activeAnnotations}  {...props} />
+					<Viewer height={height} loomFile={loomFile} activeAnnotations={activeAnnotations}  {...props} />
 				);
-			} else {
+			} else if (active) {
 				return (
-					<div className="dropContainer" style={{height: height + 'px'}}>
+					<div className="fullDropContainer dropContainer" style={{height: height + 'px'}}>
 						<p>
 							<b>Drag and drop here the annotations you want to compare.</b><br /><br />
+							Drop more annotations to combine them together.<br />
+							Move or copy annotations between the containers.<br /><br />
+							Change the number of the containers, their configuration<br />
+							and superposition properties in the upper left corner of the page<br />
+						</p>
+					</div>
+				)
+			} else {
+				return (
+					<div className="emptyDropContainer dropContainer" style={{height: height + 'px'}}>
+						<p>
+							<b>Here you will see the annotated dataset</b><br /><br />
 							Drop more annotations to combine them together.<br />
 							Move or copy annotations between the containers.<br /><br />
 							Change the number of the containers, their configuration<br />
@@ -51,8 +63,14 @@ class ViewerDropContainer extends Component {
 	}
 }
 
-export default DropTarget('Annotation', targetBehaviour, (connect, monitor) => ({
-	connectDropTarget: connect.dropTarget(),
-	isOver: monitor.isOver(),
-	canDrop: monitor.canDrop(),
-}))(ViewerDropContainer);
+export default DropTarget(
+	(props) => {
+		return props.active ? 'Annotation' : 'Nothing'
+	}, 
+	targetBehaviour, 
+	(connect, monitor) => ({
+		connectDropTarget: connect.dropTarget(),
+		isOver: monitor.isOver(),
+		canDrop: monitor.canDrop(),
+	})
+)(ViewerDropContainer);
