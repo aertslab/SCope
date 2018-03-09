@@ -182,8 +182,8 @@ class SCope(s_pb2_grpc.MainServicer):
                                 searchSpace[('{0}'.format(str(element)).casefold(), element, elementName)] = geneMappings[element]
                             else:
                                 searchSpace[(element.casefold(), element, elementName)] = element
-                        else:
-                            searchSpace[(element.casefold(), element, elementName)] = element
+                    else:
+                        searchSpace[(element.casefold(), element, elementName)] = element
             else:
                 searchSpace[(elements.casefold(), elements, elementName)] = elements
             return searchSpace
@@ -200,6 +200,7 @@ class SCope(s_pb2_grpc.MainServicer):
         try:
             searchSpace = add_element(searchSpace, loom.ra.Regulons.dtype.names, 'regulon')
         except AttributeError:
+            print('No regulons in file')
             pass  # No regulons in file
 
         if meta:
@@ -239,15 +240,15 @@ class SCope(s_pb2_grpc.MainServicer):
         collapsedResults = OrderedDict()
         for r in res:
             if searchSpace[r] not in collapsedResults.keys():
-                collapsedResults[searchSpace[r]] = [(r[1], r[2])]
+                collapsedResults[(searchSpace[r], r[2])] = [r[1]]
             else:
-                collapsedResults[searchSpace[r]].append((r[1], r[2]))
+                collapsedResults[(searchSpace[r], r[2])].append(r[1])
 
         descriptions = []
         for r in collapsedResults.keys():
-            synonyms = sorted([x[0] for x in collapsedResults[r]])
+            synonyms = sorted([x for x in collapsedResults[r]])
             try:
-                synonyms.remove(r)
+                synonyms.remove(r[0])
             except ValueError:
                 pass
             if len(synonyms) > 0:
@@ -258,8 +259,8 @@ class SCope(s_pb2_grpc.MainServicer):
 
         print("Debug: " + str(len(res)) + " genes matching '" + query + "'")
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        res = {'feature': [r for r in collapsedResults.keys()],
-               'featureType': [collapsedResults[r][0][1] for r in collapsedResults.keys()],
+        res = {'feature': [r[0] for r in collapsedResults.keys()],
+               'featureType': [r[1] for r in collapsedResults.keys()],
                'featureDescription': descriptions}
         print(query, len(res['feature']))
         return res
