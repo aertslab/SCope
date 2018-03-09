@@ -76,26 +76,36 @@ export default class Regulon extends Component {
                         />
                     </Grid.Column>
                     <Grid.Column width={sidebar ? 4 : 5}>
-                        <b>Cells passing thresholds</b>
-                        <Viewer 
-                            name="auc" 
-                            height={3 * this.height / 2 - 15} 
-                            loomFile={activeLoom} 
-                            activeFeatures={activeFeatures}                             
-                            activeCoordinates={activeCoordinates} 
-                            thresholds={true} 
-                        />
-                        <b>Expression levels</b>
-                        <Viewer 
-                            name="expr" 
-                            height={3 * this.height / 2 - 15} 
-                            loomFile={activeLoom} 
-                            activeFeatures={activeFeatures} 
-                            activeCoordinates={activeCoordinates} 
-                            genes={true}
-                            settings={true} 
-                            customScale={true} 
-                        />
+                        <Grid>
+                            <Grid.Row>
+                                <Grid.Column>
+                                    <b>Cells passing thresholds</b>
+                                    <Viewer 
+                                        name="auc" 
+                                        height={3 * this.height / 2 - 15} 
+                                        loomFile={activeLoom} 
+                                        activeFeatures={activeFeatures}                             
+                                        activeCoordinates={activeCoordinates} 
+                                        thresholds={true} 
+                                    />
+                                </Grid.Column>
+                            </Grid.Row>
+                            <Grid.Row>
+                                <Grid.Column>
+                                    <b>Expression levels</b>
+                                    <Viewer 
+                                        name="expr" 
+                                        height={3 * this.height / 2 - 15} 
+                                        loomFile={activeLoom} 
+                                        activeFeatures={activeFeatures} 
+                                        activeCoordinates={activeCoordinates} 
+                                        genes={true}
+                                        settings={true} 
+                                        customScale={true} 
+                                    />
+                                </Grid.Column>
+                            </Grid.Row>
+                        </Grid>
                     </Grid.Column>
                     <Grid.Column width={3}>
                         <b>Cell selections</b><hr />

@@ -6,7 +6,6 @@ import Expression from './pages/Expression';
 import Regulon from './pages/Regulon';
 import Comparison from './pages/Comparison';
 import DNDCompare from './pages/DNDCompare';
-import Compare2 from './pages/Compare2';
 
 export default class AppContent extends Component {
 
@@ -21,7 +20,6 @@ export default class AppContent extends Component {
 				{this.props.currentPage == 'regulon' && <Regulon />}
 				{this.props.currentPage == 'comparison' && <Comparison />}
 				{this.props.currentPage == 'dndcompare' && <DNDCompare />}
-				{this.props.currentPage == 'compare2' && <Compare2 />}
 			</Segment>
 		);
 
