@@ -10,7 +10,6 @@
 /**/*lock.json
 *.pptx
 *.save
-**/.DS_Store
 
 # .gitignore
 yarn.lock
