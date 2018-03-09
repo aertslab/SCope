@@ -117,13 +117,12 @@ class SCope(s_pb2_grpc.MainServicer):
             gene_symbol = self.get_gene_names(loom_file_path)[gene_symbol]
         print("Debug: getting expression of " + gene_symbol + "...")
         gene_expr = loom[loom.ra.Gene == gene_symbol, :][0]
-        if log_transform:
-            print("Debug: log-transforming gene expression...")
-            gene_expr = np.log2(gene_expr + 1)
         if cpm_normalise:
             print("Debug: CPM normalising gene expression...")
             gene_expr = gene_expr / loom.ca.nUMI
-            gene_expr = gene_expr
+        if log_transform:
+            print("Debug: log-transforming gene expression...")
+            gene_expr = np.log2(gene_expr + 1)
         if len(annotation) > 0:
             cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation, logic=logic)
             gene_expr = gene_expr[cellIndices]
