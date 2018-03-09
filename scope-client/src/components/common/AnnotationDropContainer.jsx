@@ -22,14 +22,19 @@ class AnnotationDropContainer extends Component {
 				return Object.keys(activeAnnotations).map((name, i) => {
 					return activeAnnotations[name].map((value, j) => {
 						return (
-							<Annotation name={name} value={value} key={j} label src={viewerName} handleRemove={this.handleRemove.bind(this)} />
+							<Annotation name={name} value={value} key={j} label src={viewerName} orientation={orientation} handleRemove={this.handleRemove.bind(this)} />
 						);
 					});
 				});
-			} else if (orientation != 'both') {
+			} else if ((orientation == 'horizontal') || (orientation == 'vertical')) {
 				return (
 					<div className="dropRow dropContainer" style={{width: orientation == 'vertical' ? height + 'px' : 'auto'}}>
 						<b>Drag and drop here the annotations to cross-reference.</b>
+					</div>
+				)
+			} else {
+				return (
+					<div className="dropContainer">
 					</div>
 				)
 			}

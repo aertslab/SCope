@@ -13,7 +13,7 @@ const targetBehaviour = {
 class ViewerDropContainer extends Component {
 
 	render() {
-		const { isOver, canDrop, loomFile, connectDropTarget, active, activeAnnotations, height, ...props } = this.props;
+		const { isOver, canDrop, orientation, loomFile, connectDropTarget, active, activeAnnotations, height, ...props } = this.props;
 
 		let container = () => {
 			if ((loomFile && activeAnnotations && Object.keys(activeAnnotations).length)) {
@@ -27,6 +27,17 @@ class ViewerDropContainer extends Component {
 							<b>Drag and drop here the annotations you want to compare.</b><br /><br />
 							Drop more annotations to combine them together.<br />
 							Move or copy annotations between the containers.<br /><br />
+							Change the number of the containers, their configuration<br />
+							and superposition properties in the upper left corner of the page<br />
+						</p>
+					</div>
+				)
+			} else if (orientation == 'one') {
+				return (
+					<div className="emptyDropContainer dropContainer" style={{height: height + 'px'}}>
+						<p>
+							<b>Choose the annotation from the menu on the right</b><br /><br />
+							Select more annotations to view how the annotation changes in the selected dataset.<br /><br />
 							Change the number of the containers, their configuration<br />
 							and superposition properties in the upper left corner of the page<br />
 						</p>

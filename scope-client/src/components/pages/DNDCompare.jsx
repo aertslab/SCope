@@ -25,12 +25,15 @@ class DNDCompare extends Component {
 			activeAnnotation: -1,
 			columns: 2,
 			rows: 2,
+			displays: 4,
 			crossAnnotations: {
 				horizontal: [], 
 				vertical: [], 
-				both: []
+				both: [],
+				one: []
 			},
 			configuration: 'simple',
+			superposition: 'OR',
 		}
 		this.activeLoomListener = (loom, metadata, coordinates) => {
 			this.setState({activeLoom: loom, activeCoordinates: coordinates, metadata: metadata});
@@ -40,6 +43,7 @@ class DNDCompare extends Component {
 		}
 		this.height = window.innerHeight - 200;
 		this.displayConf = [
+			{ text: 'auto', value: 0, disabled: true },
 			{ text: '1', value: 1 },
 			{ text: '2', value: 2 },
 			{ text: '4', value: 4 },
@@ -47,11 +51,13 @@ class DNDCompare extends Component {
 			{ text: '9', value: 9 }
 		]
 		this.superpositionConf = [
+			{ text: 'N/A', value: 'NA', disabled: true },
 			{ text: 'AND', value: 'AND' },
 			{ text: 'OR', value: 'OR' }
 		]
 		this.configurationConf = [
-			{ text: 'simple', value: 'simple' },
+			{ text: 'drag-and-drop', value: 'simple' },
+			{ text: 'one-type', value: 'one' },
 			{ text: 'cross-reference', value: 'cross' },
 			{ text: 'multi-dataset', value: 'multi' },
 		]
@@ -62,7 +68,29 @@ class DNDCompare extends Component {
 	}
 
 	render() {
-		const { activeLoom, activeThresholds, activeFeatures, crossAnnotations, metadata, activeCoordinates, activeAnnotation, annotationIDs, columns, rows, colors } = this.state;
+		const { 
+			activeLoom, 
+			activeThresholds, 
+			activeFeatures, 
+			crossAnnotations, 
+			metadata, 
+			activeCoordinates, 
+			activeAnnotation, 
+			annotationIDs, 
+			colors, 
+			displays,
+			configuration,
+			superposition,
+			multiLoom
+		} = this.state;
+
+		let annotationLinks = () => {
+			if (configuration == 'one') return (
+				<span style={{float: 'right'}}>
+					<a className="pointer" onClick={this.selectAllAnotations.bind(this)}>all</a> - <a className="pointer" onClick={this.selectNoAnotations.bind(this)}>none</a>
+				</span>
+			)
+		}
 
 		let annotationTabs = () => {
 			if (metadata && metadata.cellMetaData && metadata.cellMetaData.annotations) {
@@ -78,16 +106,33 @@ class DNDCompare extends Component {
 							<Menu vertical secondary>
 									{annotation.values.map((value, valueID)=> {
 										return (
-											<Annotation name={annotation.name} value={value} key={valueID} isDropped={this.isDropped(annotation.name, value)} />
+											<Annotation name={annotation.name} value={value} key={valueID} isDropped={this.isDropped(annotation.name, value)} onClick={this.selectAnnotation.bind(this)} />
 										);
 									})}
 							</Menu>
+							{annotationLinks()}
 						</Accordion.Content>
 						</span>
 					);
 				})
 			}
 		};
+
+		let columns = this.state.columns;
+		let rows = this.state.rows;
+		if (configuration == 'one') {
+			columns = 1;
+			while (crossAnnotations['one'].length > columns * columns) {
+				columns++;
+			}
+			rows = columns;
+			while (columns * (rows - 1) >= crossAnnotations['one'].length) {
+				rows --;
+			}
+			console.log('number of columns', columns, 'rows', rows);
+			if (rows < 1) rows = 1;
+		}
+
 
 		let viewers = () => {
 			return (
@@ -97,20 +142,23 @@ class DNDCompare extends Component {
 						{_.times(columns, (j) => {
 								let name = "comp"+(columns * i + j);
 								let annotationDropContainerHorizontal, annotationDropContainerVertical, datasetSelector;
-								if ((this.state.configuration == 'simple') || ((this.state.configuration == 'cross') && (i == 0))) {
+								if ((configuration == 'simple') || (configuration == 'one') || ((configuration == 'cross') && (i == 0))) {
+									let ca = crossAnnotations['horizontal'][j];
+									if (configuration == 'simple') ca = crossAnnotations['both'][columns * i + j];
+									if (configuration == 'one') ca = crossAnnotations['one'][columns * i + j];
 									annotationDropContainerHorizontal = (
 										<AnnotationDropContainer 
-											activeAnnotations={this.state.configuration == 'cross' ? crossAnnotations['horizontal'][j] : crossAnnotations['both'][columns * i + j]} 
+											activeAnnotations={ca} 
 											viewerName={name} 
-											orientation={this.state.configuration == 'cross' ? 'horizontal' : 'both'}
-											position={this.state.configuration == 'cross' ? j : columns * i + j}
+											orientation={configuration == 'cross' ? 'horizontal' : (configuration == 'one' ? 'one' : 'both')}
+											position={configuration == 'cross' ? j : columns * i + j}
 											height={this.height / rows}
 											onDrop={this.handleDrop.bind(this)}
 											onRemove={this.handleRemove.bind(this)}
 										/>
 									)
 								}
-								if (((this.state.configuration == 'cross') || (this.state.configuration == 'multi')) && (j == 0)) {
+								if (((configuration == 'cross') || (configuration == 'multi')) && (j == 0)) {
 									annotationDropContainerVertical = (
 										<AnnotationDropContainer 
 											activeAnnotations={crossAnnotations['vertical'][i]} 
@@ -123,36 +171,39 @@ class DNDCompare extends Component {
 										/>
 									)
 								}
-								if ((this.state.configuration == 'multi') && (i == 0)) {
+								if ((configuration == 'multi') && (i == 0)) {
 									datasetSelector = (
 										<span>
 										<b>Select a dataset: </b>
-										<Dropdown inline options={this.loomConf} disabled={j==0} defaultValue={this.state.multiLoom[j]} placeholder=" none selected " onChange={(proxy, select) => {
-											let ml = this.state.multiLoom;
+										<Dropdown inline options={this.loomConf} disabled={j==0} defaultValue={multiLoom[j]} placeholder=" none selected " onChange={(proxy, select) => {
+											let ml = multiLoom;
 											ml[j] = select.value;
 											this.setState({multiLoom: ml});
 										}}/>
 										</span>
 									)
 								}
-								let va = this.state.configuration == 'simple' ? crossAnnotations['both'][columns * i + j] : this.getCrossAnnotations(i, j);
+								let va;
+								if (configuration == 'simple') va = crossAnnotations['both'][columns * i + j];
+								else if (configuration == 'one') va = crossAnnotations['one'][columns * i + j]
+								else va = this.getCrossAnnotations(i, j);
 								return (
 									<Grid.Column key={j}>
 										{datasetSelector}
 										{annotationDropContainerHorizontal}
 										{annotationDropContainerVertical}
 										<ViewerDropContainer
-											active={this.state.configuration == 'simple' ? true : false}
+											active={configuration == 'simple' ? true : false}
 											key={columns * i + j}
 											onDrop={this.handleDrop.bind(this)}
 											onRemove={this.handleRemove.bind(this)}
 											name={name}
 											height={this.height / rows}
-											loomFile={this.state.configuration == 'multi' ? this.state.multiLoom[j] : activeLoom}
+											loomFile={configuration == 'multi' ? multiLoom[j] : activeLoom}
 											activeFeatures={activeFeatures}
 											activeCoordinates={activeCoordinates}
 											activeAnnotations={va}
-											orientation='both'
+											orientation={configuration =='one' ? 'one' : 'both'}
 											position={columns * i + j}
 											onScaleChange={this.onScaleChange.bind(this)}
 											customScale={true}
@@ -185,10 +236,10 @@ class DNDCompare extends Component {
 				<Grid.Row columns="4">
 					<Grid.Column width={2} >
 						Number of displays: &nbsp;
-						<Dropdown inline options={this.displayConf} defaultValue={4} onChange={this.displayNumberChanged.bind(this)}/>
+						<Dropdown inline options={this.displayConf} disabled={configuration=='one'} value={displays} onChange={this.displayNumberChanged.bind(this)}/>
 						<br />
 						Superposition: &nbsp;
-						<Dropdown inline disabled options={this.superpositionConf} defaultValue={'OR'} onChange={this.superpositionChanged.bind(this)}/>
+						<Dropdown inline disabled options={this.superpositionConf} value={superposition} onChange={this.superpositionChanged.bind(this)}/>
 						<br />
 						Configuration: &nbsp;
 						<Dropdown inline options={this.configurationConf} defaultValue={'simple'} onChange={this.configurationChanged.bind(this)}/>
@@ -232,7 +283,6 @@ class DNDCompare extends Component {
 	}
 
 	handleDrop(item, viewer, orientation, position) {
-		let isDropped = false;
 		if (DEBUG) console.log('handleDrop', item, viewer, orientation, position);
 		let annotations = this.state.crossAnnotations;
 		if (!annotations[orientation][position]) annotations[orientation][position] = {};
@@ -269,35 +319,100 @@ class DNDCompare extends Component {
 	displayNumberChanged(proxy, selection) {
 		setTimeout(() => {
 			if (selection.value == 1) {
-				this.setState({columns: 1, rows: 1});
+				this.setState({columns: 1, rows: 1, displays: 1});
 			} else if(selection.value == 2) {
-				this.setState({columns: 2, rows: 1});
+				this.setState({columns: 2, rows: 1, displays: 2});
 			} else if(selection.value == 4) {
-				this.setState({columns: 2, rows: 2});
+				this.setState({columns: 2, rows: 2, displays: 4});
 			} else if(selection.value == 6) {
-				this.setState({columns: 3, rows: 2});
+				this.setState({columns: 3, rows: 2, displays: 6});
 			} else if(selection.value == 9) {
-				this.setState({columns: 3, rows: 3});
+				this.setState({columns: 3, rows: 3, displays: 9});
 			}
 		}, 100);
 	}
 
 	superpositionChanged(proxy, selection) {
 		setTimeout(() => {
+			this.setState({superposition: selection.value});
 		}, 100);
 	}
 
 	configurationChanged(proxy, selection) {
 		setTimeout(() => {
-			this.setState({configuration: selection.value});
+			let conf = selection.value;
+			let displays = this.state.displays;
+			let superposition = this.state.superposition;
+			let crossAnnotations = {
+				horizontal: [], 
+				vertical: [], 
+				both: [],
+				one: []
+			}
+			if (conf == 'one') {
+				displays = 0;
+				superposition = 'NA';
+			} else {
+				displays = this.state.rows * this.state.columns;
+				superposition = 'OR';
+			}			
+			this.setState({configuration: conf, displays: displays, superposition: superposition, crossAnnotations: crossAnnotations});
 		}, 100);
 	}
 
+	selectAllAnotations() {
+        const { crossAnnotations, activeAnnotation, metadata } = this.state;
+        let annotationIDs = [];
+        let annotationGroup = metadata.cellMetaData.annotations[activeAnnotation];
+        annotationGroup.values.map((value, valueID) => {
+        	let a = {};
+        	a[annotationGroup.name] = [value];
+            annotationIDs.push(a);
+        });
+        crossAnnotations['one'] = annotationIDs;
+        this.setState({crossAnnotations: crossAnnotations});
+	}
+
+	selectNoAnotations() {
+		let { crossAnnotations } = this.state;
+		crossAnnotations['one'] = [];
+		this.setState({crossAnnotations: crossAnnotations});
+	}
+
+	selectAnnotation(name, value, selected) {
+		if (this.state.configuration == 'one') {
+			console.log('selectAnnotation', name, value, selected);
+			let annotations = this.state.crossAnnotations;
+			if (!selected) {
+				let a = {};
+				a[name] = [value];
+				annotations['one'].push(a);
+			} else {
+				let idx = -1;
+				annotations['one'].map((a, i) => {
+					if (a[name][0] == value) {
+						console.log('found', i)
+						idx = i;
+					}
+				});
+				annotations['one'].splice(idx, 1);
+			}
+			annotations['one'].sort((a, b) => {
+				let va = a[name][0], vb = b[name][0];
+				let pa = parseInt(va), pb = parseInt(vb);
+				if (!isNaN(pa) && !isNaN(pb)) return pa > pb ? 1 : (pa < pb ? -1 : 0);
+				return va > vb ? 1 : (va < vb ? -1 : 0);
+			})
+			console.log('annotations', annotations);
+			this.setState({ crossAnnotations : annotations});
+		}
+	}
 
 	selectAnnotationGroup(e, props) {
 		const { index } = props;
-		const { activeAnnotation } = this.state;
-		this.setState({activeAnnotation : activeAnnotation == index ? -1 : index, annotationIDs: []});
+		let { activeAnnotation, crossAnnotations } = this.state;
+		crossAnnotations['one'] = [];
+		this.setState({activeAnnotation : activeAnnotation == index ? -1 : index, crossAnnotations: crossAnnotations});
 	}
 
 	getCrossAnnotations(i, j) {
