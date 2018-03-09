@@ -11,8 +11,11 @@ import numpy as np
 import json
 import zlib
 import base64
+import pickle
+from collections import OrderedDict
 from functools import lru_cache
 from itertools import compress
+from pathlib import Path
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "bf9360", "1d331a", "79baf2", "deb6f2",
@@ -42,6 +45,9 @@ BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "b
                   "4c3213", "688060", "001b33", "69238c", "bf606c"]
 
 hexarr = np.vectorize('{:02x}'.format)
+
+dataDir = os.path.join(Path(__file__).resolve().parents[3], 'data', 'gene_mappings')
+dmel_mappings = pickle.load(open(os.path.join(dataDir, 'terminal_mappings.pickle'), 'rb'))
 
 
 class SCope(s_pb2_grpc.MainServicer):
@@ -83,12 +89,32 @@ class SCope(s_pb2_grpc.MainServicer):
     def decompress_meta(self, meta):
         return json.loads(zlib.decompress(base64.b64decode(meta.encode('ascii'))).decode('ascii'))
 
+    @lru_cache(maxsize=32)
+    def infer_species(self, loom_file_path):
+        loom = self.get_loom_connection(loom_file_path)
+        genes = set(loom.ra.Gene)
+        maxPerc = 0.0
+        maxSpecies = ''
+        mappings = {
+            'dmel': dmel_mappings
+        }
+        for species in mappings.keys():
+            intersect = genes.intersection(mappings[species].keys())
+            if (len(intersect) / len(genes)) > maxPerc:
+                maxPerc = (len(intersect) / len(genes))
+                maxSpecies = species
+        if maxPerc < 0.5:
+            return 'Unknown', {}
+        return maxSpecies, mappings[maxSpecies]
+
     def get_nb_cells(self, loom_file_path):
         loom = self.get_loom_connection(loom_file_path)
         return loom.shape[1]
 
     def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True, cpm_normalise=False, annotation=''):
         loom = self.get_loom_connection(loom_file_path)
+        if gene_symbol not in set(loom.ra.Gene):
+            gene_symbol = self.get_gene_names(loom_file_path)[gene_symbol]
         print("Debug: getting expression of " + gene_symbol + "...")
         gene_expr = loom[loom.ra.Gene == gene_symbol, :][0]
         if log_transform:
@@ -122,8 +148,22 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(loom_file_path)
         return loom.ca[annoName]
 
-    @lru_cache(maxsize=32)
+    @lru_cache(maxsize=8)
+    def get_gene_names(self, loom_file_path):
+        loom = self.get_loom_connection(loom_file_path)
+        genes = loom.ra.Gene
+        conversion = {}
+        species, geneMappings = self.infer_species(loom_file_path)
+        for gene in genes:
+            gene = str(gene)
+            if geneMappings[gene] != gene:
+                conversion[geneMappings[gene]] = gene
+        return conversion
+
+    @lru_cache(maxsize=8)
     def build_searchspace(self, loom_file_path):
+        start_time = time.time()
+        species, geneMappings = self.infer_species(loom_file_path)
         loom = self.get_loom_connection(loom_file_path)
         meta = True
         try:
@@ -136,14 +176,27 @@ class SCope(s_pb2_grpc.MainServicer):
         def add_element(searchSpace, elements, elementName):
             if type(elements) != str:
                 for element in elements:
-                    searchSpace[(element.casefold(), elementName)] = element
+                    if elementName == 'gene':
+                        if len(geneMappings) > 0:
+                            if geneMappings[element] != element:
+                                searchSpace[('{0}'.format(str(element)).casefold(), element, elementName)] = geneMappings[element]
+                            else:
+                                searchSpace[(element.casefold(), element, elementName)] = element
+                        else:
+                            searchSpace[(element.casefold(), element, elementName)] = element
             else:
-                searchSpace[(elements.casefold(), elementName)] = elements
+                searchSpace[(elements.casefold(), elements, elementName)] = elements
             return searchSpace
 
         searchSpace = {}
-        searchSpace = add_element(searchSpace, loom.ra.Gene, 'gene')
-        searchSpace = add_element(searchSpace, loom.ra.Regulons.dtype.names, 'regulon')
+        if len(geneMappings) > 0:
+            genes = set(loom.ra.Gene)
+            shrinkMappings = set([x for x in dmel_mappings.keys() if x in genes or dmel_mappings[x] in genes])
+            # searchSpace = add_element(searchSpace, dmel_mappings.keys(), 'gene')
+            searchSpace = add_element(searchSpace, shrinkMappings, 'gene')
+        else:
+            searchSpace = add_element(searchSpace, loom.ra.Gene, 'gene')
+
         try:
             searchSpace = add_element(searchSpace, loom.ra.Regulons.dtype.names, 'regulon')
         except AttributeError:
@@ -155,10 +208,12 @@ class SCope(s_pb2_grpc.MainServicer):
                 for cluster in clustering['clusters']:
                     allClusters.append(cluster['description'])
                 searchSpace = add_element(searchSpace, allClusters, 'Clustering: {0}'.format(clustering['name']))
+
+        print("Debug: %s seconds elapsed making search space ---" % (time.time() - start_time))
         return searchSpace
 
+    @lru_cache(maxsize=256)
     def get_features(self, loom_file_path, query):
-
         searchSpace = self.build_searchspace(loom_file_path)
         # Filter the genes by the query
 
@@ -166,7 +221,6 @@ class SCope(s_pb2_grpc.MainServicer):
         start_time = time.time()
         res = []
 
-        print("Debug: %s seconds elapsed making search space ---" % (time.time() - start_time))
         queryCF = query.casefold()
         res = [x for x in searchSpace.keys() if queryCF in x[0]]
 
@@ -175,15 +229,40 @@ class SCope(s_pb2_grpc.MainServicer):
                 r = res.pop(n)
                 res = [r] + res
         for n, r in enumerate(res):
-            if r[0] == query or r[0] == queryCF:
+            if r[0] == queryCF:
                 r = res.pop(n)
                 res = [r] + res
+        for n, r in enumerate(res):
+            if r[1] == query:
+                r = res.pop(n)
+                res = [r] + res
+        collapsedResults = OrderedDict()
+        for r in res:
+            if searchSpace[r] not in collapsedResults.keys():
+                collapsedResults[searchSpace[r]] = [(r[1], r[2])]
+            else:
+                collapsedResults[searchSpace[r]].append((r[1], r[2]))
+
+        descriptions = []
+        for r in collapsedResults.keys():
+            synonyms = sorted([x[0] for x in collapsedResults[r]])
+            try:
+                synonyms.remove(r)
+            except ValueError:
+                pass
+            if len(synonyms) > 0:
+                descriptions.append('Synonym of: {0}'.format(', '.join(synonyms)))
+            else:
+                descriptions.append('')
+        # if mapping[result] != result: change title and description to indicate synonym
 
         print("Debug: " + str(len(res)) + " genes matching '" + query + "'")
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        return {'feature': [searchSpace[r] for r in res],
-                'featureType': [r[1] for r in res],
-                'featureDescription': [searchSpace[r] for r in res]}
+        res = {'feature': [r for r in collapsedResults.keys()],
+               'featureType': [collapsedResults[r][0][1] for r in collapsedResults.keys()],
+               'featureDescription': descriptions}
+        print(query, len(res['feature']))
+        return res
 
     def get_anno_cells(self, loom_file_path, annotations):
         loom = self.get_loom_connection(loom_file_path)
@@ -279,6 +358,8 @@ class SCope(s_pb2_grpc.MainServicer):
             metaData = json.loads(loom.attrs.MetaData)
         except ValueError:
             metaData = self.decompress_meta(loom.attrs.MetaData)
+        except AttributeError:
+            pass
         if not os.path.isfile(loomFilePath):
             return
         n_cells = self.get_nb_cells(loomFilePath)
