@@ -416,7 +416,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 if feature != '':
                     vals = self.get_auc_values(loom_file_path=loomFilePath,
                                                regulon=feature,
-                                               annotation=request.annotation
+                                               annotation=request.annotation,
                                                logic=request.logic)
                     print(vals)
                     if request.vmax[n] != 0.0:
