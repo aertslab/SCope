@@ -51,20 +51,7 @@ export default class AppHeader extends Component {
 				togglePage('welcome');
 			}
 		}
-/*
-		let compare1Tab = () => {
-			if (metadata && metadata.cellMetaData && metadata.cellMetaData.annotations.length) return (
-				<Menu.Item>
-					<Button basic onClick={this.selectTab.bind(this)} active={currentPage == 'comparison'} page='comparison'>
-						Compare
-					</Button>
-				</Menu.Item>
-			);
-			else if (currentPage == 'comparison') {
-				togglePage('welcome');
-			}
-		}
-*/
+
 		let compare1DNDTab = () => {
 			if (metadata && metadata.cellMetaData && metadata.cellMetaData.annotations.length) return (
 				<Menu.Item>

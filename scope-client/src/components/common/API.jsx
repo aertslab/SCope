@@ -35,6 +35,7 @@ class API {
 		this.colors = ["red", "green", "blue"];
 
 		this.maxValues = [];
+		this.maxValuesPerViewer = {};
 		this.maxValuesChangeListeners = [];
 		this.customValues = [0, 0, 0];
 		this.customValuesChangeListeners = [];
@@ -96,8 +97,6 @@ class API {
 		});
 	}
 
-
-
 	getActiveFeatures() {
 		return this.features[this.activePage] ? this.features[this.activePage] : [];
 	}
@@ -124,24 +123,47 @@ class API {
 		}
 	}
 
-
 	
 	getFeaturesScale() {
-		return this.maxValues;
+		return this.getMaxValues();
 	}
 
-	setFeatureScales(maxValues) {
-		this.maxValues = maxValues;
+	removeFeatureScales(viewer) {
+		delete(this.maxValuesPerViewer[viewer]);
+		console.log('removeFeatureScales', viewer, this.maxValues)
+		this.maxValues = this.getMaxValues();
 		this.maxValuesChangeListeners.forEach((listener) => {
 			listener(this.maxValues, null);
 		})
 	}
-	
-	setFeatureScale(id, value) {
-		this.maxValues[id] = value;
+
+	setFeatureScales(values, id, viewer) {
+		if (DEBUG) console.log('setFeatureScales', values, id, viewer);
+		if (id == null || id == undefined) {
+			this.maxValuesPerViewer[viewer] = values;
+			this.maxValues = this.getMaxValues();
+			this.customValues = this.maxValues.slice(0);
+		} else {
+			this.maxValuesPerViewer[viewer] = this.maxValuesPerViewer[viewer] || [0, 0, 0];
+			this.maxValuesPerViewer[viewer][id] = values[id];
+			this.maxValues = this.getMaxValues();
+			this.customValues[id] = this.maxValues[id];
+		}
 		this.maxValuesChangeListeners.forEach((listener) => {
 			listener(this.maxValues, id);
 		})
+	}
+
+	getMaxValues() {
+		let r = [], g = [], b = [];
+		Object.keys(this.maxValuesPerViewer).map(viewer => {
+			r.push(this.maxValuesPerViewer[viewer][0]);
+			g.push(this.maxValuesPerViewer[viewer][1]);
+			b.push(this.maxValuesPerViewer[viewer][2]);
+		})
+		let max = [Math.max(...r, 0), Math.max(...g, 0), Math.max(...b, 0)]
+		if (DEBUG) console.log ('getMaxValues', max);
+		return max;
 	}
 
 	onFeaturesScaleChange(listener) {
@@ -160,10 +182,10 @@ class API {
 		return this.customValues;
 	}
 
-	setCustomScale(scale) {
+	setCustomScale(scale, featureID, vmaxID) {
 		this.customValues = scale;
 		this.customValuesChangeListeners.forEach((listener) => {
-			listener(this.customValues);
+			listener(this.customValues, this.getMaxValues(), featureID, vmaxID);
 		})
 	}
 
@@ -186,6 +208,7 @@ class API {
 
 	setActivePage(page) {
 		this.maxValues = [];
+		this.maxValuesPerViewer = {};
 		this.customValues = [0, 0, 0];
 		this.activePage = page;
 	}
