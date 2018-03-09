@@ -91,11 +91,15 @@ class SCope(s_pb2_grpc.MainServicer):
     def get_nb_cells(self, loom_file_path):
         loom = self.get_loom_connection(loom_file_path)
         return loom.shape[1]
+    
+    @staticmethod
+    def get_genes(loom):
+        return loom.ra.Gene.astype(str)
 
     def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True, cpm_normalise=False, annotation=''):
         loom = self.get_loom_connection(loom_file_path)
         print("Debug: getting expression of " + gene_symbol + "...")
-        gene_expr = loom[loom.ra.Gene == gene_symbol, :][0]
+        gene_expr = loom[SCope.get_genes(loom) == gene_symbol, :][0]
         if log_transform:
             print("Debug: log-transforming gene expression...")
             gene_expr = np.log2(gene_expr + 1)
@@ -108,11 +112,17 @@ class SCope(s_pb2_grpc.MainServicer):
             gene_expr = gene_expr[cellIndices]
         return gene_expr
 
+    @staticmethod
+    def get_regulons_AUC(loom):
+        L = loom.ca.RegulonsAUC.dtype.names
+        loom.ca.RegulonsAUC.dtype.names = list(map(lambda s: s.replace(' ' , '_'), L))
+        return loom.ca.RegulonsAUC
+
     def get_auc_values(self, loom_file_path, regulon, annotation=''):
         loom = self.get_loom_connection(loom_file_path)
         print("Debug: getting AUC values for {0} ...".format(regulon))
-        if regulon in loom.ca.RegulonsAUC.dtype.names:
-            vals = loom.ca.RegulonsAUC[regulon]
+        if regulon in SCope.get_regulons_AUC(loom).dtype.names:
+            vals = SCope.get_regulons_AUC(loom)[regulon]
             if len(annotation) > 0:
                 cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation)
                 vals = vals[cellIndices]
@@ -132,9 +142,9 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(loom_file_path)
         meta = True
         try:
-            metaData = json.loads(loom.attrs.MetaData)
+            metaData = json.loads(SCope.get_meta_data(loom))
         except ValueError:
-            metaData = self.decompress_meta(loom.attrs.MetaData)
+            metaData = self.decompress_meta(SCope.get_meta_data(loom))
         except AttributeError:
             meta = False
 
@@ -147,7 +157,7 @@ class SCope(s_pb2_grpc.MainServicer):
             return searchSpace
 
         searchSpace = {}
-        searchSpace = add_element(searchSpace, loom.ra.Gene, 'gene')
+        searchSpace = add_element(searchSpace, SCope.get_genes(loom), 'gene')
         searchSpace = add_element(searchSpace, loom.ra.Regulons.dtype.names, 'regulon')
         try:
             searchSpace = add_element(searchSpace, loom.ra.Regulons.dtype.names, 'regulon')
@@ -233,6 +243,13 @@ class SCope(s_pb2_grpc.MainServicer):
         return {"x": x,
                 "y": y}
 
+    @staticmethod
+    def get_meta_data(loom):
+        if type(loom.attrs.MetaData) is np.ndarray:
+            return loom.attrs.MetaData[0]
+        return loom.attrs.MetaData
+
+
     def get_file_metadata(self, loom_file_path):
         loom = self.get_loom_connection(loom_file_path)
         meta = {}
@@ -254,9 +271,9 @@ class SCope(s_pb2_grpc.MainServicer):
             meta['hasGeneSets'] = False
         try:
             try:
-                metaData = json.loads(loom.attrs.MetaData)
+                metaData = json.loads(SCope.get_meta_data(loom))
             except ValueError:
-                metaData = self.decompress_meta(loom.attrs.MetaData)
+                metaData = self.decompress_meta(SCope.get_meta_data(loom))
             meta['hasGlobalMeta'] = True
         except (KeyError, AttributeError):
             meta['hasGlobalMeta'] = False
@@ -281,9 +298,9 @@ class SCope(s_pb2_grpc.MainServicer):
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
         loom = self.get_loom_connection(loomFilePath)
         try:
-            metaData = json.loads(loom.attrs.MetaData)
+            metaData = json.loads(SCope.get_meta_data(loom))
         except ValueError:
-            metaData = self.decompress_meta(loom.attrs.MetaData)
+            metaData = self.decompress_meta(SCope.get_meta_data(loom))
         if not os.path.isfile(loomFilePath):
             return
         n_cells = self.get_nb_cells(loomFilePath)
@@ -312,6 +329,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     vals = self.get_auc_values(loom_file_path=loomFilePath,
                                                regulon=feature,
                                                annotation=request.annotation)
+                    print(vals)
                     if request.vmax[n] != 0.0:
                         vmax[n] = request.vmax[n]
                     else:
@@ -408,11 +426,11 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getRegulonMetaData(self, request, context):
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
-        regulonGenes = loom.ra.Gene[loom.ra.Regulons[request.regulon] == 1]
+        regulonGenes = SCope.get_genes(loom)[loom.ra.Regulons[request.regulon] == 1]
         try:
-            metaData = json.loads(loom.attrs.MetaData)
+            metaData = json.loads(SCope.get_meta_data(loom))
         except ValueError:
-            metaData = self.decompress_meta(loom.attrs.MetaData)
+            metaData = self.decompress_meta(SCope.get_meta_data(loom))
         for regulon in metaData['regulonThresholds']:
             if regulon['regulon'] == request.regulon:
                 autoThresholds = []
@@ -432,7 +450,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getMarkerGenes(self, request, context):
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
-        genes = loom.ra.Gene[loom.ra["ClusterMarkers_{0}".format(request.clusteringID)][request.clusterID] == 1]
+        genes = SCope.get_genes(loom)[loom.ra["ClusterMarkers_{0}".format(request.clusteringID)][request.clusterID] == 1]
         return(s_pb2.MarkerGenesReply(genes=genes))
 
     def getMyLooms(self, request, context):
@@ -443,9 +461,9 @@ class SCope(s_pb2_grpc.MainServicer):
                 fileMeta = self.get_file_metadata(self.get_loom_filepath(f))
                 if fileMeta['hasGlobalMeta']:
                     try:
-                        meta = json.loads(loom.attrs.MetaData)
+                        meta = json.loads(SCope.get_meta_data(loom))
                     except ValueError:
-                        meta = self.decompress_meta(loom.attrs.MetaData)
+                        meta = self.decompress_meta(SCope.get_meta_data(loom))
                     annotations = meta['annotations']
                     embeddings = meta['embeddings']
                     clusterings = meta['clusterings']
