@@ -111,7 +111,7 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(loom_file_path)
         return loom.shape[1]
 
-    def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True, cpm_normalise=False, annotation=''):
+    def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True, cpm_normalise=False, annotation='', logic='AND'):
         loom = self.get_loom_connection(loom_file_path)
         if gene_symbol not in set(loom.ra.Gene):
             gene_symbol = self.get_gene_names(loom_file_path)[gene_symbol]
@@ -125,17 +125,17 @@ class SCope(s_pb2_grpc.MainServicer):
             gene_expr = gene_expr / loom.ca.nUMI
             gene_expr = gene_expr
         if len(annotation) > 0:
-            cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation)
+            cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation, logic=logic)
             gene_expr = gene_expr[cellIndices]
         return gene_expr
 
-    def get_auc_values(self, loom_file_path, regulon, annotation=''):
+    def get_auc_values(self, loom_file_path, regulon, annotation='', logic='AND'):
         loom = self.get_loom_connection(loom_file_path)
         print("Debug: getting AUC values for {0} ...".format(regulon))
         if regulon in loom.ca.RegulonsAUC.dtype.names:
             vals = loom.ca.RegulonsAUC[regulon]
             if len(annotation) > 0:
-                cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation)
+                cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation, logic=logic)
                 vals = vals[cellIndices]
             return vals
         return []
@@ -269,21 +269,26 @@ class SCope(s_pb2_grpc.MainServicer):
         print(query, len(res['feature']))
         return res
 
-    def get_anno_cells(self, loom_file_path, annotations):
+    def get_anno_cells(self, loom_file_path, annotations, logic='AND'):
         loom = self.get_loom_connection(loom_file_path)
-        cellIndices = set()
+        cellIndices = []
         for anno in annotations:
+            annoSet = set()
             annoName = anno.name
             if annoName.startswith("Clustering_"):
                 clusteringID = str(annoName.split('_')[1])
                 for annotationValue in anno.values:
-                    [cellIndices.add(x) for x in np.where(loom.ca.Clusterings[clusteringID] == annotationValue)[0]]
+                    [annoSet.add(x) for x in np.where(loom.ca.Clusterings[clusteringID] == annotationValue)[0]]
             else:
                 for annotationValue in anno.values:
-                    [cellIndices.add(x) for x in np.where(loom.ca[annoName] == annotationValue)[0]]
-        return sorted(list(cellIndices))
+                    [annoSet.add(x) for x in np.where(loom.ca[annoName] == annotationValue)[0]]
+            cellIndices.append(annoSet)
+        if logic == 'AND':
+            return sorted(list(set().intersection(*cellIndices)))
+        elif logic == 'OR':
+            return sorted(list(set().union(*cellIndices)))
 
-    def get_coordinates(self, loom_file_path, coordinatesID=-1, annotation=''):
+    def get_coordinates(self, loom_file_path, coordinatesID=-1, annotation='', logic='AND'):
         loom = self.get_loom_connection(loom_file_path)
         dims = 0
         if coordinatesID == -1:
@@ -306,7 +311,7 @@ class SCope(s_pb2_grpc.MainServicer):
             x = loom.ca.Embeddings_X[str(coordinatesID)]
             y = loom.ca.Embeddings_Y[str(coordinatesID)]
         if len(annotation) > 0:
-            cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation)
+            cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation, logic=logic)
             x = x[cellIndices]
             y = y[cellIndices]
         return {"x": x,
@@ -379,7 +384,8 @@ class SCope(s_pb2_grpc.MainServicer):
                         gene_symbol=feature,
                         log_transform=request.hasLogTranform,
                         cpm_normalise=request.hasCpmTranform,
-                        annotation=request.annotation)
+                        annotation=request.annotation,
+                        logic=request.logic)
                     if request.vmax[n] != 0.0:
                         vmax[n] = request.vmax[n]
                     else:
@@ -392,7 +398,8 @@ class SCope(s_pb2_grpc.MainServicer):
                 if feature != '':
                     vals = self.get_auc_values(loom_file_path=loomFilePath,
                                                regulon=feature,
-                                               annotation=request.annotation)
+                                               annotation=request.annotation,
+                                               logic=request.logic)
                     if request.vmax[n] != 0.0:
                         vmax[n] = request.vmax[n]
                     else:
@@ -418,7 +425,7 @@ class SCope(s_pb2_grpc.MainServicer):
                                 interval = int(16581375 / numClusters)
                                 hex_vec = [hex(I)[2:].zfill(6) for I in range(0, numClusters, interval)]
                             if len(request.annotation) > 0:
-                                cellIndices = self.get_anno_cells(loom_file_path=loomFilePath, annotations=request.annotation)
+                                cellIndices = self.get_anno_cells(loom_file_path=loomFilePath, annotations=request.annotation, logic=request.logic)
                                 hex_vec = np.array(hex_vec)[cellIndices]
                             return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax)
                         else:
@@ -428,7 +435,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 clusterIndices = loom.ca.Clusterings[clusteringID] == clusterID
                 clusterCol = np.array([225 if x else 0 for x in clusterIndices])
                 if len(request.annotation) > 0:
-                    cellIndices = self.get_anno_cells(loom_file_path=loomFilePath, annotations=request.annotation)
+                    cellIndices = self.get_anno_cells(loom_file_path=loomFilePath, annotations=request.annotation, logic=request.logic)
                     clusterCol = clusterCol[cellIndices]
                 features.append(clusterCol)
             else:
@@ -484,7 +491,8 @@ class SCope(s_pb2_grpc.MainServicer):
         # request content
         c = self.get_coordinates(self.get_loom_filepath(request.loomFilePath),
                                  coordinatesID=request.coordinatesID,
-                                 annotation=request.annotation)
+                                 annotation=request.annotation,
+                                 logic=request.logic)
         return s_pb2.CoordinatesReply(x=c["x"], y=c["y"])
 
     def getRegulonMetaData(self, request, context):
