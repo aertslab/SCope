@@ -156,8 +156,11 @@ class SCope(s_pb2_grpc.MainServicer):
         species, geneMappings = self.infer_species(loom_file_path)
         for gene in genes:
             gene = str(gene)
-            if geneMappings[gene] != gene:
-                conversion[geneMappings[gene]] = gene
+            try:
+                if geneMappings[gene] != gene:
+                    conversion[geneMappings[gene]] = gene
+            except KeyError:
+                print("ERROR: Gene: {0} is not in the mapping table!".format(gene))
         return conversion
 
     @lru_cache(maxsize=8)
@@ -237,9 +240,10 @@ class SCope(s_pb2_grpc.MainServicer):
             if r[1] == query:
                 r = res.pop(n)
                 res = [r] + res
+
         collapsedResults = OrderedDict()
         for r in res:
-            if searchSpace[r] not in collapsedResults.keys():
+            if (searchSpace[r], r[2]) not in collapsedResults.keys():
                 collapsedResults[(searchSpace[r], r[2])] = [r[1]]
             else:
                 collapsedResults[(searchSpace[r], r[2])].append(r[1])
@@ -380,8 +384,8 @@ class SCope(s_pb2_grpc.MainServicer):
                         vmax[n] = request.vmax[n]
                     else:
                         vmax[n] = self.getVmax(vals)
-                    vals = np.round((vals / vmax[n]) * 255)
-                    features.append([x if x <= 255 else 255 for x in vals])
+                    vals = np.round((vals / vmax[n]) * 225)
+                    features.append([x if x <= 225 else 225 for x in vals])
                 else:
                     features.append(np.zeros(n_cells))
             elif request.featureType[n] == 'regulon':
@@ -395,8 +399,8 @@ class SCope(s_pb2_grpc.MainServicer):
                         vmax[n] = self.getVmax(vals)
                     if request.scaleThresholded:
                         vals = ([auc if auc >= request.threshold[n] else 0 for auc in vals])
-                        vals = np.round((vals / vmax[n]) * 255)
-                        features.append([x if x <= 255 else 255 for x in vals])
+                        vals = np.round((vals / vmax[n]) * 225)
+                        features.append([x if x <= 225 else 225 for x in vals])
                     else:
                         features.append([225 if auc >= request.threshold[n] else 0 for auc in vals])
                 else:
