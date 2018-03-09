@@ -92,12 +92,13 @@ export default class Viewer extends Component {
 	}
 
 	componentDidMount() {
+		if (DEBUG) console.log(this.props.name, 'componentDidMount', this.props);
 		this.zoomSelection = d3.select('#viewer'+this.props.name);
 		this.w = this.zoomSelection.node().getBoundingClientRect().width;
 		this.initGraphics();
 		if (this.props.loomFile != null) {
 			this.getPoints(this.props.loomFile, this.props.activeCoordinates, this.props.activeAnnotations, () => {
-				this.getFeatureColors(this.props.activeFeatures, this.props.loomFile, this.props.thresholds, this.props.activeAnnotations);
+				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.props.activeAnnotations);
 				let t = BackendAPI.getViewerTransform();
 				if (t) {
 					let initialTransform = d3.zoomTransform(d3.select('#viewer' + t.src).node());
@@ -110,6 +111,8 @@ export default class Viewer extends Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
+		if (DEBUG) console.log(this.props.name, 'componentWillReceiveProps', nextProps);
+
 		// TODO: dirty hacks
 		if (parseInt(this.h) != parseInt(nextProps.height)) {
 			if (DEBUG) console.log(nextProps.name, 'changing size', this.h, nextProps.height);
