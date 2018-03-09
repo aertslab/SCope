@@ -1,5 +1,6 @@
+import _ from 'lodash'
 import React, { Component } from 'react'
-import { Grid, Input, Icon } from 'semantic-ui-react'
+import { Grid, Input, Icon, Tab, Image } from 'semantic-ui-react'
 import { BackendAPI } from '../common/API' 
 import Metadata from '../common/Metadata' 
 
@@ -9,28 +10,37 @@ export default class ViewerSidebar extends Component {
 		super();
 		this.state = {
 			activePage: BackendAPI.getActivePage(),
+			activeFeatures: BackendAPI.getActiveFeatures(),
+			lassoSelections: BackendAPI.getViewerSelections(),
 			modalID: null,
-			lassoSelections: BackendAPI.getViewerSelections()
-		}
-		this.selectionsListener = (selections) => {
-			this.setState({lassoSelections: selections});
-		}        
+			activeTab: 0
+		};
+		this.selectionsListener = (selections) => {			
+			this.setState({lassoSelections: selections, activeTab: 0});
+		};
+		this.activeFeaturesListener = (features, id) => {
+			this.props.onActiveFeaturesChange(features, id);
+			this.setState({activeFeatures: features, activeTab: parseInt(id) + 1});
+		};
 	}
 
 	render() {
-
-		let lassoSelections = () => {
-			if (this.state.lassoSelections.length == 0) {
+		const { lassoSelections, activeFeatures, activeTab, activePage } = this.state;
+		console.log(activeTab);
+		let lassoTab = () => {
+			if (lassoSelections.length == 0) {
 				return (
-					<Grid.Column>No user's lasso selections</Grid.Column>
+					<Tab.Pane attached={false}>No user's lasso selections</Tab.Pane>
 				);
 			}
 
-			return (this.state.lassoSelections.map((lS, i) => {
+			return (lassoSelections.map((lS, i) => {
 				return (
+					<Tab.Pane attached={false} key={i}>
+					<Grid>
 					<Grid.Row columns={3} key={i}>
 						<Grid.Column>
-							{"Selection "+ lS.id}
+							{"Selection "+ (lS.id + 1)}
 						</Grid.Column>
 						<Grid.Column>
 							<Input
@@ -53,15 +63,72 @@ export default class ViewerSidebar extends Component {
 							}} className="pointer"  />
 						</Grid.Column>
 					</Grid.Row>
+					</Grid>
+					<br />
+					</Tab.Pane>
 				)
 			}))
 		}
 
+		let featureTab = (i) => {
+			let metadata;
+			if (activeFeatures[i].metadata) {
+				metadata = (
+					<span>
+						<Image src={'http://motifcollections.aertslab.org/v8/logos/'+activeFeatures[i].metadata.motifName} /><br />
+						<Grid columns={4} className="geneInfo">
+							{activeFeatures[i].metadata.genes.map( (g, j) => (
+								<Grid.Column key={j}>
+									<a 
+										className="pointer"
+										onClick={() => {
+											if (activePage == 'regulon') {
+
+											} else {
+												BackendAPI.setActiveFeature(i, activeFeatures[i].type, "gene", g, 0, null);
+											}
+										}} >
+										{g}
+									</a>
+								</Grid.Column>
+							))}
+						</Grid>
+					</span>
+				);
+			}
+			return (
+				<Tab.Pane attached={false} key={i} className={'feature'+i}>
+					{activeFeatures[i].featureType} <b> {activeFeatures[i].feature} </b><br />
+					{metadata}
+				</Tab.Pane>
+			)
+		}
+
+		let panes = [
+			{ menuItem: 'Cell selections', render: lassoTab },
+		]
+		_.times(3, i => {
+			if (activeFeatures[i] && activeFeatures[i].feature.length)
+				panes.push({ 
+					menuItem: activeFeatures[i].feature, 
+					render: () => featureTab(i),
+				})
+		})
+
+		console.log('panes', panes);
+
 		return (
 			<div>
-				<Grid>
-					{lassoSelections()}
-				</Grid>
+				<Tab 
+					menu={{ secondary: true, pointing: true }} 
+					panes={panes} 
+					renderActiveOnly={true} 
+					activeIndex={activeTab} 
+					className="sidebarTabs" 
+					onTabChange={(evt, data) => {
+						this.setState({activeTab: data.activeIndex});
+					}}
+				/>
 				<Metadata selectionId={this.state.modalID} onClose={() =>{
 					console.log('setting modalID', null)
 					this.setState({modalID: null});								
@@ -73,10 +140,12 @@ export default class ViewerSidebar extends Component {
 
 	componentWillMount() {
 		BackendAPI.onViewerSelectionsChange(this.selectionsListener);
+		BackendAPI.onActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
 	}
 
 	componentWillUnmount() {
 		BackendAPI.removeViewerSelectionsChange(this.selectionsListener);
+		BackendAPI.removeActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
 	}
 
 	toggleLassoSelection(id) {

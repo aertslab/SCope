@@ -32,22 +32,6 @@ export default class FeatureSearch extends React.Component {
 			padding: 0
 		}
 
-		let popup = () => {
-			if (metadata)  {
-				let image = <Image src={'http://motifcollections.aertslab.org/v8/logos/'+metadata.motifName} size='huge'/>
-				return (
-					<Menu.Item>
-						<Popup
-							size='huge'
-							trigger={<Icon name="help circle" />}
-							position='bottom left'
-							content={image}
-							/>
-					</Menu.Item>
-				)
-			}
-		}
-
 		return (
 			<Menu.Item key={field} style={noPadding}>
 				<Menu secondary style={noPadding}>
@@ -63,14 +47,15 @@ export default class FeatureSearch extends React.Component {
 							handleTypeChange={this.handleTypeChange.bind(this)}
 							onSelectionChange={this.handleSelectionChange.bind(this)}
 							onBlur={this.handleBlur.bind(this)}
+							onMouseDown={this.handleMouseDown.bind(this)}
 							results={results}
 							options={options}
+							selectFirstResult={true}
 							value={value}
 							type={type}
 							locked={locked}
 						/>
 					</Menu.Item>
-					{popup()}
 				</Menu>
 			</Menu.Item>
 		);
@@ -113,7 +98,15 @@ export default class FeatureSearch extends React.Component {
 		}
 	}
 
+
+	handleMouseDown(e, { result }) {
+		e.stopPropagation();
+		//e.preventDefault();
+	}
+
 	handleResultSelect(e, { result }) {
+		e.stopPropagation();
+		e.preventDefault();
 		if (DEBUG) console.log('handleResultSelect', e, result);
 		this.updateFeature(result.title, result.type);
 	}
@@ -128,11 +121,13 @@ export default class FeatureSearch extends React.Component {
 		this.setState({selection: result})
 	}
 
-	handleBlur(e) {
+	handleBlur(e, select) {
+		e.stopPropagation();		
 		e.preventDefault();
 		let selection = this.state.selection;
-		if (DEBUG) console.log('handleBlur', e, selection);
 		if (selection) {
+			//selection = select.results[0].results[0];
+			if (DEBUG) console.log('handleBlur', e.target, e.source, selection);
 			this.updateFeature(selection.title, selection.type)
 		}
 	}
@@ -210,4 +205,7 @@ export default class FeatureSearch extends React.Component {
 		}, 200)
 	}
 
+	componentWillReceiveProps(nextProps) {
+		this.setState({ value: nextProps.value, type: nextProps.type })
+	}
 }
