@@ -205,7 +205,6 @@ class DNDCompare extends Component {
 											activeAnnotations={va}
 											orientation={configuration =='one' ? 'one' : 'both'}
 											position={columns * i + j}
-											onScaleChange={this.onScaleChange.bind(this)}
 											customScale={true}
 											settings={true}
 											scale={true}
@@ -434,10 +433,6 @@ class DNDCompare extends Component {
 			})
 		}
 		return annotations;
-	}
-
-	onScaleChange() {
-
 	}
 
 }
