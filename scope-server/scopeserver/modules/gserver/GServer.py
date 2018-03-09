@@ -356,6 +356,8 @@ class SCope(s_pb2_grpc.MainServicer):
             vmax = max(vals)
         if vmax < 10:
             vmax = max(vals)
+        if vmax == 0:
+            vmax = 0.01
         return vmax
 
     def getCellColorByFeatures(self, request, context):
