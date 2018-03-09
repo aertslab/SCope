@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import React from 'react'
 import { Search, Input, Select, Icon } from 'semantic-ui-react'
 
@@ -20,7 +21,11 @@ export default class FeatureSearchInput extends Search {
 			<div>
 				<Input iconPosition='left'
 					   key={color} labelPosition='left' value={value} placeholder='Search...' 
-					   onChange={this.handleSearchChange}
+					   onChange={(evt, input) => {
+					   		evt.persist();
+					   		this.setState({value: evt.target.value});
+					   		this.handleSearchChangeDebounced(evt, input);
+					   }}
 					   onBlur={this.handleBlur}
 					   onFocus={this.handleFocus}
 					   onClick={this.handleInputClick}>
@@ -30,6 +35,12 @@ export default class FeatureSearchInput extends Search {
 				</Input>
 			</div>
 		)
+	}
+
+	componentWillMount() {
+		this.handleSearchChangeDebounced = _.debounce((evt, input) => {
+			this.handleSearchChange(evt, input);
+		}, 500);
 	}
 
 	handleTypeChange(proxy, select) {
