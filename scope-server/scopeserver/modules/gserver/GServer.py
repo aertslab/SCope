@@ -92,7 +92,7 @@ class SCope(s_pb2_grpc.MainServicer):
     @lru_cache(maxsize=32)
     def infer_species(self, loom_file_path):
         loom = self.get_loom_connection(loom_file_path)
-        genes = set(loom.ra.Gene)
+        genes = set(SCope.get_genes(loom))
         maxPerc = 0.0
         maxSpecies = ''
         mappings = {
@@ -117,7 +117,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True, cpm_normalise=False, annotation='', logic='AND'):
         loom = self.get_loom_connection(loom_file_path)
-        if gene_symbol not in set(loom.ra.Gene):
+        if gene_symbol not in set(SCope.get_genes(loom)):
             gene_symbol = self.get_gene_names(loom_file_path)[gene_symbol]
         print("Debug: getting expression of " + gene_symbol + "...")
         gene_expr = loom[SCope.get_genes(loom) == gene_symbol, :][0]
@@ -161,7 +161,7 @@ class SCope(s_pb2_grpc.MainServicer):
     @lru_cache(maxsize=8)
     def get_gene_names(self, loom_file_path):
         loom = self.get_loom_connection(loom_file_path)
-        genes = loom.ra.Gene
+        genes = SCope.get_genes(loom)
         conversion = {}
         species, geneMappings = self.infer_species(loom_file_path)
         for gene in genes:
@@ -202,7 +202,7 @@ class SCope(s_pb2_grpc.MainServicer):
             return searchSpace
 
         searchSpace = {}
-        searchSpace = add_element(searchSpace, SCope.get_regulons_AUC(loom).dtype.names, 'regulon')
+
         if len(geneMappings) > 0:
             genes = set(SCope.get_genes(loom))
             shrinkMappings = set([x for x in dmel_mappings.keys() if x in genes or dmel_mappings[x] in genes])
