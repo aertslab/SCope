@@ -51,7 +51,7 @@ export default class AppHeader extends Component {
 				togglePage('welcome');
 			}
 		}
-
+/*
 		let compare1Tab = () => {
 			if (metadata && metadata.cellMetaData && metadata.cellMetaData.annotations.length) return (
 				<Menu.Item>
@@ -64,7 +64,7 @@ export default class AppHeader extends Component {
 				togglePage('welcome');
 			}
 		}
-
+*/
 		let compare1DNDTab = () => {
 			if (metadata && metadata.cellMetaData && metadata.cellMetaData.annotations.length) return (
 				<Menu.Item>
@@ -77,20 +77,6 @@ export default class AppHeader extends Component {
 				togglePage('welcome');
 			}
 		}
-
-		let compare2Tab = () => {
-			if (metadata && metadata.cellMetaData && metadata.cellMetaData.annotations.length) return (
-				<Menu.Item>
-					<Button basic onClick={this.selectTab.bind(this)} active={currentPage == 'compare2'} page='compare2'>
-						Compare 2
-					</Button>
-				</Menu.Item>
-			);
-			else if (currentPage == 'compare2') {
-				togglePage('welcome');
-			}
-		}
-
 
 		return (
 			<Menu secondary attached="top" className="vib" inverted>
