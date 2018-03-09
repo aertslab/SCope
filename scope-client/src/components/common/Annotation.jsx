@@ -3,6 +3,9 @@ import { Menu, Label, Icon } from 'semantic-ui-react'
 import { DragSource } from 'react-dnd'
 
 const sourceBehaviour = {
+    canDrag(props) {
+        return props.orientation != 'one';
+    },
     beginDrag(props) {
         return {
             name: props.name,
@@ -21,24 +24,31 @@ const sourceBehaviour = {
 class Annotation extends Component {
 
     render() {
-        const { src, name, value, isDropped, isDragging, connectDragSource, label } = this.props
+        const { src, name, value, isDropped, isDragging, connectDragSource, label, orientation } = this.props
         const opacity = isDragging ? 0.4 : 1
+
+        let icon;
+        if (orientation != 'one') {
+            icon = (
+                <Icon name='delete' onClick={() => {
+                    this.props.handleRemove(src, name, value);
+                }} />                                
+            );
+        }
 
         if (label) return connectDragSource(
             <span>
                 <Label>
-                    {name} {value}
-                    <Icon name='delete' onClick={() => {
-                        console.log('aaaaa');
-                        this.props.handleRemove(src, name, value);
-                    }} />                                
+                    {name} {value} {icon}
                 </Label>
             </span>,
         )
 
         return connectDragSource(
             <div>
-                <Menu.Item as='a' active={isDropped} name={value}  />
+                <Menu.Item active={isDropped} name={value} onClick={() => {
+                    this.props.onClick(name, value, isDropped)
+                }} className="annotation" />
             </div>,
         )
     }

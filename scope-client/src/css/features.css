@@ -2,3 +2,7 @@
 	width: auto;
 	float: none;
 }
+
+a.active.item.annotation {
+	font-weight: bold !important;
+}
