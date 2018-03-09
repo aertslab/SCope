@@ -40,6 +40,7 @@ message CellColorByFeaturesRequest {
   bool scaleThresholded=7;
   repeated Annotation annotation=8;
   repeated float vmax=9;
+  string logic=10;
 }
 
 message CellColorByFeaturesReply {
@@ -84,6 +85,7 @@ message CoordinatesRequest {
   string loomFilePath=1;
   int32 coordinatesID=2;
   repeated Annotation annotation=3;
+  string logic=4;
 }
 
 message CoordinatesReply {
