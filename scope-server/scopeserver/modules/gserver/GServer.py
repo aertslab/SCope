@@ -5,19 +5,17 @@ from scopeserver.modules.gserver import s_pb2
 from scopeserver.modules.gserver import s_pb2_grpc
 
 import loompy as lp
-from loompy import LoomConnection
 import hashlib
 import os
-import math
 import numpy as np
-import pandas as pd
-import time
 import json
-import glob
 import zlib
 import base64
+import pickle
+from collections import OrderedDict
 from functools import lru_cache
 from itertools import compress
+from pathlib import Path
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "bf9360", "1d331a", "79baf2", "deb6f2",
@@ -47,6 +45,9 @@ BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "b
                   "4c3213", "688060", "001b33", "69238c", "bf606c"]
 
 hexarr = np.vectorize('{:02x}'.format)
+
+dataDir = os.path.join(Path(__file__).resolve().parents[3], 'data', 'gene_mappings')
+dmel_mappings = pickle.load(open(os.path.join(dataDir, 'terminal_mappings.pickle'), 'rb'))
 
 
 class SCope(s_pb2_grpc.MainServicer):
@@ -88,14 +89,38 @@ class SCope(s_pb2_grpc.MainServicer):
     def decompress_meta(self, meta):
         return json.loads(zlib.decompress(base64.b64decode(meta.encode('ascii'))).decode('ascii'))
 
+    @lru_cache(maxsize=32)
+    def infer_species(self, loom_file_path):
+        loom = self.get_loom_connection(loom_file_path)
+        genes = set(SCope.get_genes(loom))
+        maxPerc = 0.0
+        maxSpecies = ''
+        mappings = {
+            'dmel': dmel_mappings
+        }
+        for species in mappings.keys():
+            intersect = genes.intersection(mappings[species].keys())
+            if (len(intersect) / len(genes)) > maxPerc:
+                maxPerc = (len(intersect) / len(genes))
+                maxSpecies = species
+        if maxPerc < 0.5:
+            return 'Unknown', {}
+        return maxSpecies, mappings[maxSpecies]
+
     def get_nb_cells(self, loom_file_path):
         loom = self.get_loom_connection(loom_file_path)
         return loom.shape[1]
+    
+    @staticmethod
+    def get_genes(loom):
+        return loom.ra.Gene.astype(str)
 
-    def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True, cpm_normalise=False, annotation=''):
+    def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True, cpm_normalise=False, annotation='', logic='AND'):
         loom = self.get_loom_connection(loom_file_path)
+        if gene_symbol not in set(SCope.get_genes(loom)):
+            gene_symbol = self.get_gene_names(loom_file_path)[gene_symbol]
         print("Debug: getting expression of " + gene_symbol + "...")
-        gene_expr = loom[loom.ra.Gene == gene_symbol, :][0]
+        gene_expr = loom[SCope.get_genes(loom) == gene_symbol, :][0]
         if log_transform:
             print("Debug: log-transforming gene expression...")
             gene_expr = np.log2(gene_expr + 1)
@@ -104,17 +129,23 @@ class SCope(s_pb2_grpc.MainServicer):
             gene_expr = gene_expr / loom.ca.nUMI
             gene_expr = gene_expr
         if len(annotation) > 0:
-            cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation)
+            cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation, logic=logic)
             gene_expr = gene_expr[cellIndices]
         return gene_expr
 
-    def get_auc_values(self, loom_file_path, regulon, annotation=''):
+    @staticmethod
+    def get_regulons_AUC(loom):
+        L = loom.ca.RegulonsAUC.dtype.names
+        loom.ca.RegulonsAUC.dtype.names = list(map(lambda s: s.replace(' ' , '_'), L))
+        return loom.ca.RegulonsAUC
+
+    def get_auc_values(self, loom_file_path, regulon, annotation='', logic='AND'):
         loom = self.get_loom_connection(loom_file_path)
         print("Debug: getting AUC values for {0} ...".format(regulon))
-        if regulon in loom.ca.RegulonsAUC.dtype.names:
-            vals = loom.ca.RegulonsAUC[regulon]
+        if regulon in SCope.get_regulons_AUC(loom).dtype.names:
+            vals = SCope.get_regulons_AUC(loom)[regulon]
             if len(annotation) > 0:
-                cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation)
+                cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation, logic=logic)
                 vals = vals[cellIndices]
             return vals
         return []
@@ -127,33 +158,63 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(loom_file_path)
         return loom.ca[annoName]
 
-    @lru_cache(maxsize=32)
+    @lru_cache(maxsize=8)
+    def get_gene_names(self, loom_file_path):
+        loom = self.get_loom_connection(loom_file_path)
+        genes = SCope.get_genes(loom)
+        conversion = {}
+        species, geneMappings = self.infer_species(loom_file_path)
+        for gene in genes:
+            gene = str(gene)
+            try:
+                if geneMappings[gene] != gene:
+                    conversion[geneMappings[gene]] = gene
+            except KeyError:
+                print("ERROR: Gene: {0} is not in the mapping table!".format(gene))
+        return conversion
+
+    @lru_cache(maxsize=8)
     def build_searchspace(self, loom_file_path):
+        start_time = time.time()
+        species, geneMappings = self.infer_species(loom_file_path)
         loom = self.get_loom_connection(loom_file_path)
         meta = True
         try:
-            metaData = json.loads(loom.attrs.MetaData)
+            metaData = json.loads(SCope.get_meta_data(loom))
         except ValueError:
-            metaData = self.decompress_meta(loom.attrs.MetaData)
+            metaData = self.decompress_meta(SCope.get_meta_data(loom))
         except AttributeError:
             meta = False
-        print(metaData)
 
         def add_element(searchSpace, elements, elementName):
-            print(elements)
             if type(elements) != str:
                 for element in elements:
-                    searchSpace[(element.casefold(), elementName)] = element
+                    if elementName == 'gene':
+                        if len(geneMappings) > 0:
+                            if geneMappings[element] != element:
+                                searchSpace[('{0}'.format(str(element)).casefold(), element, elementName)] = geneMappings[element]
+                            else:
+                                searchSpace[(element.casefold(), element, elementName)] = element
+                    else:
+                        searchSpace[(element.casefold(), element, elementName)] = element
             else:
-                searchSpace[(elements.casefold(), elementName)] = elements
+                searchSpace[(elements.casefold(), elements, elementName)] = elements
             return searchSpace
 
         searchSpace = {}
-        searchSpace = add_element(searchSpace, loom.ra.Gene, 'gene')
-        searchSpace = add_element(searchSpace, loom.ra.Regulons.dtype.names, 'regulon')
+
+        if len(geneMappings) > 0:
+            genes = set(SCope.get_genes(loom))
+            shrinkMappings = set([x for x in dmel_mappings.keys() if x in genes or dmel_mappings[x] in genes])
+            # searchSpace = add_element(searchSpace, dmel_mappings.keys(), 'gene')
+            searchSpace = add_element(searchSpace, shrinkMappings, 'gene')
+        else:
+            searchSpace = add_element(searchSpace, SCope.get_genes(loom), 'gene')
+
         try:
-            searchSpace = add_element(searchSpace, loom.ra.Regulons.dtype.names, 'regulon')
+            searchSpace = add_element(searchSpace, SCope.get_regulons_AUC(loom).dtype.names, 'regulon')
         except AttributeError:
+            print('No regulons in file')
             pass  # No regulons in file
 
         if meta:
@@ -162,10 +223,12 @@ class SCope(s_pb2_grpc.MainServicer):
                 for cluster in clustering['clusters']:
                     allClusters.append(cluster['description'])
                 searchSpace = add_element(searchSpace, allClusters, 'Clustering: {0}'.format(clustering['name']))
+
+        print("Debug: %s seconds elapsed making search space ---" % (time.time() - start_time))
         return searchSpace
 
+    @lru_cache(maxsize=256)
     def get_features(self, loom_file_path, query):
-
         searchSpace = self.build_searchspace(loom_file_path)
         # Filter the genes by the query
 
@@ -173,7 +236,6 @@ class SCope(s_pb2_grpc.MainServicer):
         start_time = time.time()
         res = []
 
-        print("Debug: %s seconds elapsed making search space ---" % (time.time() - start_time))
         queryCF = query.casefold()
         res = [x for x in searchSpace.keys() if queryCF in x[0]]
 
@@ -182,30 +244,62 @@ class SCope(s_pb2_grpc.MainServicer):
                 r = res.pop(n)
                 res = [r] + res
         for n, r in enumerate(res):
-            if r[0] == query or r[0] == queryCF:
+            if r[0] == queryCF:
+                r = res.pop(n)
+                res = [r] + res
+        for n, r in enumerate(res):
+            if r[1] == query:
                 r = res.pop(n)
                 res = [r] + res
 
+        collapsedResults = OrderedDict()
+        for r in res:
+            if (searchSpace[r], r[2]) not in collapsedResults.keys():
+                collapsedResults[(searchSpace[r], r[2])] = [r[1]]
+            else:
+                collapsedResults[(searchSpace[r], r[2])].append(r[1])
+
+        descriptions = []
+        for r in collapsedResults.keys():
+            synonyms = sorted([x for x in collapsedResults[r]])
+            try:
+                synonyms.remove(r[0])
+            except ValueError:
+                pass
+            if len(synonyms) > 0:
+                descriptions.append('Synonym of: {0}'.format(', '.join(synonyms)))
+            else:
+                descriptions.append('')
+        # if mapping[result] != result: change title and description to indicate synonym
+
         print("Debug: " + str(len(res)) + " genes matching '" + query + "'")
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        return {'feature': [searchSpace[r] for r in res],
-                'featureType': [r[1] for r in res]}
+        res = {'feature': [r[0] for r in collapsedResults.keys()],
+               'featureType': [r[1] for r in collapsedResults.keys()],
+               'featureDescription': descriptions}
+        print(query, len(res['feature']))
+        return res
 
-    def get_anno_cells(self, loom_file_path, annotations):
+    def get_anno_cells(self, loom_file_path, annotations, logic='AND'):
         loom = self.get_loom_connection(loom_file_path)
-        cellIndices = set()
+        cellIndices = []
         for anno in annotations:
+            annoSet = set()
             annoName = anno.name
             if annoName.startswith("Clustering_"):
                 clusteringID = str(annoName.split('_')[1])
                 for annotationValue in anno.values:
-                    [cellIndices.add(x) for x in np.where(loom.ca.Clusterings[clusteringID] == annotationValue)[0]]
+                    [annoSet.add(x) for x in np.where(loom.ca.Clusterings[clusteringID] == annotationValue)[0]]
             else:
                 for annotationValue in anno.values:
-                    [cellIndices.add(x) for x in np.where(loom.ca[annoName] == annotationValue)[0]]
-        return sorted(list(cellIndices))
+                    [annoSet.add(x) for x in np.where(loom.ca[annoName] == annotationValue)[0]]
+            cellIndices.append(annoSet)
+        if logic == 'AND':
+            return sorted(list(set().intersection(*cellIndices)))
+        elif logic == 'OR':
+            return sorted(list(set().union(*cellIndices)))
 
-    def get_coordinates(self, loom_file_path, coordinatesID=-1, annotation=''):
+    def get_coordinates(self, loom_file_path, coordinatesID=-1, annotation='', logic='AND'):
         loom = self.get_loom_connection(loom_file_path)
         dims = 0
         if coordinatesID == -1:
@@ -228,11 +322,18 @@ class SCope(s_pb2_grpc.MainServicer):
             x = loom.ca.Embeddings_X[str(coordinatesID)]
             y = loom.ca.Embeddings_Y[str(coordinatesID)]
         if len(annotation) > 0:
-            cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation)
+            cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation, logic=logic)
             x = x[cellIndices]
             y = y[cellIndices]
         return {"x": x,
                 "y": y}
+
+    @staticmethod
+    def get_meta_data(loom):
+        if type(loom.attrs.MetaData) is np.ndarray:
+            return loom.attrs.MetaData[0]
+        return loom.attrs.MetaData
+
 
     def get_file_metadata(self, loom_file_path):
         loom = self.get_loom_connection(loom_file_path)
@@ -255,9 +356,9 @@ class SCope(s_pb2_grpc.MainServicer):
             meta['hasGeneSets'] = False
         try:
             try:
-                metaData = json.loads(loom.attrs.MetaData)
+                metaData = json.loads(SCope.get_meta_data(loom))
             except ValueError:
-                metaData = self.decompress_meta(loom.attrs.MetaData)
+                metaData = self.decompress_meta(SCope.get_meta_data(loom))
             meta['hasGlobalMeta'] = True
         except (KeyError, AttributeError):
             meta['hasGlobalMeta'] = False
@@ -282,9 +383,11 @@ class SCope(s_pb2_grpc.MainServicer):
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
         loom = self.get_loom_connection(loomFilePath)
         try:
-            metaData = json.loads(loom.attrs.MetaData)
+            metaData = json.loads(SCope.get_meta_data(loom))
         except ValueError:
-            metaData = self.decompress_meta(loom.attrs.MetaData)
+            metaData = self.decompress_meta(SCope.get_meta_data(loom))
+        except AttributeError:
+            pass
         if not os.path.isfile(loomFilePath):
             return
         n_cells = self.get_nb_cells(loomFilePath)
@@ -299,28 +402,31 @@ class SCope(s_pb2_grpc.MainServicer):
                         gene_symbol=feature,
                         log_transform=request.hasLogTranform,
                         cpm_normalise=request.hasCpmTranform,
-                        annotation=request.annotation)
+                        annotation=request.annotation,
+                        logic=request.logic)
                     if request.vmax[n] != 0.0:
                         vmax[n] = request.vmax[n]
                     else:
                         vmax[n] = self.getVmax(vals)
-                    vals = np.round((vals / vmax[n]) * 255)
-                    features.append([x if x <= 255 else 255 for x in vals])
+                    vals = np.round((vals / vmax[n]) * 225)
+                    features.append([x if x <= 225 else 225 for x in vals])
                 else:
                     features.append(np.zeros(n_cells))
             elif request.featureType[n] == 'regulon':
                 if feature != '':
                     vals = self.get_auc_values(loom_file_path=loomFilePath,
                                                regulon=feature,
-                                               annotation=request.annotation)
+                                               annotation=request.annotation,
+                                               logic=request.logic)
+                    print(vals)
                     if request.vmax[n] != 0.0:
                         vmax[n] = request.vmax[n]
                     else:
                         vmax[n] = self.getVmax(vals)
                     if request.scaleThresholded:
                         vals = ([auc if auc >= request.threshold[n] else 0 for auc in vals])
-                        vals = np.round((vals / vmax[n]) * 255)
-                        features.append([x if x <= 255 else 255 for x in vals])
+                        vals = np.round((vals / vmax[n]) * 225)
+                        features.append([x if x <= 225 else 225 for x in vals])
                     else:
                         features.append([225 if auc >= request.threshold[n] else 0 for auc in vals])
                 else:
@@ -338,7 +444,7 @@ class SCope(s_pb2_grpc.MainServicer):
                                 interval = int(16581375 / numClusters)
                                 hex_vec = [hex(I)[2:].zfill(6) for I in range(0, numClusters, interval)]
                             if len(request.annotation) > 0:
-                                cellIndices = self.get_anno_cells(loom_file_path=loomFilePath, annotations=request.annotation)
+                                cellIndices = self.get_anno_cells(loom_file_path=loomFilePath, annotations=request.annotation, logic=request.logic)
                                 hex_vec = np.array(hex_vec)[cellIndices]
                             return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax)
                         else:
@@ -348,7 +454,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 clusterIndices = loom.ca.Clusterings[clusteringID] == clusterID
                 clusterCol = np.array([225 if x else 0 for x in clusterIndices])
                 if len(request.annotation) > 0:
-                    cellIndices = self.get_anno_cells(loom_file_path=loomFilePath, annotations=request.annotation)
+                    cellIndices = self.get_anno_cells(loom_file_path=loomFilePath, annotations=request.annotation, logic=request.logic)
                     clusterCol = clusterCol[cellIndices]
                 features.append(clusterCol)
             else:
@@ -398,22 +504,23 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getFeatures(self, request, context):
         f = self.get_features(self.get_loom_filepath(request.loomFilePath), request.query)
-        return s_pb2.FeatureReply(feature=f['feature'], featureType=f['featureType'])
+        return s_pb2.FeatureReply(feature=f['feature'], featureType=f['featureType'], featureDescription=f['featureDescription'])
 
     def getCoordinates(self, request, context):
         # request content
         c = self.get_coordinates(self.get_loom_filepath(request.loomFilePath),
                                  coordinatesID=request.coordinatesID,
-                                 annotation=request.annotation)
+                                 annotation=request.annotation,
+                                 logic=request.logic)
         return s_pb2.CoordinatesReply(x=c["x"], y=c["y"])
 
     def getRegulonMetaData(self, request, context):
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
-        regulonGenes = loom.ra.Gene[loom.ra.Regulons[request.regulon] == 1]
+        regulonGenes = SCope.get_genes(loom)[loom.ra.Regulons[request.regulon] == 1]
         try:
-            metaData = json.loads(loom.attrs.MetaData)
+            metaData = json.loads(SCope.get_meta_data(loom))
         except ValueError:
-            metaData = self.decompress_meta(loom.attrs.MetaData)
+            metaData = self.decompress_meta(SCope.get_meta_data(loom))
         for regulon in metaData['regulonThresholds']:
             if regulon['regulon'] == request.regulon:
                 autoThresholds = []
@@ -433,7 +540,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getMarkerGenes(self, request, context):
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
-        genes = loom.ra.Gene[loom.ra["ClusterMarkers_{0}".format(request.clusteringID)][request.clusterID] == 1]
+        genes = SCope.get_genes(loom)[loom.ra["ClusterMarkers_{0}".format(request.clusteringID)][request.clusterID] == 1]
         return(s_pb2.MarkerGenesReply(genes=genes))
 
     def getMyLooms(self, request, context):
@@ -444,9 +551,9 @@ class SCope(s_pb2_grpc.MainServicer):
                 fileMeta = self.get_file_metadata(self.get_loom_filepath(f))
                 if fileMeta['hasGlobalMeta']:
                     try:
-                        meta = json.loads(loom.attrs.MetaData)
+                        meta = json.loads(SCope.get_meta_data(loom))
                     except ValueError:
-                        meta = self.decompress_meta(loom.attrs.MetaData)
+                        meta = self.decompress_meta(SCope.get_meta_data(loom))
                     annotations = meta['annotations']
                     embeddings = meta['embeddings']
                     clusterings = meta['clusterings']
