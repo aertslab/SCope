@@ -115,7 +115,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def get_genes(loom):
         return loom.ra.Gene.astype(str)
 
-    def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True, cpm_normalise=False, annotation='', logic='AND'):
+    def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True, cpm_normalise=False, annotation='', logic='OR'):
         loom = self.get_loom_connection(loom_file_path)
         if gene_symbol not in set(SCope.get_genes(loom)):
             gene_symbol = self.get_gene_names(loom_file_path)[gene_symbol]
@@ -138,7 +138,7 @@ class SCope(s_pb2_grpc.MainServicer):
         loom.ca.RegulonsAUC.dtype.names = list(map(lambda s: s.replace(' ' , '_'), L))
         return loom.ca.RegulonsAUC
 
-    def get_auc_values(self, loom_file_path, regulon, annotation='', logic='AND'):
+    def get_auc_values(self, loom_file_path, regulon, annotation='', logic='OR'):
         loom = self.get_loom_connection(loom_file_path)
         print("Debug: getting AUC values for {0} ...".format(regulon))
         if regulon in SCope.get_regulons_AUC(loom).dtype.names:
@@ -279,7 +279,7 @@ class SCope(s_pb2_grpc.MainServicer):
         print(query, len(res['feature']))
         return res
 
-    def get_anno_cells(self, loom_file_path, annotations, logic='AND'):
+    def get_anno_cells(self, loom_file_path, annotations, logic='OR'):
         loom = self.get_loom_connection(loom_file_path)
         cellIndices = []
         for anno in annotations:
@@ -293,12 +293,14 @@ class SCope(s_pb2_grpc.MainServicer):
                 for annotationValue in anno.values:
                     [annoSet.add(x) for x in np.where(loom.ca[annoName] == annotationValue)[0]]
             cellIndices.append(annoSet)
+        if logic not in ['AND', 'OR']:
+            logic = 'OR'
         if logic == 'AND':
             return sorted(list(set().intersection(*cellIndices)))
         elif logic == 'OR':
             return sorted(list(set().union(*cellIndices)))
 
-    def get_coordinates(self, loom_file_path, coordinatesID=-1, annotation='', logic='AND'):
+    def get_coordinates(self, loom_file_path, coordinatesID=-1, annotation='', logic='OR'):
         loom = self.get_loom_connection(loom_file_path)
         dims = 0
         if coordinatesID == -1:
