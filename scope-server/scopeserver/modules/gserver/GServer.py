@@ -137,7 +137,7 @@ class SCope(s_pb2_grpc.MainServicer):
     @staticmethod
     def get_regulons_AUC(loom):
         L = loom.ca.RegulonsAUC.dtype.names
-        loom.ca.RegulonsAUC.dtype.names = list(map(lambda s: s.replace(' ' , '_'), L))
+        loom.ca.RegulonsAUC.dtype.names = list(map(lambda s: s.replace(' ', '_'), L))
         return loom.ca.RegulonsAUC
 
     def get_auc_values(self, loom_file_path, regulon, annotation='', logic='OR'):
@@ -380,7 +380,6 @@ class SCope(s_pb2_grpc.MainServicer):
             return loom.attrs.MetaData[0]
         return loom.attrs.MetaData
 
-
     def get_file_metadata(self, loom_file_path):
         loom = self.get_loom_connection(loom_file_path)
         meta = {}
@@ -575,10 +574,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 for threshold in regulon['allThresholds'].keys():
                     autoThresholds.append({"name": threshold, "threshold": regulon['allThresholds'][threshold]})
                 defaultThreshold = regulon['defaultThresholdName']
-                if 'motifData' in regulon:
-                    motifName = os.path.basename(regulon['motifData'])
-                else:
-                    motifName = ""
+                motifName = os.path.basename(regulon['motifData'])
                 break
 
         regulon = {"genes": regulonGenes,
