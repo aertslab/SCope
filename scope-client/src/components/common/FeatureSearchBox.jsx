@@ -12,14 +12,13 @@ export default class FeatureSearch extends React.Component {
 			results: [],
 			value: props.value,
 			selection: null,
-			type: props.type,
-			metadata: null
+			type: props.type
 		};
 	}
 
 	render() {
 
-		const { isLoading, value, results, type, metadata } = this.state
+		const { isLoading, value, results, type } = this.state
 		const { locked, field, color, options } = this.props
 		let querySearchLabel = {
 			position: 'relative',
@@ -79,21 +78,47 @@ export default class FeatureSearch extends React.Component {
 				console.log('getRegulonMetaData', regulonQuery);
 				gbc.services.scope.Main.getRegulonMetaData(regulonQuery, (regulonErr, regulonResponse) => {
 					console.log('getRegulonMetaData', regulonResponse);
-					let metadata = regulonResponse ? regulonResponse.regulonMeta : null;
+					let metadata = regulonResponse ? regulonResponse.regulonMeta : {};
 					let threshold = 0;
-					if (metadata) {
+					if (metadata.autoThresholds) {
 						metadata.autoThresholds.map((t) => {
 							if (t.name == metadata.defaultThreshold) threshold = t.threshold;
 						})
 					}
 					metadata.description = featureDescription;
-					this.setState({metadata: metadata});
 					BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, threshold, metadata);
 				});
 			});
+		} else if (featureType.indexOf('Clustering:') == 0) {
+			let loomMetadata = BackendAPI.getActiveLoomMetadata();
+			let clusteringID, clusterID;
+			loomMetadata.cellMetaData.clusterings.map(clustering => {
+				if (featureType.indexOf(clustering.name) != -1) {
+					clusteringID = clustering.id
+					clustering.clusters.map(c => {
+						if (c.description == feature) {
+							clusterID = c.id;
+						}
+					})
+				}
+			})
+			let markerQuery = {
+  				loomFilePath: BackendAPI.getActiveLoom(),
+				clusterID: clusterID,
+				clusteringID: clusteringID, 
+			}
+			BackendAPI.getConnection().then((gbc) => {
+				if (DEBUG) console.log('getMarkerGenes', markerQuery);
+				gbc.services.scope.Main.getMarkerGenes(markerQuery, (markerErr, markerResponse) => {
+					if (DEBUG) console.log('getMarkerGenes', markerResponse);
+					if (!markerResponse) markerResponse = {};
+					markerResponse.description = featureDescription
+					BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, markerResponse);
+				});
+			});
+
 		} else {
 			setTimeout(() => {
-				this.setState({metadata: null});
 				BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, {description: featureDescription});
 			}, 50);
 		}
@@ -147,7 +172,6 @@ export default class FeatureSearch extends React.Component {
 					if (DEBUG) console.log("handleSearchChange", response);
 					if (response != null) {
 						let res = [], genes = [], regulons = [], clusters = {};
-						let metadata = BackendAPI.getActiveLoomMetadata();
 						let type = this.state.type;
 
 						for (var i = 0; i < response.feature.length; i++) {

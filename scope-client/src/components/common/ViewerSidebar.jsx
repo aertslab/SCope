@@ -89,11 +89,19 @@ export default class ViewerSidebar extends Component {
 									<a
 										className="pointer"
 										onClick={() => {
+											let query = {
+												loomFilePath: BackendAPI.getActiveLoom(),
+												query: g
+											};
 											if (activePage == 'regulon') {
-
-											} else {
-												BackendAPI.setActiveFeature(i, activeFeatures[i].type, "gene", g, 0, null);
+												this.setState({currentPage: 'expression'});
+												BackendAPI.setActivePage('expression');
 											}
+											BackendAPI.getConnection().then((gbc) => {
+												gbc.services.scope.Main.getFeatures(query, (err, response) => {
+													BackendAPI.setActiveFeature(i, activeFeatures[i].type, "gene", g, 0, {description: response.featureDescription[0]});
+												});
+											})
 										}} >
 										{g}
 									</a>

@@ -15,6 +15,10 @@ export default class App extends Component {
 			currentPage: BackendAPI.getActivePage(),
 			metadata: BackendAPI.getActiveLoomMetadata(),
 		}
+		this.activePageListener = (page) => {
+			this.setState({currentPage: page})
+		}
+
 	}
 
 	render() {
@@ -30,6 +34,14 @@ export default class App extends Component {
 				</Sidebar.Pushable>
 			</Segment>
 		);
+	}
+
+	componentWillMount() {
+		BackendAPI.onActivePageChange(this.activePageListener);
+	}
+
+	componentWillUnmount() {
+		BackendAPI.removeActivePageChange(this.activePageListener);
 	}
 
 
