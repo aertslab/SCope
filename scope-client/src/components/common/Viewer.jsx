@@ -66,7 +66,7 @@ export default class Viewer extends Component {
 	render() {
 		return (
 			<div>
-				<canvas id={"viewer"+this.props.name} style={{width: 100+'%', height: this.props.height-1+'px'}} >
+				<canvas id={"viewer"+this.props.name} style={{width: '99.9%', height: (this.props.height-2)+'px'}} >
 				</canvas>
 				<ReactResizeDetector handleWidth skipOnMount onResize={this.onResize.bind(this)} />
 				<Dimmer active={this.state.loading} inverted>
@@ -428,35 +428,40 @@ export default class Viewer extends Component {
 	onViewerSelectionChange(selections) {
 		let currentSelections = [];
 		if (DEBUG) console.log(this.props.name, 'onViewerSelectionChange', selections);
-		selections.map((s, i) => {
-			let ns = Object.assign({}, s);
-			let display = true;
-			if (s.src != this.props.name) {
-				if (s.translations[this.props.name]) {
-					ns.points = s.translations[this.props.name];
-				} else {
-					if (s.loomFilePath != this.props.loomFile) {
-						let query = {
-								srcLoomFilePath: s.loomFilePath,
-								destLoomFilePath: this.props.loomFile,
-								cellIndices: s.points,
-							};
-						if (DEBUG) console.log(this.props.name, 'translateLassoSelection', query);
-						BackendAPI.getConnection().then((gbc) => {
-							gbc.services.scope.Main.translateLassoSelection(query, (err, response) => {
-								// Update the coordinates and remove all previous data points
-								if (DEBUG) console.log(this.props.name, 'translateLassoSelection', response);
-							})
-						})
-						display = false;
+		if (this.props.translate) {
+			selections.map((s, i) => {
+				let ns = Object.assign({}, s);
+				let display = true;
+				if (s.src != this.props.name) {
+					if (s.translations[this.props.name]) {
+						ns.points = s.translations[this.props.name];
 					} else {
-						ns.points = this.translatePointsInLasso(s.lassoPoints);
-						s.translations[this.props.name] = ns.points.slice(0);
+						if (s.loomFilePath != this.props.loomFile) {
+							let query = {
+									srcLoomFilePath: s.loomFilePath,
+									destLoomFilePath: this.props.loomFile,
+									cellIndices: s.points,
+								};
+							if (DEBUG) console.log(this.props.name, 'translateLassoSelection', query);
+							BackendAPI.getConnection().then((gbc) => {
+								gbc.services.scope.Main.translateLassoSelection(query, (err, response) => {
+									if (DEBUG) console.log(this.props.name, 'translateLassoSelection', response);
+									ns.points = response.cellIndices;
+									s.translations[this.props.name] = ns.points.slice(0);
+								})
+							})
+							display = false;
+						} else {
+							ns.points = this.translatePointsInLasso(s.lassoPoints);
+							s.translations[this.props.name] = ns.points.slice(0);
+						}
 					}
 				}
-			}
-			if (display) currentSelections.push(ns);
-		})
+				if (display) currentSelections.push(ns);
+			})
+		} else {
+			currentSelections = selections;
+		}
 		this.setState({lassoSelections: currentSelections});
 		this.repaintLassoSelections(currentSelections);
 	}
@@ -496,8 +501,8 @@ export default class Viewer extends Component {
 			gbc.services.scope.Main.getCoordinates(query, (err, response) => {
 				// Update the coordinates and remove all previous data points
 				if (DEBUG) console.log(this.props.name, 'getPoints', response);
+				this.container.removeChildren();
 				if (response) {
-					this.container.removeChildren();
 					let c = {
 						x: response.x,
 						y: response.y
@@ -506,6 +511,7 @@ export default class Viewer extends Component {
 					this.setScalingFactor();
 				} else {
 					console.log('Could not get the coordinates - empty response!')
+					this.setState({ coord:  {x: [], y: []}});
 				}
 				this.endBenchmark("getPoints");
 				this.initializeDataPoints();

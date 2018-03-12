@@ -30,15 +30,19 @@ export default class ViewerSidebar extends Component {
 		let lassoTab = () => {
 			if (lassoSelections.length == 0) {
 				return (
-					<Tab.Pane attached={false}>No user's lasso selections</Tab.Pane>
+					<Tab.Pane attached={false} style={{'textAlign': 'center'}} >
+						<br /><br />
+						No user's lasso selections
+						<br /><br /><br />
+					</Tab.Pane>
 				);
 			}
 
 			return (lassoSelections.map((lS, i) => {
 				return (
-					<Tab.Pane attached={false} key={i}>
+					<Tab.Pane attached={false} style={{'textAlign': 'center'}} key={i}>
 					<Grid>
-					<Grid.Row columns={3} key={i}>
+					<Grid.Row columns={3} key={i} className="selectionRow">
 						<Grid.Column>
 							{"Selection "+ (lS.id + 1)}
 						</Grid.Column>
@@ -56,9 +60,11 @@ export default class ViewerSidebar extends Component {
 							&nbsp;
 							<Icon name='trash' title='remove this selection' style={{display: 'inline'}} onClick={(e,d) => this.removeLassoSelection(lS.id)} className="pointer"  />
 							&nbsp;
-							<Icon name='search' title='show metadata for this selection' style={{display: 'inline'}} onClick={(e,d) => {
-								this.setState({modalID: i});
-								this.forceUpdate();
+							<Icon name='search' title='show metadata for this selection' style={{display: 'inline'}} disabled={activePage == 'dndcompare'} onClick={(e,d) => {
+								if (activePage != 'dndcompare') {
+									this.setState({modalID: i});
+									this.forceUpdate();
+								}
 							}} className="pointer"  />
 						</Grid.Column>
 					</Grid.Row>
@@ -70,9 +76,9 @@ export default class ViewerSidebar extends Component {
 		}
 
 		let featureTab = (i) => {
-			let metadata = activeFeatures[i].feature ? "" : "Please use the inputs above to select a feature";
+			let metadata = activeFeatures[i] && activeFeatures[i].feature ? "" : "Please use the inputs above to select a feature";
 
-			if (activeFeatures[i].metadata) {
+			if (activeFeatures[i] && activeFeatures[i].metadata) {
 				let image = activeFeatures[i].metadata.motifName ? (<Image src={'http://motifcollections.aertslab.org/v8/logos/'+activeFeatures[i].metadata.motifName} />) : '';
 				let genes = "";
 				if (activeFeatures[i].metadata.genes) {
@@ -108,8 +114,8 @@ export default class ViewerSidebar extends Component {
 
 			return (
 				<Tab.Pane attached={false} key={i} className={'feature'+i} style={{textAlign: 'center'}}>
-					{activeFeatures[i].featureType} <b> {activeFeatures[i].feature} </b><br /><br />
-					{metadata}<br />
+					{activeFeatures[i] ? activeFeatures[i].featureType : ''} <b> {activeFeatures[i] ? activeFeatures[i].feature : ''} </b><br /><br />
+					{metadata}<br /><br /><br />
 				</Tab.Pane>
 			)
 		}

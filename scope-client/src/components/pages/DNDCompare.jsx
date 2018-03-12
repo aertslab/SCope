@@ -46,7 +46,7 @@ class DNDCompare extends Component {
 		this.activeFeaturesListener = (features) => {
 			this.setState({activeFeatures: features});
 		}
-		this.height = window.innerHeight - 200;
+		this.height = window.innerHeight - 142;
 		this.displayConf = [
 			{ text: 'auto', value: 0, disabled: true },
 			{ text: '1', value: 1 },
@@ -142,7 +142,7 @@ class DNDCompare extends Component {
 			return (
 				<Grid>
 				{_.times(rows, i => (
-					<Grid.Row columns={columns} key={i}>
+					<Grid.Row columns={columns} key={i} className="viewerRow">
 						{_.times(columns, (j) => {
 								let name = "comp"+(columns * i + j);
 								let annotationDropContainerHorizontal, annotationDropContainerVertical, datasetSelector;
@@ -156,7 +156,6 @@ class DNDCompare extends Component {
 											viewerName={name} 
 											orientation={configuration == 'cross' ? 'horizontal' : (configuration == 'one' ? 'one' : 'both')}
 											position={configuration == 'cross' ? j : columns * i + j}
-											height={this.height / rows}
 											onDrop={this.handleDrop.bind(this)}
 											onRemove={this.handleRemove.bind(this)}
 										/>
@@ -169,7 +168,7 @@ class DNDCompare extends Component {
 											viewerName={name} 
 											position={i}
 											orientation='vertical'
-											height={this.height / rows}
+											height={this.height / rows - 42}
 											onDrop={this.handleDrop.bind(this)}
 											onRemove={this.handleRemove.bind(this)}
 										/>
@@ -223,7 +222,7 @@ class DNDCompare extends Component {
 											onDrop={this.handleDrop.bind(this)}
 											onRemove={this.handleRemove.bind(this)}
 											name={name}
-											height={this.height / rows}
+											height={this.height / rows - 42}
 											loomFile={configuration == 'multi' ? multiLoom[j] : multiLoom[0]}
 											activeFeatures={activeFeatures}
 											activeCoordinates={configuration == 'multi' ? multiCoordinates[j] : multiCoordinates[0]}
@@ -233,6 +232,7 @@ class DNDCompare extends Component {
 											configuration={configuration}
 											customScale={true}
 											settings={true}
+											translate={true}
 											scale={true}
 										/>
 									</Grid.Column>
@@ -279,8 +279,13 @@ class DNDCompare extends Component {
 						<br />
 						<ViewerToolbar />
 					</Grid.Column>
-					<Grid.Column width={12}>
+					<Grid.Column width={11}>
 						{viewers()}
+					</Grid.Column>
+					<Grid.Column width={3}>
+                        <ViewerSidebar  onActiveFeaturesChange={(features, id) => {
+                            this.setState({activeFeatures: features});
+                        }} />
 					</Grid.Column>
 				</Grid.Row>
 			</Grid>
