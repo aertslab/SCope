@@ -19,6 +19,7 @@ export default class ViewerToolbar extends Component {
 
 		}
 		this.activeFeaturesListener = (features) => {
+			this.setState({activeFeatures: features});
 			this.onActiveFeaturesChange(features);
 		}
 		this.featuresScaleListener = (scale, id) => {

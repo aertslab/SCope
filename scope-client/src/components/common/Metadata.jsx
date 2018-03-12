@@ -17,7 +17,7 @@ export default class Metadata extends Component {
 	}
 
 	render() {
-		const { selectedGenes, selectedRegulons, selectedClusters } = this.getParsedFeatures();
+		const { selectedGenes, selectedRegulons, selectedClusters } = BackendAPI.getParsedFeatures();
 		const { metadata, cellIDs, loading } = this.state;
 		const { selectionId } = this.props;
 		let selections = BackendAPI.getViewerSelections();
@@ -179,36 +179,12 @@ export default class Metadata extends Component {
 		this.setState({loading: true});
 	}
 
-	getParsedFeatures() {
-		let features = BackendAPI.getActiveFeatures();
-		let metadata = BackendAPI.getActiveLoomMetadata();
-		let selectedGenes = [];
-		let selectedRegulons = [];
-		let selectedClusters = [];
-		features.map(f => {
-			if (f.featureType == 'gene') selectedGenes.push(f.feature);
-			if (f.featureType == 'regulon') selectedRegulons.push(f.feature);
-			if (f.featureType.indexOf('Clustering:') == 0) {
-				metadata.cellMetaData.clusterings.map( clustering => {
-					if (f.featureType.indexOf(clustering.name) != -1) {
-						clustering.clusters.map(c => {
-							if (c.description == f.feature) {
-								selectedClusters.push({clusteringName: clustering.name, clusteringID: clustering.id, clusteName: c.name, clusterID: c.id});
-							}
-						})
-					}
-				})
-			}
-		})
-		return { selectedGenes, selectedRegulons, selectedClusters }
-	}
-
 	getMetadata() {
 		let selections = BackendAPI.getViewerSelections();
 		let settings = BackendAPI.getSettings();
 		let loomFilePath = BackendAPI.getActiveLoom();
 		let coordinates = BackendAPI.getActiveCoordinates();
-		const { selectedGenes, selectedRegulons, selectedClusters } = this.getParsedFeatures();
+		const { selectedGenes, selectedRegulons, selectedClusters } = BackendAPI.getParsedFeatures();
 		let query = {
 			loomFilePath: loomFilePath,
 			cellIndices: selections[this.props.selectionId].points,

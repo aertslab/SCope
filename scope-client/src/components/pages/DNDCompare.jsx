@@ -283,6 +283,8 @@ class DNDCompare extends Component {
 						{viewers()}
 					</Grid.Column>
 					<Grid.Column width={3}>
+
+						{/*<svg id="expressionSVG" style={{width: '100%'}} height="300px" ></svg>*/}
                         <ViewerSidebar  onActiveFeaturesChange={(features, id) => {
                             this.setState({activeFeatures: features});
                         }} />
@@ -324,6 +326,7 @@ class DNDCompare extends Component {
 		selectedAnnotations.push(item.value);
 		annotations[orientation][position][item.name] = selectedAnnotations;
 		this.setState({ crossAnnotations : annotations});
+		this.renderExpressionGraph();
 		return true;
 	}
 
@@ -344,6 +347,7 @@ class DNDCompare extends Component {
 		} else {
 			console.log('Annotation cannot be found', viewer, name, remove);
 		}
+		this.renderExpressionGraph();
 	}
 
 	displayNumberChanged(proxy, selection) {
@@ -464,6 +468,31 @@ class DNDCompare extends Component {
 			})
 		}
 		return annotations;
+	}
+
+	renderExpressionGraph() {
+		let annotations = this.state.crossAnnotations;
+		let selectedAnnotations = [];
+		let settings = BackendAPI.getSettings();
+		Object.keys(annotations).map(orientation => {
+			annotations[orientation].map(annotation => {
+				Object.keys(annotation).map(a => {
+					selectedAnnotations.push(a);
+				})
+			})
+		})
+		const { selectedGenes, selectedRegulons, selectedClusters } = BackendAPI.getParsedFeatures();
+		let query = {
+			loomFilePath: this.state.multiLoom[0],
+			cellIndices: [],
+			hasLogTranform: settings.hasLogTransform,
+			hasCpmTranform: settings.hasCpmNormalization,
+			selectedGenes: selectedGenes,
+			selectedRegulons: selectedRegulons,
+			clusterings: [],
+			annotations: selectedAnnotations,
+		}
+		console.log('renderExpressionGraph', query);
 	}
 
 }
