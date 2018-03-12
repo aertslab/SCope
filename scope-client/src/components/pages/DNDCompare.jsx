@@ -16,7 +16,7 @@ class DNDCompare extends Component {
 		super(props);
 		this.state = {
 			loomFiles: BackendAPI.getLoomFiles(),
-			multiLoom: [BackendAPI.getActiveLoom()],
+			multiLoom: BackendAPI.getActiveLooms(),
 			multiCoordinates: [BackendAPI.getActiveCoordinates()],
 			multiMetadata: [BackendAPI.getActiveLoomMetadata()],
 			activeFeatures: BackendAPI.getActiveFeatures(),
@@ -201,6 +201,7 @@ class DNDCompare extends Component {
 											ml[j] = select.value;
 											mc[j] = -1;
 											mm[j] = BackendAPI.getLoomMetadata(ml[j]);
+											BackendAPI.setActiveLooms(ml);
 											this.setState({'multiLoom': ml, 'multiCoordinates': mc});
 										}}/>
 										{coordinatesSelector}
@@ -225,6 +226,7 @@ class DNDCompare extends Component {
 											height={this.height / rows - 42}
 											loomFile={configuration == 'multi' ? multiLoom[j] : multiLoom[0]}
 											activeFeatures={activeFeatures}
+											superposition={superposition}
 											activeCoordinates={configuration == 'multi' ? multiCoordinates[j] : multiCoordinates[0]}
 											activeAnnotations={va}
 											orientation={configuration =='one' ? 'one' : 'both'}
@@ -264,7 +266,7 @@ class DNDCompare extends Component {
 						<Dropdown inline options={this.displayConf} disabled={configuration=='one'} value={displays} onChange={this.displayNumberChanged.bind(this)}/>
 						<br />
 						Superposition: &nbsp;
-						<Dropdown inline disabled options={this.superpositionConf} value={superposition} onChange={this.superpositionChanged.bind(this)}/>
+						<Dropdown inline disabled={configuration=='one'} options={this.superpositionConf} value={superposition} onChange={this.superpositionChanged.bind(this)}/>
 						<br />
 						Configuration: &nbsp;
 						<Dropdown inline options={this.configurationConf} defaultValue={'simple'} onChange={this.configurationChanged.bind(this)}/>
@@ -485,14 +487,19 @@ class DNDCompare extends Component {
 		let query = {
 			loomFilePath: this.state.multiLoom[0],
 			cellIndices: [],
-			hasLogTranform: settings.hasLogTransform,
-			hasCpmTranform: settings.hasCpmNormalization,
+			hasLogTransform: settings.hasLogTransform,
+			hasCpmTransform: settings.hasCpmNormalization,
 			selectedGenes: selectedGenes,
 			selectedRegulons: selectedRegulons,
 			clusterings: [],
 			annotations: selectedAnnotations,
 		}
-		console.log('renderExpressionGraph', query);
+		BackendAPI.getConnection().then((gbc) => {
+			if (DEBUG) console.log('getCellMetaData', query);
+			gbc.services.scope.Main.getCellMetaData(query, (err, response) => {
+				if (DEBUG) console.log('getCellMetaData', response);
+			});
+		});
 	}
 
 }

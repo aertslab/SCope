@@ -13,17 +13,16 @@ export default class ViewerToolbar extends Component {
 			activeTool: BackendAPI.getViewerTool(),
 			activeFeatures: BackendAPI.getActiveFeatures(),
 			activePage: BackendAPI.getActivePage(),
-			featuresScale: BackendAPI.getFeaturesScale(),
+			featuresScale: BackendAPI.getFeatureScale(),
 			customScale: BackendAPI.getCustomScale(),
 			colors: BackendAPI.getColors(),
 
 		}
-		this.activeFeaturesListener = (features) => {
-			this.setState({activeFeatures: features});
-			this.onActiveFeaturesChange(features);
+		this.activeFeaturesListener = (features, id, customScale, featuresScale) => {
+			this.setState({activeFeatures: features, featuresScale: featuresScale, customScale: customScale});
 		}
-		this.featuresScaleListener = (scale, id) => {
-			this.onFeaturesScaleChange(scale, id);
+		this.settingsListener = (settings, customScale, featuresScale) => {
+			this.setState({featuresScale: featuresScale, customScale: customScale});
 		}
 	}
 
@@ -79,12 +78,13 @@ export default class ViewerToolbar extends Component {
 
 	componentWillMount() {
         BackendAPI.onActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
-        BackendAPI.onFeaturesScaleChange(this.featuresScaleListener);
+		BackendAPI.onSettingsChange(this.settingsListener);
+        //this.onActiveFeaturesChange(this.state.activeFeatures);
 	}
 
 	componentWillUnmount() {
-        BackendAPI.onActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
-        BackendAPI.removeFeaturesScaleChange(this.featuresScaleListener);
+        BackendAPI.removeActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
+		BackendAPI.removeSettingsChange(this.settingsListener);
 	}
 
 	handleItemClick(e, tool) {
@@ -101,42 +101,4 @@ export default class ViewerToolbar extends Component {
 		this.setState({customScale: scale});
 	}
 
-
-	onActiveFeaturesChange(features) {
-		let settings = BackendAPI.getSettings();
-		let query = {
-  			loomFilePath: [BackendAPI.getActiveLoom()],
-  			feature: features.map(f => {return f.feature}),
-  			featureType: features.map(f=> {return f.featureType}),
-  			hasLogTransform: settings.hasLogTransform,
-  			hasCpmTransform: settings.hasCpmTransform,
-		}
-		if (DEBUG) console.log('getVmax', query);
-		BackendAPI.getConnection().then((gbc) => {
-			gbc.services.scope.Main.getVmax(query, (err, response) => {
-				if (DEBUG) console.log('getVmax', response);
-				//BackendAPI.setActiveFeature(i, activeFeatures[i].type, "gene", g, 0, {description: response.featureDescription[0]});
-			})
-		})
-
-	}
-
-	onFeaturesScaleChange(scale, vmaxID) {
-		
-		if(DEBUG) console.log('onFeaturesScaleChange', scale, vmaxID);
-		let { customScale, featuresScale } = this.state;
-		
-		if (vmaxID != null) {
-			customScale[vmaxID] = scale[vmaxID];
-		} else { 
-			customScale = scale.slice(0);
-		}
-
-		if (JSON.stringify(scale) != JSON.stringify(featuresScale)) {
-			BackendAPI.setCustomScale(customScale, null, vmaxID);
-		}
-
-		this.setState({featuresScale: scale, customScale: customScale});
-		
-	}
 }
