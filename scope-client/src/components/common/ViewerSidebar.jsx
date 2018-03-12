@@ -1,11 +1,11 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { Grid, Input, Icon, Tab, Image } from 'semantic-ui-react'
-import { BackendAPI } from '../common/API' 
-import Metadata from '../common/Metadata' 
+import { BackendAPI } from '../common/API'
+import Metadata from '../common/Metadata'
 
 export default class ViewerSidebar extends Component {
-	
+
 	constructor() {
 		super();
 		this.state = {
@@ -15,7 +15,7 @@ export default class ViewerSidebar extends Component {
 			modalID: null,
 			activeTab: 0
 		};
-		this.selectionsListener = (selections) => {			
+		this.selectionsListener = (selections) => {
 			this.setState({lassoSelections: selections, activeTab: 0});
 		};
 		this.activeFeaturesListener = (features, id) => {
@@ -26,7 +26,7 @@ export default class ViewerSidebar extends Component {
 
 	render() {
 		const { lassoSelections, activeFeatures, activeTab, activePage } = this.state;
-		console.log(activeTab);
+		console.log('activeTab', activeTab, activeFeatures);
 		let lassoTab = () => {
 			if (lassoSelections.length == 0) {
 				return (
@@ -57,8 +57,7 @@ export default class ViewerSidebar extends Component {
 							<Icon name='trash' title='remove this selection' style={{display: 'inline'}} onClick={(e,d) => this.removeLassoSelection(lS.id)} className="pointer"  />
 							&nbsp;
 							<Icon name='search' title='show metadata for this selection' style={{display: 'inline'}} onClick={(e,d) => {
-								console.log('setting modalID', i)
-								this.setState({modalID: i});								
+								this.setState({modalID: i});
 								this.forceUpdate();
 							}} className="pointer"  />
 						</Grid.Column>
@@ -71,15 +70,17 @@ export default class ViewerSidebar extends Component {
 		}
 
 		let featureTab = (i) => {
-			let metadata;
+			let metadata = activeFeatures[i].feature ? "" : "Please use the inputs above to select a feature";
+
 			if (activeFeatures[i].metadata) {
-				metadata = (
-					<span>
-						<Image src={'http://motifcollections.aertslab.org/v8/logos/'+activeFeatures[i].metadata.motifName} /><br />
+				let image = activeFeatures[i].metadata.motifName ? (<Image src={'http://motifcollections.aertslab.org/v8/logos/'+activeFeatures[i].metadata.motifName} />) : '';
+				let genes = "";
+				if (activeFeatures[i].metadata.genes) {
+					genes = (
 						<Grid columns={4} className="geneInfo">
-							{activeFeatures[i].metadata.genes.map( (g, j) => (
+							{ activeFeatures[i].metadata.genes.map( (g, j) => (
 								<Grid.Column key={j}>
-									<a 
+									<a
 										className="pointer"
 										onClick={() => {
 											if (activePage == 'regulon') {
@@ -93,13 +94,22 @@ export default class ViewerSidebar extends Component {
 								</Grid.Column>
 							))}
 						</Grid>
+					);
+				}
+
+				metadata = (
+					<span>
+						{activeFeatures[i].metadata.description}<br />
+						{image}
+						{genes}
 					</span>
 				);
 			}
+
 			return (
-				<Tab.Pane attached={false} key={i} className={'feature'+i}>
-					{activeFeatures[i].featureType} <b> {activeFeatures[i].feature} </b><br />
-					{metadata}
+				<Tab.Pane attached={false} key={i} className={'feature'+i} style={{textAlign: 'center'}}>
+					{activeFeatures[i].featureType} <b> {activeFeatures[i].feature} </b><br /><br />
+					{metadata}<br />
 				</Tab.Pane>
 			)
 		}
@@ -108,9 +118,8 @@ export default class ViewerSidebar extends Component {
 			{ menuItem: 'Cell selections', render: lassoTab },
 		]
 		_.times(3, i => {
-			if (activeFeatures[i] && activeFeatures[i].feature.length)
-				panes.push({ 
-					menuItem: activeFeatures[i].feature, 
+				panes.push({
+					menuItem: activeFeatures[i] && activeFeatures[i].feature ? ("F"+(i+1)+": " + activeFeatures[i].feature) : "F"+(i+1),
 					render: () => featureTab(i),
 				})
 		})
@@ -119,19 +128,18 @@ export default class ViewerSidebar extends Component {
 
 		return (
 			<div>
-				<Tab 
-					menu={{ secondary: true, pointing: true }} 
-					panes={panes} 
-					renderActiveOnly={true} 
-					activeIndex={activeTab} 
-					className="sidebarTabs" 
+				<Tab
+					menu={{ secondary: true, pointing: true }}
+					panes={panes}
+					renderActiveOnly={true}
+					activeIndex={activeTab}
+					className="sidebarTabs"
 					onTabChange={(evt, data) => {
 						this.setState({activeTab: data.activeIndex});
 					}}
 				/>
 				<Metadata selectionId={this.state.modalID} onClose={() =>{
-					console.log('setting modalID', null)
-					this.setState({modalID: null});								
+					this.setState({modalID: null});
 					this.forceUpdate();
 				}} />
 			</div>

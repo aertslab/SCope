@@ -36,7 +36,9 @@ class DNDCompare extends Component {
 			superposition: 'OR',
 		}
 		this.activeLoomListener = (loom, metadata, coordinates) => {
-			this.setState({activeLoom: loom, activeCoordinates: coordinates, metadata: metadata});
+			let multiLoom = this.state.multiLoom;
+			multiLoom[0] = loom;
+			this.setState({activeLoom: loom, activeCoordinates: coordinates, metadata: metadata, multiLoom: multiLoom});
 		};
 		this.activeFeaturesListener = (features) => {
 			this.setState({activeFeatures: features});
@@ -175,7 +177,7 @@ class DNDCompare extends Component {
 									datasetSelector = (
 										<span>
 										<b>Select a dataset: </b>
-										<Dropdown inline options={this.loomConf} disabled={j==0} defaultValue={multiLoom[j]} placeholder=" none selected " onChange={(proxy, select) => {
+										<Dropdown inline options={this.loomConf} disabled={j==0} value={multiLoom[j]} placeholder=" none selected " onChange={(proxy, select) => {
 											let ml = multiLoom;
 											ml[j] = select.value;
 											this.setState({multiLoom: ml});
@@ -205,6 +207,7 @@ class DNDCompare extends Component {
 											activeAnnotations={va}
 											orientation={configuration =='one' ? 'one' : 'both'}
 											position={columns * i + j}
+											configuration={configuration}
 											customScale={true}
 											settings={true}
 											scale={true}

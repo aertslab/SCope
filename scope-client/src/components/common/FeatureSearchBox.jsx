@@ -68,7 +68,7 @@ export default class FeatureSearch extends React.Component {
 		}, 50);
 	}
 
-	updateFeature(feature, featureType) {
+	updateFeature(feature, featureType, featureDescription) {
 		this.setState({ value: feature, selection: null })
 		if (featureType == 'regulon') {
 			let regulonQuery = {
@@ -86,6 +86,7 @@ export default class FeatureSearch extends React.Component {
 							if (t.name == metadata.defaultThreshold) threshold = t.threshold;
 						})
 					}
+					metadata.description = featureDescription;
 					this.setState({metadata: metadata});
 					BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, threshold, metadata);
 				});
@@ -93,7 +94,7 @@ export default class FeatureSearch extends React.Component {
 		} else {
 			setTimeout(() => {
 				this.setState({metadata: null});
-				BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, null);
+				BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, {description: featureDescription});
 			}, 50);
 		}
 	}
@@ -108,7 +109,7 @@ export default class FeatureSearch extends React.Component {
 		e.stopPropagation();
 		e.preventDefault();
 		if (DEBUG) console.log('handleResultSelect', e, result);
-		this.updateFeature(result.title, result.type);
+		this.updateFeature(result.title, result.type, result.description);
 	}
 
 	handleTypeChange(type) {
@@ -116,7 +117,7 @@ export default class FeatureSearch extends React.Component {
 	}
 
 	handleSelectionChange(e, { result }) {
-		console.log('handleSelectionChange', e, result);
+		if (DEBUG) console.log('handleSelectionChange', e, result);
 		e.preventDefault();
 		this.setState({selection: result})
 	}
@@ -128,7 +129,7 @@ export default class FeatureSearch extends React.Component {
 		if (selection) {
 			//selection = select.results[0].results[0];
 			if (DEBUG) console.log('handleBlur', e.target, e.source, selection);
-			this.updateFeature(selection.title, selection.type)
+			this.updateFeature(selection.title, selection.type, selection.description);
 		}
 	}
 

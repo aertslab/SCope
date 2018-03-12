@@ -13,10 +13,10 @@ const targetBehaviour = {
 class ViewerDropContainer extends Component {
 
 	render() {
-		const { isOver, canDrop, orientation, loomFile, connectDropTarget, active, activeAnnotations, height, ...props } = this.props;
-
+		const { isOver, canDrop, orientation, loomFile, connectDropTarget, active, activeAnnotations, height, configuration, ...props } = this.props;
+		console.log('loom', loomFile);
 		let container = () => {
-			if ((loomFile && activeAnnotations && Object.keys(activeAnnotations).length)) {
+			if (loomFile && ((activeAnnotations && Object.keys(activeAnnotations).length) || (configuration == 'multi')) ) {
 				return (
 					<Viewer height={height} loomFile={loomFile} activeAnnotations={activeAnnotations}  {...props} />
 				);
