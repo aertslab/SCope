@@ -65,6 +65,10 @@ class API {
 		})
 	}
 
+	getLoomMetadata(loomFilePath) {
+		return this.loomFiles[loomFilePath];
+	}
+
 	getActiveLoomMetadata() {
 		return this.loomFiles[this.activeLoom];
 	}
