@@ -137,7 +137,7 @@ class SCope(s_pb2_grpc.MainServicer):
     @staticmethod
     def get_regulons_AUC(loom):
         L = loom.ca.RegulonsAUC.dtype.names
-        loom.ca.RegulonsAUC.dtype.names = list(map(lambda s: s.replace(' ' , '_'), L))
+        loom.ca.RegulonsAUC.dtype.names = list(map(lambda s: s.replace(' ', '_'), L))
         return loom.ca.RegulonsAUC
 
     def get_auc_values(self, loom_file_path, regulon, annotation='', logic='OR'):
@@ -380,7 +380,6 @@ class SCope(s_pb2_grpc.MainServicer):
             return loom.attrs.MetaData[0]
         return loom.attrs.MetaData
 
-
     def get_file_metadata(self, loom_file_path):
         loom = self.get_loom_connection(loom_file_path)
         meta = {}
@@ -415,7 +414,8 @@ class SCope(s_pb2_grpc.MainServicer):
         a_hex3d = hex(a >> 20 << 8 | a >> 8 & 240 | a >> 4 & 15)
         return a_hex3d.replace("0x", "")
 
-    def getVmax(self, vals):
+    def get_vmax(self, vals):
+        maxVmax = max(vals)
         vmax = np.percentile(vals, 99)
         if vmax == 0 and max(vals) != 0:
             vmax = max(vals)
@@ -423,7 +423,27 @@ class SCope(s_pb2_grpc.MainServicer):
             vmax = max(vals)
         if vmax == 0:
             vmax = 0.01
-        return vmax
+        return vmax, maxVmax
+
+    def getVmax(self, request, context):
+        vmax = np.zeros(3)
+        maxVmax = np.zeros(3)
+
+        for n, feature in enumerate(request.feature):
+            if request.featureType[n] == 'gene':
+                if feature != '':
+                    vals = self.get_gene_expression(
+                        loom_file_path=self.get_loom_filepath(request.loomFilePath),
+                        gene_symbol=feature,
+                        log_transform=request.hasLogTranform,
+                        cpm_normalise=request.hasCpmTranform)
+                    vmax[n], maxVmax[n] = self.get_vmax(vals)
+                if request.featureType[n] == 'gene':
+                    if feature != '':
+                        vals = self.get_auc_values(loom_file_path=self.get_loom_filepath(request.loomFilePath),
+                                                   regulon=feature)
+                        vmax[n], maxVmax[n] = self.get_vmax(vals)
+        return s_pb2.VmaxReply(vmax=vmax, maxVmax=maxVmax)
 
     def getCellColorByFeatures(self, request, context):
         print(request)
@@ -442,6 +462,8 @@ class SCope(s_pb2_grpc.MainServicer):
         features = []
         hex_vec = []
         vmax = np.zeros(3)
+        maxVmax = np.zeros(3)
+
         for n, feature in enumerate(request.feature):
             if request.featureType[n] == 'gene':
                 if feature != '':
@@ -455,7 +477,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     if request.vmax[n] != 0.0:
                         vmax[n] = request.vmax[n]
                     else:
-                        vmax[n] = self.getVmax(vals)
+                        vmax[n], maxVmax[n] = self.get_vmax(vals)
                     vals = np.round((vals / vmax[n]) * 225)
                     features.append([x if x <= 225 else 225 for x in vals])
                 else:
@@ -470,7 +492,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     if request.vmax[n] != 0.0:
                         vmax[n] = request.vmax[n]
                     else:
-                        vmax[n] = self.getVmax(vals)
+                        vmax[n], maxVmax[n] = self.get_vmax(vals)
                     if request.scaleThresholded:
                         vals = ([auc if auc >= request.threshold[n] else 0 for auc in vals])
                         vals = np.round((vals / vmax[n]) * 225)
@@ -511,7 +533,7 @@ class SCope(s_pb2_grpc.MainServicer):
             hex_vec = ["%02x%02x%02x" % (int(r), int(g), int(b)) for r, g, b in zip(features[0], features[1], features[2])]
 
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax)
+        return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax, maxVmax=maxVmax)
 
     def getCellAUCValuesByFeatures(self, request, context):
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
@@ -575,10 +597,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 for threshold in regulon['allThresholds'].keys():
                     autoThresholds.append({"name": threshold, "threshold": regulon['allThresholds'][threshold]})
                 defaultThreshold = regulon['defaultThresholdName']
-                if 'motifData' in regulon:
-                    motifName = os.path.basename(regulon['motifData'])
-                else:
-                    motifName = ""
+                motifName = os.path.basename(regulon['motifData'])
                 break
 
         regulon = {"genes": regulonGenes,

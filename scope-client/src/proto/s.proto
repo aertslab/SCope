@@ -27,6 +27,7 @@ service Main {
   rpc getMyLooms (MyLoomsRequest) returns (MyLoomsReply) {}
   rpc translateLassoSelection (TranslateLassoSelectionRequest) returns (TranslateLassoSelectionReply) {}
   rpc getCellIDs (CellIDsRequest) returns (CellIDsReply) {}
+  rpc getVmax (VmaxRequest) returns (VmaxReply) {}
 }
 
 
@@ -46,6 +47,7 @@ message CellColorByFeaturesRequest {
 message CellColorByFeaturesReply {
   repeated string color=1;
   repeated float vmax=2;
+  repeated float maxVmax=3;
 }
 
 message CellAUCValuesByFeaturesRequest {
@@ -208,4 +210,17 @@ message CellIDsRequest {
 
 message CellIDsReply {
   repeated string cellIds=1;
+}
+
+message VmaxRequest {
+  repeated string loomFilePath=1;
+  repeated string features=2;
+  repeated string featureTypes=3;
+  bool hasLogTransform=4;
+  bool hasCpmTransform=5;
+}
+
+message VmaxReply {
+  repeated float vmax=1;
+  repeated float maxVmax=2;
 }

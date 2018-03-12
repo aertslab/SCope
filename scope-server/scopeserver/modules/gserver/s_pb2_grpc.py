@@ -64,6 +64,11 @@ class MainStub(object):
         request_serializer=s__pb2.CellIDsRequest.SerializeToString,
         response_deserializer=s__pb2.CellIDsReply.FromString,
         )
+    self.getVmax = channel.unary_unary(
+        '/scope.Main/getVmax',
+        request_serializer=s__pb2.VmaxRequest.SerializeToString,
+        response_deserializer=s__pb2.VmaxReply.FromString,
+        )
 
 
 class MainServicer(object):
@@ -140,6 +145,13 @@ class MainServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def getVmax(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_MainServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -192,6 +204,11 @@ def add_MainServicer_to_server(servicer, server):
           servicer.getCellIDs,
           request_deserializer=s__pb2.CellIDsRequest.FromString,
           response_serializer=s__pb2.CellIDsReply.SerializeToString,
+      ),
+      'getVmax': grpc.unary_unary_rpc_method_handler(
+          servicer.getVmax,
+          request_deserializer=s__pb2.VmaxRequest.FromString,
+          response_serializer=s__pb2.VmaxReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
