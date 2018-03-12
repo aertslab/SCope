@@ -128,6 +128,31 @@ class API {
 		}
 	}
 
+	getParsedFeatures() {
+		let features = this.getActiveFeatures();
+		let metadata = this.getActiveLoomMetadata();
+		let selectedGenes = [];
+		let selectedRegulons = [];
+		let selectedClusters = [];
+		features.map(f => {
+			if (f.featureType == 'gene') selectedGenes.push(f.feature);
+			if (f.featureType == 'regulon') selectedRegulons.push(f.feature);
+			if (f.featureType.indexOf('Clustering:') == 0) {
+				metadata.cellMetaData.clusterings.map( clustering => {
+					if (f.featureType.indexOf(clustering.name) != -1) {
+						clustering.clusters.map(c => {
+							if (c.description == f.feature) {
+								selectedClusters.push({clusteringName: clustering.name, clusteringID: clustering.id, clusteName: c.name, clusterID: c.id});
+							}
+						})
+					}
+				})
+			}
+		})
+		return { selectedGenes, selectedRegulons, selectedClusters }
+	}
+
+
 	
 	getFeaturesScale() {
 		return this.getMaxValues();
