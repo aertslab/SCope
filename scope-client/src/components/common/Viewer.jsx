@@ -47,7 +47,7 @@ export default class Viewer extends Component {
 		this.viewerToolListener = (tool) => {
 			this.setState({activeTool: tool});
 		}
-		this.viewerSelectionListener = (selections) => {					
+		this.viewerSelectionListener = (selections) => {
 			this.onViewerSelectionChange(selections);
 		}
 		this.viewerTransformListener = (t) => {
@@ -66,7 +66,7 @@ export default class Viewer extends Component {
 	render() {
 		return (
 			<div>
-				<canvas id={"viewer"+this.props.name} style={{width: 100+'%', height: this.props.height-1+'px'}} >
+				<canvas id={"viewer"+this.props.name} style={{width: '99.9%', height: (this.props.height-2)+'px'}} >
 				</canvas>
 				<ReactResizeDetector handleWidth skipOnMount onResize={this.onResize.bind(this)} />
 				<Dimmer active={this.state.loading} inverted>
@@ -98,7 +98,7 @@ export default class Viewer extends Component {
 					let initialTransform = d3.zoomTransform(d3.select('#viewer' + t.src).node());
 					initialTransform.src = 'init';
 					initialTransform.receivedFromListener = true;
-					this.zoomBehaviour.transform(this.zoomSelection, initialTransform);					
+					this.zoomBehaviour.transform(this.zoomSelection, initialTransform);
 				}
 			});
 		}
@@ -113,15 +113,15 @@ export default class Viewer extends Component {
 			this.h = nextProps.height;
 			this.resizeContainer();
 		}
-		
-		if (this.props.loomFile != nextProps.loomFile || this.props.activeCoordinates != nextProps.activeCoordinates || 
+
+		if (this.props.loomFile != nextProps.loomFile || this.props.activeCoordinates != nextProps.activeCoordinates ||
 			(JSON.stringify(nextProps.activeAnnotations) != JSON.stringify(this.state.activeAnnotations)) ) {
 				this.setState({loading: true});
 				if (DEBUG) console.log(nextProps.name, 'changing points');
 				this.getPoints(nextProps.loomFile, nextProps.activeCoordinates, nextProps.activeAnnotations, () => {
 					this.getFeatureColors(this.state.activeFeatures, nextProps.loomFile, this.props.thresholds, this.state.activeAnnotations);
 				});
-		} 
+		}
 	}
 
 	getJSONFeatures(features, field) {
@@ -305,7 +305,7 @@ export default class Viewer extends Component {
 	}
 
 	getPointsInLasso() {
-		console.log('getPointsInLasso', this.container, this.lassoLayer, this.selectionLayer, this.lasso)
+		if (DEBUG) console.log(this.props.name, 'getPointsInLasso', this.container, this.lassoLayer, this.selectionLayer, this.lasso)
 		let pts = this.container.children,
 			ptsInLasso = [];
 		if (pts.length < 2) return;
@@ -330,7 +330,7 @@ export default class Viewer extends Component {
 		}
 		this.lasso.endFill();
 		let pts = this.getPointsInLasso();
-		console.log('translatePointsInLasso', pts);
+		if (DEBUG) console.log(this.props.name, 'translatePointsInLasso', pts);
 		this.lasso.clear();
 		return pts;
 	}
@@ -349,9 +349,9 @@ export default class Viewer extends Component {
 		BackendAPI.addViewerSelection(lassoSelection);
 	}
 
-	repaintLassoSelections() {
+	repaintLassoSelections(selections) {
 		this.selectionsLayer.removeChildren();
-		this.state.lassoSelections.forEach((lS) => {
+		selections.forEach((lS) => {
 			if (lS.selected) this.highlightPointsInLasso(lS);
 		})
 		this.transformLassoPoints();
@@ -407,10 +407,10 @@ export default class Viewer extends Component {
 	}
 
 	onActiveFeaturesChange(features, featureID) {
-		if ((this.getJSONFeatures(features, 'feature') != this.getJSONFeatures(this.state.activeFeatures, 'feature')) || 
+		if ((this.getJSONFeatures(features, 'feature') != this.getJSONFeatures(this.state.activeFeatures, 'feature')) ||
 			(this.getJSONFeatures(features, 'featureType') != this.getJSONFeatures(this.state.activeFeatures, 'featureType')) ||
 			(this.props.thresholds && (this.getJSONFeatures(features, 'threshold') != this.getJSONFeatures(this.state.activeFeatures, 'threshold')))) {
-			
+
 			this.setState({loading: true});
 			this.getFeatureColors(features, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, this.state.customScale, null, featureID);
 		}
@@ -418,7 +418,7 @@ export default class Viewer extends Component {
 
 	onCustomScaleChange(scale, maxValues, featureID, vmaxID) {
 		if (DEBUG) console.log(this.props.name, 'customScaleListener', scale, this.state.customScale);
-		if ((JSON.stringify(scale) != JSON.stringify(this.state.customScale)) || 
+		if ((JSON.stringify(scale) != JSON.stringify(this.state.customScale)) ||
 			(JSON.stringify(maxValues) != JSON.stringify(this.state.maxValues)) ) {
 			this.setState({loading: true, maxValues: maxValues});
 			this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, scale, featureID, vmaxID);
@@ -426,39 +426,44 @@ export default class Viewer extends Component {
 	}
 
 	onViewerSelectionChange(selections) {
-		let currentSelections = []
-		selections.map((s, i) => {
-			let ns = Object.assign({}, s);
-			let display = true;
-			if (s.src != this.props.name) {
-				if (s.translations[this.props.name]) {
-					ns.points = s.translations[this.props.name];
-				} else {
-					if (s.loomFilePath != this.props.loomFile) {						
-						console.log('translation between datasets required ');
-						let query = {
-								srcLoomFilePath: s.loomFilePath,
-								destLoomFilePath: this.props.loomFile,
-								cellIndices: s.points,
-							};
-						if (DEBUG) console.log('translateLassoSelection', query);
-						BackendAPI.getConnection().then((gbc) => {
-							gbc.services.scope.Main.translateLassoSelection(query, (err, response) => {
-								// Update the coordinates and remove all previous data points
-								if (DEBUG) console.log('translateLassoSelection', response);
-							})
-						})
-						display = false;
+		let currentSelections = [];
+		if (DEBUG) console.log(this.props.name, 'onViewerSelectionChange', selections);
+		if (this.props.translate) {
+			selections.map((s, i) => {
+				let ns = Object.assign({}, s);
+				let display = true;
+				if (s.src != this.props.name) {
+					if (s.translations[this.props.name]) {
+						ns.points = s.translations[this.props.name];
 					} else {
-						ns.points = this.translatePointsInLasso(s.lassoPoints); 
-						s.translations[this.props.name] = ns.points.slice(0);
+						if (s.loomFilePath != this.props.loomFile) {
+							let query = {
+									srcLoomFilePath: s.loomFilePath,
+									destLoomFilePath: this.props.loomFile,
+									cellIndices: s.points,
+								};
+							if (DEBUG) console.log(this.props.name, 'translateLassoSelection', query);
+							BackendAPI.getConnection().then((gbc) => {
+								gbc.services.scope.Main.translateLassoSelection(query, (err, response) => {
+									if (DEBUG) console.log(this.props.name, 'translateLassoSelection', response);
+									ns.points = response.cellIndices;
+									s.translations[this.props.name] = ns.points.slice(0);
+								})
+							})
+							display = false;
+						} else {
+							ns.points = this.translatePointsInLasso(s.lassoPoints);
+							s.translations[this.props.name] = ns.points.slice(0);
+						}
 					}
 				}
-			}
-			if (display) currentSelections.push(ns);
-		})
+				if (display) currentSelections.push(ns);
+			})
+		} else {
+			currentSelections = selections;
+		}
 		this.setState({lassoSelections: currentSelections});
-		this.repaintLassoSelections();
+		this.repaintLassoSelections(currentSelections);
 	}
 
 	onViewerTransformChange(t) {
@@ -484,20 +489,20 @@ export default class Viewer extends Component {
 				});
 			});
 		}
-		
+
 		let query = {
 			loomFilePath: loomFile,
 			coordinatesID: parseInt(coordinates),
 			annotation: queryAnnotations
 		};
-		if (DEBUG) console.log('getPoints', query);
+		if (DEBUG) console.log(this.props.name, 'getPoints', query);
 		this.startBenchmark("getPoints")
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getCoordinates(query, (err, response) => {
 				// Update the coordinates and remove all previous data points
-				if (DEBUG) console.log('getPoints', response);
+				if (DEBUG) console.log(this.props.name, 'getPoints', response);
+				this.container.removeChildren();
 				if (response) {
-					this.container.removeChildren();
 					let c = {
 						x: response.x,
 						y: response.y
@@ -506,6 +511,7 @@ export default class Viewer extends Component {
 					this.setScalingFactor();
 				} else {
 					console.log('Could not get the coordinates - empty response!')
+					this.setState({ coord:  {x: [], y: []}});
 				}
 				this.endBenchmark("getPoints");
 				this.initializeDataPoints();
@@ -562,7 +568,7 @@ export default class Viewer extends Component {
 		this.endBenchmark("transformPoints");
 	}
 
-	getFeatureColors(features, loomFile, thresholds, annotations, scale, featureID, vmaxID) {		
+	getFeatureColors(features, loomFile, thresholds, annotations, scale, featureID, vmaxID) {
 		if (scale) {
 			this.setState({activeFeatures: JSON.parse(JSON.stringify(features)), customScale: scale.slice(0)});
 		} else {
@@ -618,7 +624,7 @@ export default class Viewer extends Component {
 							customScale = maxValues.slice(0);
 						}
 						this.setState({maxValues: maxValues, customScale: customScale});
-						if (DEBUG) console.log('setFeatureScales', response.vmax, vmaxID, this.props.name);
+						if (DEBUG) console.log(this.props.name, 'setFeatureScales', response.vmax, vmaxID, this.props.name);
 						BackendAPI.setFeatureScales(response.vmax, vmaxID, this.props.name);
 					}
 					this.setState({colors: response.color});

@@ -47,3 +47,11 @@ body:before{
     transform-origin: top left;
     position: absolute;
 }
+
+.viewerRow {
+	padding-top: 0px !important;
+}
+
+.pusher .segment {
+	padding-bottom:  0px !important;
+}

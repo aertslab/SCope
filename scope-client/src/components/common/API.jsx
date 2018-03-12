@@ -5,6 +5,7 @@ class API {
 
 		this.loomFiles = [];
 		this.activePage = 'welcome';
+		this.activePageListeners = [];
 		this.activeLoom = null;
 		this.activeCoordinates = -1;
 		this.activeLoomChangeListeners = [];
@@ -63,6 +64,10 @@ class API {
 		this.activeLoomChangeListeners.forEach((listener) => {
 			listener(this.activeLoom,  this.loomFiles[this.activeLoom], this.activeCoordinates);
 		})
+	}
+
+	getLoomMetadata(loomFilePath) {
+		return this.loomFiles[loomFilePath];
 	}
 
 	getActiveLoomMetadata() {
@@ -200,8 +205,8 @@ class API {
 		}
 	}
 
-
 	
+
 	getActivePage() {
 		return this.activePage;		
 	}
@@ -211,8 +216,21 @@ class API {
 		this.maxValuesPerViewer = {};
 		this.customValues = [0, 0, 0];
 		this.activePage = page;
+		this.activePageListeners.forEach((listener) => {
+			listener(this.activePage);
+		})
 	}
 
+	onActivePageChange(listener) {
+		this.activePageListeners.push(listener);
+	}
+
+	removeActivePageChange(listener) {
+		let i = this.activePageListeners.indexOf(listener)
+		if (i > -1) {
+			this.activePageListeners.splice(i, 1);
+		}
+	}
 	
 
 	getSettings() {

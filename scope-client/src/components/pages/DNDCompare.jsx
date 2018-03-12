@@ -16,10 +16,9 @@ class DNDCompare extends Component {
 		super(props);
 		this.state = {
 			loomFiles: BackendAPI.getLoomFiles(),
-			activeLoom: BackendAPI.getActiveLoom(),
 			multiLoom: [BackendAPI.getActiveLoom()],
-			activeCoordinates: BackendAPI.getActiveCoordinates(),
-			metadata: BackendAPI.getActiveLoomMetadata(),
+			multiCoordinates: [BackendAPI.getActiveCoordinates()],
+			multiMetadata: [BackendAPI.getActiveLoomMetadata()],
 			activeFeatures: BackendAPI.getActiveFeatures(),
 			colors: BackendAPI.getColors(),
 			activeAnnotation: -1,
@@ -36,12 +35,18 @@ class DNDCompare extends Component {
 			superposition: 'OR',
 		}
 		this.activeLoomListener = (loom, metadata, coordinates) => {
-			this.setState({activeLoom: loom, activeCoordinates: coordinates, metadata: metadata});
+			let multiLoom = this.state.multiLoom;
+			let multiCoordinates = this.state.multiCoordinates;
+			let multiMetadata = this.state.multiMetadata;
+			multiLoom[0] = loom;
+			multiCoordinates[0] = coordinates;
+			multiMetadata[0] = metadata;
+			this.setState({multiLoom: multiLoom, multiCoordinates: multiCoordinates, multiMetadata: multiMetadata});
 		};
 		this.activeFeaturesListener = (features) => {
 			this.setState({activeFeatures: features});
 		}
-		this.height = window.innerHeight - 200;
+		this.height = window.innerHeight - 142;
 		this.displayConf = [
 			{ text: 'auto', value: 0, disabled: true },
 			{ text: '1', value: 1 },
@@ -69,19 +74,18 @@ class DNDCompare extends Component {
 
 	render() {
 		const { 
-			activeLoom, 
 			activeThresholds, 
 			activeFeatures, 
 			crossAnnotations, 
-			metadata, 
-			activeCoordinates, 
 			activeAnnotation, 
 			annotationIDs, 
 			colors, 
 			displays,
 			configuration,
 			superposition,
-			multiLoom
+			multiLoom,
+			multiCoordinates,
+			multiMetadata
 		} = this.state;
 
 		let annotationLinks = () => {
@@ -93,8 +97,8 @@ class DNDCompare extends Component {
 		}
 
 		let annotationTabs = () => {
-			if (metadata && metadata.cellMetaData && metadata.cellMetaData.annotations) {
-				let annotations = metadata.cellMetaData.annotations;
+			if (multiMetadata[0] && multiMetadata[0].cellMetaData && multiMetadata[0].cellMetaData.annotations) {
+				let annotations = multiMetadata[0].cellMetaData.annotations;
 				return annotations.map((annotation, annotationID) => {
 					return (
 						<span key={annotationID}>
@@ -138,7 +142,7 @@ class DNDCompare extends Component {
 			return (
 				<Grid>
 				{_.times(rows, i => (
-					<Grid.Row columns={columns} key={i}>
+					<Grid.Row columns={columns} key={i} className="viewerRow">
 						{_.times(columns, (j) => {
 								let name = "comp"+(columns * i + j);
 								let annotationDropContainerHorizontal, annotationDropContainerVertical, datasetSelector;
@@ -152,7 +156,6 @@ class DNDCompare extends Component {
 											viewerName={name} 
 											orientation={configuration == 'cross' ? 'horizontal' : (configuration == 'one' ? 'one' : 'both')}
 											position={configuration == 'cross' ? j : columns * i + j}
-											height={this.height / rows}
 											onDrop={this.handleDrop.bind(this)}
 											onRemove={this.handleRemove.bind(this)}
 										/>
@@ -165,21 +168,42 @@ class DNDCompare extends Component {
 											viewerName={name} 
 											position={i}
 											orientation='vertical'
-											height={this.height / rows}
+											height={this.height / rows - 42}
 											onDrop={this.handleDrop.bind(this)}
 											onRemove={this.handleRemove.bind(this)}
 										/>
 									)
 								}
 								if ((configuration == 'multi') && (i == 0)) {
+									let coordOptions = [], coordinatesSelector;
+									if (multiMetadata[j] && multiMetadata[j].cellMetaData) {
+										multiMetadata[j].cellMetaData.embeddings.map((coords) => {
+											coordOptions.push({text: coords.name, value: coords.id});
+										});
+										coordinatesSelector = (
+											<span>
+												<b> coordinates: </b>
+												<Dropdown inline options={coordOptions} disabled={j==0} value={multiCoordinates[j]} placeholder=" none selected " onChange={(proxy, select) => {
+													let mc = multiCoordinates;
+													mc[j] = select.value;
+													this.setState({'multiCoordinates': mc});
+												}}/>
+											</span>
+										)
+									}
 									datasetSelector = (
 										<span>
 										<b>Select a dataset: </b>
-										<Dropdown inline options={this.loomConf} disabled={j==0} defaultValue={multiLoom[j]} placeholder=" none selected " onChange={(proxy, select) => {
+										<Dropdown inline options={this.loomConf} disabled={j==0} value={multiLoom[j]} placeholder=" none selected " onChange={(proxy, select) => {
 											let ml = multiLoom;
+											let mc = multiCoordinates;
+											let mm = multiMetadata;
 											ml[j] = select.value;
-											this.setState({multiLoom: ml});
+											mc[j] = -1;
+											mm[j] = BackendAPI.getLoomMetadata(ml[j]);
+											this.setState({'multiLoom': ml, 'multiCoordinates': mc});
 										}}/>
+										{coordinatesSelector}
 										</span>
 									)
 								}
@@ -198,15 +222,17 @@ class DNDCompare extends Component {
 											onDrop={this.handleDrop.bind(this)}
 											onRemove={this.handleRemove.bind(this)}
 											name={name}
-											height={this.height / rows}
-											loomFile={configuration == 'multi' ? multiLoom[j] : activeLoom}
+											height={this.height / rows - 42}
+											loomFile={configuration == 'multi' ? multiLoom[j] : multiLoom[0]}
 											activeFeatures={activeFeatures}
-											activeCoordinates={activeCoordinates}
+											activeCoordinates={configuration == 'multi' ? multiCoordinates[j] : multiCoordinates[0]}
 											activeAnnotations={va}
 											orientation={configuration =='one' ? 'one' : 'both'}
 											position={columns * i + j}
+											configuration={configuration}
 											customScale={true}
 											settings={true}
+											translate={true}
 											scale={true}
 										/>
 									</Grid.Column>
@@ -224,7 +250,7 @@ class DNDCompare extends Component {
 			</Grid.Column>
 		));
 
-		if (!activeLoom) return (
+		if (!multiLoom[0]) return (
 			<div>
 				Select the dataset to be analyzed
 			</div>
@@ -253,8 +279,13 @@ class DNDCompare extends Component {
 						<br />
 						<ViewerToolbar />
 					</Grid.Column>
-					<Grid.Column width={12}>
+					<Grid.Column width={11}>
 						{viewers()}
+					</Grid.Column>
+					<Grid.Column width={3}>
+                        <ViewerSidebar  onActiveFeaturesChange={(features, id) => {
+                            this.setState({activeFeatures: features});
+                        }} />
 					</Grid.Column>
 				</Grid.Row>
 			</Grid>
@@ -360,9 +391,9 @@ class DNDCompare extends Component {
 	}
 
 	selectAllAnotations() {
-        const { crossAnnotations, activeAnnotation, metadata } = this.state;
+        const { crossAnnotations, activeAnnotation, multiMetadata } = this.state;
         let annotationIDs = [];
-        let annotationGroup = metadata.cellMetaData.annotations[activeAnnotation];
+        let annotationGroup = multiMetadata[0].cellMetaData.annotations[activeAnnotation];
         annotationGroup.values.map((value, valueID) => {
         	let a = {};
         	a[annotationGroup.name] = [value];
