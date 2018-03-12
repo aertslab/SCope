@@ -430,19 +430,28 @@ class SCope(s_pb2_grpc.MainServicer):
         maxVmax = np.zeros(3)
 
         for n, feature in enumerate(request.feature):
-            if request.featureType[n] == 'gene':
-                if feature != '':
-                    vals = self.get_gene_expression(
-                        loom_file_path=self.get_loom_filepath(request.loomFilePath),
-                        gene_symbol=feature,
-                        log_transform=request.hasLogTranform,
-                        cpm_normalise=request.hasCpmTranform)
-                    vmax[n], maxVmax[n] = self.get_vmax(vals)
+            fVmax = 0
+            fMaxVmax = 0
+            for loom in request.loomFilePath:
                 if request.featureType[n] == 'gene':
                     if feature != '':
-                        vals = self.get_auc_values(loom_file_path=self.get_loom_filepath(request.loomFilePath),
-                                                   regulon=feature)
-                        vmax[n], maxVmax[n] = self.get_vmax(vals)
+                        vals = self.get_gene_expression(
+                            loom_file_path=self.get_loom_filepath(request.loomFilePath),
+                            gene_symbol=feature,
+                            log_transform=request.hasLogTranform,
+                            cpm_normalise=request.hasCpmTranform)
+                        lVmax, lMaxVmax = self.get_vmax(vals)
+                    if request.featureType[n] == 'gene':
+                        if feature != '':
+                            vals = self.get_auc_values(loom_file_path=self.get_loom_filepath(request.loomFilePath),
+                                                       regulon=feature)
+                            lVmax, lMaxVmax = self.get_vmax(vals)
+                if lVmax > fVmax:
+                    fVmax = lVmax
+                if lMaxVmax > fMaxVmax:
+                    fMaxVmax = lMaxVmax
+            vmax[n] = fVmax
+            maxVmax[n] = fMaxVmax
         return s_pb2.VmaxReply(vmax=vmax, maxVmax=maxVmax)
 
     def getCellColorByFeatures(self, request, context):
