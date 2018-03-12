@@ -35,8 +35,8 @@ message CellColorByFeaturesRequest {
   string loomFilePath=1;
   repeated string feature=2;
   repeated string featureType=3;
-  bool hasLogTranform=4;
-  bool hasCpmTranform=5;
+  bool hasLogTransform=4;
+  bool hasCpmTransform=5;
   repeated float threshold=6;
   bool scaleThresholded=7;
   repeated Annotation annotation=8;
@@ -69,8 +69,8 @@ message CellMetaDataRequest {
   string loomFilePath=1;
   repeated int32 cellIndices=2; // List of cell indices to return, empty list = all cells
   repeated string selectedGenes=3; // List of genes to return epxression values for
-  bool hasLogTranform=4;
-  bool hasCpmTranform=5;
+  bool hasLogTransform=4;
+  bool hasCpmTransform=5;
   repeated string selectedRegulons=6; // As above, for regulons and AUC values
   repeated int32 clusterings=7; // IDs of clustering values to return per cell
   repeated string annotations=8; // String name of annotations to return (from global metadata)

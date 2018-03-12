@@ -212,8 +212,8 @@ export default class Metadata extends Component {
 		let query = {
 			loomFilePath: loomFilePath,
 			cellIndices: selections[this.props.selectionId].points,
-			hasLogTranform: settings.hasLogTransform,
-			hasCpmTranform: settings.hasCpmNormalization,
+			hasLogTransform: settings.hasLogTransform,
+			hasCpmTransform: settings.hasCpmNormalization,
 			selectedGenes: selectedGenes,
 			selectedRegulons: selectedRegulons,
 			clusterings: this.state.clustering ? [this.state.clustering] : [],

@@ -419,8 +419,6 @@ class SCope(s_pb2_grpc.MainServicer):
         vmax = np.percentile(vals, 99)
         if vmax == 0 and max(vals) != 0:
             vmax = max(vals)
-        if vmax < 10:
-            vmax = max(vals)
         if vmax == 0:
             vmax = 0.01
         return vmax, maxVmax
@@ -432,22 +430,21 @@ class SCope(s_pb2_grpc.MainServicer):
         for n, feature in enumerate(request.feature):
             fVmax = 0
             fMaxVmax = 0
-            for loom in request.loomFilePath:
-                if request.featureType[n] == 'gene':
-                    if feature != '':
-                        vals = self.get_gene_expression(
-                            loom_file_path=self.get_loom_filepath(request.loomFilePath),
-                            gene_symbol=feature,
-                            log_transform=request.hasLogTranform,
-                            cpm_normalise=request.hasCpmTranform)
-                        lVmax, lMaxVmax = self.get_vmax(vals)
-                    if request.featureType[n] == 'gene':
-                        if feature != '':
-                            vals = self.get_auc_values(loom_file_path=self.get_loom_filepath(request.loomFilePath),
-                                                       regulon=feature)
-                            lVmax, lMaxVmax = self.get_vmax(vals)
-                if lVmax > fVmax:
-                    fVmax = lVmax
+            if feature != '':
+                for loomFilePath in request.loomFilePath:
+                        if request.featureType[n] == 'gene':
+                                vals = self.get_gene_expression(
+                                    loom_file_path=self.get_loom_filepath(loomFilePath),
+                                    gene_symbol=feature,
+                                    log_transform=request.hasLogTransform,
+                                    cpm_normalise=request.hasCpmTransform)
+                                lVmax, lMaxVmax = self.get_vmax(vals)
+                        if request.featureType[n] == 'regulon':
+                                vals = self.get_auc_values(loom_file_path=self.get_loom_filepath(loomFilePath),
+                                                           regulon=feature)
+                                lVmax, lMaxVmax = self.get_vmax(vals)
+                        if lVmax > fVmax:
+                            fVmax = lVmax
                 if lMaxVmax > fMaxVmax:
                     fMaxVmax = lMaxVmax
             vmax[n] = fVmax
@@ -455,7 +452,6 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.VmaxReply(vmax=vmax, maxVmax=maxVmax)
 
     def getCellColorByFeatures(self, request, context):
-        print(request)
         start_time = time.time()
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
         loom = self.get_loom_connection(loomFilePath)
@@ -479,8 +475,8 @@ class SCope(s_pb2_grpc.MainServicer):
                     vals = self.get_gene_expression(
                         loom_file_path=loomFilePath,
                         gene_symbol=feature,
-                        log_transform=request.hasLogTranform,
-                        cpm_normalise=request.hasCpmTranform,
+                        log_transform=request.hasLogTransform,
+                        cpm_normalise=request.hasCpmTransform,
                         annotation=request.annotation,
                         logic=request.logic)
                     if request.vmax[n] != 0.0:
@@ -497,7 +493,6 @@ class SCope(s_pb2_grpc.MainServicer):
                                                regulon=feature,
                                                annotation=request.annotation,
                                                logic=request.logic)
-                    print(vals)
                     if request.vmax[n] != 0.0:
                         vmax[n] = request.vmax[n]
                     else:
@@ -563,8 +558,8 @@ class SCope(s_pb2_grpc.MainServicer):
             if gene != '':
                 geneExp.append(self.get_gene_expression(loom_file_path=loomFilePath,
                                                         gene_symbol=gene,
-                                                        log_transform=request.hasLogTranform,
-                                                        cpm_normalise=request.hasCpmTranform)[request.cellIndices])
+                                                        log_transform=request.hasLogTransform,
+                                                        cpm_normalise=request.hasCpmTransform)[request.cellIndices])
         aucVals = []
         for regulon in request.selectedRegulons:
             if regulon != '':
