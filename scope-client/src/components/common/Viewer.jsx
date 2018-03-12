@@ -40,7 +40,7 @@ export default class Viewer extends Component {
 		this.settingsListener = (settings, customScale) => {
 			if (this.props.settings) {
 				this.setState({loading: true});
-				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, customScale);
+				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, customScale, this.props.superposition);
 			}
 		}
 		this.viewerToolListener = (tool) => {
@@ -90,8 +90,8 @@ export default class Viewer extends Component {
 		this.w = this.zoomSelection.node().getBoundingClientRect().width;
 		this.initGraphics();
 		if (this.props.loomFile != null) {
-			this.getPoints(this.props.loomFile, this.props.activeCoordinates, this.props.activeAnnotations, () => {
-				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.props.activeAnnotations, this.state.customScale);
+			this.getPoints(this.props.loomFile, this.props.activeCoordinates, this.props.activeAnnotations, this.props.superposition, () => {
+				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.props.activeAnnotations, this.state.customScale, this.props.superposition);
 				let t = BackendAPI.getViewerTransform();
 				if (t) {
 					let initialTransform = d3.zoomTransform(d3.select('#viewer' + t.src).node());
@@ -113,12 +113,12 @@ export default class Viewer extends Component {
 			this.resizeContainer();
 		}
 
-		if (this.props.loomFile != nextProps.loomFile || this.props.activeCoordinates != nextProps.activeCoordinates ||
+		if (this.props.loomFile != nextProps.loomFile || this.props.activeCoordinates != nextProps.activeCoordinates || this.props.superposition != nextProps.superposition ||
 			(JSON.stringify(nextProps.activeAnnotations) != JSON.stringify(this.state.activeAnnotations)) ) {
 				this.setState({loading: true});
 				if (DEBUG) console.log(nextProps.name, 'changing points');
-				this.getPoints(nextProps.loomFile, nextProps.activeCoordinates, nextProps.activeAnnotations, () => {
-					this.getFeatureColors(this.state.activeFeatures, nextProps.loomFile, this.props.thresholds, this.state.activeAnnotations, this.state.customScale);
+				this.getPoints(nextProps.loomFile, nextProps.activeCoordinates, nextProps.activeAnnotations, nextProps.superposition, () => {
+					this.getFeatureColors(this.state.activeFeatures, nextProps.loomFile, this.props.thresholds, this.state.activeAnnotations, this.state.customScale, nextProps.superposition);
 				});
 		}
 	}
@@ -411,7 +411,7 @@ export default class Viewer extends Component {
 
 
 			this.setState({loading: true});
-			this.getFeatureColors(features, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, customScale);
+			this.getFeatureColors(features, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, customScale, this.props.superposition);
 		}
 	}
 
@@ -419,7 +419,7 @@ export default class Viewer extends Component {
 		if (DEBUG) console.log(this.props.name, 'customScaleListener', scale, this.state.customScale);
 		if (JSON.stringify(scale) != JSON.stringify(this.state.customScale)) {
 			this.setState({loading: true, customScale: scale});
-			this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, scale);
+			this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, scale, this.props.superposition);
 		}
 	}
 
@@ -476,7 +476,7 @@ export default class Viewer extends Component {
 		}
 	}
 
-	getPoints(loomFile, coordinates, annotations, callback) {
+	getPoints(loomFile, coordinates, annotations, superposition, callback) {
 		let queryAnnotations = []
 		if (annotations) {
 			this.setState({activeAnnotations: Object.assign({}, annotations)});
@@ -491,7 +491,8 @@ export default class Viewer extends Component {
 		let query = {
 			loomFilePath: loomFile,
 			coordinatesID: parseInt(coordinates),
-			annotation: queryAnnotations
+			annotation: queryAnnotations,
+			logic: superposition,
 		};
 		if (DEBUG) console.log(this.props.name, 'getPoints', query);
 		this.startBenchmark("getPoints")
@@ -566,7 +567,7 @@ export default class Viewer extends Component {
 		this.endBenchmark("transformPoints");
 	}
 
-	getFeatureColors(features, loomFile, thresholds, annotations, scale) {
+	getFeatureColors(features, loomFile, thresholds, annotations, scale, superposition) {
 		if (scale) {
 			this.setState({activeFeatures: JSON.parse(JSON.stringify(features)), customScale: scale.slice(0)});
 		} else {
@@ -599,7 +600,8 @@ export default class Viewer extends Component {
 			threshold: thresholds ? features.map((f) => {return f.threshold}) : [0, 0, 0],
 			scaleThresholded: this.props.scale,
 			annotation: queryAnnotations,
-			vmax: [0, 0, 0]
+			vmax: [0, 0, 0],
+			logic: superposition
 		};
 		if (this.props.customScale && scale)  {
 			query['vmax'] = scale;
