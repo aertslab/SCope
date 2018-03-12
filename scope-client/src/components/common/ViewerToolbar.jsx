@@ -19,7 +19,7 @@ export default class ViewerToolbar extends Component {
 
 		}
 		this.activeFeaturesListener = (features) => {
-			this.setState({activeFeatures: features});
+			this.onActiveFeaturesChange(features);
 		}
 		this.featuresScaleListener = (scale, id) => {
 			this.onFeaturesScaleChange(scale, id);
@@ -30,7 +30,7 @@ export default class ViewerToolbar extends Component {
 		const { activeTool, activeFeatures, colors, featuresScale, customScale } = this.state;
 		const createSliderWithTooltip = Slider.createSliderWithTooltip;
 		const TooltipSlider = createSliderWithTooltip(Slider);
-		console.log('render', activeFeatures ,featuresScale);
+		console.log('render', activeFeatures, featuresScale);
 		let levels = false;
 		let sliders = _.times(3, i => {
 				let val = customScale[i] ? customScale[i] : featuresScale[i];
@@ -100,7 +100,28 @@ export default class ViewerToolbar extends Component {
 		this.setState({customScale: scale});
 	}
 
+
+	onActiveFeaturesChange(features) {
+		let settings = BackendAPI.getSettings();
+		let query = {
+  			loomFilePath: [BackendAPI.getActiveLoom()],
+  			feature: features.map(f => {return f.feature}),
+  			featureType: features.map(f=> {return f.featureType}),
+  			hasLogTransform: settings.hasLogTransform,
+  			hasCpmTransform: settings.hasCpmTransform,
+		}
+		if (DEBUG) console.log('getVmax', query);
+		BackendAPI.getConnection().then((gbc) => {
+			gbc.services.scope.Main.getVmax(query, (err, response) => {
+				if (DEBUG) console.log('getVmax', response);
+				//BackendAPI.setActiveFeature(i, activeFeatures[i].type, "gene", g, 0, {description: response.featureDescription[0]});
+			})
+		})
+
+	}
+
 	onFeaturesScaleChange(scale, vmaxID) {
+		
 		if(DEBUG) console.log('onFeaturesScaleChange', scale, vmaxID);
 		let { customScale, featuresScale } = this.state;
 		
@@ -115,5 +136,6 @@ export default class ViewerToolbar extends Component {
 		}
 
 		this.setState({featuresScale: scale, customScale: customScale});
+		
 	}
 }
