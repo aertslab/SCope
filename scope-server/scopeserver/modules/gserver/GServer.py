@@ -432,19 +432,21 @@ class SCope(s_pb2_grpc.MainServicer):
             fMaxVmax = 0
             if feature != '':
                 for loomFilePath in request.loomFilePath:
-                        if request.featureType[n] == 'gene':
-                                vals = self.get_gene_expression(
-                                    loom_file_path=self.get_loom_filepath(loomFilePath),
-                                    gene_symbol=feature,
-                                    log_transform=request.hasLogTransform,
-                                    cpm_normalise=request.hasCpmTransform)
-                                lVmax, lMaxVmax = self.get_vmax(vals)
-                        if request.featureType[n] == 'regulon':
-                                vals = self.get_auc_values(loom_file_path=self.get_loom_filepath(loomFilePath),
-                                                           regulon=feature)
-                                lVmax, lMaxVmax = self.get_vmax(vals)
-                        if lVmax > fVmax:
-                            fVmax = lVmax
+                    lVmax = 0
+                    lMaxVmax = 0
+                    if request.featureType[n] == 'gene':
+                            vals = self.get_gene_expression(
+                                loom_file_path=self.get_loom_filepath(loomFilePath),
+                                gene_symbol=feature,
+                                log_transform=request.hasLogTransform,
+                                cpm_normalise=request.hasCpmTransform)
+                            lVmax, lMaxVmax = self.get_vmax(vals)
+                    if request.featureType[n] == 'regulon':
+                            vals = self.get_auc_values(loom_file_path=self.get_loom_filepath(loomFilePath),
+                                                       regulon=feature)
+                            lVmax, lMaxVmax = self.get_vmax(vals)
+                    if lVmax > fVmax:
+                        fVmax = lVmax
                 if lMaxVmax > fMaxVmax:
                     fMaxVmax = lMaxVmax
             vmax[n] = fVmax
