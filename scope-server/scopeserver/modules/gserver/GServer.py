@@ -547,31 +547,32 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getCellMetaData(self, request, context):
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
-        if len(request.cellIndices) == 0:
-            request.cellIndices = list(range(self.get_nb_cells(loomFilePath)))
+        cellIndices = request.cellIndices
+        if len(cellIndices) == 0:
+            cellIndices = list(range(self.get_nb_cells(loomFilePath)))
 
         cellClusters = []
         for cluster in request.clusterings:
             if cluster != '':
                 cellClusters.append(self.get_clusterIDs(loom_file_path=loomFilePath,
-                                                        clusterID=cluster)[request.cellIndices])
+                                                        clusterID=cluster)[cellIndices])
         geneExp = []
         for gene in request.selectedGenes:
             if gene != '':
                 geneExp.append(self.get_gene_expression(loom_file_path=loomFilePath,
                                                         gene_symbol=gene,
                                                         log_transform=request.hasLogTransform,
-                                                        cpm_normalise=request.hasCpmTransform)[request.cellIndices])
+                                                        cpm_normalise=request.hasCpmTransform)[cellIndices])
         aucVals = []
         for regulon in request.selectedRegulons:
             if regulon != '':
                 aucVals.append(self.get_auc_values(loom_file_path=loomFilePath,
-                                                   regulon=regulon)[request.cellIndices])
+                                                   regulon=regulon)[cellIndices])
         annotations = []
         for anno in request.annotations:
             if anno != '':
                 annotations.append(self.get_annotation(loom_file_path=loomFilePath,
-                                                       annoName=anno)[request.cellIndices])
+                                                       annoName=anno)[cellIndices])
 
         return s_pb2.CellMetaDataReply(clusterIDs=[s_pb2.CellClusters(clusters=x) for x in cellClusters],
                                        geneExpression=[s_pb2.FeatureValues(features=x) for x in geneExp],
