@@ -48,6 +48,8 @@ hexarr = np.vectorize('{:02x}'.format)
 
 dataDir = os.path.join(Path(__file__).resolve().parents[3], 'data', 'gene_mappings')
 dmel_mappings = pickle.load(open(os.path.join(dataDir, 'terminal_mappings.pickle'), 'rb'))
+hsap_to_dmel_mappings = pickle.load(open(os.path.join(dataDir, 'hsap_to_dmel_mappings.pickle'), 'rb'))
+mmus_to_dmel_mappings = pickle.load(open(os.path.join(dataDir, 'mmus_to_dmel_mappings.pickle'), 'rb'))
 
 
 class SCope(s_pb2_grpc.MainServicer):
@@ -110,24 +112,23 @@ class SCope(s_pb2_grpc.MainServicer):
     def get_nb_cells(self, loom_file_path):
         loom = self.get_loom_connection(loom_file_path)
         return loom.shape[1]
-    
+
     @staticmethod
     def get_genes(loom):
         return loom.ra.Gene.astype(str)
 
-    def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True, cpm_normalise=False, annotation='', logic='AND'):
+    def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True, cpm_normalise=False, annotation='', logic='OR'):
         loom = self.get_loom_connection(loom_file_path)
         if gene_symbol not in set(SCope.get_genes(loom)):
             gene_symbol = self.get_gene_names(loom_file_path)[gene_symbol]
         print("Debug: getting expression of " + gene_symbol + "...")
         gene_expr = loom[SCope.get_genes(loom) == gene_symbol, :][0]
-        if log_transform:
-            print("Debug: log-transforming gene expression...")
-            gene_expr = np.log2(gene_expr + 1)
         if cpm_normalise:
             print("Debug: CPM normalising gene expression...")
             gene_expr = gene_expr / loom.ca.nUMI
-            gene_expr = gene_expr
+        if log_transform:
+            print("Debug: log-transforming gene expression...")
+            gene_expr = np.log2(gene_expr + 1)
         if len(annotation) > 0:
             cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation, logic=logic)
             gene_expr = gene_expr[cellIndices]
@@ -139,7 +140,7 @@ class SCope(s_pb2_grpc.MainServicer):
         loom.ca.RegulonsAUC.dtype.names = list(map(lambda s: s.replace(' ' , '_'), L))
         return loom.ca.RegulonsAUC
 
-    def get_auc_values(self, loom_file_path, regulon, annotation='', logic='AND'):
+    def get_auc_values(self, loom_file_path, regulon, annotation='', logic='OR'):
         loom = self.get_loom_connection(loom_file_path)
         print("Debug: getting AUC values for {0} ...".format(regulon))
         if regulon in SCope.get_regulons_AUC(loom).dtype.names:
@@ -173,8 +174,8 @@ class SCope(s_pb2_grpc.MainServicer):
                 print("ERROR: Gene: {0} is not in the mapping table!".format(gene))
         return conversion
 
-    @lru_cache(maxsize=8)
-    def build_searchspace(self, loom_file_path):
+    @lru_cache(maxsize=16)
+    def build_searchspace(self, loom_file_path, crossSpecies=''):
         start_time = time.time()
         species, geneMappings = self.infer_species(loom_file_path)
         loom = self.get_loom_connection(loom_file_path)
@@ -189,12 +190,11 @@ class SCope(s_pb2_grpc.MainServicer):
         def add_element(searchSpace, elements, elementName):
             if type(elements) != str:
                 for element in elements:
-                    if elementName == 'gene':
-                        if len(geneMappings) > 0:
-                            if geneMappings[element] != element:
-                                searchSpace[('{0}'.format(str(element)).casefold(), element, elementName)] = geneMappings[element]
-                            else:
-                                searchSpace[(element.casefold(), element, elementName)] = element
+                    if elementName == 'gene' and crossSpecies == '' and len(geneMappings) > 0:
+                        if geneMappings[element] != element:
+                            searchSpace[('{0}'.format(str(element)).casefold(), element, elementName)] = geneMappings[element]
+                        else:
+                            searchSpace[(element.casefold(), element, elementName)] = element
                     else:
                         searchSpace[(element.casefold(), element, elementName)] = element
             else:
@@ -203,33 +203,52 @@ class SCope(s_pb2_grpc.MainServicer):
 
         searchSpace = {}
 
-        if len(geneMappings) > 0:
-            genes = set(SCope.get_genes(loom))
-            shrinkMappings = set([x for x in dmel_mappings.keys() if x in genes or dmel_mappings[x] in genes])
-            # searchSpace = add_element(searchSpace, dmel_mappings.keys(), 'gene')
-            searchSpace = add_element(searchSpace, shrinkMappings, 'gene')
+        if crossSpecies == 'hsap' and species == 'dmel':
+            searchSpace = add_element(searchSpace, hsap_to_dmel_mappings.keys(), 'gene')
+        elif crossSpecies == 'mmus' and species == 'dmel':
+            searchSpace = add_element(searchSpace, mmus_to_dmel_mappings.keys(), 'gene')
+
         else:
-            searchSpace = add_element(searchSpace, SCope.get_genes(loom), 'gene')
+            if len(geneMappings) > 0:
+                genes = set(SCope.get_genes(loom))
+                shrinkMappings = set([x for x in dmel_mappings.keys() if x in genes or dmel_mappings[x] in genes])
+                # searchSpace = add_element(searchSpace, dmel_mappings.keys(), 'gene')
+                searchSpace = add_element(searchSpace, shrinkMappings, 'gene')
+            else:
+                searchSpace = add_element(searchSpace, SCope.get_genes(loom), 'gene')
 
-        try:
-            searchSpace = add_element(searchSpace, SCope.get_regulons_AUC(loom).dtype.names, 'regulon')
-        except AttributeError:
-            print('No regulons in file')
-            pass  # No regulons in file
-
-        if meta:
-            for clustering in metaData['clusterings']:
-                allClusters = ['All Clusters']
-                for cluster in clustering['clusters']:
-                    allClusters.append(cluster['description'])
-                searchSpace = add_element(searchSpace, allClusters, 'Clustering: {0}'.format(clustering['name']))
+            if meta:
+                for clustering in metaData['clusterings']:
+                    allClusters = ['All Clusters']
+                    for cluster in clustering['clusters']:
+                        allClusters.append(cluster['description'])
+                    searchSpace = add_element(searchSpace, allClusters, 'Clustering: {0}'.format(clustering['name']))
+            try:
+                searchSpace = add_element(searchSpace, SCope.get_regulons_AUC(loom).dtype.names, 'regulon')
+            except AttributeError:
+                print('No regulons in file')
+                pass  # No regulons in file
 
         print("Debug: %s seconds elapsed making search space ---" % (time.time() - start_time))
+        #  Dict, keys = tuple(elementCF, element, elementName), values = element/translastedElement
         return searchSpace
 
     @lru_cache(maxsize=256)
     def get_features(self, loom_file_path, query):
-        searchSpace = self.build_searchspace(loom_file_path)
+        print(query)
+        if query.startswith('hsap\\'):
+            searchSpace = self.build_searchspace(loom_file_path, crossSpecies='hsap')
+            crossSpecies = 'hsap'
+            query = query[5:]
+        elif query.startswith('mmus\\'):
+            searchSpace = self.build_searchspace(loom_file_path, crossSpecies='mmus')
+            crossSpecies = 'mmus'
+            query = query[5:]
+        else:
+            searchSpace = self.build_searchspace(loom_file_path)
+            crossSpecies = ''
+        print(query)
+
         # Filter the genes by the query
 
         # Allow caps innsensitive searching, minor slowdown
@@ -240,7 +259,11 @@ class SCope(s_pb2_grpc.MainServicer):
         res = [x for x in searchSpace.keys() if queryCF in x[0]]
 
         for n, r in enumerate(res):
-            if r[0].startswith(queryCF) or query in r[0]:
+            if query in r[0]:
+                r = res.pop(n)
+                res = [r] + res
+        for n, r in enumerate(res):
+            if r[0].startswith(queryCF):
                 r = res.pop(n)
                 res = [r] + res
         for n, r in enumerate(res):
@@ -252,24 +275,46 @@ class SCope(s_pb2_grpc.MainServicer):
                 r = res.pop(n)
                 res = [r] + res
 
+        # These structures are a bit messy, but still fast
+        # r = (elementCF, element, elementName)
+        # dg = (drosElement, %match)
+        # searchSpace[r] = translastedElement
         collapsedResults = OrderedDict()
-        for r in res:
-            if (searchSpace[r], r[2]) not in collapsedResults.keys():
-                collapsedResults[(searchSpace[r], r[2])] = [r[1]]
-            else:
-                collapsedResults[(searchSpace[r], r[2])].append(r[1])
+        if crossSpecies == '':
+            for r in res:
+                if (searchSpace[r], r[2]) not in collapsedResults.keys():
+                    collapsedResults[(searchSpace[r], r[2])] = [r[1]]
+                else:
+                    collapsedResults[(searchSpace[r], r[2])].append(r[1])
+        elif crossSpecies == 'hsap':
+            for r in res:
+                for dg in hsap_to_dmel_mappings[searchSpace[r]]:
+                    if (dg[0], r[2]) not in collapsedResults.keys():
+                        collapsedResults[(dg[0], r[2])] = (r[1], dg[1])
+        elif crossSpecies == 'mmus':
+            for r in res:
+                for dg in mmus_to_dmel_mappings[searchSpace[r]]:
+                    if (dg[0], r[2]) not in collapsedResults.keys():
+                        collapsedResults[(dg[0], r[2])] = (r[1], dg[1])
 
         descriptions = []
-        for r in collapsedResults.keys():
-            synonyms = sorted([x for x in collapsedResults[r]])
-            try:
-                synonyms.remove(r[0])
-            except ValueError:
-                pass
-            if len(synonyms) > 0:
-                descriptions.append('Synonym of: {0}'.format(', '.join(synonyms)))
-            else:
-                descriptions.append('')
+        if crossSpecies == '':
+            for r in collapsedResults.keys():
+                synonyms = sorted([x for x in collapsedResults[r]])
+                try:
+                    synonyms.remove(r[0])
+                except ValueError:
+                    pass
+                if len(synonyms) > 0:
+                    descriptions.append('Synonym of: {0}'.format(', '.join(synonyms)))
+                else:
+                    descriptions.append('')
+        elif crossSpecies == 'hsap':
+            for r in collapsedResults.keys():
+                descriptions.append('Orthologue of {0}, {1:.2f}% identity (Human -> Drosophila)'.format(collapsedResults[r][0], collapsedResults[r][1]))
+        elif crossSpecies == 'mmus':
+            for r in collapsedResults.keys():
+                descriptions.append('Orthologue of {0}, {1:.2f}% identity (Mouse -> Drosophila)'.format(collapsedResults[r][0], collapsedResults[r][1]))
         # if mapping[result] != result: change title and description to indicate synonym
 
         print("Debug: " + str(len(res)) + " genes matching '" + query + "'")
@@ -277,10 +322,9 @@ class SCope(s_pb2_grpc.MainServicer):
         res = {'feature': [r[0] for r in collapsedResults.keys()],
                'featureType': [r[1] for r in collapsedResults.keys()],
                'featureDescription': descriptions}
-        print(query, len(res['feature']))
         return res
 
-    def get_anno_cells(self, loom_file_path, annotations, logic='AND'):
+    def get_anno_cells(self, loom_file_path, annotations, logic='OR'):
         loom = self.get_loom_connection(loom_file_path)
         cellIndices = []
         for anno in annotations:
@@ -294,12 +338,14 @@ class SCope(s_pb2_grpc.MainServicer):
                 for annotationValue in anno.values:
                     [annoSet.add(x) for x in np.where(loom.ca[annoName] == annotationValue)[0]]
             cellIndices.append(annoSet)
+        if logic not in ['AND', 'OR']:
+            logic = 'OR'
         if logic == 'AND':
             return sorted(list(set().intersection(*cellIndices)))
         elif logic == 'OR':
             return sorted(list(set().union(*cellIndices)))
 
-    def get_coordinates(self, loom_file_path, coordinatesID=-1, annotation='', logic='AND'):
+    def get_coordinates(self, loom_file_path, coordinatesID=-1, annotation='', logic='OR'):
         loom = self.get_loom_connection(loom_file_path)
         dims = 0
         if coordinatesID == -1:
@@ -375,6 +421,8 @@ class SCope(s_pb2_grpc.MainServicer):
             vmax = max(vals)
         if vmax < 10:
             vmax = max(vals)
+        if vmax == 0:
+            vmax = 0.01
         return vmax
 
     def getCellColorByFeatures(self, request, context):
@@ -527,7 +575,10 @@ class SCope(s_pb2_grpc.MainServicer):
                 for threshold in regulon['allThresholds'].keys():
                     autoThresholds.append({"name": threshold, "threshold": regulon['allThresholds'][threshold]})
                 defaultThreshold = regulon['defaultThresholdName']
-                motifName = os.path.basename(regulon['motifData'])
+                if 'motifData' in regulon:
+                    motifName = os.path.basename(regulon['motifData'])
+                else:
+                    motifName = ""
                 break
 
         regulon = {"genes": regulonGenes,
