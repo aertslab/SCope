@@ -215,7 +215,7 @@ message CellIDsReply {
 message VmaxRequest {
   repeated string loomFilePath=1;
   repeated string feature=2;
-  repeated string featureTypes=3;
+  repeated string featureType=3;
   bool hasLogTransform=4;
   bool hasCpmTransform=5;
 }
