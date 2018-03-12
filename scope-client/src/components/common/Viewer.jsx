@@ -25,7 +25,6 @@ export default class Viewer extends Component {
 			activeTool: BackendAPI.getViewerTool(),
 			customScale: BackendAPI.getCustomScale(),
 			activePage: BackendAPI.getActivePage(),
-			maxValues: BackendAPI.getMaxValues(),
 			benchmark: {}
 		}
 		this.zoomTransform = {
@@ -38,10 +37,10 @@ export default class Viewer extends Component {
 		// Increase the maxSize if displaying more than 1500 (default) objects
 		this.maxn = 200000;
 		this.texture = PIXI.Texture.fromImage("src/images/particle@2x.png");
-		this.settingsListener = (settings) => {
+		this.settingsListener = (settings, customScale) => {
 			if (this.props.settings) {
 				this.setState({loading: true});
-				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations);
+				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, customScale);
 			}
 		}
 		this.viewerToolListener = (tool) => {
@@ -53,13 +52,13 @@ export default class Viewer extends Component {
 		this.viewerTransformListener = (t) => {
 			this.onViewerTransformChange(t);
 		}
-		this.customScaleListener = (scale, maxValues, featureID, vmaxID) => {
+		this.customScaleListener = (scale) => {
 			if (this.props.customScale) {
-				this.onCustomScaleChange(scale, maxValues, featureID, vmaxID);
+				this.onCustomScaleChange(scale);
 			}
 		}
-		this.activeFeaturesListener = (features, featureID) => {
-			this.onActiveFeaturesChange(features, featureID);
+		this.activeFeaturesListener = (features, featureID, customScale) => {
+			this.onActiveFeaturesChange(features, featureID, customScale);
 		}
 	}
 
@@ -92,7 +91,7 @@ export default class Viewer extends Component {
 		this.initGraphics();
 		if (this.props.loomFile != null) {
 			this.getPoints(this.props.loomFile, this.props.activeCoordinates, this.props.activeAnnotations, () => {
-				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.props.activeAnnotations);
+				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.props.activeAnnotations, this.state.customScale);
 				let t = BackendAPI.getViewerTransform();
 				if (t) {
 					let initialTransform = d3.zoomTransform(d3.select('#viewer' + t.src).node());
@@ -119,7 +118,7 @@ export default class Viewer extends Component {
 				this.setState({loading: true});
 				if (DEBUG) console.log(nextProps.name, 'changing points');
 				this.getPoints(nextProps.loomFile, nextProps.activeCoordinates, nextProps.activeAnnotations, () => {
-					this.getFeatureColors(this.state.activeFeatures, nextProps.loomFile, this.props.thresholds, this.state.activeAnnotations);
+					this.getFeatureColors(this.state.activeFeatures, nextProps.loomFile, this.props.thresholds, this.state.activeAnnotations, this.state.customScale);
 				});
 		}
 	}
@@ -139,7 +138,6 @@ export default class Viewer extends Component {
 		BackendAPI.removeViewerTransformChange(this.viewerTransformListener);
 		BackendAPI.removeCustomScaleChange(this.customScaleListener);
 		BackendAPI.removeActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
-		BackendAPI.removeFeatureScales(this.props.name);
 		this.destroyGraphics();
 	}
 /*
@@ -406,22 +404,22 @@ export default class Viewer extends Component {
 		if (!t1.receivedFromListener) BackendAPI.setViewerTransform({k: t1.k, dx: dx, dy: dy, src: this.props.name});
 	}
 
-	onActiveFeaturesChange(features, featureID) {
+	onActiveFeaturesChange(features, featureID, customScale) {
 		if ((this.getJSONFeatures(features, 'feature') != this.getJSONFeatures(this.state.activeFeatures, 'feature')) ||
 			(this.getJSONFeatures(features, 'featureType') != this.getJSONFeatures(this.state.activeFeatures, 'featureType')) ||
 			(this.props.thresholds && (this.getJSONFeatures(features, 'threshold') != this.getJSONFeatures(this.state.activeFeatures, 'threshold')))) {
 
+
 			this.setState({loading: true});
-			this.getFeatureColors(features, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, this.state.customScale, null, featureID);
+			this.getFeatureColors(features, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, customScale);
 		}
 	}
 
-	onCustomScaleChange(scale, maxValues, featureID, vmaxID) {
+	onCustomScaleChange(scale) {
 		if (DEBUG) console.log(this.props.name, 'customScaleListener', scale, this.state.customScale);
-		if ((JSON.stringify(scale) != JSON.stringify(this.state.customScale)) ||
-			(JSON.stringify(maxValues) != JSON.stringify(this.state.maxValues)) ) {
-			this.setState({loading: true, maxValues: maxValues});
-			this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, scale, featureID, vmaxID);
+		if (JSON.stringify(scale) != JSON.stringify(this.state.customScale)) {
+			this.setState({loading: true, customScale: scale});
+			this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, scale);
 		}
 	}
 
@@ -568,7 +566,7 @@ export default class Viewer extends Component {
 		this.endBenchmark("transformPoints");
 	}
 
-	getFeatureColors(features, loomFile, thresholds, annotations, scale, featureID, vmaxID) {
+	getFeatureColors(features, loomFile, thresholds, annotations, scale) {
 		if (scale) {
 			this.setState({activeFeatures: JSON.parse(JSON.stringify(features)), customScale: scale.slice(0)});
 		} else {
@@ -604,29 +602,14 @@ export default class Viewer extends Component {
 			vmax: [0, 0, 0]
 		};
 		if (this.props.customScale && scale)  {
-			if (vmaxID != null) scale[vmaxID] = 0;
 			query['vmax'] = scale;
 		}
-		if (DEBUG) console.log(this.props.name, 'getFeatureColors', query, scale, featureID, vmaxID);
+		if (DEBUG) console.log(this.props.name, 'getFeatureColors', query, scale);
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
 				if (DEBUG) console.log(this.props.name, 'getFeatureColors', response);
 				this.endBenchmark("getFeatureColors")
 				if(response !== null) {
-					if (this.props.customScale && (featureID == null)) {
-						let maxValues = this.state.maxValues;
-						let customScale = this.state.customScale;
-						if (vmaxID != null) {
-							maxValues[vmaxID] = response.vmax[vmaxID];
-							customScale[vmaxID] = maxValues[vmaxID];
-						} else if (!scale) {
-							maxValues = response.vmax;
-							customScale = maxValues.slice(0);
-						}
-						this.setState({maxValues: maxValues, customScale: customScale});
-						if (DEBUG) console.log(this.props.name, 'setFeatureScales', response.vmax, vmaxID, this.props.name);
-						BackendAPI.setFeatureScales(response.vmax, vmaxID, this.props.name);
-					}
 					this.setState({colors: response.color});
 					this.updateDataPoints();
 				} else {

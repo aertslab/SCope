@@ -16,7 +16,7 @@ class DNDCompare extends Component {
 		super(props);
 		this.state = {
 			loomFiles: BackendAPI.getLoomFiles(),
-			multiLoom: [BackendAPI.getActiveLoom()],
+			multiLoom: BackendAPI.getActiveLooms(),
 			multiCoordinates: [BackendAPI.getActiveCoordinates()],
 			multiMetadata: [BackendAPI.getActiveLoomMetadata()],
 			activeFeatures: BackendAPI.getActiveFeatures(),
@@ -201,6 +201,7 @@ class DNDCompare extends Component {
 											ml[j] = select.value;
 											mc[j] = -1;
 											mm[j] = BackendAPI.getLoomMetadata(ml[j]);
+											BackendAPI.setActiveLooms(ml);
 											this.setState({'multiLoom': ml, 'multiCoordinates': mc});
 										}}/>
 										{coordinatesSelector}
