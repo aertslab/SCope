@@ -1,4 +1,6 @@
 import _ from 'lodash'
+import * as d3 from 'd3';
+import box2 from '../../js/box2.js'
 import React, { Component } from 'react'
 import { DragDropContext } from 'react-dnd'
 import HTML5Backend, { NativeTypes } from 'react-dnd-html5-backend'
@@ -15,6 +17,7 @@ class DNDCompare extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			activePage: BackendAPI.getActivePage(),
 			loomFiles: BackendAPI.getLoomFiles(),
 			multiLoom: BackendAPI.getActiveLooms(),
 			multiCoordinates: [BackendAPI.getActiveCoordinates()],
@@ -26,8 +29,8 @@ class DNDCompare extends Component {
 			rows: 2,
 			displays: 4,
 			crossAnnotations: {
-				horizontal: [], 
-				vertical: [], 
+				horizontal: [],
+				vertical: [],
 				both: [],
 				one: []
 			},
@@ -45,6 +48,7 @@ class DNDCompare extends Component {
 		};
 		this.activeFeaturesListener = (features) => {
 			this.setState({activeFeatures: features});
+			this.getCellMetadata();
 		}
 		this.height = window.innerHeight - 142;
 		this.displayConf = [
@@ -73,13 +77,13 @@ class DNDCompare extends Component {
 	}
 
 	render() {
-		const { 
-			activeThresholds, 
-			activeFeatures, 
-			crossAnnotations, 
-			activeAnnotation, 
-			annotationIDs, 
-			colors, 
+		const {
+			activeThresholds,
+			activeFeatures,
+			crossAnnotations,
+			activeAnnotation,
+			annotationIDs,
+			colors,
 			displays,
 			configuration,
 			superposition,
@@ -133,7 +137,6 @@ class DNDCompare extends Component {
 			while (columns * (rows - 1) >= crossAnnotations['one'].length) {
 				rows --;
 			}
-			console.log('number of columns', columns, 'rows', rows);
 			if (rows < 1) rows = 1;
 		}
 
@@ -151,9 +154,9 @@ class DNDCompare extends Component {
 									if (configuration == 'simple') ca = crossAnnotations['both'][columns * i + j];
 									if (configuration == 'one') ca = crossAnnotations['one'][columns * i + j];
 									annotationDropContainerHorizontal = (
-										<AnnotationDropContainer 
-											activeAnnotations={ca} 
-											viewerName={name} 
+										<AnnotationDropContainer
+											activeAnnotations={ca}
+											viewerName={name}
 											orientation={configuration == 'cross' ? 'horizontal' : (configuration == 'one' ? 'one' : 'both')}
 											position={configuration == 'cross' ? j : columns * i + j}
 											onDrop={this.handleDrop.bind(this)}
@@ -163,9 +166,9 @@ class DNDCompare extends Component {
 								}
 								if (((configuration == 'cross') || (configuration == 'multi')) && (j == 0)) {
 									annotationDropContainerVertical = (
-										<AnnotationDropContainer 
-											activeAnnotations={crossAnnotations['vertical'][i]} 
-											viewerName={name} 
+										<AnnotationDropContainer
+											activeAnnotations={crossAnnotations['vertical'][i]}
+											viewerName={name}
 											position={i}
 											orientation='vertical'
 											height={this.height / rows - 42}
@@ -285,11 +288,10 @@ class DNDCompare extends Component {
 						{viewers()}
 					</Grid.Column>
 					<Grid.Column width={3}>
-
-						{/*<svg id="expressionSVG" style={{width: '100%'}} height="300px" ></svg>*/}
-                        <ViewerSidebar  onActiveFeaturesChange={(features, id) => {
-                            this.setState({activeFeatures: features});
-                        }} />
+						<div className="chart-wrapper" id="chart-distro1" style={{width: '100%'}} height="200px"></div>
+						<ViewerSidebar	onActiveFeaturesChange={(features, id) => {
+							this.setState({activeFeatures: features});
+						}} />
 					</Grid.Column>
 				</Grid.Row>
 			</Grid>
@@ -298,10 +300,12 @@ class DNDCompare extends Component {
 
 	componentWillMount() {
 		BackendAPI.onActiveLoomChange(this.activeLoomListener);
+		BackendAPI.onActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
 	}
 
 	componentWillUnmount() {
 		BackendAPI.removeActiveLoomChange(this.activeLoomListener);
+		BackendAPI.removeActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
 	}
 
 	isDropped(name, value) {
@@ -328,7 +332,7 @@ class DNDCompare extends Component {
 		selectedAnnotations.push(item.value);
 		annotations[orientation][position][item.name] = selectedAnnotations;
 		this.setState({ crossAnnotations : annotations});
-		this.renderExpressionGraph();
+		this.getCellMetadata();
 		return true;
 	}
 
@@ -349,7 +353,7 @@ class DNDCompare extends Component {
 		} else {
 			console.log('Annotation cannot be found', viewer, name, remove);
 		}
-		this.renderExpressionGraph();
+		this.getCellMetadata();
 	}
 
 	displayNumberChanged(proxy, selection) {
@@ -380,8 +384,8 @@ class DNDCompare extends Component {
 			let displays = this.state.displays;
 			let superposition = this.state.superposition;
 			let crossAnnotations = {
-				horizontal: [], 
-				vertical: [], 
+				horizontal: [],
+				vertical: [],
 				both: [],
 				one: []
 			}
@@ -391,33 +395,35 @@ class DNDCompare extends Component {
 			} else {
 				displays = this.state.rows * this.state.columns;
 				superposition = 'OR';
-			}			
+			}
 			this.setState({configuration: conf, displays: displays, superposition: superposition, crossAnnotations: crossAnnotations});
+			this.getCellMetadata();
 		}, 100);
 	}
 
 	selectAllAnotations() {
-        const { crossAnnotations, activeAnnotation, multiMetadata } = this.state;
-        let annotationIDs = [];
-        let annotationGroup = multiMetadata[0].cellMetaData.annotations[activeAnnotation];
-        annotationGroup.values.map((value, valueID) => {
-        	let a = {};
-        	a[annotationGroup.name] = [value];
-            annotationIDs.push(a);
-        });
-        crossAnnotations['one'] = annotationIDs;
-        this.setState({crossAnnotations: crossAnnotations});
+		const { crossAnnotations, activeAnnotation, multiMetadata } = this.state;
+		let annotationIDs = [];
+		let annotationGroup = multiMetadata[0].cellMetaData.annotations[activeAnnotation];
+		annotationGroup.values.map((value, valueID) => {
+			let a = {};
+			a[annotationGroup.name] = [value];
+			annotationIDs.push(a);
+		});
+		crossAnnotations['one'] = annotationIDs;
+		this.setState({crossAnnotations: crossAnnotations});
+		this.getCellMetadata();
 	}
 
 	selectNoAnotations() {
 		let { crossAnnotations } = this.state;
 		crossAnnotations['one'] = [];
 		this.setState({crossAnnotations: crossAnnotations});
+		this.getCellMetadata();
 	}
 
 	selectAnnotation(name, value, selected) {
 		if (this.state.configuration == 'one') {
-			console.log('selectAnnotation', name, value, selected);
 			let annotations = this.state.crossAnnotations;
 			if (!selected) {
 				let a = {};
@@ -427,7 +433,6 @@ class DNDCompare extends Component {
 				let idx = -1;
 				annotations['one'].map((a, i) => {
 					if (a[name][0] == value) {
-						console.log('found', i)
 						idx = i;
 					}
 				});
@@ -439,7 +444,6 @@ class DNDCompare extends Component {
 				if (!isNaN(pa) && !isNaN(pb)) return pa > pb ? 1 : (pa < pb ? -1 : 0);
 				return va > vb ? 1 : (va < vb ? -1 : 0);
 			})
-			console.log('annotations', annotations);
 			this.setState({ crossAnnotations : annotations});
 		}
 	}
@@ -452,7 +456,7 @@ class DNDCompare extends Component {
 	}
 
 	getCrossAnnotations(i, j) {
-		let annotations = {}, cross = this.state.crossAnnotations;		
+		let annotations = {}, cross = this.state.crossAnnotations;
 		if (cross['horizontal'][j]) {
 			Object.keys(cross['horizontal'][j]).map(a => {
 				annotations[a] = annotations[a] || [];
@@ -472,17 +476,26 @@ class DNDCompare extends Component {
 		return annotations;
 	}
 
-	renderExpressionGraph() {
+
+	getSelectedAnnotations() {
 		let annotations = this.state.crossAnnotations;
-		let selectedAnnotations = [];
-		let settings = BackendAPI.getSettings();
+		let selectedAnnotations = {};
 		Object.keys(annotations).map(orientation => {
 			annotations[orientation].map(annotation => {
 				Object.keys(annotation).map(a => {
-					selectedAnnotations.push(a);
+					selectedAnnotations[a] = selectedAnnotations[a] || [];
+					annotation[a].map(v => {
+						if (selectedAnnotations[a].indexOf(v) == -1) selectedAnnotations[a].push(v);
+					})
 				})
 			})
 		})
+		return selectedAnnotations;
+	}
+
+	getCellMetadata() {
+		let settings = BackendAPI.getSettings();
+		let selectedAnnotations = this.getSelectedAnnotations();
 		const { selectedGenes, selectedRegulons, selectedClusters } = BackendAPI.getParsedFeatures();
 		let query = {
 			loomFilePath: this.state.multiLoom[0],
@@ -492,16 +505,139 @@ class DNDCompare extends Component {
 			selectedGenes: selectedGenes,
 			selectedRegulons: selectedRegulons,
 			clusterings: [],
-			annotations: selectedAnnotations,
+			annotations: Object.keys(selectedAnnotations),
 		}
 		BackendAPI.getConnection().then((gbc) => {
 			if (DEBUG) console.log('getCellMetaData', query);
 			gbc.services.scope.Main.getCellMetaData(query, (err, response) => {
 				if (DEBUG) console.log('getCellMetaData', response);
+				this.renderExpressionGraph(response);
 			});
 		});
 	}
 
+	renderExpressionGraph(data) {
+		const { selectedGenes, selectedRegulons, selectedClusters } = BackendAPI.getParsedFeatures();
+		if (selectedGenes.length + selectedRegulons.length == 0) return;
+		let selectedAnnotations = this.getSelectedAnnotations();
+		d3.select("#chart-distro1").select("svg").remove();
+		Object.keys(selectedAnnotations).map((annotation, ai) => {
+			let selections = 0;
+			let dataset = [];
+			selectedGenes.map((gene, gi) => {
+				data.annotations[ai].annotations.map((av, i) => {
+					dataset.push({'feature': selections, annotation: av, value: data.geneExpression[gi].features[i]});
+				})
+				selections++;
+			})
+			selectedRegulons.map((regulon, ri) => {
+				data.annotations[ai].annotations.map((av, i) => {
+					dataset.push({'feature': selections, annotation: av, value: data.aucValues[ri].features[i]});
+				})
+				selections++;
+			})
+
+			var margin = {top: 30, right: 50, bottom: 70, left: 50};
+			var width = 440 - margin.left - margin.right;
+			var height = 200 - margin.top - margin.bottom;
+			var min = Infinity, max = -Infinity;
+
+			var x0 = d3.scaleBand().range([0, width], .5);
+			var x_1 = d3.scaleBand();
+			var y_0 = d3.scaleLinear().range([height + margin.top, 0]);
+			var xAxis1 = d3.axisBottom(x0);
+			var yAxis1 = d3.axisLeft(y_0);
+			var svg1 = d3.select("#chart-distro1").append("svg")
+				.attr("class", "box")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+				.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+			var features = d3.map(dataset, function(d){return d.feature;}).keys();
+			var annotations = d3.map(dataset, function(d){return d.annotation;}).keys();
+			var graphData = [];
+			var tmp = [];
+			annotations.forEach(function(a) {
+				let annotatedFeatures = []
+				features.forEach(function(f) {
+					let featureValues = [];
+					dataset.forEach(function(d) {
+						if(d.annotation == a && d.feature == f){
+							featureValues.push(d.value);
+						};
+					});
+					annotatedFeatures.push({group: f, value: featureValues});
+				});
+				if (selectedAnnotations[annotation].indexOf(a) != -1)	graphData.push({annotation: a, Data: annotatedFeatures});
+			});
+			min = d3.min(dataset, function(d){ return d.value }) * 0.995;
+			max = d3.max(dataset, function(d){ return d.value }) * 1.005;
+			x0.domain(selectedAnnotations[annotation]);
+			x_1.domain(features).range([0, x0.bandwidth() - 10]);
+			y_0.domain([min, max]);
+			svg1.append("g")
+				.attr("class", "x axis")
+				.attr("transform", "translate(0," + (height + margin.top) + ")")
+				.call(xAxis1)
+				.append("text")
+				//.attr("transform", "rotate(-90)")
+				.attr("dy", 30)
+				.attr("fill", "black")
+				.attr("dx", width)
+				.style("text-anchor", "end")
+				.text(annotation);
+
+			svg1.append("g")
+				.attr("class", "y axis")
+				.call(yAxis1)
+				.append("text")
+				.attr("fill", "black")
+				.attr("transform", "rotate(-90)")
+				.attr("y", 6)
+				.attr("dy", -30)
+				.style("text-anchor", "end")
+				.text("Expression");
+
+			var bandwidth = x_1.bandwidth();
+			var translate = (bandwidth - 100) / 2;
+			translate = translate > 0 ? translate : 0;
+
+			var boxplot = box2()
+				.whiskers(this.iqr(1.5))
+				.width(bandwidth < 100 ? bandwidth : 100)
+				.height(height + margin.top)
+				.domain([min, max])
+				.showLabels(false);
+
+			var state = svg1.selectAll(".state2")
+				.data(graphData)
+				.enter().append("g")
+				.attr("class", "state")
+				.attr("transform", function(d) { 
+					return "translate(" +	x0(d.annotation) + ",0)"; 
+				});
+
+			state.selectAll(".box")
+				.data(function(d) { return d.Data; })
+				.enter()
+				.append("g")
+				.attr("transform", function(d) { return "translate(" +	(x_1(d.group) + 5 + translate) + ",0)"; } )
+				.call(boxplot);
+		});
+	}
+
+	iqr(k) {
+		return function(d, i) {
+		var q1 = d.quartiles[0],
+			q3 = d.quartiles[2],
+			iqr = (q3 - q1) * k,
+			i = -1,
+			j = d.length;
+		while (d[++i] < q1 - iqr);
+		while (d[--j] > q3 + iqr);
+		return [i, j];
+		};
+	}
 }
 
 export default DragDropContext(HTML5Backend)(DNDCompare);
