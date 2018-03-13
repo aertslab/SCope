@@ -13,7 +13,7 @@ import zlib
 import base64
 import pickle
 import uuid
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from functools import lru_cache
 from itertools import compress
 from pathlib import Path
@@ -54,12 +54,22 @@ hsap_to_dmel_mappings = pickle.load(open(os.path.join(dataDir, 'hsap_to_dmel_map
 mmus_to_dmel_mappings = pickle.load(open(os.path.join(dataDir, 'mmus_to_dmel_mappings.pickle'), 'rb'))
 
 if not os.path.isdir('logs'):
-    print('No log folder detected. Making log  folder in current directory.')
+    print('No log folder detected. Making log folder in current directory.')
     os.makedirs('logs')
+
 logDir = os.path.join('logs')
 uuidLog = open(os.path.join(logDir, 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()))), 'w')
 
+globalLooms = set([
+                   'FlyBrain_56k_v6.loom',
+                   'Desplan_OpticLobe_V1.loom',
+                   'Luo_OPN_v1.loom',
+                   'FlyBrain_157k_v1.loom',
+                   'dentate_gyrus_C_10X_V2_update.loom'
+                   ])
+
 curUUIDs = {}
+uploadedLooms = defaultdict(lambda: set())
 
 
 class SCope(s_pb2_grpc.MainServicer):
@@ -631,7 +641,15 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getMyLooms(self, request, context):
         my_looms = []
-        for f in os.listdir(self.loom_dir):
+        loomsToProcess = globalLooms
+        allLooms = os.listdir(self.loom_dir)
+
+        if request.UUID in uploadedLooms.keys():
+            for loom in uploadedLooms[request.UUID]:
+                if loom in allLooms:
+                    loomsToProcess.add(loom)
+
+        for f in sorted(list(loomsToProcess)):
             if f.endswith('.loom'):
                 loom = self.get_loom_connection(self.get_loom_filepath(f))
                 fileMeta = self.get_file_metadata(self.get_loom_filepath(f))
@@ -695,6 +713,10 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
         cell_ids = [loom.ca['CellID'][i] for i in request.cellIndices]
         return s_pb2.CellIDsReply(cellIds=cell_ids)
+
+    def loomUploaded(self, request, content):
+        uploadedLooms[request.UUID].add(request.filename)
+        return s_pb2.LoomUploadedReply()
 
 
 def serve(run_event, port=50052):

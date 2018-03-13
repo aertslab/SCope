@@ -30,6 +30,7 @@ service Main {
   rpc getVmax (VmaxRequest) returns (VmaxReply) {}
   rpc getUUID (UUIDRequest) returns (UUIDReply) {}
   rpc getRemainingUUIDTime (RemainingUUIDTimeRequest) returns (RemainingUUIDTimeReply) {}
+  rpc loomUploaded (LoomUploadedRequest) returns (LoomUploadedReply) {}
 }
 
 
@@ -183,7 +184,9 @@ message MarkerGenesReply {
   repeated string genes=1;
 }
 
-message MyLoomsRequest {}
+message MyLoomsRequest {
+  string UUID=1;
+}
 
 message MyLoom {
   string loomFilePath=1;
@@ -238,9 +241,16 @@ message UUIDReply {
 message RemainingUUIDTimeRequest {
   string ip=1;
   string UUID=2;
-  }
+}
 
 message RemainingUUIDTimeReply {
   string UUID=1;
   int64 timeRemaining=2;
 }
+
+message LoomUploadedRequest {
+  string UUID=1;
+  string filename=2;
+}
+
+message LoomUploadedReply {}
