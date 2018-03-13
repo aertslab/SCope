@@ -64,6 +64,11 @@ class MainStub(object):
         request_serializer=s__pb2.CellIDsRequest.SerializeToString,
         response_deserializer=s__pb2.CellIDsReply.FromString,
         )
+    self.doGeneSetEnrichment = channel.unary_stream(
+        '/scope.Main/doGeneSetEnrichment',
+        request_serializer=s__pb2.GeneSetEnrichmentRequest.SerializeToString,
+        response_deserializer=s__pb2.GeneSetEnrichmentReply.FromString,
+        )
     self.getVmax = channel.unary_unary(
         '/scope.Main/getVmax',
         request_serializer=s__pb2.VmaxRequest.SerializeToString,
@@ -160,6 +165,13 @@ class MainServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def doGeneSetEnrichment(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def getVmax(self, request, context):
     # missing associated documentation comment in .proto file
     pass
@@ -240,6 +252,11 @@ def add_MainServicer_to_server(servicer, server):
           servicer.getCellIDs,
           request_deserializer=s__pb2.CellIDsRequest.FromString,
           response_serializer=s__pb2.CellIDsReply.SerializeToString,
+      ),
+      'doGeneSetEnrichment': grpc.unary_stream_rpc_method_handler(
+          servicer.doGeneSetEnrichment,
+          request_deserializer=s__pb2.GeneSetEnrichmentRequest.FromString,
+          response_serializer=s__pb2.GeneSetEnrichmentReply.SerializeToString,
       ),
       'getVmax': grpc.unary_unary_rpc_method_handler(
           servicer.getVmax,
