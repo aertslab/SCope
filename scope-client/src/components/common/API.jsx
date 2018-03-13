@@ -5,7 +5,8 @@ class API {
 
 		this.loomFiles = [];
 		this.activePage = 'welcome';
-		this.activeLoom = null;
+		this.activePageListeners = [];
+		this.activeLooms = [];
 		this.activeCoordinates = -1;
 		this.activeLoomChangeListeners = [];
 
@@ -34,9 +35,7 @@ class API {
 
 		this.colors = ["red", "green", "blue"];
 
-		this.maxValues = [];
-		this.maxValuesPerViewer = {};
-		this.maxValuesChangeListeners = [];
+		this.maxValues = [0, 0, 0];
 		this.customValues = [0, 0, 0];
 		this.customValuesChangeListeners = [];
 	}
@@ -48,25 +47,48 @@ class API {
 
 
 	getActiveLoom() {
-		return this.activeLoom;
+		return this.activeLooms[0];
 	}
 
-	setActiveLoom(loom) {
-		this.activeLoom = loom;
+	getActiveLooms() {
+		return this.activeLooms;
+	}
+
+	setActiveLooms(looms) {
+		this.activeLooms = looms.slice(0);
+		this.getMaxScale(null, (customValues, maxValues) => {
+			this.customValuesChangeListeners.forEach((listener) => {
+				listener(customValues);
+			})
+		})
+	}
+
+	setActiveLoom(loom, id) {
+		if (id == null) id = 0;
+		this.activeLooms[id] = loom;
 		this.activeLoomChangeListeners.forEach((listener) => {
-			listener(this.activeLoom, this.loomFiles[this.activeLoom], this.activeCoordinates);
+			listener(this.activeLooms[0], this.loomFiles[this.activeLooms[0]], this.activeCoordinates);
+		})
+		this.getMaxScale(null, (customValues, maxValues) => {
+			this.customValuesChangeListeners.forEach((listener) => {
+				listener(customValues);
+			})
 		})
 	}
 
 	setActiveCoordinates(coords) {
 		this.activeCoordinates = coords;
 		this.activeLoomChangeListeners.forEach((listener) => {
-			listener(this.activeLoom,  this.loomFiles[this.activeLoom], this.activeCoordinates);
+			listener(this.activeLooms[0],  this.loomFiles[this.activeLooms[0]], this.activeCoordinates);
 		})
 	}
 
+	getLoomMetadata(loomFilePath) {
+		return this.loomFiles[loomFilePath];
+	}
+
 	getActiveLoomMetadata() {
-		return this.loomFiles[this.activeLoom];
+		return this.loomFiles[this.activeLooms[0]];
 	}
 
 	onActiveLoomChange(listener) {
@@ -101,13 +123,38 @@ class API {
 		return this.features[this.activePage] ? this.features[this.activePage] : [];
 	}
 
-	setActiveFeature(id, type, featureType, feature, threshold, metadata) {
+	setActiveFeature(featureId, type, featureType, feature, threshold, metadata) {
 		let page = this.activePage;
 		let selectedFeatures = this.features[page] || [this.emptyFeature, this.emptyFeature, this.emptyFeature];
-		selectedFeatures[id] = {type: type, featureType: featureType ? featureType : '', feature: feature ? feature : '', threshold: threshold, metadata: metadata};
+		selectedFeatures[featureId] = {type: type, featureType: featureType ? featureType : '', feature: feature ? feature : '', threshold: threshold, metadata: metadata};
 		this.features[page] = selectedFeatures;
-		(this.featureChangeListeners[page] || []).forEach((listener) => {
-			listener(selectedFeatures, id);
+		this.getMaxScale(featureId, (customValues, maxValues) => {
+			(this.featureChangeListeners[page] || []).forEach((listener) => {
+				listener(selectedFeatures, featureId, customValues, maxValues);
+			})
+		})
+	}
+
+	getMaxScale(id, callback) {
+		let settings = this.getSettings();
+		let selectedFeatures = this.features[this.activePage];
+		if (!selectedFeatures) return;
+		let query = {
+			loomFilePath: this.getActiveLooms(),
+			feature: selectedFeatures.map(f => {return f.feature}),
+			featureType: selectedFeatures.map(f=> {return f.featureType}),
+			hasLogTransform: settings.hasLogTransform,
+			hasCpmTransform: settings.hasCpmNormalization,
+		}
+		if (DEBUG) console.log('getVmax', query);
+		BackendAPI.getConnection().then((gbc) => {
+			gbc.services.scope.Main.getVmax(query, (err, response) => {
+				if (DEBUG) console.log('getVmax', response);
+				if (id != null) this.customValues[id] = response.vmax[id];
+				else this.customValues = response.vmax;
+				this.maxValues = response.maxVmax;
+				callback(this.customValues, this.maxValues);
+			})
 		})
 	}
 
@@ -123,58 +170,33 @@ class API {
 		}
 	}
 
-	
-	getFeaturesScale() {
-		return this.getMaxValues();
-	}
-
-	removeFeatureScales(viewer) {
-		delete(this.maxValuesPerViewer[viewer]);
-		console.log('removeFeatureScales', viewer, this.maxValues)
-		this.maxValues = this.getMaxValues();
-		this.maxValuesChangeListeners.forEach((listener) => {
-			listener(this.maxValues, null);
+	getParsedFeatures() {
+		let features = this.getActiveFeatures();
+		let metadata = this.getActiveLoomMetadata();
+		let selectedGenes = [];
+		let selectedRegulons = [];
+		let selectedClusters = [];
+		features.map(f => {
+			if (f.featureType == 'gene') selectedGenes.push(f.feature);
+			if (f.featureType == 'regulon') selectedRegulons.push(f.feature);
+			if (f.featureType.indexOf('Clustering:') == 0) {
+				metadata.cellMetaData.clusterings.map( clustering => {
+					if (f.featureType.indexOf(clustering.name) != -1) {
+						clustering.clusters.map(c => {
+							if (c.description == f.feature) {
+								selectedClusters.push({clusteringName: clustering.name, clusteringID: clustering.id, clusteName: c.name, clusterID: c.id});
+							}
+						})
+					}
+				})
+			}
 		})
+		return { selectedGenes, selectedRegulons, selectedClusters }
 	}
 
-	setFeatureScales(values, id, viewer) {
-		if (DEBUG) console.log('setFeatureScales', values, id, viewer);
-		if (id == null || id == undefined) {
-			this.maxValuesPerViewer[viewer] = values;
-			this.maxValues = this.getMaxValues();
-			this.customValues = this.maxValues.slice(0);
-		} else {
-			this.maxValuesPerViewer[viewer] = this.maxValuesPerViewer[viewer] || [0, 0, 0];
-			this.maxValuesPerViewer[viewer][id] = values[id];
-			this.maxValues = this.getMaxValues();
-			this.customValues[id] = this.maxValues[id];
-		}
-		this.maxValuesChangeListeners.forEach((listener) => {
-			listener(this.maxValues, id);
-		})
-	}
 
-	getMaxValues() {
-		let r = [], g = [], b = [];
-		Object.keys(this.maxValuesPerViewer).map(viewer => {
-			r.push(this.maxValuesPerViewer[viewer][0]);
-			g.push(this.maxValuesPerViewer[viewer][1]);
-			b.push(this.maxValuesPerViewer[viewer][2]);
-		})
-		let max = [Math.max(...r, 0), Math.max(...g, 0), Math.max(...b, 0)]
-		if (DEBUG) console.log ('getMaxValues', max);
-		return max;
-	}
-
-	onFeaturesScaleChange(listener) {
-		this.maxValuesChangeListeners.push(listener);
-	}
-
-	removeFeaturesScaleChange(listener) {
-		let i = this.maxValuesChangeListeners.indexOf(listener)
-		if (i > -1) {
-			this.maxValuesChangeListeners.splice(i, 1);
-		}
+	getFeatureScale() {
+		return this.maxValues;
 	}
 
 
@@ -182,10 +204,10 @@ class API {
 		return this.customValues;
 	}
 
-	setCustomScale(scale, featureID, vmaxID) {
-		this.customValues = scale;
+	setCustomScale(scale) {
+		this.customValues = scale.slice(0);
 		this.customValuesChangeListeners.forEach((listener) => {
-			listener(this.customValues, this.getMaxValues(), featureID, vmaxID);
+			listener(this.customValues);
 		})
 	}
 
@@ -200,19 +222,31 @@ class API {
 		}
 	}
 
-
 	
+
 	getActivePage() {
 		return this.activePage;		
 	}
 
 	setActivePage(page) {
-		this.maxValues = [];
-		this.maxValuesPerViewer = {};
+		this.maxValues = [0, 0, 0];
 		this.customValues = [0, 0, 0];
 		this.activePage = page;
+		this.activePageListeners.forEach((listener) => {
+			listener(this.activePage);
+		})
 	}
 
+	onActivePageChange(listener) {
+		this.activePageListeners.push(listener);
+	}
+
+	removeActivePageChange(listener) {
+		let i = this.activePageListeners.indexOf(listener)
+		if (i > -1) {
+			this.activePageListeners.splice(i, 1);
+		}
+	}
 	
 
 	getSettings() {
@@ -221,8 +255,10 @@ class API {
 
 	setSetting(key, value) {
 		this.settings[key] = value;
-		this.settingsChangeListeners.forEach((listener) => {
-			listener(this.settings);
+		this.getMaxScale(null, (customValues, maxValues) => {
+			this.settingsChangeListeners.forEach((listener) => {
+				listener(this.settings, customValues, maxValues);
+			})
 		})
 	}
 

@@ -28,6 +28,10 @@ service Main {
   rpc translateLassoSelection (TranslateLassoSelectionRequest) returns (TranslateLassoSelectionReply) {}
   rpc getCellIDs (CellIDsRequest) returns (CellIDsReply) {}
   rpc doGeneSetEnrichment (GeneSetEnrichmentRequest) returns (stream GeneSetEnrichmentReply) {}
+  rpc getVmax (VmaxRequest) returns (VmaxReply) {}
+  rpc getUUID (UUIDRequest) returns (UUIDReply) {}
+  rpc getRemainingUUIDTime (RemainingUUIDTimeRequest) returns (RemainingUUIDTimeReply) {}
+  rpc loomUploaded (LoomUploadedRequest) returns (LoomUploadedReply) {}
 }
 
 
@@ -35,8 +39,8 @@ message CellColorByFeaturesRequest {
   string loomFilePath=1;
   repeated string feature=2;
   repeated string featureType=3;
-  bool hasLogTranform=4;
-  bool hasCpmTranform=5;
+  bool hasLogTransform=4;
+  bool hasCpmTransform=5;
   repeated float threshold=6;
   bool scaleThresholded=7;
   repeated Annotation annotation=8;
@@ -47,6 +51,8 @@ message CellColorByFeaturesRequest {
 message CellColorByFeaturesReply {
   repeated string color=1;
   repeated float vmax=2;
+  repeated float maxVmax=3;
+  repeated int32 cellIndices=4;
 }
 
 message CellAUCValuesByFeaturesRequest {
@@ -68,8 +74,8 @@ message CellMetaDataRequest {
   string loomFilePath=1;
   repeated int32 cellIndices=2; // List of cell indices to return, empty list = all cells
   repeated string selectedGenes=3; // List of genes to return epxression values for
-  bool hasLogTranform=4;
-  bool hasCpmTranform=5;
+  bool hasLogTransform=4;
+  bool hasCpmTransform=5;
   repeated string selectedRegulons=6; // As above, for regulons and AUC values
   repeated int32 clusterings=7; // IDs of clustering values to return per cell
   repeated string annotations=8; // String name of annotations to return (from global metadata)
@@ -93,6 +99,7 @@ message CoordinatesRequest {
 message CoordinatesReply {
   repeated float x=1;
   repeated float y=2;
+  repeated int32 cellIndices=3;
 }
 
 message Annotation {
@@ -181,7 +188,9 @@ message MarkerGenesReply {
   repeated string genes=1;
 }
 
-message MyLoomsRequest {}
+message MyLoomsRequest {
+  string UUID=1;
+}
 
 message MyLoom {
   string loomFilePath=1;
@@ -228,3 +237,41 @@ message GeneSetEnrichmentReply {
   bool isDone=2;
   CellColorByFeaturesReply cellValues=3;
 }
+
+message VmaxRequest {
+  repeated string loomFilePath=1;
+  repeated string feature=2;
+  repeated string featureType=3;
+  bool hasLogTransform=4;
+  bool hasCpmTransform=5;
+}
+
+message VmaxReply {
+  repeated float vmax=1;
+  repeated float maxVmax=2;
+}
+
+message UUIDRequest {
+  string ip=1;
+}
+
+message UUIDReply {
+  string UUID=1;
+}
+
+message RemainingUUIDTimeRequest {
+  string ip=1;
+  string UUID=2;
+}
+
+message RemainingUUIDTimeReply {
+  string UUID=1;
+  int64 timeRemaining=2;
+}
+
+message LoomUploadedRequest {
+  string UUID=1;
+  string filename=2;
+}
+
+message LoomUploadedReply {}

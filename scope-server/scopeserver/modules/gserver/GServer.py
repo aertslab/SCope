@@ -13,7 +13,8 @@ import json
 import zlib
 import base64
 import pickle
-from collections import OrderedDict
+import uuid
+from collections import OrderedDict, defaultdict
 from functools import lru_cache
 from itertools import compress
 from pathlib import Path
@@ -22,6 +23,7 @@ from pyscenic.genesig import GeneSignature
 from pyscenic.aucell import create_rankings, enrichment, enrichment4cells
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
+_UUID_TIMEOUT = _ONE_DAY_IN_SECONDS * 5
 BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "bf9360", "1d331a", "79baf2", "deb6f2",
                   "990000", "7f6240", "283326", "2d4459", "8f00b3", "4c0000", "ccb499", "00f220", "accbe6", "520066",
                   "330000", "594f43", "16591f", "697c8c", "290033", "cc3333", "e59900", "ace6b4", "262d33", "ee00ff",
@@ -54,6 +56,26 @@ dataDir = os.path.join(Path(__file__).resolve().parents[3], 'data', 'gene_mappin
 dmel_mappings = pickle.load(open(os.path.join(dataDir, 'terminal_mappings.pickle'), 'rb'))
 hsap_to_dmel_mappings = pickle.load(open(os.path.join(dataDir, 'hsap_to_dmel_mappings.pickle'), 'rb'))
 mmus_to_dmel_mappings = pickle.load(open(os.path.join(dataDir, 'mmus_to_dmel_mappings.pickle'), 'rb'))
+
+if not os.path.isdir('logs'):
+    print('No log folder detected. Making log folder in current directory.')
+    os.makedirs('logs')
+
+logDir = os.path.join('logs')
+uuidLog = open(os.path.join(logDir, 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()))), 'w')
+
+# globalLooms = set([
+#                    'FlyBrain_56k_v6.loom',
+#                    'Desplan_OpticLobe_V1.loom',
+#                    'Luo_OPN_v1.loom',
+#                    'FlyBrain_157k_v1.loom',
+#                    'dentate_gyrus_C_10X_V2_update.loom'
+#                    ])
+
+globalLooms = set(os.listdir(os.path.join("data", "my-looms")))
+
+curUUIDs = {}
+uploadedLooms = defaultdict(lambda: set())
 
 
 class SCope(s_pb2_grpc.MainServicer):
@@ -136,24 +158,27 @@ class SCope(s_pb2_grpc.MainServicer):
         if len(annotation) > 0:
             cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation, logic=logic)
             gene_expr = gene_expr[cellIndices]
-        return gene_expr
+        else:
+            cellIndices = list(range(self.get_nb_cells(loom_file_path)))
+        return gene_expr, cellIndices
 
     @staticmethod
     def get_regulons_AUC(loom):
         L = loom.ca.RegulonsAUC.dtype.names
-        loom.ca.RegulonsAUC.dtype.names = list(map(lambda s: s.replace(' ' , '_'), L))
+        loom.ca.RegulonsAUC.dtype.names = list(map(lambda s: s.replace(' ', '_'), L))
         return loom.ca.RegulonsAUC
 
     def get_auc_values(self, loom_file_path, regulon, annotation='', logic='OR'):
         loom = self.get_loom_connection(loom_file_path)
         print("Debug: getting AUC values for {0} ...".format(regulon))
+        cellIndices = list(range(self.get_nb_cells(loom_file_path)))
         if regulon in SCope.get_regulons_AUC(loom).dtype.names:
             vals = SCope.get_regulons_AUC(loom)[regulon]
             if len(annotation) > 0:
                 cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation, logic=logic)
                 vals = vals[cellIndices]
-            return vals
-        return []
+            return vals, cellIndices
+        return [], cellIndices
 
     def get_clusterIDs(self, loom_file_path, clusterID):
         loom = self.get_loom_connection(loom_file_path)
@@ -332,22 +357,21 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(loom_file_path)
         cellIndices = []
         for anno in annotations:
-            annoSet = set()
             annoName = anno.name
-            if annoName.startswith("Clustering_"):
-                clusteringID = str(annoName.split('_')[1])
-                for annotationValue in anno.values:
+            for annotationValue in anno.values:
+                annoSet = set()
+                if annoName.startswith("Clustering_"):
+                    clusteringID = str(annoName.split('_')[1])
                     [annoSet.add(x) for x in np.where(loom.ca.Clusterings[clusteringID] == annotationValue)[0]]
-            else:
-                for annotationValue in anno.values:
+                else:
                     [annoSet.add(x) for x in np.where(loom.ca[annoName] == annotationValue)[0]]
-            cellIndices.append(annoSet)
+                cellIndices.append(annoSet)
         if logic not in ['AND', 'OR']:
             logic = 'OR'
         if logic == 'AND':
-            return sorted(list(set().intersection(*cellIndices)))
+            return sorted(list(set.intersection(*cellIndices)))
         elif logic == 'OR':
-            return sorted(list(set().union(*cellIndices)))
+            return sorted(list(set.union(*cellIndices)))
 
     def get_coordinates(self, loom_file_path, coordinatesID=-1, annotation='', logic='OR'):
         loom = self.get_loom_connection(loom_file_path)
@@ -375,15 +399,17 @@ class SCope(s_pb2_grpc.MainServicer):
             cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation, logic=logic)
             x = x[cellIndices]
             y = y[cellIndices]
+        else:
+            cellIndices = list(range(self.get_nb_cells(loom_file_path)))
         return {"x": x,
-                "y": y}
+                "y": y,
+                "cellIndices": cellIndices}
 
     @staticmethod
     def get_meta_data(loom):
         if type(loom.attrs.MetaData) is np.ndarray:
             return loom.attrs.MetaData[0]
         return loom.attrs.MetaData
-
 
     def get_file_metadata(self, loom_file_path):
         loom = self.get_loom_connection(loom_file_path)
@@ -419,18 +445,46 @@ class SCope(s_pb2_grpc.MainServicer):
         a_hex3d = hex(a >> 20 << 8 | a >> 8 & 240 | a >> 4 & 15)
         return a_hex3d.replace("0x", "")
 
-    def getVmax(self, vals):
+    def get_vmax(self, vals):
+        maxVmax = max(vals)
         vmax = np.percentile(vals, 99)
         if vmax == 0 and max(vals) != 0:
             vmax = max(vals)
-        if vmax < 10:
-            vmax = max(vals)
         if vmax == 0:
             vmax = 0.01
-        return vmax
+        return vmax, maxVmax
+
+    def getVmax(self, request, context):
+        vmax = np.zeros(3)
+        maxVmax = np.zeros(3)
+
+        for n, feature in enumerate(request.feature):
+            fVmax = 0
+            fMaxVmax = 0
+            if feature != '':
+                for loomFilePath in request.loomFilePath:
+                    lVmax = 0
+                    lMaxVmax = 0
+                    if request.featureType[n] == 'gene':
+                            vals, cellIndices = self.get_gene_expression(
+                                loom_file_path=self.get_loom_filepath(loomFilePath),
+                                gene_symbol=feature,
+                                log_transform=request.hasLogTransform,
+                                cpm_normalise=request.hasCpmTransform)
+                            lVmax, lMaxVmax = self.get_vmax(vals)
+                    if request.featureType[n] == 'regulon':
+                            vals, cellIndices = self.get_auc_values(loom_file_path=self.get_loom_filepath(loomFilePath),
+                                                                    regulon=feature)
+                            lVmax, lMaxVmax = self.get_vmax(vals)
+                    if lVmax > fVmax:
+                        fVmax = lVmax
+                if lMaxVmax > fMaxVmax:
+                    fMaxVmax = lMaxVmax
+            vmax[n] = fVmax
+            maxVmax[n] = fMaxVmax
+        return s_pb2.VmaxReply(vmax=vmax, maxVmax=maxVmax)
 
     def getCellColorByFeatures(self, request, context):
-        print(request)
         start_time = time.time()
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
         loom = self.get_loom_connection(loomFilePath)
@@ -446,35 +500,37 @@ class SCope(s_pb2_grpc.MainServicer):
         features = []
         hex_vec = []
         vmax = np.zeros(3)
+        maxVmax = np.zeros(3)
+        cellIndices = list(range(n_cells))
+
         for n, feature in enumerate(request.feature):
             if request.featureType[n] == 'gene':
                 if feature != '':
-                    vals = self.get_gene_expression(
+                    vals, cellIndices = self.get_gene_expression(
                         loom_file_path=loomFilePath,
                         gene_symbol=feature,
-                        log_transform=request.hasLogTranform,
-                        cpm_normalise=request.hasCpmTranform,
+                        log_transform=request.hasLogTransform,
+                        cpm_normalise=request.hasCpmTransform,
                         annotation=request.annotation,
                         logic=request.logic)
                     if request.vmax[n] != 0.0:
                         vmax[n] = request.vmax[n]
                     else:
-                        vmax[n] = self.getVmax(vals)
+                        vmax[n], maxVmax[n] = self.get_vmax(vals)
                     vals = np.round((vals / vmax[n]) * 225)
                     features.append([x if x <= 225 else 225 for x in vals])
                 else:
                     features.append(np.zeros(n_cells))
             elif request.featureType[n] == 'regulon':
                 if feature != '':
-                    vals = self.get_auc_values(loom_file_path=loomFilePath,
-                                               regulon=feature,
-                                               annotation=request.annotation,
-                                               logic=request.logic)
-                    print(vals)
+                    vals, cellIndices = self.get_auc_values(loom_file_path=loomFilePath,
+                                                            regulon=feature,
+                                                            annotation=request.annotation,
+                                                            logic=request.logic)
                     if request.vmax[n] != 0.0:
                         vmax[n] = request.vmax[n]
                     else:
-                        vmax[n] = self.getVmax(vals)
+                        vmax[n], maxVmax[n] = self.get_vmax(vals)
                     if request.scaleThresholded:
                         vals = ([auc if auc >= request.threshold[n] else 0 for auc in vals])
                         vals = np.round((vals / vmax[n]) * 225)
@@ -515,39 +571,43 @@ class SCope(s_pb2_grpc.MainServicer):
             hex_vec = ["%02x%02x%02x" % (int(r), int(g), int(b)) for r, g, b in zip(features[0], features[1], features[2])]
 
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax)
+        return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax, maxVmax=maxVmax, cellIndices=cellIndices)
 
     def getCellAUCValuesByFeatures(self, request, context):
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
-        return s_pb2.CellAUCValuesByFeaturesReply(value=self.get_auc_values(loom_file_path=loomFilePath, regulon=request.feature[0]))
+        vals, cellIndices = self.get_auc_values(loom_file_path=loomFilePath, regulon=request.feature[0])
+        return s_pb2.CellAUCValuesByFeaturesReply(value=vals)
 
     def getCellMetaData(self, request, context):
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
-        if len(request.cellIndices) == 0:
-            request.cellIndices = list(range(self.get_nb_cells(loomFilePath)))
+        cellIndices = request.cellIndices
+        if len(cellIndices) == 0:
+            cellIndices = list(range(self.get_nb_cells(loomFilePath)))
 
         cellClusters = []
         for cluster in request.clusterings:
             if cluster != '':
                 cellClusters.append(self.get_clusterIDs(loom_file_path=loomFilePath,
-                                                        clusterID=cluster)[request.cellIndices])
+                                                        clusterID=cluster)[cellIndices])
         geneExp = []
         for gene in request.selectedGenes:
             if gene != '':
-                geneExp.append(self.get_gene_expression(loom_file_path=loomFilePath,
-                                                        gene_symbol=gene,
-                                                        log_transform=request.hasLogTranform,
-                                                        cpm_normalise=request.hasCpmTranform)[request.cellIndices])
+                vals, _ = self.get_gene_expression(loom_file_path=loomFilePath,
+                                                   gene_symbol=gene,
+                                                   log_transform=request.hasLogTransform,
+                                                   cpm_normalise=request.hasCpmTransform)
+                geneExp.append(vals[cellIndices])
         aucVals = []
         for regulon in request.selectedRegulons:
             if regulon != '':
                 aucVals.append(self.get_auc_values(loom_file_path=loomFilePath,
-                                                   regulon=regulon)[request.cellIndices])
+                                                   regulon=regulon)[cellIndices])
         annotations = []
         for anno in request.annotations:
             if anno != '':
-                annotations.append(self.get_annotation(loom_file_path=loomFilePath,
-                                                       annoName=anno)[request.cellIndices])
+                vals, _ = self.get_annotation(loom_file_path=loomFilePath,
+                                              annoName=anno)
+                annotations.append(vals[cellIndices])
 
         return s_pb2.CellMetaDataReply(clusterIDs=[s_pb2.CellClusters(clusters=x) for x in cellClusters],
                                        geneExpression=[s_pb2.FeatureValues(features=x) for x in geneExp],
@@ -564,7 +624,7 @@ class SCope(s_pb2_grpc.MainServicer):
                                  coordinatesID=request.coordinatesID,
                                  annotation=request.annotation,
                                  logic=request.logic)
-        return s_pb2.CoordinatesReply(x=c["x"], y=c["y"])
+        return s_pb2.CoordinatesReply(x=c["x"], y=c["y"], cellIndices=c["cellIndices"])
 
     def getRegulonMetaData(self, request, context):
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
@@ -579,10 +639,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 for threshold in regulon['allThresholds'].keys():
                     autoThresholds.append({"name": threshold, "threshold": regulon['allThresholds'][threshold]})
                 defaultThreshold = regulon['defaultThresholdName']
-                if 'motifData' in regulon:
-                    motifName = os.path.basename(regulon['motifData'])
-                else:
-                    motifName = ""
+                motifName = os.path.basename(regulon['motifData'])
                 break
 
         regulon = {"genes": regulonGenes,
@@ -595,12 +652,20 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getMarkerGenes(self, request, context):
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
-        genes = SCope.get_genes(loom)[loom.ra["ClusterMarkers_{0}".format(request.clusteringID)][request.clusterID] == 1]
+        genes = SCope.get_genes(loom)[loom.ra["ClusterMarkers_{0}".format(request.clusteringID)][str(request.clusterID)] == 1]
         return(s_pb2.MarkerGenesReply(genes=genes))
 
     def getMyLooms(self, request, context):
         my_looms = []
-        for f in os.listdir(self.loom_dir):
+        loomsToProcess = globalLooms
+        allLooms = os.listdir(self.loom_dir)
+
+        if request.UUID in uploadedLooms.keys():
+            for loom in uploadedLooms[request.UUID]:
+                if loom in allLooms:
+                    loomsToProcess.add(loom)
+
+        for f in sorted(list(loomsToProcess)):
             if f.endswith('.loom'):
                 loom = self.get_loom_connection(self.get_loom_filepath(f))
                 fileMeta = self.get_file_metadata(self.get_loom_filepath(f))
@@ -622,6 +687,35 @@ class SCope(s_pb2_grpc.MainServicer):
                                                                              clusterings=clusterings),
                                              fileMetaData=fileMeta))
         return s_pb2.MyLoomsReply(myLooms=my_looms)
+
+    def getUUID(self, request, context):
+        newUUID = str(uuid.uuid4())
+        if newUUID not in curUUIDs.keys():
+            uuidLog.write("{0} :: {1} :: New UUID ({2}) assigned to IP".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, newUUID))
+            curUUIDs[newUUID] = time.time()
+        return s_pb2.GetUUIDReply(UUID=newUUID)
+
+    def getRemainingUUIDTime(self, request, context):
+        curUUIDSet = curUUIDs.keys()
+        for uid in curUUIDSet:
+            timeRemaining = _UUID_TIMEOUT - (time.time() - curUUIDs[uid])
+            if timeRemaining < 0:
+                del(curUUIDs[uid])
+                # os.rmdir()  # TODO: Remove the users loom files
+        uid = request.UUID
+        if uid in curUUIDs:
+            startTime = curUUIDs[uid]
+            timeRemaining = _UUID_TIMEOUT - (time.time() - startTime)
+            uuidLog.write("{0} :: {1} :: Old UUID ({2}) connected from IP :: Time Remaining - {4}".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid, timeRemaining))
+        else:
+            try:
+                uuid.UUID(uid)
+            except (KeyError, AttributeError):
+                uid = str(uuid.uuid4())
+            uuidLog.write("{0} :: {1} :: New UUID ({2}) assigned to IP".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid))
+            curUUIDs[uid] = time.time()
+            timeRemaining = _UUID_TIMEOUT
+        return s_pb2.GetRemainingUUIDTimeReply(UUID=uid, timeRemaining=timeRemaining)
 
     def translateLassoSelection(self, request, context):
         src_loom = self.get_loom_connection(self.get_loom_filepath(request.srcLoomFilePath))
@@ -765,6 +859,10 @@ class GeneSetEnrichment:
         else:
             self.update_state(step=0, status_code=404, status_message="This enrichment method is not implemented!", values=None)
         
+    def loomUploaded(self, request, content):
+        uploadedLooms[request.UUID].add(request.filename)
+        return s_pb2.LoomUploadedReply()
+
 
 def serve(run_event, port=50052):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
@@ -777,6 +875,8 @@ def serve(run_event, port=50052):
     while run_event.is_set():
         time.sleep(0.1)
 
+    # Write UUIDs to file here
+    uuidLog.close()
     server.stop(0)
 
 

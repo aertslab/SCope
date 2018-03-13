@@ -13,16 +13,16 @@ export default class ViewerToolbar extends Component {
 			activeTool: BackendAPI.getViewerTool(),
 			activeFeatures: BackendAPI.getActiveFeatures(),
 			activePage: BackendAPI.getActivePage(),
-			featuresScale: BackendAPI.getFeaturesScale(),
+			featuresScale: BackendAPI.getFeatureScale(),
 			customScale: BackendAPI.getCustomScale(),
 			colors: BackendAPI.getColors(),
 
 		}
-		this.activeFeaturesListener = (features) => {
-			this.setState({activeFeatures: features});
+		this.activeFeaturesListener = (features, id, customScale, featuresScale) => {
+			this.setState({activeFeatures: features, featuresScale: featuresScale, customScale: customScale});
 		}
-		this.featuresScaleListener = (scale, id) => {
-			this.onFeaturesScaleChange(scale, id);
+		this.settingsListener = (settings, customScale, featuresScale) => {
+			this.setState({featuresScale: featuresScale, customScale: customScale});
 		}
 	}
 
@@ -30,7 +30,7 @@ export default class ViewerToolbar extends Component {
 		const { activeTool, activeFeatures, colors, featuresScale, customScale } = this.state;
 		const createSliderWithTooltip = Slider.createSliderWithTooltip;
 		const TooltipSlider = createSliderWithTooltip(Slider);
-		console.log('render', activeFeatures ,featuresScale);
+		console.log('render', activeFeatures, featuresScale);
 		let levels = false;
 		let sliders = _.times(3, i => {
 				let val = customScale[i] ? customScale[i] : featuresScale[i];
@@ -78,12 +78,13 @@ export default class ViewerToolbar extends Component {
 
 	componentWillMount() {
         BackendAPI.onActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
-        BackendAPI.onFeaturesScaleChange(this.featuresScaleListener);
+		BackendAPI.onSettingsChange(this.settingsListener);
+        //this.onActiveFeaturesChange(this.state.activeFeatures);
 	}
 
 	componentWillUnmount() {
-        BackendAPI.onActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
-        BackendAPI.removeFeaturesScaleChange(this.featuresScaleListener);
+        BackendAPI.removeActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
+		BackendAPI.removeSettingsChange(this.settingsListener);
 	}
 
 	handleItemClick(e, tool) {
@@ -100,20 +101,4 @@ export default class ViewerToolbar extends Component {
 		this.setState({customScale: scale});
 	}
 
-	onFeaturesScaleChange(scale, vmaxID) {
-		if(DEBUG) console.log('onFeaturesScaleChange', scale, vmaxID);
-		let { customScale, featuresScale } = this.state;
-		
-		if (vmaxID != null) {
-			customScale[vmaxID] = scale[vmaxID];
-		} else { 
-			customScale = scale.slice(0);
-		}
-
-		if (JSON.stringify(scale) != JSON.stringify(featuresScale)) {
-			BackendAPI.setCustomScale(customScale, null, vmaxID);
-		}
-
-		this.setState({featuresScale: scale, customScale: customScale});
-	}
 }

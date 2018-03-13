@@ -16,3 +16,36 @@
 .pushable {
 	height: auto !important;
 }
+
+.sidebarTabs a:nth-child(2) {
+	color: red !important;
+}
+
+.sidebarTabs a.active:nth-child(2)  {
+	border-color: red !important;
+}
+
+.sidebarTabs a:nth-child(3) {
+	color: green !important;
+}
+
+.sidebarTabs a.active:nth-child(3)  {
+	border-color: green !important;
+}
+
+.sidebarTabs a:nth-child(4) {
+	color: blue !important;
+}
+
+.sidebarTabs a.active:nth-child(4)  {
+	border-color: blue !important;
+}
+
+.geneInfo {
+	max-height: 500px;
+	overflow-y: scroll;
+}
+
+.selectionRow {
+	padding-top: 5px !important;
+}

@@ -12,14 +12,13 @@ export default class FeatureSearch extends React.Component {
 			results: [],
 			value: props.value,
 			selection: null,
-			type: props.type,
-			metadata: null
+			type: props.type
 		};
 	}
 
 	render() {
 
-		const { isLoading, value, results, type, metadata } = this.state
+		const { isLoading, value, results, type } = this.state
 		const { locked, field, color, options } = this.props
 		let querySearchLabel = {
 			position: 'relative',
@@ -30,22 +29,6 @@ export default class FeatureSearch extends React.Component {
 
 		let noPadding = {
 			padding: 0
-		}
-
-		let popup = () => {
-			if (metadata)  {
-				let image = <Image src={'http://motifcollections.aertslab.org/v8/logos/'+metadata.motifName} size='huge'/>
-				return (
-					<Menu.Item>
-						<Popup
-							size='huge'
-							trigger={<Icon name="help circle" />}
-							position='bottom left'
-							content={image}
-							/>
-					</Menu.Item>
-				)
-			}
 		}
 
 		return (
@@ -63,14 +46,15 @@ export default class FeatureSearch extends React.Component {
 							handleTypeChange={this.handleTypeChange.bind(this)}
 							onSelectionChange={this.handleSelectionChange.bind(this)}
 							onBlur={this.handleBlur.bind(this)}
+							onMouseDown={this.handleMouseDown.bind(this)}
 							results={results}
 							options={options}
+							selectFirstResult={true}
 							value={value}
 							type={type}
 							locked={locked}
 						/>
 					</Menu.Item>
-					{popup()}
 				</Menu>
 			</Menu.Item>
 		);
@@ -83,7 +67,7 @@ export default class FeatureSearch extends React.Component {
 		}, 50);
 	}
 
-	updateFeature(feature, featureType) {
+	updateFeature(feature, featureType, featureDescription) {
 		this.setState({ value: feature, selection: null })
 		if (featureType == 'regulon') {
 			let regulonQuery = {
@@ -94,28 +78,68 @@ export default class FeatureSearch extends React.Component {
 				console.log('getRegulonMetaData', regulonQuery);
 				gbc.services.scope.Main.getRegulonMetaData(regulonQuery, (regulonErr, regulonResponse) => {
 					console.log('getRegulonMetaData', regulonResponse);
-					let metadata = regulonResponse ? regulonResponse.regulonMeta : null;
+					let metadata = regulonResponse ? regulonResponse.regulonMeta : {};
 					let threshold = 0;
-					if (metadata) {
+					if (metadata.autoThresholds) {
 						metadata.autoThresholds.map((t) => {
 							if (t.name == metadata.defaultThreshold) threshold = t.threshold;
 						})
 					}
-					this.setState({metadata: metadata});
+					metadata.description = featureDescription;
 					BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, threshold, metadata);
 				});
 			});
+		} else if (featureType.indexOf('Clustering:') == 0) {
+			let loomMetadata = BackendAPI.getActiveLoomMetadata();
+			let clusteringID, clusterID;
+			loomMetadata.cellMetaData.clusterings.map(clustering => {
+				if (featureType.indexOf(clustering.name) != -1) {
+					clusteringID = clustering.id
+					clustering.clusters.map(c => {
+						if (c.description == feature) {
+							clusterID = c.id;
+						}
+					})
+				}
+			})
+			if (clusterID != null) {
+				let markerQuery = {
+					loomFilePath: BackendAPI.getActiveLoom(),
+					clusterID: clusterID,
+					clusteringID: clusteringID, 
+				}
+				BackendAPI.getConnection().then((gbc) => {
+					if (DEBUG) console.log('getMarkerGenes', markerQuery);
+					gbc.services.scope.Main.getMarkerGenes(markerQuery, (markerErr, markerResponse) => {
+						if (DEBUG) console.log('getMarkerGenes', markerResponse);
+						if (!markerResponse) markerResponse = {};
+						markerResponse.description = featureDescription
+						BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, markerResponse);
+					});
+				});
+				} else {
+				setTimeout(() => {
+					BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, {description: featureDescription});
+				}, 50);
+			}
 		} else {
 			setTimeout(() => {
-				this.setState({metadata: null});
-				BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, null);
+				BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, {description: featureDescription});
 			}, 50);
 		}
 	}
 
+
+	handleMouseDown(e, { result }) {
+		e.stopPropagation();
+		//e.preventDefault();
+	}
+
 	handleResultSelect(e, { result }) {
+		e.stopPropagation();
+		e.preventDefault();
 		if (DEBUG) console.log('handleResultSelect', e, result);
-		this.updateFeature(result.title, result.type);
+		this.updateFeature(result.title, result.type, result.description);
 	}
 
 	handleTypeChange(type) {
@@ -123,17 +147,19 @@ export default class FeatureSearch extends React.Component {
 	}
 
 	handleSelectionChange(e, { result }) {
-		console.log('handleSelectionChange', e, result);
+		if (DEBUG) console.log('handleSelectionChange', e, result);
 		e.preventDefault();
 		this.setState({selection: result})
 	}
 
-	handleBlur(e) {
+	handleBlur(e, select) {
+		e.stopPropagation();		
 		e.preventDefault();
 		let selection = this.state.selection;
-		if (DEBUG) console.log('handleBlur', e, selection);
 		if (selection) {
-			this.updateFeature(selection.title, selection.type)
+			//selection = select.results[0].results[0];
+			if (DEBUG) console.log('handleBlur', e.target, e.source, selection);
+			this.updateFeature(selection.title, selection.type, selection.description);
 		}
 	}
 
@@ -151,7 +177,6 @@ export default class FeatureSearch extends React.Component {
 					if (DEBUG) console.log("handleSearchChange", response);
 					if (response != null) {
 						let res = [], genes = [], regulons = [], clusters = {};
-						let metadata = BackendAPI.getActiveLoomMetadata();
 						let type = this.state.type;
 
 						for (var i = 0; i < response.feature.length; i++) {
@@ -210,4 +235,7 @@ export default class FeatureSearch extends React.Component {
 		}, 200)
 	}
 
+	componentWillReceiveProps(nextProps) {
+		this.setState({ value: nextProps.value, type: nextProps.type })
+	}
 }

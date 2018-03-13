@@ -30,7 +30,7 @@ export default class Expression extends Component {
 
     render() {
         const { activeLoom, activeFeatures, activeCoordinates, sidebar, activeMetadata, colors } = this.state;
-        let featureSearch = _.times(3, i => (
+        let featureSearch = () =>  _.times(3, i => (
             <Grid.Column width={sidebar ? 4 : 5} key={i}>
                 <FeatureSearchBox field={i} color={colors[i]} type='all' value={activeFeatures[i] ? activeFeatures[i].feature : ''} />
             </Grid.Column>
@@ -45,7 +45,7 @@ export default class Expression extends Component {
         return (
             <Grid>
                 <Grid.Row columns="3">
-                    {featureSearch}
+                    {featureSearch()}
                 </Grid.Row>
                 <Grid.Row columns="3">
                     <Grid.Column width={1}>
@@ -65,8 +65,10 @@ export default class Expression extends Component {
                         />
                     </Grid.Column>
                     <Grid.Column width={3}>
-                        <b>Cell selections</b><hr />
-                        <ViewerSidebar />
+                        <ViewerSidebar  onActiveFeaturesChange={(features, id) => {
+                            this.setState({activeFeatures: features});
+                        }}
+                        />
                     </Grid.Column>
                 </Grid.Row>
             </Grid>
