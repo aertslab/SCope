@@ -53,7 +53,10 @@ dmel_mappings = pickle.load(open(os.path.join(dataDir, 'terminal_mappings.pickle
 hsap_to_dmel_mappings = pickle.load(open(os.path.join(dataDir, 'hsap_to_dmel_mappings.pickle'), 'rb'))
 mmus_to_dmel_mappings = pickle.load(open(os.path.join(dataDir, 'mmus_to_dmel_mappings.pickle'), 'rb'))
 
-logDir = os.path.join(Path(__file__).resolve().parents[3], 'logs')
+if not os.path.isdir('logs'):
+    print('No log folder detected. Making log  folder in current directory.')
+    os.makedirs('logs')
+logDir = os.path.join('logs')
 uuidLog = open(os.path.join(logDir, 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()))), 'w')
 
 curUUIDs = {}
@@ -335,22 +338,21 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(loom_file_path)
         cellIndices = []
         for anno in annotations:
-            annoSet = set()
             annoName = anno.name
-            if annoName.startswith("Clustering_"):
-                clusteringID = str(annoName.split('_')[1])
-                for annotationValue in anno.values:
+            for annotationValue in anno.values:
+                annoSet = set()
+                if annoName.startswith("Clustering_"):
+                    clusteringID = str(annoName.split('_')[1])
                     [annoSet.add(x) for x in np.where(loom.ca.Clusterings[clusteringID] == annotationValue)[0]]
-            else:
-                for annotationValue in anno.values:
+                else:
                     [annoSet.add(x) for x in np.where(loom.ca[annoName] == annotationValue)[0]]
-            cellIndices.append(annoSet)
+                cellIndices.append(annoSet)
         if logic not in ['AND', 'OR']:
             logic = 'OR'
         if logic == 'AND':
-            return sorted(list(set().intersection(*cellIndices)))
+            return sorted(list(set.intersection(*cellIndices)))
         elif logic == 'OR':
-            return sorted(list(set().union(*cellIndices)))
+            return sorted(list(set.union(*cellIndices)))
 
     def get_coordinates(self, loom_file_path, coordinatesID=-1, annotation='', logic='OR'):
         loom = self.get_loom_connection(loom_file_path)
