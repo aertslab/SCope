@@ -60,13 +60,15 @@ if not os.path.isdir('logs'):
 logDir = os.path.join('logs')
 uuidLog = open(os.path.join(logDir, 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()))), 'w')
 
-globalLooms = set([
-                   'FlyBrain_56k_v6.loom',
-                   'Desplan_OpticLobe_V1.loom',
-                   'Luo_OPN_v1.loom',
-                   'FlyBrain_157k_v1.loom',
-                   'dentate_gyrus_C_10X_V2_update.loom'
-                   ])
+# globalLooms = set([
+#                    'FlyBrain_56k_v6.loom',
+#                    'Desplan_OpticLobe_V1.loom',
+#                    'Luo_OPN_v1.loom',
+#                    'FlyBrain_157k_v1.loom',
+#                    'dentate_gyrus_C_10X_V2_update.loom'
+#                    ])
+
+globalLooms = set(os.listdir(os.path.join("data", "my-looms")))
 
 curUUIDs = {}
 uploadedLooms = defaultdict(lambda: set())
@@ -685,6 +687,7 @@ class SCope(s_pb2_grpc.MainServicer):
             timeRemaining = _UUID_TIMEOUT - (time.time() - curUUIDs[uid])
             if timeRemaining < 0:
                 del(curUUIDs[uid])
+                # os.rmdir()  # TODO: Remove the users loom files
         uid = request.UUID
         if uid in curUUIDs:
             startTime = curUUIDs[uid]
