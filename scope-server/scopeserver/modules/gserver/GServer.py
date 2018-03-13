@@ -12,12 +12,14 @@ import json
 import zlib
 import base64
 import pickle
-from collections import OrderedDict
+import uuid
+from collections import OrderedDict, defaultdict
 from functools import lru_cache
 from itertools import compress
 from pathlib import Path
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
+_UUID_TIMEOUT = _ONE_DAY_IN_SECONDS * 5
 BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "bf9360", "1d331a", "79baf2", "deb6f2",
                   "990000", "7f6240", "283326", "2d4459", "8f00b3", "4c0000", "ccb499", "00f220", "accbe6", "520066",
                   "330000", "594f43", "16591f", "697c8c", "290033", "cc3333", "e59900", "ace6b4", "262d33", "ee00ff",
@@ -50,6 +52,26 @@ dataDir = os.path.join(Path(__file__).resolve().parents[3], 'data', 'gene_mappin
 dmel_mappings = pickle.load(open(os.path.join(dataDir, 'terminal_mappings.pickle'), 'rb'))
 hsap_to_dmel_mappings = pickle.load(open(os.path.join(dataDir, 'hsap_to_dmel_mappings.pickle'), 'rb'))
 mmus_to_dmel_mappings = pickle.load(open(os.path.join(dataDir, 'mmus_to_dmel_mappings.pickle'), 'rb'))
+
+if not os.path.isdir('logs'):
+    print('No log folder detected. Making log folder in current directory.')
+    os.makedirs('logs')
+
+logDir = os.path.join('logs')
+uuidLog = open(os.path.join(logDir, 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()))), 'w')
+
+# globalLooms = set([
+#                    'FlyBrain_56k_v6.loom',
+#                    'Desplan_OpticLobe_V1.loom',
+#                    'Luo_OPN_v1.loom',
+#                    'FlyBrain_157k_v1.loom',
+#                    'dentate_gyrus_C_10X_V2_update.loom'
+#                    ])
+
+globalLooms = set(os.listdir(os.path.join("data", "my-looms")))
+
+curUUIDs = {}
+uploadedLooms = defaultdict(lambda: set())
 
 
 class SCope(s_pb2_grpc.MainServicer):
@@ -328,22 +350,21 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(loom_file_path)
         cellIndices = []
         for anno in annotations:
-            annoSet = set()
             annoName = anno.name
-            if annoName.startswith("Clustering_"):
-                clusteringID = str(annoName.split('_')[1])
-                for annotationValue in anno.values:
+            for annotationValue in anno.values:
+                annoSet = set()
+                if annoName.startswith("Clustering_"):
+                    clusteringID = str(annoName.split('_')[1])
                     [annoSet.add(x) for x in np.where(loom.ca.Clusterings[clusteringID] == annotationValue)[0]]
-            else:
-                for annotationValue in anno.values:
+                else:
                     [annoSet.add(x) for x in np.where(loom.ca[annoName] == annotationValue)[0]]
-            cellIndices.append(annoSet)
+                cellIndices.append(annoSet)
         if logic not in ['AND', 'OR']:
             logic = 'OR'
         if logic == 'AND':
-            return sorted(list(set().intersection(*cellIndices)))
+            return sorted(list(set.intersection(*cellIndices)))
         elif logic == 'OR':
-            return sorted(list(set().union(*cellIndices)))
+            return sorted(list(set.union(*cellIndices)))
 
     def get_coordinates(self, loom_file_path, coordinatesID=-1, annotation='', logic='OR'):
         loom = self.get_loom_connection(loom_file_path)
@@ -622,7 +643,15 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getMyLooms(self, request, context):
         my_looms = []
-        for f in os.listdir(self.loom_dir):
+        loomsToProcess = globalLooms
+        allLooms = os.listdir(self.loom_dir)
+
+        if request.UUID in uploadedLooms.keys():
+            for loom in uploadedLooms[request.UUID]:
+                if loom in allLooms:
+                    loomsToProcess.add(loom)
+
+        for f in sorted(list(loomsToProcess)):
             if f.endswith('.loom'):
                 loom = self.get_loom_connection(self.get_loom_filepath(f))
                 fileMeta = self.get_file_metadata(self.get_loom_filepath(f))
@@ -645,6 +674,35 @@ class SCope(s_pb2_grpc.MainServicer):
                                              fileMetaData=fileMeta))
         return s_pb2.MyLoomsReply(myLooms=my_looms)
 
+    def getUUID(self, request, context):
+        newUUID = str(uuid.uuid4())
+        if newUUID not in curUUIDs.keys():
+            uuidLog.write("{0} :: {1} :: New UUID ({2}) assigned to IP".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, newUUID))
+            curUUIDs[newUUID] = time.time()
+        return s_pb2.GetUUIDReply(UUID=newUUID)
+
+    def getRemainingUUIDTime(self, request, context):
+        curUUIDSet = curUUIDs.keys()
+        for uid in curUUIDSet:
+            timeRemaining = _UUID_TIMEOUT - (time.time() - curUUIDs[uid])
+            if timeRemaining < 0:
+                del(curUUIDs[uid])
+                # os.rmdir()  # TODO: Remove the users loom files
+        uid = request.UUID
+        if uid in curUUIDs:
+            startTime = curUUIDs[uid]
+            timeRemaining = _UUID_TIMEOUT - (time.time() - startTime)
+            uuidLog.write("{0} :: {1} :: Old UUID ({2}) connected from IP :: Time Remaining - {4}".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid, timeRemaining))
+        else:
+            try:
+                uuid.UUID(uid)
+            except (KeyError, AttributeError):
+                uid = str(uuid.uuid4())
+            uuidLog.write("{0} :: {1} :: New UUID ({2}) assigned to IP".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid))
+            curUUIDs[uid] = time.time()
+            timeRemaining = _UUID_TIMEOUT
+        return s_pb2.GetRemainingUUIDTimeReply(UUID=uid, timeRemaining=timeRemaining)
+
     def translateLassoSelection(self, request, context):
         src_loom = self.get_loom_connection(self.get_loom_filepath(request.srcLoomFilePath))
         dest_loom = self.get_loom_connection(self.get_loom_filepath(request.destLoomFilePath))
@@ -659,6 +717,11 @@ class SCope(s_pb2_grpc.MainServicer):
         cell_ids = [loom.ca['CellID'][i] for i in request.cellIndices]
         return s_pb2.CellIDsReply(cellIds=cell_ids)
 
+    def loomUploaded(self, request, content):
+        uploadedLooms[request.UUID].add(request.filename)
+        return s_pb2.LoomUploadedReply()
+
+
 def serve(run_event, port=50052):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     s_pb2_grpc.add_MainServicer_to_server(SCope(), server)
@@ -670,6 +733,8 @@ def serve(run_event, port=50052):
     while run_event.is_set():
         time.sleep(0.1)
 
+    # Write UUIDs to file here
+    uuidLog.close()
     server.stop(0)
 
 
