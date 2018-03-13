@@ -19,6 +19,7 @@ from itertools import compress
 from pathlib import Path
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
+_UUID_TIMEOUT = _ONE_DAY_IN_SECONDS * 5
 BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "bf9360", "1d331a", "79baf2", "deb6f2",
                   "990000", "7f6240", "283326", "2d4459", "8f00b3", "4c0000", "ccb499", "00f220", "accbe6", "520066",
                   "330000", "594f43", "16591f", "697c8c", "290033", "cc3333", "e59900", "ace6b4", "262d33", "ee00ff",
@@ -54,6 +55,8 @@ mmus_to_dmel_mappings = pickle.load(open(os.path.join(dataDir, 'mmus_to_dmel_map
 
 logDir = os.path.join(Path(__file__).resolve().parents[3], 'logs')
 uuidLog = open(os.path.join(logDir, 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()))), 'w')
+
+curUUIDs = {}
 
 
 class SCope(s_pb2_grpc.MainServicer):
@@ -650,9 +653,32 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.MyLoomsReply(myLooms=my_looms)
 
     def getUUID(self, request, context):
-        newUUID = uuid.uuid4()
-        uuidLog.write("{0} :: {1} :: New UUID ({1}) assigned to IP".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, newUUID))
+        newUUID = str(uuid.uuid4())
+        if newUUID not in curUUIDs.keys():
+            uuidLog.write("{0} :: {1} :: New UUID ({2}) assigned to IP".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, newUUID))
+            curUUIDs[newUUID] = time.time()
         return s_pb2.GetUUIDReply(UUID=newUUID)
+
+    def getRemainingUUIDTime(self, request, context):
+        curUUIDSet = curUUIDs.keys()
+        for uid in curUUIDSet:
+            timeRemaining = _UUID_TIMEOUT - (time.time() - curUUIDs[uid])
+            if timeRemaining < 0:
+                del(curUUIDs[uid])
+        uid = request.UUID
+        if uid in curUUIDs:
+            startTime = curUUIDs[uid]
+            timeRemaining = _UUID_TIMEOUT - (time.time() - startTime)
+            uuidLog.write("{0} :: {1} :: Old UUID ({2}) connected from IP :: Time Remaining - {4}".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid, timeRemaining))
+        else:
+            try:
+                uuid.UUID(uid)
+            except (KeyError, AttributeError):
+                uid = str(uuid.uuid4())
+            uuidLog.write("{0} :: {1} :: New UUID ({2}) assigned to IP".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid))
+            curUUIDs[uid] = time.time()
+            timeRemaining = _UUID_TIMEOUT
+        return s_pb2.GetRemainingUUIDTimeReply(UUID=uid, timeRemaining=timeRemaining)
 
     def translateLassoSelection(self, request, context):
         src_loom = self.get_loom_connection(self.get_loom_filepath(request.srcLoomFilePath))

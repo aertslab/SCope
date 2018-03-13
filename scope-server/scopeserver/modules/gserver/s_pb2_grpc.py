@@ -74,6 +74,11 @@ class MainStub(object):
         request_serializer=s__pb2.UUIDRequest.SerializeToString,
         response_deserializer=s__pb2.UUIDReply.FromString,
         )
+    self.getRemainingUUIDTime = channel.unary_unary(
+        '/scope.Main/getRemainingUUIDTime',
+        request_serializer=s__pb2.RemainingUUIDTimeRequest.SerializeToString,
+        response_deserializer=s__pb2.RemainingUUIDTimeReply.FromString,
+        )
 
 
 class MainServicer(object):
@@ -164,6 +169,13 @@ class MainServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def getRemainingUUIDTime(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_MainServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -226,6 +238,11 @@ def add_MainServicer_to_server(servicer, server):
           servicer.getUUID,
           request_deserializer=s__pb2.UUIDRequest.FromString,
           response_serializer=s__pb2.UUIDReply.SerializeToString,
+      ),
+      'getRemainingUUIDTime': grpc.unary_unary_rpc_method_handler(
+          servicer.getRemainingUUIDTime,
+          request_deserializer=s__pb2.RemainingUUIDTimeRequest.FromString,
+          response_serializer=s__pb2.RemainingUUIDTimeReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

@@ -29,6 +29,7 @@ service Main {
   rpc getCellIDs (CellIDsRequest) returns (CellIDsReply) {}
   rpc getVmax (VmaxRequest) returns (VmaxReply) {}
   rpc getUUID (UUIDRequest) returns (UUIDReply) {}
+  rpc getRemainingUUIDTime (RemainingUUIDTimeRequest) returns (RemainingUUIDTimeReply) {}
 }
 
 
@@ -232,4 +233,14 @@ message UUIDRequest {
 
 message UUIDReply {
   string UUID=1;
+}
+
+message RemainingUUIDTimeRequest {
+  string ip=1;
+  string UUID=2;
+  }
+
+message RemainingUUIDTimeReply {
+  string UUID=1;
+  int64 timeRemaining=2;
 }
