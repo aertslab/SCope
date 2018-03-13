@@ -72,17 +72,34 @@ uuidLog = open(os.path.join(logDir, 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%
 #                    'dentate_gyrus_C_10X_V2_update.loom'
 #                    ])
 
-globalLooms = set(os.listdir(os.path.join("data", "my-looms")))
+data_dirs = {"Loom": {"path":"data/my-looms", "message": "No data folder detected. Making loom data folder in current directory."}
+           , "GeneSet": {"path":"data/my-gene-sets", "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."}
+           , "LoomAUCellRankings": {"path":"data/my-aucell-rankings", "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
+
+globalLooms = set(os.listdir(data_dirs["Loom"]["path"]))
 
 curUUIDs = {}
 uploadedLooms = defaultdict(lambda: set())
-
 
 class SCope(s_pb2_grpc.MainServicer):
 
     def __init__(self):
         self.active_loom_connections = {}
-        self.loom_dir = os.path.join("data", "my-looms")
+        self.loom_dir = data_dirs["Loom"]["path"]
+        self.gene_sets_dir = data_dirs["GeneSet"]["path"]
+        # Create the data directories
+        SCope.create_dirs()
+        
+    @staticmethod
+    def get_data_dir_path_by_file_type(file_type):
+        return data_dirs[file_type]["path"]
+
+    @staticmethod
+    def create_dirs():
+        for data_type in data_dirs.keys():
+            if not os.path.isdir(data_dirs[data_type]["path"]):
+                print(data_dirs[data_type]["message"])
+                os.makedirs(data_dirs[data_type]["path"])
 
     @staticmethod
     def get_partial_md5_hash(file_path, last_n_kb):
@@ -654,6 +671,13 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
         genes = SCope.get_genes(loom)[loom.ra["ClusterMarkers_{0}".format(request.clusteringID)][str(request.clusterID)] == 1]
         return(s_pb2.MarkerGenesReply(genes=genes))
+
+    def getMyGeneSets(self, request, context):
+        my_gene_sets = os.listdir(self.gene_sets_dir)
+        gene_sets = []
+        for f in sorted(list(my_gene_sets)):
+            gene_sets.append(s_pb2.MyGeneSet(geneSetFilePath=f))
+        return s_pb2.MyGeneSetsReply(myGeneSets=gene_sets)
 
     def getMyLooms(self, request, context):
         my_looms = []

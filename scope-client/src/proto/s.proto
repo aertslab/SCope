@@ -32,6 +32,7 @@ service Main {
   rpc getUUID (UUIDRequest) returns (UUIDReply) {}
   rpc getRemainingUUIDTime (RemainingUUIDTimeRequest) returns (RemainingUUIDTimeReply) {}
   rpc loomUploaded (LoomUploadedRequest) returns (LoomUploadedReply) {}
+  rpc getMyGeneSets (MyGeneSetsRequest) returns (MyGeneSetsReply) {}
 }
 
 
@@ -275,3 +276,14 @@ message LoomUploadedRequest {
 }
 
 message LoomUploadedReply {}
+
+message MyGeneSet {
+  string geneSetFilePath=1;
+}
+
+message MyGeneSetsRequest {
+}
+
+message MyGeneSetsReply {
+  repeated MyGeneSet myGeneSets=1;
+}
