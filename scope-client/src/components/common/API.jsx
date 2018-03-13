@@ -144,7 +144,7 @@ class API {
 			feature: selectedFeatures.map(f => {return f.feature}),
 			featureType: selectedFeatures.map(f=> {return f.featureType}),
 			hasLogTransform: settings.hasLogTransform,
-			hasCpmTransform: settings.hasCpmTransform,
+			hasCpmTransform: settings.hasCpmNormalization,
 		}
 		if (DEBUG) console.log('getVmax', query);
 		BackendAPI.getConnection().then((gbc) => {
