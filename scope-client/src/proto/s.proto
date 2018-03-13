@@ -28,6 +28,7 @@ service Main {
   rpc translateLassoSelection (TranslateLassoSelectionRequest) returns (TranslateLassoSelectionReply) {}
   rpc getCellIDs (CellIDsRequest) returns (CellIDsReply) {}
   rpc getVmax (VmaxRequest) returns (VmaxReply) {}
+  rpc getUUID (UUIDRequest) returns (UUIDReply) {}
 }
 
 
@@ -223,4 +224,12 @@ message VmaxRequest {
 message VmaxReply {
   repeated float vmax=1;
   repeated float maxVmax=2;
+}
+
+message UUIDRequest {
+  string ip=1;
+}
+
+message UUIDReply {
+  string UUID=1;
 }

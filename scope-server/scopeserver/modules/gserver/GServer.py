@@ -12,6 +12,7 @@ import json
 import zlib
 import base64
 import pickle
+import uuid
 from collections import OrderedDict
 from functools import lru_cache
 from itertools import compress
@@ -50,6 +51,9 @@ dataDir = os.path.join(Path(__file__).resolve().parents[3], 'data', 'gene_mappin
 dmel_mappings = pickle.load(open(os.path.join(dataDir, 'terminal_mappings.pickle'), 'rb'))
 hsap_to_dmel_mappings = pickle.load(open(os.path.join(dataDir, 'hsap_to_dmel_mappings.pickle'), 'rb'))
 mmus_to_dmel_mappings = pickle.load(open(os.path.join(dataDir, 'mmus_to_dmel_mappings.pickle'), 'rb'))
+
+logDir = os.path.join(Path(__file__).resolve().parents[3], 'logs')
+uuidLog = open(os.path.join(logDir, 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()))), 'w')
 
 
 class SCope(s_pb2_grpc.MainServicer):
@@ -645,6 +649,11 @@ class SCope(s_pb2_grpc.MainServicer):
                                              fileMetaData=fileMeta))
         return s_pb2.MyLoomsReply(myLooms=my_looms)
 
+    def getUUID(self, request, context):
+        newUUID = uuid.uuid4()
+        uuidLog.write("{0} :: {1} :: New UUID ({1}) assigned to IP".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, newUUID))
+        return s_pb2.GetUUIDReply(UUID=newUUID)
+
     def translateLassoSelection(self, request, context):
         src_loom = self.get_loom_connection(self.get_loom_filepath(request.srcLoomFilePath))
         dest_loom = self.get_loom_connection(self.get_loom_filepath(request.destLoomFilePath))
@@ -659,6 +668,7 @@ class SCope(s_pb2_grpc.MainServicer):
         cell_ids = [loom.ca['CellID'][i] for i in request.cellIndices]
         return s_pb2.CellIDsReply(cellIds=cell_ids)
 
+
 def serve(run_event, port=50052):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     s_pb2_grpc.add_MainServicer_to_server(SCope(), server)
@@ -670,6 +680,8 @@ def serve(run_event, port=50052):
     while run_event.is_set():
         time.sleep(0.1)
 
+    # Write UUIDs to file here
+    uuidLog.close()
     server.stop(0)
 
 
