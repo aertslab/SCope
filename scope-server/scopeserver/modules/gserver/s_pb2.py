@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='s.proto',
   package='scope',
   syntax='proto3',
-  serialized_pb=_b('\n\x07s.proto\x12\x05scope\"\xfb\x01\n\x1a\x43\x65llColorByFeaturesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x02 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x03 \x03(\t\x12\x17\n\x0fhasLogTransform\x18\x04 \x01(\x08\x12\x17\n\x0fhasCpmTransform\x18\x05 \x01(\x08\x12\x11\n\tthreshold\x18\x06 \x03(\x02\x12\x18\n\x10scaleThresholded\x18\x07 \x01(\x08\x12%\n\nannotation\x18\x08 \x03(\x0b\x32\x11.scope.Annotation\x12\x0c\n\x04vmax\x18\t \x03(\x02\x12\r\n\x05logic\x18\n \x01(\t\"H\n\x18\x43\x65llColorByFeaturesReply\x12\r\n\x05\x63olor\x18\x01 \x03(\t\x12\x0c\n\x04vmax\x18\x02 \x03(\x02\x12\x0f\n\x07maxVmax\x18\x03 \x03(\x02\"\\\n\x1e\x43\x65llAUCValuesByFeaturesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x02 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x03 \x03(\t\"-\n\x1c\x43\x65llAUCValuesByFeaturesReply\x12\r\n\x05value\x18\x01 \x03(\x02\"5\n\x0e\x46\x65\x61tureRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\r\n\x05query\x18\x02 \x01(\t\"\xcd\x01\n\x13\x43\x65llMetaDataRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x13\n\x0b\x63\x65llIndices\x18\x02 \x03(\x05\x12\x15\n\rselectedGenes\x18\x03 \x03(\t\x12\x17\n\x0fhasLogTransform\x18\x04 \x01(\x08\x12\x17\n\x0fhasCpmTransform\x18\x05 \x01(\x08\x12\x18\n\x10selectedRegulons\x18\x06 \x03(\t\x12\x13\n\x0b\x63lusterings\x18\x07 \x03(\x05\x12\x13\n\x0b\x61nnotations\x18\x08 \x03(\t\"P\n\x0c\x46\x65\x61tureReply\x12\x0f\n\x07\x66\x65\x61ture\x18\x01 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x02 \x03(\t\x12\x1a\n\x12\x66\x65\x61tureDescription\x18\x03 \x03(\t\"w\n\x12\x43oordinatesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x15\n\rcoordinatesID\x18\x02 \x01(\x05\x12%\n\nannotation\x18\x03 \x03(\x0b\x32\x11.scope.Annotation\x12\r\n\x05logic\x18\x04 \x01(\t\"(\n\x10\x43oordinatesReply\x12\t\n\x01x\x18\x01 \x03(\x02\x12\t\n\x01y\x18\x02 \x03(\x02\"*\n\nAnnotation\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06values\x18\x02 \x03(\t\"%\n\tEmbedding\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\"4\n\x11\x43lusterAnnotation\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\"a\n\nClustering\x12\n\n\x02id\x18\x01 \x01(\x05\x12\r\n\x05group\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12*\n\x08\x63lusters\x18\x04 \x03(\x0b\x32\x18.scope.ClusterAnnotation\"\x84\x01\n\x0c\x43\x65llMetaData\x12&\n\x0b\x61nnotations\x18\x01 \x03(\x0b\x32\x11.scope.Annotation\x12$\n\nembeddings\x18\x02 \x03(\x0b\x32\x10.scope.Embedding\x12&\n\x0b\x63lusterings\x18\x03 \x03(\x0b\x32\x11.scope.Clustering\"/\n\x0c\x41UCThreshold\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x11\n\tthreshold\x18\x02 \x01(\x02\"r\n\x07Regulon\x12\r\n\x05genes\x18\x01 \x03(\t\x12+\n\x0e\x61utoThresholds\x18\x02 \x03(\x0b\x32\x13.scope.AUCThreshold\x12\x18\n\x10\x64\x65\x66\x61ultThreshold\x18\x03 \x01(\t\x12\x11\n\tmotifName\x18\x04 \x01(\t\"\x86\x01\n\x0c\x46ileMetaData\x12\x16\n\x0ehasRegulonsAUC\x18\x01 \x01(\x08\x12\x13\n\x0bhasGeneSets\x18\x02 \x01(\x08\x12\x16\n\x0ehasClusterings\x18\x03 \x01(\x08\x12\x1a\n\x12hasExtraEmbeddings\x18\x04 \x01(\x08\x12\x15\n\rhasGlobalMeta\x18\x05 \x01(\x08\"!\n\rFeatureValues\x12\x10\n\x08\x66\x65\x61tures\x18\x01 \x03(\x02\"&\n\x0f\x43\x65llAnnotations\x12\x13\n\x0b\x61nnotations\x18\x01 \x03(\t\" \n\x0c\x43\x65llClusters\x12\x10\n\x08\x63lusters\x18\x01 \x03(\x05\"\xc0\x01\n\x11\x43\x65llMetaDataReply\x12\'\n\nclusterIDs\x18\x01 \x03(\x0b\x32\x13.scope.CellClusters\x12,\n\x0egeneExpression\x18\x02 \x03(\x0b\x32\x14.scope.FeatureValues\x12\'\n\taucValues\x18\x03 \x03(\x0b\x32\x14.scope.FeatureValues\x12+\n\x0b\x61nnotations\x18\x04 \x03(\x0b\x32\x16.scope.CellAnnotations\"?\n\x16RegulonMetaDataRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x0f\n\x07regulon\x18\x02 \x01(\t\";\n\x14RegulonMetaDataReply\x12#\n\x0bregulonMeta\x18\x01 \x01(\x0b\x32\x0e.scope.Regulon\"S\n\x12MarkerGenesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x14\n\x0c\x63lusteringID\x18\x02 \x01(\x05\x12\x11\n\tclusterID\x18\x03 \x01(\x05\"!\n\x10MarkerGenesReply\x12\r\n\x05genes\x18\x01 \x03(\t\"\x1e\n\x0eMyLoomsRequest\x12\x0c\n\x04UUID\x18\x01 \x01(\t\"t\n\x06MyLoom\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12)\n\x0c\x63\x65llMetaData\x18\x02 \x01(\x0b\x32\x13.scope.CellMetaData\x12)\n\x0c\x66ileMetaData\x18\x03 \x01(\x0b\x32\x13.scope.FileMetaData\".\n\x0cMyLoomsReply\x12\x1e\n\x07myLooms\x18\x01 \x03(\x0b\x32\r.scope.MyLoom\"h\n\x1eTranslateLassoSelectionRequest\x12\x17\n\x0fsrcLoomFilePath\x18\x01 \x01(\t\x12\x18\n\x10\x64\x65stLoomFilePath\x18\x02 \x01(\t\x12\x13\n\x0b\x63\x65llIndices\x18\x03 \x03(\x05\"3\n\x1cTranslateLassoSelectionReply\x12\x13\n\x0b\x63\x65llIndices\x18\x01 \x03(\x05\";\n\x0e\x43\x65llIDsRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x13\n\x0b\x63\x65llIndices\x18\x02 \x03(\x05\"\x1f\n\x0c\x43\x65llIDsReply\x12\x0f\n\x07\x63\x65llIds\x18\x01 \x03(\t\"{\n\x0bVmaxRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x03(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x02 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x03 \x03(\t\x12\x17\n\x0fhasLogTransform\x18\x04 \x01(\x08\x12\x17\n\x0fhasCpmTransform\x18\x05 \x01(\x08\"*\n\tVmaxReply\x12\x0c\n\x04vmax\x18\x01 \x03(\x02\x12\x0f\n\x07maxVmax\x18\x02 \x03(\x02\"\x19\n\x0bUUIDRequest\x12\n\n\x02ip\x18\x01 \x01(\t\"\x19\n\tUUIDReply\x12\x0c\n\x04UUID\x18\x01 \x01(\t\"4\n\x18RemainingUUIDTimeRequest\x12\n\n\x02ip\x18\x01 \x01(\t\x12\x0c\n\x04UUID\x18\x02 \x01(\t\"=\n\x16RemainingUUIDTimeReply\x12\x0c\n\x04UUID\x18\x01 \x01(\t\x12\x15\n\rtimeRemaining\x18\x02 \x01(\x03\"5\n\x13LoomUploadedRequest\x12\x0c\n\x04UUID\x18\x01 \x01(\t\x12\x10\n\x08\x66ilename\x18\x02 \x01(\t\"\x13\n\x11LoomUploadedReply2\xa7\x08\n\x04Main\x12^\n\x16getCellColorByFeatures\x12!.scope.CellColorByFeaturesRequest\x1a\x1f.scope.CellColorByFeaturesReply\"\x00\x12j\n\x1agetCellAUCValuesByFeatures\x12%.scope.CellAUCValuesByFeaturesRequest\x1a#.scope.CellAUCValuesByFeaturesReply\"\x00\x12I\n\x0fgetCellMetaData\x12\x1a.scope.CellMetaDataRequest\x1a\x18.scope.CellMetaDataReply\"\x00\x12;\n\x0bgetFeatures\x12\x15.scope.FeatureRequest\x1a\x13.scope.FeatureReply\"\x00\x12\x46\n\x0egetCoordinates\x12\x19.scope.CoordinatesRequest\x1a\x17.scope.CoordinatesReply\"\x00\x12R\n\x12getRegulonMetaData\x12\x1d.scope.RegulonMetaDataRequest\x1a\x1b.scope.RegulonMetaDataReply\"\x00\x12\x46\n\x0egetMarkerGenes\x12\x19.scope.MarkerGenesRequest\x1a\x17.scope.MarkerGenesReply\"\x00\x12:\n\ngetMyLooms\x12\x15.scope.MyLoomsRequest\x1a\x13.scope.MyLoomsReply\"\x00\x12g\n\x17translateLassoSelection\x12%.scope.TranslateLassoSelectionRequest\x1a#.scope.TranslateLassoSelectionReply\"\x00\x12:\n\ngetCellIDs\x12\x15.scope.CellIDsRequest\x1a\x13.scope.CellIDsReply\"\x00\x12\x31\n\x07getVmax\x12\x12.scope.VmaxRequest\x1a\x10.scope.VmaxReply\"\x00\x12\x31\n\x07getUUID\x12\x12.scope.UUIDRequest\x1a\x10.scope.UUIDReply\"\x00\x12X\n\x14getRemainingUUIDTime\x12\x1f.scope.RemainingUUIDTimeRequest\x1a\x1d.scope.RemainingUUIDTimeReply\"\x00\x12\x46\n\x0cloomUploaded\x12\x1a.scope.LoomUploadedRequest\x1a\x18.scope.LoomUploadedReply\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\x07s.proto\x12\x05scope\"\xfb\x01\n\x1a\x43\x65llColorByFeaturesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x02 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x03 \x03(\t\x12\x17\n\x0fhasLogTransform\x18\x04 \x01(\x08\x12\x17\n\x0fhasCpmTransform\x18\x05 \x01(\x08\x12\x11\n\tthreshold\x18\x06 \x03(\x02\x12\x18\n\x10scaleThresholded\x18\x07 \x01(\x08\x12%\n\nannotation\x18\x08 \x03(\x0b\x32\x11.scope.Annotation\x12\x0c\n\x04vmax\x18\t \x03(\x02\x12\r\n\x05logic\x18\n \x01(\t\"]\n\x18\x43\x65llColorByFeaturesReply\x12\r\n\x05\x63olor\x18\x01 \x03(\t\x12\x0c\n\x04vmax\x18\x02 \x03(\x02\x12\x0f\n\x07maxVmax\x18\x03 \x03(\x02\x12\x13\n\x0b\x63\x65llIndices\x18\x04 \x03(\x05\"\\\n\x1e\x43\x65llAUCValuesByFeaturesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x02 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x03 \x03(\t\"-\n\x1c\x43\x65llAUCValuesByFeaturesReply\x12\r\n\x05value\x18\x01 \x03(\x02\"5\n\x0e\x46\x65\x61tureRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\r\n\x05query\x18\x02 \x01(\t\"\xcd\x01\n\x13\x43\x65llMetaDataRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x13\n\x0b\x63\x65llIndices\x18\x02 \x03(\x05\x12\x15\n\rselectedGenes\x18\x03 \x03(\t\x12\x17\n\x0fhasLogTransform\x18\x04 \x01(\x08\x12\x17\n\x0fhasCpmTransform\x18\x05 \x01(\x08\x12\x18\n\x10selectedRegulons\x18\x06 \x03(\t\x12\x13\n\x0b\x63lusterings\x18\x07 \x03(\x05\x12\x13\n\x0b\x61nnotations\x18\x08 \x03(\t\"P\n\x0c\x46\x65\x61tureReply\x12\x0f\n\x07\x66\x65\x61ture\x18\x01 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x02 \x03(\t\x12\x1a\n\x12\x66\x65\x61tureDescription\x18\x03 \x03(\t\"w\n\x12\x43oordinatesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x15\n\rcoordinatesID\x18\x02 \x01(\x05\x12%\n\nannotation\x18\x03 \x03(\x0b\x32\x11.scope.Annotation\x12\r\n\x05logic\x18\x04 \x01(\t\"=\n\x10\x43oordinatesReply\x12\t\n\x01x\x18\x01 \x03(\x02\x12\t\n\x01y\x18\x02 \x03(\x02\x12\x13\n\x0b\x63\x65llIndices\x18\x03 \x03(\x05\"*\n\nAnnotation\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06values\x18\x02 \x03(\t\"%\n\tEmbedding\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\"4\n\x11\x43lusterAnnotation\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\"a\n\nClustering\x12\n\n\x02id\x18\x01 \x01(\x05\x12\r\n\x05group\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12*\n\x08\x63lusters\x18\x04 \x03(\x0b\x32\x18.scope.ClusterAnnotation\"\x84\x01\n\x0c\x43\x65llMetaData\x12&\n\x0b\x61nnotations\x18\x01 \x03(\x0b\x32\x11.scope.Annotation\x12$\n\nembeddings\x18\x02 \x03(\x0b\x32\x10.scope.Embedding\x12&\n\x0b\x63lusterings\x18\x03 \x03(\x0b\x32\x11.scope.Clustering\"/\n\x0c\x41UCThreshold\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x11\n\tthreshold\x18\x02 \x01(\x02\"r\n\x07Regulon\x12\r\n\x05genes\x18\x01 \x03(\t\x12+\n\x0e\x61utoThresholds\x18\x02 \x03(\x0b\x32\x13.scope.AUCThreshold\x12\x18\n\x10\x64\x65\x66\x61ultThreshold\x18\x03 \x01(\t\x12\x11\n\tmotifName\x18\x04 \x01(\t\"\x86\x01\n\x0c\x46ileMetaData\x12\x16\n\x0ehasRegulonsAUC\x18\x01 \x01(\x08\x12\x13\n\x0bhasGeneSets\x18\x02 \x01(\x08\x12\x16\n\x0ehasClusterings\x18\x03 \x01(\x08\x12\x1a\n\x12hasExtraEmbeddings\x18\x04 \x01(\x08\x12\x15\n\rhasGlobalMeta\x18\x05 \x01(\x08\"!\n\rFeatureValues\x12\x10\n\x08\x66\x65\x61tures\x18\x01 \x03(\x02\"&\n\x0f\x43\x65llAnnotations\x12\x13\n\x0b\x61nnotations\x18\x01 \x03(\t\" \n\x0c\x43\x65llClusters\x12\x10\n\x08\x63lusters\x18\x01 \x03(\x05\"\xc0\x01\n\x11\x43\x65llMetaDataReply\x12\'\n\nclusterIDs\x18\x01 \x03(\x0b\x32\x13.scope.CellClusters\x12,\n\x0egeneExpression\x18\x02 \x03(\x0b\x32\x14.scope.FeatureValues\x12\'\n\taucValues\x18\x03 \x03(\x0b\x32\x14.scope.FeatureValues\x12+\n\x0b\x61nnotations\x18\x04 \x03(\x0b\x32\x16.scope.CellAnnotations\"?\n\x16RegulonMetaDataRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x0f\n\x07regulon\x18\x02 \x01(\t\";\n\x14RegulonMetaDataReply\x12#\n\x0bregulonMeta\x18\x01 \x01(\x0b\x32\x0e.scope.Regulon\"S\n\x12MarkerGenesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x14\n\x0c\x63lusteringID\x18\x02 \x01(\x05\x12\x11\n\tclusterID\x18\x03 \x01(\x05\"!\n\x10MarkerGenesReply\x12\r\n\x05genes\x18\x01 \x03(\t\"\x1e\n\x0eMyLoomsRequest\x12\x0c\n\x04UUID\x18\x01 \x01(\t\"t\n\x06MyLoom\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12)\n\x0c\x63\x65llMetaData\x18\x02 \x01(\x0b\x32\x13.scope.CellMetaData\x12)\n\x0c\x66ileMetaData\x18\x03 \x01(\x0b\x32\x13.scope.FileMetaData\".\n\x0cMyLoomsReply\x12\x1e\n\x07myLooms\x18\x01 \x03(\x0b\x32\r.scope.MyLoom\"h\n\x1eTranslateLassoSelectionRequest\x12\x17\n\x0fsrcLoomFilePath\x18\x01 \x01(\t\x12\x18\n\x10\x64\x65stLoomFilePath\x18\x02 \x01(\t\x12\x13\n\x0b\x63\x65llIndices\x18\x03 \x03(\x05\"3\n\x1cTranslateLassoSelectionReply\x12\x13\n\x0b\x63\x65llIndices\x18\x01 \x03(\x05\";\n\x0e\x43\x65llIDsRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x13\n\x0b\x63\x65llIndices\x18\x02 \x03(\x05\"\x1f\n\x0c\x43\x65llIDsReply\x12\x0f\n\x07\x63\x65llIds\x18\x01 \x03(\t\"{\n\x0bVmaxRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x03(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x02 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x03 \x03(\t\x12\x17\n\x0fhasLogTransform\x18\x04 \x01(\x08\x12\x17\n\x0fhasCpmTransform\x18\x05 \x01(\x08\"*\n\tVmaxReply\x12\x0c\n\x04vmax\x18\x01 \x03(\x02\x12\x0f\n\x07maxVmax\x18\x02 \x03(\x02\"\x19\n\x0bUUIDRequest\x12\n\n\x02ip\x18\x01 \x01(\t\"\x19\n\tUUIDReply\x12\x0c\n\x04UUID\x18\x01 \x01(\t\"4\n\x18RemainingUUIDTimeRequest\x12\n\n\x02ip\x18\x01 \x01(\t\x12\x0c\n\x04UUID\x18\x02 \x01(\t\"=\n\x16RemainingUUIDTimeReply\x12\x0c\n\x04UUID\x18\x01 \x01(\t\x12\x15\n\rtimeRemaining\x18\x02 \x01(\x03\"5\n\x13LoomUploadedRequest\x12\x0c\n\x04UUID\x18\x01 \x01(\t\x12\x10\n\x08\x66ilename\x18\x02 \x01(\t\"\x13\n\x11LoomUploadedReply2\xa7\x08\n\x04Main\x12^\n\x16getCellColorByFeatures\x12!.scope.CellColorByFeaturesRequest\x1a\x1f.scope.CellColorByFeaturesReply\"\x00\x12j\n\x1agetCellAUCValuesByFeatures\x12%.scope.CellAUCValuesByFeaturesRequest\x1a#.scope.CellAUCValuesByFeaturesReply\"\x00\x12I\n\x0fgetCellMetaData\x12\x1a.scope.CellMetaDataRequest\x1a\x18.scope.CellMetaDataReply\"\x00\x12;\n\x0bgetFeatures\x12\x15.scope.FeatureRequest\x1a\x13.scope.FeatureReply\"\x00\x12\x46\n\x0egetCoordinates\x12\x19.scope.CoordinatesRequest\x1a\x17.scope.CoordinatesReply\"\x00\x12R\n\x12getRegulonMetaData\x12\x1d.scope.RegulonMetaDataRequest\x1a\x1b.scope.RegulonMetaDataReply\"\x00\x12\x46\n\x0egetMarkerGenes\x12\x19.scope.MarkerGenesRequest\x1a\x17.scope.MarkerGenesReply\"\x00\x12:\n\ngetMyLooms\x12\x15.scope.MyLoomsRequest\x1a\x13.scope.MyLoomsReply\"\x00\x12g\n\x17translateLassoSelection\x12%.scope.TranslateLassoSelectionRequest\x1a#.scope.TranslateLassoSelectionReply\"\x00\x12:\n\ngetCellIDs\x12\x15.scope.CellIDsRequest\x1a\x13.scope.CellIDsReply\"\x00\x12\x31\n\x07getVmax\x12\x12.scope.VmaxRequest\x1a\x10.scope.VmaxReply\"\x00\x12\x31\n\x07getUUID\x12\x12.scope.UUIDRequest\x1a\x10.scope.UUIDReply\"\x00\x12X\n\x14getRemainingUUIDTime\x12\x1f.scope.RemainingUUIDTimeRequest\x1a\x1d.scope.RemainingUUIDTimeReply\"\x00\x12\x46\n\x0cloomUploaded\x12\x1a.scope.LoomUploadedRequest\x1a\x18.scope.LoomUploadedReply\"\x00\x62\x06proto3')
 )
 
 
@@ -147,6 +147,13 @@ _CELLCOLORBYFEATURESREPLY = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='cellIndices', full_name='scope.CellColorByFeaturesReply.cellIndices', index=3,
+      number=4, type=5, cpp_type=1, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -160,7 +167,7 @@ _CELLCOLORBYFEATURESREPLY = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=272,
-  serialized_end=344,
+  serialized_end=365,
 )
 
 
@@ -204,8 +211,8 @@ _CELLAUCVALUESBYFEATURESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=346,
-  serialized_end=438,
+  serialized_start=367,
+  serialized_end=459,
 )
 
 
@@ -235,8 +242,8 @@ _CELLAUCVALUESBYFEATURESREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=440,
-  serialized_end=485,
+  serialized_start=461,
+  serialized_end=506,
 )
 
 
@@ -273,8 +280,8 @@ _FEATUREREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=487,
-  serialized_end=540,
+  serialized_start=508,
+  serialized_end=561,
 )
 
 
@@ -353,8 +360,8 @@ _CELLMETADATAREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=543,
-  serialized_end=748,
+  serialized_start=564,
+  serialized_end=769,
 )
 
 
@@ -398,8 +405,8 @@ _FEATUREREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=750,
-  serialized_end=830,
+  serialized_start=771,
+  serialized_end=851,
 )
 
 
@@ -450,8 +457,8 @@ _COORDINATESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=832,
-  serialized_end=951,
+  serialized_start=853,
+  serialized_end=972,
 )
 
 
@@ -476,6 +483,13 @@ _COORDINATESREPLY = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='cellIndices', full_name='scope.CoordinatesReply.cellIndices', index=2,
+      number=3, type=5, cpp_type=1, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -488,8 +502,8 @@ _COORDINATESREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=953,
-  serialized_end=993,
+  serialized_start=974,
+  serialized_end=1035,
 )
 
 
@@ -526,8 +540,8 @@ _ANNOTATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=995,
-  serialized_end=1037,
+  serialized_start=1037,
+  serialized_end=1079,
 )
 
 
@@ -564,8 +578,8 @@ _EMBEDDING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1039,
-  serialized_end=1076,
+  serialized_start=1081,
+  serialized_end=1118,
 )
 
 
@@ -602,8 +616,8 @@ _CLUSTERANNOTATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1078,
-  serialized_end=1130,
+  serialized_start=1120,
+  serialized_end=1172,
 )
 
 
@@ -654,8 +668,8 @@ _CLUSTERING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1132,
-  serialized_end=1229,
+  serialized_start=1174,
+  serialized_end=1271,
 )
 
 
@@ -699,8 +713,8 @@ _CELLMETADATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1232,
-  serialized_end=1364,
+  serialized_start=1274,
+  serialized_end=1406,
 )
 
 
@@ -737,8 +751,8 @@ _AUCTHRESHOLD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1366,
-  serialized_end=1413,
+  serialized_start=1408,
+  serialized_end=1455,
 )
 
 
@@ -789,8 +803,8 @@ _REGULON = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1415,
-  serialized_end=1529,
+  serialized_start=1457,
+  serialized_end=1571,
 )
 
 
@@ -848,8 +862,8 @@ _FILEMETADATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1532,
-  serialized_end=1666,
+  serialized_start=1574,
+  serialized_end=1708,
 )
 
 
@@ -879,8 +893,8 @@ _FEATUREVALUES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1668,
-  serialized_end=1701,
+  serialized_start=1710,
+  serialized_end=1743,
 )
 
 
@@ -910,8 +924,8 @@ _CELLANNOTATIONS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1703,
-  serialized_end=1741,
+  serialized_start=1745,
+  serialized_end=1783,
 )
 
 
@@ -941,8 +955,8 @@ _CELLCLUSTERS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1743,
-  serialized_end=1775,
+  serialized_start=1785,
+  serialized_end=1817,
 )
 
 
@@ -993,8 +1007,8 @@ _CELLMETADATAREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1778,
-  serialized_end=1970,
+  serialized_start=1820,
+  serialized_end=2012,
 )
 
 
@@ -1031,8 +1045,8 @@ _REGULONMETADATAREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1972,
-  serialized_end=2035,
+  serialized_start=2014,
+  serialized_end=2077,
 )
 
 
@@ -1062,8 +1076,8 @@ _REGULONMETADATAREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2037,
-  serialized_end=2096,
+  serialized_start=2079,
+  serialized_end=2138,
 )
 
 
@@ -1107,8 +1121,8 @@ _MARKERGENESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2098,
-  serialized_end=2181,
+  serialized_start=2140,
+  serialized_end=2223,
 )
 
 
@@ -1138,8 +1152,8 @@ _MARKERGENESREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2183,
-  serialized_end=2216,
+  serialized_start=2225,
+  serialized_end=2258,
 )
 
 
@@ -1169,8 +1183,8 @@ _MYLOOMSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2218,
-  serialized_end=2248,
+  serialized_start=2260,
+  serialized_end=2290,
 )
 
 
@@ -1214,8 +1228,8 @@ _MYLOOM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2250,
-  serialized_end=2366,
+  serialized_start=2292,
+  serialized_end=2408,
 )
 
 
@@ -1245,8 +1259,8 @@ _MYLOOMSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2368,
-  serialized_end=2414,
+  serialized_start=2410,
+  serialized_end=2456,
 )
 
 
@@ -1290,8 +1304,8 @@ _TRANSLATELASSOSELECTIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2416,
-  serialized_end=2520,
+  serialized_start=2458,
+  serialized_end=2562,
 )
 
 
@@ -1321,8 +1335,8 @@ _TRANSLATELASSOSELECTIONREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2522,
-  serialized_end=2573,
+  serialized_start=2564,
+  serialized_end=2615,
 )
 
 
@@ -1359,8 +1373,8 @@ _CELLIDSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2575,
-  serialized_end=2634,
+  serialized_start=2617,
+  serialized_end=2676,
 )
 
 
@@ -1390,8 +1404,8 @@ _CELLIDSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2636,
-  serialized_end=2667,
+  serialized_start=2678,
+  serialized_end=2709,
 )
 
 
@@ -1449,8 +1463,8 @@ _VMAXREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2669,
-  serialized_end=2792,
+  serialized_start=2711,
+  serialized_end=2834,
 )
 
 
@@ -1487,8 +1501,8 @@ _VMAXREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2794,
-  serialized_end=2836,
+  serialized_start=2836,
+  serialized_end=2878,
 )
 
 
@@ -1518,8 +1532,8 @@ _UUIDREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2838,
-  serialized_end=2863,
+  serialized_start=2880,
+  serialized_end=2905,
 )
 
 
@@ -1549,8 +1563,8 @@ _UUIDREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2865,
-  serialized_end=2890,
+  serialized_start=2907,
+  serialized_end=2932,
 )
 
 
@@ -1587,8 +1601,8 @@ _REMAININGUUIDTIMEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2892,
-  serialized_end=2944,
+  serialized_start=2934,
+  serialized_end=2986,
 )
 
 
@@ -1625,8 +1639,8 @@ _REMAININGUUIDTIMEREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2946,
-  serialized_end=3007,
+  serialized_start=2988,
+  serialized_end=3049,
 )
 
 
@@ -1663,8 +1677,8 @@ _LOOMUPLOADEDREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3009,
-  serialized_end=3062,
+  serialized_start=3051,
+  serialized_end=3104,
 )
 
 
@@ -1687,8 +1701,8 @@ _LOOMUPLOADEDREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3064,
-  serialized_end=3083,
+  serialized_start=3106,
+  serialized_end=3125,
 )
 
 _CELLCOLORBYFEATURESREQUEST.fields_by_name['annotation'].message_type = _ANNOTATION
@@ -2036,8 +2050,8 @@ _MAIN = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=3086,
-  serialized_end=4149,
+  serialized_start=3128,
+  serialized_end=4191,
   methods=[
   _descriptor.MethodDescriptor(
     name='getCellColorByFeatures',

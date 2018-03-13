@@ -154,7 +154,9 @@ class SCope(s_pb2_grpc.MainServicer):
         if len(annotation) > 0:
             cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation, logic=logic)
             gene_expr = gene_expr[cellIndices]
-        return gene_expr
+        else:
+            cellIndices = list(range(self.get_nb_cells(loom_file_path)))
+        return gene_expr, cellIndices
 
     @staticmethod
     def get_regulons_AUC(loom):
@@ -165,13 +167,14 @@ class SCope(s_pb2_grpc.MainServicer):
     def get_auc_values(self, loom_file_path, regulon, annotation='', logic='OR'):
         loom = self.get_loom_connection(loom_file_path)
         print("Debug: getting AUC values for {0} ...".format(regulon))
+        cellIndices = list(range(self.get_nb_cells(loom_file_path)))
         if regulon in SCope.get_regulons_AUC(loom).dtype.names:
             vals = SCope.get_regulons_AUC(loom)[regulon]
             if len(annotation) > 0:
                 cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation, logic=logic)
                 vals = vals[cellIndices]
-            return vals
-        return []
+            return vals, cellIndices
+        return [], cellIndices
 
     def get_clusterIDs(self, loom_file_path, clusterID):
         loom = self.get_loom_connection(loom_file_path)
@@ -392,8 +395,11 @@ class SCope(s_pb2_grpc.MainServicer):
             cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation, logic=logic)
             x = x[cellIndices]
             y = y[cellIndices]
+        else:
+            cellIndices = list(range(self.get_nb_cells(loom_file_path)))
         return {"x": x,
-                "y": y}
+                "y": y,
+                "cellIndices": cellIndices}
 
     @staticmethod
     def get_meta_data(loom):
@@ -456,15 +462,15 @@ class SCope(s_pb2_grpc.MainServicer):
                     lVmax = 0
                     lMaxVmax = 0
                     if request.featureType[n] == 'gene':
-                            vals = self.get_gene_expression(
+                            vals, cellIndices = self.get_gene_expression(
                                 loom_file_path=self.get_loom_filepath(loomFilePath),
                                 gene_symbol=feature,
                                 log_transform=request.hasLogTransform,
                                 cpm_normalise=request.hasCpmTransform)
                             lVmax, lMaxVmax = self.get_vmax(vals)
                     if request.featureType[n] == 'regulon':
-                            vals = self.get_auc_values(loom_file_path=self.get_loom_filepath(loomFilePath),
-                                                       regulon=feature)
+                            vals, cellIndices = self.get_auc_values(loom_file_path=self.get_loom_filepath(loomFilePath),
+                                                                    regulon=feature)
                             lVmax, lMaxVmax = self.get_vmax(vals)
                     if lVmax > fVmax:
                         fVmax = lVmax
@@ -491,11 +497,12 @@ class SCope(s_pb2_grpc.MainServicer):
         hex_vec = []
         vmax = np.zeros(3)
         maxVmax = np.zeros(3)
+        cellIndices = list(range(n_cells))
 
         for n, feature in enumerate(request.feature):
             if request.featureType[n] == 'gene':
                 if feature != '':
-                    vals = self.get_gene_expression(
+                    vals, cellIndices = self.get_gene_expression(
                         loom_file_path=loomFilePath,
                         gene_symbol=feature,
                         log_transform=request.hasLogTransform,
@@ -512,10 +519,10 @@ class SCope(s_pb2_grpc.MainServicer):
                     features.append(np.zeros(n_cells))
             elif request.featureType[n] == 'regulon':
                 if feature != '':
-                    vals = self.get_auc_values(loom_file_path=loomFilePath,
-                                               regulon=feature,
-                                               annotation=request.annotation,
-                                               logic=request.logic)
+                    vals, cellIndices = self.get_auc_values(loom_file_path=loomFilePath,
+                                                            regulon=feature,
+                                                            annotation=request.annotation,
+                                                            logic=request.logic)
                     if request.vmax[n] != 0.0:
                         vmax[n] = request.vmax[n]
                     else:
@@ -560,11 +567,12 @@ class SCope(s_pb2_grpc.MainServicer):
             hex_vec = ["%02x%02x%02x" % (int(r), int(g), int(b)) for r, g, b in zip(features[0], features[1], features[2])]
 
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax, maxVmax=maxVmax)
+        return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax, maxVmax=maxVmax, cellIndices=cellIndices)
 
     def getCellAUCValuesByFeatures(self, request, context):
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
-        return s_pb2.CellAUCValuesByFeaturesReply(value=self.get_auc_values(loom_file_path=loomFilePath, regulon=request.feature[0]))
+        vals, cellIndices = self.get_auc_values(loom_file_path=loomFilePath, regulon=request.feature[0])
+        return s_pb2.CellAUCValuesByFeaturesReply(value=vals)
 
     def getCellMetaData(self, request, context):
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
@@ -580,10 +588,11 @@ class SCope(s_pb2_grpc.MainServicer):
         geneExp = []
         for gene in request.selectedGenes:
             if gene != '':
-                geneExp.append(self.get_gene_expression(loom_file_path=loomFilePath,
-                                                        gene_symbol=gene,
-                                                        log_transform=request.hasLogTransform,
-                                                        cpm_normalise=request.hasCpmTransform)[cellIndices])
+                vals, _ = self.get_gene_expression(loom_file_path=loomFilePath,
+                                                   gene_symbol=gene,
+                                                   log_transform=request.hasLogTransform,
+                                                   cpm_normalise=request.hasCpmTransform)
+                geneExp.append(vals[cellIndices])
         aucVals = []
         for regulon in request.selectedRegulons:
             if regulon != '':
@@ -592,8 +601,9 @@ class SCope(s_pb2_grpc.MainServicer):
         annotations = []
         for anno in request.annotations:
             if anno != '':
-                annotations.append(self.get_annotation(loom_file_path=loomFilePath,
-                                                       annoName=anno)[cellIndices])
+                vals, _ = self.get_annotation(loom_file_path=loomFilePath,
+                                              annoName=anno)
+                annotations.append(vals[cellIndices])
 
         return s_pb2.CellMetaDataReply(clusterIDs=[s_pb2.CellClusters(clusters=x) for x in cellClusters],
                                        geneExpression=[s_pb2.FeatureValues(features=x) for x in geneExp],
@@ -610,7 +620,7 @@ class SCope(s_pb2_grpc.MainServicer):
                                  coordinatesID=request.coordinatesID,
                                  annotation=request.annotation,
                                  logic=request.logic)
-        return s_pb2.CoordinatesReply(x=c["x"], y=c["y"])
+        return s_pb2.CoordinatesReply(x=c["x"], y=c["y"], cellIndices=c["cellIndices"])
 
     def getRegulonMetaData(self, request, context):
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
