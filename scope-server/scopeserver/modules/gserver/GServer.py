@@ -8,6 +8,7 @@ import loompy as lp
 import hashlib
 import os
 import numpy as np
+import pandas as pd
 import json
 import zlib
 import base64
@@ -16,6 +17,9 @@ from collections import OrderedDict
 from functools import lru_cache
 from itertools import compress
 from pathlib import Path
+
+from pyscenic.genesig import GeneSignature
+from pyscenic.aucell import create_rankings, enrichment, enrichment4cells
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "bf9360", "1d331a", "79baf2", "deb6f2",
@@ -632,6 +636,135 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
         cell_ids = [loom.ca['CellID'][i] for i in request.cellIndices]
         return s_pb2.CellIDsReply(cellIds=cell_ids)
+
+
+    # Gene set enrichment
+    #
+    # Threaded makes it slower because of GIL 
+    #
+    def doGeneSetEnrichment(self, request, context):
+        gene_set_file_path = os.path.join("data", "my-gene-sets", request.geneSetFilePath)
+        gse = GeneSetEnrichment(scope=self
+                              , method="AUCell"
+                              , loom_file_name=request.loomFilePath
+                              , gene_set_file_path=gene_set_file_path)
+        
+        # Running AUCell...
+        yield gse.update_state(step=-1, status_code=200, status_message="Running AUCell...", values=None)
+        time.sleep(1)
+
+        # Reading gene set...
+        yield gse.update_state(step=0, status_code=200, status_message="Reading the gene set...", values=None)
+        with open(gse.gene_set_file_path, 'r') as f:
+            # Skip first line because it contains the name of the signature
+            gs = GeneSignature('Gene Signature #1', 
+                               'FlyBase', [line.strip() for idx, line in enumerate(f) if idx > 0])
+        time.sleep(1)
+
+        # Creating the matrix as DataFrame...
+        yield gse.update_state(step=1, status_code=200, status_message="Creating the matrix as DataFrame...", values=None)
+        loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
+        dgem = np.transpose(loom[:, :])
+        ex_mtx = pd.DataFrame(data=dgem
+                            , index=loom.ca.CellID
+                            , columns=SCope.get_genes(loom))
+
+        if not gse.has_AUCell_rankings():
+            # Creating the rankings...
+            start_time = time.time()
+            yield gse.update_state(step=2.1, status_code=200, status_message="Creating the rankings...", values=None)
+            rnk_mtx = create_rankings(ex_mtx=ex_mtx)
+            # Saving the rankings...
+            yield gse.update_state(step=2.2, status_code=200, status_message="Saving the rankings...", values=None)
+            lp.create(gse.get_AUCell_ranking_filepath(), rnk_mtx.as_matrix(), {"CellID": loom.ca.CellID}, {"Gene": self.get_genes(loom)})
+            print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
+        else:
+            # Load the rankings...
+            yield gse.update_state(step=2, status_code=200, status_message="Rankings exists: loading...", values=None)
+            rnk_loom = self.get_loom_connection(gse.get_AUCell_ranking_filepath())
+            rnk_mtx = pd.DataFrame(data=rnk_loom[:,:]
+                                 , index=rnk_loom.ra.CellID
+                                 , columns=rnk_loom.ca.Gene)
+
+        # Calculating AUCell enrichment...
+        start_time = time.time()
+        yield gse.update_state(step=3, status_code=200, status_message="Calculating AUCell enrichment...", values=None)
+        aucs = enrichment(rnk_mtx, gs, rank_threshold=5000).loc[:,"AUC"].values
+
+        print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
+        yield gse.update_state(step=4, status_code=200, status_message=gse.get_method() +" enrichment done!", values=aucs)
+
+class GeneSetEnrichment:
+
+    def __init__(self, scope, method, loom_file_name, gene_set_file_path):
+        ''' Constructor
+        :type dgem: ndarray
+        :param dgem: digital gene expression matrix with cells as columns and genes as rows
+        :type gene_set_file_path: str
+        :param gene_set_file_path: Absolute file path to the gene set
+        '''
+        self.scope = scope
+        self.method = method
+        self.loom_file_name = loom_file_name
+        self.gene_set_file_path = gene_set_file_path
+        self.AUCell_rankings_dir = os.path.join("data", "my-aucell-rankings")
+
+    class State:
+        def __init__(self, step, status_code, status_message, values):
+            self.step = step
+            self.status_code = status_code
+            self.status_message = status_message
+            self.values = values
+
+        def get_values(self):
+            return self.values
+
+        def get_status_code(self):
+            return self.status_code
+
+        def get_status_message(self):
+            return self.status_message
+
+        def get_step(self):
+            return self.step
+    
+    def update_state(self, step, status_code, status_message, values):
+        state = GeneSetEnrichment.State(step=step, status_code=status_code, status_message=status_message, values=values)
+        print("Status: "+ state.get_status_message())
+        if state.get_values() is None:
+            return s_pb2.GeneSetEnrichmentReply(progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message())
+                                              , isDone = False
+                                              , cellValues=s_pb2.CellColorByFeaturesReply(color=[],vmax=[]))
+        else:
+            vmax = np.zeros(3)
+            aucs = state.get_values()
+            vmax[0] = self.scope.getVmax(aucs)
+            vals = np.round((aucs / vmax[0]) * 225)
+            hex_vec = ["%02x%02x%02x" % (int(r), int(g), int(b)) for r, g, b in zip(vals, np.zeros(len(aucs)), np.zeros(len(aucs)))]
+            return s_pb2.GeneSetEnrichmentReply(progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message())
+                                              , isDone = True
+                                              , cellValues=s_pb2.CellColorByFeaturesReply(color=hex_vec,vmax=vmax))
+
+    def get_method(self):
+            return self.method
+    
+    def get_AUCell_ranking_filepath(self):
+        AUCell_rankings_file_name = self.loom_file_name.split(".")[0] + "." + "AUCell.rankings.loom"
+        return os.path.join(self.AUCell_rankings_dir, AUCell_rankings_file_name)
+    
+    def has_AUCell_rankings(self):
+        return os.path.exists(self.get_AUCell_ranking_filepath()) 
+    
+    def run_AUCell(self):
+        '''
+        '''
+
+    def run(self):
+        if self.method == "AUCell":
+            self.run_AUCell()
+        else:
+            self.update_state(step=0, status_code=404, status_message="This enrichment method is not implemented!", values=None)
+        
 
 def serve(run_event, port=50052):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

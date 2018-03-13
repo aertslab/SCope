@@ -27,6 +27,7 @@ service Main {
   rpc getMyLooms (MyLoomsRequest) returns (MyLoomsReply) {}
   rpc translateLassoSelection (TranslateLassoSelectionRequest) returns (TranslateLassoSelectionReply) {}
   rpc getCellIDs (CellIDsRequest) returns (CellIDsReply) {}
+  rpc doGeneSetEnrichment (GeneSetEnrichmentRequest) returns (stream GeneSetEnrichmentReply) {}
 }
 
 
@@ -87,6 +88,7 @@ message CoordinatesRequest {
   repeated Annotation annotation=3;
   string logic=4;
 }
+
 
 message CoordinatesReply {
   repeated float x=1;
@@ -208,4 +210,21 @@ message CellIDsRequest {
 
 message CellIDsReply {
   repeated string cellIds=1;
+}
+
+message GeneSetEnrichmentRequest {
+  string loomFilePath=1;
+  string geneSetFilePath=2;
+  string method=3;
+}
+
+message Progress {
+  float value=1;
+  string status=2;
+}
+
+message GeneSetEnrichmentReply {
+  Progress progress=1;
+  bool isDone=2;
+  CellColorByFeaturesReply cellValues=3;
 }
