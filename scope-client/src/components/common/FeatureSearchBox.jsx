@@ -102,21 +102,26 @@ export default class FeatureSearch extends React.Component {
 					})
 				}
 			})
-			let markerQuery = {
-  				loomFilePath: BackendAPI.getActiveLoom(),
-				clusterID: clusterID,
-				clusteringID: clusteringID, 
-			}
-			BackendAPI.getConnection().then((gbc) => {
-				if (DEBUG) console.log('getMarkerGenes', markerQuery);
-				gbc.services.scope.Main.getMarkerGenes(markerQuery, (markerErr, markerResponse) => {
-					if (DEBUG) console.log('getMarkerGenes', markerResponse);
-					if (!markerResponse) markerResponse = {};
-					markerResponse.description = featureDescription
-					BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, markerResponse);
+			if (clusterID != null) {
+				let markerQuery = {
+					loomFilePath: BackendAPI.getActiveLoom(),
+					clusterID: clusterID,
+					clusteringID: clusteringID, 
+				}
+				BackendAPI.getConnection().then((gbc) => {
+					if (DEBUG) console.log('getMarkerGenes', markerQuery);
+					gbc.services.scope.Main.getMarkerGenes(markerQuery, (markerErr, markerResponse) => {
+						if (DEBUG) console.log('getMarkerGenes', markerResponse);
+						if (!markerResponse) markerResponse = {};
+						markerResponse.description = featureDescription
+						BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, markerResponse);
+					});
 				});
-			});
-
+				} else {
+				setTimeout(() => {
+					BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, {description: featureDescription});
+				}, 50);
+			}
 		} else {
 			setTimeout(() => {
 				BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, {description: featureDescription});
