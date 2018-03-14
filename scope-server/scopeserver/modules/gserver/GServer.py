@@ -89,7 +89,7 @@ class SCope(s_pb2_grpc.MainServicer):
         self.gene_sets_dir = data_dirs["GeneSet"]["path"]
         # Create the data directories
         SCope.create_dirs()
-        
+
     @staticmethod
     def get_data_dir_path_by_file_type(file_type):
         return data_dirs[file_type]["path"]
@@ -717,7 +717,7 @@ class SCope(s_pb2_grpc.MainServicer):
         if newUUID not in curUUIDs.keys():
             uuidLog.write("{0} :: {1} :: New UUID ({2}) assigned to IP".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, newUUID))
             curUUIDs[newUUID] = time.time()
-        return s_pb2.GetUUIDReply(UUID=newUUID)
+        return s_pb2.UUIDReply(UUID=newUUID)
 
     def getRemainingUUIDTime(self, request, context):
         curUUIDSet = curUUIDs.keys()
@@ -739,7 +739,7 @@ class SCope(s_pb2_grpc.MainServicer):
             uuidLog.write("{0} :: {1} :: New UUID ({2}) assigned to IP".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid))
             curUUIDs[uid] = time.time()
             timeRemaining = _UUID_TIMEOUT
-        return s_pb2.GetRemainingUUIDTimeReply(UUID=uid, timeRemaining=timeRemaining)
+        return s_pb2.RemainingUUIDTimeReply(UUID=uid, timeRemaining=timeRemaining)
 
     def translateLassoSelection(self, request, context):
         src_loom = self.get_loom_connection(self.get_loom_filepath(request.srcLoomFilePath))
@@ -758,7 +758,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     # Gene set enrichment
     #
-    # Threaded makes it slower because of GIL 
+    # Threaded makes it slower because of GIL
     #
     def doGeneSetEnrichment(self, request, context):
         gene_set_file_path = os.path.join("data", "my-gene-sets", request.geneSetFilePath)
@@ -766,7 +766,7 @@ class SCope(s_pb2_grpc.MainServicer):
                               , method="AUCell"
                               , loom_file_name=request.loomFilePath
                               , gene_set_file_path=gene_set_file_path)
-        
+
         # Running AUCell...
         yield gse.update_state(step=-1, status_code=200, status_message="Running AUCell...", values=None)
         time.sleep(1)
@@ -775,7 +775,7 @@ class SCope(s_pb2_grpc.MainServicer):
         yield gse.update_state(step=0, status_code=200, status_message="Reading the gene set...", values=None)
         with open(gse.gene_set_file_path, 'r') as f:
             # Skip first line because it contains the name of the signature
-            gs = GeneSignature('Gene Signature #1', 
+            gs = GeneSignature('Gene Signature #1',
                                'FlyBase', [line.strip() for idx, line in enumerate(f) if idx > 0])
         time.sleep(1)
 
@@ -845,7 +845,7 @@ class GeneSetEnrichment:
 
         def get_step(self):
             return self.step
-    
+
     def update_state(self, step, status_code, status_message, values):
         state = GeneSetEnrichment.State(step=step, status_code=status_code, status_message=status_message, values=values)
         print("Status: "+ state.get_status_message())
@@ -865,14 +865,14 @@ class GeneSetEnrichment:
 
     def get_method(self):
             return self.method
-    
+
     def get_AUCell_ranking_filepath(self):
         AUCell_rankings_file_name = self.loom_file_name.split(".")[0] + "." + "AUCell.rankings.loom"
         return os.path.join(self.AUCell_rankings_dir, AUCell_rankings_file_name)
-    
+
     def has_AUCell_rankings(self):
-        return os.path.exists(self.get_AUCell_ranking_filepath()) 
-    
+        return os.path.exists(self.get_AUCell_ranking_filepath())
+
     def run_AUCell(self):
         '''
         '''
@@ -882,7 +882,7 @@ class GeneSetEnrichment:
             self.run_AUCell()
         else:
             self.update_state(step=0, status_code=404, status_message="This enrichment method is not implemented!", values=None)
-        
+
     def loomUploaded(self, request, content):
         uploadedLooms[request.UUID].add(request.filename)
         return s_pb2.LoomUploadedReply()
