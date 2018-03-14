@@ -27,10 +27,12 @@ service Main {
   rpc getMyLooms (MyLoomsRequest) returns (MyLoomsReply) {}
   rpc translateLassoSelection (TranslateLassoSelectionRequest) returns (TranslateLassoSelectionReply) {}
   rpc getCellIDs (CellIDsRequest) returns (CellIDsReply) {}
+  rpc doGeneSetEnrichment (GeneSetEnrichmentRequest) returns (stream GeneSetEnrichmentReply) {}
   rpc getVmax (VmaxRequest) returns (VmaxReply) {}
   rpc getUUID (UUIDRequest) returns (UUIDReply) {}
   rpc getRemainingUUIDTime (RemainingUUIDTimeRequest) returns (RemainingUUIDTimeReply) {}
   rpc loomUploaded (LoomUploadedRequest) returns (LoomUploadedReply) {}
+  rpc getMyGeneSets (MyGeneSetsRequest) returns (MyGeneSetsReply) {}
 }
 
 
@@ -51,6 +53,7 @@ message CellColorByFeaturesReply {
   repeated string color=1;
   repeated float vmax=2;
   repeated float maxVmax=3;
+  repeated int32 cellIndices=4;
 }
 
 message CellAUCValuesByFeaturesRequest {
@@ -93,9 +96,11 @@ message CoordinatesRequest {
   string logic=4;
 }
 
+
 message CoordinatesReply {
   repeated float x=1;
   repeated float y=2;
+  repeated int32 cellIndices=3;
 }
 
 message Annotation {
@@ -217,6 +222,23 @@ message CellIDsReply {
   repeated string cellIds=1;
 }
 
+message GeneSetEnrichmentRequest {
+  string loomFilePath=1;
+  string geneSetFilePath=2;
+  string method=3;
+}
+
+message Progress {
+  float value=1;
+  string status=2;
+}
+
+message GeneSetEnrichmentReply {
+  Progress progress=1;
+  bool isDone=2;
+  CellColorByFeaturesReply cellValues=3;
+}
+
 message VmaxRequest {
   repeated string loomFilePath=1;
   repeated string feature=2;
@@ -254,3 +276,14 @@ message LoomUploadedRequest {
 }
 
 message LoomUploadedReply {}
+
+message MyGeneSet {
+  string geneSetFilePath=1;
+}
+
+message MyGeneSetsRequest {
+}
+
+message MyGeneSetsReply {
+  repeated MyGeneSet myGeneSets=1;
+}

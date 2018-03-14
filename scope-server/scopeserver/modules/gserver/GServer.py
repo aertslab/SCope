@@ -8,6 +8,7 @@ import loompy as lp
 import hashlib
 import os
 import numpy as np
+import pandas as pd
 import json
 import zlib
 import base64
@@ -17,6 +18,9 @@ from collections import OrderedDict, defaultdict
 from functools import lru_cache
 from itertools import compress
 from pathlib import Path
+
+from pyscenic.genesig import GeneSignature
+from pyscenic.aucell import create_rankings, enrichment, enrichment4cells
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 _UUID_TIMEOUT = _ONE_DAY_IN_SECONDS * 5
@@ -68,17 +72,34 @@ uuidLog = open(os.path.join(logDir, 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%
 #                    'dentate_gyrus_C_10X_V2_update.loom'
 #                    ])
 
-globalLooms = set(os.listdir(os.path.join("data", "my-looms")))
+data_dirs = {"Loom": {"path":"data/my-looms", "message": "No data folder detected. Making loom data folder in current directory."}
+           , "GeneSet": {"path":"data/my-gene-sets", "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."}
+           , "LoomAUCellRankings": {"path":"data/my-aucell-rankings", "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
+
+globalLooms = set(os.listdir(data_dirs["Loom"]["path"]))
 
 curUUIDs = {}
 uploadedLooms = defaultdict(lambda: set())
-
 
 class SCope(s_pb2_grpc.MainServicer):
 
     def __init__(self):
         self.active_loom_connections = {}
-        self.loom_dir = os.path.join("data", "my-looms")
+        self.loom_dir = data_dirs["Loom"]["path"]
+        self.gene_sets_dir = data_dirs["GeneSet"]["path"]
+        # Create the data directories
+        SCope.create_dirs()
+        
+    @staticmethod
+    def get_data_dir_path_by_file_type(file_type):
+        return data_dirs[file_type]["path"]
+
+    @staticmethod
+    def create_dirs():
+        for data_type in data_dirs.keys():
+            if not os.path.isdir(data_dirs[data_type]["path"]):
+                print(data_dirs[data_type]["message"])
+                os.makedirs(data_dirs[data_type]["path"])
 
     @staticmethod
     def get_partial_md5_hash(file_path, last_n_kb):
@@ -154,7 +175,9 @@ class SCope(s_pb2_grpc.MainServicer):
         if len(annotation) > 0:
             cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation, logic=logic)
             gene_expr = gene_expr[cellIndices]
-        return gene_expr
+        else:
+            cellIndices = list(range(self.get_nb_cells(loom_file_path)))
+        return gene_expr, cellIndices
 
     @staticmethod
     def get_regulons_AUC(loom):
@@ -165,13 +188,14 @@ class SCope(s_pb2_grpc.MainServicer):
     def get_auc_values(self, loom_file_path, regulon, annotation='', logic='OR'):
         loom = self.get_loom_connection(loom_file_path)
         print("Debug: getting AUC values for {0} ...".format(regulon))
+        cellIndices = list(range(self.get_nb_cells(loom_file_path)))
         if regulon in SCope.get_regulons_AUC(loom).dtype.names:
             vals = SCope.get_regulons_AUC(loom)[regulon]
             if len(annotation) > 0:
                 cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation, logic=logic)
                 vals = vals[cellIndices]
-            return vals
-        return []
+            return vals, cellIndices
+        return [], cellIndices
 
     def get_clusterIDs(self, loom_file_path, clusterID):
         loom = self.get_loom_connection(loom_file_path)
@@ -392,8 +416,11 @@ class SCope(s_pb2_grpc.MainServicer):
             cellIndices = self.get_anno_cells(loom_file_path=loom_file_path, annotations=annotation, logic=logic)
             x = x[cellIndices]
             y = y[cellIndices]
+        else:
+            cellIndices = list(range(self.get_nb_cells(loom_file_path)))
         return {"x": x,
-                "y": y}
+                "y": y,
+                "cellIndices": cellIndices}
 
     @staticmethod
     def get_meta_data(loom):
@@ -456,15 +483,15 @@ class SCope(s_pb2_grpc.MainServicer):
                     lVmax = 0
                     lMaxVmax = 0
                     if request.featureType[n] == 'gene':
-                            vals = self.get_gene_expression(
+                            vals, cellIndices = self.get_gene_expression(
                                 loom_file_path=self.get_loom_filepath(loomFilePath),
                                 gene_symbol=feature,
                                 log_transform=request.hasLogTransform,
                                 cpm_normalise=request.hasCpmTransform)
                             lVmax, lMaxVmax = self.get_vmax(vals)
                     if request.featureType[n] == 'regulon':
-                            vals = self.get_auc_values(loom_file_path=self.get_loom_filepath(loomFilePath),
-                                                       regulon=feature)
+                            vals, cellIndices = self.get_auc_values(loom_file_path=self.get_loom_filepath(loomFilePath),
+                                                                    regulon=feature)
                             lVmax, lMaxVmax = self.get_vmax(vals)
                     if lVmax > fVmax:
                         fVmax = lVmax
@@ -491,11 +518,12 @@ class SCope(s_pb2_grpc.MainServicer):
         hex_vec = []
         vmax = np.zeros(3)
         maxVmax = np.zeros(3)
+        cellIndices = list(range(n_cells))
 
         for n, feature in enumerate(request.feature):
             if request.featureType[n] == 'gene':
                 if feature != '':
-                    vals = self.get_gene_expression(
+                    vals, cellIndices = self.get_gene_expression(
                         loom_file_path=loomFilePath,
                         gene_symbol=feature,
                         log_transform=request.hasLogTransform,
@@ -512,10 +540,10 @@ class SCope(s_pb2_grpc.MainServicer):
                     features.append(np.zeros(n_cells))
             elif request.featureType[n] == 'regulon':
                 if feature != '':
-                    vals = self.get_auc_values(loom_file_path=loomFilePath,
-                                               regulon=feature,
-                                               annotation=request.annotation,
-                                               logic=request.logic)
+                    vals, cellIndices = self.get_auc_values(loom_file_path=loomFilePath,
+                                                            regulon=feature,
+                                                            annotation=request.annotation,
+                                                            logic=request.logic)
                     if request.vmax[n] != 0.0:
                         vmax[n] = request.vmax[n]
                     else:
@@ -560,11 +588,12 @@ class SCope(s_pb2_grpc.MainServicer):
             hex_vec = ["%02x%02x%02x" % (int(r), int(g), int(b)) for r, g, b in zip(features[0], features[1], features[2])]
 
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax, maxVmax=maxVmax)
+        return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax, maxVmax=maxVmax, cellIndices=cellIndices)
 
     def getCellAUCValuesByFeatures(self, request, context):
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
-        return s_pb2.CellAUCValuesByFeaturesReply(value=self.get_auc_values(loom_file_path=loomFilePath, regulon=request.feature[0]))
+        vals, cellIndices = self.get_auc_values(loom_file_path=loomFilePath, regulon=request.feature[0])
+        return s_pb2.CellAUCValuesByFeaturesReply(value=vals)
 
     def getCellMetaData(self, request, context):
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
@@ -580,10 +609,11 @@ class SCope(s_pb2_grpc.MainServicer):
         geneExp = []
         for gene in request.selectedGenes:
             if gene != '':
-                geneExp.append(self.get_gene_expression(loom_file_path=loomFilePath,
-                                                        gene_symbol=gene,
-                                                        log_transform=request.hasLogTransform,
-                                                        cpm_normalise=request.hasCpmTransform)[cellIndices])
+                vals, _ = self.get_gene_expression(loom_file_path=loomFilePath,
+                                                   gene_symbol=gene,
+                                                   log_transform=request.hasLogTransform,
+                                                   cpm_normalise=request.hasCpmTransform)
+                geneExp.append(vals[cellIndices])
         aucVals = []
         for regulon in request.selectedRegulons:
             if regulon != '':
@@ -592,8 +622,9 @@ class SCope(s_pb2_grpc.MainServicer):
         annotations = []
         for anno in request.annotations:
             if anno != '':
-                annotations.append(self.get_annotation(loom_file_path=loomFilePath,
-                                                       annoName=anno)[cellIndices])
+                vals, _ = self.get_annotation(loom_file_path=loomFilePath,
+                                              annoName=anno)
+                annotations.append(vals[cellIndices])
 
         return s_pb2.CellMetaDataReply(clusterIDs=[s_pb2.CellClusters(clusters=x) for x in cellClusters],
                                        geneExpression=[s_pb2.FeatureValues(features=x) for x in geneExp],
@@ -610,7 +641,7 @@ class SCope(s_pb2_grpc.MainServicer):
                                  coordinatesID=request.coordinatesID,
                                  annotation=request.annotation,
                                  logic=request.logic)
-        return s_pb2.CoordinatesReply(x=c["x"], y=c["y"])
+        return s_pb2.CoordinatesReply(x=c["x"], y=c["y"], cellIndices=c["cellIndices"])
 
     def getRegulonMetaData(self, request, context):
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
@@ -640,6 +671,13 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
         genes = SCope.get_genes(loom)[loom.ra["ClusterMarkers_{0}".format(request.clusteringID)][str(request.clusterID)] == 1]
         return(s_pb2.MarkerGenesReply(genes=genes))
+
+    def getMyGeneSets(self, request, context):
+        my_gene_sets = os.listdir(self.gene_sets_dir)
+        gene_sets = []
+        for f in sorted(list(my_gene_sets)):
+            gene_sets.append(s_pb2.MyGeneSet(geneSetFilePath=f))
+        return s_pb2.MyGeneSetsReply(myGeneSets=gene_sets)
 
     def getMyLooms(self, request, context):
         my_looms = []
@@ -717,6 +755,134 @@ class SCope(s_pb2_grpc.MainServicer):
         cell_ids = [loom.ca['CellID'][i] for i in request.cellIndices]
         return s_pb2.CellIDsReply(cellIds=cell_ids)
 
+
+    # Gene set enrichment
+    #
+    # Threaded makes it slower because of GIL 
+    #
+    def doGeneSetEnrichment(self, request, context):
+        gene_set_file_path = os.path.join("data", "my-gene-sets", request.geneSetFilePath)
+        gse = GeneSetEnrichment(scope=self
+                              , method="AUCell"
+                              , loom_file_name=request.loomFilePath
+                              , gene_set_file_path=gene_set_file_path)
+        
+        # Running AUCell...
+        yield gse.update_state(step=-1, status_code=200, status_message="Running AUCell...", values=None)
+        time.sleep(1)
+
+        # Reading gene set...
+        yield gse.update_state(step=0, status_code=200, status_message="Reading the gene set...", values=None)
+        with open(gse.gene_set_file_path, 'r') as f:
+            # Skip first line because it contains the name of the signature
+            gs = GeneSignature('Gene Signature #1', 
+                               'FlyBase', [line.strip() for idx, line in enumerate(f) if idx > 0])
+        time.sleep(1)
+
+        # Creating the matrix as DataFrame...
+        yield gse.update_state(step=1, status_code=200, status_message="Creating the matrix as DataFrame...", values=None)
+        loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
+        dgem = np.transpose(loom[:, :])
+        ex_mtx = pd.DataFrame(data=dgem
+                            , index=loom.ca.CellID
+                            , columns=SCope.get_genes(loom))
+
+        if not gse.has_AUCell_rankings():
+            # Creating the rankings...
+            start_time = time.time()
+            yield gse.update_state(step=2.1, status_code=200, status_message="Creating the rankings...", values=None)
+            rnk_mtx = create_rankings(ex_mtx=ex_mtx)
+            # Saving the rankings...
+            yield gse.update_state(step=2.2, status_code=200, status_message="Saving the rankings...", values=None)
+            lp.create(gse.get_AUCell_ranking_filepath(), rnk_mtx.as_matrix(), {"CellID": loom.ca.CellID}, {"Gene": self.get_genes(loom)})
+            print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
+        else:
+            # Load the rankings...
+            yield gse.update_state(step=2, status_code=200, status_message="Rankings exists: loading...", values=None)
+            rnk_loom = self.get_loom_connection(gse.get_AUCell_ranking_filepath())
+            rnk_mtx = pd.DataFrame(data=rnk_loom[:,:]
+                                 , index=rnk_loom.ra.CellID
+                                 , columns=rnk_loom.ca.Gene)
+
+        # Calculating AUCell enrichment...
+        start_time = time.time()
+        yield gse.update_state(step=3, status_code=200, status_message="Calculating AUCell enrichment...", values=None)
+        aucs = enrichment(rnk_mtx, gs, rank_threshold=5000).loc[:,"AUC"].values
+
+        print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
+        yield gse.update_state(step=4, status_code=200, status_message=gse.get_method() +" enrichment done!", values=aucs)
+
+class GeneSetEnrichment:
+
+    def __init__(self, scope, method, loom_file_name, gene_set_file_path):
+        ''' Constructor
+        :type dgem: ndarray
+        :param dgem: digital gene expression matrix with cells as columns and genes as rows
+        :type gene_set_file_path: str
+        :param gene_set_file_path: Absolute file path to the gene set
+        '''
+        self.scope = scope
+        self.method = method
+        self.loom_file_name = loom_file_name
+        self.gene_set_file_path = gene_set_file_path
+        self.AUCell_rankings_dir = os.path.join("data", "my-aucell-rankings")
+
+    class State:
+        def __init__(self, step, status_code, status_message, values):
+            self.step = step
+            self.status_code = status_code
+            self.status_message = status_message
+            self.values = values
+
+        def get_values(self):
+            return self.values
+
+        def get_status_code(self):
+            return self.status_code
+
+        def get_status_message(self):
+            return self.status_message
+
+        def get_step(self):
+            return self.step
+    
+    def update_state(self, step, status_code, status_message, values):
+        state = GeneSetEnrichment.State(step=step, status_code=status_code, status_message=status_message, values=values)
+        print("Status: "+ state.get_status_message())
+        if state.get_values() is None:
+            return s_pb2.GeneSetEnrichmentReply(progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message())
+                                              , isDone = False
+                                              , cellValues=s_pb2.CellColorByFeaturesReply(color=[],vmax=[]))
+        else:
+            vmax = np.zeros(3)
+            aucs = state.get_values()
+            vmax[0] = self.scope.getVmax(aucs)
+            vals = np.round((aucs / vmax[0]) * 225)
+            hex_vec = ["%02x%02x%02x" % (int(r), int(g), int(b)) for r, g, b in zip(vals, np.zeros(len(aucs)), np.zeros(len(aucs)))]
+            return s_pb2.GeneSetEnrichmentReply(progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message())
+                                              , isDone = True
+                                              , cellValues=s_pb2.CellColorByFeaturesReply(color=hex_vec,vmax=vmax))
+
+    def get_method(self):
+            return self.method
+    
+    def get_AUCell_ranking_filepath(self):
+        AUCell_rankings_file_name = self.loom_file_name.split(".")[0] + "." + "AUCell.rankings.loom"
+        return os.path.join(self.AUCell_rankings_dir, AUCell_rankings_file_name)
+    
+    def has_AUCell_rankings(self):
+        return os.path.exists(self.get_AUCell_ranking_filepath()) 
+    
+    def run_AUCell(self):
+        '''
+        '''
+
+    def run(self):
+        if self.method == "AUCell":
+            self.run_AUCell()
+        else:
+            self.update_state(step=0, status_code=404, status_message="This enrichment method is not implemented!", values=None)
+        
     def loomUploaded(self, request, content):
         uploadedLooms[request.UUID].add(request.filename)
         return s_pb2.LoomUploadedReply()

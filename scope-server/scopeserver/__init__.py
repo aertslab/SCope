@@ -18,11 +18,6 @@ def run():
     |____/ \____\___/| .__/ \___|   |____/|____/
                      |_|
         ''')
-
-    if not os.path.isdir('data/my-looms'):
-        print('No data folder detected. Making loom data folder in current directory.')
-        os.makedirs('data/my-looms')
-
     run_event = threading.Event()
     run_event.set()
 
