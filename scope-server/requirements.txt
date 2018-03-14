@@ -1,0 +1,8 @@
+pandas==0.20.3
+setuptools==36.5.0.post20170921
+pynpm==0.1.1
+pyscenic==0.5.7+2.gd9da38f
+zerorpc==0.6.1
+loompy==2.0.6
+numpy==1.13.3
+grpclib==0.1.0rc1
