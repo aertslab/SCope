@@ -429,12 +429,12 @@ export default class Viewer extends Component {
 		if (this.props.translate) {
 			selections.map((s, i) => {
 				let ns = Object.assign({}, s);
-				let display = true;
 				if (s.src != this.props.name) {
 					if (s.translations[this.props.name]) {
 						ns.points = s.translations[this.props.name];
 					} else {
-						if (s.loomFilePath != this.props.loomFile) {
+						if (s.loomFilePath != this.props.loomFile) {							
+							ns.selected = false;
 							let query = {
 									srcLoomFilePath: s.loomFilePath,
 									destLoomFilePath: this.props.loomFile,
@@ -446,16 +446,17 @@ export default class Viewer extends Component {
 									if (DEBUG) console.log(this.props.name, 'translateLassoSelection', response);
 									ns.points = response.cellIndices;
 									s.translations[this.props.name] = ns.points.slice(0);
+									ns.selected = true;
+									this.repaintLassoSelections(currentSelections);
 								})
 							})
-							display = false;
 						} else {
 							ns.points = this.translatePointsInLasso(s.lassoPoints);
 							s.translations[this.props.name] = ns.points.slice(0);
 						}
 					}
 				}
-				if (display) currentSelections.push(ns);
+				currentSelections.push(ns);
 			})
 		} else {
 			currentSelections = selections;
