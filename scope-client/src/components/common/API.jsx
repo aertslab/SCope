@@ -38,6 +38,8 @@ class API {
 		this.maxValues = [0, 0, 0];
 		this.customValues = [0, 0, 0];
 		this.customValuesChangeListeners = [];
+
+		this.uuid = null;
 	}
 
 	getConnection() {
@@ -56,6 +58,7 @@ class API {
 
 	setActiveLooms(looms) {
 		this.activeLooms = looms.slice(0);
+		this.activeCoordinates = -1;
 		this.getMaxScale(null, (customValues, maxValues) => {
 			this.customValuesChangeListeners.forEach((listener) => {
 				listener(customValues);
@@ -66,6 +69,7 @@ class API {
 	setActiveLoom(loom, id) {
 		if (id == null) id = 0;
 		this.activeLooms[id] = loom;
+		this.activeCoordinates = -1;
 		this.activeLoomChangeListeners.forEach((listener) => {
 			listener(this.activeLooms[0], this.loomFiles[this.activeLooms[0]], this.activeCoordinates);
 		})
@@ -390,6 +394,13 @@ class API {
 		}
 	}
 	
+	setUUID(uuid) {
+		this.uuid = uuid;
+	}
+
+	getUUID() {
+		return this.uuid;
+	}
 	
 
 	getColors() {

@@ -26,7 +26,7 @@ export default class ViewerSidebar extends Component {
 
 	render() {
 		const { lassoSelections, activeFeatures, activeTab, activePage } = this.state;
-		console.log('activeTab', activeTab, activeFeatures);
+
 		let lassoTab = () => {
 			if (lassoSelections.length == 0) {
 				return (
@@ -137,8 +137,6 @@ export default class ViewerSidebar extends Component {
 					render: () => featureTab(i),
 				})
 		})
-
-		console.log('panes', panes);
 
 		return (
 			<div>

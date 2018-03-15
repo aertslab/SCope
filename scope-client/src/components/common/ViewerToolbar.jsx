@@ -30,7 +30,7 @@ export default class ViewerToolbar extends Component {
 		const { activeTool, activeFeatures, colors, featuresScale, customScale } = this.state;
 		const createSliderWithTooltip = Slider.createSliderWithTooltip;
 		const TooltipSlider = createSliderWithTooltip(Slider);
-		console.log('render', activeFeatures, featuresScale);
+
 		let levels = false;
 		let sliders = _.times(3, i => {
 				let val = customScale[i] ? customScale[i] : featuresScale[i];
