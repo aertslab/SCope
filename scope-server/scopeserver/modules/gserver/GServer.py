@@ -617,14 +617,14 @@ class SCope(s_pb2_grpc.MainServicer):
         aucVals = []
         for regulon in request.selectedRegulons:
             if regulon != '':
-                aucVals.append(self.get_auc_values(loom_file_path=loomFilePath,
-                                                   regulon=regulon)[cellIndices])
+                vals, _ = aucVals.append(self.get_auc_values(loom_file_path=loomFilePath,
+                                                             regulon=regulon))
+                aucVals.append(vals[[cellIndices]])
         annotations = []
         for anno in request.annotations:
             if anno != '':
-                vals, _ = self.get_annotation(loom_file_path=loomFilePath,
-                                              annoName=anno)
-                annotations.append(vals[cellIndices])
+                vals = self.get_annotation(loom_file_path=loomFilePath,
+                                           annoName=anno)[cellIndices]
 
         return s_pb2.CellMetaDataReply(clusterIDs=[s_pb2.CellClusters(clusters=x) for x in cellClusters],
                                        geneExpression=[s_pb2.FeatureValues(features=x) for x in geneExp],
