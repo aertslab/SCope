@@ -170,10 +170,12 @@ export default class Viewer extends Component {
 		if (DEBUG) console.log("Initializing Viewer ", this.props.name);
 		this.renderer = PIXI.autoDetectRenderer(this.w, this.h, { backgroundColor: 0xFFFFFF, antialias: true, view: this.zoomSelection.node() });
 		this.stage = new PIXI.Container();
+		this.stage.blendMode = PIXI.BLEND_MODES.ADD;
 		this.stage.width = this.w;
 		this.stage.height = this.h;
 		this.renderer.render(this.stage);
 		this.container = new PIXI.particles.ParticleContainer(this.maxn, [false, true, false, false, true]);
+//		this.container.blendMode = PIXI.BLEND_MODES.NORMAL;
 		this.stage.addChild(this.container);
 		this.addLassoLayer();
 		this.zoomBehaviour = d3.zoom().scaleExtent([-1, 10]).on("zoom", this.zoom.bind(this));
@@ -214,7 +216,7 @@ export default class Viewer extends Component {
 		const cy = y * 15 + this.renderer.height / 2;
 		s.position.x = cx;
 		s.position.y = cy;
-		s.blendMode = PIXI.BLEND_MODES.ADD;
+		s.blendMode = PIXI.BLEND_MODES.SCREEN;
 		s._originalData = {x: x, y: y};
 		return s;
 	}
@@ -238,6 +240,7 @@ export default class Viewer extends Component {
 		this.lassoLayer.width = this.w;
 		this.lassoLayer.height = this.h;
 		this.selectionsLayer = new PIXI.Container();
+		this.selectionsLayer.blendMode = PIXI.BLEND_MODES.ADD;
 		this.selectionsLayer.width = this.w;
 		this.selectionsLayer.height = this.h;
 		this.lassoLayer.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
@@ -259,10 +262,10 @@ export default class Viewer extends Component {
 			this.zoomSelection.call(this.zoomBehaviour);
 			this.closeLasso()
 			this.setState({ mouse: { down: false } })
-			const { lassoPoints, lassoIndices } = this.getPointsInLasso();
+			const lassoPoints = this.getPointsInLasso();
 			if(lassoPoints.length > 1) {
 				this.clearLasso();
-				this.addLassoSelection(lassoPoints, lassoIndices);
+				this.addLassoSelection(lassoPoints);
 			}
 		});
 		this.lassoLayer.on("mousemove", (e) => {
@@ -305,18 +308,18 @@ export default class Viewer extends Component {
 
 	getPointsInLasso() {
 		let pts = this.container.children,
-			lassoPoints = [], lassoIndices = [];
+			lassoPoints = [];
 		if (pts.length < 2) return;
 		for (let i = 0; i < pts.length; ++i) {
 			// Calculate the position of the point in the lasso reference
 			let pointPosRelToLassoRef = this.lassoLayer.toLocal(pts[i], this.container, null, true)
 			if(this.lasso.containsPoint(pointPosRelToLassoRef)) {
-				lassoPoints.push(i);
-				lassoIndices.push(this.state.coord.idx[i]);
+				let idx = pts[i]._originalData.idx;
+				lassoPoints.push(idx);
 			}
 		}
-		if (DEBUG) console.log(this.props.name, 'getPointsInLasso', lassoPoints,'>', lassoIndices)
-		return { lassoPoints, lassoIndices }
+		if (DEBUG) console.log(this.props.name, 'getPointsInLasso', lassoPoints);
+		return lassoPoints;
 	}
 
 	translatePointsInLasso(indices) {
@@ -337,7 +340,6 @@ export default class Viewer extends Component {
 			points: lassoPoints,
 			src: this.props.name,
 			loomFilePath: this.props.loomFile,
-			indices: lassoIndices,
 			translations: {},
 		}
 		BackendAPI.addViewerSelection(lassoSelection);
@@ -354,13 +356,11 @@ export default class Viewer extends Component {
 	highlightPointsInLasso(lS) {
 		this.startBenchmark("highlightPointsInLasso")
 		let pts = this.container.children;
-		for (let i = 0; i < lS.points.length; ++i) {
-			let idx = lS.points[i];
-			let x = this.state.coord.x[idx];
-			let y = this.state.coord.y[idx];
-			let point = this.getTexturedColorPoint(x, y, lS.color);
+		pts.map(p => {
+			if (lS.points.indexOf(p._originalData.idx) == -1) return;
+			let point = this.getTexturedColorPoint(p._originalData.x, p._originalData.y, lS.color);
 			this.selectionsLayer.addChild(point);
-		}
+		})
 		this.endBenchmark("highlightPointsInLasso");
 	}
 
@@ -447,7 +447,6 @@ export default class Viewer extends Component {
 								})
 							})
 						} else {
-							ns.points = this.translatePointsInLasso(s.indices);
 							s.translations[this.props.name] = ns.points.slice(0);
 						}
 					}
@@ -531,6 +530,7 @@ export default class Viewer extends Component {
 		let dP = [], n = c.x.length;
 		for (let i = 0; i < n; ++i) {
 			let point = this.getTexturedColorPoint(c.x[i], c.y[i], "000000");
+			point._originalData.idx = c.idx[i];
 			this.container.addChild(point);
 		}
 		this.endBenchmark("initializeDataPoints");
@@ -618,18 +618,35 @@ export default class Viewer extends Component {
 			});
 		});
 	}
-
+	
+	hexToRgb(hex) {
+		var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+		return result ? {
+			r: parseInt(result[1], 16),
+			g: parseInt(result[2], 16),
+			b: parseInt(result[3], 16)
+		} : null;
+	}
+	
 	updateDataPoints() {
 		this.startBenchmark("updateDataPoints")
-		let pts = this.container.children;
-		let n = pts.length;
-		let v = this.state.colors;
-		for (let i = 0; i < n; ++i) {
-			let point = this.getTexturedColorPoint(pts[i]._originalData.x, pts[i]._originalData.y, v[i])
-			this.container.addChildAt(point, n+i);
-		}
+		let n = this.container.children.length;
 		this.container.removeChildren(0, n).map((p) => {
 			p.destroy();
+		})
+		let v = this.state.colors;
+		let pts = _.zip(this.state.coord.idx, this.state.coord.x, this.state.coord.y, this.state.colors);
+		pts.sort((a, b) =>{
+			let ca = this.hexToRgb(a[3]);
+			let cb = this.hexToRgb(b[3]);
+			let r = (ca.r + ca.g + ca.b) - (cb.r + cb.g + cb.b);
+			return r;
+		})
+		console.log(pts);
+		pts.map((p, i) => {
+			let point = this.getTexturedColorPoint(p[1], p[2], p[3])
+			point._originalData.idx = p[0];
+			this.container.addChildAt(point, i);
 		})
 		this.endBenchmark("updateDataPoints");
 		this.transformDataPoints();
@@ -642,6 +659,7 @@ export default class Viewer extends Component {
 		// Draw new data points
 		for (let i = 0; i < n; ++i) {
 			let point = this.getTexturedColorPoint(pts[i]._originalData.x, pts[i]._originalData.y, '000000')
+			point._originalData.idx = pts[i]._originalData.idx; 
 			this.container.addChildAt(point, n+i);
 		}
 		// Remove the first old data points (firstly rendered)

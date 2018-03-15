@@ -319,6 +319,7 @@ class API {
 	}
 
 	removeViewerSelection(index) {
+		console.log('removing selection', index);
 		this.viewerSelections.splice(index, 1);
 		this.viewerSelectionsChangeListeners.forEach((listener) => {
 			listener(this.viewerSelections);

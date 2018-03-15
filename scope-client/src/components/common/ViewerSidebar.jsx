@@ -58,7 +58,7 @@ export default class ViewerSidebar extends Component {
 						<Grid.Column>
 							<Icon name='eye' title='toggle show/hide selection' style={{display: 'inline'}} onClick={(e,d) => this.toggleLassoSelection(lS.id)} style={{opacity: lS.selected ? 1 : .5 }} className="pointer" />
 							&nbsp;
-							<Icon name='trash' title='remove this selection' style={{display: 'inline'}} onClick={(e,d) => this.removeLassoSelection(lS.id)} className="pointer"  />
+							<Icon name='trash' title='remove this selection' style={{display: 'inline'}} onClick={(e,d) => this.removeLassoSelection(i)} className="pointer"  />
 							&nbsp;
 							<Icon name='search' title='show metadata for this selection' style={{display: 'inline'}} onClick={(e,d) => {
 								this.setState({modalID: i});
