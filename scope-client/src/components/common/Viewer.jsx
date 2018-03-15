@@ -92,6 +92,7 @@ export default class Viewer extends Component {
 		if (this.props.loomFile != null) {
 			this.getPoints(this.props.loomFile, this.props.activeCoordinates, this.props.activeAnnotations, this.props.superposition, () => {
 				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.props.activeAnnotations, this.state.customScale, this.props.superposition);
+				this.onViewerSelectionChange(this.state.lassoSelections);
 				let t = BackendAPI.getViewerTransform();
 				if (t) {
 					let initialTransform = d3.zoomTransform(d3.select('#viewer' + t.src).node());
@@ -258,10 +259,10 @@ export default class Viewer extends Component {
 			this.zoomSelection.call(this.zoomBehaviour);
 			this.closeLasso()
 			this.setState({ mouse: { down: false } })
-			let lassoPoints = this.getPointsInLasso()
+			const { lassoPoints, lassoIndices } = this.getPointsInLasso();
 			if(lassoPoints.length > 1) {
 				this.clearLasso();
-				this.addLassoSelection(lassoPoints);
+				this.addLassoSelection(lassoPoints, lassoIndices);
 			}
 		});
 		this.lassoLayer.on("mousemove", (e) => {
@@ -303,37 +304,32 @@ export default class Viewer extends Component {
 	}
 
 	getPointsInLasso() {
-		if (DEBUG) console.log(this.props.name, 'getPointsInLasso', this.container, this.lassoLayer, this.selectionLayer, this.lasso)
 		let pts = this.container.children,
-			ptsInLasso = [];
+			lassoPoints = [], lassoIndices = [];
 		if (pts.length < 2) return;
 		for (let i = 0; i < pts.length; ++i) {
 			// Calculate the position of the point in the lasso reference
 			let pointPosRelToLassoRef = this.lassoLayer.toLocal(pts[i], this.container, null, true)
 			if(this.lasso.containsPoint(pointPosRelToLassoRef)) {
-				ptsInLasso.push(i)
+				lassoPoints.push(i);
+				lassoIndices.push(this.state.coord.idx[i]);
 			}
 		}
-		return ptsInLasso
+		if (DEBUG) console.log(this.props.name, 'getPointsInLasso', lassoPoints,'>', lassoIndices)
+		return { lassoPoints, lassoIndices }
 	}
 
-	translatePointsInLasso(lp) {
-		this.lasso = new PIXI.Graphics();
-		this.lassoLayer.addChild(this.lasso);
-		this.lasso.lineStyle(2, "#000")
-		this.lasso.beginFill(0x8bc5ff, 0.4);
-		this.lasso.moveTo(lp[0].x,lp[0].y)
-		if(lp.length > 1) {
-			this.lasso.drawPolygon(lp)
-		}
-		this.lasso.endFill();
-		let pts = this.getPointsInLasso();
-		if (DEBUG) console.log(this.props.name, 'translatePointsInLasso', pts);
-		this.lasso.clear();
-		return pts;
+	translatePointsInLasso(indices) {
+		let ptsInLasso = [];
+		let idxInLasso = _.intersection(indices, this.state.coord.idx);
+		ptsInLasso = idxInLasso.map(idx => {
+			return this.state.coord.idx.indexOf(idx);
+		});
+		if (DEBUG) console.log(this.props.name, 'translatePointsInLasso', indices, '>', ptsInLasso);
+		return ptsInLasso;
 	}
 
-	addLassoSelection(lassoPoints) {
+	addLassoSelection(lassoPoints, lassoIndices) {
 		let lassoSelection = {
 			id: this.state.lassoSelections.length,
 			selected: true,
@@ -341,7 +337,7 @@ export default class Viewer extends Component {
 			points: lassoPoints,
 			src: this.props.name,
 			loomFilePath: this.props.loomFile,
-			lassoPoints: this.state.lassoPoints,
+			indices: lassoIndices,
 			translations: {},
 		}
 		BackendAPI.addViewerSelection(lassoSelection);
@@ -451,7 +447,7 @@ export default class Viewer extends Component {
 								})
 							})
 						} else {
-							ns.points = this.translatePointsInLasso(s.lassoPoints);
+							ns.points = this.translatePointsInLasso(s.indices);
 							s.translations[this.props.name] = ns.points.slice(0);
 						}
 					}
@@ -505,7 +501,8 @@ export default class Viewer extends Component {
 				if (response) {
 					let c = {
 						x: response.x,
-						y: response.y
+						y: response.y,
+						idx: response.cellIndices
 					}
 					this.setState({ coord: c });
 					this.setScalingFactor();
