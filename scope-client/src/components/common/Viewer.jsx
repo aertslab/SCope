@@ -429,12 +429,12 @@ export default class Viewer extends Component {
 		if (this.props.translate) {
 			selections.map((s, i) => {
 				let ns = Object.assign({}, s);
-				let display = true;
 				if (s.src != this.props.name) {
 					if (s.translations[this.props.name]) {
 						ns.points = s.translations[this.props.name];
 					} else {
-						if (s.loomFilePath != this.props.loomFile) {
+						if (s.loomFilePath != this.props.loomFile) {							
+							ns.selected = false;
 							let query = {
 									srcLoomFilePath: s.loomFilePath,
 									destLoomFilePath: this.props.loomFile,
@@ -446,16 +446,17 @@ export default class Viewer extends Component {
 									if (DEBUG) console.log(this.props.name, 'translateLassoSelection', response);
 									ns.points = response.cellIndices;
 									s.translations[this.props.name] = ns.points.slice(0);
+									ns.selected = true;
+									this.repaintLassoSelections(currentSelections);
 								})
 							})
-							display = false;
 						} else {
 							ns.points = this.translatePointsInLasso(s.lassoPoints);
 							s.translations[this.props.name] = ns.points.slice(0);
 						}
 					}
 				}
-				if (display) currentSelections.push(ns);
+				currentSelections.push(ns);
 			})
 		} else {
 			currentSelections = selections;
@@ -494,12 +495,12 @@ export default class Viewer extends Component {
 			annotation: queryAnnotations,
 			logic: superposition,
 		};
-		if (DEBUG) console.log(this.props.name, 'getPoints', query);
-		this.startBenchmark("getPoints")
+		this.startBenchmark("getCoordinates")
+		if (DEBUG) console.log(this.props.name, 'getCoordinates', query);
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getCoordinates(query, (err, response) => {
 				// Update the coordinates and remove all previous data points
-				if (DEBUG) console.log(this.props.name, 'getPoints', response);
+				if (DEBUG) console.log(this.props.name, 'getCoordinates', response);
 				this.container.removeChildren();
 				if (response) {
 					let c = {
@@ -512,7 +513,7 @@ export default class Viewer extends Component {
 					console.log('Could not get the coordinates - empty response!')
 					this.setState({ coord:  {x: [], y: []}});
 				}
-				this.endBenchmark("getPoints");
+				this.endBenchmark("getCoordinates");
 				this.initializeDataPoints();
 				callback();
 			});

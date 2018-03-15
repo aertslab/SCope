@@ -1,31 +1,44 @@
 import React, { Component } from 'react';
-import { Sidebar, Menu, Icon, Image, Button, Divider, Modal, Checkbox, Dropdown, Grid, Input, Progress } from 'semantic-ui-react';
+import { withRouter, Link } from 'react-router-dom';
+import { Sidebar, Menu, Icon, Image, Button, Divider, Modal, Checkbox, Dropdown, Grid, Input, Progress, Dimmer, Loader } from 'semantic-ui-react';
 import FileReaderInput from 'react-file-reader-input';
 import { BackendAPI } from './common/API';
 
-export default class AppSidebar extends Component {
+class AppSidebar extends Component {
 
 	constructor() {
 		super();
 
 		this.state = {
-			activeLoom: BackendAPI.getActiveLoom(),
 			activeCoordinates: BackendAPI.getActiveCoordinates(),
-			metadata: BackendAPI.getActiveLoomMetadata(),
 			settings: BackendAPI.getSettings(),
-			myLooms: [],
+			loomFiles: [],
 			uploadLoomFile: null,
 			uploadLoomModalOpened: false,
 			uploadLoomProgress: 0,
+			loading: true
 		}
 	}
 
 	render () {
+		const { match } = this.props;
+		const { activeCoordinates, settings, loading, loomFiles } = this.state;
+		let metadata = {}, coordinates = [];
+		loomFiles.map(loomFile => {
+			if (loomFile.loomFilePath == match.params.loom) {
+				metadata = loomFile;
+				coordinates = metadata.cellMetaData.embeddings.map(coords => {
+					return {
+						text: coords.name,
+						value: coords.id
+					}
+				})
+			}
+		})
+		let showTransforms = metadata && (['welcome','dataset'].indexOf(match.params.page) == -1) ? true : false;
+		let showCoordinatesSelection = showTransforms && metadata.fileMetaData && metadata.fileMetaData.hasExtraEmbeddings ? true : false;
 
-		const { activeCoordinates, metadata, settings } = this.state;
-		let showTransforms = metadata && (['welcome','dataset'].indexOf(this.props.currentPage) == -1) ? true : false;
-		let showCoordinatesSelection = showTransforms && metadata.fileMetaData.hasExtraEmbeddings ? true : false;
-		
+		console.log('AppSidebar render');
 		return (
 			<Sidebar as={Menu} animation="push" visible={this.props.visible} vertical>
 				<Menu.Item>
@@ -35,29 +48,42 @@ export default class AppSidebar extends Component {
 								<Icon name="add" />
 								<em>Upload new dataset</em>
 							</Menu.Item>
-							{this.myLooms()}
+							{loomFiles.map((loomFile, i) => {
+								let active = match.params.loom == loomFile.loomFilePath;
+								return (
+									<Link key={i} to={'/' + [match.params.uuid, loomFile.loomFilePath, match.params.page].join('/')} >
+										<Menu.Item active={active} key={loomFile.loomFilePath} >
+											<Icon name={active ? "selected radio" : "radio"} />
+											{loomFile.loomFilePath}
+										</Menu.Item>
+									</Link>
+								);
+							})}
+							<Dimmer active={loading} inverted>
+								<Loader inverted>Loading</Loader>
+							</Dimmer>
 						</Menu.Menu>
 					<Divider />
 					<Menu.Header style={{display:  showTransforms || showCoordinatesSelection ? 'block' : 'none'}} >SETTINGS</Menu.Header>
-					<Menu.Menu style={{display: showCoordinatesSelection ? 'block' : 'none'}}>
-						<Menu.Item>Coordinates</Menu.Item>
-						<Menu.Item>
-						<Dropdown placeholder="Select coordinates ID" labeled fluid  text={activeCoordinates.name} >
-							<Dropdown.Menu>
-								{this.myLoomCoordinates()}
-							</Dropdown.Menu>
-						</Dropdown>
-						</Menu.Item>
-					</Menu.Menu>
-					<Menu.Menu style={{display:  showTransforms ? 'block' : 'none'}}>
-						<Menu.Item>Gene expression</Menu.Item>
-						<Menu.Item>
-							<Checkbox toggle label="Log transform" checked={settings.hasLogTransform} onChange={this.toggleLogTransform.bind(this)} />
-						</Menu.Item>
-						<Menu.Item>
-							<Checkbox toggle label="CPM normalize" checked={settings.hasCpmNormalization} onChange={this.toggleCpmNormization.bind(this)} />
-						</Menu.Item>
-					</Menu.Menu>
+					{showCoordinatesSelection &&
+						<Menu.Menu>
+							<Menu.Item>Coordinates</Menu.Item>
+							<Menu.Item>
+								<Dropdown inline defaultValue={activeCoordinates} options={coordinates} onChange={this.setActiveCoordinates.bind(this)} />
+							</Menu.Item>
+						</Menu.Menu>
+					}
+					{ showTransforms && 
+						<Menu.Menu>
+							<Menu.Item>Gene expression</Menu.Item>
+							<Menu.Item>
+								<Checkbox toggle label="Log transform" checked={settings.hasLogTransform} onChange={this.toggleLogTransform.bind(this)} />
+							</Menu.Item>
+							<Menu.Item>
+								<Checkbox toggle label="CPM normalize" checked={settings.hasCpmNormalization} onChange={this.toggleCpmNormization.bind(this)} />
+							</Menu.Item>
+						</Menu.Menu>
+					}
 					<Divider />
 					<Menu.Menu className="logos">
 						<Image src='src/images/kuleuven.png' size="small" centered href="http://kuleuven.be" />
@@ -99,18 +125,23 @@ export default class AppSidebar extends Component {
 		);
 	}
 
-	componentDidMount() {
-		this.updateMyLooms();
+	componentWillMount() {
+		this.getLoomFiles();
 	}
 
-	updateMyLooms() {
-		let query = {};
+	getLoomFiles() {
+		const { match } = this.props;
+		let query = {
+			UUID: match.params.uuid
+		};
 		BackendAPI.getConnection().then((gbc) => {
+			if (DEBUG) console.log("getMyLooms", query);
 			gbc.services.scope.Main.getMyLooms(query, (error, response) => {
 				if (response !== null) {
-					if (DEBUG) console.log("updateMyLooms", response.myLooms);
-					this.setState({ myLooms: response.myLooms });
+					if (DEBUG) console.log("getMyLooms", response);
+					this.setState({ loomFiles: response.myLooms, loading: false });
 					BackendAPI.setLoomFiles(response.myLooms);
+					this.props.onMetadataChange(BackendAPI.getActiveLoomMetadata());
 				} else {
 					console.log("No .loom files detected. You can import one via Import .loom link.");
 				}
@@ -118,32 +149,6 @@ export default class AppSidebar extends Component {
 		}, () => {
 			console.log("Unable to connect to BackendAPI");
 		});
-	}
-
-	myLooms() {
-		if(this.state.myLooms.length > 0) {
-			return this.state.myLooms.map((loomFile) => {
-				let icon = <Icon name="radio" />
-				let active = loomFile.loomFilePath === this.state.activeLoom;
-				if (active) {
-					icon = <Icon name="selected radio" />
-				}
-				return (
-					<Menu.Item active={active} key={loomFile.loomFilePath} onClick={() => this.setActiveLoom(loomFile.loomFilePath)}>{icon} {loomFile.loomFilePath}</Menu.Item>
-				)
-			});
-		}
-	}
-
-	myLoomCoordinates() {
-		const { activeCoordinates, metadata } = this.state;
-		if (metadata && metadata.cellMetaData) {
-			return metadata.cellMetaData.embeddings.map((coords) => {
-				return (
-					<Dropdown.Item key={coords.id} text={coords.name} value={coords.id} active={activeCoordinates.id == coords.id} onClick={this.setActiveCoordinates.bind(this)} />
-				);
-			});
-		}
 	}
 
 	toggleUploadLoomModal(event) {
@@ -168,8 +173,9 @@ export default class AppSidebar extends Component {
 	}
 
 	uploadLoomFile() {
+		const { match } = this.props;
 		let file = this.state.uploadLoomFile
-		if (DEBUG) console.log(">", file)
+
 		if (file == null) {
 			alert("Please select a .loom file first")
 			return
@@ -184,33 +190,31 @@ export default class AppSidebar extends Component {
 			if (DEBUG) console.log("Data uploaded: " + event.loaded + "/" + event.total);
 			let progress = (event.loaded / event.total * 100).toPrecision(1);
 			this.setState({ uploadLoomProgress: progress });
-			if (event.loaded == event.total) {
-				if (DEBUG) console.log('Loom file '+ file.name +' successfully uploaded !');
-				this.setState({ uploadLoomFile: null, uploadLoomProgress: 0 })
-				this.updateMyLooms()
-				this.toggleUploadLoomModal()
-			}
 		});
+		xhr.upload.addEventListener('load', (event) => {
+			if (DEBUG) console.log('Loom file '+ file.name +' successfully uploaded !');
+			let query = {
+				UUID: match.params.uuid,
+				filename: file.name,
+			};
+			BackendAPI.getConnection().then((gbc) => {
+				if (DEBUG) console.log("loomUploaded", query);
+				gbc.services.scope.Main.loomUploaded(query, (error, response) => {
+					if (DEBUG) console.log("loomUploaded", response);
+					this.setState({ uploadLoomFile: null, uploadLoomProgress: 0 })
+					this.getLoomFiles()
+					this.toggleUploadLoomModal()
+				})
+			})
+		})
 		xhr.setRequestHeader("Content-Disposition", "attachment;filename=" + file.name)
 		xhr.send(form);
 	}
 
-	setActiveLoom(l) {
-		if (DEBUG) console.log('setActiveLoom', l);
-		BackendAPI.setActiveCoordinates(-1);
-		BackendAPI.setActiveLoom(l);
-		let metadata = BackendAPI.getActiveLoomMetadata();
-		this.setState({ activeLoom: l, metadata: metadata})
-		this.props.handleLoomChange(metadata);
-		if (metadata.fileMetaData.hasExtraEmbeddings) {
-			this.setState({ activeCoordinates: metadata.cellMetaData.embeddings[0] });
-		} else {
-			this.setState({ activeCoordinates: { id: -1, name: '' }});
-		}
-	}
-
 	setActiveCoordinates(evt, coords) {
 		BackendAPI.setActiveCoordinates(coords.value);
-		this.setState({ activeCoordinates: { id: coords.value, name: coords.text }});
+		this.setState({ activeCoordinates: coords.value });
 	}
 }
+
+export default withRouter(AppSidebar);

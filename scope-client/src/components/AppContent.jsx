@@ -1,25 +1,25 @@
 import React, { Component } from 'react';
+import { Route } from 'react-router-dom';
 import { Segment } from 'semantic-ui-react';
 import Welcome from './pages/Welcome';
 import Dataset from './pages/Dataset';
 import Expression from './pages/Expression';
 import Regulon from './pages/Regulon';
 import DNDCompare from './pages/DNDCompare';
+import Tutorial from './pages/Tutorial';
 
 export default class AppContent extends Component {
-
-	render () {
-
+	render() {
 		return (
 			<Segment style={{height: (window.innerHeight-85)+"px"}}>
 				{/* TODO: remove css calculations */}
-				{this.props.currentPage == 'welcome' && <Welcome />}
-				{this.props.currentPage == 'dataset' && <Dataset />}
-				{this.props.currentPage == 'expression' && <Expression />}
-				{this.props.currentPage == 'regulon' && <Regulon />}
-				{this.props.currentPage == 'dndcompare' && <DNDCompare />}
+				<Route path="/:uuid/:loom?/welcome" component={Welcome} />
+				<Route path="/:uuid/:loom?/dataset" component={Dataset} />
+				<Route path="/:uuid/:loom?/gene" component={Expression} />
+				<Route path="/:uuid/:loom?/regulon" component={Regulon} />
+				<Route path="/:uuid/:loom?/compare" component={DNDCompare} />
+				<Route path="/:uuid/:loom?/tutorial" component={Tutorial} />
 			</Segment>
 		);
-
 	}
 }

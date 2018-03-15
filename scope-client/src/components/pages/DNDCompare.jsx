@@ -18,7 +18,6 @@ class DNDCompare extends Component {
 		super(props);
 		this.state = {
 			activePage: BackendAPI.getActivePage(),
-			loomFiles: BackendAPI.getLoomFiles(),
 			multiLoom: BackendAPI.getActiveLooms(),
 			multiCoordinates: [BackendAPI.getActiveCoordinates()],
 			multiMetadata: [BackendAPI.getActiveLoomMetadata()],
@@ -37,6 +36,7 @@ class DNDCompare extends Component {
 			configuration: 'simple',
 			superposition: 'OR',
 		}
+		this.loomConf = [];
 		this.activeLoomListener = (loom, metadata, coordinates) => {
 			let multiLoom = this.state.multiLoom;
 			let multiCoordinates = this.state.multiCoordinates;
@@ -45,6 +45,10 @@ class DNDCompare extends Component {
 			multiCoordinates[0] = coordinates;
 			multiMetadata[0] = metadata;
 			this.setState({multiLoom: multiLoom, multiCoordinates: multiCoordinates, multiMetadata: multiMetadata});
+			let loomFiles = BackendAPI.getLoomFiles();
+			Object.keys(loomFiles).map(l => {
+				this.loomConf.push({text: l, value: l});
+			});
 		};
 		this.activeFeaturesListener = (features) => {
 			this.setState({activeFeatures: features});
@@ -70,10 +74,6 @@ class DNDCompare extends Component {
 			{ text: 'cross-reference', value: 'cross' },
 			{ text: 'multi-dataset', value: 'multi' },
 		]
-		this.loomConf = [];
-		Object.keys(this.state.loomFiles).map(l => {
-			this.loomConf.push({text: l, value: l});
-		});
 	}
 
 	render() {
@@ -230,7 +230,7 @@ class DNDCompare extends Component {
 											loomFile={configuration == 'multi' ? multiLoom[j] : multiLoom[0]}
 											activeFeatures={activeFeatures}
 											superposition={superposition}
-											activeCoordinates={configuration == 'multi' ? multiCoordinates[j] : multiCoordinates[0]}
+											activeCoordinates={configuration == 'multi' ? multiCoordinates[j] ? multiCoordinates[j] : -1 : multiCoordinates[0]}
 											activeAnnotations={va}
 											orientation={configuration =='one' ? 'one' : 'both'}
 											position={columns * i + j}
