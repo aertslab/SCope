@@ -135,9 +135,11 @@ export default class ViewerSidebar extends Component {
 					render: () => featureTab(i),
 				})
 		})
-
-		let annotations = this.props.getSelectedAnnotations();
-		console.log('annotations', annotations);
+		
+		let annotations = {}
+		if (this.props.getSelectedAnnotations) {
+			annotations = this.props.getSelectedAnnotations();
+		}
 
 		return (
 			<div>
