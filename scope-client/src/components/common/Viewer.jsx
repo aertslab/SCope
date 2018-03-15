@@ -495,12 +495,12 @@ export default class Viewer extends Component {
 			annotation: queryAnnotations,
 			logic: superposition,
 		};
-		if (DEBUG) console.log(this.props.name, 'getPoints', query);
-		this.startBenchmark("getPoints")
+		this.startBenchmark("getCoordinates")
+		if (DEBUG) console.log(this.props.name, 'getCoordinates', query);
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getCoordinates(query, (err, response) => {
 				// Update the coordinates and remove all previous data points
-				if (DEBUG) console.log(this.props.name, 'getPoints', response);
+				if (DEBUG) console.log(this.props.name, 'getCoordinates', response);
 				this.container.removeChildren();
 				if (response) {
 					let c = {
@@ -513,7 +513,7 @@ export default class Viewer extends Component {
 					console.log('Could not get the coordinates - empty response!')
 					this.setState({ coord:  {x: [], y: []}});
 				}
-				this.endBenchmark("getPoints");
+				this.endBenchmark("getCoordinates");
 				this.initializeDataPoints();
 				callback();
 			});
