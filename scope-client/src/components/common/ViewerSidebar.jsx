@@ -60,11 +60,9 @@ export default class ViewerSidebar extends Component {
 							&nbsp;
 							<Icon name='trash' title='remove this selection' style={{display: 'inline'}} onClick={(e,d) => this.removeLassoSelection(lS.id)} className="pointer"  />
 							&nbsp;
-							<Icon name='search' title='show metadata for this selection' style={{display: 'inline'}} disabled={activePage == 'dndcompare'} onClick={(e,d) => {
-								if (activePage != 'dndcompare') {
-									this.setState({modalID: i});
-									this.forceUpdate();
-								}
+							<Icon name='search' title='show metadata for this selection' style={{display: 'inline'}} onClick={(e,d) => {
+								this.setState({modalID: i});
+								this.forceUpdate();
 							}} className="pointer"  />
 						</Grid.Column>
 					</Grid.Row>
@@ -138,6 +136,9 @@ export default class ViewerSidebar extends Component {
 				})
 		})
 
+		let annotations = this.props.getSelectedAnnotations();
+		console.log('annotations', annotations);
+
 		return (
 			<div>
 				<Tab
@@ -150,10 +151,14 @@ export default class ViewerSidebar extends Component {
 						this.setState({activeTab: data.activeIndex});
 					}}
 				/>
-				<Metadata selectionId={this.state.modalID} onClose={() =>{
-					this.setState({modalID: null});
-					this.forceUpdate();
-				}} />
+				<Metadata 
+					selectionId={this.state.modalID} 
+					onClose={() =>{
+						this.setState({modalID: null});
+						this.forceUpdate();
+					}}
+					annotations={Object.keys(annotations)}
+				/>
 			</div>
 		);
 	}

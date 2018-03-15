@@ -9,8 +9,8 @@ export default class Metadata extends Component {
 		this.state = {
 			selectionId: props.selectionId,
 			loading: true,
-			annotation: null,
-			clustering: null,
+			annotation: props.annotations,
+			clustering: props.clusterings,
 			cellIDs: null,
 			metadata : null
 		}
@@ -98,7 +98,8 @@ export default class Metadata extends Component {
 							<Table.HeaderCell>{selectedRegulons[1]}</Table.HeaderCell>
 							<Table.HeaderCell>{selectedRegulons[2]}</Table.HeaderCell>
 							<Table.HeaderCell>
-								<Dropdown inline placeholder='select annotation' defaultValue={this.state.annotation} options={annotationOptions} onChange={(p, s) =>{
+								<Dropdown placeholder='select annotation' defaultValue={this.state.annotation} options={annotationOptions} multiple onChange={(p, s) =>{
+									console.log(s);
 									setTimeout(() => {
 										this.setState({annotation: s.value, metadata: null, loading: true});
 										this.getMetadata();
@@ -106,7 +107,8 @@ export default class Metadata extends Component {
 								}} />
 							</Table.HeaderCell>
 							<Table.HeaderCell>
-								<Dropdown inline placeholder='select clustering' defaultValue={this.state.clustering} options={clusteringOptions} onChange={(p, s) => {
+								<Dropdown inline placeholder='select clustering' defaultValue={this.state.clustering} options={clusteringOptions} multiple onChange={(p, s) => {
+									console.log(s);
 									setTimeout(() => {
 										this.setState({clustering: s.value, metadata: null, loading: true});
 										this.getMetadata();
@@ -171,7 +173,7 @@ export default class Metadata extends Component {
 	}
 
 	componentWillReceiveProps() {
-		this.forceUpdate();
+		this.setState({annotation: this.props.annotations, clustering: this.props.clustering});
 	}
 
 	closeModal() {
@@ -192,12 +194,12 @@ export default class Metadata extends Component {
 			hasCpmTransform: settings.hasCpmNormalization,
 			selectedGenes: selectedGenes,
 			selectedRegulons: selectedRegulons,
-			clusterings: this.state.clustering ? [this.state.clustering] : [],
-			annotations: this.state.annotation ? [this.state.annotation] : []
+			clusterings: this.state.clustering ? this.state.clustering : [],
+			annotations: this.state.annotation ? this.state.annotation : []
 		}
 		let queryCells = {
 			loomFilePath: loomFilePath,
-			cellIndices: selections[this.props.selectionId].points,
+			cellIndices: selections[this.props.selectionId].indices,
 		}
 		BackendAPI.getConnection().then((gbc) => {
 			if (DEBUG) console.log('getCellIDs', queryCells);

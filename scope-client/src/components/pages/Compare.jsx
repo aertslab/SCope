@@ -13,7 +13,7 @@ import ViewerToolbar from '../common/ViewerToolbar'
 import AnnotationDropContainer from '../common/AnnotationDropContainer'
 import ViewerDropContainer from '../common/ViewerDropContainer'
 
-class DNDCompare extends Component {
+class Compare extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -289,9 +289,12 @@ class DNDCompare extends Component {
 					</Grid.Column>
 					<Grid.Column width={3}>
 						<div className="chart-wrapper" id="chart-distro1" style={{width: '100%'}} height="200px"></div>
-						<ViewerSidebar	onActiveFeaturesChange={(features, id) => {
-							this.setState({activeFeatures: features});
-						}} />
+						<ViewerSidebar
+							getSelectedAnnotations={this.getSelectedAnnotations.bind(this)}
+							onActiveFeaturesChange={(features, id) => {
+								this.setState({activeFeatures: features});
+							}} 
+						/>
 					</Grid.Column>
 				</Grid.Row>
 			</Grid>
@@ -640,4 +643,4 @@ class DNDCompare extends Component {
 	}
 }
 
-export default DragDropContext(HTML5Backend)(DNDCompare);
+export default DragDropContext(HTML5Backend)(Compare);
