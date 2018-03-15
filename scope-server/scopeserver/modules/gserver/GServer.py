@@ -623,8 +623,8 @@ class SCope(s_pb2_grpc.MainServicer):
         annotations = []
         for anno in request.annotations:
             if anno != '':
-                vals = self.get_annotation(loom_file_path=loomFilePath,
-                                           annoName=anno)[cellIndices]
+                annotations.append(self.get_annotation(loom_file_path=loomFilePath,
+                                           annoName=anno)[cellIndices])
 
         return s_pb2.CellMetaDataReply(clusterIDs=[s_pb2.CellClusters(clusters=x) for x in cellClusters],
                                        geneExpression=[s_pb2.FeatureValues(features=x) for x in geneExp],
