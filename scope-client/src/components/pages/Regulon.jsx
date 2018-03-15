@@ -99,6 +99,7 @@ export default class Regulon extends Component {
                                         loomFile={activeLoom} 
                                         activeFeatures={activeFeatures} 
                                         activeCoordinates={activeCoordinates} 
+                                        scale={true} 
                                         genes={true}
                                         settings={true} 
                                         customScale={true} 
@@ -130,8 +131,7 @@ export default class Regulon extends Component {
     }
 
     onThresholdChange(idx, threshold) {
-        let feature = this.state.activeFeatures[idx];
-        BackendAPI.setActiveFeature(idx, feature.type, feature.featureType, feature.feature, threshold, feature.metadata);
+        BackendAPI.setFeatureThreshold(idx, threshold);
     }
 
 }

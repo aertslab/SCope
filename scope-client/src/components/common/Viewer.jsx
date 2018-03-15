@@ -642,7 +642,6 @@ export default class Viewer extends Component {
 			let r = (ca.r + ca.g + ca.b) - (cb.r + cb.g + cb.b);
 			return r;
 		})
-		console.log(pts);
 		pts.map((p, i) => {
 			let point = this.getTexturedColorPoint(p[1], p[2], p[3])
 			point._originalData.idx = p[0];

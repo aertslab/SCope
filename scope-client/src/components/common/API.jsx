@@ -142,6 +142,16 @@ class API {
 		})
 	}
 
+	setFeatureThreshold(id, threshold) {
+		let page = this.activePage;
+		let selectedFeatures = this.features[page] || [this.emptyFeature, this.emptyFeature, this.emptyFeature];
+		selectedFeatures[id].threshold = threshold;
+		this.features[page] = selectedFeatures;
+		(this.featureChangeListeners[page] || []).forEach((listener) => {
+			listener(selectedFeatures, id, this.customValues, this.maxValues);
+		})
+}
+
 	getMaxScale(id, callback) {
 		let settings = this.getSettings();
 		let selectedFeatures = this.features[this.activePage];
