@@ -715,31 +715,37 @@ class SCope(s_pb2_grpc.MainServicer):
     def getUUID(self, request, context):
         newUUID = str(uuid.uuid4())
         if newUUID not in curUUIDs.keys():
-            uuidLog.write("{0} :: {1} :: New UUID ({2}) assigned to IP".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, newUUID))
+            uuidLog.write("{0} :: {1} :: New UUID ({2}) assigned.\n".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, newUUID))
+            uuidLog.flush()
             curUUIDs[newUUID] = time.time()
         return s_pb2.UUIDReply(UUID=newUUID)
 
     def getRemainingUUIDTime(self, request, context):
-        curUUIDSet = curUUIDs.keys()
+        print(curUUIDs)
+        print(request.UUID)
+        curUUIDSet = set(list(curUUIDs.keys()))
         for uid in curUUIDSet:
-            timeRemaining = _UUID_TIMEOUT - (time.time() - curUUIDs[uid])
+            timeRemaining = int(_UUID_TIMEOUT - (time.time() - curUUIDs[uid]))
             if timeRemaining < 0:
+                print('Removing UUID: {0}'.format(uid))
                 del(curUUIDs[uid])
                 # os.rmdir()  # TODO: Remove the users loom files
         uid = request.UUID
         if uid in curUUIDs:
             startTime = curUUIDs[uid]
-            timeRemaining = _UUID_TIMEOUT - (time.time() - startTime)
-            uuidLog.write("{0} :: {1} :: Old UUID ({2}) connected from IP :: Time Remaining - {3}".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid, timeRemaining))
+            timeRemaining = int(_UUID_TIMEOUT - (time.time() - startTime))
+            uuidLog.write("{0} :: {1} :: Old UUID ({2}) connected :: Time Remaining - {3}.\n".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid, timeRemaining))
+            uuidLog.flush()
         else:
             try:
                 uuid.UUID(uid)
             except (KeyError, AttributeError):
                 uid = str(uuid.uuid4())
-            uuidLog.write("{0} :: {1} :: New UUID ({2}) assigned to IP".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid))
+            uuidLog.write("{0} :: {1} :: New UUID ({2}) assigned.\n".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid))
+            uuidLog.flush()
             curUUIDs[uid] = time.time()
-            timeRemaining = _UUID_TIMEOUT
-        return s_pb2.RemainingUUIDTimeReply(UUID=uid, timeRemaining=int(timeRemaining))
+            timeRemaining = int(_UUID_TIMEOUT)
+        return s_pb2.RemainingUUIDTimeReply(UUID=uid, timeRemaining=timeRemaining)
 
     def translateLassoSelection(self, request, context):
         src_loom = self.get_loom_connection(self.get_loom_filepath(request.srcLoomFilePath))
