@@ -1,6 +1,9 @@
 # SCope: Visualization of large-scale and high dimensional single cell data
 
-## Server
+SCope is a fast visualization tool for large-scale and high dimensional scRNA-seq datasets.
+Currently the format of the datasets supported by SCope is .loom. 
+
+## Development
 
 ### SCope Server
 
@@ -15,7 +18,23 @@ python setup.py develop
 scope-server
 ```
 
-- Packaging
+### SCope Client
+
+- Install
+```
+cd scope-client
+npm install
+```
+
+- Run (development version)
+```
+cd scope-client
+npm run dev
+```
+
+## Production
+
+### Packaging SCope Server
 
 Install python 3.6:
 ```
@@ -38,33 +57,20 @@ cd ..
 python3.6 setup.py develop
 ```
 
-Finally package the SCope Server:
+Package the SCope Server:
 ```
 pip3.6 install pyinstaller
 pyinstaller --onedir --hidden-import=scipy._lib.messagestream --hidden-import=pandas._libs.tslibs.timedeltas __init__.py
 ```
 
-### SCope Client
-
-- Install
-```
-cd scope-client
-npm install
-```
-
-- Run (development version)
-```
-cd scope-client
-npm run dev
-```
-
-### Packaging 
+### Packaging SCope
 
 First install electron-packager node module:
 ```
 sudo npm install electron-packager -g
 ```
 
+Finally, bundle the SCope app:
 - Linux (x64)
 ```
 npm run package-linux-x64
