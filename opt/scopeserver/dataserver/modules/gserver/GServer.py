@@ -1,9 +1,6 @@
 from concurrent import futures
 import time
 import grpc
-from scopeserver.modules.gserver import s_pb2
-from scopeserver.modules.gserver import s_pb2_grpc
-
 import loompy as lp
 from loompy import LoomConnection
 import hashlib
@@ -16,8 +13,13 @@ import json
 import glob
 import zlib
 import base64
+import threading
 from functools import lru_cache
 from itertools import compress
+from pathlib import Path
+
+from scopeserver.dataserver.modules.gserver import s_pb2
+from scopeserver.dataserver.modules.gserver import s_pb2_grpc
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "bf9360", "1d331a", "79baf2", "deb6f2",
@@ -48,12 +50,11 @@ BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "b
 
 hexarr = np.vectorize('{:02x}'.format)
 
-
 class SCope(s_pb2_grpc.MainServicer):
 
     def __init__(self):
         self.active_loom_connections = {}
-        self.loom_dir = os.path.join("data", "my-looms")
+        self.loom_dir = os.path.join(str(Path.home()), ".scope", "data", "my-looms")
 
     @staticmethod
     def get_partial_md5_hash(file_path, last_n_kb):
@@ -491,4 +492,6 @@ def serve(run_event, port=50052):
 
 
 if __name__ == '__main__':
-    serve()
+    run_event = threading.Event()
+    run_event.set()
+    serve(run_event=run_event)

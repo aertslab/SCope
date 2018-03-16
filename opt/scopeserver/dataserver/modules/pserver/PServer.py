@@ -13,6 +13,8 @@ import tempfile
 from http import server as httpserver
 import socketserver
 from urllib import parse as urllibparse
+from pathlib import Path
+
 unicode = str
 
 def _decode_str_if_py2(inputstr, encoding='utf-8'):
@@ -213,9 +215,13 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
             self.log_message("Started file transfer")
             # -- Save file (numbered to avoid overwriting, ex: foo-3.png)
             form = DroopyFieldStorage(fp=self.rfile,
-                                      directory=self.directory,
+                                      directory='',
                                       headers=self.headers,
                                       environ={'REQUEST_METHOD': self.command})
+            # Set the output directory
+            self.directory = os.path.join(str(Path.home()), ".scope", "data", "my-looms")
+            form.directory = self.directory
+
             file_items = form[self.form_field]
             #-- Handle multiple file upload
             if not isinstance(file_items, list):
@@ -327,7 +333,7 @@ def run(run_event,
         port=50051,
         templates=None,
         localisations=None,
-        directory='data/my-looms',
+        directory='',
         timeout=3*60,
         file_mode=None,
         publish_files=False,

@@ -13,7 +13,7 @@ let config = {
     output: {
         path: path.resolve('assets'),
         // filename: 'main.js',
-        publicPath: '/assets/',
+        publicPath: './assets/',
         filename: pkg.name +'-'+ pkg.version +'.[githash].js',
         chunkFilename: pkg.name +'-chunk.[githash].js'
     },
