@@ -3,6 +3,10 @@
 SCope is a fast visualization tool for large-scale and high dimensional scRNA-seq datasets.
 Currently the format of the datasets supported by SCope is .loom. 
 
+Architecture of SCope can be visualized below:
+
+![GitHub Logo](/images/SCope_architecture.png)
+
 ## Development
 
 ### SCope Server
