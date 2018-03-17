@@ -80,3 +80,9 @@ Finally, bundle the SCope app:
 npm run package-linux-x64
 sudo tar -zcvf scope-linux-x64.tar.gz scope-linux-x64
 ```
+Run the binary:
+```
+./release/scope-linux-x64/scope
+```
+
+All the uploaded data from SCope will be put ~/.scope/data,

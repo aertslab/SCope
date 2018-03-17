@@ -1,0 +1,16 @@
+altgraph==0.15: MIT
+future==0.16.0: MIT
+grpcio==1.10.0: Apache License 2.0
+h5py==2.8.0rc1: BSD
+loompy==2.0.7: BSD
+macholib==1.9: MIT
+numpy==1.14.2: BSD
+pandas==0.22.0: BSD
+pefile==2017.11.5: UNKNOWN
+protobuf==3.5.2: 3-Clause BSD License
+PyInstaller==3.3.1: GPL license with a special exception which allows to use PyInstaller to build and distribute non-free programs (including commercial ones)
+python-dateutil==2.7.0: Apache 2.0
+pytz==2018.3: MIT
+scipy==1.0.0: BSD
+six==1.11.0: MIT
+typing==3.6.4: PSF
