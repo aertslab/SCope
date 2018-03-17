@@ -170,7 +170,7 @@ export default class Viewer extends Component {
 		if (DEBUG) console.log("Initializing Viewer ", this.props.name);
 		this.renderer = PIXI.autoDetectRenderer(this.w, this.h, { backgroundColor: 0xFFFFFF, antialias: true, view: this.zoomSelection.node() });
 		this.stage = new PIXI.Container();
-		this.stage.blendMode = PIXI.BLEND_MODES.ADD;
+//		this.stage.blendMode = PIXI.BLEND_MODES.ADD;
 		this.stage.width = this.w;
 		this.stage.height = this.h;
 		this.renderer.render(this.stage);
@@ -240,7 +240,7 @@ export default class Viewer extends Component {
 		this.lassoLayer.width = this.w;
 		this.lassoLayer.height = this.h;
 		this.selectionsLayer = new PIXI.Container();
-		this.selectionsLayer.blendMode = PIXI.BLEND_MODES.ADD;
+//		this.selectionsLayer.blendMode = PIXI.BLEND_MODES.ADD;
 		this.selectionsLayer.width = this.w;
 		this.selectionsLayer.height = this.h;
 		this.lassoLayer.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);

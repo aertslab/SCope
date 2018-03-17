@@ -35,8 +35,9 @@ class API {
 
 		this.colors = ["red", "green", "blue"];
 
-		this.maxValues = [0, 0, 0];
-		this.customValues = [0, 0, 0];
+		this.maxValues = {};
+		this.maxValuesChangeListeners = [];
+		this.customValues = {};
 		this.customValuesChangeListeners = [];
 
 		this.uuid = null;
@@ -148,14 +149,16 @@ class API {
 		selectedFeatures[id].threshold = threshold;
 		this.features[page] = selectedFeatures;
 		(this.featureChangeListeners[page] || []).forEach((listener) => {
-			listener(selectedFeatures, id, this.customValues, this.maxValues);
+			listener(selectedFeatures, id, this.customValues[page], this.maxValues[page]);
 		})
-}
+	}
 
 	getMaxScale(id, callback) {
 		let settings = this.getSettings();
-		let selectedFeatures = this.features[this.activePage];
+		let page = this.activePage;
+		let selectedFeatures = this.features[page];
 		if (!selectedFeatures) return;
+		if (DEBUG) console.log('getMaxScale', id, page);
 		let query = {
 			loomFilePath: this.getActiveLooms(),
 			feature: selectedFeatures.map(f => {return f.feature}),
@@ -167,12 +170,26 @@ class API {
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getVmax(query, (err, response) => {
 				if (DEBUG) console.log('getVmax', response);
-				if (id != null) this.customValues[id] = response.vmax[id];
-				else this.customValues = response.vmax;
-				this.maxValues = response.maxVmax;
-				callback(this.customValues, this.maxValues);
+				if (id != null) this.customValues[page][id] = response.vmax[id];
+				else this.customValues[page] = response.vmax;
+				this.maxValues[page] = response.maxVmax;
+				this.maxValuesChangeListeners.forEach(listener => {
+					listener(this.maxValues[page]);
+				})
+				callback(this.customValues[page], this.maxValues[page]);
 			})
 		})
+	}
+
+	onFeatureScaleChange(listener) {
+		this.maxValuesChangeListeners.push(listener);
+	}
+
+	removeFeatureScaleChange(listener) {
+		let i = this.maxValuesChangeListeners.indexOf(listener);
+		if (i > -1) {
+			this.maxValuesChangeListeners.splice(i, 1);
+		}
 	}
 
 	onActiveFeaturesChange(page, listener) {
@@ -207,24 +224,26 @@ class API {
 					}
 				})
 			}
+
 		})
 		return { selectedGenes, selectedRegulons, selectedClusters }
 	}
 
 
 	getFeatureScale() {
-		return this.maxValues;
+		console.log('getFeatureScale', this.maxValues);
+		return this.maxValues[this.activePage] || [0, 0, 0];
 	}
 
 
 	getCustomScale() {
-		return this.customValues;
+		return this.customValues[this.activePage] || [0, 0, 0];
 	}
 
 	setCustomScale(scale) {
-		this.customValues = scale.slice(0);
+		this.customValues[this.activePage] = scale.slice(0);
 		this.customValuesChangeListeners.forEach((listener) => {
-			listener(this.customValues);
+			listener(this.customValues[this.activePage]);
 		})
 	}
 
@@ -246,8 +265,8 @@ class API {
 	}
 
 	setActivePage(page) {
-		this.maxValues = [0, 0, 0];
-		this.customValues = [0, 0, 0];
+		this.maxValues[page] = this.maxValues[page] || [0, 0, 0];
+		this.customValues[page] = this.customValues[page] || [0, 0, 0];
 		this.activePage = page;
 		this.activePageListeners.forEach((listener) => {
 			listener(this.activePage);

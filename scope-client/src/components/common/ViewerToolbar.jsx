@@ -19,9 +19,15 @@ export default class ViewerToolbar extends Component {
 
 		}
 		this.activeFeaturesListener = (features, id, customScale, featuresScale) => {
+			console.log('activeFeaturesListener', featuresScale);
 			this.setState({activeFeatures: features, featuresScale: featuresScale, customScale: customScale});
 		}
+		this.featuresScaleListener = (featuresScale) => {
+			console.log('featuresScaleListener', featuresScale);
+			this.setState({featuresScale: featuresScale});
+		}
 		this.settingsListener = (settings, customScale, featuresScale) => {
+			console.log('settingsListener')
 			this.setState({featuresScale: featuresScale, customScale: customScale});
 		}
 	}
@@ -30,6 +36,8 @@ export default class ViewerToolbar extends Component {
 		const { activeTool, activeFeatures, colors, featuresScale, customScale } = this.state;
 		const createSliderWithTooltip = Slider.createSliderWithTooltip;
 		const TooltipSlider = createSliderWithTooltip(Slider);
+
+		console.log('ViewerToolbar render', featuresScale)
 
 		let levels = false;
 		let sliders = _.times(3, i => {
@@ -79,12 +87,14 @@ export default class ViewerToolbar extends Component {
 	componentWillMount() {
         BackendAPI.onActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
 		BackendAPI.onSettingsChange(this.settingsListener);
+		BackendAPI.onFeatureScaleChange(this.featuresScaleListener);
         //this.onActiveFeaturesChange(this.state.activeFeatures);
 	}
 
 	componentWillUnmount() {
         BackendAPI.removeActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
 		BackendAPI.removeSettingsChange(this.settingsListener);
+		BackendAPI.removeFeatureScaleChange(this.featuresScaleListener);
 	}
 
 	handleItemClick(e, tool) {

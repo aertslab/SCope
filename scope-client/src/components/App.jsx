@@ -63,7 +63,7 @@ class App extends Component {
 
 	componentWillMount() {
 		this.parseURLParams(this.props);
-		this.getUUID(this.props);
+		this.getUUIDFromIP(this.props);
 	}
 
 	componentWillUnmount() {
@@ -73,41 +73,47 @@ class App extends Component {
 	componentWillReceiveProps(nextProps) {
 		this.parseURLParams(nextProps);
 		if (this.state.uuid != nextProps.match.params.uuid)
-			this.getUUID(nextProps);
+			this.getUUIDFromIP(nextProps);
 	}
 
 	parseURLParams(props) {
 		let loom = props.match.params.loom;
 		let page = props.match.params.page;
-		BackendAPI.setActiveLoom(loom ? loom : '');
 		BackendAPI.setActivePage(page ? page : 'welcome');
+		BackendAPI.setActiveLoom(loom ? loom : '');
 		ReactGA.pageview('/' + loom + '/' + page);
 	}
 
-	getUUID(props) {
+	getUUIDFromIP(props) {
+		publicIp.v4().then(ip => {
+			this.getUUID(props, ip)
+		}, () => {
+			this.getUUID(props);
+		});
+	}
+
+	getUUID(props, ip) {
 		const { cookies, match } = props;
 
-		publicIp.v4().then(ip => {
-			if (match.params.uuid) {
-				if (DEBUG) console.log('Params UUID detected');
-				this.checkUUID(ip, match.params.uuid);
-			} else if (cookies.get(cookieName)) {
-				if (DEBUG) console.log('Cookie UUID detected');
-				this.checkUUID(ip, cookies.get(cookieName));
-			} else {
-				if (DEBUG) console.log('No UUID detected');
-				BackendAPI.getConnection().then((gbc) => {
-					let query = {
-						ip: ip
-					}
-					if (DEBUG) console.log('getUUID', query);
-					gbc.services.scope.Main.getUUID(query, (err, response) => {
-						if (DEBUG) console.log('getUUID', response);
-						this.checkUUID(ip, response.UUID);
-					})
+		if (match.params.uuid) {
+			if (DEBUG) console.log('Params UUID detected');
+			this.checkUUID(ip, match.params.uuid);
+		} else if (cookies.get(cookieName)) {
+			if (DEBUG) console.log('Cookie UUID detected');
+			this.checkUUID(ip, cookies.get(cookieName));
+		} else {
+			if (DEBUG) console.log('No UUID detected');
+			BackendAPI.getConnection().then((gbc) => {
+				let query = {
+					ip: ip
+				}
+				if (DEBUG) console.log('getUUID', query);
+				gbc.services.scope.Main.getUUID(query, (err, response) => {
+					if (DEBUG) console.log('getUUID', response);
+					this.checkUUID(ip, response.UUID);
 				})
-			}
-		});
+			})
+		}
 	}
 
 	checkUUID(ip, uuid) {

@@ -82,7 +82,7 @@ export default class Regulon extends Component {
                                     <b>Cells passing thresholds</b>
                                     <Viewer 
                                         name="auc" 
-                                        height={3 * this.height / 2 - 15} 
+                                        height={3 * this.height / 2 - 20} 
                                         loomFile={activeLoom} 
                                         activeFeatures={activeFeatures}                             
                                         activeCoordinates={activeCoordinates} 
@@ -90,12 +90,12 @@ export default class Regulon extends Component {
                                     />
                                 </Grid.Column>
                             </Grid.Row>
-                            <Grid.Row>
+                            <Grid.Row style={{paddingTop: '0px'}}>
                                 <Grid.Column>
                                     <b>Expression levels</b>
                                     <Viewer 
                                         name="expr" 
-                                        height={3 * this.height / 2 - 15} 
+                                        height={3 * this.height / 2 - 20} 
                                         loomFile={activeLoom} 
                                         activeFeatures={activeFeatures} 
                                         activeCoordinates={activeCoordinates} 
