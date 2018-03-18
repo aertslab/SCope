@@ -52,13 +52,6 @@ BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "b
 
 hexarr = np.vectorize('{:02x}'.format)
 
-if not os.path.isdir('logs'):
-    print('No log folder detected. Making log folder in current directory.')
-    os.makedirs('logs')
-
-logDir = os.path.join('logs')
-uuidLog = open(os.path.join(logDir, 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()))), 'w')
-
 # globalLooms = set([
 #                    'FlyBrain_56k_v6.loom',
 #                    'Desplan_OpticLobe_V1.loom',
@@ -75,13 +68,17 @@ class SCope(s_pb2_grpc.MainServicer):
     def __init__(self):
         # Create the data directories
         SCope.set_root_dir()
-        SCope.set_data_dir()
+        SCope.set_data_dirs()
         SCope.create_dirs()
+        SCope.create_uuid_log()
         SCope.set_global_looms()
         SCope.load_gene_mappings()
         self.active_loom_connections = {}
         self.loom_dir = SCope.get_data_dir_path_by_file_type("Loom")
         self.gene_sets_dir = SCope.get_data_dir_path_by_file_type("Loom")
+
+    def create_uuid_log():
+        SCope.uuid_log = open(os.path.join(SCope.get_logs_dir(), 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()))), 'w')
 
     @staticmethod
     def load_gene_mappings():
@@ -95,11 +92,15 @@ class SCope(s_pb2_grpc.MainServicer):
         SCope.root = "dataserver" if SCope.DEV_ENV else os.path.join(str(Path.home()), ".scope")
     
     @staticmethod
-    def set_data_dir():
+    def set_data_dirs():
         SCope.data_dirs = {"Loom": {"path":os.path.join(SCope.root,"data","my-looms"), "message": "No data folder detected. Making loom data folder in current directory."}
-                          , "GeneSet": {"path":os.path.join(SCope.root,"data","my-gene-sets"), "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."}
-                          , "LoomAUCellRankings": {"path":os.path.join(SCope.root,"data","my-aucell-rankings"), "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
+                         , "GeneSet": {"path":os.path.join(SCope.root,"data","my-gene-sets"), "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."}
+                         , "LoomAUCellRankings": {"path":os.path.join(SCope.root,"data","my-aucell-rankings"), "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
 
+    @staticmethod
+    def get_logs_dir():
+        return os.path.join(SCope.root,"logs")
+    
     @staticmethod
     def set_global_looms():
         print(SCope.data_dirs["Loom"]["path"])
@@ -116,10 +117,16 @@ class SCope(s_pb2_grpc.MainServicer):
 
     @staticmethod
     def create_dirs():
+        # Create data directories if not exists
         for data_type in SCope.data_dirs.keys():
             if not os.path.isdir(SCope.data_dirs[data_type]["path"]):
                 print(SCope.data_dirs[data_type]["message"])
                 os.makedirs(SCope.data_dirs[data_type]["path"])
+        # Create log directory if not exists
+        logs_dir = SCope.get_logs_dir()
+        if not os.path.isdir(logs_dir):
+            print('No log folder detected. Making log folder in current directory.')
+            os.makedirs(logs_dir)
 
     @staticmethod
     def get_partial_md5_hash(file_path, last_n_kb):
@@ -735,7 +742,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def getUUID(self, request, context):
         newUUID = str(uuid.uuid4())
         if newUUID not in curUUIDs.keys():
-            uuidLog.write("{0} :: {1} :: New UUID ({2}) assigned to IP".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, newUUID))
+            SCope.uuid_log.write("{0} :: {1} :: New UUID ({2}) assigned to IP".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, newUUID))
             curUUIDs[newUUID] = time.time()
         return s_pb2.UUIDReply(UUID=newUUID)
 
@@ -750,13 +757,13 @@ class SCope(s_pb2_grpc.MainServicer):
         if uid in curUUIDs:
             startTime = curUUIDs[uid]
             timeRemaining = _UUID_TIMEOUT - (time.time() - startTime)
-            uuidLog.write("{0} :: {1} :: Old UUID ({2}) connected from IP :: Time Remaining - {3}".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid, timeRemaining))
+            SCope.uuid_log.write("{0} :: {1} :: Old UUID ({2}) connected from IP :: Time Remaining - {3}".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid, timeRemaining))
         else:
             try:
                 uuid.UUID(uid)
             except (KeyError, AttributeError):
                 uid = str(uuid.uuid4())
-            uuidLog.write("{0} :: {1} :: New UUID ({2}) assigned to IP".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid))
+            SCope.uuid_log.write("{0} :: {1} :: New UUID ({2}) assigned to IP".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid))
             curUUIDs[uid] = time.time()
             timeRemaining = _UUID_TIMEOUT
         return s_pb2.RemainingUUIDTimeReply(UUID=uid, timeRemaining=int(timeRemaining))
@@ -921,7 +928,7 @@ def serve(run_event, dev_env, port=50052):
         time.sleep(0.1)
 
     # Write UUIDs to file here
-    uuidLog.close()
+    SCope.uuid_log.close()
     server.stop(0)
 
 
