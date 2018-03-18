@@ -1,4 +1,4 @@
-# SCope Server/Client
+# SCope Data Server
 
 ## G-Server
 
