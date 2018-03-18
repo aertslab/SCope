@@ -47,6 +47,7 @@ npm run dev
 
 Install python 3.6:
 ```
+sudo apt-get install libsqlite3-dev
 sudo add-apt-repository ppa:jonathonf/python-3.6
 sudo apt-get update
 sudo apt-get install python3.6
@@ -69,7 +70,7 @@ python3.6 setup.py develop
 Package the SCope Server:
 ```
 pip3.6 install pyinstaller
-pyinstaller --onedir --hidden-import=scipy._lib.messagestream --hidden-import=pandas._libs.tslibs.timedeltas __init__.py
+pyinstaller --onedir --hidden-import=scipy._lib.messagestream --hidden-import=pandas._libs.tslibs.timedeltas  --hidden-import=cytoolz.utils --hidden-import=cytoolz._signatures __init__.py
 ```
 
 ### Packaging SCope

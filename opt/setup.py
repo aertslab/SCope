@@ -19,5 +19,6 @@ setup(name='scope-server',
           'loompy>=2.0',
           'pandas',
           'numpy'
+          'pyscenic'
       ],
       zip_safe=False)
