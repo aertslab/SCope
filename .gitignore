@@ -34,6 +34,8 @@ opt/scopeserver/data/my-looms
 opt/scopeserver/dist/
 opt/scopeserver/pyvenv
 opt/scopeserver/build
+opt/scopeserver/logs
 opt/scope_server.egg-info
 
 release/*
+release/logs

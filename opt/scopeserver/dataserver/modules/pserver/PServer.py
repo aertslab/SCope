@@ -14,7 +14,7 @@ from http import server as httpserver
 import socketserver
 from urllib import parse as urllibparse
 from pathlib import Path
-from scopeserver.modules.gserver import GServer
+from scopeserver.dataserver.modules.gserver import GServer
 
 unicode = str
 

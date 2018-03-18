@@ -52,11 +52,6 @@ BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "b
 
 hexarr = np.vectorize('{:02x}'.format)
 
-dataDir = os.path.join(Path(__file__).resolve().parents[3], 'data', 'gene_mappings')
-dmel_mappings = pickle.load(open(os.path.join(dataDir, 'terminal_mappings.pickle'), 'rb'))
-hsap_to_dmel_mappings = pickle.load(open(os.path.join(dataDir, 'hsap_to_dmel_mappings.pickle'), 'rb'))
-mmus_to_dmel_mappings = pickle.load(open(os.path.join(dataDir, 'mmus_to_dmel_mappings.pickle'), 'rb'))
-
 if not os.path.isdir('logs'):
     print('No log folder detected. Making log folder in current directory.')
     os.makedirs('logs')
@@ -72,41 +67,59 @@ uuidLog = open(os.path.join(logDir, 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%
 #                    'dentate_gyrus_C_10X_V2_update.loom'
 #                    ])
 
-production = True
-if production:
-    root = os.path.join(str(Path.home()), ".scope")
-else:
-    root = "."
-
-data_dirs = {"Loom": {"path":os.path.join("data","my-looms"), "message": "No data folder detected. Making loom data folder in current directory."}
-           , "GeneSet": {"path":os.path.join("data","my-gene-sets"), "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."}
-           , "LoomAUCellRankings": {"path":os.path.join("data","my-aucell-rankings"), "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
-
-globalLooms = set(os.listdir(data_dirs["Loom"]["path"]))
-
 curUUIDs = {}
 uploadedLooms = defaultdict(lambda: set())
 
 class SCope(s_pb2_grpc.MainServicer):
 
     def __init__(self):
-        self.active_loom_connections = {}
-        self.loom_dir = os.path.join(str(Path.home()), ".scope", "data", "my-looms")
-        self.loom_dir = data_dirs["Loom"]["path"]
-        self.gene_sets_dir = data_dirs["GeneSet"]["path"]
         # Create the data directories
+        SCope.set_root_dir()
+        SCope.set_data_dir()
         SCope.create_dirs()
+        SCope.set_global_looms()
+        SCope.load_gene_mappings()
+        self.active_loom_connections = {}
+        self.loom_dir = SCope.get_data_dir_path_by_file_type("Loom")
+        self.gene_sets_dir = SCope.get_data_dir_path_by_file_type("Loom")
+
+    @staticmethod
+    def load_gene_mappings():
+        gene_mappings_dir_path = os.path.join('dataserver', 'data', 'gene_mappings') if SCope.DEV_ENV else os.path.join('opt', 'scopeserver', 'dataserver', 'data', 'gene_mappings')
+        SCope.dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'terminal_mappings.pickle'), 'rb'))
+        SCope.hsap_to_dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'hsap_to_dmel_mappings.pickle'), 'rb'))
+        SCope.mmus_to_dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'mmus_to_dmel_mappings.pickle'), 'rb'))
+
+    @staticmethod
+    def set_root_dir():
+        SCope.root = "dataserver" if SCope.DEV_ENV else os.path.join(str(Path.home()), ".scope")
+    
+    @staticmethod
+    def set_data_dir():
+        SCope.data_dirs = {"Loom": {"path":os.path.join(SCope.root,"data","my-looms"), "message": "No data folder detected. Making loom data folder in current directory."}
+                          , "GeneSet": {"path":os.path.join(SCope.root,"data","my-gene-sets"), "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."}
+                          , "LoomAUCellRankings": {"path":os.path.join(SCope.root,"data","my-aucell-rankings"), "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
+
+    @staticmethod
+    def set_global_looms():
+        print(SCope.data_dirs["Loom"]["path"])
+        SCope.globalLooms = set(os.listdir(SCope.data_dirs["Loom"]["path"]))
+    
+    @staticmethod
+    def get_global_looms():
+        print(SCope.globalLooms)
+        return SCope.globalLooms
 
     @staticmethod
     def get_data_dir_path_by_file_type(file_type):
-        return data_dirs[file_type]["path"]
+        return SCope.data_dirs[file_type]["path"]
 
     @staticmethod
     def create_dirs():
-        for data_type in data_dirs.keys():
-            if not os.path.isdir(data_dirs[data_type]["path"]):
-                print(data_dirs[data_type]["message"])
-                os.makedirs(data_dirs[data_type]["path"])
+        for data_type in SCope.data_dirs.keys():
+            if not os.path.isdir(SCope.data_dirs[data_type]["path"]):
+                print(SCope.data_dirs[data_type]["message"])
+                os.makedirs(SCope.data_dirs[data_type]["path"])
 
     @staticmethod
     def get_partial_md5_hash(file_path, last_n_kb):
@@ -148,7 +161,7 @@ class SCope(s_pb2_grpc.MainServicer):
         maxPerc = 0.0
         maxSpecies = ''
         mappings = {
-            'dmel': dmel_mappings
+            'dmel': SCope.dmel_mappings
         }
         for species in mappings.keys():
             intersect = genes.intersection(mappings[species].keys())
@@ -257,15 +270,15 @@ class SCope(s_pb2_grpc.MainServicer):
         searchSpace = {}
 
         if crossSpecies == 'hsap' and species == 'dmel':
-            searchSpace = add_element(searchSpace, hsap_to_dmel_mappings.keys(), 'gene')
+            searchSpace = add_element(searchSpace, SCope.hsap_to_dmel_mappings.keys(), 'gene')
         elif crossSpecies == 'mmus' and species == 'dmel':
-            searchSpace = add_element(searchSpace, mmus_to_dmel_mappings.keys(), 'gene')
+            searchSpace = add_element(searchSpace, SCope.mmus_to_dmel_mappings.keys(), 'gene')
 
         else:
             if len(geneMappings) > 0:
                 genes = set(SCope.get_genes(loom))
-                shrinkMappings = set([x for x in dmel_mappings.keys() if x in genes or dmel_mappings[x] in genes])
-                # searchSpace = add_element(searchSpace, dmel_mappings.keys(), 'gene')
+                shrinkMappings = set([x for x in SCope.dmel_mappings.keys() if x in genes or SCope.dmel_mappings[x] in genes])
+                # searchSpace = add_element(searchSpace, SCope.dmel_mappings.keys(), 'gene')
                 searchSpace = add_element(searchSpace, shrinkMappings, 'gene')
             else:
                 searchSpace = add_element(searchSpace, SCope.get_genes(loom), 'gene')
@@ -341,12 +354,12 @@ class SCope(s_pb2_grpc.MainServicer):
                     collapsedResults[(searchSpace[r], r[2])].append(r[1])
         elif crossSpecies == 'hsap':
             for r in res:
-                for dg in hsap_to_dmel_mappings[searchSpace[r]]:
+                for dg in SCope.hsap_to_dmel_mappings[searchSpace[r]]:
                     if (dg[0], r[2]) not in collapsedResults.keys():
                         collapsedResults[(dg[0], r[2])] = (r[1], dg[1])
         elif crossSpecies == 'mmus':
             for r in res:
-                for dg in mmus_to_dmel_mappings[searchSpace[r]]:
+                for dg in SCope.mmus_to_dmel_mappings[searchSpace[r]]:
                     if (dg[0], r[2]) not in collapsedResults.keys():
                         collapsedResults[(dg[0], r[2])] = (r[1], dg[1])
 
@@ -688,7 +701,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getMyLooms(self, request, context):
         my_looms = []
-        loomsToProcess = globalLooms
+        loomsToProcess = SCope.get_global_looms()
         allLooms = os.listdir(self.loom_dir)
 
         if request.UUID in uploadedLooms.keys():
@@ -895,7 +908,8 @@ class GeneSetEnrichment:
         return s_pb2.LoomUploadedReply()
 
 
-def serve(run_event, port=50052):
+def serve(run_event, dev_env, port=50052):
+    SCope.DEV_ENV = dev_env
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     s_pb2_grpc.add_MainServicer_to_server(SCope(), server)
     server.add_insecure_port('[::]:{0}'.format(port))

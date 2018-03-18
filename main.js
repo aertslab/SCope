@@ -79,7 +79,7 @@ const getBindServerPort = () => {
 
 const startBindServer = () => {
   const exec = require('child_process').exec;
-  const bindServerProc = exec('cd '+ BINDSERVER_FOLDER +'; node '+ path.join(BINDSERVER_FOLDER, BINDSERVER_MODULE) +" "+ getBindServerPort(), (e, stdout, stderr)=> {
+  const bindServerProc = exec('cd '+ BINDSERVER_FOLDER +'; node '+ BINDSERVER_MODULE +" "+ getBindServerPort(), (e, stdout, stderr)=> {
       if (e instanceof Error) {
           // Error when loading .loom file: Error: stdout maxBuffer exceeded
           // console.error(e);
@@ -129,7 +129,7 @@ const createWindow = () => {
   // Set the size of the window to the size of the available screen
   const {width, height} = electron.screen.getPrimaryDisplay().workAreaSize
   mainWindow = new BrowserWindow({width: width, height: height, webPreferences: {
-    devTools: true
+    devTools: false
   }})
   mainWindow.loadURL(require('url').format({
     pathname: path.join(__dirname, 'index.html'),
