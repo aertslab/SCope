@@ -14,6 +14,7 @@ from http import server as httpserver
 import socketserver
 from urllib import parse as urllibparse
 from pathlib import Path
+from scopeserver.modules.gserver import GServer
 
 unicode = str
 
@@ -213,16 +214,20 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
         "Standard method to override in this Server object."
         try:
             self.log_message("Started file transfer")
-            # -- Save file (numbered to avoid overwriting, ex: foo-3.png)
             form = DroopyFieldStorage(fp=self.rfile,
                                       directory='',
                                       headers=self.headers,
                                       environ={'REQUEST_METHOD': self.command})
-            # Set the output directory
-            self.directory = os.path.join(str(Path.home()), ".scope", "data", "my-looms")
-            form.directory = self.directory
 
+            if form.getvalue('file-type') in GServer.data_dirs.keys():
+                self.directory = GServer.SCope.get_data_dir_path_by_file_type(file_type=form.getvalue('file-type'))
+            else:
+                self.send_error(415, "Unsupported file tyype")
+            # Update the directory of DroopyFieldStorage
+            form.directory = self.directory
+            print("Saving uploaded file in "+ self.directory)
             file_items = form[self.form_field]
+
             #-- Handle multiple file upload
             if not isinstance(file_items, list):
                 file_items = [file_items]

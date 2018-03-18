@@ -1,112 +1,185 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
-import { Grid, Input, Icon } from 'semantic-ui-react'
-import { BackendAPI } from '../common/API' 
+import { Grid, Input, Icon, Tab, Image } from 'semantic-ui-react'
+import { BackendAPI } from '../common/API'
+import Metadata from '../common/Metadata'
 
 export default class ViewerSidebar extends Component {
-    
-    constructor() {
-        super();
-        this.state = {
-            activePage: BackendAPI.getActivePage(),
-            lassoSelections: BackendAPI.getViewerSelections()
-        }
-        this.featuresListener = (features) => {
 
-        }
-        this.selectionsListener = (selections) => {
-            //getCellMetaData 
-            this.getMetadata(selections);
-            this.setState({lassoSelections: selections});
-        }        
-    }
+	constructor() {
+		super();
+		this.state = {
+			activePage: BackendAPI.getActivePage(),
+			activeFeatures: BackendAPI.getActiveFeatures(),
+			lassoSelections: BackendAPI.getViewerSelections(),
+			modalID: null,
+			activeTab: 0
+		};
+		this.selectionsListener = (selections) => {
+			this.setState({lassoSelections: selections, activeTab: 0});
+		};
+		this.activeFeaturesListener = (features, id) => {
+			this.props.onActiveFeaturesChange(features, id);
+			this.setState({activeFeatures: features, activeTab: parseInt(id) + 1});
+		};
+	}
 
-    render() {
+	render() {
+		const { lassoSelections, activeFeatures, activeTab, activePage } = this.state;
 
-        let lassoSelections = () => {
-            if(this.state.lassoSelections.length == 0) {
-                return (
-                    <Grid>
-                        <Grid.Column>No user's lasso selections</Grid.Column>
-                    </Grid>
-                );
-            }
-            return (this.state.lassoSelections.map((lS) => {
-                return (
-                    <Grid key={lS.id} columns={3}>
-                        <Grid.Column>
-                            {"Selection "+ lS.id}
-                        </Grid.Column>
-                        <Grid.Column>
-                            <Input
-                                size='mini'
-                                style={{width: 75, height: 10}}
-                                label={{ style: {backgroundColor: '#'+lS.color } }}
-                                labelPosition='right'
-                                placeholder={'#'+lS.color}
-                            />
-                        </Grid.Column>
-                        <Grid.Column>
-                            <Icon name='eye' style={{display: 'inline'}} onClick={(e,d) => this.toggleLassoSelection(lS.id)} style={{opacity: lS.selected ? 1 : .5 }}/>
-                            <Icon name='trash' style={{display: 'inline'}} onClick={(e,d) => this.removeLassoSelection(lS.id)} />
-                            <Icon name='download' style={{display: 'inline'}} onClick={(e,d) => this.downloadLassoSelection(lS.id)} />
-                        </Grid.Column>
-                    </Grid>
-                )
-            }))
-        }
+		let lassoTab = () => {
+			if (lassoSelections.length == 0) {
+				return (
+					<Tab.Pane attached={false} style={{'textAlign': 'center'}} >
+						<br /><br />
+						No user's lasso selections
+						<br /><br /><br />
+					</Tab.Pane>
+				);
+			}
 
-        return lassoSelections();
-    }
+			return (lassoSelections.map((lS, i) => {
+				return (
+					<Tab.Pane attached={false} style={{'textAlign': 'center'}} key={i}>
+					<Grid>
+					<Grid.Row columns={3} key={i} className="selectionRow">
+						<Grid.Column>
+							{"Selection "+ (lS.id + 1)}
+						</Grid.Column>
+						<Grid.Column>
+							<Input
+								size='mini'
+								style={{width: 75, height: 10}}
+								label={{ style: {backgroundColor: '#'+lS.color } }}
+								labelPosition='right'
+								placeholder={'#'+lS.color}
+							/>
+						</Grid.Column>
+						<Grid.Column>
+							<Icon name='eye' title='toggle show/hide selection' style={{display: 'inline'}} onClick={(e,d) => this.toggleLassoSelection(lS.id)} style={{opacity: lS.selected ? 1 : .5 }} className="pointer" />
+							&nbsp;
+							<Icon name='trash' title='remove this selection' style={{display: 'inline'}} onClick={(e,d) => this.removeLassoSelection(i)} className="pointer"  />
+							&nbsp;
+							<Icon name='search' title='show metadata for this selection' style={{display: 'inline'}} onClick={(e,d) => {
+								this.setState({modalID: i});
+								this.forceUpdate();
+							}} className="pointer"  />
+						</Grid.Column>
+					</Grid.Row>
+					</Grid>
+					<br />
+					</Tab.Pane>
+				)
+			}))
+		}
 
-    componentWillMount() {
-        BackendAPI.onViewerSelectionsChange(this.selectionsListener);
-        BackendAPI.onActiveFeaturesChange(this.state.activePage, this.featuresListener);
-    }
+		let featureTab = (i) => {
+			let metadata = activeFeatures[i] && activeFeatures[i].feature ? "" : "Please use the inputs above to select a feature";
 
-    componentWillUnmount() {
-        BackendAPI.removeViewerSelectionsChange(this.selectionsListener);
-        BackendAPI.removeActiveFeaturesChange(this.state.activePage, this.featuresListener);
-    }
+			if (activeFeatures[i] && activeFeatures[i].metadata) {
+				let image = activeFeatures[i].metadata.motifName ? (<Image src={'http://motifcollections.aertslab.org/v8/logos/'+activeFeatures[i].metadata.motifName} />) : '';
+				let genes = "";
+				if (activeFeatures[i].metadata.genes) {
+					genes = (
+						<Grid columns={4} className="geneInfo">
+							{ activeFeatures[i].metadata.genes.map( (g, j) => (
+								<Grid.Column key={j}>
+									<a
+										className="pointer"
+										onClick={() => {
+											let query = {
+												loomFilePath: BackendAPI.getActiveLoom(),
+												query: g
+											};
+											if (activePage == 'regulon') {
+												this.setState({currentPage: 'expression'});
+												BackendAPI.setActivePage('expression');
+											}
+											BackendAPI.getConnection().then((gbc) => {
+												gbc.services.scope.Main.getFeatures(query, (err, response) => {
+													BackendAPI.setActiveFeature(i, activeFeatures[i].type, "gene", g, 0, {description: response.featureDescription[0]});
+												});
+											})
+										}} >
+										{g}
+									</a>
+								</Grid.Column>
+							))}
+						</Grid>
+					);
+				}
 
-    toggleLassoSelection(id) {
-        BackendAPI.toggleLassoSelection(id);
-    }
+				metadata = (
+					<span>
+						{activeFeatures[i].metadata.description}<br />
+						{image}
+						{genes}
+					</span>
+				);
+			}
 
-    removeLassoSelection(id) {
-        BackendAPI.removeViewerSelection(id);
-    }
+			return (
+				<Tab.Pane attached={false} key={i} className={'feature'+i} style={{textAlign: 'center'}}>
+					{activeFeatures[i] ? activeFeatures[i].featureType : ''} <b> {activeFeatures[i] ? activeFeatures[i].feature : ''} </b><br /><br />
+					{metadata}<br /><br /><br />
+				</Tab.Pane>
+			)
+		}
 
-    getMetadata(selections) {
-        let settings = BackendAPI.getSettings();
-        let loomFilePath = BackendAPI.getActiveLoom();
-        let coordinates = BackendAPI.getActiveCoordinates();
-        let features = BackendAPI.getActiveFeatures();
-        let selectedGenes = [];
-        let selectedRegulons = [];
-        features.map(f => {
-            if (f.featureType == 'gene') selectedGenes.push(f.feature);
-            if (f.featureType == 'regulon') selectedRegulons.push(f.feature);
-        })
-        selections.map(s => {
-            console.log('selectionsListener', s, );
-            let query = {
-                loomFilePath: loomFilePath,
-                cellIndices: s.points,
-                hasLogTranform: settings.hasLogTransform,
-                hasCpmTranform: settings.hasCpmNormalization,
-                selectedGenes: selectedGenes,    // List of genes to return epxression values for
-                selectedRegulons: selectedRegulons, // As above, for regulons and AUC values
-                clusterings: [], // IDs of clustering values to return per cell
-                annotations: []  // String name of annotations to return (from global metadata)
-            }
-            console.log('getCellMetaData', query);
-            BackendAPI.getConnection().then((gbc) => {
-                gbc.services.scope.Main.getCellMetaData(query, (err, response) => {
-                    console.log('getCellMetaData', response);
-                });
-            });
-        });
-    }
+		let panes = [
+			{ menuItem: 'Cell selections', render: lassoTab },
+		]
+		_.times(3, i => {
+				panes.push({
+					menuItem: activeFeatures[i] && activeFeatures[i].feature ? ("F"+(i+1)+": " + activeFeatures[i].feature) : "F"+(i+1),
+					render: () => featureTab(i),
+				})
+		})
+		
+		let annotations = {}
+		if (this.props.getSelectedAnnotations) {
+			annotations = this.props.getSelectedAnnotations();
+		}
 
+		return (
+			<div>
+				<Tab
+					menu={{ secondary: true, pointing: true }}
+					panes={panes}
+					renderActiveOnly={true}
+					activeIndex={activeTab}
+					className="sidebarTabs"
+					onTabChange={(evt, data) => {
+						this.setState({activeTab: data.activeIndex});
+					}}
+				/>
+				<Metadata 
+					selectionId={this.state.modalID} 
+					onClose={() =>{
+						this.setState({modalID: null});
+						this.forceUpdate();
+					}}
+					annotations={Object.keys(annotations)}
+				/>
+			</div>
+		);
+	}
+
+	componentWillMount() {
+		BackendAPI.onViewerSelectionsChange(this.selectionsListener);
+		BackendAPI.onActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
+	}
+
+	componentWillUnmount() {
+		BackendAPI.removeViewerSelectionsChange(this.selectionsListener);
+		BackendAPI.removeActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
+	}
+
+	toggleLassoSelection(id) {
+		BackendAPI.toggleLassoSelection(id);
+	}
+
+	removeLassoSelection(id) {
+		BackendAPI.removeViewerSelection(id);
+	}
 }

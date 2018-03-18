@@ -1,103 +1,122 @@
 import React, { Component } from 'react';
+import { withRouter, Link } from 'react-router-dom';
 import { Icon, Button, Menu } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
+const moment = require('moment');
+const timer = 60 * 1000;
 
-export default class AppHeader extends Component {
+class AppHeader extends Component {
 
-	constructor() {
-		super();
+	constructor(props) {
+		super(props);
 		this.state = {
-			sidebar: true
+			timeout: props.timeout
 		}
 	}
 
 	render() {
-		const { metadata } = this.props;
+		const { match, location } = this.props;
+		const { timeout } = this.state;
+		let metadata = BackendAPI.getLoomMetadata(match.params.loom);
 
-		let infoTab = () => {
-			if (metadata) return (
-				<Menu.Item>
-					<Button basic onClick={this.selectTab.bind(this)} active={this.props.currentPage == 'dataset'} page='dataset'>
-						Dataset info
-					</Button>
-				</Menu.Item>
-			);
-		}
-		let geneTab = () => {
-			if (metadata) return (
-				<Menu.Item>
-					<Button basic onClick={this.selectTab.bind(this)} active={this.props.currentPage == 'expression'} page='expression'>
-						Gene expression
-					</Button>
-				</Menu.Item>
-			);
-		}
+		let menu = [
+			{
+				display: true,
+				path: 'welcome',
+				title: 'SCope',
+				icon: 'home'
+			},
+			{
+				display: metadata ? true : false,
+				path: 'dataset',
+				title: 'Dataset info',
+				icon: false
+			},
+			{
+				display: metadata ? true : false,
+				path: 'gene',
+				title: 'Gene',
+				icon: false
+			},
+/*			{
+				display: metadata ? true : false,
+				path: 'geneset',
+				title: 'Gene set',
+				icon: false
+			},
+*/			{
+				display: metadata && metadata.fileMetaData.hasRegulonsAUC ? true : false,
+				path: 'regulon',
+				title: 'Regulon',
+				icon: false
+			},
+			{
+				display: metadata && metadata.cellMetaData  && metadata.cellMetaData.annotations.length ? true : false,
+				path: 'compare',
+				title: 'Compare',
+				icon: false
+			},
+			{
+				display: true,
+				path: 'tutorial',
+				title: 'Tutorial',
+				icon: false
+			},
+		];
 
-		let regulonTab = () => {
-			if (metadata && metadata.fileMetaData.hasRegulonsAUC) return (
-				<Menu.Item>
-					<Button basic onClick={this.selectTab.bind(this)} active={this.props.currentPage == 'regulon'} page='regulon'>
-						Regulon
-					</Button>
-				</Menu.Item>
-			);
-		}
-
-		let compare1Tab = () => {
-			if (metadata && metadata.cellMetaData && metadata.cellMetaData.annotations.length) return (
-				<Menu.Item>
-					<Button basic onClick={this.selectTab.bind(this)} active={this.props.currentPage == 'comparison'} page='comparison'>
-						Compare
-					</Button>
-				</Menu.Item>
-			);
-		}
-
-		let compare2Tab = () => {
-			if (metadata && metadata.cellMetaData && metadata.cellMetaData.annotations.length) return (
-				<Menu.Item>
-					<Button basic onClick={this.selectTab.bind(this)} active={this.props.currentPage == 'dndcompare'} page='dndcompare'>
-						DND Compare 
-					</Button>
-				</Menu.Item>
-			);
-		}
-
-
+		console.log('AppHeader render')
 		return (
 			<Menu secondary attached="top" className="vib" inverted>
 				<Menu.Item>
 					<Icon name="sidebar" onClick={this.toggleSidebar.bind(this)} className="pointer" title="Toggle sidebar" />
 				</Menu.Item>
-				<Menu.Item>
-					<Button basic onClick={this.selectTab.bind(this)} active={this.props.currentPage == 'welcome'} page='welcome'>
-						<Icon name="home" />
-						SCope
-					</Button>
+
+				{menu.map((item, i) => item.display &&
+					<Menu.Item key={i}>
+						<Link to={'/' + [match.params.uuid, match.params.loom, item.path].join('/')}>
+							<Button basic active={match.params.page == item.path}>
+								{item.icon &&
+									<Icon name={item.icon} />
+								}
+								{item.title}
+							</Button>
+						</Link>
+					</Menu.Item>
+				)}
+
+				<Menu.Item style={{position: 'absolute', right: '0px'}}>
+					Your session will be deleted in {moment.duration(timeout).humanize()} &nbsp;
+					<Icon name="info circle" inverted title="Our servers can only store that much data. Your files will be removed after the session times out." />
 				</Menu.Item>
-				{infoTab()}
-				{geneTab()}
-				{regulonTab()}
-				{compare1Tab()}
-				{compare2Tab()}
 			</Menu>
 		);
 	}
 
-	componentWillReceiveProps() {
-		this.forceUpdate();
+	componentWillMount() {
+		this.timer = setInterval(() => {
+			let timeout = this.state.timeout;
+			timeout -= timer;
+			this.setState({timeout});
+			if (timeout <= 0) {
+				clearInterval(this.timer);
+				this.timer = null;
+			}
+		}, timer);
 	}
 
-	selectTab(evt, btn) {
-		evt.preventDefault();
-		this.props.togglePage(btn.page);
+	componentWillReceiveProps(nextProps) {
+		this.setState({timeout: nextProps.timeout});
 	}
 
+	componentWillUnmount() {
+		if (this.timer)	clearInterval(this.timer);
+	}
+	
 	toggleSidebar() {
 		this.props.toggleSidebar();
-		let state = !this.state.sidebar;
-		BackendAPI.setSidebarVisible(state);
-		this.setState({sidebar: state});
+		BackendAPI.setSidebarVisible(!BackendAPI.getSidebarVisible());
 	}
 
 }
+
+export default withRouter(AppHeader);

@@ -12,6 +12,7 @@
 *.pptx
 *.save
 *.spec
+**/.DS_Store
 
 yarn.lock
 SCope.code-workspace

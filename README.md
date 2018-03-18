@@ -14,6 +14,11 @@ Architecture of SCope can be visualized below:
 - Install
 ```
 cd scope-server
+
+# Dependencies
+pip install -r requirements.txt
+
+# Server
 python setup.py develop
 ```
 

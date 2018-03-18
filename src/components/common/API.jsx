@@ -5,7 +5,8 @@ class API {
 
 		this.loomFiles = [];
 		this.activePage = 'welcome';
-		this.activeLoom = null;
+		this.activePageListeners = [];
+		this.activeLooms = [];
 		this.activeCoordinates = -1;
 		this.activeLoomChangeListeners = [];
 
@@ -34,10 +35,11 @@ class API {
 
 		this.colors = ["red", "green", "blue"];
 
-		this.maxValues = [];
-		this.maxValuesChangeListeners = [];
+		this.maxValues = [0, 0, 0];
 		this.customValues = [0, 0, 0];
 		this.customValuesChangeListeners = [];
+
+		this.uuid = null;
 	}
 
 	getConnection() {
@@ -47,25 +49,50 @@ class API {
 
 
 	getActiveLoom() {
-		return this.activeLoom;
+		return this.activeLooms[0];
 	}
 
-	setActiveLoom(loom) {
-		this.activeLoom = loom;
+	getActiveLooms() {
+		return this.activeLooms;
+	}
+
+	setActiveLooms(looms) {
+		this.activeLooms = looms.slice(0);
+		this.activeCoordinates = -1;
+		this.getMaxScale(null, (customValues, maxValues) => {
+			this.customValuesChangeListeners.forEach((listener) => {
+				listener(customValues);
+			})
+		})
+	}
+
+	setActiveLoom(loom, id) {
+		if (id == null) id = 0;
+		this.activeLooms[id] = loom;
+		this.activeCoordinates = -1;
 		this.activeLoomChangeListeners.forEach((listener) => {
-			listener(this.activeLoom, this.loomFiles[this.activeLoom], this.activeCoordinates);
+			listener(this.activeLooms[0], this.loomFiles[this.activeLooms[0]], this.activeCoordinates);
+		})
+		this.getMaxScale(null, (customValues, maxValues) => {
+			this.customValuesChangeListeners.forEach((listener) => {
+				listener(customValues);
+			})
 		})
 	}
 
 	setActiveCoordinates(coords) {
 		this.activeCoordinates = coords;
 		this.activeLoomChangeListeners.forEach((listener) => {
-			listener(this.activeLoom,  this.loomFiles[this.activeLoom], this.activeCoordinates);
+			listener(this.activeLooms[0],  this.loomFiles[this.activeLooms[0]], this.activeCoordinates);
 		})
 	}
 
+	getLoomMetadata(loomFilePath) {
+		return this.loomFiles[loomFilePath];
+	}
+
 	getActiveLoomMetadata() {
-		return this.loomFiles[this.activeLoom];
+		return this.loomFiles[this.activeLooms[0]];
 	}
 
 	onActiveLoomChange(listener) {
@@ -84,6 +111,9 @@ class API {
 	}
 
 
+	getLoomFiles() {
+		return this.loomFiles;
+	}
 
 	setLoomFiles(files) {		
 		this.loomFiles = {};
@@ -91,21 +121,57 @@ class API {
 			let file = files[i];
 			this.loomFiles[file.loomFilePath] = file;
 		});
+		this.activeLoomChangeListeners.forEach((listener) => {
+			listener(this.activeLooms[0], this.loomFiles[this.activeLooms[0]], this.activeCoordinates);
+		})
 	}
-
-
 
 	getActiveFeatures() {
 		return this.features[this.activePage] ? this.features[this.activePage] : [];
 	}
 
-	setActiveFeature(id, type, featureType, feature, threshold, metadata) {
+	setActiveFeature(featureId, type, featureType, feature, threshold, metadata) {
 		let page = this.activePage;
 		let selectedFeatures = this.features[page] || [this.emptyFeature, this.emptyFeature, this.emptyFeature];
-		selectedFeatures[id] = {type: type, featureType: featureType ? featureType : '', feature: feature ? feature : '', threshold: threshold, metadata: metadata};
+		selectedFeatures[featureId] = {type: type, featureType: featureType ? featureType : '', feature: feature ? feature : '', threshold: threshold, metadata: metadata};
+		this.features[page] = selectedFeatures;
+		this.getMaxScale(featureId, (customValues, maxValues) => {
+			(this.featureChangeListeners[page] || []).forEach((listener) => {
+				listener(selectedFeatures, featureId, customValues, maxValues);
+			})
+		})
+	}
+
+	setFeatureThreshold(id, threshold) {
+		let page = this.activePage;
+		let selectedFeatures = this.features[page] || [this.emptyFeature, this.emptyFeature, this.emptyFeature];
+		selectedFeatures[id].threshold = threshold;
 		this.features[page] = selectedFeatures;
 		(this.featureChangeListeners[page] || []).forEach((listener) => {
-			listener(selectedFeatures, id);
+			listener(selectedFeatures, id, this.customValues, this.maxValues);
+		})
+}
+
+	getMaxScale(id, callback) {
+		let settings = this.getSettings();
+		let selectedFeatures = this.features[this.activePage];
+		if (!selectedFeatures) return;
+		let query = {
+			loomFilePath: this.getActiveLooms(),
+			feature: selectedFeatures.map(f => {return f.feature}),
+			featureType: selectedFeatures.map(f=> {return f.featureType}),
+			hasLogTransform: settings.hasLogTransform,
+			hasCpmTransform: settings.hasCpmNormalization,
+		}
+		if (DEBUG) console.log('getVmax', query);
+		BackendAPI.getConnection().then((gbc) => {
+			gbc.services.scope.Main.getVmax(query, (err, response) => {
+				if (DEBUG) console.log('getVmax', response);
+				if (id != null) this.customValues[id] = response.vmax[id];
+				else this.customValues = response.vmax;
+				this.maxValues = response.maxVmax;
+				callback(this.customValues, this.maxValues);
+			})
 		})
 	}
 
@@ -121,35 +187,33 @@ class API {
 		}
 	}
 
+	getParsedFeatures() {
+		let features = this.getActiveFeatures();
+		let metadata = this.getActiveLoomMetadata();
+		let selectedGenes = [];
+		let selectedRegulons = [];
+		let selectedClusters = [];
+		features.map(f => {
+			if (f.featureType == 'gene') selectedGenes.push(f.feature);
+			if (f.featureType == 'regulon') selectedRegulons.push(f.feature);
+			if (f.featureType.indexOf('Clustering:') == 0) {
+				metadata.cellMetaData.clusterings.map( clustering => {
+					if (f.featureType.indexOf(clustering.name) != -1) {
+						clustering.clusters.map(c => {
+							if (c.description == f.feature) {
+								selectedClusters.push({clusteringName: clustering.name, clusteringID: clustering.id, clusteName: c.name, clusterID: c.id});
+							}
+						})
+					}
+				})
+			}
+		})
+		return { selectedGenes, selectedRegulons, selectedClusters }
+	}
 
-	
-	getFeaturesScale() {
+
+	getFeatureScale() {
 		return this.maxValues;
-	}
-
-	setFeatureScales(maxValues) {
-		this.maxValues = maxValues;
-		this.maxValuesChangeListeners.forEach((listener) => {
-			listener(this.maxValues, null);
-		})
-	}
-	
-	setFeatureScale(id, value) {
-		this.maxValues[id] = value;
-		this.maxValuesChangeListeners.forEach((listener) => {
-			listener(this.maxValues, id);
-		})
-	}
-
-	onFeaturesScaleChange(listener) {
-		this.maxValuesChangeListeners.push(listener);
-	}
-
-	removeFeaturesScaleChange(listener) {
-		let i = this.maxValuesChangeListeners.indexOf(listener)
-		if (i > -1) {
-			this.maxValuesChangeListeners.splice(i, 1);
-		}
 	}
 
 
@@ -158,7 +222,7 @@ class API {
 	}
 
 	setCustomScale(scale) {
-		this.customValues = scale;
+		this.customValues = scale.slice(0);
 		this.customValuesChangeListeners.forEach((listener) => {
 			listener(this.customValues);
 		})
@@ -175,18 +239,31 @@ class API {
 		}
 	}
 
-
 	
+
 	getActivePage() {
 		return this.activePage;		
 	}
 
 	setActivePage(page) {
-		this.maxValues = [];
+		this.maxValues = [0, 0, 0];
 		this.customValues = [0, 0, 0];
 		this.activePage = page;
+		this.activePageListeners.forEach((listener) => {
+			listener(this.activePage);
+		})
 	}
 
+	onActivePageChange(listener) {
+		this.activePageListeners.push(listener);
+	}
+
+	removeActivePageChange(listener) {
+		let i = this.activePageListeners.indexOf(listener)
+		if (i > -1) {
+			this.activePageListeners.splice(i, 1);
+		}
+	}
 	
 
 	getSettings() {
@@ -195,8 +272,10 @@ class API {
 
 	setSetting(key, value) {
 		this.settings[key] = value;
-		this.settingsChangeListeners.forEach((listener) => {
-			listener(this.settings);
+		this.getMaxScale(null, (customValues, maxValues) => {
+			this.settingsChangeListeners.forEach((listener) => {
+				listener(this.settings, customValues, maxValues);
+			})
 		})
 	}
 
@@ -242,6 +321,7 @@ class API {
 	}
 
 	addViewerSelection(selection) {
+		if (DEBUG) console.log('addViewerSelection', selection)
 		this.viewerSelections.push(selection);
 		this.viewerSelectionsChangeListeners.forEach((listener) => {
 			listener(this.viewerSelections);
@@ -249,6 +329,7 @@ class API {
 	}
 
 	removeViewerSelection(index) {
+		console.log('removing selection', index);
 		this.viewerSelections.splice(index, 1);
 		this.viewerSelectionsChangeListeners.forEach((listener) => {
 			listener(this.viewerSelections);
@@ -327,6 +408,13 @@ class API {
 		}
 	}
 	
+	setUUID(uuid) {
+		this.uuid = uuid;
+	}
+
+	getUUID() {
+		return this.uuid;
+	}
 	
 
 	getColors() {

@@ -13,19 +13,15 @@ export default class ViewerToolbar extends Component {
 			activeTool: BackendAPI.getViewerTool(),
 			activeFeatures: BackendAPI.getActiveFeatures(),
 			activePage: BackendAPI.getActivePage(),
-			featuresScale: BackendAPI.getFeaturesScale(),
+			featuresScale: BackendAPI.getFeatureScale(),
 			customScale: BackendAPI.getCustomScale(),
 			colors: BackendAPI.getColors(),
 
 		}
-		this.activeFeaturesListener = (features) => {
-			this.setState({activeFeatures: features});
+		this.activeFeaturesListener = (features, id, customScale, featuresScale) => {
+			this.setState({activeFeatures: features, featuresScale: featuresScale, customScale: customScale});
 		}
-		this.featuresScaleListener = (featuresScale, updateID) => {
-			console.log('featuresScaleListener', featuresScale, updateID);
-			let customScale = this.state.customScale;
-			if (updateID != null) customScale[updateID] = 0;
-			else customScale = [0, 0, 0]
+		this.settingsListener = (settings, customScale, featuresScale) => {
 			this.setState({featuresScale: featuresScale, customScale: customScale});
 		}
 	}
@@ -82,12 +78,13 @@ export default class ViewerToolbar extends Component {
 
 	componentWillMount() {
         BackendAPI.onActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
-        BackendAPI.onFeaturesScaleChange(this.featuresScaleListener);
+		BackendAPI.onSettingsChange(this.settingsListener);
+        //this.onActiveFeaturesChange(this.state.activeFeatures);
 	}
 
 	componentWillUnmount() {
-        BackendAPI.onActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
-        BackendAPI.removeFeaturesScaleChange(this.featuresScaleListener);
+        BackendAPI.removeActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
+		BackendAPI.removeSettingsChange(this.settingsListener);
 	}
 
 	handleItemClick(e, tool) {
@@ -97,10 +94,11 @@ export default class ViewerToolbar extends Component {
 	} 
 
 	handleUpdateScale(slider, value) {
-		if (DEBUG) console.log("handleUpdateScale", slider, value);
 		let scale = this.state.customScale;
 		scale[slider] = value;
-		BackendAPI.setCustomScale(scale);
+		if (DEBUG) console.log("handleUpdateScale", slider, value, scale);
+		BackendAPI.setCustomScale(scale, slider);
 		this.setState({customScale: scale});
 	}
+
 }

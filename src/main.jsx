@@ -6,15 +6,18 @@ import './css/header.css';
 import './css/sidebar.css';
 import './css/viewer.css';
 import './css/features.css';
-import { BrowserRouter } from 'react-router-dom'
+import { HashRouter, Route } from 'react-router-dom'
 import { AppContainer } from 'react-hot-loader'
+import { CookiesProvider } from 'react-cookie';
 
 const renderApp = () => {
     ReactDOM.render((
         <AppContainer>
-            <BrowserRouter>
-                <App/>
-            </BrowserRouter>
+            <CookiesProvider>
+                <HashRouter>
+                    <Route path="/:uuid?/:loom?/:page?" component={App} />
+                </HashRouter>
+            </CookiesProvider>
         </AppContainer>
     ), document.getElementById('scope'));
 }

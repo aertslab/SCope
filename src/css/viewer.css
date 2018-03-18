@@ -22,12 +22,36 @@ body:before{
     display:block;
 }
 
+.emptyDropContainer {
+	border: 1px solid black;
+}
+
+.fullDropContainer, .dropRow {
+	background: #eee;
+}
+
 .dropContainer {
 	text-align: center;
-	background: #eee;
+	min-height: 30px;
+	padding-top: 5px;
 }
 
 .dropContainer p {
 	position: relative;
-	top:50%;
+	top: 38%;
+}
+
+.dropZone.vertical {
+	text-align: center;
+	transform: rotate(90deg);
+    transform-origin: top left;
+    position: absolute;
+}
+
+.viewerRow {
+	padding-top: 0px !important;
+}
+
+.pusher .segment {
+	padding-bottom:  0px !important;
 }
