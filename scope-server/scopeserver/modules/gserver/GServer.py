@@ -76,14 +76,13 @@ uuidLog = open(os.path.join(logDir, 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%
 #                    'dentate_gyrus_C_10X_V2_update.loom'
 #                    ])
 
-data_dirs = {"Loom": {"path":"data/my-looms", "message": "No data folder detected. Making loom data folder in current directory."}
-           , "GeneSet": {"path":"data/my-gene-sets", "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."}
-           , "LoomAUCellRankings": {"path":"data/my-aucell-rankings", "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
-
-globalLooms = set(os.listdir(data_dirs["Loom"]["path"]))
+data_dirs = {"Loom": {"path": "data/my-looms", "message": "No data folder detected. Making loom data folder in current directory."},
+             "GeneSet": {"path": "data/my-gene-sets", "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."},
+             "LoomAUCellRankings": {"path": "data/my-aucell-rankings", "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
 
 curUUIDs = {}
 uploadedLooms = defaultdict(lambda: set())
+
 
 class SCope(s_pb2_grpc.MainServicer):
 
@@ -91,12 +90,23 @@ class SCope(s_pb2_grpc.MainServicer):
         self.active_loom_connections = {}
         self.loom_dir = data_dirs["Loom"]["path"]
         self.gene_sets_dir = data_dirs["GeneSet"]["path"]
+        self.rankings_dir = data_dirs["LoomAUCellRankings"]["path"]
+
+        self.globalLooms = os.listdir(self.loom_dir)
+        self.globalSets = os.listdir(self.gene_sets_dir)
+        self.globalrankings = os.listdir(self.rankings_dir)
+
         # Create the data directories
         SCope.create_dirs()
 
     @staticmethod
-    def get_data_dir_path_by_file_type(file_type):
-        return data_dirs[file_type]["path"]
+    def get_data_dir_path_by_file_type(file_type, UUID=None):
+        if UUID is not None:
+            globalDir = data_dirs[file_type]["path"]
+            UUIDDir = os.path.join(globalDir, UUID)
+            return UUIDDir
+        else:
+            return data_dirs[file_type]["path"]
 
     @staticmethod
     def create_dirs():
@@ -691,15 +701,14 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getMyLooms(self, request, context):
         my_looms = []
-        loomsToProcess = globalLooms
-        allLooms = os.listdir(self.loom_dir)
+        userDir = self.get_data_dir_path_by_file_type('Loom', UUID=request.UUID)
+        if not os.path.isdir(userDir):
+            for i in data_dirs.keys():
+                os.mkdir(os.path.join(data_dirs[i]['path'], request.UUID))
 
-        if request.UUID in uploadedLooms.keys():
-            for loom in uploadedLooms[request.UUID]:
-                if loom in allLooms:
-                    loomsToProcess.add(loom)
+        loomsToProcess = sorted(self.globalLooms) + sorted([os.path.join(request.UUID, x) for x in os.listdir(userDir)])
 
-        for f in sorted(list(loomsToProcess)):
+        for f in loomsToProcess:
             if f.endswith('.loom'):
                 loom = self.get_loom_connection(self.get_loom_filepath(f))
                 fileMeta = self.get_file_metadata(self.get_loom_filepath(f))
@@ -716,6 +725,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     embeddings = []
                     clusterings = []
                 my_looms.append(s_pb2.MyLoom(loomFilePath=f,
+                                             loomDisplayName=os.path.splitext(os.path.basename(f))[0],
                                              cellMetaData=s_pb2.CellMetaData(annotations=annotations,
                                                                              embeddings=embeddings,
                                                                              clusterings=clusterings),
