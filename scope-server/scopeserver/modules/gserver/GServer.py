@@ -24,6 +24,10 @@ from pyscenic.aucell import create_rankings, enrichment, enrichment4cells
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 _UUID_TIMEOUT = _ONE_DAY_IN_SECONDS * 5
+_LOWER_LIMIT_RGB = 0
+_UPPER_LIMIT_RGB = 225
+_NO_EXPR_RGB = 166
+
 BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "bf9360", "1d331a", "79baf2", "deb6f2",
                   "990000", "7f6240", "283326", "2d4459", "8f00b3", "4c0000", "ccb499", "00f220", "accbe6", "520066",
                   "330000", "594f43", "16591f", "697c8c", "290033", "cc3333", "e59900", "ace6b4", "262d33", "ee00ff",
@@ -534,8 +538,10 @@ class SCope(s_pb2_grpc.MainServicer):
                         vmax[n] = request.vmax[n]
                     else:
                         vmax[n], maxVmax[n] = self.get_vmax(vals)
-                    vals = np.round((vals / vmax[n]) * 225)
-                    features.append([x if x <= 225 else 225 for x in vals])
+                    # vals = np.round((vals / vmax[n]) * 225)
+                    vals = np.round((vals / vmax[n]))
+                    vals = (((_UPPER_LIMIT_RGB - _LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))) + _LOWER_LIMIT_RGB
+                    features.append([x if x <= _UPPER_LIMIT_RGB else _UPPER_LIMIT_RGB for x in vals])
                 else:
                     features.append(np.zeros(n_cells))
             elif request.featureType[n] == 'regulon':
@@ -550,10 +556,12 @@ class SCope(s_pb2_grpc.MainServicer):
                         vmax[n], maxVmax[n] = self.get_vmax(vals)
                     if request.scaleThresholded:
                         vals = ([auc if auc >= request.threshold[n] else 0 for auc in vals])
-                        vals = np.round((vals / vmax[n]) * 225)
-                        features.append([x if x <= 225 else 225 for x in vals])
+                        # vals = np.round((vals / vmax[n]) * 225)
+                        vals = np.round((vals / vmax[n]))
+                        vals = (((_UPPER_LIMIT_RGB - _LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))) + _LOWER_LIMIT_RGB
+                        features.append([x if x <= _UPPER_LIMIT_RGB else _UPPER_LIMIT_RGB for x in vals])
                     else:
-                        features.append([225 if auc >= request.threshold[n] else 0 for auc in vals])
+                        features.append([_UPPER_LIMIT_RGB if auc >= request.threshold[n] else 0 for auc in vals])
                 else:
                     features.append(np.zeros(n_cells))
             elif request.featureType[n].startswith('Clustering: '):
@@ -577,15 +585,17 @@ class SCope(s_pb2_grpc.MainServicer):
                                 if request.feature[n] == cluster['description']:
                                     clusterID = int(cluster['id'])
                 clusterIndices = loom.ca.Clusterings[clusteringID] == clusterID
-                clusterCol = np.array([225 if x else 0 for x in clusterIndices])
+                clusterCol = np.array([_UPPER_LIMIT_RGB if x else 0 for x in clusterIndices])
                 if len(request.annotation) > 0:
                     cellIndices = self.get_anno_cells(loom_file_path=loomFilePath, annotations=request.annotation, logic=request.logic)
                     clusterCol = clusterCol[cellIndices]
                 features.append(clusterCol)
             else:
-                features.append(np.zeros(n_cells))
+                features.append([_LOWER_LIMIT_RGB for n in range(n_cells)])
         if len(features) > 0 and len(hex_vec) == 0:
-            hex_vec = ["%02x%02x%02x" % (int(r), int(g), int(b)) for r, g, b in zip(features[0], features[1], features[2])]
+            hex_vec = ["{0:02x}{0:02x}{0:02x}".format(_NO_EXPR_RGB) if r == g == b == 0
+                       else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
+                       for r, g, b in zip(features[0], features[1], features[2])]
 
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
         return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax, maxVmax=maxVmax, cellIndices=cellIndices)
@@ -624,7 +634,7 @@ class SCope(s_pb2_grpc.MainServicer):
         for anno in request.annotations:
             if anno != '':
                 annotations.append(self.get_annotation(loom_file_path=loomFilePath,
-                                           annoName=anno)[cellIndices])
+                                                       annoName=anno)[cellIndices])
 
         return s_pb2.CellMetaDataReply(clusterIDs=[s_pb2.CellClusters(clusters=x) for x in cellClusters],
                                        geneExpression=[s_pb2.FeatureValues(features=x) for x in geneExp],
@@ -761,17 +771,16 @@ class SCope(s_pb2_grpc.MainServicer):
         cell_ids = [loom.ca['CellID'][i] for i in request.cellIndices]
         return s_pb2.CellIDsReply(cellIds=cell_ids)
 
-
     # Gene set enrichment
     #
     # Threaded makes it slower because of GIL
     #
     def doGeneSetEnrichment(self, request, context):
         gene_set_file_path = os.path.join("data", "my-gene-sets", request.geneSetFilePath)
-        gse = GeneSetEnrichment(scope=self
-                              , method="AUCell"
-                              , loom_file_name=request.loomFilePath
-                              , gene_set_file_path=gene_set_file_path)
+        gse = GeneSetEnrichment(scope=self,
+                                method="AUCell",
+                                loom_file_name=request.loomFilePath,
+                                gene_set_file_path=gene_set_file_path)
 
         # Running AUCell...
         yield gse.update_state(step=-1, status_code=200, status_message="Running AUCell...", values=None)
@@ -789,9 +798,9 @@ class SCope(s_pb2_grpc.MainServicer):
         yield gse.update_state(step=1, status_code=200, status_message="Creating the matrix as DataFrame...", values=None)
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
         dgem = np.transpose(loom[:, :])
-        ex_mtx = pd.DataFrame(data=dgem
-                            , index=loom.ca.CellID
-                            , columns=SCope.get_genes(loom))
+        ex_mtx = pd.DataFrame(data=dgem,
+                              index=loom.ca.CellID,
+                              columns=SCope.get_genes(loom))
 
         if not gse.has_AUCell_rankings():
             # Creating the rankings...
@@ -806,17 +815,18 @@ class SCope(s_pb2_grpc.MainServicer):
             # Load the rankings...
             yield gse.update_state(step=2, status_code=200, status_message="Rankings exists: loading...", values=None)
             rnk_loom = self.get_loom_connection(gse.get_AUCell_ranking_filepath())
-            rnk_mtx = pd.DataFrame(data=rnk_loom[:,:]
-                                 , index=rnk_loom.ra.CellID
-                                 , columns=rnk_loom.ca.Gene)
+            rnk_mtx = pd.DataFrame(data=rnk_loom[:, :],
+                                   index=rnk_loom.ra.CellID,
+                                   columns=rnk_loom.ca.Gene)
 
         # Calculating AUCell enrichment...
         start_time = time.time()
         yield gse.update_state(step=3, status_code=200, status_message="Calculating AUCell enrichment...", values=None)
-        aucs = enrichment(rnk_mtx, gs, rank_threshold=5000).loc[:,"AUC"].values
+        aucs = enrichment(rnk_mtx, gs, rank_threshold=5000).loc[:, "AUC"].values
 
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        yield gse.update_state(step=4, status_code=200, status_message=gse.get_method() +" enrichment done!", values=aucs)
+        yield gse.update_state(step=4, status_code=200, status_message=gse.get_method() + " enrichment done!", values=aucs)
+
 
 class GeneSetEnrichment:
 
@@ -854,20 +864,23 @@ class GeneSetEnrichment:
 
     def update_state(self, step, status_code, status_message, values):
         state = GeneSetEnrichment.State(step=step, status_code=status_code, status_message=status_message, values=values)
-        print("Status: "+ state.get_status_message())
+        print("Status: " + state.get_status_message())
         if state.get_values() is None:
-            return s_pb2.GeneSetEnrichmentReply(progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message())
-                                              , isDone = False
-                                              , cellValues=s_pb2.CellColorByFeaturesReply(color=[],vmax=[]))
+            return s_pb2.GeneSetEnrichmentReply(progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message()),
+                                                isDone=False,
+                                                cellValues=s_pb2.CellColorByFeaturesReply(color=[], vmax=[]))
         else:
             vmax = np.zeros(3)
             aucs = state.get_values()
             vmax[0] = self.scope.getVmax(aucs)
-            vals = np.round((aucs / vmax[0]) * 225)
-            hex_vec = ["%02x%02x%02x" % (int(r), int(g), int(b)) for r, g, b in zip(vals, np.zeros(len(aucs)), np.zeros(len(aucs)))]
-            return s_pb2.GeneSetEnrichmentReply(progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message())
-                                              , isDone = True
-                                              , cellValues=s_pb2.CellColorByFeaturesReply(color=hex_vec,vmax=vmax))
+            vals = np.round((aucs / vmax[0]))
+            vals = (((_UPPER_LIMIT_RGB - _LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))) + _LOWER_LIMIT_RGB
+            hex_vec = ["{0:02x}{0:02x}{0:02x}".format(_NO_EXPR_RGB) if r == g == b == 0
+                       else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
+                       for r, g, b in zip(vals, np.zeros(len(aucs)), np.zeros(len(aucs)))]
+            return s_pb2.GeneSetEnrichmentReply(progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message()),
+                                                isDone=True,
+                                                cellValues=s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax))
 
     def get_method(self):
             return self.method
