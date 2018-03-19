@@ -35,6 +35,7 @@ opt/scopeserver/dist/
 opt/scopeserver/pyvenv
 opt/scopeserver/build
 opt/scopeserver/logs
+opt/scopeserver/dataserver/logs
 opt/scope_server.egg-info
 
 release/*
