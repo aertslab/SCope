@@ -76,9 +76,9 @@ uuidLog = open(os.path.join(logDir, 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%
 #                    'dentate_gyrus_C_10X_V2_update.loom'
 #                    ])
 
-data_dirs = {"Loom": {"path": "data/my-looms", "message": "No data folder detected. Making loom data folder in current directory."},
-             "GeneSet": {"path": "data/my-gene-sets", "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."},
-             "LoomAUCellRankings": {"path": "data/my-aucell-rankings", "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
+data_dirs = {"Loom": {"path": os.path.join("data", "my-looms"), "message": "No data folder detected. Making loom data folder in current directory."},
+             "GeneSet": {"path": os.path.join("data", "my-gene-sets"), "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."},
+             "LoomAUCellRankings": {"path": os.path.join("data", "my-aucell-rankings"), "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
 
 curUUIDs = {}
 uploadedLooms = defaultdict(lambda: set())
