@@ -47,7 +47,7 @@ class Compare extends Component {
 			this.setState({multiLoom: multiLoom, multiCoordinates: multiCoordinates, multiMetadata: multiMetadata});
 			let loomFiles = BackendAPI.getLoomFiles();
 			Object.keys(loomFiles).map(l => {
-				this.loomConf.push({text: l, value: l});
+				this.loomConf.push({text: loomFiles[l].loomDisplayName, value: l});
 			});
 		};
 		this.activeFeaturesListener = (features) => {
@@ -177,7 +177,7 @@ class Compare extends Component {
 								}
 								if ((configuration == 'multi') && (i == 0)) {
 									let coordOptions = [], coordinatesSelector;
-									if (multiMetadata[j] && multiMetadata[j].cellMetaData) {
+									if (multiMetadata[j] && multiMetadata[j].cellMetaData && multiMetadata[j].cellMetaData.embeddings.length) {
 										multiMetadata[j].cellMetaData.embeddings.map((coords) => {
 											coordOptions.push({text: coords.name, value: coords.id});
 										});

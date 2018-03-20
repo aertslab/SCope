@@ -64,7 +64,6 @@ class AppHeader extends Component {
 			},
 		];
 
-		console.log('AppHeader render')
 		return (
 			<Menu secondary attached="top" className="vib" inverted>
 				<Menu.Item>
