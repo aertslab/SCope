@@ -30,19 +30,18 @@ export default class Regulon extends Component {
             this.setState({sidebar: state});
             this.forceUpdate();
         }
-        this.height = (window.innerHeight - 160) / 4;
     }
 
     render() {
         const { activeLoom, activeCoordinates, activeFeatures, colors, geneFeatures, sidebar } = this.state;
         let featureSearch = _.times(3, i => (
-            <Grid.Column key={i}  width={sidebar ? 4 : 5}>
+            <Grid.Column key={i}>
                 <FeatureSearchBox field={i} color={colors[i]} type="regulon" locked="1" value={activeFeatures[i] ? activeFeatures[i].feature : ''} />
             </Grid.Column>
         ));
         let featureThreshold = _.times(3, i => (
-            <Grid.Column key={i} width={sidebar ? 4 : 5}>
-                <Histogram field={i} height={this.height - 50} color={colors[i]} loomFile={activeLoom} feature={activeFeatures[i]} onThresholdChange={this.onThresholdChange.bind(this)} />
+            <Grid.Column key={i} className="flexDisplay" stretched>
+                <Histogram field={i} color={colors[i]} loomFile={activeLoom} feature={activeFeatures[i]} onThresholdChange={this.onThresholdChange.bind(this)} />
             </Grid.Column>
         ));
 
@@ -53,59 +52,49 @@ export default class Regulon extends Component {
         )
 
         return (
-            <Grid>
-                <Grid.Row columns="3">
+            <Grid className="flexDisplay" >
+                <Grid.Row columns="4" centered>
                     {featureSearch}
+                    <Grid.Column>&nbsp;</Grid.Column>
                 </Grid.Row>
-                <Grid.Row columns="3">
+                <Grid.Row columns="4" centered>
                     {featureThreshold}
+                    <Grid.Column>&nbsp;</Grid.Column>
                 </Grid.Row>
-                <Grid.Row columns="4">
+                <Grid.Row columns="4" stretched className="viewerFlex flexRow">
                     <Grid.Column width={1}>
                         <ViewerToolbar />
                     </Grid.Column>
-                    <Grid.Column width={sidebar ? 6 : 7}>
-                        <b>Regulon AUC values</b>
+                    <Grid.Column stretched className="flexDouble">
+                        <b className="noStretch">Regulon AUC values</b>
                         <Viewer 
                             name="reg" 
-                            height={3 * this.height - 15} 
                             loomFile={activeLoom} 
                             activeFeatures={activeFeatures} 
                             activeCoordinates={activeCoordinates}
                             scale={true} 
                         />
                     </Grid.Column>
-                    <Grid.Column width={sidebar ? 4 : 5}>
-                        <Grid>
-                            <Grid.Row>
-                                <Grid.Column>
-                                    <b>Cells passing thresholds</b>
-                                    <Viewer 
-                                        name="auc" 
-                                        height={3 * this.height / 2 - 15} 
-                                        loomFile={activeLoom} 
-                                        activeFeatures={activeFeatures}                             
-                                        activeCoordinates={activeCoordinates} 
-                                        thresholds={true} 
-                                    />
-                                </Grid.Column>
-                            </Grid.Row>
-                            <Grid.Row>
-                                <Grid.Column>
-                                    <b>Expression levels</b>
-                                    <Viewer 
-                                        name="expr" 
-                                        height={3 * this.height / 2 - 15} 
-                                        loomFile={activeLoom} 
-                                        activeFeatures={activeFeatures} 
-                                        activeCoordinates={activeCoordinates} 
-                                        genes={true}
-                                        settings={true} 
-                                        customScale={true} 
-                                    />
-                                </Grid.Column>
-                            </Grid.Row>
-                        </Grid>
+                    <Grid.Column stretched>
+                        <b className="noStretch">Cells passing thresholds</b>
+                        <Viewer 
+                            name="auc" 
+                            loomFile={activeLoom} 
+                            activeFeatures={activeFeatures}                             
+                            activeCoordinates={activeCoordinates} 
+                            thresholds={true} 
+                        />
+                        <b className="noStretch">Expression levels</b>
+                        <Viewer 
+                            name="expr" 
+                            loomFile={activeLoom} 
+                            activeFeatures={activeFeatures} 
+                            activeCoordinates={activeCoordinates} 
+                            scale={true} 
+                            genes={true}
+                            settings={true} 
+                            customScale={true} 
+                        />
                     </Grid.Column>
                     <Grid.Column width={3}>
                         <ViewerSidebar  onActiveFeaturesChange={(features, id) => {
@@ -130,8 +119,7 @@ export default class Regulon extends Component {
     }
 
     onThresholdChange(idx, threshold) {
-        let feature = this.state.activeFeatures[idx];
-        BackendAPI.setActiveFeature(idx, feature.type, feature.featureType, feature.feature, threshold, feature.metadata);
+        BackendAPI.setFeatureThreshold(idx, threshold);
     }
 
 }

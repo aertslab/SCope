@@ -13,7 +13,7 @@ import ViewerToolbar from '../common/ViewerToolbar'
 import AnnotationDropContainer from '../common/AnnotationDropContainer'
 import ViewerDropContainer from '../common/ViewerDropContainer'
 
-class DNDCompare extends Component {
+class Compare extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -54,7 +54,6 @@ class DNDCompare extends Component {
 			this.setState({activeFeatures: features});
 			this.getCellMetadata();
 		}
-		this.height = window.innerHeight - 142;
 		this.displayConf = [
 			{ text: 'auto', value: 0, disabled: true },
 			{ text: '1', value: 1 },
@@ -145,7 +144,7 @@ class DNDCompare extends Component {
 			return (
 				<Grid>
 				{_.times(rows, i => (
-					<Grid.Row columns={columns} key={i} className="viewerRow">
+					<Grid.Row columns={columns} key={i} className="viewerRow" stretched>
 						{_.times(columns, (j) => {
 								let name = "comp"+(columns * i + j);
 								let annotationDropContainerHorizontal, annotationDropContainerVertical, datasetSelector;
@@ -171,7 +170,6 @@ class DNDCompare extends Component {
 											viewerName={name}
 											position={i}
 											orientation='vertical'
-											height={this.height / rows - 42}
 											onDrop={this.handleDrop.bind(this)}
 											onRemove={this.handleRemove.bind(this)}
 										/>
@@ -195,7 +193,7 @@ class DNDCompare extends Component {
 										)
 									}
 									datasetSelector = (
-										<span>
+										<span className="noStretch">
 										<b>Select a dataset: </b>
 										<Dropdown inline options={this.loomConf} disabled={j==0} value={multiLoom[j]} placeholder=" none selected " onChange={(proxy, select) => {
 											let ml = multiLoom;
@@ -216,7 +214,7 @@ class DNDCompare extends Component {
 								else if (configuration == 'one') va = crossAnnotations['one'][columns * i + j]
 								else va = this.getCrossAnnotations(i, j);
 								return (
-									<Grid.Column key={j}>
+									<Grid.Column key={j} stretched className="viewerCell">
 										{datasetSelector}
 										{annotationDropContainerHorizontal}
 										{annotationDropContainerVertical}
@@ -226,7 +224,6 @@ class DNDCompare extends Component {
 											onDrop={this.handleDrop.bind(this)}
 											onRemove={this.handleRemove.bind(this)}
 											name={name}
-											height={this.height / rows - 42}
 											loomFile={configuration == 'multi' ? multiLoom[j] : multiLoom[0]}
 											activeFeatures={activeFeatures}
 											superposition={superposition}
@@ -250,7 +247,7 @@ class DNDCompare extends Component {
 		}
 
 		let featureSearch = _.times(3, i => (
-			<Grid.Column width={4} key={i}>
+			<Grid.Column key={i}>
 				<FeatureSearchBox field={i} color={colors[i]} type='all' value={activeFeatures[i] ? activeFeatures[i].feature : ''} />
 			</Grid.Column>
 		));
@@ -263,8 +260,8 @@ class DNDCompare extends Component {
 
 		return (
 			<Grid>
-				<Grid.Row columns="4">
-					<Grid.Column width={2} >
+				<Grid.Row columns="5">
+					<Grid.Column width={2}>
 						Number of displays: &nbsp;
 						<Dropdown inline options={this.displayConf} disabled={configuration=='one'} value={displays} onChange={this.displayNumberChanged.bind(this)}/>
 						<br />
@@ -275,8 +272,9 @@ class DNDCompare extends Component {
 						<Dropdown inline options={this.configurationConf} defaultValue={'simple'} onChange={this.configurationChanged.bind(this)}/>
 					</Grid.Column>
 					{featureSearch}
+					<Grid.Column>&nbsp;</Grid.Column>
 				</Grid.Row>
-				<Grid.Row columns={3}>
+				<Grid.Row columns={3} stretched className="viewerRow">
 					<Grid.Column width={2}>
 						<Accordion styled>
 						{annotationTabs()}
@@ -284,14 +282,17 @@ class DNDCompare extends Component {
 						<br />
 						<ViewerToolbar />
 					</Grid.Column>
-					<Grid.Column width={11}>
+					<Grid.Column width={11} className="viewerCell">
 						{viewers()}
 					</Grid.Column>
 					<Grid.Column width={3}>
-						<div className="chart-wrapper" id="chart-distro1" style={{width: '100%'}} height="200px"></div>
-						<ViewerSidebar	onActiveFeaturesChange={(features, id) => {
-							this.setState({activeFeatures: features});
-						}} />
+						<div className="chart-wrapper noStretch" id="chart-distro1" style={{width: '100%'}} height="200px"></div>
+						<ViewerSidebar
+							getSelectedAnnotations={this.getSelectedAnnotations.bind(this)}
+							onActiveFeaturesChange={(features, id) => {
+								this.setState({activeFeatures: features});
+							}} 
+						/>
 					</Grid.Column>
 				</Grid.Row>
 			</Grid>
@@ -640,4 +641,4 @@ class DNDCompare extends Component {
 	}
 }
 
-export default DragDropContext(HTML5Backend)(DNDCompare);
+export default DragDropContext(HTML5Backend)(Compare);

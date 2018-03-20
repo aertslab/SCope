@@ -9,7 +9,7 @@ export default class Metadata extends Component {
 		this.state = {
 			selectionId: props.selectionId,
 			loading: true,
-			annotation: null,
+			annotation: props.annotations,
 			clustering: null,
 			cellIDs: null,
 			metadata : null
@@ -18,7 +18,7 @@ export default class Metadata extends Component {
 
 	render() {
 		const { selectedGenes, selectedRegulons, selectedClusters } = BackendAPI.getParsedFeatures();
-		const { metadata, cellIDs, loading } = this.state;
+		const { metadata, cellIDs, loading, annotation, clustering } = this.state;
 		const { selectionId } = this.props;
 		let selections = BackendAPI.getViewerSelections();
 		let selection = selections[selectionId];
@@ -66,8 +66,20 @@ export default class Metadata extends Component {
 							<Table.Cell>{metadata.aucValues[0] ? metadata.aucValues[0].features[j] : ''}</Table.Cell>
 							<Table.Cell>{metadata.aucValues[1] ? metadata.aucValues[1].features[j] : ''}</Table.Cell>
 							<Table.Cell>{metadata.aucValues[2] ? metadata.aucValues[2].features[j] : ''}</Table.Cell>
-							<Table.Cell>{metadata.annotations[0] ? metadata.annotations[0].annotations[j] : ''}</Table.Cell>
-							<Table.Cell>{metadata.clusterIDs[0] ? selectedClustering[metadata.clusterIDs[0].clusters[j]] : ''}</Table.Cell>
+							{annotation.length ?
+								metadata.annotations.map((a, k) => (
+									<Table.Cell key={k}>{a ? a.annotations[j] : ''}</Table.Cell>
+								)) : (
+									<Table.Cell>&nbsp;</Table.Cell>
+								)
+							}
+							{clustering ? 
+								metadata.clusterIDs.map((c, k) => (
+									<Table.Cell key={k}>{c ? selectedClustering[c.clusters[j]] : ''}</Table.Cell>
+								)) : (
+									<Table.Cell>&nbsp;</Table.Cell>
+								)
+							}
 						</Table.Row>
 					);
 				}
@@ -86,7 +98,7 @@ export default class Metadata extends Component {
 							<Table.HeaderCell></Table.HeaderCell>
 							<Table.HeaderCell colSpan='3'>Gene expression</Table.HeaderCell>
 							<Table.HeaderCell colSpan='3'>AUC values</Table.HeaderCell>
-							<Table.HeaderCell>Annotation</Table.HeaderCell>
+							<Table.HeaderCell colSpan={annotation.length}>Annotation</Table.HeaderCell>
 							<Table.HeaderCell>Clustering</Table.HeaderCell>
 						</Table.Row>
 						<Table.Row textAlign='center'>
@@ -97,8 +109,9 @@ export default class Metadata extends Component {
 							<Table.HeaderCell>{selectedRegulons[0] ? selectedRegulons[0] : 'none selected'}</Table.HeaderCell>
 							<Table.HeaderCell>{selectedRegulons[1]}</Table.HeaderCell>
 							<Table.HeaderCell>{selectedRegulons[2]}</Table.HeaderCell>
-							<Table.HeaderCell>
-								<Dropdown inline placeholder='select annotation' defaultValue={this.state.annotation} options={annotationOptions} onChange={(p, s) =>{
+							<Table.HeaderCell colSpan={annotation.length}>
+								<Dropdown placeholder='select annotation' defaultValue={this.state.annotation} options={annotationOptions} multiple onChange={(p, s) =>{
+									console.log(s);
 									setTimeout(() => {
 										this.setState({annotation: s.value, metadata: null, loading: true});
 										this.getMetadata();
@@ -107,6 +120,7 @@ export default class Metadata extends Component {
 							</Table.HeaderCell>
 							<Table.HeaderCell>
 								<Dropdown inline placeholder='select clustering' defaultValue={this.state.clustering} options={clusteringOptions} onChange={(p, s) => {
+									console.log(s);
 									setTimeout(() => {
 										this.setState({clustering: s.value, metadata: null, loading: true});
 										this.getMetadata();
@@ -171,7 +185,7 @@ export default class Metadata extends Component {
 	}
 
 	componentWillReceiveProps() {
-		this.forceUpdate();
+		this.setState({annotation: this.props.annotations, clustering: this.props.clustering});
 	}
 
 	closeModal() {
@@ -192,8 +206,8 @@ export default class Metadata extends Component {
 			hasCpmTransform: settings.hasCpmNormalization,
 			selectedGenes: selectedGenes,
 			selectedRegulons: selectedRegulons,
-			clusterings: this.state.clustering ? [this.state.clustering] : [],
-			annotations: this.state.annotation ? [this.state.annotation] : []
+			clusterings: this.state.clustering != null ? [this.state.clustering] : [],
+			annotations: this.state.annotation != null ? this.state.annotation : []
 		}
 		let queryCells = {
 			loomFilePath: loomFilePath,

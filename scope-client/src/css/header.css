@@ -25,6 +25,28 @@ VIB colours:
 	background-color: #ff681e !important;
 	color: white !important;
 }
+
 .pointer {
 	cursor: pointer;
+}
+
+.pointer:hover {
+	color: #ff681e !important;
+}
+
+.sessionInfo {
+	position: absolute !important;
+	right: 0px;
+}
+
+.pusher .segment.noPadding {
+	padding: 5px !important;
+}
+
+.typeSelect {
+	min-width: 115px !important;
+}
+
+.message.empty .header {
+	font-size: 0.75rem !important;
 }

@@ -6,7 +6,7 @@ import Viewer from '../common/Viewer'
 import ViewerToolbar from '../common/ViewerToolbar'
 import ViewerSidebar from '../common/ViewerSidebar'
 
-export default class Expression extends Component {
+export default class Gene extends Component {
     constructor() {
         super();
         this.state = {
@@ -23,7 +23,6 @@ export default class Expression extends Component {
         };
         this.sidebarVisibleListener = (state) => {
             this.setState({sidebar: state});
-            this.forceUpdate();
         }
         this.height = window.innerHeight - 200;
     }
@@ -31,7 +30,7 @@ export default class Expression extends Component {
     render() {
         const { activeLoom, activeFeatures, activeCoordinates, sidebar, activeMetadata, colors } = this.state;
         let featureSearch = () =>  _.times(3, i => (
-            <Grid.Column width={sidebar ? 4 : 5} key={i}>
+            <Grid.Column key={i}>
                 <FeatureSearchBox field={i} color={colors[i]} type='all' value={activeFeatures[i] ? activeFeatures[i].feature : ''} />
             </Grid.Column>
         ));
@@ -42,20 +41,21 @@ export default class Expression extends Component {
             </div>
         );
 
+        console.log('sidebar', sidebar);
         return (
             <Grid>
-                <Grid.Row columns="3">
+                <Grid.Row columns="4" centered>
                     {featureSearch()}
+                    <Grid.Column>&nbsp;</Grid.Column>
                 </Grid.Row>
-                <Grid.Row columns="3">
-                    <Grid.Column width={1}>
+                <Grid.Row columns="3" stretched className="viewerFlex">
+                    <Grid.Column width={1} className="viewerToolbar">
                         <ViewerToolbar />
                     </Grid.Column>
-                    <Grid.Column width={sidebar ? 10 : 12}>
+                    <Grid.Column stretched>
                         <b>Expression levels</b>
                         <Viewer 
                             name="expr" 
-                            height={this.height} 
                             loomFile={activeLoom} 
                             activeFeatures={activeFeatures} 
                             activeCoordinates={activeCoordinates} 

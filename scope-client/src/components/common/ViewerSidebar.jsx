@@ -58,13 +58,11 @@ export default class ViewerSidebar extends Component {
 						<Grid.Column>
 							<Icon name='eye' title='toggle show/hide selection' style={{display: 'inline'}} onClick={(e,d) => this.toggleLassoSelection(lS.id)} style={{opacity: lS.selected ? 1 : .5 }} className="pointer" />
 							&nbsp;
-							<Icon name='trash' title='remove this selection' style={{display: 'inline'}} onClick={(e,d) => this.removeLassoSelection(lS.id)} className="pointer"  />
+							<Icon name='trash' title='remove this selection' style={{display: 'inline'}} onClick={(e,d) => this.removeLassoSelection(i)} className="pointer"  />
 							&nbsp;
-							<Icon name='search' title='show metadata for this selection' style={{display: 'inline'}} disabled={activePage == 'dndcompare'} onClick={(e,d) => {
-								if (activePage != 'dndcompare') {
-									this.setState({modalID: i});
-									this.forceUpdate();
-								}
+							<Icon name='search' title='show metadata for this selection' style={{display: 'inline'}} onClick={(e,d) => {
+								this.setState({modalID: i});
+								this.forceUpdate();
 							}} className="pointer"  />
 						</Grid.Column>
 					</Grid.Row>
@@ -83,9 +81,9 @@ export default class ViewerSidebar extends Component {
 				let genes = "";
 				if (activeFeatures[i].metadata.genes) {
 					genes = (
-						<Grid columns={4} className="geneInfo">
+						<Grid columns="4" className="geneInfo blockDisplay">
 							{ activeFeatures[i].metadata.genes.map( (g, j) => (
-								<Grid.Column key={j}>
+								<Grid.Column key={j} className="viewerCell">
 									<a
 										className="pointer"
 										onClick={() => {
@@ -112,18 +110,26 @@ export default class ViewerSidebar extends Component {
 				}
 
 				metadata = (
-					<span>
-						{activeFeatures[i].metadata.description}<br />
-						{image}
-						{genes}
-					</span>
+					<Grid.Row columns="1" centered className='viewerRow'>
+						<Grid.Column stretched className='viewerCell'>
+							{activeFeatures[i].metadata.description}<br />
+							{image}
+							{genes}
+						</Grid.Column>
+					</Grid.Row>
 				);
 			}
 
 			return (
-				<Tab.Pane attached={false} key={i} className={'feature'+i} style={{textAlign: 'center'}}>
-					{activeFeatures[i] ? activeFeatures[i].featureType : ''} <b> {activeFeatures[i] ? activeFeatures[i].feature : ''} </b><br /><br />
-					{metadata}<br /><br /><br />
+				<Tab.Pane attached={false} key={i} className={'feature'+ i + ' stretched marginBottom'} style={{textAlign: 'center'}}>
+					<Grid>
+						<Grid.Row columns="1" centered className='viewerRow'>
+							<Grid.Column className='viewerCell'>
+								{activeFeatures[i] ? activeFeatures[i].featureType : ''} <b> {activeFeatures[i] ? activeFeatures[i].feature : ''} </b>
+							</Grid.Column>
+						</Grid.Row>
+						{metadata}
+					</Grid>
 				</Tab.Pane>
 			)
 		}
@@ -137,9 +143,14 @@ export default class ViewerSidebar extends Component {
 					render: () => featureTab(i),
 				})
 		})
+		
+		let annotations = {}
+		if (this.props.getSelectedAnnotations) {
+			annotations = this.props.getSelectedAnnotations();
+		}
 
 		return (
-			<div>
+			<div className="flexDisplay">
 				<Tab
 					menu={{ secondary: true, pointing: true }}
 					panes={panes}
@@ -150,10 +161,14 @@ export default class ViewerSidebar extends Component {
 						this.setState({activeTab: data.activeIndex});
 					}}
 				/>
-				<Metadata selectionId={this.state.modalID} onClose={() =>{
-					this.setState({modalID: null});
-					this.forceUpdate();
-				}} />
+				<Metadata 
+					selectionId={this.state.modalID} 
+					onClose={() =>{
+						this.setState({modalID: null});
+						this.forceUpdate();
+					}}
+					annotations={Object.keys(annotations)}
+				/>
 			</div>
 		);
 	}

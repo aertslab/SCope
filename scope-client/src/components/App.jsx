@@ -7,8 +7,13 @@ import ReactGA from 'react-ga';
 import { Sidebar, Segment, Dimmer, Loader, Button } from 'semantic-ui-react';
 import AppHeader from './AppHeader';
 import AppSidebar from './AppSidebar';
-import AppContent from './AppContent';
 import { BackendAPI } from './common/API';
+import Welcome from './pages/Welcome';
+import Dataset from './pages/Dataset';
+import Gene from './pages/Gene';
+import Regulon from './pages/Regulon';
+import Compare from './pages/Compare';
+import Tutorial from './pages/Tutorial';
 
 const publicIp = require('public-ip');
 const timer = 60 * 1000;
@@ -44,7 +49,12 @@ class App extends Component {
 					<Sidebar.Pushable>
 						<AppSidebar visible={this.state.isSidebarVisible} onMetadataChange={metadata => {this.setState({metadata})}} />
 						<Sidebar.Pusher>
-							<AppContent />
+							<Route path="/:uuid/:loom?/welcome"  component={Welcome} />
+							<Route path="/:uuid/:loom?/dataset"  component={Dataset} />
+							<Route path="/:uuid/:loom?/gene"     component={Gene} />
+							<Route path="/:uuid/:loom?/regulon"  component={Regulon} />
+							<Route path="/:uuid/:loom?/compare"  component={Compare} />
+							<Route path="/:uuid/:loom?/tutorial" component={Tutorial} />
 						</Sidebar.Pusher>
 					</Sidebar.Pushable>
 					<Dimmer active={loading} inverted>
@@ -63,7 +73,7 @@ class App extends Component {
 
 	componentWillMount() {
 		this.parseURLParams(this.props);
-		this.getUUID(this.props);
+		this.getUUIDFromIP(this.props);
 	}
 
 	componentWillUnmount() {
@@ -73,41 +83,47 @@ class App extends Component {
 	componentWillReceiveProps(nextProps) {
 		this.parseURLParams(nextProps);
 		if (this.state.uuid != nextProps.match.params.uuid)
-			this.getUUID(nextProps);
+			this.getUUIDFromIP(nextProps);
 	}
 
 	parseURLParams(props) {
 		let loom = props.match.params.loom;
 		let page = props.match.params.page;
-		BackendAPI.setActiveLoom(loom ? loom : '');
 		BackendAPI.setActivePage(page ? page : 'welcome');
-		ReactGA.pageview('/' + loom + '/' + page);
+		BackendAPI.setActiveLoom(loom ? loom : '');
+		ReactGA.pageview('/' + encodeURIComponent(loom) + '/' + encodeURIComponent(page));
 	}
 
-	getUUID(props) {
+	getUUIDFromIP(props) {
+		publicIp.v4().then(ip => {
+			this.getUUID(props, ip)
+		}, () => {
+			this.getUUID(props);
+		});
+	}
+
+	getUUID(props, ip) {
 		const { cookies, match } = props;
 
-		publicIp.v4().then(ip => {
-			if (match.params.uuid) {
-				if (DEBUG) console.log('Params UUID detected');
-				this.checkUUID(ip, match.params.uuid);
-			} else if (cookies.get(cookieName)) {
-				if (DEBUG) console.log('Cookie UUID detected');
-				this.checkUUID(ip, cookies.get(cookieName));
-			} else {
-				if (DEBUG) console.log('No UUID detected');
-				BackendAPI.getConnection().then((gbc) => {
-					let query = {
-						ip: ip
-					}
-					if (DEBUG) console.log('getUUID', query);
-					gbc.services.scope.Main.getUUID(query, (err, response) => {
-						if (DEBUG) console.log('getUUID', response);
-						this.checkUUID(ip, response.UUID);
-					})
+		if (match.params.uuid) {
+			if (DEBUG) console.log('Params UUID detected');
+			this.checkUUID(ip, match.params.uuid);
+		} else if (cookies.get(cookieName)) {
+			if (DEBUG) console.log('Cookie UUID detected');
+			this.checkUUID(ip, cookies.get(cookieName));
+		} else {
+			if (DEBUG) console.log('No UUID detected');
+			BackendAPI.getConnection().then((gbc) => {
+				let query = {
+					ip: ip
+				}
+				if (DEBUG) console.log('getUUID', query);
+				gbc.services.scope.Main.getUUID(query, (err, response) => {
+					if (DEBUG) console.log('getUUID', response);
+					this.checkUUID(ip, response.UUID);
 				})
-			}
-		});
+			})
+		}
 	}
 
 	checkUUID(ip, uuid) {

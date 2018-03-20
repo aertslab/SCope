@@ -18,22 +18,31 @@ export default class FeatureSearchInput extends Search {
 		}
 
 		return (
-			<div>
-				<Input iconPosition='left'
-					   key={color} labelPosition='left' value={value} placeholder='Search...' 
-					   onChange={(evt, input) => {
-					   		evt.persist();
-					   		this.setState({value: evt.target.value});
-					   		this.handleSearchChangeDebounced(evt, input);
-					   }}
-					   onBlur={this.handleBlur}
-					   onFocus={this.handleFocus}
-					   onClick={this.handleInputClick}>
-					<Icon name='search' />
-					<input data-mqi={color} />
-					<Select options={options} defaultValue={type} className='icon' disabled={locked == 1 ? true : false} onChange={this.handleTypeChange.bind(this)} tabIndex={-1} />
-				</Input>
-			</div>
+			<Input key={color}
+				fluid
+				iconPosition='left'
+				labelPosition='left' 
+				value={value} 
+				placeholder='Search...' 
+				onChange={(evt, input) => {
+					evt.persist();
+					this.setState({value: evt.target.value});
+					this.handleSearchChangeDebounced(evt, input);
+				}}
+				onBlur={this.handleBlur}
+				onFocus={this.handleFocus}
+				onClick={this.handleInputClick}
+			>
+				<Icon name='search' />
+				<input />
+				<Select options={options} 
+					defaultValue={type} 
+					className='icon typeSelect' 
+					disabled={locked == 1 ? true : false} 
+					onChange={this.handleTypeChange.bind(this)} 
+					tabIndex={-1} 					
+				/>
+			</Input>
 		)
 	}
 
