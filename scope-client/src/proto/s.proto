@@ -195,8 +195,9 @@ message MyLoomsRequest {
 
 message MyLoom {
   string loomFilePath=1;
-  CellMetaData cellMetaData=2;
-  FileMetaData fileMetaData=3;
+  string loomDisplayName=2;
+  CellMetaData cellMetaData=3;
+  FileMetaData fileMetaData=4;
 }
 
 message MyLoomsReply {

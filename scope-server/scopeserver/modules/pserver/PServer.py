@@ -217,13 +217,14 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                                       directory=self.directory,
                                       headers=self.headers,
                                       environ={'REQUEST_METHOD': self.command})
+
             if form.getvalue('file-type') in GServer.data_dirs.keys():
-                self.directory = GServer.SCope.get_data_dir_path_by_file_type(file_type=form.getvalue('file-type'))
+                self.directory = GServer.SCope.get_data_dir_path_by_file_type(file_type=form.getvalue('file-type'), UUID=form.getvalue('UUID'))
             else:
                 self.send_error(415, "Unsupported file tyype")
             # Update the directory of DroopyFieldStorage
             form.directory = self.directory
-            print("Saving uploaded file in "+ self.directory)
+            print("Saving uploaded file in " + self.directory)
             file_items = form[self.form_field]
 
             #-- Handle multiple file upload
