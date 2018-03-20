@@ -549,7 +549,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     else:
                         vmax[n], maxVmax[n] = self.get_vmax(vals)
                     # vals = np.round((vals / vmax[n]) * 225)
-                    vals = np.round((vals / vmax[n]))
+                    vals = vals / vmax[n]
                     vals = (((_UPPER_LIMIT_RGB - _LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))) + _LOWER_LIMIT_RGB
                     features.append([x if x <= _UPPER_LIMIT_RGB else _UPPER_LIMIT_RGB for x in vals])
                 else:
@@ -567,7 +567,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     if request.scaleThresholded:
                         vals = ([auc if auc >= request.threshold[n] else 0 for auc in vals])
                         # vals = np.round((vals / vmax[n]) * 225)
-                        vals = np.round((vals / vmax[n]))
+                        vals = vals / vmax[n]
                         vals = (((_UPPER_LIMIT_RGB - _LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))) + _LOWER_LIMIT_RGB
                         features.append([x if x <= _UPPER_LIMIT_RGB else _UPPER_LIMIT_RGB for x in vals])
                     else:
@@ -883,7 +883,7 @@ class GeneSetEnrichment:
             vmax = np.zeros(3)
             aucs = state.get_values()
             vmax[0] = self.scope.getVmax(aucs)
-            vals = np.round((aucs / vmax[0]))
+            vals = aucs / vmax[0]
             vals = (((_UPPER_LIMIT_RGB - _LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))) + _LOWER_LIMIT_RGB
             hex_vec = ["{0:02x}{0:02x}{0:02x}".format(_NO_EXPR_RGB) if r == g == b == 0
                        else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
