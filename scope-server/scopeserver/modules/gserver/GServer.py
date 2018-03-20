@@ -118,7 +118,11 @@ class SCope(s_pb2_grpc.MainServicer):
     @staticmethod
     def get_partial_md5_hash(file_path, last_n_kb):
         with open(file_path, 'rb') as f:
-            f.seek(- last_n_kb * 1024, 2)
+            file_size = os.fstat(f.fileno()).st_size
+            if file_size < last_n_kb * 1024:
+                f.seek(- file_size, 2)
+            else:
+                f.seek(- last_n_kb * 1024, 2)
             return hashlib.md5(f.read()).hexdigest()
 
     def add_loom_connection(self, partial_md5_hash, loom):
@@ -603,7 +607,7 @@ class SCope(s_pb2_grpc.MainServicer):
             else:
                 features.append([_LOWER_LIMIT_RGB for n in range(n_cells)])
         if len(features) > 0 and len(hex_vec) == 0:
-            hex_vec = ["{0:02x}{0:02x}{0:02x}".format(_NO_EXPR_RGB) if r == g == b == 0
+            hex_vec = ["null" if r == g == b == 0
                        else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
                        for r, g, b in zip(features[0], features[1], features[2])]
 
@@ -885,7 +889,7 @@ class GeneSetEnrichment:
             vmax[0] = self.scope.getVmax(aucs)
             vals = aucs / vmax[0]
             vals = (((_UPPER_LIMIT_RGB - _LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))) + _LOWER_LIMIT_RGB
-            hex_vec = ["{0:02x}{0:02x}{0:02x}".format(_NO_EXPR_RGB) if r == g == b == 0
+            hex_vec = ["null" if r == g == b == 0
                        else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
                        for r, g, b in zip(vals, np.zeros(len(aucs)), np.zeros(len(aucs)))]
             return s_pb2.GeneSetEnrichmentReply(progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message()),
