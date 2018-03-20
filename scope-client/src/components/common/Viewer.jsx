@@ -5,6 +5,8 @@ import { BackendAPI } from './API'
 import { Dimmer, Loader } from 'semantic-ui-react'
 import ReactResizeDetector from 'react-resize-detector';
 
+const DEFAULT_POINT_COLOR = 'A6A6A6';
+
 export default class Viewer extends Component {
 
 	constructor(props) {
@@ -203,6 +205,7 @@ export default class Viewer extends Component {
 		s.scale.x = 2.5;
 		s.scale.y = 2.5;
 		s.anchor = { x: .5, y: .5 };
+		if (c == 'null') c = DEFAULT_POINT_COLOR;
 		s.tint = "0x"+ c;
 		// Decompressing the color not working as without compression
 		// tint request a full 6 hexadecimal digits format
