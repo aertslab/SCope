@@ -18,8 +18,8 @@
     "networks",
     "visualization"
   ],
-  "author": "M.D.W",
-  "license": "ISC",
+  "author": "Maxime De Waegeneer",
+  "license": "GPL-3.0",
   "dependencies": {
     "@types/google-protobuf": "^3.2.7",
     "d3": "^4.12.0",
