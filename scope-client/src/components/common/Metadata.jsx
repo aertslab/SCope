@@ -73,7 +73,7 @@ export default class Metadata extends Component {
 									<Table.Cell>&nbsp;</Table.Cell>
 								)
 							}
-							{clustering ? 
+							{clustering != null ? 
 								metadata.clusterIDs.map((c, k) => (
 									<Table.Cell key={k}>{c ? selectedClustering[c.clusters[j]] : ''}</Table.Cell>
 								)) : (
