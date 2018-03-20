@@ -81,9 +81,9 @@ export default class ViewerSidebar extends Component {
 				let genes = "";
 				if (activeFeatures[i].metadata.genes) {
 					genes = (
-						<Grid columns={4} className="geneInfo">
+						<Grid columns="4" className="geneInfo blockDisplay">
 							{ activeFeatures[i].metadata.genes.map( (g, j) => (
-								<Grid.Column key={j}>
+								<Grid.Column key={j} className="viewerCell">
 									<a
 										className="pointer"
 										onClick={() => {
@@ -110,18 +110,26 @@ export default class ViewerSidebar extends Component {
 				}
 
 				metadata = (
-					<span>
-						{activeFeatures[i].metadata.description}<br />
-						{image}
-						{genes}
-					</span>
+					<Grid.Row columns="1" centered className='viewerRow'>
+						<Grid.Column stretched className='viewerCell'>
+							{activeFeatures[i].metadata.description}<br />
+							{image}
+							{genes}
+						</Grid.Column>
+					</Grid.Row>
 				);
 			}
 
 			return (
-				<Tab.Pane attached={false} key={i} className={'feature'+i} style={{textAlign: 'center'}}>
-					{activeFeatures[i] ? activeFeatures[i].featureType : ''} <b> {activeFeatures[i] ? activeFeatures[i].feature : ''} </b><br /><br />
-					{metadata}<br /><br /><br />
+				<Tab.Pane attached={false} key={i} className={'feature'+ i + ' stretched marginBottom'} style={{textAlign: 'center'}}>
+					<Grid>
+						<Grid.Row columns="1" centered className='viewerRow'>
+							<Grid.Column className='viewerCell'>
+								{activeFeatures[i] ? activeFeatures[i].featureType : ''} <b> {activeFeatures[i] ? activeFeatures[i].feature : ''} </b>
+							</Grid.Column>
+						</Grid.Row>
+						{metadata}
+					</Grid>
 				</Tab.Pane>
 			)
 		}
@@ -142,7 +150,7 @@ export default class ViewerSidebar extends Component {
 		}
 
 		return (
-			<div>
+			<div className="flexDisplay">
 				<Tab
 					menu={{ secondary: true, pointing: true }}
 					panes={panes}

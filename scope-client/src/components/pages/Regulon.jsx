@@ -36,12 +36,12 @@ export default class Regulon extends Component {
     render() {
         const { activeLoom, activeCoordinates, activeFeatures, colors, geneFeatures, sidebar } = this.state;
         let featureSearch = _.times(3, i => (
-            <Grid.Column key={i}  width={sidebar ? 4 : 5}>
+            <Grid.Column key={i}>
                 <FeatureSearchBox field={i} color={colors[i]} type="regulon" locked="1" value={activeFeatures[i] ? activeFeatures[i].feature : ''} />
             </Grid.Column>
         ));
         let featureThreshold = _.times(3, i => (
-            <Grid.Column key={i} width={sidebar ? 4 : 5}>
+            <Grid.Column key={i}>
                 <Histogram field={i} height={this.height - 50} color={colors[i]} loomFile={activeLoom} feature={activeFeatures[i]} onThresholdChange={this.onThresholdChange.bind(this)} />
             </Grid.Column>
         ));
@@ -54,35 +54,35 @@ export default class Regulon extends Component {
 
         return (
             <Grid>
-                <Grid.Row columns="3">
+                <Grid.Row columns="4" centered>
                     {featureSearch}
+                    <Grid.Column>&nbsp;</Grid.Column>
                 </Grid.Row>
-                <Grid.Row columns="3">
+                <Grid.Row columns="4" centered>
                     {featureThreshold}
+                    <Grid.Column>&nbsp;</Grid.Column>
                 </Grid.Row>
-                <Grid.Row columns="4">
+                <Grid.Row columns="4" stretched>
                     <Grid.Column width={1}>
                         <ViewerToolbar />
                     </Grid.Column>
-                    <Grid.Column width={sidebar ? 6 : 7}>
+                    <Grid.Column stretched className="flexDouble">
                         <b>Regulon AUC values</b>
                         <Viewer 
                             name="reg" 
-                            height={3 * this.height - 15} 
                             loomFile={activeLoom} 
                             activeFeatures={activeFeatures} 
                             activeCoordinates={activeCoordinates}
                             scale={true} 
                         />
                     </Grid.Column>
-                    <Grid.Column width={sidebar ? 4 : 5}>
+                    <Grid.Column stretched>
                         <Grid>
-                            <Grid.Row>
-                                <Grid.Column>
+                            <Grid.Row stretched className="viewerRow">
+                                <Grid.Column stretched>
                                     <b>Cells passing thresholds</b>
                                     <Viewer 
                                         name="auc" 
-                                        height={3 * this.height / 2 - 20} 
                                         loomFile={activeLoom} 
                                         activeFeatures={activeFeatures}                             
                                         activeCoordinates={activeCoordinates} 
@@ -90,12 +90,11 @@ export default class Regulon extends Component {
                                     />
                                 </Grid.Column>
                             </Grid.Row>
-                            <Grid.Row style={{paddingTop: '0px'}}>
-                                <Grid.Column>
+                            <Grid.Row stretched className="viewerRow">
+                                <Grid.Column stretched>
                                     <b>Expression levels</b>
                                     <Viewer 
                                         name="expr" 
-                                        height={3 * this.height / 2 - 20} 
                                         loomFile={activeLoom} 
                                         activeFeatures={activeFeatures} 
                                         activeCoordinates={activeCoordinates} 

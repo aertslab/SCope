@@ -211,7 +211,7 @@ export default class Metadata extends Component {
 		}
 		let queryCells = {
 			loomFilePath: loomFilePath,
-			cellIndices: selections[this.props.selectionId].indices,
+			cellIndices: selections[this.props.selectionId].points,
 		}
 		BackendAPI.getConnection().then((gbc) => {
 			if (DEBUG) console.log('getCellIDs', queryCells);

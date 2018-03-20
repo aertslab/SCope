@@ -64,8 +64,8 @@ export default class Viewer extends Component {
 
 	render() {
 		return (
-			<div>
-				<canvas id={"viewer"+this.props.name} style={{width: '99.9%', height: (this.props.height-2)+'px'}} >
+			<div style={{width: '100%'}}>
+				<canvas id={"viewer"+this.props.name}  >
 				</canvas>
 				<ReactResizeDetector handleWidth skipOnMount onResize={this.onResize.bind(this)} />
 				<Dimmer active={this.state.loading} inverted>
@@ -87,7 +87,9 @@ export default class Viewer extends Component {
 	componentDidMount() {
 		if (DEBUG) console.log(this.props.name, 'componentDidMount', this.props);
 		this.zoomSelection = d3.select('#viewer'+this.props.name);
-		this.w = this.zoomSelection.node().getBoundingClientRect().width;
+		let bbox = this.zoomSelection.select(function() {return this.parentNode}).node().getBoundingClientRect();
+		this.w = bbox.width - 10;
+		this.h = bbox.height - 10;
 		this.initGraphics();
 		if (this.props.loomFile != null) {
 			this.getPoints(this.props.loomFile, this.props.activeCoordinates, this.props.activeAnnotations, this.props.superposition, () => {
@@ -108,9 +110,11 @@ export default class Viewer extends Component {
 		if (DEBUG) console.log(this.props.name, 'componentWillReceiveProps', nextProps);
 
 		// TODO: dirty hacks
-		if (parseInt(this.h) != parseInt(nextProps.height)) {
+		let bbox = this.zoomSelection.select(function() {return this.parentNode}).node().getBoundingClientRect();
+		if ((parseInt(this.w) != parseInt(bbox.width - 10)) || (parseInt(this.h) != parseInt(bbox.height - 10))) {
 			if (DEBUG) console.log(nextProps.name, 'changing size', this.h, nextProps.height);
-			this.h = nextProps.height;
+			this.w = bbox.width - 10;
+			this.h = bbox.height - 10;
 			this.resizeContainer();
 		}
 
@@ -639,7 +643,7 @@ export default class Viewer extends Component {
 		pts.sort((a, b) =>{
 			let ca = this.hexToRgb(a[3]);
 			let cb = this.hexToRgb(b[3]);
-			let r = (ca.r + ca.g + ca.b) - (cb.r + cb.g + cb.b);
+			let r = (ca ? (ca.r + ca.g + ca.b) : 0) - (cb ? (cb.r + cb.g + cb.b) : 0);
 			return r;
 		})
 		pts.map((p, i) => {

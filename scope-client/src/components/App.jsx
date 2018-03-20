@@ -7,8 +7,13 @@ import ReactGA from 'react-ga';
 import { Sidebar, Segment, Dimmer, Loader, Button } from 'semantic-ui-react';
 import AppHeader from './AppHeader';
 import AppSidebar from './AppSidebar';
-import AppContent from './AppContent';
 import { BackendAPI } from './common/API';
+import Welcome from './pages/Welcome';
+import Dataset from './pages/Dataset';
+import Gene from './pages/Gene';
+import Regulon from './pages/Regulon';
+import Compare from './pages/Compare';
+import Tutorial from './pages/Tutorial';
 
 const publicIp = require('public-ip');
 const timer = 60 * 1000;
@@ -44,7 +49,12 @@ class App extends Component {
 					<Sidebar.Pushable>
 						<AppSidebar visible={this.state.isSidebarVisible} onMetadataChange={metadata => {this.setState({metadata})}} />
 						<Sidebar.Pusher>
-							<AppContent />
+							<Route path="/:uuid/:loom?/welcome"  component={Welcome} />
+							<Route path="/:uuid/:loom?/dataset"  component={Dataset} />
+							<Route path="/:uuid/:loom?/gene"     component={Gene} />
+							<Route path="/:uuid/:loom?/regulon"  component={Regulon} />
+							<Route path="/:uuid/:loom?/compare"  component={Compare} />
+							<Route path="/:uuid/:loom?/tutorial" component={Tutorial} />
 						</Sidebar.Pusher>
 					</Sidebar.Pushable>
 					<Dimmer active={loading} inverted>

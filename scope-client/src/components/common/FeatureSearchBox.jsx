@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
-import { Label, Menu, Icon, Popup, Image } from 'semantic-ui-react'
+import { Label, Segment, Icon, Popup, Image } from 'semantic-ui-react'
 import FeatureSearchInput from './FeatureSearchInput';
 import { BackendAPI } from './API'
 
 export default class FeatureSearch extends React.Component {
 
 	constructor(props) {
-		super(props)
+		super(props);
 		this.state = {
 			isLoading: false,
 			results: [],
@@ -18,45 +18,28 @@ export default class FeatureSearch extends React.Component {
 
 	render() {
 
-		const { isLoading, value, results, type } = this.state
-		const { locked, field, color, options } = this.props
-		let querySearchLabel = {
-			position: 'relative',
-			top: 1,
-			left: 15,
-			height: 38
-		}
-
-		let noPadding = {
-			padding: 0
-		}
+		const { isLoading, value, results, type } = this.state;
+		const { locked, color, options } = this.props;
 
 		return (
-			<Menu.Item key={field} style={noPadding}>
-				<Menu secondary style={noPadding}>
-					<Menu.Item style={{padding: 0, display: 'block'}}>
-						<Label color={color} style={querySearchLabel}></Label>
-					</Menu.Item>
-					<Menu.Item style={noPadding}>
-						<FeatureSearchInput
-							category
-							loading={isLoading}
-							onResultSelect={this.handleResultSelect.bind(this)}
-							onSearchChange={this.handleSearchChange.bind(this)}
-							handleTypeChange={this.handleTypeChange.bind(this)}
-							onSelectionChange={this.handleSelectionChange.bind(this)}
-							onBlur={this.handleBlur.bind(this)}
-							onMouseDown={this.handleMouseDown.bind(this)}
-							results={results}
-							options={options}
-							selectFirstResult={true}
-							value={value}
-							type={type}
-							locked={locked}
-						/>
-					</Menu.Item>
-				</Menu>
-			</Menu.Item>
+			<Segment color={color} inverted className="noPadding">
+				<FeatureSearchInput
+					category
+					loading={isLoading}
+					onResultSelect={this.handleResultSelect.bind(this)}
+					onSearchChange={this.handleSearchChange.bind(this)}
+					handleTypeChange={this.handleTypeChange.bind(this)}
+					onSelectionChange={this.handleSelectionChange.bind(this)}
+					onBlur={this.handleBlur.bind(this)}
+					onMouseDown={this.handleMouseDown.bind(this)}
+					results={results}
+					options={options}
+					selectFirstResult={true}
+					value={value}
+					type={type}
+					locked={locked}
+				/>
+			</Segment>
 		);
 	}
 

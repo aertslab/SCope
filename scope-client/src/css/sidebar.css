@@ -1,20 +1,38 @@
-.item {
-	min-height: 100%;
-}
-
 .menu.logos {
 	text-align: center;
-	position: absolute;
-	left: 10%;
-	right: 10%;
-	bottom: 1%;
-	margin-top: 50px;
-	margin-bottom: 10px;
-	padding-bottom: 10px;
+}
+
+.header {
+	padding-left: 0.5em;
 }
 
 .pushable {
-	height: auto !important;
+	flex-grow: 1;
+	overflow: hidden;
+}
+
+.ui {
+	font-size: 0.75rem !important;
+}
+
+.push.sidebar {
+	overflow-y: scroll;
+}
+
+.vertical .active.item {
+	font-weight: bold !important;
+	color: black !important;
+}
+
+.vertical .item:hover {
+	font-weight: bold !important;
+	color: black !important;
+}
+
+.sidebarTabs {
+	display: flex;
+	width: 100%;
+	flex-direction: column;
 }
 
 .sidebarTabs a:nth-child(2) {
@@ -42,10 +60,27 @@
 }
 
 .geneInfo {
-	max-height: 500px;
+	max-height: 200px;
 	overflow-y: scroll;
 }
 
 .selectionRow {
 	padding-top: 5px !important;
+}
+
+.viewerToolbar {
+	flex-basis: 100px;
+}
+
+.ui.segment.basic {
+	padding: 0px;
+	padding-left: 10px;
+}
+
+.ui.accordion {
+	flex-grow: 0 !important;
+} 
+
+.ui.pointing.secondary.menu {
+	margin: 0px;
 }

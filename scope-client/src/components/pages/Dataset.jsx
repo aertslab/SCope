@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { BackendAPI } from '../common/API'
 import ReactJson from 'react-json-view'
+import { Grid } from 'semantic-ui-react';
 
 
 export default class Dataset extends Component {
@@ -18,17 +19,24 @@ export default class Dataset extends Component {
     render() {
         const { activeLoom, metadata } = this.state;
 
-        if (!activeLoom) return (
-            <div>
-                Select the dataset to be analyzed
-            </div>
-        )
-
         return (
-            <div>
-                Active loom file: <b>{activeLoom}</b><br /><br />
-                <ReactJson src={metadata} collapsed={2} />
-            </div>
+            <Grid>
+                {!activeLoom &&
+                    <Grid.Row>
+                        <Grid.Column>
+                            Select the dataset to be analyzed
+                        </Grid.Column>
+                    </Grid.Row>
+                }
+                {activeLoom &&
+                    <Grid.Row>
+                        <Grid.Column>
+                            Active loom file: <b>{activeLoom}</b><br /><br />
+                            <ReactJson src={metadata} collapsed={2} />
+                        </Grid.Column>
+                    </Grid.Row>
+                }
+            </Grid>
         );
     }
 

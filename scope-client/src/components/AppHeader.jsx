@@ -84,7 +84,7 @@ class AppHeader extends Component {
 					</Menu.Item>
 				)}
 
-				<Menu.Item style={{position: 'absolute', right: '0px'}}>
+				<Menu.Item className="sessionInfo">
 					Your session will be deleted in {moment.duration(timeout).humanize()} &nbsp;
 					<Icon name="info circle" inverted title="Our servers can only store that much data. Your files will be removed after the session times out." />
 				</Menu.Item>

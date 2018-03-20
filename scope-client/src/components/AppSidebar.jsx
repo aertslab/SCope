@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
-import { Sidebar, Menu, Icon, Image, Button, Divider, Modal, Checkbox, Dropdown, Grid, Input, Progress, Dimmer, Loader } from 'semantic-ui-react';
+import { Segment,  Sidebar, Menu, Icon, Image, Button, Divider, Modal, Checkbox, Dropdown, Grid, Input, Progress, Dimmer, Loader } from 'semantic-ui-react';
 import FileReaderInput from 'react-file-reader-input';
 import { BackendAPI } from './common/API';
 
@@ -41,7 +41,9 @@ class AppSidebar extends Component {
 		console.log('AppSidebar render');
 		return (
 			<Sidebar as={Menu} animation="push" visible={this.props.visible} vertical>
-				<Menu.Item>
+					<Segment basic>
+						<Icon name='arrow up' /><em>Hide me to get bigger workspace</em>
+					</Segment>
 					<Menu.Header>DATASETS</Menu.Header>
 						<Menu.Menu>
 							<Menu.Item key="new" onClick={this.toggleUploadLoomModal.bind(this)}>
@@ -64,7 +66,9 @@ class AppSidebar extends Component {
 							</Dimmer>
 						</Menu.Menu>
 					<Divider />
-					<Menu.Header style={{display:  showTransforms || showCoordinatesSelection ? 'block' : 'none'}} >SETTINGS</Menu.Header>
+					{(showTransforms || showCoordinatesSelection) &&
+						<Menu.Header>SETTINGS</Menu.Header>
+					}
 					{showCoordinatesSelection &&
 						<Menu.Menu>
 							<Menu.Item>Coordinates</Menu.Item>
@@ -86,11 +90,11 @@ class AppSidebar extends Component {
 					}
 					<Divider />
 					<Menu.Menu className="logos">
-						<Image src='src/images/kuleuven.png' size="small" centered href="http://kuleuven.be" />
+						{/*<Image src='src/images/kuleuven.png' size="small" centered href="http://kuleuven.be" />
 						<br /><br />
-						<Image src='src/images/vib.png' size="small" centered href="http://vib.be" />
+						<Image src='src/images/vib.png' size="small" centered href="http://vib.be" />*/}
+						<Image src='src/images/flycellatlas.png' size="small" centered href="http://flycellatlas.org/" />
 					</Menu.Menu>
-				</Menu.Item>
 				<Modal open={this.state.uploadLoomModalOpened} onClose={this.toggleUploadLoomModal.bind(this)} closeIcon>
 					<Modal.Header>Import a .loom file</Modal.Header>
 					<Modal.Content image>

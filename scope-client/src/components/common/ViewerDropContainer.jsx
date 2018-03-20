@@ -59,7 +59,7 @@ class ViewerDropContainer extends Component {
 		}
 
 		return connectDropTarget(
-			<div>
+			<div className="flexDisplay">
 				{container()}
 			</div>,
 		)
