@@ -118,7 +118,11 @@ class SCope(s_pb2_grpc.MainServicer):
     @staticmethod
     def get_partial_md5_hash(file_path, last_n_kb):
         with open(file_path, 'rb') as f:
-            f.seek(- last_n_kb * 1024, 2)
+            file_size = os.fstat(f.fileno()).st_size
+            if file_size < last_n_kb * 1024:
+                f.seek(- file_size, 2)
+            else:
+                f.seek(- last_n_kb * 1024, 2)
             return hashlib.md5(f.read()).hexdigest()
 
     def add_loom_connection(self, partial_md5_hash, loom):
