@@ -14,6 +14,7 @@ export default class FeatureSearch extends React.Component {
 			selection: null,
 			type: props.type
 		};
+		this.call = null;
 	}
 
 	render() {
@@ -147,6 +148,7 @@ export default class FeatureSearch extends React.Component {
 	}
 
 	handleSearchChange(e, { value }) {
+		if (this.call != null) this.call.end();
 		this.setState({ isLoading: true, value })
 		setTimeout(() => {
 			if (this.state.value.length < 1) return this.resetComponent()
@@ -156,7 +158,7 @@ export default class FeatureSearch extends React.Component {
 			};
 			if (DEBUG) console.log("handleSearchChange", query);
 			BackendAPI.getConnection().then((gbc) => {
-				gbc.services.scope.Main.getFeatures(query, (err, response) => {
+				this.call = gbc.services.scope.Main.getFeatures(query, (err, response) => {
 					if (DEBUG) console.log("handleSearchChange", response);
 					if (response != null) {
 						let res = [], genes = [], regulons = [], clusters = {};
@@ -214,6 +216,7 @@ export default class FeatureSearch extends React.Component {
 
 					}
 				});
+				console.log('gbc', gbc, this.call);
 			});
 		}, 200)
 	}
