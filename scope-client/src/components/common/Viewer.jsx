@@ -64,7 +64,7 @@ export default class Viewer extends Component {
 
 	render() {
 		return (
-			<div style={{width: '100%'}}>
+			<div className="stretched">
 				<canvas id={"viewer"+this.props.name}  >
 				</canvas>
 				<ReactResizeDetector handleWidth skipOnMount onResize={this.onResize.bind(this)} />
@@ -112,10 +112,10 @@ export default class Viewer extends Component {
 		// TODO: dirty hacks
 		let bbox = this.zoomSelection.select(function() {return this.parentNode}).node().getBoundingClientRect();
 		if ((parseInt(this.w) != parseInt(bbox.width - 10)) || (parseInt(this.h) != parseInt(bbox.height - 10))) {
-			if (DEBUG) console.log(nextProps.name, 'changing size', this.h, nextProps.height);
+			if (DEBUG) console.log(nextProps.name, 'changing size', bbox);
 			this.w = bbox.width - 10;
 			this.h = bbox.height - 10;
-			this.resizeContainer();
+			//this.resizeContainer();
 		}
 
 		if (this.props.loomFile != nextProps.loomFile || this.props.activeCoordinates != nextProps.activeCoordinates || this.props.superposition != nextProps.superposition ||

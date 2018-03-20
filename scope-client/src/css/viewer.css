@@ -1,7 +1,6 @@
 .pusher {
 	display: flex;
 	flex-direction: column;
-	overflow-y:	scroll !important;
 }
 
 .ui .grid {
@@ -61,6 +60,7 @@ canvas {
 
 .flexDisplay {
 	display: flex;
+	flex-direction: column;
 }
 
 .dropContainer p {
@@ -89,7 +89,12 @@ canvas {
 }
 
 .stretched {
-	flex: 1
+	flex: 1;
+	width: 100%;
+}
+
+.viewerFlex {
+	flex: 1 0 500px !important;
 }
 
 .stretched > .column > b {
@@ -97,7 +102,11 @@ canvas {
 }
 
 .flexDouble {
-	flex: 2;
+	flex-grow: 2 !important;
+}
+
+.flexRow {
+	flex-direction: row !important;
 }
 
 .viewerCell {
@@ -107,4 +116,10 @@ canvas {
 
 .marginBottom {
 	margin-bottom: 10px !important;
+}
+
+.clearfix::after {
+    content: "";
+    clear: both;
+    display: table;
 }

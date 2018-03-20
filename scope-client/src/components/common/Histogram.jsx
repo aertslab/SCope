@@ -11,21 +11,20 @@ export default class Histogram extends Component {
 
 	constructor(props) {
 		super(props);
-		console.log('Histogram', props);
 		this.state = {
 			min: 0,
 			max: 1,
 			selected: props.feature ? props.feature.threshold : 0,
-			width: 0,
-			height: 0,
 			matched: 0,
 			total: 0,
 			points: []
 		}
+		this.w = 0;
+		this.h = 0;
 	}
 
 	render() {
-		const { field, feature, height } = this.props;
+		const { field, feature } = this.props;
 		const { min, max, selected, matched, total } = this.state;
 		let enabled =( feature && feature.feature.length );
 		let handle = (props) => {
@@ -37,8 +36,8 @@ export default class Histogram extends Component {
 			);
 		};
 		return (
-			<div>
-				<svg id={"thresholdSVG" + field} style={{width: 100+'%'}} height={height} ></svg>
+			<div className="flexDisplay">
+				<svg id={"thresholdSVG" + field} style={{width: '100%', height: '100%'}} ></svg>
 				<div className="auc">AUC threshold: <b>{selected.toFixed(4)}</b> (matched points: {matched} / {total})</div>
 				<Slider disabled={!enabled} value={selected} min={min} max={max} step={0.0001} handle={handle} onChange={this.handleThresholdChange.bind(this)}  onAfterChange={this.handleUpdateTSNE.bind(this)} />
 			</div>
@@ -106,12 +105,11 @@ export default class Histogram extends Component {
 		console.log('renderAUCGraph', feature, points);
 		var formatCount = d3.format(",.0f");
 		var svg = d3.select("#thresholdSVG"+this.props.field);
-		var width = svg.node().getBoundingClientRect().width;
-		svg.attr('width', width);
+		var bbox = svg.node().getBoundingClientRect();
 		svg.selectAll("*").remove();
 		var margin = {top: 10, right: 10, bottom: 30, left: 40},
-			width = +svg.attr("width") - margin.left - margin.right,
-			height = +svg.attr("height") - margin.top - margin.bottom,
+			width = bbox.width - margin.left - margin.right,
+			height = bbox.height - margin.top - margin.bottom,
 			max = d3.max(points),
 			g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 

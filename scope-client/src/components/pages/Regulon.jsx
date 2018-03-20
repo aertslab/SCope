@@ -30,7 +30,6 @@ export default class Regulon extends Component {
             this.setState({sidebar: state});
             this.forceUpdate();
         }
-        this.height = (window.innerHeight - 160) / 4;
     }
 
     render() {
@@ -41,8 +40,8 @@ export default class Regulon extends Component {
             </Grid.Column>
         ));
         let featureThreshold = _.times(3, i => (
-            <Grid.Column key={i}>
-                <Histogram field={i} height={this.height - 50} color={colors[i]} loomFile={activeLoom} feature={activeFeatures[i]} onThresholdChange={this.onThresholdChange.bind(this)} />
+            <Grid.Column key={i} className="flexDisplay" stretched>
+                <Histogram field={i} color={colors[i]} loomFile={activeLoom} feature={activeFeatures[i]} onThresholdChange={this.onThresholdChange.bind(this)} />
             </Grid.Column>
         ));
 
@@ -53,7 +52,7 @@ export default class Regulon extends Component {
         )
 
         return (
-            <Grid>
+            <Grid className="flexDisplay" >
                 <Grid.Row columns="4" centered>
                     {featureSearch}
                     <Grid.Column>&nbsp;</Grid.Column>
@@ -62,12 +61,12 @@ export default class Regulon extends Component {
                     {featureThreshold}
                     <Grid.Column>&nbsp;</Grid.Column>
                 </Grid.Row>
-                <Grid.Row columns="4" stretched>
+                <Grid.Row columns="4" stretched className="viewerFlex flexRow">
                     <Grid.Column width={1}>
                         <ViewerToolbar />
                     </Grid.Column>
                     <Grid.Column stretched className="flexDouble">
-                        <b>Regulon AUC values</b>
+                        <b className="noStretch">Regulon AUC values</b>
                         <Viewer 
                             name="reg" 
                             loomFile={activeLoom} 
@@ -77,35 +76,25 @@ export default class Regulon extends Component {
                         />
                     </Grid.Column>
                     <Grid.Column stretched>
-                        <Grid>
-                            <Grid.Row stretched className="viewerRow">
-                                <Grid.Column stretched>
-                                    <b>Cells passing thresholds</b>
-                                    <Viewer 
-                                        name="auc" 
-                                        loomFile={activeLoom} 
-                                        activeFeatures={activeFeatures}                             
-                                        activeCoordinates={activeCoordinates} 
-                                        thresholds={true} 
-                                    />
-                                </Grid.Column>
-                            </Grid.Row>
-                            <Grid.Row stretched className="viewerRow">
-                                <Grid.Column stretched>
-                                    <b>Expression levels</b>
-                                    <Viewer 
-                                        name="expr" 
-                                        loomFile={activeLoom} 
-                                        activeFeatures={activeFeatures} 
-                                        activeCoordinates={activeCoordinates} 
-                                        scale={true} 
-                                        genes={true}
-                                        settings={true} 
-                                        customScale={true} 
-                                    />
-                                </Grid.Column>
-                            </Grid.Row>
-                        </Grid>
+                        <b className="noStretch">Cells passing thresholds</b>
+                        <Viewer 
+                            name="auc" 
+                            loomFile={activeLoom} 
+                            activeFeatures={activeFeatures}                             
+                            activeCoordinates={activeCoordinates} 
+                            thresholds={true} 
+                        />
+                        <b className="noStretch">Expression levels</b>
+                        <Viewer 
+                            name="expr" 
+                            loomFile={activeLoom} 
+                            activeFeatures={activeFeatures} 
+                            activeCoordinates={activeCoordinates} 
+                            scale={true} 
+                            genes={true}
+                            settings={true} 
+                            customScale={true} 
+                        />
                     </Grid.Column>
                     <Grid.Column width={3}>
                         <ViewerSidebar  onActiveFeaturesChange={(features, id) => {

@@ -48,7 +48,7 @@ export default class Gene extends Component {
                     {featureSearch()}
                     <Grid.Column>&nbsp;</Grid.Column>
                 </Grid.Row>
-                <Grid.Row columns="3" stretched>
+                <Grid.Row columns="3" stretched className="viewerFlex">
                     <Grid.Column width={1} className="viewerToolbar">
                         <ViewerToolbar />
                     </Grid.Column>

@@ -38,9 +38,8 @@ class AppSidebar extends Component {
 		let showTransforms = metadata && (['welcome','dataset'].indexOf(match.params.page) == -1) ? true : false;
 		let showCoordinatesSelection = showTransforms && metadata.fileMetaData && metadata.fileMetaData.hasExtraEmbeddings ? true : false;
 
-		console.log('AppSidebar render');
 		return (
-			<Sidebar as={Menu} animation="push" visible={this.props.visible} vertical>
+			<Sidebar as={Menu} animation="push" visible={this.props.visible} vertical className="clearfix">
 					<Segment basic>
 						<Icon name='arrow up' /><em>Hide me to get bigger workspace</em>
 					</Segment>
@@ -56,7 +55,7 @@ class AppSidebar extends Component {
 									<Link key={i} to={'/' + [match.params.uuid, loomFile.loomFilePath, match.params.page].join('/')} >
 										<Menu.Item active={active} key={loomFile.loomFilePath} >
 											<Icon name={active ? "selected radio" : "radio"} />
-											{loomFile.loomFilePath}
+											{loomFile.loomDisplayName}
 										</Menu.Item>
 									</Link>
 								);
@@ -186,6 +185,8 @@ class AppSidebar extends Component {
 		}
 
 		let form = new FormData();
+		form.append('UUID', match.params.uuid);
+		form.append('file-type', 'Loom');
 		form.append('file', file);
 
 		let xhr = new XMLHttpRequest();
@@ -201,15 +202,19 @@ class AppSidebar extends Component {
 				UUID: match.params.uuid,
 				filename: file.name,
 			};
+			/*
 			BackendAPI.getConnection().then((gbc) => {
 				if (DEBUG) console.log("loomUploaded", query);
 				gbc.services.scope.Main.loomUploaded(query, (error, response) => {
 					if (DEBUG) console.log("loomUploaded", response);
+					*/
 					this.setState({ uploadLoomFile: null, uploadLoomProgress: 0 })
 					this.getLoomFiles()
 					this.toggleUploadLoomModal()
+					/*
 				})
 			})
+			*/
 		})
 		xhr.setRequestHeader("Content-Disposition", "attachment;filename=" + file.name)
 		xhr.send(form);

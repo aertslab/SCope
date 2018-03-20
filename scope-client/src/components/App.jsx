@@ -91,7 +91,7 @@ class App extends Component {
 		let page = props.match.params.page;
 		BackendAPI.setActivePage(page ? page : 'welcome');
 		BackendAPI.setActiveLoom(loom ? loom : '');
-		ReactGA.pageview('/' + loom + '/' + page);
+		ReactGA.pageview('/' + encodeURIComponent(loom) + '/' + encodeURIComponent(page));
 	}
 
 	getUUIDFromIP(props) {
