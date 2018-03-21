@@ -280,6 +280,7 @@ message LoomUploadedReply {}
 
 message MyGeneSet {
   string geneSetFilePath=1;
+  string geneSetDisplayName=2;
 }
 
 message MyGeneSetsRequest {
