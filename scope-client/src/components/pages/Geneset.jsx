@@ -25,7 +25,7 @@ class Geneset extends Component {
             selectedGeneset: null,
             uploadModalOpened: false,
             sidebar: BackendAPI.getSidebarVisible(),
-            colors: BackendAPI.getColors()
+            colors: [],
         };
         this.activeLoomListener = (loom, metadata, coordinates) => {
             this.setState({activeLoom: loom, activeCoordinates: coordinates});
@@ -42,16 +42,6 @@ class Geneset extends Component {
     render() {
         const { match } = this.props;
         const { activeLoom, activeCoordinates, activeFeatures, colors, geneFeatures, sidebar, genesets, loading, uploadModalOpened, selectedGeneset, loadingMessage } = this.state;
-        let featureSearch = _.times(3, i => (
-            <Grid.Column key={i}>
-                <FeatureSearchBox field={i} color={colors[i]} type="regulon" locked="1" value={activeFeatures[i] ? activeFeatures[i].feature : ''} />
-            </Grid.Column>
-        ));
-        let featureThreshold = _.times(3, i => (
-            <Grid.Column key={i} className="flexDisplay" stretched>
-                <Histogram field={i} color={colors[i]} loomFile={activeLoom} feature={activeFeatures[i]} onThresholdChange={this.onThresholdChange.bind(this)} />
-            </Grid.Column>
-        ));
 
         if (!activeLoom) return (
             <div>
@@ -87,7 +77,7 @@ class Geneset extends Component {
                         </Menu>
                     </Grid.Column>
                     <Grid.Column width="2">
-                        <Button onClick={this.runGeneEnrichment.bind(this)}>Run gene enrichment</Button>
+                        <Button onClick={this.runGeneEnrichment.bind(this)} disabled={!selectedGeneset} >Run gene enrichment</Button>
                     </Grid.Column>
                     <Grid.Column width="3">&nbsp;</Grid.Column>
                 </Grid.Row>
@@ -103,7 +93,7 @@ class Geneset extends Component {
                             activeFeatures={activeFeatures} 
                             activeCoordinates={activeCoordinates}
                             scale={true} 
-                            colors={this.state.colors}
+                            colors={colors}
                         />
                     </Grid.Column>
                     <Grid.Column width={3}>
@@ -179,7 +169,7 @@ class Geneset extends Component {
 	        });
 	        call.on('end', () => {
 		        if (DEBUG) console.log('doGeneSetEnrichment end');
-                this.setState({loading: false});
+                //this.setState({loading: false});
 	        });
         })
     }

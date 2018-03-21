@@ -95,7 +95,7 @@ export default class Viewer extends Component {
 		this.initGraphics();
 		if (this.props.loomFile != null) {
 			this.getPoints(this.props.loomFile, this.props.activeCoordinates, this.props.activeAnnotations, this.props.superposition, () => {
-				if (this.props.colors)	this.updateDataPoints();
+				if (this.props.colors)	this.updateDataPoints(this.props.colors);
 				else this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.props.activeAnnotations, this.state.customScale, this.props.superposition);
 				this.onViewerSelectionChange(this.state.lassoSelections);
 				let t = BackendAPI.getViewerTransform();
@@ -128,6 +128,11 @@ export default class Viewer extends Component {
 				this.getPoints(nextProps.loomFile, nextProps.activeCoordinates, nextProps.activeAnnotations, nextProps.superposition, () => {
 					this.getFeatureColors(this.state.activeFeatures, nextProps.loomFile, this.props.thresholds, this.state.activeAnnotations, this.state.customScale, nextProps.superposition);
 				});
+		}
+
+		if (JSON.stringify(nextProps.colors) != JSON.stringify(this.state.colors)) {
+			this.setState({colors: nextProps.colors});
+			this.updateDataPoints(nextProps.colors);
 		}
 	}
 
@@ -636,14 +641,14 @@ export default class Viewer extends Component {
 		} : null;
 	}
 	
-	updateDataPoints() {
+	updateDataPoints(colors) {
 		this.startBenchmark("updateDataPoints")
 		let n = this.container.children.length;
 		this.container.removeChildren(0, n).map((p) => {
 			p.destroy();
 		})
-		let v = this.state.colors;
-		let pts = _.zip(this.state.coord.idx, this.state.coord.x, this.state.coord.y, this.state.colors);
+		console.log(colors);
+		let pts = _.zip(this.state.coord.idx, this.state.coord.x, this.state.coord.y, colors ? colors : this.state.colors);
 		pts.sort((a, b) =>{
 			let ca = this.hexToRgb(a[3]);
 			let cb = this.hexToRgb(b[3]);
