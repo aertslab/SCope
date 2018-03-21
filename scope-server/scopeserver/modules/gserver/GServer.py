@@ -697,10 +697,13 @@ class SCope(s_pb2_grpc.MainServicer):
         return(s_pb2.MarkerGenesReply(genes=genes))
 
     def getMyGeneSets(self, request, context):
-        my_gene_sets = os.listdir(self.gene_sets_dir)
-        gene_sets = []
-        for f in sorted(list(my_gene_sets)):
-            gene_sets.append(s_pb2.MyGeneSet(geneSetFilePath=f))
+        userDir = self.get_data_dir_path_by_file_type('GeneSet', UUID=request.UUID)
+        if not os.path.isdir(userDir):
+            for i in data_dirs.keys():
+                os.mkdir(os.path.join(data_dirs[i]['path'], request.UUID))
+
+        geneSetsToProcess = sorted(self.globalSets) + sorted([os.path.join(request.UUID, x) for x in os.listdir(userDir)])
+        gene_sets = [s_pb2.MyGeneSet(geneSetFilePath=f) for f in geneSetsToProcess]
         return s_pb2.MyGeneSetsReply(myGeneSets=gene_sets)
 
     def getMyLooms(self, request, context):
