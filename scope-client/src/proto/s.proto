@@ -283,6 +283,7 @@ message MyGeneSet {
 }
 
 message MyGeneSetsRequest {
+  string UUID=1;
 }
 
 message MyGeneSetsReply {
