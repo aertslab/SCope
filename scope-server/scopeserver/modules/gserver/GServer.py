@@ -92,10 +92,9 @@ class SCope(s_pb2_grpc.MainServicer):
         self.gene_sets_dir = data_dirs["GeneSet"]["path"]
         self.rankings_dir = data_dirs["LoomAUCellRankings"]["path"]
 
-        self.globalLooms = os.listdir(self.loom_dir)
-        self.globalSets = os.listdir(self.gene_sets_dir)
-        self.globalrankings = os.listdir(self.rankings_dir)
-
+        self.globalLooms = [x for x in os.listdir(self.loom_dir) if not os.path.isdir(os.path.join(self.loom_dir, x))]
+        self.globalSets = [x for x in os.listdir(self.gene_sets_dir) if not os.path.isdir(os.path.join(self.gene_sets_dir, x))]
+        self.globalrankings = [x for x in os.listdir(self.rankings_dir) if not os.path.isdir(os.path.join(self.rankings_dir, x))]
         # Create the data directories
         SCope.create_dirs()
 
