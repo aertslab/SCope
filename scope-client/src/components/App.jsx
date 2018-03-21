@@ -11,6 +11,7 @@ import { BackendAPI } from './common/API';
 import Welcome from './pages/Welcome';
 import Dataset from './pages/Dataset';
 import Gene from './pages/Gene';
+import Geneset from './pages/Geneset';
 import Regulon from './pages/Regulon';
 import Compare from './pages/Compare';
 import Tutorial from './pages/Tutorial';
@@ -53,6 +54,7 @@ class App extends Component {
 							<Route path="/:uuid/:loom?/welcome"  component={Welcome} />
 							<Route path="/:uuid/:loom?/dataset"  component={Dataset} />
 							<Route path="/:uuid/:loom?/gene"     component={Gene} />
+							<Route path="/:uuid/:loom?/geneset"  component={Geneset} />
 							<Route path="/:uuid/:loom?/regulon"  component={Regulon} />
 							<Route path="/:uuid/:loom?/compare"  component={Compare} />
 							<Route path="/:uuid/:loom?/tutorial" component={Tutorial} />

@@ -38,13 +38,13 @@ class AppHeader extends Component {
 				title: 'Gene',
 				icon: false
 			},
-/*			{
+			{
 				display: metadata ? true : false,
 				path: 'geneset',
 				title: 'Gene set',
 				icon: false
 			},
-*/			{
+			{
 				display: metadata && metadata.fileMetaData.hasRegulonsAUC ? true : false,
 				path: 'regulon',
 				title: 'Regulon',

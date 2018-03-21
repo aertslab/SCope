@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
-import { Segment,  Sidebar, Menu, Icon, Image, Button, Divider, Modal, Checkbox, Dropdown, Grid, Input, Progress, Dimmer, Loader } from 'semantic-ui-react';
-import FileReaderInput from 'react-file-reader-input';
+import { Segment,  Sidebar, Menu, Icon, Image, Divider,  Checkbox, Dropdown, Grid, Dimmer, Loader } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
+import UploadModal from './common/UploadModal';
 
 class AppSidebar extends Component {
 
@@ -13,16 +13,15 @@ class AppSidebar extends Component {
 			activeCoordinates: BackendAPI.getActiveCoordinates(),
 			settings: BackendAPI.getSettings(),
 			loomFiles: [],
-			uploadLoomFile: null,
-			uploadLoomModalOpened: false,
-			uploadLoomProgress: 0,
+			uploadModalOpened: false,
 			loading: true
 		}
+		this.uploadFileType = null;
 	}
 
 	render () {
 		const { match } = this.props;
-		const { activeCoordinates, settings, loading, loomFiles } = this.state;
+		const { activeCoordinates, settings, loading, loomFiles, uploadModalOpened } = this.state;
 		let metadata = {}, coordinates = [];
 		loomFiles.map(loomFile => {
 			if (loomFile.loomFilePath == match.params.loom) {
@@ -45,7 +44,7 @@ class AppSidebar extends Component {
 					</Segment>
 					<Menu.Header>DATASETS</Menu.Header>
 						<Menu.Menu>
-							<Menu.Item key="new" onClick={this.toggleUploadLoomModal.bind(this)}>
+							<Menu.Item key="new" onClick={this.toggleUploadModal.bind(this)}>
 								<Icon name="add" />
 								<em>Upload new dataset</em>
 							</Menu.Item>
@@ -94,36 +93,7 @@ class AppSidebar extends Component {
 						<Image src='src/images/vib.png' size="small" centered href="http://vib.be" />*/}
 						<Image src='src/images/flycellatlas.png' size="small" centered href="http://flycellatlas.org/" />
 					</Menu.Menu>
-				<Modal open={this.state.uploadLoomModalOpened} onClose={this.toggleUploadLoomModal.bind(this)} closeIcon>
-					<Modal.Header>Import a .loom file</Modal.Header>
-					<Modal.Content image>
-						<Modal.Description>
-							<Grid>
-								<Grid.Row>
-									<Grid.Column width={13}>
-										<FileReaderInput as="binary" id="my-file-input" onChange={this.selectLoomFile.bind(this)}>
-											<Input
-												label="File to be uploaded:" labelPosition='left' action="Select a file..." fluid
-												placeholder={ this.state.uploadLoomFile ? this.state.uploadLoomFile.name : ""}
-											/>
-										</FileReaderInput>
-									</Grid.Column>
-									<Grid.Column width={3}>
-										<Button onClick={this.uploadLoomFile.bind(this)} disabled={this.state.uploadLoomProgress > 0}> Upload!</Button>
-									</Grid.Column>
-								</Grid.Row>
-								<Grid.Row>
-									<Grid.Column width={3}>
-										Upload progress:
-									</Grid.Column>
-									<Grid.Column width={13}>
-										<Progress percent={this.state.uploadLoomProgress} indicating progress disabled></Progress>
-									</Grid.Column>
-								</Grid.Row>
-							</Grid>
-						</Modal.Description>
-					</Modal.Content>
-				</Modal>
+				<UploadModal title="Import a .loom file" type='Loom' uuid={match.params.uuid} opened={uploadModalOpened} onClose={this.toggleUploadModal.bind(this)} />
 			</Sidebar>
 		);
 	}
@@ -146,7 +116,8 @@ class AppSidebar extends Component {
 					BackendAPI.setLoomFiles(response.myLooms);
 					this.props.onMetadataChange(BackendAPI.getActiveLoomMetadata());
 				} else {
-					console.log("No .loom files detected. You can import one via Import .loom link.");
+					this.setState({loading: false});
+					console.log("No loom files detected");
 				}
 			});
 		}, () => {
@@ -154,8 +125,8 @@ class AppSidebar extends Component {
 		});
 	}
 
-	toggleUploadLoomModal(event) {
-		this.setState({ uploadLoomModalOpened: !this.state.uploadLoomModalOpened })
+	toggleUploadModal(event) {
+		this.setState({ uploadModalOpened: !this.state.uploadModalOpened })
 	}
 
 	toggleCpmNormization() {
@@ -166,58 +137,6 @@ class AppSidebar extends Component {
 	toggleLogTransform() {
 		BackendAPI.setSetting('hasLogTransform', !this.state.settings.hasLogTransform);
 		this.setState({settings: BackendAPI.getSettings()});
-	}
-
-	selectLoomFile(event, selection) {
-		selection.forEach((selected) => {
-			const [event, file] = selected;
-			this.setState({ uploadLoomFile: file })
-		})
-	}
-
-	uploadLoomFile() {
-		const { match } = this.props;
-		let file = this.state.uploadLoomFile
-
-		if (file == null) {
-			alert("Please select a .loom file first")
-			return
-		}
-
-		let form = new FormData();
-		form.append('UUID', match.params.uuid);
-		form.append('file-type', 'Loom');
-		form.append('file', file);
-
-		let xhr = new XMLHttpRequest();
-		xhr.open("POST", BACKEND.proto + "://" + BACKEND.host + ":" + BACKEND.XHRport + "/");
-		xhr.upload.addEventListener('progress', (event) => {
-			if (DEBUG) console.log("Data uploaded: " + event.loaded + "/" + event.total);
-			let progress = (event.loaded / event.total * 100).toPrecision(1);
-			this.setState({ uploadLoomProgress: progress });
-		});
-		xhr.upload.addEventListener('load', (event) => {
-			if (DEBUG) console.log('Loom file '+ file.name +' successfully uploaded !');
-			let query = {
-				UUID: match.params.uuid,
-				filename: file.name,
-			};
-			/*
-			BackendAPI.getConnection().then((gbc) => {
-				if (DEBUG) console.log("loomUploaded", query);
-				gbc.services.scope.Main.loomUploaded(query, (error, response) => {
-					if (DEBUG) console.log("loomUploaded", response);
-					*/
-					this.setState({ uploadLoomFile: null, uploadLoomProgress: 0 })
-					this.getLoomFiles()
-					this.toggleUploadLoomModal()
-					/*
-				})
-			})
-			*/
-		})
-		xhr.setRequestHeader("Content-Disposition", "attachment;filename=" + file.name)
-		xhr.send(form);
 	}
 
 	setActiveCoordinates(evt, coords) {

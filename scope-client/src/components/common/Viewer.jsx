@@ -17,7 +17,7 @@ export default class Viewer extends Component {
 				x: [],
 				y: []
 			},
-			colors: [],
+			colors: props.colors || [],
 			lassoPoints: [],
 			lassoSelections: BackendAPI.getViewerSelections(),
 			mouse: {
@@ -95,7 +95,8 @@ export default class Viewer extends Component {
 		this.initGraphics();
 		if (this.props.loomFile != null) {
 			this.getPoints(this.props.loomFile, this.props.activeCoordinates, this.props.activeAnnotations, this.props.superposition, () => {
-				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.props.activeAnnotations, this.state.customScale, this.props.superposition);
+				if (this.props.colors)	this.updateDataPoints();
+				else this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.props.activeAnnotations, this.state.customScale, this.props.superposition);
 				this.onViewerSelectionChange(this.state.lassoSelections);
 				let t = BackendAPI.getViewerTransform();
 				if (t) {
