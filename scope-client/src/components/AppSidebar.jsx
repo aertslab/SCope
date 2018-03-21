@@ -52,7 +52,7 @@ class AppSidebar extends Component {
 							{loomFiles.map((loomFile, i) => {
 								let active = match.params.loom == loomFile.loomFilePath;
 								return (
-									<Link key={i} to={'/' + [match.params.uuid, loomFile.loomFilePath, match.params.page].join('/')} >
+									<Link key={i} to={'/' + [match.params.uuid, encodeURIComponent(loomFile.loomFilePath), encodeURIComponent(match.params.page)].join('/')} >
 										<Menu.Item active={active} key={loomFile.loomFilePath} >
 											<Icon name={active ? "selected radio" : "radio"} />
 											{loomFile.loomDisplayName}
