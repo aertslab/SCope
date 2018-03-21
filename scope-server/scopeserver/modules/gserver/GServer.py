@@ -616,6 +616,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def getCellAUCValuesByFeatures(self, request, context):
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
         vals, cellIndices = self.get_auc_values(loom_file_path=loomFilePath, regulon=request.feature[0])
+        print(zlib.compress())
         return s_pb2.CellAUCValuesByFeaturesReply(value=vals)
 
     def getCellMetaData(self, request, context):
@@ -888,7 +889,7 @@ class GeneSetEnrichment:
         else:
             vmax = np.zeros(3)
             aucs = state.get_values()
-            vmax[0] = self.scope.getVmax(aucs)
+            vmax[0] = self.scope.get_vmax(aucs)
             vals = aucs / vmax[0]
             vals = (((_UPPER_LIMIT_RGB - _LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))) + _LOWER_LIMIT_RGB
             hex_vec = ["null" if r == g == b == 0
