@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Grid, Header } from 'semantic-ui-react'
 
-export default class Regulon extends Component {
+export default class Tutorial extends Component {
 
     render() {
         return (

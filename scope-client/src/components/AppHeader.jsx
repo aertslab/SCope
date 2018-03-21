@@ -62,6 +62,12 @@ class AppHeader extends Component {
 				title: 'Tutorial',
 				icon: false
 			},
+			{
+				display: true,
+				path: 'about',
+				title: 'About',
+				icon: false
+			},
 		];
 
 		return (

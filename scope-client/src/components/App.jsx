@@ -14,6 +14,7 @@ import Gene from './pages/Gene';
 import Regulon from './pages/Regulon';
 import Compare from './pages/Compare';
 import Tutorial from './pages/Tutorial';
+import About from './pages/About';
 
 const publicIp = require('public-ip');
 const timer = 60 * 1000;
@@ -55,6 +56,7 @@ class App extends Component {
 							<Route path="/:uuid/:loom?/regulon"  component={Regulon} />
 							<Route path="/:uuid/:loom?/compare"  component={Compare} />
 							<Route path="/:uuid/:loom?/tutorial" component={Tutorial} />
+							<Route path="/:uuid/:loom?/about"    component={About} />
 						</Sidebar.Pusher>
 					</Sidebar.Pushable>
 					<Dimmer active={loading} inverted>
