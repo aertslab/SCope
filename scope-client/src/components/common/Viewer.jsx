@@ -43,6 +43,7 @@ export default class Viewer extends Component {
 			if (this.props.settings) {
 				this.setState({loading: true});
 				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, customScale, this.props.superposition);
+				this.repaintLassoSelections(this.state.lassoSelections);
 			}
 		}
 		this.viewerToolListener = (tool) => {

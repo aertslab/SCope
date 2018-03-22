@@ -170,6 +170,7 @@ class AppSidebar extends Component {
 	}
 
 	handleUpdateScale(scale) {
+		this.setState({spriteScale: scale})
 		BackendAPI.setSpriteScale(scale);
 	}
 }
