@@ -40,7 +40,7 @@ class AppSidebar extends Component {
 				})
 			}
 		})
-		let showTransforms = metadata && (['welcome','dataset'].indexOf(match.params.page) == -1) ? true : false;
+		let showTransforms = metadata && (['welcome', 'dataset', 'tutorial', 'about'].indexOf(match.params.page) == -1) ? true : false;
 		let showCoordinatesSelection = showTransforms && metadata.fileMetaData && metadata.fileMetaData.hasExtraEmbeddings ? true : false;
 
 		return (
