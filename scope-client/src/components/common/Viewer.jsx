@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 import { BackendAPI } from './API'
 import { Dimmer, Loader } from 'semantic-ui-react'
 import ReactResizeDetector from 'react-resize-detector';
+import ReactGA from 'react-ga';
 
 const DEFAULT_POINT_COLOR = 'A6A6A6';
 
@@ -365,6 +366,12 @@ export default class Viewer extends Component {
 			translations: {},
 		}
 		BackendAPI.addViewerSelection(lassoSelection);
+		ReactGA.event({
+			category: 'viewer',
+			action: 'selection added',
+			label: lassoPoints.length,
+			value: id
+		});
 	}
 
 	repaintLassoSelections(selections) {

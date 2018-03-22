@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Label, Segment, Icon, Popup, Image } from 'semantic-ui-react'
 import FeatureSearchInput from './FeatureSearchInput';
 import { BackendAPI } from './API'
+import ReactGA from 'react-ga';
 
 export default class FeatureSearch extends React.Component {
 
@@ -116,6 +117,12 @@ export default class FeatureSearch extends React.Component {
 				BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, {description: featureDescription});
 			}, 50);
 		}
+		ReactGA.event({
+			category: 'action',
+			action: 'feature selected',
+			label: featureType + ": " + feature,
+			value: this.props.field
+		});
 	}
 
 
@@ -133,6 +140,11 @@ export default class FeatureSearch extends React.Component {
 
 	handleTypeChange(type) {
 		this.setState({type: type});
+		ReactGA.event({
+			category: 'action',
+			action: 'selected feature type',
+			label: type
+		});
 	}
 
 	handleSelectionChange(e, { result }) {
@@ -222,6 +234,11 @@ export default class FeatureSearch extends React.Component {
 			});
 		}, () => {
 			BackendAPI.showError();	
+		});
+		ReactGA.event({
+			category: 'action',
+			action: 'feature search',
+			label: value
 		});
 	}
 

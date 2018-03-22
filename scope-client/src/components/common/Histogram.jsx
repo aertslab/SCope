@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 import React, { Component } from 'react'
 import Slider from 'rc-slider';
 import { BackendAPI } from './API'; 
+import ReactGA from 'react-ga';
 
 const Handle = Slider.Handle;
 
@@ -39,7 +40,13 @@ export default class Histogram extends Component {
 			<div className="flexDisplay">
 				<svg id={"thresholdSVG" + field} style={{width: '100%', height: '100%'}} ></svg>
 				<div className="auc">AUC threshold: <b>{selected.toFixed(4)}</b> (matched points: {matched} / {total})</div>
-				<Slider disabled={!enabled} value={selected} min={min} max={max} step={0.0001} handle={handle} onChange={this.handleThresholdChange.bind(this)}  onAfterChange={this.handleUpdateTSNE.bind(this)} />
+				<Slider disabled={!enabled} value={selected} min={min} max={max} step={0.0001} handle={handle} onChange={this.handleThresholdChange.bind(this)}  onAfterChange={() => {
+			        ReactGA.event({
+						category: 'regulon',
+						action: 'threshold slider used'
+					});
+					this.handleUpdateTSNE.bind(this)
+				}} />
 			</div>
 		);
 	}
@@ -194,6 +201,10 @@ export default class Histogram extends Component {
 					.on('click', function() {
 						component.handleThresholdChange(t.threshold);
 						component.handleUpdateTSNE();
+						ReactGA.event({
+							category: 'regulon',
+							action: 'threshold clicked'
+						});
 					})
 					.append('title')
 					.text(t.name);

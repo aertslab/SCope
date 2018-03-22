@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Button, Icon, Table, Modal, Dimmer, Loader, Dropdown } from 'semantic-ui-react'
 import { BackendAPI } from '../common/API' 
+import ReactGA from 'react-ga';
 
 export default class Metadata extends Component { 
 
@@ -115,6 +116,11 @@ export default class Metadata extends Component {
 									setTimeout(() => {
 										this.setState({annotation: s.value, metadata: null, loading: true});
 										this.getMetadata();
+										ReactGA.event({
+											category: 'metadata',
+											action: 'selected annotation',
+											label: s.text
+										});
 									}, 50);
 								}} />
 							</Table.HeaderCell>
@@ -124,6 +130,11 @@ export default class Metadata extends Component {
 									setTimeout(() => {
 										this.setState({clustering: s.value, metadata: null, loading: true});
 										this.getMetadata();
+										ReactGA.event({
+											category: 'metadata',
+											action: 'selected clustering',
+											label: s.text
+										});
 									}, 50);
 								}} />
 							</Table.HeaderCell>
@@ -172,6 +183,10 @@ export default class Metadata extends Component {
 							const json2csv  = require('json2csv').parse;
 							const csv = json2csv(data);
 							fileDownload(csv, 'metadata.csv');
+							ReactGA.event({
+								category: 'metadata',
+								action: 'downloaded csv file'
+							});
 						}}
 						>
 						<Icon name='download' /> Download 
@@ -191,7 +206,7 @@ export default class Metadata extends Component {
 	closeModal() {
 		this.props.onClose()
 		this.setState({loading: true});
-	}
+}
 
 	getMetadata() {
 		let selections = BackendAPI.getViewerSelections();

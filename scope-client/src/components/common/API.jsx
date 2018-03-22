@@ -333,6 +333,7 @@ class API {
 				listener(this.settings, customValues, maxValues);
 			})
 		})
+		return value;
 	}
 
 	onSettingsChange(listener) {
@@ -413,6 +414,7 @@ class API {
 		this.viewerSelectionsChangeListeners.forEach((listener) => {
 			listener(this.viewerSelections[this.activePage]);
 		});
+		return this.viewerSelections[this.activePage][index].selected;
 	}
 
 

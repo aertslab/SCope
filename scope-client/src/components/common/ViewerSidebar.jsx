@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import { Grid, Input, Icon, Tab, Image } from 'semantic-ui-react'
 import { BackendAPI } from '../common/API'
 import Metadata from '../common/Metadata'
+import ReactGA from 'react-ga';
 
 export default class ViewerSidebar extends Component {
 
@@ -63,6 +64,11 @@ export default class ViewerSidebar extends Component {
 							<Icon name='search' title='show metadata for this selection' style={{display: 'inline'}} onClick={(e,d) => {
 								this.setState({modalID: i});
 								this.forceUpdate();
+								ReactGA.event({
+									category: 'metadata',
+									action: 'modal opened',
+									value: i
+								});
 							}} className="pointer"  />
 						</Grid.Column>
 					</Grid.Row>
@@ -102,6 +108,11 @@ export default class ViewerSidebar extends Component {
 											}, () => {
 												BackendAPI.showError();	
 											})
+											ReactGA.event({
+												category: 'action',
+												action: 'gene clicked',
+												label: g
+											});
 										}} >
 										{g}
 									</a>
@@ -166,6 +177,11 @@ export default class ViewerSidebar extends Component {
 				<Metadata 
 					selectionId={this.state.modalID} 
 					onClose={() =>{
+						ReactGA.event({
+							category: 'metadata',
+							action: 'modal closed',
+							value: this.state.modalID,
+						});
 						this.setState({modalID: null});
 						this.forceUpdate();
 					}}
@@ -186,10 +202,21 @@ export default class ViewerSidebar extends Component {
 	}
 
 	toggleLassoSelection(id) {
-		BackendAPI.toggleLassoSelection(id);
+		let selected = BackendAPI.toggleLassoSelection(id);
+		ReactGA.event({
+			category: 'viewer',
+			action: 'selection toggled',
+			label: selected ? 'on' : 'off',
+			value: id
+		});
 	}
 
 	removeLassoSelection(id) {
 		BackendAPI.removeViewerSelection(id);
+		ReactGA.event({
+			category: 'viewer',
+			action: 'selection removed',
+			value: id
+		});
 	}
 }

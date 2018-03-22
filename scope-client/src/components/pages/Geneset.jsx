@@ -9,6 +9,7 @@ import ViewerSidebar from '../common/ViewerSidebar'
 import ViewerToolbar from '../common/ViewerToolbar'
 import Histogram from '../common/Histogram'
 import UploadModal from '../common/UploadModal';
+import ReactGA from 'react-ga';
 
 class Geneset extends Component {
 
@@ -112,7 +113,6 @@ class Geneset extends Component {
         BackendAPI.onActiveLoomChange(this.activeLoomListener);
         BackendAPI.onActiveFeaturesChange('regulon', this.activeFeaturesListener);
         BackendAPI.onSidebarVisibleChange(this.sidebarVisibleListener);
-        this.getGeneSets();
     }
 
     componentWillUnmount() {
@@ -121,12 +121,16 @@ class Geneset extends Component {
         BackendAPI.removeSidebarVisibleChange(this.sidebarVisibleListener)
     }
 
-    onThresholdChange(idx, threshold) {
-        BackendAPI.setFeatureThreshold(idx, threshold);
+    componentDidMount() {
+        this.getGeneSets();
     }
 
     toggleUploadModal(event) {
 		this.setState({ uploadModalOpened: !this.state.uploadModalOpened })
+		ReactGA.event({
+			category: 'upload',
+			action: 'toggle geneset upload modal'
+		});
 	}
 
 	getGeneSets() {
@@ -161,25 +165,38 @@ class Geneset extends Component {
             if (DEBUG) console.log('doGeneSetEnrichment', query);
     	    var call = gbc.services.scope.Main.doGeneSetEnrichment(query);
 	        call.on('data', (gse) => {
-		        if (DEBUG) console.log('doGeneSetEnrichment data', gse);
-		        if (gse.isDone) {
+                if (DEBUG) console.log('doGeneSetEnrichment data', gse);
+                if (gse.isDone) {
                     this.setState({loading: false, colors: gse.cellValues.color});
-		        } else {
+                } else {
                     this.setState({loadingMessage: gse.progress.status});
                 }
 	        });
 	        call.on('end', () => {
 		        if (DEBUG) console.log('doGeneSetEnrichment end');
-                //this.setState({loading: false});
+                ReactGA.event({
+                    category: 'geneset',
+                    action: 'enrichment finished',
+                    nonInteraction: true
+                });
 	        });
         }, () => {
             BackendAPI.showError();	
         })
+		ReactGA.event({
+			category: 'geneset',
+			action: 'enrichment started'
+		});
     }
 
     onGenesetUploaded() {
 		this.getGeneSets();
 		this.toggleUploadModal();
+		ReactGA.event({
+			category: 'upload',
+            action: 'uploaded geneset file',
+            nonInteraction: true
+		});
 	}
 
 }

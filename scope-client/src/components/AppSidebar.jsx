@@ -4,6 +4,10 @@ import { Segment,  Sidebar, Menu, Icon, Image, Divider,  Checkbox, Dropdown, Gri
 import { BackendAPI } from './common/API';
 import UploadModal from './common/UploadModal';
 import Slider, { Range } from 'rc-slider';
+import ReactGA from 'react-ga';
+
+const createSliderWithTooltip = Slider.createSliderWithTooltip;
+const TooltipSlider = createSliderWithTooltip(Slider);
 
 class AppSidebar extends Component {
 
@@ -38,8 +42,6 @@ class AppSidebar extends Component {
 		})
 		let showTransforms = metadata && (['welcome','dataset'].indexOf(match.params.page) == -1) ? true : false;
 		let showCoordinatesSelection = showTransforms && metadata.fileMetaData && metadata.fileMetaData.hasExtraEmbeddings ? true : false;
-		const createSliderWithTooltip = Slider.createSliderWithTooltip;
-		const TooltipSlider = createSliderWithTooltip(Slider);
 
 		return (
 			<Sidebar as={Menu} animation="push" visible={this.props.visible} vertical className="clearfix">
@@ -97,6 +99,11 @@ class AppSidebar extends Component {
 								defaultValue={spriteScale}
 								onAfterChange={(v) => {
 									this.handleUpdateSprite(v, spriteAlpha);
+									ReactGA.event({
+										category: 'settings',
+										action: 'changed point size',
+										value: v
+									});
 								}}
 								min={1}
 								step={1}
@@ -113,6 +120,11 @@ class AppSidebar extends Component {
 								defaultValue={spriteAlpha}
 								onAfterChange={(v) => {
 									this.handleUpdateSprite(spriteScale, v);
+									ReactGA.event({
+										category: 'settings',
+										action: 'changed point alpha',
+										value: v
+									});
 								}}
 								min={0}
 								step={0.1}
@@ -164,26 +176,52 @@ class AppSidebar extends Component {
 
 	toggleUploadModal(event) {
 		this.setState({ uploadModalOpened: !this.state.uploadModalOpened })
+		ReactGA.event({
+			category: 'upload',
+			action: 'toggle loom upload modal'
+		});
 	}
 
 	toggleCpmNormization() {
 		BackendAPI.setSetting('hasCpmNormalization', !this.state.settings.hasCpmNormalization);
-		this.setState({settings: BackendAPI.getSettings()});
+		let settings = BackendAPI.getSettings();
+		this.setState({settings: settings});
+		ReactGA.event({
+			category: 'settings',
+			action: 'toggle cpm normalization',
+			label: settings.hasCpmNormalization ? 'on' : 'off'
+		});
 	}
 
 	toggleLogTransform() {
 		BackendAPI.setSetting('hasLogTransform', !this.state.settings.hasLogTransform);
-		this.setState({settings: BackendAPI.getSettings()});
+		let settings = BackendAPI.getSettings();
+		this.setState({settings: settings});
+		ReactGA.event({
+			category: 'settings',
+			action: 'toggle log transform',
+			label: settings.hasCpmNormalization ? 'on' : 'off'
+		});
 	}
 
 	setActiveCoordinates(evt, coords) {
 		BackendAPI.setActiveCoordinates(coords.value);
 		this.setState({ activeCoordinates: coords.value });
+		ReactGA.event({
+			category: 'settings',
+			action: 'changed active coordinates',
+			label: coords.text
+		});
 	}
 
 	onLoomUploaded() {
 		this.getLoomFiles();
 		this.toggleUploadModal();
+		ReactGA.event({
+			category: 'upload',
+			action: 'uploaded loom file',
+			nonInteraction: true
+		});
 	}
 
 	handleUpdateSprite(scale, alpha) {
