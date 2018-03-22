@@ -138,8 +138,11 @@ export default class Viewer extends Component {
 					this.state.activeFeatures.map((f) => {
 						if (f.feature.length) featuresActive = true;
 					})
-					if (featuresActive)
+					if (featuresActive) {
 						this.getFeatureColors(this.state.activeFeatures, nextProps.loomFile, this.props.thresholds, this.state.activeAnnotations, this.state.customScale, nextProps.superposition);
+					} else {
+						this.setState({loading: false});
+					}
 				});
 		}
 
