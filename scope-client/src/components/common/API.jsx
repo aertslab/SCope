@@ -9,7 +9,10 @@ class API {
 			this.connected = false;
 		}
 
-		this.spriteScale = 5;
+		this.spriteSettings = {
+			scale: 5,
+			alpha: 1,
+		}
 
 		this.loomFiles = [];
 		this.activePage = 'welcome';
@@ -64,15 +67,16 @@ class API {
 	}
 
 
-	setSpriteScale(scale) {
-		this.spriteScale = scale;
+	setSpriteSettings(scale, alpha) {
+		this.spriteSettings.scale = scale;
+		this.spriteSettings.alpha = alpha;
 		this.settingsChangeListeners.forEach((listener) => {
 			listener(this.settings, this.customValues[this.activePage], this.maxValues[this.activePage]);
 		})
 }
 
-	getSpriteScale() {
-		return this.spriteScale;
+	getSpriteSettings() {
+		return this.spriteSettings;
 	}
 
 	getActiveLoom() {

@@ -9,12 +9,13 @@ class AppSidebar extends Component {
 
 	constructor() {
 		super();
-
+		let sprite = BackendAPI.getSpriteSettings();
 		this.state = {
 			activeCoordinates: BackendAPI.getActiveCoordinates(),
 			settings: BackendAPI.getSettings(),
 			loomFiles: [],
-			spriteScale: BackendAPI.getSpriteScale(),
+			spriteScale: sprite.scale,
+			spriteAlpha: sprite.alpha,
 			uploadModalOpened: false,
 			loading: true
 		}
@@ -22,7 +23,7 @@ class AppSidebar extends Component {
 
 	render () {
 		const { match } = this.props;
-		const { activeCoordinates, settings, loading, loomFiles, uploadModalOpened, spriteScale } = this.state;
+		const { activeCoordinates, settings, loading, loomFiles, uploadModalOpened, spriteScale, spriteAlpha } = this.state;
 		let metadata = {}, coordinates = [];
 		loomFiles.map(loomFile => {
 			if (loomFile.loomFilePath == match.params.loom) {
@@ -95,10 +96,26 @@ class AppSidebar extends Component {
 								max={20}
 								defaultValue={spriteScale}
 								onAfterChange={(v) => {
-									this.handleUpdateScale(v);
+									this.handleUpdateSprite(v, spriteAlpha);
 								}}
 								min={1}
 								step={1}
+								tipFormatter={(v) => {
+									return v.toFixed(1);
+								}}
+							/>
+							</Menu.Item>
+							<Menu.Item>Point alpha</Menu.Item>
+							<Menu.Item>
+								<TooltipSlider
+								style={{margin: '5px'}} 
+								max={1}
+								defaultValue={spriteAlpha}
+								onAfterChange={(v) => {
+									this.handleUpdateSprite(spriteScale, v);
+								}}
+								min={0}
+								step={0.1}
 								tipFormatter={(v) => {
 									return v.toFixed(1);
 								}}
@@ -169,9 +186,9 @@ class AppSidebar extends Component {
 		this.toggleUploadModal();
 	}
 
-	handleUpdateScale(scale) {
-		this.setState({spriteScale: scale})
-		BackendAPI.setSpriteScale(scale);
+	handleUpdateSprite(scale, alpha) {
+		this.setState({spriteScale: scale, spriteAlpha: alpha})
+		BackendAPI.setSpriteSettings(scale, alpha);
 	}
 }
 

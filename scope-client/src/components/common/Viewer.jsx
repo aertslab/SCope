@@ -209,8 +209,10 @@ export default class Viewer extends Component {
 
 	makePointSprite(c) {
 		let s = new PIXI.Sprite(this.texture);
-		s.scale.x = BackendAPI.getSpriteScale() / 50;
-		s.scale.y = BackendAPI.getSpriteScale() / 50;
+		let settings = BackendAPI.getSpriteSettings();
+		s.scale.x = settings.scale / 50;
+		s.scale.y = settings.scale / 50;
+		s.alpha = settings.alpha;
 		s.anchor = { x: .5, y: .5 };
 		if (c == 'null') c = DEFAULT_POINT_COLOR;
 		s.tint = "0x"+ c;
