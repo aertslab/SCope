@@ -451,7 +451,7 @@ export default class Viewer extends Component {
 			if (featuresActive)
 				this.getFeatureColors(features, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, customScale, this.props.superposition);
 			else {
-				this.setState({activeFeatures: JSON.parse(JSON.stringify(features))});
+				this.setState({activeFeatures: JSON.parse(JSON.stringify(features)), colors: []});
 				this.resetDataPoints();
 			}
 		}
