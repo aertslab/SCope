@@ -508,8 +508,7 @@ export default class Viewer extends Component {
 		this.startBenchmark("getCoordinates")
 		if (DEBUG) console.log(this.props.name, 'getCoordinates', query);
 		BackendAPI.getConnection().then((gbc) => {
-			try {
-			let call = gbc.services.scope.Main.getCoordinates(query, (err, response) => {
+			gbc.services.scope.Main.getCoordinates(query, (err, response) => {
 				// Update the coordinates and remove all previous data points
 				if (DEBUG) console.log(this.props.name, 'getCoordinates', response);
 				this.container.removeChildren();
@@ -529,26 +528,13 @@ export default class Viewer extends Component {
 				this.initializeDataPoints();
 				callback();
 			});
-			call.on('close', (ex) => {
-				console.log('close', ex);	
-			})
-			call.on('error', (ex) => {
-				console.log('error', ex);	
-			})
-			call.on('end', (ex) => {
-				console.log('end', ex);	
-			})
-		} catch (ex) {
-			console.log('catch', ex);
-			//BackendAPI.showError();	
-		}
-		}, (ex) => {
-			console.log('reject', ex);
-			//BackendAPI.showError();	
+		}, () => {
+			BackendAPI.showError();	
 		});
 	}
 
 	setScalingFactor() {
+		if (!this.renderer) return;
 		let min = this.renderer.width / (d3.max(this.state.coord.x) - d3.min(this.state.coord.x));
 		let max = this.renderer.height / (d3.max(this.state.coord.y) - d3.min(this.state.coord.y));
 		this.scalingFactor = Math.floor(d3.min([min, max])) - 1;
