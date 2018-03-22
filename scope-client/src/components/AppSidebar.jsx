@@ -3,6 +3,7 @@ import { withRouter, Link } from 'react-router-dom';
 import { Segment,  Sidebar, Menu, Icon, Image, Divider,  Checkbox, Dropdown, Grid, Dimmer, Loader } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
 import UploadModal from './common/UploadModal';
+import Slider, { Range } from 'rc-slider';
 
 class AppSidebar extends Component {
 
@@ -13,6 +14,7 @@ class AppSidebar extends Component {
 			activeCoordinates: BackendAPI.getActiveCoordinates(),
 			settings: BackendAPI.getSettings(),
 			loomFiles: [],
+			spriteScale: BackendAPI.getSpriteScale(),
 			uploadModalOpened: false,
 			loading: true
 		}
@@ -20,7 +22,7 @@ class AppSidebar extends Component {
 
 	render () {
 		const { match } = this.props;
-		const { activeCoordinates, settings, loading, loomFiles, uploadModalOpened } = this.state;
+		const { activeCoordinates, settings, loading, loomFiles, uploadModalOpened, spriteScale } = this.state;
 		let metadata = {}, coordinates = [];
 		loomFiles.map(loomFile => {
 			if (loomFile.loomFilePath == match.params.loom) {
@@ -35,6 +37,8 @@ class AppSidebar extends Component {
 		})
 		let showTransforms = metadata && (['welcome','dataset'].indexOf(match.params.page) == -1) ? true : false;
 		let showCoordinatesSelection = showTransforms && metadata.fileMetaData && metadata.fileMetaData.hasExtraEmbeddings ? true : false;
+		const createSliderWithTooltip = Slider.createSliderWithTooltip;
+		const TooltipSlider = createSliderWithTooltip(Slider);
 
 		return (
 			<Sidebar as={Menu} animation="push" visible={this.props.visible} vertical className="clearfix">
@@ -66,6 +70,7 @@ class AppSidebar extends Component {
 					{(showTransforms || showCoordinatesSelection) &&
 						<Menu.Header>SETTINGS</Menu.Header>
 					}
+						
 					{showCoordinatesSelection &&
 						<Menu.Menu>
 							<Menu.Item>Coordinates</Menu.Item>
@@ -82,6 +87,22 @@ class AppSidebar extends Component {
 							</Menu.Item>
 							<Menu.Item>
 								<Checkbox toggle label="CPM normalize" checked={settings.hasCpmNormalization} onChange={this.toggleCpmNormization.bind(this)} />
+							</Menu.Item>
+							<Menu.Item>Point size</Menu.Item>
+							<Menu.Item>
+								<TooltipSlider
+								style={{margin: '5px'}} 
+								max={20}
+								defaultValue={spriteScale}
+								onAfterChange={(v) => {
+									this.handleUpdateScale(v);
+								}}
+								min={1}
+								step={1}
+								tipFormatter={(v) => {
+									return v.toFixed(1);
+								}}
+							/>
 							</Menu.Item>
 						</Menu.Menu>
 					}
@@ -146,6 +167,10 @@ class AppSidebar extends Component {
 	onLoomUploaded() {
 		this.getLoomFiles();
 		this.toggleUploadModal();
+	}
+
+	handleUpdateScale(scale) {
+		BackendAPI.setSpriteScale(scale);
 	}
 }
 

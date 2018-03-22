@@ -38,7 +38,7 @@ export default class Viewer extends Component {
 		this.h = parseInt(this.props.height);
 		// Increase the maxSize if displaying more than 1500 (default) objects
 		this.maxn = 200000;
-		this.texture = PIXI.Texture.fromImage("src/images/particle@2x.png");
+		this.texture = PIXI.Texture.fromImage("src/images/dot.png");
 		this.settingsListener = (settings, customScale) => {
 			if (this.props.settings) {
 				this.setState({loading: true});
@@ -208,8 +208,8 @@ export default class Viewer extends Component {
 
 	makePointSprite(c) {
 		let s = new PIXI.Sprite(this.texture);
-		s.scale.x = 2.5;
-		s.scale.y = 2.5;
+		s.scale.x = BackendAPI.getSpriteScale() / 50;
+		s.scale.y = BackendAPI.getSpriteScale() / 50;
 		s.anchor = { x: .5, y: .5 };
 		if (c == 'null') c = DEFAULT_POINT_COLOR;
 		s.tint = "0x"+ c;
