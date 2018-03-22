@@ -168,6 +168,10 @@ class App extends Component {
 				UUID: uuid
 			}
 			gbc.ws.onclose = (err) => {
+				ReactGA.event({
+					category: 'errors',
+					action: 'socket closed',
+				});
 				this.setState({error: true});
 			}
 			if (DEBUG) console.log('getRemainingUUIDTime', query);

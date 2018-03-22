@@ -47,6 +47,7 @@ export default class Viewer extends Component {
 			}
 		}
 		this.spriteSettingsListener = () => {
+			this.setState({loading: true});
 			if (this.state.colors) this.updateDataPoints(this.state.colors);
 			else this.resetDataPoints();
 			this.repaintLassoSelections(this.state.lassoSelections);
@@ -134,7 +135,7 @@ export default class Viewer extends Component {
 				if (DEBUG) console.log(nextProps.name, 'changing points');
 				this.getPoints(nextProps.loomFile, nextProps.activeCoordinates, nextProps.activeAnnotations, nextProps.superposition, () => {
 					let featuresActive = false;
-					features.map((f) => {
+					this.state.activeFeatures.map((f) => {
 						if (f.feature.length) featuresActive = true;
 					})
 					if (featuresActive)
@@ -557,7 +558,7 @@ export default class Viewer extends Component {
 					this.setState({ coord:  {x: [], y: []}});
 				}
 				this.endBenchmark("getCoordinates");
-				this.initializeDataPoints();
+				this.initializeDataPoints(callback ? true : false);
 				callback();
 			});
 		}, () => {
@@ -572,7 +573,7 @@ export default class Viewer extends Component {
 		this.scalingFactor = Math.floor(d3.min([min, max])) - 1;
 	}
 
-	initializeDataPoints() {
+	initializeDataPoints(stillLoading) {
 		this.startBenchmark("initializeDataPoints");
 		let c = this.state.coord;
 		if (c.x.length !== c.y.length)
@@ -584,13 +585,13 @@ export default class Viewer extends Component {
 			this.container.addChild(point);
 		}
 		this.endBenchmark("initializeDataPoints");
-		this.transformDataPoints();
+		this.transformDataPoints(stillLoading);
 	}
 
-	transformDataPoints() {
+	transformDataPoints(stillLoading) {
 		this.transformPoints(this.container);
 		this.transformPoints(this.selectionsLayer);
-		this.setState({loading: false});
+		if (!stillLoading) this.setState({loading: false});
 	}
 
 	transformLassoPoints() {
