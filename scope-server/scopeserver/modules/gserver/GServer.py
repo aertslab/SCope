@@ -795,8 +795,9 @@ class SCope(s_pb2_grpc.MainServicer):
         gene_set_file_path = os.path.join("data", "my-gene-sets", request.geneSetFilePath)
         gse = GeneSetEnrichment(scope=self,
                                 method="AUCell",
-                                loom_file_path=request.loomFilePath,
-                                gene_set_file_path=gene_set_file_path)
+                                loom_file_name=request.loomFilePath,
+                                gene_set_file_path=gene_set_file_path,
+                                annotation='')
 
         # Running AUCell...
         yield gse.update_state(step=-1, status_code=200, status_message="Running AUCell...", values=None)
@@ -809,7 +810,6 @@ class SCope(s_pb2_grpc.MainServicer):
             gs = GeneSignature('Gene Signature #1',
                                'FlyBase', [line.strip() for idx, line in enumerate(f) if idx > 0])
         time.sleep(1)
-
         # Creating the matrix as DataFrame...
         yield gse.update_state(step=1, status_code=200, status_message="Creating the matrix as DataFrame...", values=None)
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
@@ -846,7 +846,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
 class GeneSetEnrichment:
 
-    def __init__(self, scope, method, loom_file_path, gene_set_file_path):
+    def __init__(self, scope, method, loom_file_name, gene_set_file_path, annotation):
         ''' Constructor
         :type dgem: ndarray
         :param dgem: digital gene expression matrix with cells as columns and genes as rows
@@ -855,8 +855,10 @@ class GeneSetEnrichment:
         '''
         self.scope = scope
         self.method = method
-        self.loom_file_path = loom_file_path
+        self.loom_file_name = loom_file_name
+        self.loom_file_path = self.scope.get_loom_filepath(loom_file_name)
         self.gene_set_file_path = gene_set_file_path
+        self.annotation = annotation
         self.AUCell_rankings_dir = os.path.join("data", "my-aucell-rankings")
 
     class State:
@@ -889,7 +891,7 @@ class GeneSetEnrichment:
             vmax = np.zeros(3)
             max_vmax = np.zeros(3)
             aucs = state.get_values()
-            _vmax self.scope.get_vmax(aucs)
+            _vmax = self.scope.get_vmax(aucs)
             vmax[0] = _vmax[0]
             max_vmax[0] = _vmax[1]
             vals = aucs / vmax[0]
@@ -897,7 +899,10 @@ class GeneSetEnrichment:
             hex_vec = ["null" if r == g == b == 0
                        else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
                        for r, g, b in zip(vals, np.zeros(len(aucs)), np.zeros(len(aucs)))]
-            cell_indices = self.scope.get_anno_cells(loom_file_path=self.loom_file_path, annotations='', logic='OR')
+            if len(self.annotation) > 0:
+                cell_indices = self.get_anno_cells(loom_file_path=self.loom_file_path, annotations=annotation, logic=logic)
+            else:
+                cell_indices = list(range(self.scope.get_nb_cells(self.loom_file_path)))
             return s_pb2.GeneSetEnrichmentReply(progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message()),
                                                 isDone=True,
                                                 cellValues=s_pb2.CellColorByFeaturesReply(color=hex_vec
@@ -909,7 +914,7 @@ class GeneSetEnrichment:
             return self.method
 
     def get_AUCell_ranking_filepath(self):
-        AUCell_rankings_file_name = self.loom_file_path.split(".")[0] + "." + "AUCell.rankings.loom"
+        AUCell_rankings_file_name = self.loom_file_name.split(".")[0] + "." + "AUCell.rankings.loom"
         return os.path.join(self.AUCell_rankings_dir, AUCell_rankings_file_name)
 
     def has_AUCell_rankings(self):
