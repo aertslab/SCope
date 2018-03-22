@@ -806,15 +806,14 @@ class SCope(s_pb2_grpc.MainServicer):
                                'FlyBase', [line.strip() for idx, line in enumerate(f) if idx > 0])
         time.sleep(1)
 
-        # Creating the matrix as DataFrame...
-        yield gse.update_state(step=1, status_code=200, status_message="Creating the matrix as DataFrame...", values=None)
-        loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
-        dgem = np.transpose(loom[:, :])
-        ex_mtx = pd.DataFrame(data=dgem
-                            , index=loom.ca.CellID
-                            , columns=SCope.get_genes(loom))
-
         if not gse.has_AUCell_rankings():
+            # Creating the matrix as DataFrame...
+            yield gse.update_state(step=1, status_code=200, status_message="Creating the matrix...", values=None)
+            loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
+            dgem = np.transpose(loom[:, :])
+            ex_mtx = pd.DataFrame(data=dgem
+                                , index=loom.ca.CellID
+                                , columns=SCope.get_genes(loom))
             # Creating the rankings...
             start_time = time.time()
             yield gse.update_state(step=2.1, status_code=200, status_message="Creating the rankings...", values=None)
