@@ -189,7 +189,7 @@ export default class Histogram extends Component {
 			.call(d3.axisLeft(y));    
 
 		let component = this;
-		if (feature.metadata) {
+		if (feature.metadata && feature.metadata.autoThresholds) {
 			let gt = g.append("g")
 				.attr("class", "autoThresholds");
 			feature.metadata.autoThresholds.map((t) => {
