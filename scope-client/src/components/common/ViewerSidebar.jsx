@@ -111,7 +111,8 @@ export default class ViewerSidebar extends Component {
 											ReactGA.event({
 												category: 'action',
 												action: 'gene clicked',
-												label: g
+												label: g,
+												value: i
 											});
 										}} >
 										{g}

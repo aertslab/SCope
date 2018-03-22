@@ -370,7 +370,7 @@ export default class Viewer extends Component {
 			category: 'viewer',
 			action: 'selection added',
 			label: lassoPoints.length,
-			value: id
+			value: this.state.lassoSelections.length
 		});
 	}
 

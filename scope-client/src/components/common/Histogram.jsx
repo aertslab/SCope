@@ -40,12 +40,13 @@ export default class Histogram extends Component {
 			<div className="flexDisplay">
 				<svg id={"thresholdSVG" + field} style={{width: '100%', height: '100%'}} ></svg>
 				<div className="auc">AUC threshold: <b>{selected.toFixed(4)}</b> (matched points: {matched} / {total})</div>
-				<Slider disabled={!enabled} value={selected} min={min} max={max} step={0.0001} handle={handle} onChange={this.handleThresholdChange.bind(this)}  onAfterChange={() => {
+				<Slider disabled={!enabled} value={selected} min={min} max={max} step={0.0001} handle={handle} onChange={this.handleThresholdChange.bind(this)} onAfterChange={() => {
 			        ReactGA.event({
 						category: 'regulon',
-						action: 'threshold slider used'
+						action: 'threshold changed',
+						value: field
 					});
-					this.handleUpdateTSNE.bind(this)
+					this.handleUpdateTSNE()
 				}} />
 			</div>
 		);
@@ -203,7 +204,9 @@ export default class Histogram extends Component {
 						component.handleUpdateTSNE();
 						ReactGA.event({
 							category: 'regulon',
-							action: 'threshold clicked'
+							action: 'threshold clicked',
+							label: t.name,
+							value: this.props.field
 						});
 					})
 					.append('title')

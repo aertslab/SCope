@@ -333,7 +333,7 @@ class API {
 				listener(this.settings, customValues, maxValues);
 			})
 		})
-		return value;
+		return this.settings;
 	}
 
 	onSettingsChange(listener) {

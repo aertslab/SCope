@@ -175,16 +175,17 @@ class AppSidebar extends Component {
 	}
 
 	toggleUploadModal(event) {
-		this.setState({ uploadModalOpened: !this.state.uploadModalOpened })
+		let state = !this.state.uploadModalOpened;
+		this.setState({ uploadModalOpened: state })
 		ReactGA.event({
 			category: 'upload',
-			action: 'toggle loom upload modal'
+			action: 'toggle loom upload modal',
+			label: state ? 'on' : 'off'
 		});
 	}
 
-	toggleCpmNormization() {
-		BackendAPI.setSetting('hasCpmNormalization', !this.state.settings.hasCpmNormalization);
-		let settings = BackendAPI.getSettings();
+	toggleCpmNormization() {	
+		let settings = BackendAPI.setSetting('hasCpmNormalization', !this.state.settings.hasCpmNormalization);
 		this.setState({settings: settings});
 		ReactGA.event({
 			category: 'settings',
@@ -194,8 +195,7 @@ class AppSidebar extends Component {
 	}
 
 	toggleLogTransform() {
-		BackendAPI.setSetting('hasLogTransform', !this.state.settings.hasLogTransform);
-		let settings = BackendAPI.getSettings();
+		let settings = BackendAPI.setSetting('hasLogTransform', !this.state.settings.hasLogTransform);
 		this.setState({settings: settings});
 		ReactGA.event({
 			category: 'settings',

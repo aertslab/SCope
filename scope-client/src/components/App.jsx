@@ -200,10 +200,12 @@ class App extends Component {
 	}
 
 	toggleSidebar() {
-		this.setState({isSidebarVisible: !this.state.isSidebarVisible});
+		let state = !this.state.isSidebarVisible;
+		this.setState({isSidebarVisible: state});
 		ReactGA.event({
 			category: 'settings',
-			action: 'toggle sidebar'
+			action: 'toggle sidebar',
+			label: state ? 'on' : 'off'
 		});
 	}
 

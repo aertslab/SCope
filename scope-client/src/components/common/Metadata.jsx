@@ -185,7 +185,8 @@ export default class Metadata extends Component {
 							fileDownload(csv, 'metadata.csv');
 							ReactGA.event({
 								category: 'metadata',
-								action: 'downloaded csv file'
+								action: 'downloaded csv file',
+								value: selection.points.length
 							});
 						}}
 						>

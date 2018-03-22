@@ -142,8 +142,9 @@ export default class FeatureSearch extends React.Component {
 		this.setState({type: type});
 		ReactGA.event({
 			category: 'action',
-			action: 'selected feature type',
-			label: type
+			action: 'feature type selected',
+			label: type,
+			value: this.props.field
 		});
 	}
 
@@ -238,7 +239,8 @@ export default class FeatureSearch extends React.Component {
 		ReactGA.event({
 			category: 'action',
 			action: 'feature search',
-			label: value
+			label: value,
+			value: this.props.field
 		});
 	}
 
