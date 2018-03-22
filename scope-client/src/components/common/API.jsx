@@ -13,6 +13,7 @@ class API {
 			scale: 5,
 			alpha: 1,
 		}
+		this.spriteSettingsChangeListeners = [];
 
 		this.loomFiles = [];
 		this.activePage = 'welcome';
@@ -70,14 +71,25 @@ class API {
 	setSpriteSettings(scale, alpha) {
 		this.spriteSettings.scale = scale;
 		this.spriteSettings.alpha = alpha;
-		this.settingsChangeListeners.forEach((listener) => {
-			listener(this.settings, this.customValues[this.activePage], this.maxValues[this.activePage]);
+		this.spriteSettingsChangeListeners.forEach((listener) => {
+			listener(this.spriteSettings);
 		})
-}
+	}
 
 	getSpriteSettings() {
 		return this.spriteSettings;
 	}
+
+	onSpriteSettingsChange(listener) {
+		this.spriteSettingsChangeListeners.push(listener);
+	}
+	
+	removeSpriteSettingsChange(listener) {
+		let i = this.spriteSettingsChangeListeners.indexOf(listener)
+		if (i > -1) {
+			this.spriteSettingsChangeListeners.splice(i, 1);
+		}
+	};
 
 	getActiveLoom() {
 		return this.activeLooms[0];

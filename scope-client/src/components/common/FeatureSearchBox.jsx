@@ -158,9 +158,9 @@ export default class FeatureSearch extends React.Component {
 		e.stopPropagation();		
 		e.preventDefault();
 		let selection = this.state.selection;
+		if (DEBUG) console.log('handleBlur', e, select, selection);
 		if (selection) {
 			//selection = select.results[0].results[0];
-			if (DEBUG) console.log('handleBlur', e.target, e.source, selection);
 			this.updateFeature(selection.title, selection.type, selection.description);
 		}
 	}

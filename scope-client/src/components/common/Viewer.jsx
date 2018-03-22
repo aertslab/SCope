@@ -43,9 +43,13 @@ export default class Viewer extends Component {
 		this.settingsListener = (settings, customScale) => {
 			if (this.props.settings) {
 				this.setState({loading: true});
-				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, customScale, this.props.superposition);
-				this.repaintLassoSelections(this.state.lassoSelections);
+				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, customScale, this.props.superposition);				
 			}
+		}
+		this.spriteSettingsListener = () => {
+			if (this.state.colors) this.updateDataPoints(this.state.colors);
+			else this.resetDataPoints();
+			this.repaintLassoSelections(this.state.lassoSelections);
 		}
 		this.viewerToolListener = (tool) => {
 			this.setState({activeTool: tool});
@@ -81,6 +85,7 @@ export default class Viewer extends Component {
 
 	componentWillMount() {
 		BackendAPI.onSettingsChange(this.settingsListener);
+		BackendAPI.onSpriteSettingsChange(this.spriteSettingsListener);
 		BackendAPI.onViewerToolChange(this.viewerToolListener);
 		BackendAPI.onViewerSelectionsChange(this.viewerSelectionListener);
 		BackendAPI.onViewerTransformChange(this.viewerTransformListener);
@@ -159,6 +164,7 @@ export default class Viewer extends Component {
 		BackendAPI.removeViewerTransformChange(this.viewerTransformListener);
 		BackendAPI.removeCustomScaleChange(this.customScaleListener);
 		BackendAPI.removeActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
+		BackendAPI.removeSpriteSettingsChange(this.spriteSettingsListener);
 		this.destroyGraphics();
 	}
 /*
