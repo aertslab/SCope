@@ -127,11 +127,17 @@ export default class Viewer extends Component {
 				this.setState({loading: true});
 				if (DEBUG) console.log(nextProps.name, 'changing points');
 				this.getPoints(nextProps.loomFile, nextProps.activeCoordinates, nextProps.activeAnnotations, nextProps.superposition, () => {
-					this.getFeatureColors(this.state.activeFeatures, nextProps.loomFile, this.props.thresholds, this.state.activeAnnotations, this.state.customScale, nextProps.superposition);
+					let featuresActive = false;
+					features.map((f) => {
+						if (f.feature.length) featuresActive = true;
+					})
+					if (featuresActive)
+						this.getFeatureColors(this.state.activeFeatures, nextProps.loomFile, this.props.thresholds, this.state.activeAnnotations, this.state.customScale, nextProps.superposition);
 				});
 		}
 
-		if (JSON.stringify(nextProps.colors) != JSON.stringify(this.state.colors)) {
+		if (nextProps.customColors && (JSON.stringify(nextProps.colors) != JSON.stringify(this.state.colors))) {
+			if (DEBUG) console.log(nextProps.name, 'changing colors');
 			this.setState({colors: nextProps.colors});
 			this.updateDataPoints(nextProps.colors);
 		}
@@ -423,7 +429,17 @@ export default class Viewer extends Component {
 
 
 			this.setState({loading: true});
-			this.getFeatureColors(features, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, customScale, this.props.superposition);
+			
+			let featuresActive = false;
+			features.map((f) => {
+				if (f.feature.length) featuresActive = true;
+			})
+			if (featuresActive)
+				this.getFeatureColors(features, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, customScale, this.props.superposition);
+			else {
+				this.setState({activeFeatures: JSON.parse(JSON.stringify(features))});
+				this.resetDataPoints();
+			}
 		}
 	}
 

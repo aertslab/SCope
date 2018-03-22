@@ -49,9 +49,7 @@ export default class FeatureSearch extends React.Component {
 
 	resetComponent() {
 		this.setState({ isLoading: false, results: [], value: '', selection: null })
-		setTimeout(() => {
-			BackendAPI.setActiveFeature(this.props.field, this.state.type, '', '', 0, null);
-		}, 50);
+		BackendAPI.setActiveFeature(this.props.field, this.state.type, '', '', 0, null);
 	}
 
 	updateFeature(feature, featureType, featureDescription) {

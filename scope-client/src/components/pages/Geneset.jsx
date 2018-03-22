@@ -88,6 +88,7 @@ class Geneset extends Component {
                     <Grid.Column stretched className="flexDouble">
                         <b className="noStretch">Geneset AUC values</b>
                         <Viewer 
+                            customColors={true}
                             name="reg" 
                             loomFile={activeLoom} 
                             activeFeatures={activeFeatures} 
