@@ -4,7 +4,7 @@ import { withRouter, Route, Link } from 'react-router-dom';
 import { withCookies, Cookies } from 'react-cookie';
 import ReactResizeDetector from 'react-resize-detector';
 import ReactGA from 'react-ga';
-import { Sidebar, Segment, Dimmer, Loader, Button } from 'semantic-ui-react';
+import { Sidebar, Header, Image, Segment, Dimmer, Loader, Button, Icon } from 'semantic-ui-react';
 import AppHeader from './AppHeader';
 import AppSidebar from './AppSidebar';
 import { BackendAPI } from './common/API';
@@ -31,6 +31,7 @@ class App extends Component {
 		this.state = {
 			metadata: null,
 			loading: true,
+			error: false,
 			isSidebarVisible: true,
 		}
 		this.timeout = null;
@@ -38,40 +39,66 @@ class App extends Component {
 	}
 
 	render() {
-		const { loading, metadata } = this.state;
+		const { loading, metadata, error } = this.state;
+
+		let errorDimmer = (
+			<Dimmer active={error} >
+				<Icon name='warning circle' color='red' size='huge' /><br /><br />
+				<Header as='h2' inverted>
+				An error occured when connecting to SCope back-end.<br /><br />
+				Please check your Internet connection.
+				</Header>
+			</Dimmer>
+		);
+
 		return (
-			<Route path="/:uuid/:loom?/:page?" render={({history}) =>
-				<Segment className="parentView">
-					<ReactResizeDetector handleHeight skipOnMount onResize={this.onResize.bind(this)} />
-					<AppHeader 
-						toggleSidebar={this.toggleSidebar.bind(this)} 
-						metadata={metadata}
-						timeout={this.timeout} 
-					/>
-					<Sidebar.Pushable>
-						<AppSidebar visible={this.state.isSidebarVisible} onMetadataChange={metadata => {this.setState({metadata})}} />
-						<Sidebar.Pusher>
-							<Route path="/:uuid/:loom?/welcome"  component={Welcome} />
-							<Route path="/:uuid/:loom?/dataset"  component={Dataset} />
-							<Route path="/:uuid/:loom?/gene"     component={Gene} />
-							<Route path="/:uuid/:loom?/geneset"  component={Geneset} />
-							<Route path="/:uuid/:loom?/regulon"  component={Regulon} />
-							<Route path="/:uuid/:loom?/compare"  component={Compare} />
-							<Route path="/:uuid/:loom?/tutorial" component={Tutorial} />
-							<Route path="/:uuid/:loom?/about"    component={About} />
-						</Sidebar.Pusher>
-					</Sidebar.Pushable>
-					<Dimmer active={loading} inverted>
-						<Loader inverted>Your SCope session is starting</Loader>
-					</Dimmer>
-					<Dimmer active={!loading && this.timeout != null && this.timeout <= 0}>
-						Your SCope session has ended<br /><br />
-						<Link to='/'>
-							<Button primary onClick={() => {history.replace('/')}}>RESTART</Button>
-						</Link>
-					</Dimmer>
-				</Segment>
-			} />
+			<Segment className="parentView">
+				<Route exact path="/" render={() => 
+					<Segment textAlign='center' className="parentView">
+						<Segment vertical>
+							<Header as='h1'>SCope</Header>
+							for Fly Cell Atlas
+							<br /><br />
+							<Image src='src/images/flycellatlas.png' size="small" centered />
+							<br /><br />
+						</Segment>
+						{errorDimmer}
+					</Segment>
+				} />
+				<Route path="/:uuid/:loom?/:page?" render={({history}) =>
+					<Segment className="parentView">
+						<ReactResizeDetector handleHeight skipOnMount onResize={this.onResize.bind(this)} />
+						<AppHeader 
+							toggleSidebar={this.toggleSidebar.bind(this)} 
+							metadata={metadata}
+							timeout={this.timeout} 
+						/>
+						<Sidebar.Pushable>
+							<AppSidebar visible={this.state.isSidebarVisible} onMetadataChange={metadata => {this.setState({metadata})}} />
+							<Sidebar.Pusher>
+								<Route path="/:uuid/:loom?/welcome"  component={Welcome} />
+								<Route path="/:uuid/:loom?/dataset"  component={Dataset} />
+								<Route path="/:uuid/:loom?/gene"     component={Gene} />
+								<Route path="/:uuid/:loom?/geneset"  component={Geneset} />
+								<Route path="/:uuid/:loom?/regulon"  component={Regulon} />
+								<Route path="/:uuid/:loom?/compare"  component={Compare} />
+								<Route path="/:uuid/:loom?/tutorial" component={Tutorial} />
+								<Route path="/:uuid/:loom?/about"    component={About} />
+							</Sidebar.Pusher>
+						</Sidebar.Pushable>
+						<Dimmer active={loading} inverted>
+							<Loader inverted>Your SCope session is starting</Loader>
+						</Dimmer>
+						<Dimmer active={!loading && this.timeout != null && this.timeout <= 0}>
+							Your SCope session has ended<br /><br />
+							<Link to='/'>
+								<Button primary onClick={() => {history.replace('/')}}>RESTART</Button>
+							</Link>
+						</Dimmer>
+						{errorDimmer}
+					</Segment>
+				} />
+			</Segment>
 		);
 	}
 
@@ -126,6 +153,8 @@ class App extends Component {
 					if (DEBUG) console.log('getUUID', response);
 					this.checkUUID(ip, response.UUID);
 				})
+			}, () => {
+				this.setState({error: true});
 			})
 		}
 	}
@@ -133,10 +162,13 @@ class App extends Component {
 	checkUUID(ip, uuid) {
 		const { cookies, history, match } = this.props;
 		if (!uuid) return;
-		BackendAPI.getConnection().then((gbc) => {
+		BackendAPI.getConnection().then((gbc, ws) => {
 			let query = {
 				ip: ip,
 				UUID: uuid
+			}
+			gbc.ws.onclose = (err) => {
+				this.setState({error: true});
 			}
 			if (DEBUG) console.log('getRemainingUUIDTime', query);
 			gbc.services.scope.Main.getRemainingUUIDTime(query, (err, response) => {
@@ -152,6 +184,9 @@ class App extends Component {
 							cookies.remove(cookieName);
 							clearInterval(this.timer);
 							this.timer = null;
+							if (!BackendAPI.isConnected()) {
+								this.setState({error: true});
+							}
 							this.forceUpdate();
 						}
 					}, timer);
@@ -159,6 +194,8 @@ class App extends Component {
 				history.push('/' + [uuid, match.params.loom ? match.params.loom : '*', match.params.page ? match.params.page : 'welcome' ].join('/'));
 				ReactGA.set({ userId: uuid });
 			});
+		}, () => {
+			this.setState({error: true});
 		})
 	}
 

@@ -514,6 +514,8 @@ class Compare extends Component {
 				if (DEBUG) console.log('getCellMetaData', response);
 				this.renderExpressionGraph(response);
 			});
+		}, () => {
+			BackendAPI.showError();	
 		});
 	}
 

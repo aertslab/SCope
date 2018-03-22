@@ -145,8 +145,8 @@ class Geneset extends Component {
 				}
 			});
 		}, () => {
-			console.log("Unable to connect to BackendAPI");
-		});
+            BackendAPI.showError();	
+        });
     }
     
     runGeneEnrichment() {
@@ -171,6 +171,8 @@ class Geneset extends Component {
 		        if (DEBUG) console.log('doGeneSetEnrichment end');
                 //this.setState({loading: false});
 	        });
+        }, () => {
+            BackendAPI.showError();	
         })
     }
 

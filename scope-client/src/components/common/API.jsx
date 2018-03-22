@@ -1,7 +1,14 @@
 class API {
 	constructor() {
 		this.GBC = require("grpc-bus-websocket-client");
-		this.GBCConnection = new this.GBC("ws://" + BACKEND.host + ":" + BACKEND.WSport + "/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + BACKEND.RPCport } }).connect();
+		try {
+			this.GBCConnection = new this.GBC("ws://" + BACKEND.host + ":" + BACKEND.WSport + "/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + BACKEND.RPCport } }).connect();
+			this.connected = true;
+		} catch (ex) {
+			this.GBCConnection = null;
+			this.connected = false;
+		}
+
 
 		this.loomFiles = [];
 		this.activePage = 'welcome';
@@ -41,6 +48,14 @@ class API {
 		this.customValuesChangeListeners = [];
 
 		this.uuid = null;
+	}
+
+	isConnected() {
+		return this.connected;
+	}
+
+	showError() {
+		this.connected = false;
 	}
 
 	getConnection() {
@@ -178,7 +193,9 @@ class API {
 				})
 				callback(this.customValues[page], this.maxValues[page]);
 			})
-		})
+		}, () => {
+			BackendAPI.showError();	
+		});
 	}
 
 	onFeatureScaleChange(listener) {

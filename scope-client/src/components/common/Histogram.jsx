@@ -98,6 +98,8 @@ export default class Histogram extends Component {
 					this.renderAUCGraph('', [])
 				}
 			});
+		}, () => {
+			BackendAPI.showError();	
 		});
 	}
 

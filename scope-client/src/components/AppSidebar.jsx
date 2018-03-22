@@ -120,7 +120,7 @@ class AppSidebar extends Component {
 				}
 			});
 		}, () => {
-			console.log("Unable to connect to BackendAPI");
+			BackendAPI.showError();
 		});
 	}
 

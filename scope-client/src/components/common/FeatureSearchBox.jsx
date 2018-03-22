@@ -72,6 +72,8 @@ export default class FeatureSearch extends React.Component {
 					metadata.description = featureDescription;
 					BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, threshold, metadata);
 				});
+			}, () => {
+				BackendAPI.showError();	
 			});
 		} else if (featureType.indexOf('Clustering:') == 0) {
 			let loomMetadata = BackendAPI.getActiveLoomMetadata();
@@ -100,8 +102,10 @@ export default class FeatureSearch extends React.Component {
 						markerResponse.description = featureDescription
 						BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, markerResponse);
 					});
+				}, () => {
+					BackendAPI.showError();	
 				});
-				} else {
+			} else {
 				setTimeout(() => {
 					BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, {description: featureDescription});
 				}, 50);
@@ -217,6 +221,8 @@ export default class FeatureSearch extends React.Component {
 					}
 				});
 				console.log('gbc', gbc, this.call);
+			}, () => {
+				BackendAPI.showError();	
 			});
 		}, 200)
 	}

@@ -99,6 +99,8 @@ export default class ViewerSidebar extends Component {
 												gbc.services.scope.Main.getFeatures(query, (err, response) => {
 													BackendAPI.setActiveFeature(i, activeFeatures[i].type, "gene", g, 0, {description: response.featureDescription[0]});
 												});
+											}, () => {
+												BackendAPI.showError();	
 											})
 										}} >
 										{g}

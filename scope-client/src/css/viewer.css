@@ -123,3 +123,11 @@ canvas {
     clear: both;
     display: table;
 }
+
+h1.ui.header {
+	font-size: 1.5rem !important;
+}
+
+h2.ui.header {
+	font-size: 1.25rem !important;
+}

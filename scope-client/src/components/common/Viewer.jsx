@@ -458,6 +458,8 @@ export default class Viewer extends Component {
 									ns.selected = true;
 									this.repaintLassoSelections(currentSelections);
 								})
+							}, () => {
+								BackendAPI.showError();	
 							})
 						} else {
 							s.translations[this.props.name] = ns.points.slice(0);
@@ -506,7 +508,8 @@ export default class Viewer extends Component {
 		this.startBenchmark("getCoordinates")
 		if (DEBUG) console.log(this.props.name, 'getCoordinates', query);
 		BackendAPI.getConnection().then((gbc) => {
-			gbc.services.scope.Main.getCoordinates(query, (err, response) => {
+			try {
+			let call = gbc.services.scope.Main.getCoordinates(query, (err, response) => {
 				// Update the coordinates and remove all previous data points
 				if (DEBUG) console.log(this.props.name, 'getCoordinates', response);
 				this.container.removeChildren();
@@ -526,6 +529,22 @@ export default class Viewer extends Component {
 				this.initializeDataPoints();
 				callback();
 			});
+			call.on('close', (ex) => {
+				console.log('close', ex);	
+			})
+			call.on('error', (ex) => {
+				console.log('error', ex);	
+			})
+			call.on('end', (ex) => {
+				console.log('end', ex);	
+			})
+		} catch (ex) {
+			console.log('catch', ex);
+			//BackendAPI.showError();	
+		}
+		}, (ex) => {
+			console.log('reject', ex);
+			//BackendAPI.showError();	
 		});
 	}
 
@@ -629,6 +648,8 @@ export default class Viewer extends Component {
 					this.resetDataPoints();
 				}
 			});
+		}, () => {
+			BackendAPI.showError();	
 		});
 	}
 	

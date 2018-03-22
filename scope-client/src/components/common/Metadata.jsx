@@ -223,6 +223,8 @@ export default class Metadata extends Component {
 					this.setState({loading: false, metadata: response, selection: selections[this.state.selectionId], cellIDs: cellsResponse.cellIds});
 				});
 			});
+		}, () => {
+			BackendAPI.showError();	
 		});
 	}
 }
