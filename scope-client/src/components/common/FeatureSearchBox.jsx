@@ -33,6 +33,9 @@ export default class FeatureSearch extends React.Component {
 					onSelectionChange={this.handleSelectionChange.bind(this)}
 					onBlur={this.handleBlur.bind(this)}
 					onMouseDown={this.handleMouseDown.bind(this)}
+					stopRequest={() => {
+						if (this.call != null) this.call.end();
+					}}
 					results={results}
 					options={options}
 					selectFirstResult={true}
@@ -59,9 +62,9 @@ export default class FeatureSearch extends React.Component {
 				regulon: feature
 			}
 			BackendAPI.getConnection().then((gbc) => {
-				console.log('getRegulonMetaData', regulonQuery);
+				if (DEBUG) console.log('getRegulonMetaData', regulonQuery);
 				gbc.services.scope.Main.getRegulonMetaData(regulonQuery, (regulonErr, regulonResponse) => {
-					console.log('getRegulonMetaData', regulonResponse);
+					if (DEBUG) console.log('getRegulonMetaData', regulonResponse);
 					let metadata = regulonResponse ? regulonResponse.regulonMeta : {};
 					let threshold = 0;
 					if (metadata.autoThresholds) {
@@ -154,77 +157,74 @@ export default class FeatureSearch extends React.Component {
 	handleSearchChange(e, { value }) {
 		if (this.call != null) this.call.end();
 		this.setState({ isLoading: true, value })
-		setTimeout(() => {
-			if (this.state.value.length < 1) return this.resetComponent()
-			let query = {
-				loomFilePath: BackendAPI.getActiveLoom(),
-				query: this.state.value
-			};
-			if (DEBUG) console.log("handleSearchChange", query);
-			BackendAPI.getConnection().then((gbc) => {
-				this.call = gbc.services.scope.Main.getFeatures(query, (err, response) => {
-					if (DEBUG) console.log("handleSearchChange", response);
-					if (response != null) {
-						let res = [], genes = [], regulons = [], clusters = {};
-						let type = this.state.type;
+		if (this.state.value.length < 1) return this.resetComponent();
+		let query = {
+			loomFilePath: BackendAPI.getActiveLoom(),
+			query: this.state.value
+		};
+		if (DEBUG) console.log("getFeatures", query);
+		BackendAPI.getConnection().then((gbc) => {
+			this.call = gbc.services.scope.Main.getFeatures(query, (err, response) => {
+				if (DEBUG) console.log("getFeatures", response);
+				if (response != null) {
+					let res = [], genes = [], regulons = [], clusters = {};
+					let type = this.state.type;
 
-						for (var i = 0; i < response.feature.length; i++) {
-							let f = response.feature[i];
-							let ft = response.featureType[i];
-							let d = response.featureDescription[i];
-							if (ft == 'gene') {
-								genes.push({ "title": f, "type": ft, "description": d });
-							} else if (ft == 'regulon') {
-								regulons.push({ "title": f, "type": ft, "description": d });
-							} else if (ft.indexOf('Clustering:') == 0) {
-								if (!clusters[ft]) clusters[ft] = [];
-								clusters[ft].push({ "title": f, "type": ft, "description": d });
-							} else if (ft.indexOf('cluster#') == 0) {
-								let cid = ft.split('#')[1], name = '';
-								activeMetadata.cellMetaData.clusterings.map((c, i) => {
-									if (c.id == cid) {
-										name = c.name;
-									}
-								})
-								if (!clusters[ft]) clusters[ft] = {name: name, results: []};
-								clusters[ft].push({ "title": f, "type": ft, "description": d });
-							}
-						};
-
-						genes = {"name": "gene", "results": genes.slice(0, 10)}
-						regulons = {"name": "regulon", "results": regulons.slice(0, 10)}
-
-						if (genes['results'].length && (type == 'all' || type == 'gene')) {
-							res.push(genes);
+					for (var i = 0; i < response.feature.length; i++) {
+						let f = response.feature[i];
+						let ft = response.featureType[i];
+						let d = response.featureDescription[i];
+						if (ft == 'gene') {
+							genes.push({ "title": f, "type": ft, "description": d });
+						} else if (ft == 'regulon') {
+							regulons.push({ "title": f, "type": ft, "description": d });
+						} else if (ft.indexOf('Clustering:') == 0) {
+							if (!clusters[ft]) clusters[ft] = [];
+							clusters[ft].push({ "title": f, "type": ft, "description": d });
+						} else if (ft.indexOf('cluster#') == 0) {
+							let cid = ft.split('#')[1], name = '';
+							activeMetadata.cellMetaData.clusterings.map((c, i) => {
+								if (c.id == cid) {
+									name = c.name;
+								}
+							})
+							if (!clusters[ft]) clusters[ft] = {name: name, results: []};
+							clusters[ft].push({ "title": f, "type": ft, "description": d });
 						}
-						if (regulons['results'].length && (type == 'all' || type == 'regulon')) {
-							res.push(regulons);
-						}
-						if (type == 'all' || type == 'cluster') {
-							Object.keys(clusters).map((ft) => {
-								res.push({"name": ft, "results": clusters[ft].slice(0, 10)})
-							});
-						}
+					};
 
-						this.setState({
-							isLoading: false,
-							results: res,
-						})
+					genes = {"name": "gene", "results": genes.slice(0, 10)}
+					regulons = {"name": "regulon", "results": regulons.slice(0, 10)}
 
-					} else {
-
-						this.setState({
-							isLoading: false,
-							results: [],
-						})
-
+					if (genes['results'].length && (type == 'all' || type == 'gene')) {
+						res.push(genes);
 					}
-				});
-				console.log('gbc', gbc, this.call);
-			}, () => {
-				BackendAPI.showError();	
+					if (regulons['results'].length && (type == 'all' || type == 'regulon')) {
+						res.push(regulons);
+					}
+					if (type == 'all' || type == 'cluster') {
+						Object.keys(clusters).map((ft) => {
+							res.push({"name": ft, "results": clusters[ft].slice(0, 10)})
+						});
+					}
+
+					this.setState({
+						isLoading: false,
+						results: res,
+					})
+
+				} else {
+
+					this.setState({
+						isLoading: false,
+						results: [],
+					})
+
+				}
 			});
-		}, 200)
+		}, () => {
+			BackendAPI.showError();	
+		});
 	}
 
 	componentWillReceiveProps(nextProps) {

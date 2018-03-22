@@ -27,6 +27,8 @@ export default class FeatureSearchInput extends Search {
 				onChange={(evt, input) => {
 					evt.persist();
 					this.setState({value: evt.target.value});
+					this.props.stopRequest();
+					this.handleSearchChangeDebounced.cancel();
 					this.handleSearchChangeDebounced(evt, input);
 				}}
 				onBlur={this.handleBlur}
@@ -49,7 +51,7 @@ export default class FeatureSearchInput extends Search {
 	componentWillMount() {
 		this.handleSearchChangeDebounced = _.debounce((evt, input) => {
 			this.handleSearchChange(evt, input);
-		}, 500);
+		}, 750);
 	}
 
 	handleTypeChange(proxy, select) {
