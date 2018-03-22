@@ -41,7 +41,7 @@ class AppHeader extends Component {
 			{
 				display: metadata ? true : false,
 				path: 'geneset',
-				title: 'Gene set',
+				title: 'Geneset',
 				icon: false
 			},
 			{

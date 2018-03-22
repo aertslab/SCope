@@ -1,22 +1,14 @@
 import React, { Component } from 'react';
-import { withRouter, Link } from 'react-router-dom';
 import { Button, Modal, Grid, Input, Progress } from 'semantic-ui-react';
 import FileReaderInput from 'react-file-reader-input';
-import { BackendAPI } from './API';
 
 export default class UploadModal extends Component {
     constructor() {
         super();
         this.state = {
-            activeCoordinates: BackendAPI.getActiveCoordinates(),
-            settings: BackendAPI.getSettings(),
-            loomFiles: [],
             uploadLoomFile: null,
-            uploadLoomModalOpened: false,
             uploadLoomProgress: 0,
-            loading: true
         }
-        this.uploadFileType = null;
     }
     
     render() {
@@ -30,13 +22,13 @@ export default class UploadModal extends Component {
                                 <Grid.Column width={13}>
                                     <FileReaderInput as="binary" id="my-file-input" onChange={this.selectLoomFile.bind(this)}>
                                         <Input
-                                            label="File to be uploaded:" labelPosition='left' action="Select a file..." fluid
+                                            label="File to be uploaded:" labelPosition='left' action={{ color: this.state.uploadLoomFile ? 'grey' : 'orange', content:"Select a file..."}} fluid 
                                             placeholder={ this.state.uploadLoomFile ? this.state.uploadLoomFile.name : ""}
                                         />
                                     </FileReaderInput>
                                 </Grid.Column>
                                 <Grid.Column width={3}>
-                                    <Button onClick={this.uploadLoomFile.bind(this)} disabled={this.state.uploadLoomProgress > 0}> Upload!</Button>
+                                    <Button color={this.state.uploadLoomFile ? 'orange' : 'grey'} onClick={this.uploadLoomFile.bind(this)} disabled={!this.state.uploadLoomFile || (this.state.uploadLoomProgress > 0)}> Upload!</Button>
                                 </Grid.Column>
                             </Grid.Row>
                             <Grid.Row>
@@ -62,8 +54,7 @@ export default class UploadModal extends Component {
 	}
 
     uploadLoomFile() {
-		const { match } = this.props;
-		let file = this.state.uploadLoomFile
+		let file = this.state.uploadLoomFile;
 
 		if (file == null) {
 			alert("Please select a .loom file first")
@@ -83,11 +74,9 @@ export default class UploadModal extends Component {
 			this.setState({ uploadLoomProgress: progress });
 		});
 		xhr.upload.addEventListener('load', (event) => {
-			if (DEBUG) console.log('Loom file '+ file.name +' successfully uploaded !');
-					this.setState({ uploadLoomFile: null, uploadLoomProgress: 0 })
-					this.getLoomFiles()
-					this.toggleUploadLoomModal()
-			this.uploadFileType = null;
+			if (DEBUG) console.log("file uploaded: " + file.name);
+            this.setState({ uploadLoomFile: null, uploadLoomProgress: 0 })
+            setTimeout(this.props.onUploaded, 1000);
 		})
 		xhr.setRequestHeader("Content-Disposition", "attachment;filename=" + file.name)
 		xhr.send(form);

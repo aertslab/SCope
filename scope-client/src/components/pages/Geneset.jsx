@@ -77,7 +77,7 @@ class Geneset extends Component {
                         </Menu>
                     </Grid.Column>
                     <Grid.Column width="2">
-                        <Button onClick={this.runGeneEnrichment.bind(this)} disabled={!selectedGeneset} >Run gene enrichment</Button>
+                        <Button color="orange" onClick={this.runGeneEnrichment.bind(this)} disabled={!selectedGeneset} >Run gene enrichment</Button>
                     </Grid.Column>
                     <Grid.Column width="3">&nbsp;</Grid.Column>
                 </Grid.Row>
@@ -102,7 +102,7 @@ class Geneset extends Component {
                         }} />
                     </Grid.Column>
                 </Grid.Row>
-				<UploadModal title="Import a geneset file" type='GeneSet' uuid={match.params.uuid} opened={uploadModalOpened} onClose={this.toggleUploadModal.bind(this)} />
+				<UploadModal title="Import a geneset file" type='GeneSet' uuid={match.params.uuid} opened={uploadModalOpened} onClose={this.toggleUploadModal.bind(this)} onUploaded={this.onGenesetUploaded.bind(this)} />
             </Grid>
         );
     }
@@ -173,5 +173,11 @@ class Geneset extends Component {
 	        });
         })
     }
+
+    onGenesetUploaded() {
+		this.getGeneSets();
+		this.toggleUploadModal();
+	}
+
 }
 export default withRouter(Geneset);

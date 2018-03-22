@@ -647,7 +647,6 @@ export default class Viewer extends Component {
 		this.container.removeChildren(0, n).map((p) => {
 			p.destroy();
 		})
-		console.log(colors);
 		let pts = _.zip(this.state.coord.idx, this.state.coord.x, this.state.coord.y, colors ? colors : this.state.colors);
 		pts.sort((a, b) =>{
 			let ca = this.hexToRgb(a[3]);

@@ -16,7 +16,6 @@ class AppSidebar extends Component {
 			uploadModalOpened: false,
 			loading: true
 		}
-		this.uploadFileType = null;
 	}
 
 	render () {
@@ -93,7 +92,7 @@ class AppSidebar extends Component {
 						<Image src='src/images/vib.png' size="small" centered href="http://vib.be" />*/}
 						<Image src='src/images/flycellatlas.png' size="small" centered href="http://flycellatlas.org/" />
 					</Menu.Menu>
-				<UploadModal title="Import a .loom file" type='Loom' uuid={match.params.uuid} opened={uploadModalOpened} onClose={this.toggleUploadModal.bind(this)} />
+				<UploadModal title="Import a .loom file" type='Loom' uuid={match.params.uuid} opened={uploadModalOpened} onClose={this.toggleUploadModal.bind(this)} onUploaded={this.onLoomUploaded.bind(this)} />
 			</Sidebar>
 		);
 	}
@@ -142,6 +141,11 @@ class AppSidebar extends Component {
 	setActiveCoordinates(evt, coords) {
 		BackendAPI.setActiveCoordinates(coords.value);
 		this.setState({ activeCoordinates: coords.value });
+	}
+
+	onLoomUploaded() {
+		this.getLoomFiles();
+		this.toggleUploadModal();
 	}
 }
 

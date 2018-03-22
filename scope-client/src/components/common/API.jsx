@@ -231,7 +231,6 @@ class API {
 
 
 	getFeatureScale() {
-		console.log('getFeatureScale', this.maxValues);
 		return this.maxValues[this.activePage] || [0, 0, 0];
 	}
 
