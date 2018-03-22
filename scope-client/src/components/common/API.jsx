@@ -31,7 +31,7 @@ class API {
 		this.viewerTool = 's-zoom';
 		this.viewerToolChangeListeners = [];
 
-		this.viewerSelections = [];
+		this.viewerSelections = {};
 		this.viewerSelectionsChangeListeners = [];
 
 		this.viewerTransform = null;
@@ -84,7 +84,13 @@ class API {
 
 	setActiveLoom(loom, id) {
 		if (id == null) id = 0;
+		if (this.activeLooms[id] == loom) return;
 		this.activeLooms[id] = loom;
+		this.viewerSelections = {};
+		this.viewerSelections[this.activePage] = [];
+		this.viewerSelectionsChangeListeners.forEach((listener) => {
+			listener(this.viewerSelections[this.activePage]);
+		});
 		this.activeCoordinates = -1;
 		this.activeLoomChangeListeners.forEach((listener) => {
 			listener(this.activeLooms[0], this.loomFiles[this.activeLooms[0]], this.activeCoordinates);
@@ -352,22 +358,21 @@ class API {
 
 	
 	getViewerSelections() {
-		return this.viewerSelections;
+		return this.viewerSelections[this.activePage] || [];
 	}
 
 	addViewerSelection(selection) {
-		if (DEBUG) console.log('addViewerSelection', selection)
-		this.viewerSelections.push(selection);
+		if (!this.viewerSelections[this.activePage]) this.viewerSelections[this.activePage] = [];
+		this.viewerSelections[this.activePage].push(selection);
 		this.viewerSelectionsChangeListeners.forEach((listener) => {
-			listener(this.viewerSelections);
+			listener(this.viewerSelections[this.activePage]);
 		});
 	}
 
 	removeViewerSelection(index) {
-		console.log('removing selection', index);
-		this.viewerSelections.splice(index, 1);
+		this.viewerSelections[this.activePage].splice(index, 1);
 		this.viewerSelectionsChangeListeners.forEach((listener) => {
-			listener(this.viewerSelections);
+			listener(this.viewerSelections[this.activePage]);
 		});
 	}
 
@@ -383,15 +388,15 @@ class API {
 	};
 
 	clearViewerSelections() {
-		this.viewerSelections = [];
+		this.viewerSelections[this.activePage] = [];
 	}
 
 
 
 	toggleLassoSelection(index) {
-		this.viewerSelections[index].selected = !this.viewerSelections[index].selected;
+		this.viewerSelections[this.activePage][index].selected = !this.viewerSelections[this.activePage][index].selected;
 		this.viewerSelectionsChangeListeners.forEach((listener) => {
-			listener(this.viewerSelections);
+			listener(this.viewerSelections[this.activePage]);
 		});
 	}
 
