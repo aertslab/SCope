@@ -98,8 +98,8 @@ export default class Viewer extends Component {
 		if (DEBUG) console.log(this.props.name, 'componentDidMount', this.props);
 		this.zoomSelection = d3.select('#viewer'+this.props.name);
 		let bbox = this.zoomSelection.select(function() {return this.parentNode}).node().getBoundingClientRect();
-		this.w = bbox.width - 10;
-		this.h = bbox.height - 10;
+		this.w = bbox.width - 5;
+		this.h = bbox.height - 5;
 		this.initGraphics();
 		if (this.props.loomFile != null) {
 			this.getPoints(this.props.loomFile, this.props.activeCoordinates, this.props.activeAnnotations, this.props.superposition, () => {

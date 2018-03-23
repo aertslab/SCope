@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
-import { Grid } from 'semantic-ui-react'
+import { Segment, Grid } from 'semantic-ui-react'
 import FeatureSearchBox from '../common/FeatureSearchBox'
 import { BackendAPI } from '../common/API'
 import Viewer from '../common/Viewer'
@@ -76,6 +76,7 @@ export default class Regulon extends Component {
                         />
                     </Grid.Column>
                     <Grid.Column stretched>
+                    <Segment vertical className="flexDisplay">
                         <b className="noStretch">Cells passing thresholds</b>
                         <Viewer 
                             name="auc" 
@@ -84,6 +85,8 @@ export default class Regulon extends Component {
                             activeCoordinates={activeCoordinates} 
                             thresholds={true} 
                         />
+                        </Segment>
+                        <Segment vertical className="flexDisplay">
                         <b className="noStretch">Expression levels</b>
                         <Viewer 
                             name="expr" 
@@ -95,6 +98,7 @@ export default class Regulon extends Component {
                             settings={true} 
                             customScale={true} 
                         />
+                        </Segment>
                     </Grid.Column>
                     <Grid.Column width={3}>
                         <ViewerSidebar  onActiveFeaturesChange={(features, id) => {

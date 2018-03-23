@@ -209,8 +209,8 @@ class API {
 		if (DEBUG) console.log('getMaxScale', id, page);
 		let query = {
 			loomFilePath: this.getActiveLooms(),
-			feature: selectedFeatures.map(f => {return f.feature}),
-			featureType: selectedFeatures.map(f=> {return f.featureType}),
+			feature: selectedFeatures.map(f => {return page == 'regulon' ? f.feature.split('_')[0] : f.feature}),
+			featureType: selectedFeatures.map(f=> {return page == 'regulon' ? 'gene' : f.featureType}),
 			hasLogTransform: settings.hasLogTransform,
 			hasCpmTransform: settings.hasCpmNormalization,
 		}

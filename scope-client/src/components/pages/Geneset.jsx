@@ -77,7 +77,7 @@ class Geneset extends Component {
 						</Menu.Menu>
                         </Menu>
                     </Grid.Column>
-                    <Grid.Column width="2">
+                    <Grid.Column width="2" textAlign='right'>
                         <Button color="orange" onClick={this.runGeneEnrichment.bind(this)} disabled={!selectedGeneset} >Run gene enrichment</Button>
                     </Grid.Column>
                     <Grid.Column width="3">&nbsp;</Grid.Column>
@@ -99,7 +99,7 @@ class Geneset extends Component {
                         />
                     </Grid.Column>
                     <Grid.Column width={3}>
-                        <ViewerSidebar  onActiveFeaturesChange={(features, id) => {
+                        <ViewerSidebar hideFeatures={true} onActiveFeaturesChange={(features, id) => {
                             this.setState({activeFeatures: features});
                         }} />
                     </Grid.Column>

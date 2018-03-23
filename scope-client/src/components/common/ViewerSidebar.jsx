@@ -27,7 +27,7 @@ class ViewerSidebar extends Component {
 	}
 
 	render() {
-		const { history, match } = this.props;
+		const { history, match, hideFeatures } = this.props;
 		const { lassoSelections, activeFeatures, activeTab, activePage } = this.state;
 
 		let lassoTab = () => {
@@ -154,12 +154,14 @@ class ViewerSidebar extends Component {
 		let panes = [
 			{ menuItem: 'Cell selections', render: lassoTab },
 		]
-		_.times(3, i => {
-				panes.push({
-					menuItem: activeFeatures[i] && activeFeatures[i].feature ? ("F"+(i+1)+": " + activeFeatures[i].feature) : "F"+(i+1),
-					render: () => featureTab(i),
-				})
-		})
+		if (!hideFeatures) {
+			_.times(3, i => {
+					panes.push({
+						menuItem: activeFeatures[i] && activeFeatures[i].feature ? ("F"+(i+1)+": " + activeFeatures[i].feature) : "F"+(i+1),
+						render: () => featureTab(i),
+					})
+			})
+		}
 		
 		let annotations = {}
 		if (this.props.getSelectedAnnotations) {

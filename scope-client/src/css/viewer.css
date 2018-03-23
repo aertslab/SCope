@@ -131,3 +131,17 @@ h1.ui.header {
 h2.ui.header {
 	font-size: 1.25rem !important;
 }
+
+.vertical.segment.flexDisplay {
+	padding: 0px !important;
+	border: none !important;
+}
+
+.ui.grid .row {
+	padding-top: 0.5rem;
+}
+
+.ui.grid .row .column {
+	padding-left: 0.5rem;
+	padding-right: 0;
+}
