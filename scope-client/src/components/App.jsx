@@ -195,8 +195,8 @@ class App extends Component {
 						}
 					}, timer);
 				}
-				history.push('/' + [uuid, match.params.loom ? match.params.loom : '*', match.params.page ? match.params.page : 'welcome' ].join('/'));
 				ReactGA.set({ userId: uuid });
+				history.push('/' + [uuid, encodeURIComponent(match.params.loom ? match.params.loom : '*'), encodeURIComponent(match.params.page ? match.params.page : 'welcome') ].join('/'));
 			});
 		}, () => {
 			this.setState({error: true});

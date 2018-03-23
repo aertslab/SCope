@@ -1,11 +1,12 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
+import { withRouter } from 'react-router-dom';
 import { Grid, Input, Icon, Tab, Image } from 'semantic-ui-react'
 import { BackendAPI } from '../common/API'
 import Metadata from '../common/Metadata'
 import ReactGA from 'react-ga';
 
-export default class ViewerSidebar extends Component {
+class ViewerSidebar extends Component {
 
 	constructor() {
 		super();
@@ -26,6 +27,7 @@ export default class ViewerSidebar extends Component {
 	}
 
 	render() {
+		const { history, match } = this.props;
 		const { lassoSelections, activeFeatures, activeTab, activePage } = this.state;
 
 		let lassoTab = () => {
@@ -98,9 +100,10 @@ export default class ViewerSidebar extends Component {
 												query: g
 											};
 											if (activePage == 'regulon') {
-												this.setState({currentPage: 'expression'});
-												BackendAPI.setActivePage('expression');
-											}
+												this.setState({currentPage: 'gene'});
+												BackendAPI.setActivePage('gene');
+												history.push('/' + [match.params.uuid, encodeURIComponent(match.params.loom ? match.params.loom : '*'), 'gene' ].join('/'));
+											}											
 											BackendAPI.getConnection().then((gbc) => {
 												gbc.services.scope.Main.getFeatures(query, (err, response) => {
 													BackendAPI.setActiveFeature(i, activeFeatures[i].type, "gene", g, 0, {description: response.featureDescription[0]});
@@ -221,3 +224,4 @@ export default class ViewerSidebar extends Component {
 		});
 	}
 }
+export default withRouter(ViewerSidebar);
