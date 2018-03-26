@@ -479,6 +479,7 @@ class SCope(s_pb2_grpc.MainServicer):
         a_hex3d = hex(a >> 20 << 8 | a >> 8 & 240 | a >> 4 & 15)
         return a_hex3d.replace("0x", "")
 
+    # Should be static method
     def get_vmax(self, vals):
         maxVmax = max(vals)
         vmax = np.percentile(vals, 99)
@@ -796,7 +797,8 @@ class SCope(s_pb2_grpc.MainServicer):
         gse = GeneSetEnrichment(scope=self,
                                 method="AUCell",
                                 loom_file_name=request.loomFilePath,
-                                gene_set_file_path=gene_set_file_path)
+                                gene_set_file_path=gene_set_file_path,
+                                annotation='')
 
         # Running AUCell...
         yield gse.update_state(step=-1, status_code=200, status_message="Running AUCell...", values=None)
@@ -810,15 +812,14 @@ class SCope(s_pb2_grpc.MainServicer):
                                'FlyBase', [line.strip() for idx, line in enumerate(f) if idx > 0])
         time.sleep(1)
 
-        # Creating the matrix as DataFrame...
-        yield gse.update_state(step=1, status_code=200, status_message="Creating the matrix as DataFrame...", values=None)
-        loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
-        dgem = np.transpose(loom[:, :])
-        ex_mtx = pd.DataFrame(data=dgem,
-                              index=loom.ca.CellID,
-                              columns=SCope.get_genes(loom))
-
         if not gse.has_AUCell_rankings():
+            # Creating the matrix as DataFrame...
+            yield gse.update_state(step=1, status_code=200, status_message="Creating the matrix...", values=None)
+            loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
+            dgem = np.transpose(loom[:, :])
+            ex_mtx = pd.DataFrame(data=dgem,
+                                  index=loom.ca.CellID,
+                                  columns=SCope.get_genes(loom))
             # Creating the rankings...
             start_time = time.time()
             yield gse.update_state(step=2.1, status_code=200, status_message="Creating the rankings...", values=None)
@@ -846,7 +847,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
 class GeneSetEnrichment:
 
-    def __init__(self, scope, method, loom_file_name, gene_set_file_path):
+    def __init__(self, scope, method, loom_file_name, gene_set_file_path, annotation):
         ''' Constructor
         :type dgem: ndarray
         :param dgem: digital gene expression matrix with cells as columns and genes as rows
@@ -856,7 +857,9 @@ class GeneSetEnrichment:
         self.scope = scope
         self.method = method
         self.loom_file_name = loom_file_name
+        self.loom_file_path = self.scope.get_loom_filepath(loom_file_name)
         self.gene_set_file_path = gene_set_file_path
+        self.annotation = annotation
         self.AUCell_rankings_dir = os.path.join("data", "my-aucell-rankings")
 
     class State:
@@ -884,19 +887,29 @@ class GeneSetEnrichment:
         if state.get_values() is None:
             return s_pb2.GeneSetEnrichmentReply(progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message()),
                                                 isDone=False,
-                                                cellValues=s_pb2.CellColorByFeaturesReply(color=[], vmax=[]))
+                                                cellValues=s_pb2.CellColorByFeaturesReply(color=[], vmax=[], maxVmax=[], cellIndices=[]))
         else:
             vmax = np.zeros(3)
+            max_vmax = np.zeros(3)
             aucs = state.get_values()
-            vmax[0] = self.scope.get_vmax(aucs)[0]
+            _vmax = self.scope.get_vmax(aucs)
+            vmax[0] = _vmax[0]
+            max_vmax[0] = _vmax[1]
             vals = aucs / vmax[0]
             vals = (((_UPPER_LIMIT_RGB - _LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))) + _LOWER_LIMIT_RGB
             hex_vec = ["null" if r == g == b == 0
                        else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
                        for r, g, b in zip(vals, np.zeros(len(aucs)), np.zeros(len(aucs)))]
+            if len(self.annotation) > 0:
+                cell_indices = self.get_anno_cells(loom_file_path=self.loom_file_path, annotations=annotation, logic=logic)
+            else:
+                cell_indices = list(range(self.scope.get_nb_cells(self.loom_file_path)))
             return s_pb2.GeneSetEnrichmentReply(progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message()),
                                                 isDone=True,
-                                                cellValues=s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax))
+                                                cellValues=s_pb2.CellColorByFeaturesReply(color=hex_vec
+                                                                                        , vmax=vmax
+                                                                                        , maxVmax=max_vmax
+                                                                                        , cellIndices=cell_indices))
 
     def get_method(self):
             return self.method
