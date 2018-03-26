@@ -139,8 +139,8 @@ class AppSidebar extends Component {
 					<Menu.Menu className="logos">
 						{/*<Image src='src/images/kuleuven.png' size="small" centered href="http://kuleuven.be" />
 						<br /><br />
-						<Image src='src/images/vib.png' size="small" centered href="http://vib.be" />*/}
-						<Image src='src/images/flycellatlas.png' size="small" centered href="http://flycellatlas.org/" />
+						<Image src='src/images/vib.png' size="small" centered href="http://vib.be" />
+						<Image src='src/images/flycellatlas.png' size="small" centered href="http://flycellatlas.org/" />*/}
 					</Menu.Menu>
 				<UploadModal title="Import a .loom file" type='Loom' uuid={match.params.uuid} opened={uploadModalOpened} onClose={this.toggleUploadModal.bind(this)} onUploaded={this.onLoomUploaded.bind(this)} />
 			</Sidebar>

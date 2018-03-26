@@ -18,7 +18,8 @@ export default class About extends Component {
                         Refer to the source code for the complete list.<br />
                         This website uses cookies.<br /><br /><br />
                         <a href='http://kuleuven.be'><Image src='src/images/vib.png' height="50" centered flex/></a><br /><br />
-                        <a href='http://vib.be'><Image src='src/images/kuleuven.png' height="50" centered flex /></a>
+                        <a href='http://vib.be'><Image src='src/images/kuleuven.png' height="50" centered flex /></a><br /><br />
+                        <a href='http://flycellatlas.org/'><Image src='src/images/flycellatlas.png' height="100" centered flex /></a>
                     </Grid.Column>
                 </Grid.Row>
             </Grid>

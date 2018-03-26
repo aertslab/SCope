@@ -57,10 +57,10 @@ class App extends Component {
 					<Segment textAlign='center' className="parentView">
 						<Segment vertical>
 							<Header as='h1'>SCope</Header>
-							for Fly Cell Atlas
+							{/*for Fly Cell Atlas
 							<br /><br />
 							<Image src='src/images/flycellatlas.png' size="small" centered />
-							<br /><br />
+							<br /><br />*/}
 						</Segment>
 						{errorDimmer}
 					</Segment>
