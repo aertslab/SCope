@@ -74,16 +74,16 @@ class App extends Component {
 							timeout={this.timeout} 
 						/>
 						<Sidebar.Pushable>
-							<AppSidebar visible={this.state.isSidebarVisible} onMetadataChange={metadata => {this.setState({metadata})}} />
+							<AppSidebar visible={this.state.isSidebarVisible} onMetadataChange={this.onMetadataChange.bind(this)} />
 							<Sidebar.Pusher>
-								<Route path="/:uuid/:loom?/welcome"  component={Welcome} />
-								<Route path="/:uuid/:loom?/dataset"  component={Dataset} />
-								<Route path="/:uuid/:loom?/gene"     component={Gene} />
-								<Route path="/:uuid/:loom?/geneset"  component={Geneset} />
-								<Route path="/:uuid/:loom?/regulon"  component={Regulon} />
-								<Route path="/:uuid/:loom?/compare"  component={Compare} />
+								<Route path="/:uuid/:loom?/welcome"  component={Welcome}  />
+								<Route path="/:uuid/:loom?/dataset"  component={Dataset}  />
+								<Route path="/:uuid/:loom?/gene"     component={Gene}     />
+								<Route path="/:uuid/:loom?/geneset"  component={Geneset}  />
+								<Route path="/:uuid/:loom?/regulon"  component={Regulon}  />
+								<Route path="/:uuid/:loom?/compare"  component={Compare}  />
 								<Route path="/:uuid/:loom?/tutorial" component={Tutorial} />
-								<Route path="/:uuid/:loom?/about"    component={About} />
+								<Route path="/:uuid/:loom?/about"    component={About}    />
 							</Sidebar.Pusher>
 						</Sidebar.Pushable>
 						<Dimmer active={loading} inverted>
@@ -103,6 +103,7 @@ class App extends Component {
 	}
 
 	componentWillMount() {
+		if (DEBUG) console.log('componentWillMount', this.props);
 		this.parseURLParams(this.props);
 		this.getUUIDFromIP(this.props);
 	}
@@ -201,6 +202,10 @@ class App extends Component {
 		}, () => {
 			this.setState({error: true});
 		})
+	}
+
+	onMetadataChange(metadata) {
+		this.setState({ metadata });
 	}
 
 	toggleSidebar() {

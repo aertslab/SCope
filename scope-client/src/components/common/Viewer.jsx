@@ -211,6 +211,9 @@ export default class Viewer extends Component {
 		this.addLassoLayer();
 		this.zoomBehaviour = d3.zoom().scaleExtent([-1, 10]).on("zoom", this.zoom.bind(this));
 		this.zoomSelection.call(this.zoomBehaviour);
+		var ticker = PIXI.ticker.shared; 
+		ticker.autoStart = false; 
+		ticker.stop();
 	}
 
 	destroyGraphics() {
@@ -596,11 +599,17 @@ export default class Viewer extends Component {
 		if (DEBUG) console.log(this.props.name, 'transformDataPoints', stillLoading);
 		this.transformPoints(this.container);
 		this.transformPoints(this.selectionsLayer);
+		requestAnimationFrame(() => {
+			this.renderer.render(this.stage);
+		});
 		if (!stillLoading) this.setState({loading: false});
 	}
 
 	transformLassoPoints() {
 		this.transformPoints(this.selectionsLayer);
+		requestAnimationFrame(() => {
+			this.renderer.render(this.stage);
+		});
 	}
 
 	transformPoints(container) {
@@ -615,9 +624,6 @@ export default class Viewer extends Component {
 			p.position.x = x * k;
 			p.position.y = y * k;
 		}
-		//requestAnimationFrame(() => {
-			this.renderer.render(this.stage);
-		//});
 		this.endBenchmark("transformPoints");
 	}
 
@@ -734,7 +740,13 @@ export default class Viewer extends Component {
 	endBenchmark(msg) {
 		var t2 = performance.now();
 		let benchmark = this.state.benchmark[msg];
-		let et = (t2 - benchmark.t1).toFixed(3)
-		if (DEBUG) console.log(this.props.name + ": benchmark - "+ benchmark.msg +": took " + et + " milliseconds.")
+		let et = (t2 - benchmark.t1) || 0;
+		if (DEBUG) console.log(this.props.name + ": benchmark - "+ benchmark.msg +": took " + et.toFixed(3) + " milliseconds.")
+		ReactGA.timing({
+			category: 'Backend',
+			variable: benchmark.msg,
+			value: et,
+			label: this.props.name
+		});
 	}
 }

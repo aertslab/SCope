@@ -18,8 +18,74 @@ class AppHeader extends Component {
 		const { match, location } = this.props;
 		const { timeout } = this.state;
 		let metadata = BackendAPI.getLoomMetadata(match.params.loom);
+		let menu = this.menuList(metadata);
 
-		let menu = [
+		return (
+			<Menu secondary attached="top" className="vib" inverted>
+				<Menu.Item>
+					<Icon name="sidebar" onClick={this.toggleSidebar.bind(this)} className="pointer" title="Toggle sidebar" />
+				</Menu.Item>
+
+				{menu.map((item, i) => item.display &&
+					<Menu.Item key={i}>
+						<Link to={'/' + [match.params.uuid, match.params.loom, item.path].join('/')}>
+							<Button basic active={match.params.page == item.path}>
+								{item.icon &&
+									<Icon name={item.icon} />
+								}
+								{item.title}
+							</Button>
+						</Link>
+					</Menu.Item>
+				)}
+
+				<Menu.Item className="sessionInfo">
+					Your session will be deleted in {moment.duration(timeout).humanize()} &nbsp;
+					<Icon name="info circle" inverted title="Our servers can only store that much data. Your files will be removed after the session times out." />
+				</Menu.Item>
+			</Menu>
+		);
+	}
+
+	componentWillMount() {
+		this.timer = setInterval(() => {
+			let timeout = this.state.timeout;
+			timeout -= timer;
+			this.setState({timeout});
+			if (timeout <= 0) {
+				clearInterval(this.timer);
+				this.timer = null;
+			}
+		}, timer);
+	}
+
+	componentWillReceiveProps(nextProps) {
+		console.log('componentWillReceiveProps', nextProps);
+		const { timeout, metadata, match, history } = nextProps;
+		this.setState({timeout: timeout});
+		let menu = this.menuList(metadata);
+		menu.map((item) => {
+			if ((item.path == match.params.page) && (!item.display))  {
+				if (metadata) {
+					history.replace('/'+ [match.params.uuid, encodeURIComponent(match.params.loom), 'dataset' ].join('/'));
+				} else {
+					history.replace('/'+ [match.params.uuid, encodeURIComponent(match.params.loom), 'welcome' ].join('/'));
+				}
+			}
+		});
+	}
+
+	componentWillUnmount() {
+		if (this.timer)	clearInterval(this.timer);
+	}
+	
+	toggleSidebar() {
+		this.props.toggleSidebar();
+		BackendAPI.setSidebarVisible(!BackendAPI.getSidebarVisible());
+	}
+
+	menuList(metadata) {
+		return [
 			{
 				display: true,
 				path: 'welcome',
@@ -69,57 +135,6 @@ class AppHeader extends Component {
 				icon: false
 			},
 		];
-
-		return (
-			<Menu secondary attached="top" className="vib" inverted>
-				<Menu.Item>
-					<Icon name="sidebar" onClick={this.toggleSidebar.bind(this)} className="pointer" title="Toggle sidebar" />
-				</Menu.Item>
-
-				{menu.map((item, i) => item.display &&
-					<Menu.Item key={i}>
-						<Link to={'/' + [match.params.uuid, match.params.loom, item.path].join('/')}>
-							<Button basic active={match.params.page == item.path}>
-								{item.icon &&
-									<Icon name={item.icon} />
-								}
-								{item.title}
-							</Button>
-						</Link>
-					</Menu.Item>
-				)}
-
-				<Menu.Item className="sessionInfo">
-					Your session will be deleted in {moment.duration(timeout).humanize()} &nbsp;
-					<Icon name="info circle" inverted title="Our servers can only store that much data. Your files will be removed after the session times out." />
-				</Menu.Item>
-			</Menu>
-		);
-	}
-
-	componentWillMount() {
-		this.timer = setInterval(() => {
-			let timeout = this.state.timeout;
-			timeout -= timer;
-			this.setState({timeout});
-			if (timeout <= 0) {
-				clearInterval(this.timer);
-				this.timer = null;
-			}
-		}, timer);
-	}
-
-	componentWillReceiveProps(nextProps) {
-		this.setState({timeout: nextProps.timeout});
-	}
-
-	componentWillUnmount() {
-		if (this.timer)	clearInterval(this.timer);
-	}
-	
-	toggleSidebar() {
-		this.props.toggleSidebar();
-		BackendAPI.setSidebarVisible(!BackendAPI.getSidebarVisible());
 	}
 
 }
