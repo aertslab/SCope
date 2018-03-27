@@ -41,7 +41,6 @@ export default class Gene extends Component {
             </div>
         );
 
-        console.log('sidebar', sidebar);
         return (
             <Grid>
                 <Grid.Row columns="4" centered>

@@ -138,6 +138,7 @@ export default class Viewer extends Component {
 					this.state.activeFeatures.map((f) => {
 						if (f.feature.length) featuresActive = true;
 					})
+					if (DEBUG) console.log(nextProps.name, 'features active', featuresActive);
 					if (featuresActive) {
 						this.getFeatureColors(this.state.activeFeatures, nextProps.loomFile, this.props.thresholds, this.state.activeAnnotations, this.state.customScale, nextProps.superposition);
 					} else {
@@ -592,6 +593,7 @@ export default class Viewer extends Component {
 	}
 
 	transformDataPoints(stillLoading) {
+		if (DEBUG) console.log(this.props.name, 'transformDataPoints', stillLoading);
 		this.transformPoints(this.container);
 		this.transformPoints(this.selectionsLayer);
 		if (!stillLoading) this.setState({loading: false});
