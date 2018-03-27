@@ -76,28 +76,28 @@ export default class Regulon extends Component {
                         />
                     </Grid.Column>
                     <Grid.Column stretched>
-                    <Segment vertical className="flexDisplay">
-                        <b className="noStretch">Cells passing thresholds</b>
-                        <Viewer 
-                            name="auc" 
-                            loomFile={activeLoom} 
-                            activeFeatures={activeFeatures}                             
-                            activeCoordinates={activeCoordinates} 
-                            thresholds={true} 
-                        />
+                        <Segment vertical stretched className="flexDisplay">
+                            <b className="noStretch">Cells passing thresholds</b>
+                            <Viewer 
+                                name="auc" 
+                                loomFile={activeLoom} 
+                                activeFeatures={activeFeatures}                             
+                                activeCoordinates={activeCoordinates} 
+                                thresholds={true} 
+                            />
                         </Segment>
-                        <Segment vertical className="flexDisplay">
-                        <b className="noStretch">Expression levels</b>
-                        <Viewer 
-                            name="expr" 
-                            loomFile={activeLoom} 
-                            activeFeatures={activeFeatures} 
-                            activeCoordinates={activeCoordinates} 
-                            scale={true} 
-                            genes={true}
-                            settings={true} 
-                            customScale={true} 
-                        />
+                        <Segment vertical stretched className="flexDisplay">
+                            <b className="noStretch">Expression levels</b>
+                            <Viewer 
+                                name="expr" 
+                                loomFile={activeLoom} 
+                                activeFeatures={activeFeatures} 
+                                activeCoordinates={activeCoordinates} 
+                                scale={true} 
+                                genes={true}
+                                settings={true} 
+                                customScale={true} 
+                            />
                         </Segment>
                     </Grid.Column>
                     <Grid.Column width={3}>

@@ -61,18 +61,20 @@ class AppHeader extends Component {
 
 	componentWillReceiveProps(nextProps) {
 		console.log('componentWillReceiveProps', nextProps);
-		const { timeout, metadata, match, history } = nextProps;
+		const { timeout, metadata, match, history, loaded } = nextProps;
 		this.setState({timeout: timeout});
-		let menu = this.menuList(metadata);
-		menu.map((item) => {
-			if ((item.path == match.params.page) && (!item.display))  {
-				if (metadata) {
-					history.replace('/'+ [match.params.uuid, encodeURIComponent(match.params.loom), 'dataset' ].join('/'));
-				} else {
-					history.replace('/'+ [match.params.uuid, encodeURIComponent(match.params.loom), 'welcome' ].join('/'));
+		if (loaded) {
+			let menu = this.menuList(metadata);
+			menu.map((item) => {
+				if ((item.path == match.params.page) && (!item.display))  {
+					if (metadata) {
+						history.replace('/'+ [match.params.uuid, encodeURIComponent(match.params.loom), 'dataset' ].join('/'));
+					} else {
+						history.replace('/'+ [match.params.uuid, encodeURIComponent(match.params.loom), 'welcome' ].join('/'));
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	componentWillUnmount() {

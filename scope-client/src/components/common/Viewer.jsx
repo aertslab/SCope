@@ -7,6 +7,7 @@ import ReactResizeDetector from 'react-resize-detector';
 import ReactGA from 'react-ga';
 
 const DEFAULT_POINT_COLOR = 'A6A6A6';
+const VIEWER_MARGIN = 5;
 
 export default class Viewer extends Component {
 
@@ -95,11 +96,11 @@ export default class Viewer extends Component {
 	}
 
 	componentDidMount() {
-		if (DEBUG) console.log(this.props.name, 'componentDidMount', this.props);
 		this.zoomSelection = d3.select('#viewer'+this.props.name);
 		let bbox = this.zoomSelection.select(function() {return this.parentNode}).node().getBoundingClientRect();
-		this.w = bbox.width - 5;
-		this.h = bbox.height - 5;
+		if (DEBUG) console.log(this.props.name, 'componentDidMount', this.props, bbox);
+		this.w = bbox.width - VIEWER_MARGIN;
+		this.h = bbox.height - VIEWER_MARGIN;
 		this.initGraphics();
 		if (this.props.loomFile != null) {
 			this.getPoints(this.props.loomFile, this.props.activeCoordinates, this.props.activeAnnotations, this.props.superposition, () => {
@@ -122,10 +123,10 @@ export default class Viewer extends Component {
 
 		// TODO: dirty hacks
 		let bbox = this.zoomSelection.select(function() {return this.parentNode}).node().getBoundingClientRect();
-		if ((parseInt(this.w) != parseInt(bbox.width - 10)) || (parseInt(this.h) != parseInt(bbox.height - 10))) {
+		if ((parseInt(this.w) != parseInt(bbox.width - VIEWER_MARGIN)) || (parseInt(this.h) != parseInt(bbox.height - VIEWER_MARGIN))) {
 			if (DEBUG) console.log(nextProps.name, 'changing size', bbox);
-			this.w = bbox.width - 10;
-			this.h = bbox.height - 10;
+			this.w = bbox.width - VIEWER_MARGIN;
+			this.h = bbox.height - VIEWER_MARGIN;
 			//this.resizeContainer();
 		}
 
@@ -616,7 +617,7 @@ export default class Viewer extends Component {
 		this.startBenchmark("transformPoints");
 		let k = this.zoomTransform.k;
 		let cx = this.renderer.width / 2;
-		let cy = this.renderer.height / 2; // - 100
+		let cy = this.renderer.height / 2;
 		for (let i = 0, n = container.children.length; i < n; ++i) {
 			let p = container.children[i];
 			let x = p._originalData.x * this.scalingFactor + cx;

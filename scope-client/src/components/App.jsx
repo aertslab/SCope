@@ -31,6 +31,7 @@ class App extends Component {
 		this.state = {
 			metadata: null,
 			loading: true,
+			loaded: false,
 			error: false,
 			isSidebarVisible: true,
 		}
@@ -39,7 +40,7 @@ class App extends Component {
 	}
 
 	render() {
-		const { loading, metadata, error } = this.state;
+		const { loading, metadata, error, loaded } = this.state;
 
 		let errorDimmer = (
 			<Dimmer active={error} >
@@ -71,6 +72,7 @@ class App extends Component {
 						<AppHeader 
 							toggleSidebar={this.toggleSidebar.bind(this)} 
 							metadata={metadata}
+							loaded={loaded}
 							timeout={this.timeout} 
 						/>
 						<Sidebar.Pushable>
@@ -103,7 +105,7 @@ class App extends Component {
 	}
 
 	componentWillMount() {
-		if (DEBUG) console.log('componentWillMount', this.props);
+		if (DEBUG) console.log('App componentWillMount', this.props);
 		this.parseURLParams(this.props);
 		this.getUUIDFromIP(this.props);
 	}
@@ -197,7 +199,7 @@ class App extends Component {
 					}, timer);
 				}
 				ReactGA.set({ userId: uuid });
-				history.push('/' + [uuid, encodeURIComponent(match.params.loom ? match.params.loom : '*'), encodeURIComponent(match.params.page ? match.params.page : 'welcome') ].join('/'));
+				history.replace('/' + [uuid, encodeURIComponent(match.params.loom ? match.params.loom : '*'), encodeURIComponent(match.params.page ? match.params.page : 'welcome') ].join('/'));
 			});
 		}, () => {
 			this.setState({error: true});
@@ -205,7 +207,7 @@ class App extends Component {
 	}
 
 	onMetadataChange(metadata) {
-		this.setState({ metadata });
+		this.setState({ metadata: metadata, loaded: true });
 	}
 
 	toggleSidebar() {

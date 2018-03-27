@@ -135,6 +135,7 @@ h2.ui.header {
 .vertical.segment.flexDisplay {
 	padding: 0px !important;
 	border: none !important;
+	flex: 1 0 0;
 }
 
 .ui.grid .row {
