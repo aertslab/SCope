@@ -149,7 +149,11 @@ class SCope(s_pb2_grpc.MainServicer):
             return self.load_loom_file(partial_md5_hash, loom_file_path)
 
     def decompress_meta(self, meta):
-        return json.loads(zlib.decompress(base64.b64decode(meta.encode('ascii'))).decode('ascii'))
+        try:
+            meta = meta.decode('ascii')
+            return json.loads(zlib.decompress(base64.b64decode(meta)))
+        except AttributeError:
+            return json.loads(zlib.decompress(base64.b64decode(meta.encode('ascii'))).decode('ascii'))
 
     @lru_cache(maxsize=32)
     def infer_species(self, loom_file_path):
