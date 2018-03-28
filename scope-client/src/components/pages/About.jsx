@@ -15,6 +15,7 @@ export default class About extends Component {
                         SCope is licensed under <a href='https://www.gnu.org/licenses/gpl-3.0.en.html'>GPL-3.0</a><br />
                         The source code is available under <a href='https://github.com/aertslab/SCope'>https://github.com/aertslab/SCope</a><br />
                         This software makes use of open source packages (i.e. <a href='https://www.npmjs.com/package/caniuse-db'>caniuse-db</a>) and standards (i.e. <a href='https://www.npmjs.com/package/spdx-expression-parse' >SPDX</a>).<br />
+                        Datasets present in this tool were made using <a href='https://aertslab.org/#scenic'>SCENIC workflow</a>.<br />
                         Refer to the source code for the complete list.<br />
                         This website uses cookies.<br /><br /><br />
                         <a href='http://kuleuven.be'><Image src='src/images/vib.png' height="50" centered flex/></a><br /><br />
