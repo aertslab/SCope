@@ -43,10 +43,16 @@ class Compare extends Component {
 			let multiLoom = this.state.multiLoom;
 			let multiCoordinates = this.state.multiCoordinates;
 			let multiMetadata = this.state.multiMetadata;
+			let crossAnnotations = {
+				horizontal: [],
+				vertical: [],
+				both: [],
+				one: []
+			};
 			multiLoom[0] = loom;
 			multiCoordinates[0] = coordinates;
 			multiMetadata[0] = metadata;
-			this.setState({multiLoom: multiLoom, multiCoordinates: multiCoordinates, multiMetadata: multiMetadata});
+			this.setState({ multiLoom, multiCoordinates, multiMetadata, crossAnnotations});
 			this.rebuildLoomOptions();
 		};
 		this.activeFeaturesListener = (features) => {
@@ -704,6 +710,7 @@ class Compare extends Component {
 
 	rebuildLoomOptions() {
 		let loomFiles = BackendAPI.getLoomFiles();
+		this.loomConf = [];
 		Object.keys(loomFiles).map(l => {
 			this.loomConf.push({text: loomFiles[l].loomDisplayName, value: l});
 		});
