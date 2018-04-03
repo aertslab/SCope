@@ -3,10 +3,6 @@
 SCope is a fast visualization tool for large-scale and high dimensional scRNA-seq datasets.
 Currently the format of the datasets supported by SCope is .loom. 
 
-Architecture of SCope can be visualized below:
-
-![GitHub Logo](/images/SCope_architecture.png)
-
 ## Development
 
 ### SCope Server
@@ -31,13 +27,11 @@ scope-server
 
 - Install
 ```
-cd scope-client
 npm install
 ```
 
 - Run (development version)
 ```
-cd scope-client
 npm run dev
 ```
 
@@ -91,4 +85,10 @@ Run the binary:
 ./release/scope-linux-x64/scope
 ```
 
-All the uploaded data from SCope will be put ~/.scope/data,
+All the uploaded data from SCope will be put ~/.scope/data
+
+# Architecture
+
+SCope architecture can be visualized below:
+
+![GitHub Logo](/images/SCope_architecture.png)
