@@ -7,6 +7,19 @@ Currently the format of the datasets supported by SCope is .loom.
 
 ### Install
 
+Install miniconda:
+```
+wget http://bit.ly/miniconda3
+bash miniconda3
+```
+
+Create miniconda (python) virtual environment:
+```
+conda create -n scope python=3.6.2
+conda activate scope
+```
+
+Install SCope:
 ```
 npm install
 ```
@@ -28,17 +41,7 @@ npm run dev
 
 ### 1) Packaging SCope Data Server
 
-Install conda:
-```
-wget http://bit.ly/miniconda3
-bash miniconda
-```
-
-Create miniconda (python) virtual environment:
-```
-conda create -n scope python=3.6.2
-conda activate scope
-```
+Miniconda should be installed and a `scope` python virtual should be loaded (see `Development Mode` section).
 
 Install the SCope Server as Python package:
 ```
@@ -48,6 +51,7 @@ python setup.py develop
 
 Package the SCope Data Server:
 ```
+cd scopeserver/dataserver
 pip install pyinstaller
 pyinstaller --onedir --hidden-import=scipy._lib.messagestream --hidden-import=pandas._libs.tslibs.timedeltas  --hidden-import=cytoolz.utils --hidden-import=cytoolz._signatures __init__.py
 ```
