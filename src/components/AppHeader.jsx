@@ -18,53 +18,8 @@ class AppHeader extends Component {
 		const { match, location } = this.props;
 		const { timeout } = this.state;
 		let metadata = BackendAPI.getLoomMetadata(match.params.loom);
+		let menu = this.menuList(metadata);
 
-		let menu = [
-			{
-				display: true,
-				path: 'welcome',
-				title: 'SCope',
-				icon: 'home'
-			},
-			{
-				display: metadata ? true : false,
-				path: 'dataset',
-				title: 'Dataset info',
-				icon: false
-			},
-			{
-				display: metadata ? true : false,
-				path: 'gene',
-				title: 'Gene',
-				icon: false
-			},
-/*			{
-				display: metadata ? true : false,
-				path: 'geneset',
-				title: 'Gene set',
-				icon: false
-			},
-*/			{
-				display: metadata && metadata.fileMetaData.hasRegulonsAUC ? true : false,
-				path: 'regulon',
-				title: 'Regulon',
-				icon: false
-			},
-			{
-				display: metadata && metadata.cellMetaData  && metadata.cellMetaData.annotations.length ? true : false,
-				path: 'compare',
-				title: 'Compare',
-				icon: false
-			},
-			{
-				display: true,
-				path: 'tutorial',
-				title: 'Tutorial',
-				icon: false
-			},
-		];
-
-		console.log('AppHeader render')
 		return (
 			<Menu secondary attached="top" className="vib" inverted>
 				<Menu.Item>
@@ -84,7 +39,7 @@ class AppHeader extends Component {
 					</Menu.Item>
 				)}
 
-				<Menu.Item style={{position: 'absolute', right: '0px'}}>
+				<Menu.Item className="sessionInfo">
 					Your session will be deleted in {moment.duration(timeout).humanize()} &nbsp;
 					<Icon name="info circle" inverted title="Our servers can only store that much data. Your files will be removed after the session times out." />
 				</Menu.Item>
@@ -105,7 +60,21 @@ class AppHeader extends Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		this.setState({timeout: nextProps.timeout});
+		console.log('componentWillReceiveProps', nextProps);
+		const { timeout, metadata, match, history, loaded } = nextProps;
+		this.setState({timeout: timeout});
+		if (loaded) {
+			let menu = this.menuList(metadata);
+			menu.map((item) => {
+				if ((item.path == match.params.page) && (!item.display))  {
+					if (metadata) {
+						history.replace('/'+ [match.params.uuid, encodeURIComponent(match.params.loom), 'dataset' ].join('/'));
+					} else {
+						history.replace('/'+ [match.params.uuid, encodeURIComponent(match.params.loom), 'welcome' ].join('/'));
+					}
+				}
+			});
+		}
 	}
 
 	componentWillUnmount() {
@@ -115,6 +84,59 @@ class AppHeader extends Component {
 	toggleSidebar() {
 		this.props.toggleSidebar();
 		BackendAPI.setSidebarVisible(!BackendAPI.getSidebarVisible());
+	}
+
+	menuList(metadata) {
+		return [
+			{
+				display: true,
+				path: 'welcome',
+				title: 'SCope',
+				icon: 'home'
+			},
+			{
+				display: metadata ? true : false,
+				path: 'dataset',
+				title: 'Dataset info',
+				icon: false
+			},
+			{
+				display: metadata ? true : false,
+				path: 'gene',
+				title: 'Gene',
+				icon: false
+			},
+			{
+				display: metadata ? true : false,
+				path: 'geneset',
+				title: 'Geneset',
+				icon: false
+			},
+			{
+				display: metadata && metadata.fileMetaData.hasRegulonsAUC ? true : false,
+				path: 'regulon',
+				title: 'Regulon',
+				icon: false
+			},
+			{
+				display: metadata && metadata.cellMetaData  && metadata.cellMetaData.annotations.length ? true : false,
+				path: 'compare',
+				title: 'Compare',
+				icon: false
+			},
+			{
+				display: true,
+				path: 'tutorial',
+				title: 'Tutorial',
+				icon: false
+			},
+			{
+				display: true,
+				path: 'about',
+				title: 'About',
+				icon: false
+			},
+		];
 	}
 
 }

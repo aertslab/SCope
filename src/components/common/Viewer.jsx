@@ -4,6 +4,10 @@ import * as d3 from 'd3';
 import { BackendAPI } from './API'
 import { Dimmer, Loader } from 'semantic-ui-react'
 import ReactResizeDetector from 'react-resize-detector';
+import ReactGA from 'react-ga';
+
+const DEFAULT_POINT_COLOR = 'A6A6A6';
+const VIEWER_MARGIN = 5;
 
 export default class Viewer extends Component {
 
@@ -15,7 +19,7 @@ export default class Viewer extends Component {
 				x: [],
 				y: []
 			},
-			colors: [],
+			colors: props.colors || [],
 			lassoPoints: [],
 			lassoSelections: BackendAPI.getViewerSelections(),
 			mouse: {
@@ -36,12 +40,18 @@ export default class Viewer extends Component {
 		this.h = parseInt(this.props.height);
 		// Increase the maxSize if displaying more than 1500 (default) objects
 		this.maxn = 200000;
-		this.texture = PIXI.Texture.fromImage("src/images/particle@2x.png");
+		this.texture = PIXI.Texture.fromImage("src/images/dot.png");
 		this.settingsListener = (settings, customScale) => {
 			if (this.props.settings) {
 				this.setState({loading: true});
-				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, customScale, this.props.superposition);
+				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, customScale, this.props.superposition);				
 			}
+		}
+		this.spriteSettingsListener = () => {
+			this.setState({loading: true});
+			if (this.state.colors) this.updateDataPoints(this.state.colors);
+			else this.resetDataPoints();
+			this.repaintLassoSelections(this.state.lassoSelections);
 		}
 		this.viewerToolListener = (tool) => {
 			this.setState({activeTool: tool});
@@ -64,8 +74,8 @@ export default class Viewer extends Component {
 
 	render() {
 		return (
-			<div>
-				<canvas id={"viewer"+this.props.name} style={{width: '99.9%', height: (this.props.height-2)+'px'}} >
+			<div className="stretched">
+				<canvas id={"viewer"+this.props.name}  >
 				</canvas>
 				<ReactResizeDetector handleWidth skipOnMount onResize={this.onResize.bind(this)} />
 				<Dimmer active={this.state.loading} inverted>
@@ -77,6 +87,7 @@ export default class Viewer extends Component {
 
 	componentWillMount() {
 		BackendAPI.onSettingsChange(this.settingsListener);
+		BackendAPI.onSpriteSettingsChange(this.spriteSettingsListener);
 		BackendAPI.onViewerToolChange(this.viewerToolListener);
 		BackendAPI.onViewerSelectionsChange(this.viewerSelectionListener);
 		BackendAPI.onViewerTransformChange(this.viewerTransformListener);
@@ -85,13 +96,16 @@ export default class Viewer extends Component {
 	}
 
 	componentDidMount() {
-		if (DEBUG) console.log(this.props.name, 'componentDidMount', this.props);
 		this.zoomSelection = d3.select('#viewer'+this.props.name);
-		this.w = this.zoomSelection.node().getBoundingClientRect().width;
+		let bbox = this.zoomSelection.select(function() {return this.parentNode}).node().getBoundingClientRect();
+		if (DEBUG) console.log(this.props.name, 'componentDidMount', this.props, bbox);
+		this.w = bbox.width - VIEWER_MARGIN;
+		this.h = bbox.height - VIEWER_MARGIN;
 		this.initGraphics();
 		if (this.props.loomFile != null) {
 			this.getPoints(this.props.loomFile, this.props.activeCoordinates, this.props.activeAnnotations, this.props.superposition, () => {
-				this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.props.activeAnnotations, this.state.customScale, this.props.superposition);
+				if (this.props.colors)	this.updateDataPoints(this.props.colors);
+				else this.getFeatureColors(this.state.activeFeatures, this.props.loomFile, this.props.thresholds, this.props.activeAnnotations, this.state.customScale, this.props.superposition);
 				this.onViewerSelectionChange(this.state.lassoSelections);
 				let t = BackendAPI.getViewerTransform();
 				if (t) {
@@ -108,10 +122,12 @@ export default class Viewer extends Component {
 		if (DEBUG) console.log(this.props.name, 'componentWillReceiveProps', nextProps);
 
 		// TODO: dirty hacks
-		if (parseInt(this.h) != parseInt(nextProps.height)) {
-			if (DEBUG) console.log(nextProps.name, 'changing size', this.h, nextProps.height);
-			this.h = nextProps.height;
-			this.resizeContainer();
+		let bbox = this.zoomSelection.select(function() {return this.parentNode}).node().getBoundingClientRect();
+		if ((parseInt(this.w) != parseInt(bbox.width - VIEWER_MARGIN)) || (parseInt(this.h) != parseInt(bbox.height - VIEWER_MARGIN))) {
+			if (DEBUG) console.log(nextProps.name, 'changing size', bbox);
+			this.w = bbox.width - VIEWER_MARGIN;
+			this.h = bbox.height - VIEWER_MARGIN;
+			//this.resizeContainer();
 		}
 
 		if (this.props.loomFile != nextProps.loomFile || this.props.activeCoordinates != nextProps.activeCoordinates || this.props.superposition != nextProps.superposition ||
@@ -119,8 +135,23 @@ export default class Viewer extends Component {
 				this.setState({loading: true});
 				if (DEBUG) console.log(nextProps.name, 'changing points');
 				this.getPoints(nextProps.loomFile, nextProps.activeCoordinates, nextProps.activeAnnotations, nextProps.superposition, () => {
-					this.getFeatureColors(this.state.activeFeatures, nextProps.loomFile, this.props.thresholds, this.state.activeAnnotations, this.state.customScale, nextProps.superposition);
+					let featuresActive = false;
+					this.state.activeFeatures.map((f) => {
+						if (f.feature.length) featuresActive = true;
+					})
+					if (DEBUG) console.log(nextProps.name, 'features active', featuresActive);
+					if (featuresActive) {
+						this.getFeatureColors(this.state.activeFeatures, nextProps.loomFile, this.props.thresholds, this.state.activeAnnotations, this.state.customScale, nextProps.superposition);
+					} else {
+						this.setState({loading: false});
+					}
 				});
+		}
+
+		if (nextProps.customColors && (JSON.stringify(nextProps.colors) != JSON.stringify(this.state.colors))) {
+			if (DEBUG) console.log(nextProps.name, 'changing colors');
+			this.setState({colors: nextProps.colors});
+			this.updateDataPoints(nextProps.colors);
 		}
 	}
 
@@ -139,6 +170,7 @@ export default class Viewer extends Component {
 		BackendAPI.removeViewerTransformChange(this.viewerTransformListener);
 		BackendAPI.removeCustomScaleChange(this.customScaleListener);
 		BackendAPI.removeActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
+		BackendAPI.removeSpriteSettingsChange(this.spriteSettingsListener);
 		this.destroyGraphics();
 	}
 /*
@@ -170,7 +202,7 @@ export default class Viewer extends Component {
 		if (DEBUG) console.log("Initializing Viewer ", this.props.name);
 		this.renderer = PIXI.autoDetectRenderer(this.w, this.h, { backgroundColor: 0xFFFFFF, antialias: true, view: this.zoomSelection.node() });
 		this.stage = new PIXI.Container();
-		this.stage.blendMode = PIXI.BLEND_MODES.ADD;
+//		this.stage.blendMode = PIXI.BLEND_MODES.ADD;
 		this.stage.width = this.w;
 		this.stage.height = this.h;
 		this.renderer.render(this.stage);
@@ -180,6 +212,9 @@ export default class Viewer extends Component {
 		this.addLassoLayer();
 		this.zoomBehaviour = d3.zoom().scaleExtent([-1, 10]).on("zoom", this.zoom.bind(this));
 		this.zoomSelection.call(this.zoomBehaviour);
+		var ticker = PIXI.ticker.shared; 
+		ticker.autoStart = false; 
+		ticker.stop();
 	}
 
 	destroyGraphics() {
@@ -196,9 +231,12 @@ export default class Viewer extends Component {
 
 	makePointSprite(c) {
 		let s = new PIXI.Sprite(this.texture);
-		s.scale.x = 2.5;
-		s.scale.y = 2.5;
+		let settings = BackendAPI.getSpriteSettings();
+		s.scale.x = settings.scale / 50;
+		s.scale.y = settings.scale / 50;
+		s.alpha = settings.alpha;
 		s.anchor = { x: .5, y: .5 };
+		if (c == 'null') c = DEFAULT_POINT_COLOR;
 		s.tint = "0x"+ c;
 		// Decompressing the color not working as without compression
 		// tint request a full 6 hexadecimal digits format
@@ -240,7 +278,7 @@ export default class Viewer extends Component {
 		this.lassoLayer.width = this.w;
 		this.lassoLayer.height = this.h;
 		this.selectionsLayer = new PIXI.Container();
-		this.selectionsLayer.blendMode = PIXI.BLEND_MODES.ADD;
+//		this.selectionsLayer.blendMode = PIXI.BLEND_MODES.ADD;
 		this.selectionsLayer.width = this.w;
 		this.selectionsLayer.height = this.h;
 		this.lassoLayer.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
@@ -343,6 +381,12 @@ export default class Viewer extends Component {
 			translations: {},
 		}
 		BackendAPI.addViewerSelection(lassoSelection);
+		ReactGA.event({
+			category: 'viewer',
+			action: 'selection added',
+			label: lassoPoints.length,
+			value: this.state.lassoSelections.length
+		});
 	}
 
 	repaintLassoSelections(selections) {
@@ -407,7 +451,17 @@ export default class Viewer extends Component {
 
 
 			this.setState({loading: true});
-			this.getFeatureColors(features, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, customScale, this.props.superposition);
+			
+			let featuresActive = false;
+			features.map((f) => {
+				if (f.feature.length) featuresActive = true;
+			})
+			if (featuresActive)
+				this.getFeatureColors(features, this.props.loomFile, this.props.thresholds, this.state.activeAnnotations, customScale, this.props.superposition);
+			else {
+				this.setState({activeFeatures: JSON.parse(JSON.stringify(features)), colors: []});
+				this.resetDataPoints();
+			}
 		}
 	}
 
@@ -445,6 +499,8 @@ export default class Viewer extends Component {
 									ns.selected = true;
 									this.repaintLassoSelections(currentSelections);
 								})
+							}, () => {
+								BackendAPI.showError();	
 							})
 						} else {
 							s.translations[this.props.name] = ns.points.slice(0);
@@ -510,19 +566,22 @@ export default class Viewer extends Component {
 					this.setState({ coord:  {x: [], y: []}});
 				}
 				this.endBenchmark("getCoordinates");
-				this.initializeDataPoints();
+				this.initializeDataPoints(callback ? true : false);
 				callback();
 			});
+		}, () => {
+			BackendAPI.showError();	
 		});
 	}
 
 	setScalingFactor() {
+		if (!this.renderer) return;
 		let min = this.renderer.width / (d3.max(this.state.coord.x) - d3.min(this.state.coord.x));
 		let max = this.renderer.height / (d3.max(this.state.coord.y) - d3.min(this.state.coord.y));
 		this.scalingFactor = Math.floor(d3.min([min, max])) - 1;
 	}
 
-	initializeDataPoints() {
+	initializeDataPoints(stillLoading) {
 		this.startBenchmark("initializeDataPoints");
 		let c = this.state.coord;
 		if (c.x.length !== c.y.length)
@@ -534,24 +593,31 @@ export default class Viewer extends Component {
 			this.container.addChild(point);
 		}
 		this.endBenchmark("initializeDataPoints");
-		this.transformDataPoints();
+		this.transformDataPoints(stillLoading);
 	}
 
-	transformDataPoints() {
+	transformDataPoints(stillLoading) {
+		if (DEBUG) console.log(this.props.name, 'transformDataPoints', stillLoading);
 		this.transformPoints(this.container);
 		this.transformPoints(this.selectionsLayer);
-		this.setState({loading: false});
+		requestAnimationFrame(() => {
+			this.renderer.render(this.stage);
+		});
+		if (!stillLoading) this.setState({loading: false});
 	}
 
 	transformLassoPoints() {
 		this.transformPoints(this.selectionsLayer);
+		requestAnimationFrame(() => {
+			this.renderer.render(this.stage);
+		});
 	}
 
 	transformPoints(container) {
 		this.startBenchmark("transformPoints");
 		let k = this.zoomTransform.k;
 		let cx = this.renderer.width / 2;
-		let cy = this.renderer.height / 2; // - 100
+		let cy = this.renderer.height / 2;
 		for (let i = 0, n = container.children.length; i < n; ++i) {
 			let p = container.children[i];
 			let x = p._originalData.x * this.scalingFactor + cx;
@@ -559,9 +625,6 @@ export default class Viewer extends Component {
 			p.position.x = x * k;
 			p.position.y = y * k;
 		}
-		//requestAnimationFrame(() => {
-			this.renderer.render(this.stage);
-		//});
 		this.endBenchmark("transformPoints");
 	}
 
@@ -616,6 +679,8 @@ export default class Viewer extends Component {
 					this.resetDataPoints();
 				}
 			});
+		}, () => {
+			BackendAPI.showError();	
 		});
 	}
 	
@@ -628,18 +693,17 @@ export default class Viewer extends Component {
 		} : null;
 	}
 	
-	updateDataPoints() {
+	updateDataPoints(colors) {
 		this.startBenchmark("updateDataPoints")
 		let n = this.container.children.length;
 		this.container.removeChildren(0, n).map((p) => {
 			p.destroy();
 		})
-		let v = this.state.colors;
-		let pts = _.zip(this.state.coord.idx, this.state.coord.x, this.state.coord.y, this.state.colors);
+		let pts = _.zip(this.state.coord.idx, this.state.coord.x, this.state.coord.y, colors ? colors : this.state.colors);
 		pts.sort((a, b) =>{
 			let ca = this.hexToRgb(a[3]);
 			let cb = this.hexToRgb(b[3]);
-			let r = (ca.r + ca.g + ca.b) - (cb.r + cb.g + cb.b);
+			let r = (ca ? (ca.r + ca.g + ca.b) : 0) - (cb ? (cb.r + cb.g + cb.b) : 0);
 			return r;
 		})
 		pts.map((p, i) => {
@@ -677,7 +741,13 @@ export default class Viewer extends Component {
 	endBenchmark(msg) {
 		var t2 = performance.now();
 		let benchmark = this.state.benchmark[msg];
-		let et = (t2 - benchmark.t1).toFixed(3)
-		if (DEBUG) console.log(this.props.name + ": benchmark - "+ benchmark.msg +": took " + et + " milliseconds.")
+		let et = (t2 - benchmark.t1) || 0;
+		if (DEBUG) console.log(this.props.name + ": benchmark - "+ benchmark.msg +": took " + et.toFixed(3) + " milliseconds.")
+		ReactGA.timing({
+			category: 'Backend',
+			variable: benchmark.msg,
+			value: et,
+			label: this.props.name
+		});
 	}
 }

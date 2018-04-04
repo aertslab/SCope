@@ -1,12 +1,13 @@
 import React, { Component } from 'react'
-import { Label, Menu, Icon, Popup, Image } from 'semantic-ui-react'
+import { Label, Segment, Icon, Popup, Image } from 'semantic-ui-react'
 import FeatureSearchInput from './FeatureSearchInput';
 import { BackendAPI } from './API'
+import ReactGA from 'react-ga';
 
 export default class FeatureSearch extends React.Component {
 
 	constructor(props) {
-		super(props)
+		super(props);
 		this.state = {
 			isLoading: false,
 			results: [],
@@ -14,57 +15,42 @@ export default class FeatureSearch extends React.Component {
 			selection: null,
 			type: props.type
 		};
+		this.call = null;
 	}
 
 	render() {
 
-		const { isLoading, value, results, type } = this.state
-		const { locked, field, color, options } = this.props
-		let querySearchLabel = {
-			position: 'relative',
-			top: 1,
-			left: 15,
-			height: 38
-		}
-
-		let noPadding = {
-			padding: 0
-		}
+		const { isLoading, value, results, type } = this.state;
+		const { locked, color, options } = this.props;
 
 		return (
-			<Menu.Item key={field} style={noPadding}>
-				<Menu secondary style={noPadding}>
-					<Menu.Item style={{padding: 0, display: 'block'}}>
-						<Label color={color} style={querySearchLabel}></Label>
-					</Menu.Item>
-					<Menu.Item style={noPadding}>
-						<FeatureSearchInput
-							category
-							loading={isLoading}
-							onResultSelect={this.handleResultSelect.bind(this)}
-							onSearchChange={this.handleSearchChange.bind(this)}
-							handleTypeChange={this.handleTypeChange.bind(this)}
-							onSelectionChange={this.handleSelectionChange.bind(this)}
-							onBlur={this.handleBlur.bind(this)}
-							onMouseDown={this.handleMouseDown.bind(this)}
-							results={results}
-							options={options}
-							selectFirstResult={true}
-							value={value}
-							type={type}
-							locked={locked}
-						/>
-					</Menu.Item>
-				</Menu>
-			</Menu.Item>
+			<Segment color={color} inverted className="noPadding">
+				<FeatureSearchInput
+					category
+					loading={isLoading}
+					onResultSelect={this.handleResultSelect.bind(this)}
+					onSearchChange={this.handleSearchChange.bind(this)}
+					handleTypeChange={this.handleTypeChange.bind(this)}
+					onSelectionChange={this.handleSelectionChange.bind(this)}
+					onBlur={this.handleBlur.bind(this)}
+					onMouseDown={this.handleMouseDown.bind(this)}
+					stopRequest={() => {
+						if (this.call != null) this.call.end();
+					}}
+					results={results}
+					options={options}
+					selectFirstResult={true}
+					value={value}
+					type={type}
+					locked={locked}
+				/>
+			</Segment>
 		);
 	}
 
 	resetComponent() {
 		this.setState({ isLoading: false, results: [], value: '', selection: null })
-		setTimeout(() => {
-			BackendAPI.setActiveFeature(this.props.field, this.state.type, '', '', 0, null);
-		}, 50);
+		BackendAPI.setActiveFeature(this.props.field, this.state.type, '', '', 0, null);
 	}
 
 	updateFeature(feature, featureType, featureDescription) {
@@ -75,9 +61,9 @@ export default class FeatureSearch extends React.Component {
 				regulon: feature
 			}
 			BackendAPI.getConnection().then((gbc) => {
-				console.log('getRegulonMetaData', regulonQuery);
+				if (DEBUG) console.log('getRegulonMetaData', regulonQuery);
 				gbc.services.scope.Main.getRegulonMetaData(regulonQuery, (regulonErr, regulonResponse) => {
-					console.log('getRegulonMetaData', regulonResponse);
+					if (DEBUG) console.log('getRegulonMetaData', regulonResponse);
 					let metadata = regulonResponse ? regulonResponse.regulonMeta : {};
 					let threshold = 0;
 					if (metadata.autoThresholds) {
@@ -88,6 +74,8 @@ export default class FeatureSearch extends React.Component {
 					metadata.description = featureDescription;
 					BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, threshold, metadata);
 				});
+			}, () => {
+				BackendAPI.showError();	
 			});
 		} else if (featureType.indexOf('Clustering:') == 0) {
 			let loomMetadata = BackendAPI.getActiveLoomMetadata();
@@ -116,8 +104,10 @@ export default class FeatureSearch extends React.Component {
 						markerResponse.description = featureDescription
 						BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, markerResponse);
 					});
+				}, () => {
+					BackendAPI.showError();	
 				});
-				} else {
+			} else {
 				setTimeout(() => {
 					BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, {description: featureDescription});
 				}, 50);
@@ -127,6 +117,12 @@ export default class FeatureSearch extends React.Component {
 				BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, {description: featureDescription});
 			}, 50);
 		}
+		ReactGA.event({
+			category: 'action',
+			action: 'feature selected',
+			label: featureType + ": " + feature,
+			value: this.props.field
+		});
 	}
 
 
@@ -144,6 +140,12 @@ export default class FeatureSearch extends React.Component {
 
 	handleTypeChange(type) {
 		this.setState({type: type});
+		ReactGA.event({
+			category: 'action',
+			action: 'feature type selected',
+			label: type,
+			value: this.props.field
+		});
 	}
 
 	handleSelectionChange(e, { result }) {
@@ -156,83 +158,90 @@ export default class FeatureSearch extends React.Component {
 		e.stopPropagation();		
 		e.preventDefault();
 		let selection = this.state.selection;
+		if (DEBUG) console.log('handleBlur', e, select, selection);
 		if (selection) {
 			//selection = select.results[0].results[0];
-			if (DEBUG) console.log('handleBlur', e.target, e.source, selection);
 			this.updateFeature(selection.title, selection.type, selection.description);
 		}
 	}
 
 	handleSearchChange(e, { value }) {
+		if (this.call != null) this.call.end();
 		this.setState({ isLoading: true, value })
-		setTimeout(() => {
-			if (this.state.value.length < 1) return this.resetComponent()
-			let query = {
-				loomFilePath: BackendAPI.getActiveLoom(),
-				query: this.state.value
-			};
-			if (DEBUG) console.log("handleSearchChange", query);
-			BackendAPI.getConnection().then((gbc) => {
-				gbc.services.scope.Main.getFeatures(query, (err, response) => {
-					if (DEBUG) console.log("handleSearchChange", response);
-					if (response != null) {
-						let res = [], genes = [], regulons = [], clusters = {};
-						let type = this.state.type;
+		if (this.state.value.length < 1) return this.resetComponent();
+		let query = {
+			loomFilePath: BackendAPI.getActiveLoom(),
+			query: this.state.value
+		};
+		if (DEBUG) console.log("getFeatures", query);
+		BackendAPI.getConnection().then((gbc) => {
+			this.call = gbc.services.scope.Main.getFeatures(query, (err, response) => {
+				if (DEBUG) console.log("getFeatures", response);
+				if (response != null) {
+					let res = [], genes = [], regulons = [], clusters = {};
+					let type = this.state.type;
 
-						for (var i = 0; i < response.feature.length; i++) {
-							let f = response.feature[i];
-							let ft = response.featureType[i];
-							let d = response.featureDescription[i];
-							if (ft == 'gene') {
-								genes.push({ "title": f, "type": ft, "description": d });
-							} else if (ft == 'regulon') {
-								regulons.push({ "title": f, "type": ft, "description": d });
-							} else if (ft.indexOf('Clustering:') == 0) {
-								if (!clusters[ft]) clusters[ft] = [];
-								clusters[ft].push({ "title": f, "type": ft, "description": d });
-							} else if (ft.indexOf('cluster#') == 0) {
-								let cid = ft.split('#')[1], name = '';
-								activeMetadata.cellMetaData.clusterings.map((c, i) => {
-									if (c.id == cid) {
-										name = c.name;
-									}
-								})
-								if (!clusters[ft]) clusters[ft] = {name: name, results: []};
-								clusters[ft].push({ "title": f, "type": ft, "description": d });
-							}
-						};
-
-						genes = {"name": "gene", "results": genes.slice(0, 10)}
-						regulons = {"name": "regulon", "results": regulons.slice(0, 10)}
-
-						if (genes['results'].length && (type == 'all' || type == 'gene')) {
-							res.push(genes);
+					for (var i = 0; i < response.feature.length; i++) {
+						let f = response.feature[i];
+						let ft = response.featureType[i];
+						let d = response.featureDescription[i];
+						if (ft == 'gene') {
+							genes.push({ "title": f, "type": ft, "description": d });
+						} else if (ft == 'regulon') {
+							regulons.push({ "title": f, "type": ft, "description": d });
+						} else if (ft.indexOf('Clustering:') == 0) {
+							if (!clusters[ft]) clusters[ft] = [];
+							clusters[ft].push({ "title": f, "type": ft, "description": d });
+						} else if (ft.indexOf('cluster#') == 0) {
+							let cid = ft.split('#')[1], name = '';
+							activeMetadata.cellMetaData.clusterings.map((c, i) => {
+								if (c.id == cid) {
+									name = c.name;
+								}
+							})
+							if (!clusters[ft]) clusters[ft] = {name: name, results: []};
+							clusters[ft].push({ "title": f, "type": ft, "description": d });
 						}
-						if (regulons['results'].length && (type == 'all' || type == 'regulon')) {
-							res.push(regulons);
-						}
-						if (type == 'all' || type == 'cluster') {
-							Object.keys(clusters).map((ft) => {
-								res.push({"name": ft, "results": clusters[ft].slice(0, 10)})
-							});
-						}
+					};
 
-						this.setState({
-							isLoading: false,
-							results: res,
-						})
+					genes = {"name": "gene", "results": genes.slice(0, 10)}
+					regulons = {"name": "regulon", "results": regulons.slice(0, 10)}
 
-					} else {
-
-						this.setState({
-							isLoading: false,
-							results: [],
-						})
-
+					if (genes['results'].length && (type == 'all' || type == 'gene')) {
+						res.push(genes);
 					}
-				});
+					if (regulons['results'].length && (type == 'all' || type == 'regulon')) {
+						res.push(regulons);
+					}
+					if (type == 'all' || type == 'cluster') {
+						Object.keys(clusters).map((ft) => {
+							res.push({"name": ft, "results": clusters[ft].slice(0, 10)})
+						});
+					}
+
+					this.setState({
+						isLoading: false,
+						results: res,
+					})
+
+				} else {
+
+					this.setState({
+						isLoading: false,
+						results: [],
+					})
+
+				}
 			});
-		}, 200)
+		}, () => {
+			BackendAPI.showError();	
+		});
+		ReactGA.event({
+			category: 'action',
+			action: 'feature search',
+			label: value,
+			value: this.props.field
+		});
 	}
 
 	componentWillReceiveProps(nextProps) {

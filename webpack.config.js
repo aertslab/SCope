@@ -46,6 +46,7 @@ let config = {
         }),
         new webpack.DefinePlugin({
             BACKEND: JSON.stringify({
+                proto: "http",
                 host: "127.0.0.1",
                 WSport: "8081",
                 XHRport: "50051",

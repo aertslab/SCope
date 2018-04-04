@@ -1,28 +1,33 @@
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
-import { Sidebar, Menu, Icon, Image, Button, Divider, Modal, Checkbox, Dropdown, Grid, Input, Progress, Dimmer, Loader } from 'semantic-ui-react';
-import FileReaderInput from 'react-file-reader-input';
+import { Segment,  Sidebar, Menu, Icon, Image, Divider,  Checkbox, Dropdown, Grid, Dimmer, Loader } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
+import UploadModal from './common/UploadModal';
+import Slider, { Range } from 'rc-slider';
+import ReactGA from 'react-ga';
+
+const createSliderWithTooltip = Slider.createSliderWithTooltip;
+const TooltipSlider = createSliderWithTooltip(Slider);
 
 class AppSidebar extends Component {
 
 	constructor() {
 		super();
-
+		let sprite = BackendAPI.getSpriteSettings();
 		this.state = {
 			activeCoordinates: BackendAPI.getActiveCoordinates(),
 			settings: BackendAPI.getSettings(),
 			loomFiles: [],
-			uploadLoomFile: null,
-			uploadLoomModalOpened: false,
-			uploadLoomProgress: 0,
+			spriteScale: sprite.scale,
+			spriteAlpha: sprite.alpha,
+			uploadModalOpened: false,
 			loading: true
 		}
 	}
 
 	render () {
 		const { match } = this.props;
-		const { activeCoordinates, settings, loading, loomFiles } = this.state;
+		const { activeCoordinates, settings, loading, loomFiles, uploadModalOpened, spriteScale, spriteAlpha } = this.state;
 		let metadata = {}, coordinates = [];
 		loomFiles.map(loomFile => {
 			if (loomFile.loomFilePath == match.params.loom) {
@@ -35,26 +40,29 @@ class AppSidebar extends Component {
 				})
 			}
 		})
-		let showTransforms = metadata && (['welcome','dataset'].indexOf(match.params.page) == -1) ? true : false;
+		let showTransforms = metadata && (['welcome', 'dataset', 'tutorial', 'about'].indexOf(match.params.page) == -1) ? true : false;
 		let showCoordinatesSelection = showTransforms && metadata.fileMetaData && metadata.fileMetaData.hasExtraEmbeddings ? true : false;
 
-		console.log('AppSidebar render');
 		return (
-			<Sidebar as={Menu} animation="push" visible={this.props.visible} vertical>
-				<Menu.Item>
+			<Sidebar as={Menu} animation="push" visible={this.props.visible} vertical className="clearfix">
+					<Segment basic>
+						<Icon name='arrow up' /><em>Hide me to get bigger workspace</em>
+					</Segment>
 					<Menu.Header>DATASETS</Menu.Header>
 						<Menu.Menu>
-							<Menu.Item key="new" onClick={this.toggleUploadLoomModal.bind(this)}>
+							<Menu.Item key="new" onClick={this.toggleUploadModal.bind(this)}>
 								<Icon name="add" />
 								<em>Upload new dataset</em>
 							</Menu.Item>
 							{loomFiles.map((loomFile, i) => {
 								let active = match.params.loom == loomFile.loomFilePath;
 								return (
-									<Link key={i} to={'/' + [match.params.uuid, loomFile.loomFilePath, match.params.page].join('/')} >
+									<Link key={i} to={'/' + [match.params.uuid, encodeURIComponent(loomFile.loomFilePath), encodeURIComponent(match.params.page)].join('/')} onClick={() => {
+										this.props.onMetadataChange(loomFile);
+									}}  >
 										<Menu.Item active={active} key={loomFile.loomFilePath} >
 											<Icon name={active ? "selected radio" : "radio"} />
-											{loomFile.loomFilePath}
+											{loomFile.loomDisplayName}
 										</Menu.Item>
 									</Link>
 								);
@@ -64,7 +72,10 @@ class AppSidebar extends Component {
 							</Dimmer>
 						</Menu.Menu>
 					<Divider />
-					<Menu.Header style={{display:  showTransforms || showCoordinatesSelection ? 'block' : 'none'}} >SETTINGS</Menu.Header>
+					{(showTransforms || showCoordinatesSelection) &&
+						<Menu.Header>SETTINGS</Menu.Header>
+					}
+						
 					{showCoordinatesSelection &&
 						<Menu.Menu>
 							<Menu.Item>Coordinates</Menu.Item>
@@ -82,45 +93,58 @@ class AppSidebar extends Component {
 							<Menu.Item>
 								<Checkbox toggle label="CPM normalize" checked={settings.hasCpmNormalization} onChange={this.toggleCpmNormization.bind(this)} />
 							</Menu.Item>
+							<Menu.Item>Point size</Menu.Item>
+							<Menu.Item>
+								<TooltipSlider
+								style={{margin: '5px'}} 
+								max={20}
+								defaultValue={spriteScale}
+								onAfterChange={(v) => {
+									this.handleUpdateSprite(v, spriteAlpha);
+									ReactGA.event({
+										category: 'settings',
+										action: 'changed point size',
+										value: v
+									});
+								}}
+								min={1}
+								step={1}
+								tipFormatter={(v) => {
+									return v.toFixed(1);
+								}}
+							/>
+							</Menu.Item>
+							<Menu.Item>Point alpha</Menu.Item>
+							<Menu.Item>
+								<TooltipSlider
+								style={{margin: '5px'}} 
+								max={1}
+								defaultValue={spriteAlpha}
+								onAfterChange={(v) => {
+									this.handleUpdateSprite(spriteScale, v);
+									ReactGA.event({
+										category: 'settings',
+										action: 'changed point alpha',
+										value: v
+									});
+								}}
+								min={0}
+								step={0.1}
+								tipFormatter={(v) => {
+									return v.toFixed(1);
+								}}
+							/>
+							</Menu.Item>
 						</Menu.Menu>
 					}
 					<Divider />
 					<Menu.Menu className="logos">
-						<Image src='src/images/kuleuven.png' size="small" centered href="http://kuleuven.be" />
+						{/*<Image src='src/images/kuleuven.png' size="small" centered href="http://kuleuven.be" />
 						<br /><br />
 						<Image src='src/images/vib.png' size="small" centered href="http://vib.be" />
+						<Image src='src/images/flycellatlas.png' size="small" centered href="http://flycellatlas.org/" />*/}
 					</Menu.Menu>
-				</Menu.Item>
-				<Modal open={this.state.uploadLoomModalOpened} onClose={this.toggleUploadLoomModal.bind(this)} closeIcon>
-					<Modal.Header>Import a .loom file</Modal.Header>
-					<Modal.Content image>
-						<Modal.Description>
-							<Grid>
-								<Grid.Row>
-									<Grid.Column width={13}>
-										<FileReaderInput as="binary" id="my-file-input" onChange={this.selectLoomFile.bind(this)}>
-											<Input
-												label="File to be uploaded:" labelPosition='left' action="Select a file..." fluid
-												placeholder={ this.state.uploadLoomFile ? this.state.uploadLoomFile.name : ""}
-											/>
-										</FileReaderInput>
-									</Grid.Column>
-									<Grid.Column width={3}>
-										<Button onClick={this.uploadLoomFile.bind(this)} disabled={this.state.uploadLoomProgress > 0}> Upload!</Button>
-									</Grid.Column>
-								</Grid.Row>
-								<Grid.Row>
-									<Grid.Column width={3}>
-										Upload progress:
-									</Grid.Column>
-									<Grid.Column width={13}>
-										<Progress percent={this.state.uploadLoomProgress} indicating progress disabled></Progress>
-									</Grid.Column>
-								</Grid.Row>
-							</Grid>
-						</Modal.Description>
-					</Modal.Content>
-				</Modal>
+				<UploadModal title="Import a .loom file" type='Loom' uuid={match.params.uuid} opened={uploadModalOpened} onClose={this.toggleUploadModal.bind(this)} onUploaded={this.onLoomUploaded.bind(this)} />
 			</Sidebar>
 		);
 	}
@@ -143,77 +167,68 @@ class AppSidebar extends Component {
 					BackendAPI.setLoomFiles(response.myLooms);
 					this.props.onMetadataChange(BackendAPI.getActiveLoomMetadata());
 				} else {
-					console.log("No .loom files detected. You can import one via Import .loom link.");
+					this.setState({loading: false});
+					console.log("No loom files detected");
 				}
 			});
 		}, () => {
-			console.log("Unable to connect to BackendAPI");
+			BackendAPI.showError();
 		});
 	}
 
-	toggleUploadLoomModal(event) {
-		this.setState({ uploadLoomModalOpened: !this.state.uploadLoomModalOpened })
+	toggleUploadModal(event) {
+		let state = !this.state.uploadModalOpened;
+		this.setState({ uploadModalOpened: state })
+		ReactGA.event({
+			category: 'upload',
+			action: 'toggle loom upload modal',
+			label: state ? 'on' : 'off'
+		});
 	}
 
-	toggleCpmNormization() {
-		BackendAPI.setSetting('hasCpmNormalization', !this.state.settings.hasCpmNormalization);
-		this.setState({settings: BackendAPI.getSettings()});
+	toggleCpmNormization() {	
+		let settings = BackendAPI.setSetting('hasCpmNormalization', !this.state.settings.hasCpmNormalization);
+		this.setState({settings: settings});
+		ReactGA.event({
+			category: 'settings',
+			action: 'toggle cpm normalization',
+			label: settings.hasCpmNormalization ? 'on' : 'off'
+		});
 	}
 
 	toggleLogTransform() {
-		BackendAPI.setSetting('hasLogTransform', !this.state.settings.hasLogTransform);
-		this.setState({settings: BackendAPI.getSettings()});
-	}
-
-	selectLoomFile(event, selection) {
-		selection.forEach((selected) => {
-			const [event, file] = selected;
-			this.setState({ uploadLoomFile: file })
-		})
-	}
-
-	uploadLoomFile() {
-		const { match } = this.props;
-		let file = this.state.uploadLoomFile
-
-		if (file == null) {
-			alert("Please select a .loom file first")
-			return
-		}
-
-		let form = new FormData();
-		form.append('file', file);
-
-		let xhr = new XMLHttpRequest();
-		xhr.open("POST", "http://" + BACKEND.host + ":" + BACKEND.XHRport + "/");
-		xhr.upload.addEventListener('progress', (event) => {
-			if (DEBUG) console.log("Data uploaded: " + event.loaded + "/" + event.total);
-			let progress = (event.loaded / event.total * 100).toPrecision(1);
-			this.setState({ uploadLoomProgress: progress });
+		let settings = BackendAPI.setSetting('hasLogTransform', !this.state.settings.hasLogTransform);
+		this.setState({settings: settings});
+		ReactGA.event({
+			category: 'settings',
+			action: 'toggle log transform',
+			label: settings.hasCpmNormalization ? 'on' : 'off'
 		});
-		xhr.upload.addEventListener('load', (event) => {
-			if (DEBUG) console.log('Loom file '+ file.name +' successfully uploaded !');
-			let query = {
-				UUID: match.params.uuid,
-				filename: file.name,
-			};
-			BackendAPI.getConnection().then((gbc) => {
-				if (DEBUG) console.log("loomUploaded", query);
-				gbc.services.scope.Main.loomUploaded(query, (error, response) => {
-					if (DEBUG) console.log("loomUploaded", response);
-					this.setState({ uploadLoomFile: null, uploadLoomProgress: 0 })
-					this.getLoomFiles()
-					this.toggleUploadLoomModal()
-				})
-			})
-		})
-		xhr.setRequestHeader("Content-Disposition", "attachment;filename=" + file.name)
-		xhr.send(form);
 	}
 
 	setActiveCoordinates(evt, coords) {
 		BackendAPI.setActiveCoordinates(coords.value);
 		this.setState({ activeCoordinates: coords.value });
+		ReactGA.event({
+			category: 'settings',
+			action: 'changed active coordinates',
+			label: coords.text
+		});
+	}
+
+	onLoomUploaded() {
+		this.getLoomFiles();
+		this.toggleUploadModal();
+		ReactGA.event({
+			category: 'upload',
+			action: 'uploaded loom file',
+			nonInteraction: true
+		});
+	}
+
+	handleUpdateSprite(scale, alpha) {
+		this.setState({spriteScale: scale, spriteAlpha: alpha})
+		BackendAPI.setSpriteSettings(scale, alpha);
 	}
 }
 

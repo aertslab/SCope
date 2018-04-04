@@ -1,10 +1,12 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
+import { withRouter } from 'react-router-dom';
 import { Grid, Input, Icon, Tab, Image } from 'semantic-ui-react'
 import { BackendAPI } from '../common/API'
 import Metadata from '../common/Metadata'
+import ReactGA from 'react-ga';
 
-export default class ViewerSidebar extends Component {
+class ViewerSidebar extends Component {
 
 	constructor() {
 		super();
@@ -25,6 +27,7 @@ export default class ViewerSidebar extends Component {
 	}
 
 	render() {
+		const { history, match, hideFeatures } = this.props;
 		const { lassoSelections, activeFeatures, activeTab, activePage } = this.state;
 
 		let lassoTab = () => {
@@ -63,6 +66,11 @@ export default class ViewerSidebar extends Component {
 							<Icon name='search' title='show metadata for this selection' style={{display: 'inline'}} onClick={(e,d) => {
 								this.setState({modalID: i});
 								this.forceUpdate();
+								ReactGA.event({
+									category: 'metadata',
+									action: 'modal opened',
+									value: i
+								});
 							}} className="pointer"  />
 						</Grid.Column>
 					</Grid.Row>
@@ -81,9 +89,9 @@ export default class ViewerSidebar extends Component {
 				let genes = "";
 				if (activeFeatures[i].metadata.genes) {
 					genes = (
-						<Grid columns={4} className="geneInfo">
+						<Grid columns="4" className="geneInfo blockDisplay">
 							{ activeFeatures[i].metadata.genes.map( (g, j) => (
-								<Grid.Column key={j}>
+								<Grid.Column key={j} className="viewerCell">
 									<a
 										className="pointer"
 										onClick={() => {
@@ -92,14 +100,23 @@ export default class ViewerSidebar extends Component {
 												query: g
 											};
 											if (activePage == 'regulon') {
-												this.setState({currentPage: 'expression'});
-												BackendAPI.setActivePage('expression');
-											}
+												this.setState({currentPage: 'gene'});
+												BackendAPI.setActivePage('gene');
+												history.push('/' + [match.params.uuid, encodeURIComponent(match.params.loom ? match.params.loom : '*'), 'gene' ].join('/'));
+											}											
 											BackendAPI.getConnection().then((gbc) => {
 												gbc.services.scope.Main.getFeatures(query, (err, response) => {
 													BackendAPI.setActiveFeature(i, activeFeatures[i].type, "gene", g, 0, {description: response.featureDescription[0]});
 												});
+											}, () => {
+												BackendAPI.showError();	
 											})
+											ReactGA.event({
+												category: 'action',
+												action: 'gene clicked',
+												label: g,
+												value: i
+											});
 										}} >
 										{g}
 									</a>
@@ -110,18 +127,26 @@ export default class ViewerSidebar extends Component {
 				}
 
 				metadata = (
-					<span>
-						{activeFeatures[i].metadata.description}<br />
-						{image}
-						{genes}
-					</span>
+					<Grid.Row columns="1" centered className='viewerRow'>
+						<Grid.Column stretched className='viewerCell'>
+							{activeFeatures[i].metadata.description}<br />
+							{image}
+							{genes}
+						</Grid.Column>
+					</Grid.Row>
 				);
 			}
 
 			return (
-				<Tab.Pane attached={false} key={i} className={'feature'+i} style={{textAlign: 'center'}}>
-					{activeFeatures[i] ? activeFeatures[i].featureType : ''} <b> {activeFeatures[i] ? activeFeatures[i].feature : ''} </b><br /><br />
-					{metadata}<br /><br /><br />
+				<Tab.Pane attached={false} key={i} className={'feature'+ i + ' stretched marginBottom'} style={{textAlign: 'center'}}>
+					<Grid>
+						<Grid.Row columns="1" centered className='viewerRow'>
+							<Grid.Column className='viewerCell'>
+								{activeFeatures[i] ? activeFeatures[i].featureType : ''} <b> {activeFeatures[i] ? activeFeatures[i].feature : ''} </b>
+							</Grid.Column>
+						</Grid.Row>
+						{metadata}
+					</Grid>
 				</Tab.Pane>
 			)
 		}
@@ -129,12 +154,14 @@ export default class ViewerSidebar extends Component {
 		let panes = [
 			{ menuItem: 'Cell selections', render: lassoTab },
 		]
-		_.times(3, i => {
-				panes.push({
-					menuItem: activeFeatures[i] && activeFeatures[i].feature ? ("F"+(i+1)+": " + activeFeatures[i].feature) : "F"+(i+1),
-					render: () => featureTab(i),
-				})
-		})
+		if (!hideFeatures) {
+			_.times(3, i => {
+					panes.push({
+						menuItem: activeFeatures[i] && activeFeatures[i].feature ? ("F"+(i+1)+": " + activeFeatures[i].feature) : "F"+(i+1),
+						render: () => featureTab(i),
+					})
+			})
+		}
 		
 		let annotations = {}
 		if (this.props.getSelectedAnnotations) {
@@ -142,7 +169,7 @@ export default class ViewerSidebar extends Component {
 		}
 
 		return (
-			<div>
+			<div className="flexDisplay">
 				<Tab
 					menu={{ secondary: true, pointing: true }}
 					panes={panes}
@@ -156,6 +183,11 @@ export default class ViewerSidebar extends Component {
 				<Metadata 
 					selectionId={this.state.modalID} 
 					onClose={() =>{
+						ReactGA.event({
+							category: 'metadata',
+							action: 'modal closed',
+							value: this.state.modalID,
+						});
 						this.setState({modalID: null});
 						this.forceUpdate();
 					}}
@@ -176,10 +208,22 @@ export default class ViewerSidebar extends Component {
 	}
 
 	toggleLassoSelection(id) {
-		BackendAPI.toggleLassoSelection(id);
+		let selected = BackendAPI.toggleLassoSelection(id);
+		ReactGA.event({
+			category: 'viewer',
+			action: 'selection toggled',
+			label: selected ? 'on' : 'off',
+			value: id
+		});
 	}
 
 	removeLassoSelection(id) {
 		BackendAPI.removeViewerSelection(id);
+		ReactGA.event({
+			category: 'viewer',
+			action: 'selection removed',
+			value: id
+		});
 	}
 }
+export default withRouter(ViewerSidebar);

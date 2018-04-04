@@ -12,6 +12,7 @@ import ViewerSidebar from '../common/ViewerSidebar'
 import ViewerToolbar from '../common/ViewerToolbar'
 import AnnotationDropContainer from '../common/AnnotationDropContainer'
 import ViewerDropContainer from '../common/ViewerDropContainer'
+import ReactGA from 'react-ga';
 
 class Compare extends Component {
 	constructor(props) {
@@ -37,24 +38,27 @@ class Compare extends Component {
 			superposition: 'OR',
 		}
 		this.loomConf = [];
+		this.rebuildLoomOptions();
 		this.activeLoomListener = (loom, metadata, coordinates) => {
 			let multiLoom = this.state.multiLoom;
 			let multiCoordinates = this.state.multiCoordinates;
 			let multiMetadata = this.state.multiMetadata;
+			let crossAnnotations = {
+				horizontal: [],
+				vertical: [],
+				both: [],
+				one: []
+			};
 			multiLoom[0] = loom;
 			multiCoordinates[0] = coordinates;
 			multiMetadata[0] = metadata;
-			this.setState({multiLoom: multiLoom, multiCoordinates: multiCoordinates, multiMetadata: multiMetadata});
-			let loomFiles = BackendAPI.getLoomFiles();
-			Object.keys(loomFiles).map(l => {
-				this.loomConf.push({text: l, value: l});
-			});
+			this.setState({ multiLoom, multiCoordinates, multiMetadata, crossAnnotations});
+			this.rebuildLoomOptions();
 		};
 		this.activeFeaturesListener = (features) => {
 			this.setState({activeFeatures: features});
 			this.getCellMetadata();
 		}
-		this.height = window.innerHeight - 142;
 		this.displayConf = [
 			{ text: 'auto', value: 0, disabled: true },
 			{ text: '1', value: 1 },
@@ -145,7 +149,7 @@ class Compare extends Component {
 			return (
 				<Grid>
 				{_.times(rows, i => (
-					<Grid.Row columns={columns} key={i} className="viewerRow">
+					<Grid.Row columns={columns} key={i} className="viewerRow" stretched>
 						{_.times(columns, (j) => {
 								let name = "comp"+(columns * i + j);
 								let annotationDropContainerHorizontal, annotationDropContainerVertical, datasetSelector;
@@ -171,7 +175,6 @@ class Compare extends Component {
 											viewerName={name}
 											position={i}
 											orientation='vertical'
-											height={this.height / rows - 42}
 											onDrop={this.handleDrop.bind(this)}
 											onRemove={this.handleRemove.bind(this)}
 										/>
@@ -179,7 +182,7 @@ class Compare extends Component {
 								}
 								if ((configuration == 'multi') && (i == 0)) {
 									let coordOptions = [], coordinatesSelector;
-									if (multiMetadata[j] && multiMetadata[j].cellMetaData) {
+									if (multiMetadata[j] && multiMetadata[j].cellMetaData && multiMetadata[j].cellMetaData.embeddings.length) {
 										multiMetadata[j].cellMetaData.embeddings.map((coords) => {
 											coordOptions.push({text: coords.name, value: coords.id});
 										});
@@ -190,12 +193,18 @@ class Compare extends Component {
 													let mc = multiCoordinates;
 													mc[j] = select.value;
 													this.setState({'multiCoordinates': mc});
+													ReactGA.event({
+														category: 'compare',
+														action: 'comparison coordinates selected',
+														label: select.text,
+														value: j
+													});
 												}}/>
 											</span>
 										)
 									}
 									datasetSelector = (
-										<span>
+										<span className="noStretch">
 										<b>Select a dataset: </b>
 										<Dropdown inline options={this.loomConf} disabled={j==0} value={multiLoom[j]} placeholder=" none selected " onChange={(proxy, select) => {
 											let ml = multiLoom;
@@ -206,6 +215,12 @@ class Compare extends Component {
 											mm[j] = BackendAPI.getLoomMetadata(ml[j]);
 											BackendAPI.setActiveLooms(ml);
 											this.setState({'multiLoom': ml, 'multiCoordinates': mc});
+											ReactGA.event({
+												category: 'compare',
+												action: 'comparison dataset selected',
+												label: select.value,
+												value: j
+											});
 										}}/>
 										{coordinatesSelector}
 										</span>
@@ -216,7 +231,7 @@ class Compare extends Component {
 								else if (configuration == 'one') va = crossAnnotations['one'][columns * i + j]
 								else va = this.getCrossAnnotations(i, j);
 								return (
-									<Grid.Column key={j}>
+									<Grid.Column key={j} stretched className="viewerCell">
 										{datasetSelector}
 										{annotationDropContainerHorizontal}
 										{annotationDropContainerVertical}
@@ -226,7 +241,6 @@ class Compare extends Component {
 											onDrop={this.handleDrop.bind(this)}
 											onRemove={this.handleRemove.bind(this)}
 											name={name}
-											height={this.height / rows - 42}
 											loomFile={configuration == 'multi' ? multiLoom[j] : multiLoom[0]}
 											activeFeatures={activeFeatures}
 											superposition={superposition}
@@ -250,7 +264,7 @@ class Compare extends Component {
 		}
 
 		let featureSearch = _.times(3, i => (
-			<Grid.Column width={4} key={i}>
+			<Grid.Column key={i}>
 				<FeatureSearchBox field={i} color={colors[i]} type='all' value={activeFeatures[i] ? activeFeatures[i].feature : ''} />
 			</Grid.Column>
 		));
@@ -263,8 +277,8 @@ class Compare extends Component {
 
 		return (
 			<Grid>
-				<Grid.Row columns="4">
-					<Grid.Column width={2} >
+				<Grid.Row columns="5">
+					<Grid.Column width={2}>
 						Number of displays: &nbsp;
 						<Dropdown inline options={this.displayConf} disabled={configuration=='one'} value={displays} onChange={this.displayNumberChanged.bind(this)}/>
 						<br />
@@ -275,8 +289,9 @@ class Compare extends Component {
 						<Dropdown inline options={this.configurationConf} defaultValue={'simple'} onChange={this.configurationChanged.bind(this)}/>
 					</Grid.Column>
 					{featureSearch}
+					<Grid.Column>&nbsp;</Grid.Column>
 				</Grid.Row>
-				<Grid.Row columns={3}>
+				<Grid.Row columns={3} stretched className="viewerRow">
 					<Grid.Column width={2}>
 						<Accordion styled>
 						{annotationTabs()}
@@ -284,11 +299,11 @@ class Compare extends Component {
 						<br />
 						<ViewerToolbar />
 					</Grid.Column>
-					<Grid.Column width={11}>
+					<Grid.Column width={11} className="viewerCell">
 						{viewers()}
 					</Grid.Column>
 					<Grid.Column width={3}>
-						<div className="chart-wrapper" id="chart-distro1" style={{width: '100%'}} height="200px"></div>
+						<div className="chart-wrapper noStretch" id="chart-distro1" style={{width: '100%'}} height="200px"></div>
 						<ViewerSidebar
 							getSelectedAnnotations={this.getSelectedAnnotations.bind(this)}
 							onActiveFeaturesChange={(features, id) => {
@@ -336,6 +351,11 @@ class Compare extends Component {
 		annotations[orientation][position][item.name] = selectedAnnotations;
 		this.setState({ crossAnnotations : annotations});
 		this.getCellMetadata();
+		ReactGA.event({
+			category: 'compare',
+			action: 'annotation added',
+			label: item.name + ": " + item.value
+		});
 		return true;
 	}
 
@@ -357,6 +377,11 @@ class Compare extends Component {
 			console.log('Annotation cannot be found', viewer, name, remove);
 		}
 		this.getCellMetadata();
+		ReactGA.event({
+			category: 'compare',
+			action: 'annotation removed',
+			label: name + ": " + value
+		});
 	}
 
 	displayNumberChanged(proxy, selection) {
@@ -372,12 +397,22 @@ class Compare extends Component {
 			} else if(selection.value == 9) {
 				this.setState({columns: 3, rows: 3, displays: 9});
 			}
+			ReactGA.event({
+				category: 'compare',
+				action: 'display number changed',
+				value: selection.value
+			});
 		}, 100);
 	}
 
 	superpositionChanged(proxy, selection) {
 		setTimeout(() => {
 			this.setState({superposition: selection.value});
+			ReactGA.event({
+				category: 'compare',
+				action: 'superposition changed',
+				label: selection.value
+			});
 		}, 100);
 	}
 
@@ -401,6 +436,11 @@ class Compare extends Component {
 			}
 			this.setState({configuration: conf, displays: displays, superposition: superposition, crossAnnotations: crossAnnotations});
 			this.getCellMetadata();
+			ReactGA.event({
+				category: 'compare',
+				action: 'configuration changed',
+				label: selection.value
+			});
 		}, 100);
 	}
 
@@ -416,13 +456,25 @@ class Compare extends Component {
 		crossAnnotations['one'] = annotationIDs;
 		this.setState({crossAnnotations: crossAnnotations});
 		this.getCellMetadata();
+        ReactGA.event({
+            category: 'compare',
+			action: 'all annotations selected',
+			label: annotationGroup.name
+        });
 	}
 
 	selectNoAnotations() {
 		let { crossAnnotations } = this.state;
+		const {  activeAnnotation, multiMetadata } = this.state;
+		let annotationGroup = multiMetadata[0].cellMetaData.annotations[activeAnnotation];
 		crossAnnotations['one'] = [];
 		this.setState({crossAnnotations: crossAnnotations});
 		this.getCellMetadata();
+        ReactGA.event({
+            category: 'compare',
+            action: 'none annotations selected',
+			label: annotationGroup.name
+        });
 	}
 
 	selectAnnotation(name, value, selected) {
@@ -448,14 +500,26 @@ class Compare extends Component {
 				return va > vb ? 1 : (va < vb ? -1 : 0);
 			})
 			this.setState({ crossAnnotations : annotations});
+			ReactGA.event({
+				category: 'compare',
+				action: 'annotation toggled',
+				label: value
+			});
 		}
 	}
 
 	selectAnnotationGroup(e, props) {
 		const { index } = props;
 		let { activeAnnotation, crossAnnotations } = this.state;
+		const {  multiMetadata } = this.state;
 		crossAnnotations['one'] = [];
 		this.setState({activeAnnotation : activeAnnotation == index ? -1 : index, crossAnnotations: crossAnnotations});
+		let annotationGroup = multiMetadata[0].cellMetaData.annotations[index];
+		ReactGA.event({
+			category: 'compare',
+			action: 'toggle annotation group',
+			label: annotationGroup.name
+		});
 	}
 
 	getCrossAnnotations(i, j) {
@@ -516,6 +580,8 @@ class Compare extends Component {
 				if (DEBUG) console.log('getCellMetaData', response);
 				this.renderExpressionGraph(response);
 			});
+		}, () => {
+			BackendAPI.showError();	
 		});
 	}
 
@@ -640,6 +706,14 @@ class Compare extends Component {
 		while (d[--j] > q3 + iqr);
 		return [i, j];
 		};
+	}
+
+	rebuildLoomOptions() {
+		let loomFiles = BackendAPI.getLoomFiles();
+		this.loomConf = [];
+		Object.keys(loomFiles).map(l => {
+			this.loomConf.push({text: loomFiles[l].loomDisplayName, value: l});
+		});
 	}
 }
 

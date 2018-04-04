@@ -195,8 +195,9 @@ message MyLoomsRequest {
 
 message MyLoom {
   string loomFilePath=1;
-  CellMetaData cellMetaData=2;
-  FileMetaData fileMetaData=3;
+  string loomDisplayName=2;
+  CellMetaData cellMetaData=3;
+  FileMetaData fileMetaData=4;
 }
 
 message MyLoomsReply {
@@ -279,9 +280,11 @@ message LoomUploadedReply {}
 
 message MyGeneSet {
   string geneSetFilePath=1;
+  string geneSetDisplayName=2;
 }
 
 message MyGeneSetsRequest {
+  string UUID=1;
 }
 
 message MyGeneSetsReply {

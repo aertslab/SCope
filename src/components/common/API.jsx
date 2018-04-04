@@ -1,7 +1,19 @@
 class API {
 	constructor() {
 		this.GBC = require("grpc-bus-websocket-client");
-		this.GBCConnection = new this.GBC("ws://" + BACKEND.host + ":" + BACKEND.WSport + "/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + BACKEND.RPCport } }).connect();
+		try {
+			this.GBCConnection = new this.GBC("ws://" + BACKEND.host + ":" + BACKEND.WSport + "/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + BACKEND.RPCport } }).connect();
+			this.connected = true;
+		} catch (ex) {
+			this.GBCConnection = null;
+			this.connected = false;
+		}
+
+		this.spriteSettings = {
+			scale: 5,
+			alpha: 1,
+		}
+		this.spriteSettingsChangeListeners = [];
 
 		this.loomFiles = [];
 		this.activePage = 'welcome';
@@ -24,7 +36,7 @@ class API {
 		this.viewerTool = 's-zoom';
 		this.viewerToolChangeListeners = [];
 
-		this.viewerSelections = [];
+		this.viewerSelections = {};
 		this.viewerSelectionsChangeListeners = [];
 
 		this.viewerTransform = null;
@@ -35,11 +47,20 @@ class API {
 
 		this.colors = ["red", "green", "blue"];
 
-		this.maxValues = [0, 0, 0];
-		this.customValues = [0, 0, 0];
+		this.maxValues = {};
+		this.maxValuesChangeListeners = [];
+		this.customValues = {};
 		this.customValuesChangeListeners = [];
 
 		this.uuid = null;
+	}
+
+	isConnected() {
+		return this.connected;
+	}
+
+	showError() {
+		this.connected = false;
 	}
 
 	getConnection() {
@@ -47,6 +68,28 @@ class API {
 	}
 
 
+	setSpriteSettings(scale, alpha) {
+		this.spriteSettings.scale = scale;
+		this.spriteSettings.alpha = alpha;
+		this.spriteSettingsChangeListeners.forEach((listener) => {
+			listener(this.spriteSettings);
+		})
+	}
+
+	getSpriteSettings() {
+		return this.spriteSettings;
+	}
+
+	onSpriteSettingsChange(listener) {
+		this.spriteSettingsChangeListeners.push(listener);
+	}
+	
+	removeSpriteSettingsChange(listener) {
+		let i = this.spriteSettingsChangeListeners.indexOf(listener)
+		if (i > -1) {
+			this.spriteSettingsChangeListeners.splice(i, 1);
+		}
+	};
 
 	getActiveLoom() {
 		return this.activeLooms[0];
@@ -68,7 +111,13 @@ class API {
 
 	setActiveLoom(loom, id) {
 		if (id == null) id = 0;
+		if (this.activeLooms[id] == loom) return;
 		this.activeLooms[id] = loom;
+		this.viewerSelections = {};
+		this.viewerSelections[this.activePage] = [];
+		this.viewerSelectionsChangeListeners.forEach((listener) => {
+			listener(this.viewerSelections[this.activePage]);
+		});
 		this.activeCoordinates = -1;
 		this.activeLoomChangeListeners.forEach((listener) => {
 			listener(this.activeLooms[0], this.loomFiles[this.activeLooms[0]], this.activeCoordinates);
@@ -148,18 +197,20 @@ class API {
 		selectedFeatures[id].threshold = threshold;
 		this.features[page] = selectedFeatures;
 		(this.featureChangeListeners[page] || []).forEach((listener) => {
-			listener(selectedFeatures, id, this.customValues, this.maxValues);
+			listener(selectedFeatures, id, this.customValues[page], this.maxValues[page]);
 		})
-}
+	}
 
 	getMaxScale(id, callback) {
 		let settings = this.getSettings();
-		let selectedFeatures = this.features[this.activePage];
+		let page = this.activePage;
+		let selectedFeatures = this.features[page];
 		if (!selectedFeatures) return;
+		if (DEBUG) console.log('getMaxScale', id, page);
 		let query = {
 			loomFilePath: this.getActiveLooms(),
-			feature: selectedFeatures.map(f => {return f.feature}),
-			featureType: selectedFeatures.map(f=> {return f.featureType}),
+			feature: selectedFeatures.map(f => {return page == 'regulon' ? f.feature.split('_')[0] : f.feature}),
+			featureType: selectedFeatures.map(f=> {return page == 'regulon' ? 'gene' : f.featureType}),
 			hasLogTransform: settings.hasLogTransform,
 			hasCpmTransform: settings.hasCpmNormalization,
 		}
@@ -167,12 +218,28 @@ class API {
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getVmax(query, (err, response) => {
 				if (DEBUG) console.log('getVmax', response);
-				if (id != null) this.customValues[id] = response.vmax[id];
-				else this.customValues = response.vmax;
-				this.maxValues = response.maxVmax;
-				callback(this.customValues, this.maxValues);
+				if (id != null) this.customValues[page][id] = response.vmax[id];
+				else this.customValues[page] = response.vmax;
+				this.maxValues[page] = response.maxVmax;
+				this.maxValuesChangeListeners.forEach(listener => {
+					listener(this.maxValues[page]);
+				})
+				callback(this.customValues[page], this.maxValues[page]);
 			})
-		})
+		}, () => {
+			BackendAPI.showError();	
+		});
+	}
+
+	onFeatureScaleChange(listener) {
+		this.maxValuesChangeListeners.push(listener);
+	}
+
+	removeFeatureScaleChange(listener) {
+		let i = this.maxValuesChangeListeners.indexOf(listener);
+		if (i > -1) {
+			this.maxValuesChangeListeners.splice(i, 1);
+		}
 	}
 
 	onActiveFeaturesChange(page, listener) {
@@ -207,24 +274,25 @@ class API {
 					}
 				})
 			}
+
 		})
 		return { selectedGenes, selectedRegulons, selectedClusters }
 	}
 
 
 	getFeatureScale() {
-		return this.maxValues;
+		return this.maxValues[this.activePage] || [0, 0, 0];
 	}
 
 
 	getCustomScale() {
-		return this.customValues;
+		return this.customValues[this.activePage] || [0, 0, 0];
 	}
 
 	setCustomScale(scale) {
-		this.customValues = scale.slice(0);
+		this.customValues[this.activePage] = scale.slice(0);
 		this.customValuesChangeListeners.forEach((listener) => {
-			listener(this.customValues);
+			listener(this.customValues[this.activePage]);
 		})
 	}
 
@@ -246,8 +314,8 @@ class API {
 	}
 
 	setActivePage(page) {
-		this.maxValues = [0, 0, 0];
-		this.customValues = [0, 0, 0];
+		this.maxValues[page] = this.maxValues[page] || [0, 0, 0];
+		this.customValues[page] = this.customValues[page] || [0, 0, 0];
 		this.activePage = page;
 		this.activePageListeners.forEach((listener) => {
 			listener(this.activePage);
@@ -277,6 +345,7 @@ class API {
 				listener(this.settings, customValues, maxValues);
 			})
 		})
+		return this.settings;
 	}
 
 	onSettingsChange(listener) {
@@ -317,22 +386,21 @@ class API {
 
 	
 	getViewerSelections() {
-		return this.viewerSelections;
+		return this.viewerSelections[this.activePage] || [];
 	}
 
 	addViewerSelection(selection) {
-		if (DEBUG) console.log('addViewerSelection', selection)
-		this.viewerSelections.push(selection);
+		if (!this.viewerSelections[this.activePage]) this.viewerSelections[this.activePage] = [];
+		this.viewerSelections[this.activePage].push(selection);
 		this.viewerSelectionsChangeListeners.forEach((listener) => {
-			listener(this.viewerSelections);
+			listener(this.viewerSelections[this.activePage]);
 		});
 	}
 
 	removeViewerSelection(index) {
-		console.log('removing selection', index);
-		this.viewerSelections.splice(index, 1);
+		this.viewerSelections[this.activePage].splice(index, 1);
 		this.viewerSelectionsChangeListeners.forEach((listener) => {
-			listener(this.viewerSelections);
+			listener(this.viewerSelections[this.activePage]);
 		});
 	}
 
@@ -348,16 +416,17 @@ class API {
 	};
 
 	clearViewerSelections() {
-		this.viewerSelections = [];
+		this.viewerSelections[this.activePage] = [];
 	}
 
 
 
 	toggleLassoSelection(index) {
-		this.viewerSelections[index].selected = !this.viewerSelections[index].selected;
+		this.viewerSelections[this.activePage][index].selected = !this.viewerSelections[this.activePage][index].selected;
 		this.viewerSelectionsChangeListeners.forEach((listener) => {
-			listener(this.viewerSelections);
+			listener(this.viewerSelections[this.activePage]);
 		});
+		return this.viewerSelections[this.activePage][index].selected;
 	}
 
 

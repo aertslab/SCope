@@ -41,7 +41,7 @@ class AnnotationDropContainer extends Component {
 		}
 
 		return connectDropTarget(
-			<div className={"dropZone " + orientation} >
+			<div className={"dropZone noStretch " + orientation} >
 				{container()}
 			</div>,
 		)

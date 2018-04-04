@@ -1,25 +1,42 @@
-.menu.toolbar {
-	max-width: 55px;
+.pusher {
+	display: flex;
+	flex-direction: column;
 }
+
+.ui .grid {
+	margin: 0px !important;
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-height: 100%;
+	min-width: 100%;
+	align-content: stretch;
+	align-items: stretch;
+}
+
+.menu.toolbar {
+	max-width: 50px;
+}
+
 canvas {
 	border: 1px solid black;
 }
+
 .auc {
 	text-align: center;
 }
+
 .row {
 	padding-bottom: 0px !important;
 }
+
 .parentView {
+	padding: 0px !important;
 	height: 100vh;
-}
-html,body {
-	height: 100%;
-}
-body:before{
-    width:100%;
-    height:100%;
-    display:block;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	align-content: stretch;
 }
 
 .emptyDropContainer {
@@ -32,8 +49,18 @@ body:before{
 
 .dropContainer {
 	text-align: center;
+	flex:1;
 	min-height: 30px;
 	padding-top: 5px;
+}
+
+.blockDisplay {
+	display: block !important;
+}
+
+.flexDisplay {
+	display: flex;
+	flex-direction: column;
 }
 
 .dropContainer p {
@@ -50,8 +77,72 @@ body:before{
 
 .viewerRow {
 	padding-top: 0px !important;
+	
 }
 
 .pusher .segment {
 	padding-bottom:  0px !important;
+}
+
+.noStretch {
+	flex-grow: 0 !important;
+}
+
+.stretched {
+	flex: 1;
+	width: 100%;
+}
+
+.viewerFlex {
+	flex: 1 0 500px !important;
+}
+
+.stretched > .column > b {
+	flex-grow: 0 !important;
+}
+
+.flexDouble {
+	flex-grow: 2 !important;
+}
+
+.flexRow {
+	flex-direction: row !important;
+}
+
+.viewerCell {
+	padding: 2px !important;
+	word-break: break-all;
+}
+
+.marginBottom {
+	margin-bottom: 10px !important;
+}
+
+.clearfix::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+h1.ui.header {
+	font-size: 1.5rem !important;
+}
+
+h2.ui.header {
+	font-size: 1.25rem !important;
+}
+
+.vertical.segment.flexDisplay {
+	padding: 0px !important;
+	border: none !important;
+	flex: 1 0 0;
+}
+
+.ui.grid .row {
+	padding-top: 0.5rem;
+}
+
+.ui.grid .row .column {
+	padding-left: 0.5rem;
+	padding-right: 0;
 }
