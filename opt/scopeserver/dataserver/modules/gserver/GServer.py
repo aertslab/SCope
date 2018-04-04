@@ -78,31 +78,25 @@ class SCope(s_pb2_grpc.MainServicer):
         # Create the data directories
         SCope.set_root_dir()
         SCope.set_data_dirs()
-        SCope.create_dirs()
+        SCope.create_global_dirs()
         SCope.create_uuid_log()
-        SCope.set_global_looms()
         SCope.load_gene_mappings()
         self.active_loom_connections = {}
         self.loom_dir = SCope.get_data_dir_path_by_file_type("Loom")
         self.gene_sets_dir = SCope.get_data_dir_path_by_file_type("GeneSet")
         self.rankings_dir = SCope.get_data_dir_path_by_file_type("LoomAUCellRankings")
-        self.globalLooms = [x for x in os.listdir(self.loom_dir) if not os.path.isdir(os.path.join(self.loom_dir, x))]
-        self.globalSets = [x for x in os.listdir(self.gene_sets_dir) if not os.path.isdir(os.path.join(self.gene_sets_dir, x))]
-        self.globalrankings = [x for x in os.listdir(self.rankings_dir) if not os.path.isdir(os.path.join(self.rankings_dir, x))]
-
-    def create_uuid_log():
-        SCope.uuid_log = open(os.path.join(SCope.get_logs_dir(), 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()))), 'w')
+        self.set_global_data()
 
     @staticmethod
     def load_gene_mappings():
-        gene_mappings_dir_path = os.path.join('dataserver', 'data', 'gene_mappings') if SCope.DEV_ENV else os.path.join(Path(__file__).parents[6], 'data', 'gene_mappings')
+        gene_mappings_dir_path = os.path.join(Path(__file__).parents[3], 'dataserver', 'data', 'gene_mappings') if SCope.DEV_ENV else os.path.join(Path(__file__).parents[6], 'data', 'gene_mappings')
         SCope.dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'terminal_mappings.pickle'), 'rb'))
         SCope.hsap_to_dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'hsap_to_dmel_mappings.pickle'), 'rb'))
         SCope.mmus_to_dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'mmus_to_dmel_mappings.pickle'), 'rb'))
 
     @staticmethod
     def set_root_dir():
-        SCope.root = "dataserver" if SCope.DEV_ENV else os.path.join(str(Path.home()), ".scope")
+        SCope.root = os.path.join(Path(__file__).parents[3], 'dataserver') if SCope.DEV_ENV else os.path.join(str(Path.home()), ".scope")
     
     @staticmethod
     def set_data_dirs():
@@ -115,26 +109,16 @@ class SCope(s_pb2_grpc.MainServicer):
         return os.path.join(SCope.root,"logs")
     
     @staticmethod
-    def set_global_looms():
-        print(SCope.data_dirs["Loom"]["path"])
-        SCope.globalLooms = set(os.listdir(SCope.data_dirs["Loom"]["path"]))
-    
-    @staticmethod
-    def get_global_looms():
-        print(SCope.globalLooms)
-        return SCope.globalLooms
-
-    @staticmethod
     def get_data_dir_path_by_file_type(file_type, UUID=None):
         if UUID is not None:
-            globalDir = data_dirs[file_type]["path"]
+            globalDir = SCope.data_dirs[file_type]["path"]
             UUIDDir = os.path.join(globalDir, UUID)
             return UUIDDir
         else:
-            return data_dirs[file_type]["path"]
+            return SCope.data_dirs[file_type]["path"]
 
     @staticmethod
-    def create_dirs():
+    def create_global_dirs():
         # Create data directories if not exists
         for data_type in SCope.data_dirs.keys():
             if not os.path.isdir(SCope.data_dirs[data_type]["path"]):
@@ -155,6 +139,14 @@ class SCope(s_pb2_grpc.MainServicer):
             else:
                 f.seek(- last_n_kb * 1024, 2)
             return hashlib.md5(f.read()).hexdigest()
+
+    def create_uuid_log():
+        SCope.uuid_log = open(os.path.join(SCope.get_logs_dir(), 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()))), 'w')
+
+    def set_global_data(self):
+        self.globalLooms = [x for x in os.listdir(self.loom_dir) if not os.path.isdir(os.path.join(self.loom_dir, x))]
+        self.globalSets = [x for x in os.listdir(self.gene_sets_dir) if not os.path.isdir(os.path.join(self.gene_sets_dir, x))]
+        self.globalrankings = [x for x in os.listdir(self.rankings_dir) if not os.path.isdir(os.path.join(self.rankings_dir, x))]
 
     def add_loom_connection(self, partial_md5_hash, loom):
         self.active_loom_connections[partial_md5_hash] = loom
@@ -731,8 +723,8 @@ class SCope(s_pb2_grpc.MainServicer):
     def getMyGeneSets(self, request, context):
         userDir = self.get_data_dir_path_by_file_type('GeneSet', UUID=request.UUID)
         if not os.path.isdir(userDir):
-            for i in data_dirs.keys():
-                os.mkdir(os.path.join(data_dirs[i]['path'], request.UUID))
+            for i in SCope.data_dirs.keys():
+                os.mkdir(os.path.join(SCope.data_dirs[i]['path'], request.UUID))
 
         geneSetsToProcess = sorted(self.globalSets) + sorted([os.path.join(request.UUID, x) for x in os.listdir(userDir)])
         gene_sets = [s_pb2.MyGeneSet(geneSetFilePath=f, geneSetDisplayName=os.path.splitext(os.path.basename(f))[0]) for f in geneSetsToProcess]
@@ -742,8 +734,8 @@ class SCope(s_pb2_grpc.MainServicer):
         my_looms = []
         userDir = self.get_data_dir_path_by_file_type('Loom', UUID=request.UUID)
         if not os.path.isdir(userDir):
-            for i in data_dirs.keys():
-                os.mkdir(os.path.join(data_dirs[i]['path'], request.UUID))
+            for i in SCope.data_dirs.keys():
+                os.mkdir(os.path.join(SCope.data_dirs[i]['path'], request.UUID))
 
         loomsToProcess = sorted(self.globalLooms) + sorted([os.path.join(request.UUID, x) for x in os.listdir(userDir)])
 
@@ -774,8 +766,8 @@ class SCope(s_pb2_grpc.MainServicer):
     def getUUID(self, request, context):
         newUUID = str(uuid.uuid4())
         if newUUID not in curUUIDs.keys():
-            uuidLog.write("{0} :: {1} :: New UUID ({2}) assigned.\n".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, newUUID))
-            uuidLog.flush()
+            SCope.uuid_log.write("{0} :: {1} :: New UUID ({2}) assigned.\n".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, newUUID))
+            SCope.uuid_log.flush()
             curUUIDs[newUUID] = time.time()
         return s_pb2.UUIDReply(UUID=newUUID)
 
@@ -793,15 +785,15 @@ class SCope(s_pb2_grpc.MainServicer):
         if uid in curUUIDs:
             startTime = curUUIDs[uid]
             timeRemaining = int(_UUID_TIMEOUT - (time.time() - startTime))
-            uuidLog.write("{0} :: {1} :: Old UUID ({2}) connected :: Time Remaining - {3}.\n".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid, timeRemaining))
-            uuidLog.flush()
+            SCope.uuid_log.write("{0} :: {1} :: Old UUID ({2}) connected :: Time Remaining - {3}.\n".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid, timeRemaining))
+            SCope.uuid_log.flush()
         else:
             try:
                 uuid.UUID(uid)
             except (KeyError, AttributeError):
                 uid = str(uuid.uuid4())
-            uuidLog.write("{0} :: {1} :: New UUID ({2}) assigned.\n".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid))
-            uuidLog.flush()
+            SCope.uuid_log.write("{0} :: {1} :: New UUID ({2}) assigned.\n".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid))
+            SCope.uuid_log.flush()
             curUUIDs[uid] = time.time()
             timeRemaining = int(_UUID_TIMEOUT)
         return s_pb2.RemainingUUIDTimeReply(UUID=uid, timeRemaining=timeRemaining)
