@@ -154,7 +154,8 @@ class App extends Component {
 				if (DEBUG) console.log('getUUID', query);
 				gbc.services.scope.Main.getUUID(query, (err, response) => {
 					if (DEBUG) console.log('getUUID', response);
-					this.checkUUID(ip, response.UUID);
+					if (response != null) 
+						this.checkUUID(ip, response.UUID);
 				})
 			}, () => {
 				this.setState({error: true});
