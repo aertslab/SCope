@@ -4,7 +4,7 @@ from setuptools.command.install import install
 
 setup(name='scope-server',
       entry_points={'console_scripts': [
-                        'scope-server = scopeserver:run'
+                        'scope-server = scopeserver:dev'
                         ]
                     },
       version='0.0.1',
