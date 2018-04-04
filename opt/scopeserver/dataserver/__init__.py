@@ -7,6 +7,7 @@ import os
 import time
 from urllib.request import urlopen
 import http
+import sys
 
 class SCopeServer():
 
@@ -68,9 +69,15 @@ class SCopeServer():
         self.start_scope_server()
         self.wait()
 
-def run(dev_env=True):
+def run(dev_env=False):
+    filename, file_extension = os.path.splitext(__file__)
+    if "--bind" in sys.argv:
+        dev_env = True
     scope_server = SCopeServer(dev_env=dev_env)
     scope_server.run()
+
+def dev():
+    run(dev_env=True)
 
 if __name__ == '__main__':
     run(dev_env=False)
