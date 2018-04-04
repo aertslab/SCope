@@ -24,6 +24,7 @@ HOWTO.md
 REFERENCES.md
 RELEASES.md
 TODO.md
+NOTES.md
 
 # Server
 opt/scopeserver/dataserver/__pycache__

@@ -82,7 +82,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     @staticmethod
     def load_gene_mappings():
-        gene_mappings_dir_path = os.path.join('dataserver', 'data', 'gene_mappings') if SCope.DEV_ENV else os.path.join('opt', 'scopeserver', 'dataserver', 'data', 'gene_mappings')
+        gene_mappings_dir_path = os.path.join('dataserver', 'data', 'gene_mappings') if SCope.DEV_ENV else os.path.join(Path(__file__).parents[6], 'data', 'gene_mappings')
         SCope.dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'terminal_mappings.pickle'), 'rb'))
         SCope.hsap_to_dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'hsap_to_dmel_mappings.pickle'), 'rb'))
         SCope.mmus_to_dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'mmus_to_dmel_mappings.pickle'), 'rb'))

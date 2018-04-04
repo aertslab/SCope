@@ -17,53 +17,56 @@ dataDirs.forEach(function(value){
  * Data Server process
  *************************************************************/
 
-const SCOPESERVER_DIST_FOLDER = 'opt/scopeserver/dist'
-const SCOPESERVER_FOLDER = '__init__'
-const SCOPESERVER_MODULE = '__init__' // without .py suffix
+// const DATASERVER_DIST_FOLDER = 'opt/scopeserver/dataserver/dist'
+const DATASERVER_DIST_FOLDER = path.join(app.getAppPath(), "opt", "scopeserver", "dataserver", "dist")
+const DATASERVER_FOLDER = '__init__'
+const DATASERVER_MODULE = '__init__' // without .py suffix
 
-let scopeServerProc = null
+let dataServerProc = null
 
 const isPackaged = () => {
-  const fullPath = path.join(__dirname, SCOPESERVER_DIST_FOLDER)
+  const fullPath = path.join(DATASERVER_DIST_FOLDER)
   return require('fs').existsSync(fullPath)
 }
 
 const getScopeServerScriptPath = () => {
   if (!isPackaged()) {
-    return path.join(__dirname, SCOPESERVER_FOLDER, SCOPESERVER_MODULE + '.py')
+    return path.join(DATASERVER_FOLDER, DATASERVER_MODULE + '.py')
   }
   if (process.platform === 'win32') {
-    return path.join(__dirname, SCOPESERVER_DIST_FOLDER, SCOPESERVER_MODULE, SCOPESERVER_MODULE + '.exe')
+    return path.join(DATASERVER_DIST_FOLDER, DATASERVER_MODULE, DATASERVER_MODULE + '.exe')
   }
-  return path.join(__dirname, SCOPESERVER_DIST_FOLDER, SCOPESERVER_MODULE, SCOPESERVER_MODULE)
+  return path.join(DATASERVER_DIST_FOLDER, DATASERVER_MODULE, DATASERVER_MODULE)
 }
 
-const startScopeServer = () => {
+const startDataServer = () => {
   let script = getScopeServerScriptPath()
-  if (isPackaged()) {
-    scopeServerProc = require('child_process').execFile(script, [], (err, stdout, stderr) => {
+  if(isPackaged()) {
+    console.log("SCope Server Packaged.")
+    dataServerProc = require('child_process').execFile(script, [], (err, stdout, stderr) => {
       if (err) throw err;
       console.log(stdout, stderr);
     });
   } else {
-    scopeServerProc = require('child_process').spawn('python', [script])
+    dataServerProc = require('child_process').spawn('python', [script])
   }
-  if (scopeServerProc != null) {
+  if (dataServerProc != null) {
     console.log('Scope Server started!')
   }
 }
 
-const stopScopeServer = () => {
-  scopeServerProc.kill()
-  scopeServerProc = null
-  scopeServerProc = null
+const stopDataServer = () => {
+  dataServerProc.kill()
+  dataServerProc = null
+  dataServerProc = null
 }
 
 /*************************************************************
  * Bind Server process
  *************************************************************/
 
-const BINDSERVER_FOLDER = 'opt/scopeserver/bindserver'
+// const BINDSERVER_FOLDER = 'opt/scopeserver/bindserver'
+const BINDSERVER_FOLDER = path.join(app.getAppPath(), "opt", "scopeserver", "bindserver")
 const BINDSERVER_MODULE = 'server.js'
 
 let bindServerProc = null
@@ -86,10 +89,9 @@ const startBindServer = () => {
           // throw e;
       }
       // console.log('stdout ', stdout);
-      // console.log('stderr ', stderr);
+      console.log('stderr: ', stderr);
   });
   if (bindServerProc != null) {
-    //console.log(pyProc)
     console.log('Bind Server started!')
   }
 }
@@ -100,23 +102,23 @@ const stopBindServer = () => {
   bindServerProc = null
 }
 
-const startServers = () => {
+const startSCopeServer = () => {
   // Start Data Server
-  startScopeServer()
+  startDataServer()
   // Start Bind Server
   startBindServer()
 }
 
 
-const stopServers = () => {
+const stopSCopeServer = () => {
   // Start Data Server
-  stopScopeServer()
+  stopDataServer()
   // Start Bind Server
   stopBindServer()
 }
 
-app.on('ready', startServers)
-app.on('will-quit', stopServers)
+app.on('ready', startSCopeServer)
+app.on('will-quit', stopSCopeServer)
 
 
 /*************************************************************

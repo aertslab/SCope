@@ -6,6 +6,8 @@ var wss = new WebSocketServer({ port: process.argv[2] });
 var grpcBus = require('grpc-bus');
 var protobuf = require("protobufjs");
 var path = require("path")
+// var pathToModule = require.resolve('protobufjs');
+// console.log(">>"+ pathToModule)
 
 gbBuilder = protobuf.loadProtoFile(path.join(__dirname,'grpc-bus.proto'));
 gbTree = gbBuilder.build().grpcbus;
@@ -42,7 +44,7 @@ wss.on('connection', function connection(ws) {
 
     ws.on('message', function incoming(data, flags) {
       console.log('received (raw):');
-      console.log(data);
+      // console.log(data);
       console.log('with flags:')
       console.dir(flags);
       //var message = JSON.parse(data);
