@@ -1,0 +1,11 @@
+{
+    "dest": "release",
+    "categories": [
+      "Utility",
+      "Biology",
+      "DataVisualization"
+    ],
+    "lintianOverrides": [
+      "changelog-file-missing-in-native-package"
+    ]
+}
