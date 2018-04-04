@@ -3,71 +3,56 @@
 SCope is a fast visualization tool for large-scale and high dimensional scRNA-seq datasets.
 Currently the format of the datasets supported by SCope is .loom. 
 
-## Development
+## Development Mode
 
-### SCope Server
+### Install
 
-- Install
-```
-cd scope-server
-
-# Dependencies
-pip install -r requirements.txt
-
-# Server
-python setup.py develop
-```
-
-- Run (development version)
-```
-scope-server
-```
-
-### SCope Client
-
-- Install
 ```
 npm install
 ```
 
-- Run (development version)
+### Run 
+
+- SCope Server
+```
+cd opt/scopeserver/dataserver
+scope-server
+```
+
+- SCope Client
 ```
 npm run dev
 ```
 
-## Production
+## Production Mode
 
-### Packaging SCope Server
+### 1) Packaging SCope Data Server
 
-Install python 3.6:
+Install conda:
 ```
-sudo apt-get install libsqlite3-dev
-sudo add-apt-repository ppa:jonathonf/python-3.6
-sudo apt-get update
-sudo apt-get install python3.6
-sudo apt-get install libpython3.6-dev
+wget http://bit.ly/miniconda3
+bash miniconda
 ```
 
-Create python virtual environment:
+Create miniconda (python) virtual environment:
 ```
-cd opt/scopeserver
-virtualenv -p python3.6 pyvenv
-source pyvenv/bin/activate
+conda create -n scope python=3.6.2
+conda activate scope
 ```
 
 Install the SCope Server as Python package:
 ```
-cd ..
-python3.6 setup.py develop
+cd opt
+python setup.py develop
 ```
 
-Package the SCope Server:
+Package the SCope Data Server:
 ```
-pip3.6 install pyinstaller
+pip install pyinstaller
 pyinstaller --onedir --hidden-import=scipy._lib.messagestream --hidden-import=pandas._libs.tslibs.timedeltas  --hidden-import=cytoolz.utils --hidden-import=cytoolz._signatures __init__.py
 ```
 
-### Packaging SCope
+### 2) Packaging SCope
 
 First install electron-packager node module:
 ```
@@ -78,11 +63,19 @@ Finally, bundle the SCope app:
 - Linux (x64)
 ```
 npm run package-linux-x64
-sudo tar -zcvf scope-linux-x64.tar.gz scope-linux-x64
+tar -zcvf scope-linux-x64.tar.gz scope-linux-x64
 ```
 Run the binary:
 ```
 ./release/scope-linux-x64/scope
+```
+
+### 3) Creating Single Executable File
+
+#### Debian package
+For more details, follow https://www.christianengvall.se/electron-installer-debian-package/ 
+```
+npm run create-debian-installer
 ```
 
 All the uploaded data from SCope will be put ~/.scope/data
