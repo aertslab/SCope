@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(name='scope-server',
       entry_points={'console_scripts': [
-                        'scope-server = scopeserver:dev'
+                        'scope-server = scopeserver.dataserver:dev'
                         ]
                     },
       version='0.0.1',
