@@ -3,15 +3,26 @@
 SCope is a fast visualization tool for large-scale and high dimensional scRNA-seq datasets.
 Currently the format of the datasets supported by SCope is .loom. 
 
-## Development Mode
+## Requirements
 
-### Install
-
-Install miniconda:
+- Miniconda: 
 ```
 wget http://bit.ly/miniconda3
 bash miniconda3
 ```
+
+- Node.js & npm: 
+```
+# Using Ubuntu
+curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
+For more details and other versions please visit https://github.com/nodesource/distributions
+
+## Development Mode
+Requirements should be fullfilled (see `Requirements` section).
+
+### Install
 
 Create miniconda (python) virtual environment:
 ```
@@ -28,7 +39,6 @@ npm install
 
 - SCope Server
 ```
-cd opt/scopeserver/dataserver
 scope-server
 ```
 
@@ -41,7 +51,7 @@ npm run dev
 
 ### 1) Packaging SCope Data Server
 
-Miniconda should be installed and a `scope` python virtual should be loaded (see `Development Mode` section).
+Requirements should be fullfilled and a `scope` python virtual should be loaded (see `Development Mode` section).
 
 Install the SCope Server as Python package:
 ```
