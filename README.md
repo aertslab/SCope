@@ -5,10 +5,16 @@ Currently the format of the datasets supported by SCope is .loom.
 
 ## Requirements
 
-- Miniconda: 
+- Miniconda:
+
+Download minicond3 from https://conda.io/miniconda.html or use the command line:
 ```
-wget http://bit.ly/miniconda3
-bash miniconda3
+wget --content-disposition http://bit.ly/miniconda3
+```
+
+Install Minconda (Python 3):
+```
+bash Miniconda3-latest-[...].sh
 ```
 
 - Node.js & npm: 
@@ -27,7 +33,7 @@ Requirements should be fullfilled (see `Requirements` section).
 Create miniconda (python) virtual environment:
 ```
 conda create -n scope python=3.6.2
-conda activate scope
+conda activate scope # or source activate scope
 ```
 
 Install SCope:
