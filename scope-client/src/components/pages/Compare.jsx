@@ -231,7 +231,7 @@ class Compare extends Component {
 								else if (configuration == 'one') va = crossAnnotations['one'][columns * i + j]
 								else va = this.getCrossAnnotations(i, j);
 								return (
-									<Grid.Column key={j} stretched className="viewerCell">
+									<Grid.Column key={j} className="viewerCell">
 										{datasetSelector}
 										{annotationDropContainerHorizontal}
 										{annotationDropContainerVertical}

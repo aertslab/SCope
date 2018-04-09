@@ -76,7 +76,9 @@ export default class UploadModal extends Component {
 		xhr.upload.addEventListener('load', (event) => {
 			if (DEBUG) console.log("file uploaded: " + file.name);
             this.setState({ uploadLoomFile: null, uploadLoomProgress: 0 })
-            setTimeout(this.props.onUploaded, 1000);
+            setTimeout(() => {
+                this.props.onUploaded(file.name);
+            }, 1000);
 		})
 		xhr.setRequestHeader("Content-Disposition", "attachment;filename=" + file.name)
 		xhr.send(form);

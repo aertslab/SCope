@@ -17,7 +17,7 @@ const sourceBehaviour = {
         let item = monitor.getItem();
         let dropResult = monitor.getDropResult();
         if (DEBUG) console.log('endDrag', item, dropResult);
-        if (dropResult.dropped && item.src && (dropResult.dropEffect == 'move')) props.handleRemove(item.src, item.name, item.value);        
+        if (dropResult && dropResult.dropped && item.src && (dropResult.dropEffect == 'move')) props.handleRemove(item.src, item.name, item.value);        
     }
 }
 

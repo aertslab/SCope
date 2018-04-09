@@ -77,7 +77,7 @@ export default class Viewer extends Component {
 			<div className="stretched">
 				<canvas id={"viewer"+this.props.name}  >
 				</canvas>
-				<ReactResizeDetector handleWidth skipOnMount onResize={this.onResize.bind(this)} />
+				<ReactResizeDetector skipOnMount onResize={this.onResize.bind(this)} />
 				<Dimmer active={this.state.loading} inverted>
 					<Loader inverted>Loading</Loader>
 				</Dimmer>
@@ -96,11 +96,13 @@ export default class Viewer extends Component {
 	}
 
 	componentDidMount() {
+		if (DEBUG) console.log(this.props.name, 'componentDidMount', this.props);
 		this.zoomSelection = d3.select('#viewer'+this.props.name);
+
 		let bbox = this.zoomSelection.select(function() {return this.parentNode}).node().getBoundingClientRect();
-		if (DEBUG) console.log(this.props.name, 'componentDidMount', this.props, bbox);
 		this.w = bbox.width - VIEWER_MARGIN;
 		this.h = bbox.height - VIEWER_MARGIN;
+
 		this.initGraphics();
 		if (this.props.loomFile != null) {
 			this.getPoints(this.props.loomFile, this.props.activeCoordinates, this.props.activeAnnotations, this.props.superposition, () => {
@@ -122,13 +124,16 @@ export default class Viewer extends Component {
 		if (DEBUG) console.log(this.props.name, 'componentWillReceiveProps', nextProps);
 
 		// TODO: dirty hacks
+		/*
 		let bbox = this.zoomSelection.select(function() {return this.parentNode}).node().getBoundingClientRect();
 		if ((parseInt(this.w) != parseInt(bbox.width - VIEWER_MARGIN)) || (parseInt(this.h) != parseInt(bbox.height - VIEWER_MARGIN))) {
 			if (DEBUG) console.log(nextProps.name, 'changing size', bbox);
 			this.w = bbox.width - VIEWER_MARGIN;
 			this.h = bbox.height - VIEWER_MARGIN;
-			//this.resizeContainer();
+			this.resizeContainer();
 		}
+		*/
+		onResize();
 
 		if (this.props.loomFile != nextProps.loomFile || this.props.activeCoordinates != nextProps.activeCoordinates || this.props.superposition != nextProps.superposition ||
 			(JSON.stringify(nextProps.activeAnnotations) != JSON.stringify(this.state.activeAnnotations)) ) {
@@ -178,10 +183,14 @@ export default class Viewer extends Component {
 		return false;
 	}
 */
-	onResize() {
-		let brect = this.zoomSelection.node().getBoundingClientRect();
-		if ((brect.width != 0) && (brect.width != this.w)) {
-			this.w = brect.width;
+	onResize(width, height) {
+		console.log('onResize', width, height);
+		let bbox = this.zoomSelection.select(function() {return this.parentNode}).node().getBoundingClientRect();
+		let dw = bbox.width - this.w;
+		let dh = bbox.height - this.h;
+		if (((bbox.width != 0) && (VIEWER_MARGIN < dw && dw < -1*VIEWER_MARGIN)) || ((bbox.height != 0) && (VIEWER_MARGIN < dh && dh < -1*VIEWER_MARGIN))) {
+			this.w = bbox.width - VIEWER_MARGIN;
+			this.h = bbox.height - VIEWER_MARGIN;
 			this.resizeContainer();
 		}
 	}
