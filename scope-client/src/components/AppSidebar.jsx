@@ -56,7 +56,7 @@ class AppSidebar extends Component {
 							</Menu.Item>
 							{loomFiles.map((loomFile, i) => {
 								let loomUri = encodeURIComponent(loomFile.loomFilePath);
-								let active = match.params.loom == loomUri;
+								let active = (match.params.loom == loomUri) || (encodeURIComponent(match.params.loom) == loomUri);
 								return (
 									<Link key={i} to={'/' + [match.params.uuid, loomUri, match.params.page].join('/')} onClick={() => {
 										this.props.onMetadataChange(loomFile);

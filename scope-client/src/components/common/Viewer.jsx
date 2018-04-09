@@ -133,7 +133,7 @@ export default class Viewer extends Component {
 			this.resizeContainer();
 		}
 		*/
-		onResize();
+		this.onResize();
 
 		if (this.props.loomFile != nextProps.loomFile || this.props.activeCoordinates != nextProps.activeCoordinates || this.props.superposition != nextProps.superposition ||
 			(JSON.stringify(nextProps.activeAnnotations) != JSON.stringify(this.state.activeAnnotations)) ) {
