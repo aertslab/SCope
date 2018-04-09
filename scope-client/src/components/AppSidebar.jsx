@@ -30,7 +30,7 @@ class AppSidebar extends Component {
 		const { activeCoordinates, settings, loading, loomFiles, uploadModalOpened, spriteScale, spriteAlpha } = this.state;
 		let metadata = {}, coordinates = [];
 		loomFiles.map(loomFile => {
-			if (loomFile.loomFilePath == match.params.loom) {
+			if (loomFile.loomFilePath == decodeURIComponent(match.params.loom)) {
 				metadata = loomFile;
 				coordinates = metadata.cellMetaData.embeddings.map(coords => {
 					return {
@@ -55,9 +55,10 @@ class AppSidebar extends Component {
 								<em>Upload new dataset</em>
 							</Menu.Item>
 							{loomFiles.map((loomFile, i) => {
-								let active = match.params.loom == loomFile.loomFilePath;
+								let loomUri = encodeURIComponent(loomFile.loomFilePath);
+								let active = match.params.loom == loomUri;
 								return (
-									<Link key={i} to={'/' + [match.params.uuid, encodeURIComponent(loomFile.loomFilePath), encodeURIComponent(match.params.page)].join('/')} onClick={() => {
+									<Link key={i} to={'/' + [match.params.uuid, loomUri, match.params.page].join('/')} onClick={() => {
 										this.props.onMetadataChange(loomFile);
 									}}  >
 										<Menu.Item active={active} key={loomFile.loomFilePath} >

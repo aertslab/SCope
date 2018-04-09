@@ -121,8 +121,9 @@ class App extends Component {
 	}
 
 	parseURLParams(props) {
-		let loom = props.match.params.loom;
-		let page = props.match.params.page;
+		let loom = decodeURIComponent(props.match.params.loom);
+		let page = decodeURIComponent(props.match.params.page);
+		if (DEBUG) console.log('Query params - loom: ', loom, ' page: ', page);
 		BackendAPI.setActivePage(page ? page : 'welcome');
 		BackendAPI.setActiveLoom(loom ? loom : '');
 		ReactGA.pageview('/' + encodeURIComponent(loom) + '/' + encodeURIComponent(page));
@@ -199,7 +200,9 @@ class App extends Component {
 					}, timer);
 				}
 				ReactGA.set({ userId: uuid });
-				history.replace('/' + [uuid, encodeURIComponent(match.params.loom ? match.params.loom : '*'), encodeURIComponent(match.params.page ? match.params.page : 'welcome') ].join('/'));
+				let loom = match.params.loom ? decodeURIComponent(match.params.loom) : '*';
+				let page = match.params.page ? decodeURIComponent(match.params.page) : 'welcome';
+				history.replace('/' + [uuid, encodeURIComponent(loom), encodeURIComponent(page)].join('/'));
 			});
 		}, () => {
 			this.setState({error: true});
