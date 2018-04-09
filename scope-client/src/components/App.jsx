@@ -20,6 +20,7 @@ import About from './pages/About';
 const publicIp = require('public-ip');
 const timer = 60 * 1000;
 const cookieName = 'SCOPE_UUID';
+const sidebarCookieName = 'SCOPE_SIDEBAR';
 
 class App extends Component {
 	static propTypes = {
@@ -40,7 +41,7 @@ class App extends Component {
 	}
 
 	render() {
-		const { loading, metadata, error, loaded } = this.state;
+		const { loading, metadata, error, loaded, isSidebarVisible } = this.state;
 
 		let errorDimmer = (
 			<Dimmer active={error} >
@@ -51,6 +52,8 @@ class App extends Component {
 				</Header>
 			</Dimmer>
 		);
+
+		console.log('isSidebarVisible', isSidebarVisible);
 
 		return (
 			<Segment className="parentView">
@@ -76,7 +79,7 @@ class App extends Component {
 							timeout={this.timeout} 
 						/>
 						<Sidebar.Pushable>
-							<AppSidebar visible={this.state.isSidebarVisible} onMetadataChange={this.onMetadataChange.bind(this)} />
+							<AppSidebar visible={isSidebarVisible} onMetadataChange={this.onMetadataChange.bind(this)} />
 							<Sidebar.Pusher>
 								<Route path="/:uuid/:loom?/welcome"  component={Welcome}  />
 								<Route path="/:uuid/:loom?/dataset"  component={Dataset}  />
@@ -108,6 +111,9 @@ class App extends Component {
 		if (DEBUG) console.log('App componentWillMount', this.props);
 		this.parseURLParams(this.props);
 		this.getUUIDFromIP(this.props);
+		let isSidebarVisible = this.props.cookies.get(sidebarCookieName);
+		if (isSidebarVisible == '1') this.setState({isSidebarVisible: true});
+		if (isSidebarVisible == '0') this.setState({isSidebarVisible: false});
 	}
 
 	componentWillUnmount() {
@@ -215,6 +221,7 @@ class App extends Component {
 
 	toggleSidebar() {
 		let state = !this.state.isSidebarVisible;
+		this.props.cookies.set(sidebarCookieName, state ? 1 : 0, { path: '/' });
 		this.setState({isSidebarVisible: state});
 		ReactGA.event({
 			category: 'settings',
