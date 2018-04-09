@@ -2,7 +2,7 @@ import 'rc-slider/assets/index.css';
 import 'rc-tooltip/assets/bootstrap.css';
 import _ from 'lodash'
 import React, { Component } from 'react'
-import { Menu } from 'semantic-ui-react'
+import { Menu, Grid } from 'semantic-ui-react'
 import Slider, { Range } from 'rc-slider';
 import { BackendAPI } from '../common/API' 
 import ReactGA from 'react-ga';
@@ -63,21 +63,24 @@ export default class ViewerToolbar extends Component {
 		let levelsHeader = levels ? <p>Expression<br />levels</p> : '';
 
 		return (
-			<div>
-				<Menu style={{position: "relative", top: 0, left: 0}} vertical fluid className="toolbar" >
-					<Menu.Item name='lasso' active={activeTool === 'lasso'} onClick={this.handleItemClick.bind(this)}>
-						<div title="Lasso Tool" style={{ display: "block", width: 20, height: 20, backgroundImage: 'url("src/images/lasso.svg")', backgroundSize: "cover" }}></div>
-					</Menu.Item>
-					<Menu.Item name='s-zoom' active={activeTool === 's-zoom'} onClick={this.handleItemClick.bind(this)}>
-						<div title="Semantic Zoom" style={{ display: "block", width: 20, height: 20, backgroundImage: 'url("src/images/expad-arrows.svg")', backgroundSize: "cover" }}></div>
-					</Menu.Item>
-				</Menu>
-				<br />
-				{levelsHeader}				
-				<div>
+			<Grid>
+				<Grid.Row>
+					<Menu style={{position: "relative", top: 0, left: 0}} vertical fluid className="toolbar" >
+						<Menu.Item name='lasso' active={activeTool === 'lasso'} onClick={this.handleItemClick.bind(this)}>
+							<div title="Lasso Tool" style={{ display: "block", width: 20, height: 20, backgroundImage: 'url("src/images/lasso.svg")', backgroundSize: "cover" }}></div>
+						</Menu.Item>
+						<Menu.Item name='s-zoom' active={activeTool === 's-zoom'} onClick={this.handleItemClick.bind(this)}>
+							<div title="Semantic Zoom" style={{ display: "block", width: 20, height: 20, backgroundImage: 'url("src/images/expad-arrows.svg")', backgroundSize: "cover" }}></div>
+						</Menu.Item>
+					</Menu>
+				</Grid.Row>
+				<Grid.Row>
+					{levelsHeader}				
+				</Grid.Row>
+				<Grid.Row>
 					{sliders}		
-				</div>
-			</div>
+				</Grid.Row>
+			</Grid>
 		);
 	}
 

@@ -14,6 +14,8 @@ import AnnotationDropContainer from '../common/AnnotationDropContainer'
 import ViewerDropContainer from '../common/ViewerDropContainer'
 import ReactGA from 'react-ga';
 
+
+
 class Compare extends Component {
 	constructor(props) {
 		super(props);
@@ -606,8 +608,9 @@ class Compare extends Component {
 				selections++;
 			})
 
+			let bbox = d3.select("#chart-distro1").node().getBoundingClientRect();
 			var margin = {top: 30, right: 50, bottom: 70, left: 50};
-			var width = 440 - margin.left - margin.right;
+			var width = bbox.width - margin.left - margin.right;
 			var height = 200 - margin.top - margin.bottom;
 			var min = Infinity, max = -Infinity;
 

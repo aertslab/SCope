@@ -77,7 +77,7 @@ export default class Viewer extends Component {
 			<div className="stretched">
 				<canvas id={"viewer"+this.props.name}  >
 				</canvas>
-				<ReactResizeDetector skipOnMount onResize={this.onResize.bind(this)} />
+				<ReactResizeDetector skipOnMount handleWidth handleHeight onResize={this.onResize.bind(this)} />
 				<Dimmer active={this.state.loading} inverted>
 					<Loader inverted>Loading</Loader>
 				</Dimmer>
@@ -184,11 +184,11 @@ export default class Viewer extends Component {
 	}
 */
 	onResize(width, height) {
-		console.log('onResize', width, height);
 		let bbox = this.zoomSelection.select(function() {return this.parentNode}).node().getBoundingClientRect();
-		let dw = bbox.width - this.w;
-		let dh = bbox.height - this.h;
-		if (((bbox.width != 0) && (VIEWER_MARGIN < dw && dw < -1*VIEWER_MARGIN)) || ((bbox.height != 0) && (VIEWER_MARGIN < dh && dh < -1*VIEWER_MARGIN))) {
+		console.log(this.props.name, 'onResize', width, height, bbox);
+		let dw = bbox.width - this.w - VIEWER_MARGIN;
+		let dh = bbox.height - this.h - VIEWER_MARGIN;
+		if (((bbox.width != 0) && (2*VIEWER_MARGIN < dw || dw < -2*VIEWER_MARGIN)) || ((bbox.height != 0) && (2*VIEWER_MARGIN < dh || dh < -2*VIEWER_MARGIN))) {
 			this.w = bbox.width - VIEWER_MARGIN;
 			this.h = bbox.height - VIEWER_MARGIN;
 			this.resizeContainer();
@@ -196,7 +196,7 @@ export default class Viewer extends Component {
 	}
 
 	resizeContainer() {
-		if (DEBUG) console.log(this.props.name, 'new dimensions', this.w, this.h);
+		if (DEBUG) console.log(this.props.name, 'resizeContainer', this.w, this.h);
 		this.forceUpdate();
 		this.renderer.resize(this.w, this.h);
 		this.renderer.reset();
