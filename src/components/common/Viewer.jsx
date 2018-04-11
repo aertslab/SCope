@@ -5,6 +5,7 @@ import { BackendAPI } from './API'
 import { Dimmer, Loader } from 'semantic-ui-react'
 import ReactResizeDetector from 'react-resize-detector';
 import ReactGA from 'react-ga';
+import zlib from 'zlib';
 
 const DEFAULT_POINT_COLOR = 'A6A6A6';
 const VIEWER_MARGIN = 5;
@@ -628,6 +629,19 @@ export default class Viewer extends Component {
 		this.endBenchmark("transformPoints");
 	}
 
+	chunkString(str, length) {
+		return str.match(new RegExp('.{1,' + length + '}', 'g'));
+	}
+
+	updateColors = (response, colors) => {
+		if(response !== null) {
+			this.setState({colors: colors});
+			this.updateDataPoints();
+		} else {
+			this.resetDataPoints();
+		}
+	}
+
 	getFeatureColors(features, loomFile, thresholds, annotations, scale, superposition) {
 		if (scale) {
 			this.setState({activeFeatures: JSON.parse(JSON.stringify(features)), customScale: scale.slice(0)});
@@ -671,12 +685,20 @@ export default class Viewer extends Component {
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
 				if (DEBUG) console.log(this.props.name, 'getFeatureColors', response);
-				this.endBenchmark("getFeatureColors")
-				if(response !== null) {
-					this.setState({colors: response.color});
-					this.updateDataPoints();
+				// Convert object to ArrayBuffer
+				let responseBuffered = new Buffer(response.compressedColor.toArrayBuffer())
+				// Uncompress
+				if(response.hasAddCompressionLayer) {
+					zlib.inflate(responseBuffered, (err, uncompressedMessage) => {
+						if(err) console.log(err)
+						else {
+							this.endBenchmark("getFeatureColors")
+							this.updateColors(response, this.chunkString(uncompressedMessage.toString(), 6))
+						}
+					});
 				} else {
-					this.resetDataPoints();
+					this.endBenchmark("getFeatureColors")
+					this.updateColors(response, response.color)
 				}
 			});
 		}, () => {
@@ -700,17 +722,21 @@ export default class Viewer extends Component {
 			p.destroy();
 		})
 		let pts = _.zip(this.state.coord.idx, this.state.coord.x, this.state.coord.y, colors ? colors : this.state.colors);
+		this.startBenchmark("sort")
 		pts.sort((a, b) =>{
 			let ca = this.hexToRgb(a[3]);
 			let cb = this.hexToRgb(b[3]);
 			let r = (ca ? (ca.r + ca.g + ca.b) : 0) - (cb ? (cb.r + cb.g + cb.b) : 0);
 			return r;
 		})
+		this.endBenchmark("sort")
+		this.startBenchmark("map")
 		pts.map((p, i) => {
 			let point = this.getTexturedColorPoint(p[1], p[2], p[3])
 			point._originalData.idx = p[0];
 			this.container.addChildAt(point, i);
 		})
+		this.endBenchmark("map")
 		this.endBenchmark("updateDataPoints");
 		this.transformDataPoints();
 	}
