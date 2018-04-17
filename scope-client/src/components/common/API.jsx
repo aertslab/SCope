@@ -28,6 +28,7 @@ class API {
 		this.featureChangeListeners = {};
 
 		this.settings = {
+			sortCells: true,
 			hasLogTransform: true,
 			hasCpmNormalization: false
 		}

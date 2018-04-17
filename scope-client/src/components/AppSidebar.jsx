@@ -94,6 +94,10 @@ class AppSidebar extends Component {
 							<Menu.Item>
 								<Checkbox toggle label="CPM normalize" checked={settings.hasCpmNormalization} onChange={this.toggleCpmNormization.bind(this)} />
 							</Menu.Item>
+							<Menu.Item>Plot enhancement</Menu.Item>
+							<Menu.Item>
+								<Checkbox toggle label="Expression-based plotting" checked={settings.sortCells} onChange={this.toggleSortCells.bind(this)} />
+							</Menu.Item>
 							<Menu.Item>Point size</Menu.Item>
 							<Menu.Item>
 								<TooltipSlider
@@ -184,6 +188,16 @@ class AppSidebar extends Component {
 			category: 'upload',
 			action: 'toggle loom upload modal',
 			label: state ? 'on' : 'off'
+		});
+	}
+
+	toggleSortCells() {	
+		let settings = BackendAPI.setSetting('sortCells', !this.state.settings.sortCells);
+		this.setState({settings: settings});
+		ReactGA.event({
+			category: 'settings',
+			action: 'toggle cell sorting',
+			label: settings.sortCells ? 'on' : 'off'
 		});
 	}
 

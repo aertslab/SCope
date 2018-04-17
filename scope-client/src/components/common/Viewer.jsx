@@ -563,16 +563,16 @@ export default class Viewer extends Component {
 				if (DEBUG) console.log(this.props.name, 'getCoordinates', response);
 				this.container.removeChildren();
 				if (response) {
-					let c = {
+					let coord = {
+						idx: response.cellIndices,
 						x: response.x,
-						y: response.y,
-						idx: response.cellIndices
+						y: response.y
 					}
-					this.setState({ coord: c });
+					this.setState({ coord });
 					this.setScalingFactor();
 				} else {
 					console.log('Could not get the coordinates - empty response!')
-					this.setState({ coord:  {x: [], y: []}});
+					this.setState({ coord:  { idx: [], x: [], y: [] } });
 				}
 				this.endBenchmark("getCoordinates");
 				this.initializeDataPoints(callback ? true : false);
@@ -708,18 +708,27 @@ export default class Viewer extends Component {
 		this.container.removeChildren(0, n).map((p) => {
 			p.destroy();
 		})
-		let pts = _.zip(this.state.coord.idx, this.state.coord.x, this.state.coord.y, colors ? colors : this.state.colors);
-		pts.sort((a, b) =>{
-			let ca = this.hexToRgb(a[3]);
-			let cb = this.hexToRgb(b[3]);
-			let r = (ca ? (ca.r + ca.g + ca.b) : 0) - (cb ? (cb.r + cb.g + cb.b) : 0);
-			return r;
-		})
-		pts.map((p, i) => {
-			let point = this.getTexturedColorPoint(p[1], p[2], p[3])
-			point._originalData.idx = p[0];
-			this.container.addChildAt(point, i);
-		})
+		let settings = BackendAPI.getSettings();
+		if (settings.sortCells) {
+			let pts = _.zip(this.state.coord.idx, this.state.coord.x, this.state.coord.y, colors ? colors : this.state.colors);
+			pts.sort((a, b) =>{
+				let ca = this.hexToRgb(a[3]);
+				let cb = this.hexToRgb(b[3]);
+				let r = (ca ? (ca.r + ca.g + ca.b) : 0) - (cb ? (cb.r + cb.g + cb.b) : 0);
+				return r;
+			})
+			pts.map((p, i) => {
+				let point = this.getTexturedColorPoint(p[1], p[2], p[3])
+				point._originalData.idx = p[0];
+				this.container.addChildAt(point, i);
+			})
+		} else {
+			this.state.coord.idx.map((ci, i) => {
+				let point = this.getTexturedColorPoint(this.state.coord.x[i], this.state.coord.y[i], this.state.colors[i])
+				point._originalData.idx = ci;
+				this.container.addChildAt(point, i);
+			})
+		}
 		this.endBenchmark("updateDataPoints");
 		this.transformDataPoints();
 	}
