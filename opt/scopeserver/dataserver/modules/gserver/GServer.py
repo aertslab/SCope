@@ -56,14 +56,6 @@ BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "b
 
 hexarr = np.vectorize('{:02x}'.format)
 
-# globalLooms = set([
-#                    'FlyBrain_56k_v6.loom',
-#                    'Desplan_OpticLobe_V1.loom',
-#                    'Luo_OPN_v1.loom',
-#                    'FlyBrain_157k_v1.loom',
-#                    'dentate_gyrus_C_10X_V2_update.loom'
-#                    ])
-
 data_dirs = {"Loom": {"path": os.path.join("data", "my-looms"), "message": "No data folder detected. Making loom data folder in current directory."},
              "GeneSet": {"path": os.path.join("data", "my-gene-sets"), "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."},
              "LoomAUCellRankings": {"path": os.path.join("data", "my-aucell-rankings"), "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
@@ -97,17 +89,17 @@ class SCope(s_pb2_grpc.MainServicer):
     @staticmethod
     def set_root_dir():
         SCope.root = os.path.join(Path(__file__).parents[3], 'dataserver') if SCope.DEV_ENV else os.path.join(str(Path.home()), ".scope")
-    
+
     @staticmethod
     def set_data_dirs():
-        SCope.data_dirs = {"Loom": {"path":os.path.join(SCope.root,"data","my-looms"), "message": "No data folder detected. Making loom data folder in current directory."}
-                         , "GeneSet": {"path":os.path.join(SCope.root,"data","my-gene-sets"), "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."}
-                         , "LoomAUCellRankings": {"path":os.path.join(SCope.root,"data","my-aucell-rankings"), "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
+        SCope.data_dirs = {"Loom": {"path": os.path.join(SCope.root, "data", "my-looms"), "message": "No data folder detected. Making loom data folder in current directory."},
+                           "GeneSet": {"path": os.path.join(SCope.root, "data", "my-gene-sets"), "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."},
+                           "LoomAUCellRankings": {"path": os.path.join(SCope.root, "data", "my-aucell-rankings"), "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
 
     @staticmethod
     def get_logs_dir():
-        return os.path.join(SCope.root,"logs")
-    
+        return os.path.join(SCope.root, "logs")
+
     @staticmethod
     def get_data_dir_path_by_file_type(file_type, UUID=None):
         if UUID is not None:
@@ -929,15 +921,15 @@ class GeneSetEnrichment:
                        else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
                        for r, g, b in zip(vals, np.zeros(len(aucs)), np.zeros(len(aucs)))]
             if len(self.annotation) > 0:
-                cell_indices = self.get_anno_cells(loom_file_path=self.loom_file_path, annotations=annotation, logic=logic)
+                cell_indices = self.get_anno_cells(loom_file_path=self.loom_file_path, annotations=annotation, logic=logic)  # This is broken and/or not neccessary
             else:
                 cell_indices = list(range(self.scope.get_nb_cells(self.loom_file_path)))
             return s_pb2.GeneSetEnrichmentReply(progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message()),
                                                 isDone=True,
-                                                cellValues=s_pb2.CellColorByFeaturesReply(color=hex_vec
-                                                                                        , vmax=vmax
-                                                                                        , maxVmax=max_vmax
-                                                                                        , cellIndices=cell_indices))
+                                                cellValues=s_pb2.CellColorByFeaturesReply(color=hex_vec,
+                                                                                          vmax=vmax,
+                                                                                          maxVmax=max_vmax,
+                                                                                          cellIndices=cell_indices))
 
     def get_method(self):
             return self.method

@@ -9,6 +9,7 @@ from urllib.request import urlopen
 import http
 import sys
 
+
 class SCopeServer():
 
     def __init__(self, g_port=50052, p_port=50051, x_port=8081, dev_env=True):
@@ -18,13 +19,13 @@ class SCopeServer():
         self.p_port = p_port
         self.x_port = x_port
         self.dev_env = dev_env
-    
+
     def start_bind_server(self):
         self.xs_thread = threading.Thread(target=xs.run, args=(self.run_event,), kwargs={'port': self.x_port})
         self.xs_thread.start()
 
     def start_data_server(self):
-        self.gs_thread = threading.Thread(target=gs.serve, args=(self.run_event,self.dev_env), kwargs={'port': self.g_port})
+        self.gs_thread = threading.Thread(target=gs.serve, args=(self.run_event, self.dev_env), kwargs={'port': self.g_port})
         self.ps_thread = threading.Thread(target=ps.run, args=(self.run_event,), kwargs={'port': self.p_port})
         self.gs_thread.start()
         self.ps_thread.start()
@@ -54,13 +55,12 @@ class SCopeServer():
 
     def run(self):
         print('''\
- ____   ____                    ____                           
-/ ___| / ___|___  _ __   ___   / ___|  ___ _ ____   _____ _ __ 
+ ____   ____                    ____
+/ ___| / ___|___  _ __   ___   / ___|  ___ _ ____   _____ _ __
 \___ \| |   / _ \| '_ \ / _ \  \___ \ / _ \ '__\ \ / / _ \ '__|
- ___) | |__| (_) | |_) |  __/   ___) |  __/ |   \ V /  __/ |   
-|____/ \____\___/| .__/ \___|  |____/ \___|_|    \_/ \___|_|   
-                 |_|   
-                                                       
+ ___) | |__| (_) | |_) |  __/   ___) |  __/ |   \ V /  __/ |
+|____/ \____\___/| .__/ \___|  |____/ \___|_|    \_/ \___|_|
+                 |_|
         ''')
         if self.dev_env:
             print("Running SCope Server in development mode...")
@@ -69,6 +69,7 @@ class SCopeServer():
         self.start_scope_server()
         self.wait()
 
+
 def run(dev_env=False):
     filename, file_extension = os.path.splitext(__file__)
     if "--bind" in sys.argv:
@@ -76,9 +77,10 @@ def run(dev_env=False):
     scope_server = SCopeServer(dev_env=dev_env)
     scope_server.run()
 
+
 def dev():
     run(dev_env=True)
 
+
 if __name__ == '__main__':
     run(dev_env=False)
-
