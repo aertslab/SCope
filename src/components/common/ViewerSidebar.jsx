@@ -102,7 +102,7 @@ class ViewerSidebar extends Component {
 											if (activePage == 'regulon') {
 												this.setState({currentPage: 'gene'});
 												BackendAPI.setActivePage('gene');
-												history.push('/' + [match.params.uuid, encodeURIComponent(match.params.loom ? match.params.loom : '*'), 'gene' ].join('/'));
+												history.push('/' + [match.params.uuid, match.params.loom ? match.params.loom : '*', 'gene' ].join('/'));
 											}											
 											BackendAPI.getConnection().then((gbc) => {
 												gbc.services.scope.Main.getFeatures(query, (err, response) => {

@@ -17,7 +17,7 @@ class AppHeader extends Component {
 	render() {
 		const { match, location } = this.props;
 		const { timeout } = this.state;
-		let metadata = BackendAPI.getLoomMetadata(match.params.loom);
+		let metadata = BackendAPI.getLoomMetadata(decodeURIComponent(match.params.loom));
 		let menu = this.menuList(metadata);
 
 		return (
@@ -68,9 +68,9 @@ class AppHeader extends Component {
 			menu.map((item) => {
 				if ((item.path == match.params.page) && (!item.display))  {
 					if (metadata) {
-						history.replace('/'+ [match.params.uuid, encodeURIComponent(match.params.loom), 'dataset' ].join('/'));
+						history.replace('/'+ [match.params.uuid, match.params.loom, 'dataset' ].join('/'));
 					} else {
-						history.replace('/'+ [match.params.uuid, encodeURIComponent(match.params.loom), 'welcome' ].join('/'));
+						history.replace('/'+ [match.params.uuid, match.params.loom, 'welcome' ].join('/'));
 					}
 				}
 			});

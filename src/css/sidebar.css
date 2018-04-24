@@ -84,3 +84,10 @@
 .ui.pointing.secondary.menu {
 	margin: 0px;
 }
+
+.ui.modal.transition.visible.active {
+	margin-top: 0px !important;
+}
+.rc-slider {
+	margin: 0px !important;
+}

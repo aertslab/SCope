@@ -30,7 +30,7 @@ class AppSidebar extends Component {
 		const { activeCoordinates, settings, loading, loomFiles, uploadModalOpened, spriteScale, spriteAlpha } = this.state;
 		let metadata = {}, coordinates = [];
 		loomFiles.map(loomFile => {
-			if (loomFile.loomFilePath == match.params.loom) {
+			if (loomFile.loomFilePath == decodeURIComponent(match.params.loom)) {
 				metadata = loomFile;
 				coordinates = metadata.cellMetaData.embeddings.map(coords => {
 					return {
@@ -55,9 +55,10 @@ class AppSidebar extends Component {
 								<em>Upload new dataset</em>
 							</Menu.Item>
 							{loomFiles.map((loomFile, i) => {
-								let active = match.params.loom == loomFile.loomFilePath;
+								let loomUri = encodeURIComponent(loomFile.loomFilePath);
+								let active = (match.params.loom == loomUri) || (encodeURIComponent(match.params.loom) == loomUri);
 								return (
-									<Link key={i} to={'/' + [match.params.uuid, encodeURIComponent(loomFile.loomFilePath), encodeURIComponent(match.params.page)].join('/')} onClick={() => {
+									<Link key={i} to={'/' + [match.params.uuid, loomUri, match.params.page].join('/')} onClick={() => {
 										this.props.onMetadataChange(loomFile);
 									}}  >
 										<Menu.Item active={active} key={loomFile.loomFilePath} >
@@ -92,6 +93,10 @@ class AppSidebar extends Component {
 							</Menu.Item>
 							<Menu.Item>
 								<Checkbox toggle label="CPM normalize" checked={settings.hasCpmNormalization} onChange={this.toggleCpmNormization.bind(this)} />
+							</Menu.Item>
+							<Menu.Item>Plot enhancement</Menu.Item>
+							<Menu.Item>
+								<Checkbox toggle label="Expression-based plotting" checked={settings.sortCells} onChange={this.toggleSortCells.bind(this)} />
 							</Menu.Item>
 							<Menu.Item>Point size</Menu.Item>
 							<Menu.Item>
@@ -183,6 +188,16 @@ class AppSidebar extends Component {
 			category: 'upload',
 			action: 'toggle loom upload modal',
 			label: state ? 'on' : 'off'
+		});
+	}
+
+	toggleSortCells() {	
+		let settings = BackendAPI.setSetting('sortCells', !this.state.settings.sortCells);
+		this.setState({settings: settings});
+		ReactGA.event({
+			category: 'settings',
+			action: 'toggle cell sorting',
+			label: settings.sortCells ? 'on' : 'off'
 		});
 	}
 
