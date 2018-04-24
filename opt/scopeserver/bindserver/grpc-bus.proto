@@ -1,0 +1,152 @@
+syntax="proto3";
+package grpcbus;
+
+// Wrapper for a message from client
+message GBClientMessage {
+  // Service management
+  GBCreateService service_create = 1;
+  GBReleaseService service_release = 2;
+
+  // Call management
+  GBCreateCall call_create = 3;
+  // Terminates a call
+  GBCallEnd    call_end    = 4;
+  GBSendCall   call_send   = 5;
+}
+
+message GBServerMessage {
+  // service management responses
+  GBCreateServiceResult service_create = 1;
+  GBReleaseServiceResult service_release = 2;
+
+  // Call management
+  GBCreateCallResult call_create = 3;
+  GBCallEvent         call_event = 4;
+  GBCallEnded         call_ended = 5;
+}
+
+// Information about a service
+message GBServiceInfo {
+  // Endpoint
+  string endpoint = 1;
+  // Fully qualified service identifier
+  string service_id = 2;
+  // TODO: figure out how to serialize credentials
+}
+
+// Initialize a new Service.
+message GBCreateService {
+  // ID of the service, client-generated, unique.
+  int32 service_id = 1;
+  GBServiceInfo service_info = 2;
+}
+
+// Release an existing / pending Service.
+message GBReleaseService {
+  int32 service_id = 1;
+}
+
+message GBMetadataValues {
+  repeated string values = 1;
+}
+
+message GBCallInfo {
+  string method_id = 1;
+  bytes bin_argument = 2;
+  // Meta is a map from string to []string
+  // e.g: https://godoc.org/google.golang.org/grpc/metadata#MD
+  map<string, GBMetadataValues> metadata = 3;
+}
+
+// Create a call
+message GBCreateCall {
+  int32 service_id = 1;
+  int32 call_id = 2;
+  // Info
+  GBCallInfo info = 3;
+}
+
+// When the call is ended
+message GBCallEnded {
+  int32 call_id = 1;
+  int32 service_id = 2;
+}
+
+// End the call
+message GBEndCall {
+  int32 call_id = 1;
+  int32 service_id = 2;
+}
+
+// Send a message on a streaming call
+message GBSendCall {
+  int32 call_id = 1;
+  int32 service_id = 2;
+  bytes bin_data = 3;
+  // Do we want to just send end() over a streaming call?
+  bool is_end = 4;
+}
+
+// Result of attempting to create a service
+message GBCreateServiceResult {
+  // ID of service, client-generated, unique
+  int32 service_id = 1;
+  // Result
+  ECreateServiceResult result = 2;
+  // Error details
+  string error_details = 3;
+
+  enum ECreateServiceResult {
+    // Success
+    SUCCESS = 0;
+    // Invalid service ID, retry with a new one.
+    INVALID_ID = 1;
+    // GRPC internal error constructing the service.
+    GRPC_ERROR = 2;
+  }
+}
+
+// When the server releases a service
+message GBReleaseServiceResult {
+  int32 service_id = 1;
+}
+
+// Result of creating a call.
+// This is sent immediately after starting call.
+message GBCreateCallResult {
+  int32 call_id = 1;
+  int32 service_id = 4;
+
+  // Result
+  ECreateCallResult result = 2;
+  string error_details = 3;
+
+  enum ECreateCallResult {
+    // Success
+    SUCCESS = 0;
+    // Invalid call ID, retry with a new one.
+    INVALID_ID = 1;
+    // GRPC internal error initializing the call
+    GRPC_ERROR = 2;
+  }
+}
+
+// Received message during streaming call.
+message GBCallEvent {
+  // Call ID
+  int32 call_id = 1;
+  // Service ID
+  int32 service_id = 4;
+  // Event ID
+  string event = 2;
+  // JSON data.
+  string json_data = 3;
+  // Binary data
+  bytes bin_data = 5;
+}
+
+// Terminate a call
+message GBCallEnd {
+  int32 call_id = 1;
+  int32 service_id = 2;
+}
