@@ -12,6 +12,7 @@ import base64
 import threading
 import pickle
 import uuid
+from appdirs import AppDirs
 from collections import OrderedDict, defaultdict
 from functools import lru_cache
 from itertools import compress
@@ -27,6 +28,11 @@ _UUID_TIMEOUT = _ONE_DAY_IN_SECONDS * 5
 _LOWER_LIMIT_RGB = 0
 _UPPER_LIMIT_RGB = 225
 _NO_EXPR_RGB = 166
+
+appName = 'SCope'
+appAuthor = 'Aertslab'
+appVersion = '1.0'
+
 
 BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "bf9360", "1d331a", "79baf2", "deb6f2",
                   "990000", "7f6240", "283326", "2d4459", "8f00b3", "4c0000", "ccb499", "00f220", "accbe6", "520066",
@@ -56,10 +62,20 @@ BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "b
 
 hexarr = np.vectorize('{:02x}'.format)
 
-data_dirs = {"Loom": {"path": os.path.join("data", "my-looms"), "message": "No data folder detected. Making loom data folder in current directory."},
-             "GeneSet": {"path": os.path.join("data", "my-gene-sets"), "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."},
-             "LoomAUCellRankings": {"path": os.path.join("data", "my-aucell-rankings"), "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
+platformDirs = AppDirs(appname=appName, appauthor=appAuthor)
 
+data_dirs = {"Loom": {"path": os.path.join(platformDirs.user_data_dir, "my-looms"),
+                      "message": "No data folder detected. Making loom data folder: {0}.".format(str(os.path.join(platformDirs.user_data_dir, "my-looms")))},
+             "GeneSet": {"path": os.path.join(platformDirs.user_data_dir, "my-gene-sets"),
+                         "message": "No gene-sets folder detected. Making gene-sets data folder in current directory: {0}.".format(str(os.path.join(platformDirs.user_data_dir, "my-gene-sets")))},
+             "LoomAUCellRankings": {"path": os.path.join(platformDirs.user_data_dir, "my-aucell-rankings"),
+                                    "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory: {0}.".format(str(os.path.join(platformDirs.user_data_dir, "my-aucell-rankings")))},
+             "Config": {"path": os.path.join(platformDirs.user_config_dir),
+                        "message": "No Config folder detected. Making Config folder: {0}.".format(str(os.path.join(platformDirs.user_config_dir)))},
+             "Logs": {"path": os.path.join(platformDirs.user_log_dir),
+                      "message": "No Logs folder detected. Making Logs folder: {0}.".format(str(os.path.join(platformDirs.user_log_dir)))}}
+
+print(data_dirs)
 curUUIDs = {}
 uploadedLooms = defaultdict(lambda: set())
 
@@ -68,15 +84,20 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def __init__(self):
         # Create the data directories
-        SCope.set_root_dir()
-        SCope.set_data_dirs()
+        # SCope.set_root_dir()
+        # SCope.set_data_dirs()
         SCope.create_global_dirs()
-        SCope.create_uuid_log()
-        SCope.load_gene_mappings()
+
+        self.data_dirs = data_dirs
         self.active_loom_connections = {}
         self.loom_dir = SCope.get_data_dir_path_by_file_type("Loom")
         self.gene_sets_dir = SCope.get_data_dir_path_by_file_type("GeneSet")
         self.rankings_dir = SCope.get_data_dir_path_by_file_type("LoomAUCellRankings")
+        self.config_dir = SCope.get_data_dir_path_by_file_type("Config")
+        self.logs_dir = SCope.get_data_dir_path_by_file_type("Logs")
+
+        SCope.load_gene_mappings()
+        self.create_uuid_log()
         self.set_global_data()
 
     @staticmethod
@@ -86,41 +107,41 @@ class SCope(s_pb2_grpc.MainServicer):
         SCope.hsap_to_dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'hsap_to_dmel_mappings.pickle'), 'rb'))
         SCope.mmus_to_dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'mmus_to_dmel_mappings.pickle'), 'rb'))
 
-    @staticmethod
-    def set_root_dir():
-        SCope.root = os.path.join(Path(__file__).parents[3], 'dataserver') if SCope.DEV_ENV else os.path.join(str(Path.home()), ".scope")
-
-    @staticmethod
-    def set_data_dirs():
-        SCope.data_dirs = {"Loom": {"path": os.path.join(SCope.root, "data", "my-looms"), "message": "No data folder detected. Making loom data folder in current directory."},
-                           "GeneSet": {"path": os.path.join(SCope.root, "data", "my-gene-sets"), "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."},
-                           "LoomAUCellRankings": {"path": os.path.join(SCope.root, "data", "my-aucell-rankings"), "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
-
-    @staticmethod
-    def get_logs_dir():
-        return os.path.join(SCope.root, "logs")
+    # @staticmethod
+    # def set_root_dir():
+    #     SCope.root = os.path.join(Path(__file__).parents[3], 'dataserver') if SCope.DEV_ENV else os.path.join(str(Path.home()), ".scope")
+    #
+    # @staticmethod
+    # def set_data_dirs():
+    #     data_dirs = {"Loom": {"path": os.path.join(SCope.root, "data", "my-looms"), "message": "No data folder detected. Making loom data folder in current directory."},
+    #                        "GeneSet": {"path": os.path.join(SCope.root, "data", "my-gene-sets"), "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."},
+    #                        "LoomAUCellRankings": {"path": os.path.join(SCope.root, "data", "my-aucell-rankings"), "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
+    #
+    # @staticmethod
+    # def get_logs_dir():
+    #     return os.path.join(SCope.root, "logs")
 
     @staticmethod
     def get_data_dir_path_by_file_type(file_type, UUID=None):
         if UUID is not None:
-            globalDir = SCope.data_dirs[file_type]["path"]
+            globalDir = data_dirs[file_type]["path"]
             UUIDDir = os.path.join(globalDir, UUID)
             return UUIDDir
         else:
-            return SCope.data_dirs[file_type]["path"]
+            return data_dirs[file_type]["path"]
 
     @staticmethod
     def create_global_dirs():
         # Create data directories if not exists
-        for data_type in SCope.data_dirs.keys():
-            if not os.path.isdir(SCope.data_dirs[data_type]["path"]):
-                print(SCope.data_dirs[data_type]["message"])
-                os.makedirs(SCope.data_dirs[data_type]["path"])
+        for data_type in data_dirs.keys():
+            if not os.path.isdir(data_dirs[data_type]["path"]):
+                print(data_dirs[data_type]["message"])
+                os.makedirs(data_dirs[data_type]["path"])
         # Create log directory if not exists
-        logs_dir = SCope.get_logs_dir()
-        if not os.path.isdir(logs_dir):
-            print('No log folder detected. Making log folder in current directory.')
-            os.makedirs(logs_dir)
+        # logs_dir = SCope.get_logs_dir()
+        # if not os.path.isdir(logs_dir):
+        #     print('No log folder detected. Making log folder in current directory.')
+        #     os.makedirs(logs_dir)
 
     @staticmethod
     def get_partial_md5_hash(file_path, last_n_kb):
@@ -132,8 +153,8 @@ class SCope(s_pb2_grpc.MainServicer):
                 f.seek(- last_n_kb * 1024, 2)
             return hashlib.md5(f.read()).hexdigest()
 
-    def create_uuid_log():
-        SCope.uuid_log = open(os.path.join(SCope.get_logs_dir(), 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()))), 'w')
+    def create_uuid_log(self):
+        SCope.uuid_log = open(os.path.join(self.logs_dir, 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()))), 'w')
 
     def set_global_data(self):
         self.globalLooms = [x for x in os.listdir(self.loom_dir) if not os.path.isdir(os.path.join(self.loom_dir, x))]
@@ -719,8 +740,8 @@ class SCope(s_pb2_grpc.MainServicer):
     def getMyGeneSets(self, request, context):
         userDir = self.get_data_dir_path_by_file_type('GeneSet', UUID=request.UUID)
         if not os.path.isdir(userDir):
-            for i in SCope.data_dirs.keys():
-                os.mkdir(os.path.join(SCope.data_dirs[i]['path'], request.UUID))
+            for i in data_dirs.keys():
+                os.mkdir(os.path.join(data_dirs[i]['path'], request.UUID))
 
         geneSetsToProcess = sorted(self.globalSets) + sorted([os.path.join(request.UUID, x) for x in os.listdir(userDir)])
         gene_sets = [s_pb2.MyGeneSet(geneSetFilePath=f, geneSetDisplayName=os.path.splitext(os.path.basename(f))[0]) for f in geneSetsToProcess]
@@ -730,8 +751,8 @@ class SCope(s_pb2_grpc.MainServicer):
         my_looms = []
         userDir = self.get_data_dir_path_by_file_type('Loom', UUID=request.UUID)
         if not os.path.isdir(userDir):
-            for i in SCope.data_dirs.keys():
-                os.mkdir(os.path.join(SCope.data_dirs[i]['path'], request.UUID))
+            for i in data_dirs.keys():
+                os.mkdir(os.path.join(data_dirs[i]['path'], request.UUID))
 
         loomsToProcess = sorted(self.globalLooms) + sorted([os.path.join(request.UUID, x) for x in os.listdir(userDir)])
 
