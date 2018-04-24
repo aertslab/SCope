@@ -1,0 +1,86 @@
+.menu.logos {
+	text-align: center;
+}
+
+.header {
+	padding-left: 0.5em;
+}
+
+.pushable {
+	flex-grow: 1;
+	overflow: auto;
+}
+
+.ui {
+	font-size: 0.75rem !important;
+}
+
+.push.sidebar {
+	overflow-y: visible !important;
+}
+
+.vertical .active.item {
+	font-weight: bold !important;
+	color: black !important;
+}
+
+.vertical .item:hover {
+	font-weight: bold !important;
+	color: black !important;
+}
+
+.sidebarTabs {
+	display: flex;
+	width: 100%;
+	flex-direction: column;
+}
+
+.sidebarTabs a:nth-child(2) {
+	color: red !important;
+}
+
+.sidebarTabs a.active:nth-child(2)  {
+	border-color: red !important;
+}
+
+.sidebarTabs a:nth-child(3) {
+	color: green !important;
+}
+
+.sidebarTabs a.active:nth-child(3)  {
+	border-color: green !important;
+}
+
+.sidebarTabs a:nth-child(4) {
+	color: blue !important;
+}
+
+.sidebarTabs a.active:nth-child(4)  {
+	border-color: blue !important;
+}
+
+.geneInfo {
+	max-height: 200px;
+	overflow-y: scroll;
+}
+
+.selectionRow {
+	padding-top: 5px !important;
+}
+
+.viewerToolbar {
+	flex-basis: 100px;
+}
+
+.ui.segment.basic {
+	padding: 0px;
+	padding-left: 10px;
+}
+
+.ui.accordion {
+	flex-grow: 0 !important;
+} 
+
+.ui.pointing.secondary.menu {
+	margin: 0px;
+}
