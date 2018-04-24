@@ -3,6 +3,7 @@
 # vscode settings
 /.vscode
 /.deprecated
+.gitignore
 
 # pycache
 **/__pycache__
@@ -10,23 +11,32 @@
 /**/*lock.json
 *.pptx
 *.save
+*.spec
 **/.DS_Store
 
-# .gitignore
 yarn.lock
 SCope.code-workspace
 
-#scope-client/assets
-scope-client/node_modules
-scope-client/test
-scope-client/HOWTO.md
-scope-client/REFERENCES.md
-scope-client/RELEASES.md
+#scope/assets
+node_modules
+test
+HOWTO.md
+REFERENCES.md
+RELEASES.md
 TODO.md
+NOTES.md
 
 # Server
-scope-server/scope_server.egg-info
-scope-server/scopeserver/data/my-looms
-scope-server/scopeserver/modules/xserver/node_modules
-scope-server/test
-scope-server/data/my-looms
+opt/scopeserver/dataserver/__pycache__
+opt/scopeserver/scope_server.egg-info
+opt/scopeserver/data/my-looms
+opt/scopeserver/dataserver/test
+opt/scopeserver/dataserver/data/my-looms
+opt/scopeserver/dataserver/dist/
+opt/scopeserver/dataserver/pyvenv
+opt/scopeserver/dataserver/build
+opt/scopeserver/dataserver/logs
+opt/scope_server.egg-info
+
+release/*
+release/logs

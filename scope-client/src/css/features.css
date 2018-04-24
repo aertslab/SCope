@@ -1,8 +1,0 @@
-.ui.category.search>.results .category>.name {
-	width: auto;
-	float: none;
-}
-
-a.active.item.annotation {
-	font-weight: bold !important;
-}
