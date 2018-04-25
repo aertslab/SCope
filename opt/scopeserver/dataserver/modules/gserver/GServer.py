@@ -77,6 +77,7 @@ data_dirs = {"Loom": {"path": os.path.join(platformDirs.user_data_dir, "my-looms
 
 print(data_dirs)
 curUUIDs = {}
+permUUIDs = set()
 uploadedLooms = defaultdict(lambda: set())
 
 
@@ -99,6 +100,7 @@ class SCope(s_pb2_grpc.MainServicer):
         SCope.load_gene_mappings()
         self.create_uuid_log()
         self.set_global_data()
+        self.readUUIDdb()
 
     @staticmethod
     def load_gene_mappings():
@@ -152,6 +154,30 @@ class SCope(s_pb2_grpc.MainServicer):
             else:
                 f.seek(- last_n_kb * 1024, 2)
             return hashlib.md5(f.read()).hexdigest()
+
+    def readUUIDdb(self):
+        if os.path.isfile(os.path.join(self.config_dir, 'UUID_Timeouts.tsv')):
+            with open(os.path.join(self.config_dir, 'UUID_Timeouts.tsv'), 'r') as fh:
+                for line in fh.readlines():
+                    ls = line.rstrip('\n').split('\t')
+                    curUUIDs[ls[0]] = float(ls[1])
+        print(curUUIDs)
+        if os.path.isfile(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt')):
+            with open(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt'), 'r') as fh:
+                for line in fh.readlines():
+                    permUUIDs.add(line.rstrip('\n'))
+                    curUUIDs[line.rstrip('\n')] = time.time() + (_ONE_DAY_IN_SECONDS * 365)
+
+    def updateUUIDdb(self):
+        with open(os.path.join(self.config_dir, 'UUID_Timeouts.tsv'), 'w') as fh:
+            for UUID in curUUIDs.keys():
+                if UUID not in permUUIDs:
+                    fh.write('{0}\t{1}\n'.format(UUID, curUUIDs[UUID]))
+        if os.path.isfile(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt')):
+            with open(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt'), 'r') as fh:
+                for line in fh.readlines():
+                    permUUIDs.add(line.rstrip('\n'))
+                    curUUIDs[line.rstrip('\n')] = time.time() + (_ONE_DAY_IN_SECONDS * 365)
 
     def create_uuid_log(self):
         SCope.uuid_log = open(os.path.join(self.logs_dir, 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()))), 'w')
@@ -740,7 +766,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def getMyGeneSets(self, request, context):
         userDir = self.get_data_dir_path_by_file_type('GeneSet', UUID=request.UUID)
         if not os.path.isdir(userDir):
-            for i in data_dirs.keys():
+            for i in ['Loom', 'GeneSet', 'LoomAUCellRankings']:
                 os.mkdir(os.path.join(data_dirs[i]['path'], request.UUID))
 
         geneSetsToProcess = sorted(self.globalSets) + sorted([os.path.join(request.UUID, x) for x in os.listdir(userDir)])
@@ -751,7 +777,7 @@ class SCope(s_pb2_grpc.MainServicer):
         my_looms = []
         userDir = self.get_data_dir_path_by_file_type('Loom', UUID=request.UUID)
         if not os.path.isdir(userDir):
-            for i in data_dirs.keys():
+            for i in ['Loom', 'GeneSet', 'LoomAUCellRankings']:
                 os.mkdir(os.path.join(data_dirs[i]['path'], request.UUID))
 
         loomsToProcess = sorted(self.globalLooms) + sorted([os.path.join(request.UUID, x) for x in os.listdir(userDir)])
@@ -778,6 +804,9 @@ class SCope(s_pb2_grpc.MainServicer):
                                                                              embeddings=embeddings,
                                                                              clusterings=clusterings),
                                              fileMetaData=fileMeta))
+        print(curUUIDs)
+        self.updateUUIDdb()
+
         return s_pb2.MyLoomsReply(myLooms=my_looms)
 
     def getUUID(self, request, context):
@@ -991,6 +1020,7 @@ def serve(run_event, dev_env, port=50052):
 
     # Write UUIDs to file here
     SCope.uuid_log.close()
+    SCope.updateUUIDdb(SCope())
     server.stop(0)
 
 
