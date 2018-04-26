@@ -17,7 +17,7 @@ class AppHeader extends Component {
 	render() {
 		const { match, location } = this.props;
 		const { timeout } = this.state;
-		let metadata = BackendAPI.getLoomMetadata(match.params.loom);
+		let metadata = BackendAPI.getLoomMetadata(decodeURIComponent(match.params.loom));
 		let menu = this.menuList(metadata);
 
 		return (

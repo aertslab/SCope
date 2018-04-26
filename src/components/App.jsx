@@ -121,7 +121,7 @@ class App extends Component {
 	}
 
 	parseURLParams(props) {
-		let loom = props.match.params.loom;
+		let loom = decodeURIComponent(props.match.params.loom);
 		let page = props.match.params.page;
 		BackendAPI.setActivePage(page ? page : 'welcome');
 		BackendAPI.setActiveLoom(loom ? loom : '');
