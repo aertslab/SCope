@@ -503,7 +503,7 @@ class SCope(s_pb2_grpc.MainServicer):
         else:
             cellIndices = list(range(self.get_nb_cells(loom_file_path)))
         return {"x": x,
-                "y": y,
+                "y": -y,
                 "cellIndices": cellIndices}
 
     @staticmethod
