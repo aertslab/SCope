@@ -863,7 +863,7 @@ class SCope(s_pb2_grpc.MainServicer):
     # Threaded makes it slower because of GIL
     #
     def doGeneSetEnrichment(self, request, context):
-        gene_set_file_path = os.path.join("data", "my-gene-sets", request.geneSetFilePath)
+        gene_set_file_path = os.path.join(self.gene_sets_dir, request.geneSetFilePath)
         gse = GeneSetEnrichment(scope=self,
                                 method="AUCell",
                                 loom_file_name=request.loomFilePath,
@@ -909,7 +909,7 @@ class SCope(s_pb2_grpc.MainServicer):
         # Calculating AUCell enrichment...
         start_time = time.time()
         yield gse.update_state(step=3, status_code=200, status_message="Calculating AUCell enrichment...", values=None)
-        aucs = enrichment(rnk_mtx, gs, rank_threshold=5000).loc[:, "AUC"].values
+        aucs = enrichment(rnk_mtx, gs).loc[:, "AUC"].values
 
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
         yield gse.update_state(step=4, status_code=200, status_message=gse.get_method() + " enrichment done!", values=aucs)
@@ -930,7 +930,7 @@ class GeneSetEnrichment:
         self.loom_file_path = self.scope.get_loom_filepath(loom_file_name)
         self.gene_set_file_path = gene_set_file_path
         self.annotation = annotation
-        self.AUCell_rankings_dir = os.path.join("data", "my-aucell-rankings")
+        self.AUCell_rankings_dir = SCope.get_data_dir_path_by_file_type('LoomAUCellRankings')
 
     class State:
         def __init__(self, step, status_code, status_message, values):
