@@ -6,6 +6,7 @@ import hashlib
 import os
 import numpy as np
 import pandas as pd
+import shutil
 import json
 import zlib
 import base64
@@ -817,7 +818,8 @@ class SCope(s_pb2_grpc.MainServicer):
             if timeRemaining < 0:
                 print('Removing UUID: {0}'.format(uid))
                 del(curUUIDs[uid])
-                # os.rmdir()  # TODO: Remove the users loom files
+                for i in ['Loom', 'GeneSet', 'LoomAUCellRankings']:
+                    shutil.rmtree(os.path.join(data_dirs[i]['path'], request.UUID))
         uid = request.UUID
         if uid in curUUIDs:
             startTime = curUUIDs[uid]
