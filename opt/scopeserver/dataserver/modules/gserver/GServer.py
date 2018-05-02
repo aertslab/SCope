@@ -88,9 +88,7 @@ activeSessions = {}
 class SCope(s_pb2_grpc.MainServicer):
 
     def __init__(self):
-        # Create the data directories
-        # SCope.set_root_dir()
-        # SCope.set_data_dirs()
+
         SCope.create_global_dirs()
 
         self.data_dirs = data_dirs
@@ -113,20 +111,6 @@ class SCope(s_pb2_grpc.MainServicer):
         SCope.hsap_to_dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'hsap_to_dmel_mappings.pickle'), 'rb'))
         SCope.mmus_to_dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'mmus_to_dmel_mappings.pickle'), 'rb'))
 
-    # @staticmethod
-    # def set_root_dir():
-    #     SCope.root = os.path.join(Path(__file__).parents[3], 'dataserver') if SCope.DEV_ENV else os.path.join(str(Path.home()), ".scope")
-    #
-    # @staticmethod
-    # def set_data_dirs():
-    #     data_dirs = {"Loom": {"path": os.path.join(SCope.root, "data", "my-looms"), "message": "No data folder detected. Making loom data folder in current directory."},
-    #                        "GeneSet": {"path": os.path.join(SCope.root, "data", "my-gene-sets"), "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."},
-    #                        "LoomAUCellRankings": {"path": os.path.join(SCope.root, "data", "my-aucell-rankings"), "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
-    #
-    # @staticmethod
-    # def get_logs_dir():
-    #     return os.path.join(SCope.root, "logs")
-
     @staticmethod
     def get_data_dir_path_by_file_type(file_type, UUID=None):
         if UUID is not None:
@@ -138,16 +122,10 @@ class SCope(s_pb2_grpc.MainServicer):
 
     @staticmethod
     def create_global_dirs():
-        # Create data directories if not exists
         for data_type in data_dirs.keys():
             if not os.path.isdir(data_dirs[data_type]["path"]):
                 print(data_dirs[data_type]["message"])
                 os.makedirs(data_dirs[data_type]["path"])
-        # Create log directory if not exists
-        # logs_dir = SCope.get_logs_dir()
-        # if not os.path.isdir(logs_dir):
-        #     print('No log folder detected. Making log folder in current directory.')
-        #     os.makedirs(logs_dir)
 
     @staticmethod
     def get_partial_md5_hash(file_path, last_n_kb):
