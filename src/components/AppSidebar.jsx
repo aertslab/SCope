@@ -58,7 +58,7 @@ class AppSidebar extends Component {
 								let loomUri = encodeURIComponent(loomFile.loomFilePath);
 								let active = (match.params.loom == loomUri) || (encodeURIComponent(match.params.loom) == loomUri);
 								return (
-									<Link key={i} to={'/' + [match.params.uuid, loomUri, match.params.page].join('/')} onClick={() => {
+									<Link key={i} to={'/' + [match.params.uuid, loomUri, match.params.page == 'welcome' ? 'gene' : match.params.page ].join('/')} onClick={() => {
 										this.props.onMetadataChange(loomFile);
 									}}  >
 										<Menu.Item active={active} key={loomFile.loomFilePath} >
@@ -158,7 +158,7 @@ class AppSidebar extends Component {
 		this.getLoomFiles();
 	}
 
-	getLoomFiles() {
+	getLoomFiles(page) {
 		const { match } = this.props;
 		let query = {
 			UUID: match.params.uuid
@@ -232,7 +232,7 @@ class AppSidebar extends Component {
 	}
 
 	onLoomUploaded() {
-		this.getLoomFiles();
+		this.getLoomFiles('gene');
 		this.toggleUploadModal();
 		ReactGA.event({
 			category: 'upload',
