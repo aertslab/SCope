@@ -113,10 +113,10 @@ class SCope(s_pb2_grpc.MainServicer):
 
     @staticmethod
     def get_data_dir_path_by_file_type(file_type, UUID=None):
-        if UUID is not None:
-            globalDir = data_dirs[file_type]["path"]
-            UUIDDir = os.path.join(globalDir, UUID)
-            return UUIDDir
+        if file_type in ['Loom', 'GeneSet', 'LoomAUCellRankings'] and UUID is not None:
+                globalDir = data_dirs[file_type]["path"]
+                UUIDDir = os.path.join(globalDir, UUID)
+                return UUIDDir
         else:
             return data_dirs[file_type]["path"]
 
