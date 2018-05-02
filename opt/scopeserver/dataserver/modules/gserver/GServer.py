@@ -25,6 +25,9 @@ from pyscenic.aucell import create_rankings, enrichment, enrichment4cells
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 _UUID_TIMEOUT = _ONE_DAY_IN_SECONDS * 5
+_SESSION_TIMEOUT = 60 * 5
+_ACTIVE_SESSIONS_LIMIT = 25
+_MOUSE_EVENTS_THRESHOLD = 1
 _LOWER_LIMIT_RGB = 0
 _UPPER_LIMIT_RGB = 225
 _NO_EXPR_RGB = 166
@@ -79,6 +82,7 @@ print(data_dirs)
 curUUIDs = {}
 permUUIDs = set()
 uploadedLooms = defaultdict(lambda: set())
+activeSessions = {}
 
 
 class SCope(s_pb2_grpc.MainServicer):
@@ -154,6 +158,17 @@ class SCope(s_pb2_grpc.MainServicer):
             else:
                 f.seek(- last_n_kb * 1024, 2)
             return hashlib.md5(f.read()).hexdigest()
+
+    @staticmethod
+    def activeSessionCheck():
+        curTime = time.time()
+        for UUID in list(activeSessions.keys()):
+            if curTime - activeSessions[UUID] < _SESSION_TIMEOUT or UUID not in curUUIDs:
+                del(activeSessions[UUID])
+
+    @staticmethod
+    def resetActiveSessionTimeout(UUID):
+        activeSessions[UUID] = time.time()
 
     def readUUIDdb(self):
         if os.path.isfile(os.path.join(self.config_dir, 'UUID_Timeouts.tsv')):
@@ -817,9 +832,7 @@ class SCope(s_pb2_grpc.MainServicer):
             curUUIDs[newUUID] = time.time()
         return s_pb2.UUIDReply(UUID=newUUID)
 
-    def getRemainingUUIDTime(self, request, context):
-        print(curUUIDs)
-        print(request.UUID)
+    def getRemainingUUIDTime(self, request, context):  # This function will be called a lot more often, we should reduce what it does.
         curUUIDSet = set(list(curUUIDs.keys()))
         for uid in curUUIDSet:
             timeRemaining = int(_UUID_TIMEOUT - (time.time() - curUUIDs[uid]))
@@ -842,7 +855,17 @@ class SCope(s_pb2_grpc.MainServicer):
             SCope.uuid_log.flush()
             curUUIDs[uid] = time.time()
             timeRemaining = int(_UUID_TIMEOUT)
-        return s_pb2.RemainingUUIDTimeReply(UUID=uid, timeRemaining=timeRemaining)
+
+        SCope.activeSessionCheck()
+        if request.mouseEvents >= _MOUSE_EVENTS_THRESHOLD:
+            SCope.resetActiveSessionTimeout(uid)
+
+        sessionsLimitReached = False
+
+        if len(activeSessions.keys()) >= _ACTIVE_SESSIONS_LIMIT and uid not in permUUIDs:
+            sessionsLimitReached = True
+
+        return s_pb2.RemainingUUIDTimeReply(UUID=uid, timeRemaining=timeRemaining, sessionsLimitReached=sessionsLimitReached)
 
     def translateLassoSelection(self, request, context):
         src_loom = self.get_loom_connection(self.get_loom_filepath(request.srcLoomFilePath))

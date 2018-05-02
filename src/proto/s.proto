@@ -264,11 +264,13 @@ message UUIDReply {
 message RemainingUUIDTimeRequest {
   string ip=1;
   string UUID=2;
+  int64 mouseEvents=3;
 }
 
 message RemainingUUIDTimeReply {
   string UUID=1;
   int64 timeRemaining=2;
+  bool sessionsLimitReached=3;
 }
 
 message LoomUploadedRequest {
