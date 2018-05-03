@@ -57,6 +57,7 @@ class App extends Component {
 				</Header>
 			</Dimmer>
 		);
+
 		let limitReachedDimmer = (
 			<Dimmer active={!loading && sessionsLimitReached}>
 				<br /><br />
@@ -282,23 +283,29 @@ class App extends Component {
 
 	restoreSession(permalink) {
 		const { history } = this.props;
-		permalink = decodeURIComponent(permalink);
-		let base64 = permalink.replace(/\$/g, '/');
-		let deflated = window.atob(base64);
-		let settings = JSON.parse(pako.inflate(deflated, { to: 'string' }));
-		if (DEBUG) console.log(settings);
-		BackendAPI.importObject(settings);
-		BackendAPI.queryLoomFiles(settings.uuid, () => {
-			Object.keys(settings.features).map((page) => {			
-				settings.features[page].map((f, i) => {
-					console.log(page, i, f);
-					BackendAPI.updateFeature(i, f.type, f.feature, f.featureType, f.metadata ? f.metadata.description : null, page);
+		try {
+			permalink = decodeURIComponent(permalink);
+			let base64 = permalink.replace(/\$/g, '/');
+			let deflated = window.atob(base64);
+			let settings = JSON.parse(pako.inflate(deflated, { to: 'string' }));
+			if (DEBUG) console.log(settings);
+			BackendAPI.importObject(settings);
+			BackendAPI.queryLoomFiles(settings.uuid, () => {
+				Object.keys(settings.features).map((page) => {			
+					settings.features[page].map((f, i) => {
+						console.log(page, i, f);
+						BackendAPI.updateFeature(i, f.type, f.feature, f.featureType, f.metadata ? f.metadata.description : null, page);
+					})
 				})
-			})
-			if (settings.uuid && settings.page && settings.loom) {
-				history.replace('/' + [settings.uuid, encodeURIComponent(settings.loom), encodeURIComponent(settings.page)].join('/'));
-			}
-		});
+				if (settings.uuid && settings.page && settings.loom) {
+					history.replace('/' + [settings.uuid, encodeURIComponent(settings.loom), encodeURIComponent(settings.page)].join('/'));
+				} else {
+					throw "URL params are missing";
+				}
+			});
+		} catch (ex) {
+			window.location.href='/';
+		}
 	}
 };
 
