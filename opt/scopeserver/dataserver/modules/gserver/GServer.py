@@ -842,7 +842,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
         sessionsLimitReached = False
 
-        if len(activeSessions.keys()) >= _ACTIVE_SESSIONS_LIMIT and uid not in permUUIDs:
+        if len(activeSessions.keys()) >= _ACTIVE_SESSIONS_LIMIT and uid not in permUUIDs and uid not in activeSessions.keys():
             sessionsLimitReached = True
 
         if uid not in activeSessions.keys() and not sessionsLimitReached:
