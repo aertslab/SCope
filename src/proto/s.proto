@@ -193,11 +193,20 @@ message MyLoomsRequest {
   string UUID=1;
 }
 
+message LoomHeierarchy {
+  string L1=1;
+  string L2=2;
+  string L3=3;
+
+}
+
 message MyLoom {
   string loomFilePath=1;
   string loomDisplayName=2;
   CellMetaData cellMetaData=3;
   FileMetaData fileMetaData=4;
+  LoomHeierarchy loomHeierarchy=5;
+
 }
 
 message MyLoomsReply {
