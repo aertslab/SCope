@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
-import { Icon, Label, Button, Menu } from 'semantic-ui-react';
+import { Icon, Label, Button, Menu, Input } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
+import Bitly from 'bitlyapi';
 const moment = require('moment');
+const pako = require('pako');
+let bitly = new Bitly(BITLY.token);
 const timer = 60 * 1000;
 
 class AppHeader extends Component {
@@ -10,13 +13,14 @@ class AppHeader extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			timeout: props.timeout
+			timeout: props.timeout,
+			shortUrl: null,
 		}
 	}
 
 	render() {
 		const { match, location } = this.props;
-		const { timeout } = this.state;
+		const { timeout, shortUrl } = this.state;
 		let metadata = BackendAPI.getLoomMetadata(decodeURIComponent(match.params.loom));
 		let menu = this.menuList(metadata);
 
@@ -38,6 +42,13 @@ class AppHeader extends Component {
 						</Link>
 					</Menu.Item>
 				)}
+
+				<Menu.Item>
+					<Icon name="linkify" onClick={this.getPermalink.bind(this)} className="pointer" title="Get permalink" />
+					{shortUrl &&
+						<Label className="permalink">{shortUrl}</Label>
+					}
+				</Menu.Item>
 
 				<Menu.Item className="sessionInfo">
 					Your session will be deleted in {moment.duration(timeout).humanize()} &nbsp;
@@ -140,7 +151,21 @@ class AppHeader extends Component {
 			},
 		];
 	}
-
+	
+	getPermalink() {
+		const { match } = this.props;
+		console.log(BackendAPI);
+		let j = JSON.stringify(BackendAPI.getExportObject(match.params), BackendAPI.getExportKeys());
+		let d = pako.deflate(j, { to: 'string' });
+		let b = encodeURIComponent(window.btoa(d).replace(/\//g,'$'));
+		bitly.shorten(BITLY.baseURL + "/#/permalink/" + b)
+		.then((result) => {
+			this.setState({shortUrl: result.data.url});
+			this.forceUpdate();
+		}).then((error) => {
+			console.log(error);
+		});
+	}
 }
 
 export default withRouter(AppHeader);
