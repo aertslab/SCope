@@ -35,13 +35,15 @@ class App extends Component {
 			loaded: false,
 			error: false,
 			isSidebarVisible: true,
+			sessionsLimitReached: false,
 		}
 		this.timeout = null;
+		this.mouseClicks = 0;
 		ReactGA.initialize('UA-61194136-10');
 	}
 
 	render() {
-		const { loading, metadata, error, loaded, isSidebarVisible } = this.state;
+		const { loading, metadata, error, loaded, isSidebarVisible, sessionsLimitReached } = this.state;
 
 		let errorDimmer = (
 			<Dimmer active={error} >
@@ -50,7 +52,7 @@ class App extends Component {
 				<Header as='h2' inverted>
 					An error occured when connecting to SCope back-end.<br /><br />
 					Please check your Internet connection.<br /><br />
-					<Button color='orange' onClick={() => {window.location.reload()}}>Refresh</Button>
+					<Button color='orange' onClick={() => {window.location.reload()}}>REFRESH</Button>
 				</Header>
 			</Dimmer>
 		);
@@ -97,10 +99,24 @@ class App extends Component {
 							<Loader inverted>Your SCope session is starting</Loader>
 						</Dimmer>
 						<Dimmer active={!loading && this.timeout != null && this.timeout <= 0}>
-							Your SCope session has ended<br /><br />
-							<Link to='/'>
-								<Button primary onClick={() => {history.replace('/')}}>RESTART</Button>
-							</Link>
+							<br /><br />
+							<Icon name='warning circle' color='orange' size='big' /><br /><br />
+							<Header as='h2' inverted>
+								Your SCope session has ended<br /><br />
+								<Link to='/'>
+									<Button color="orange" onClick={() => {history.replace('/')}}>RESTART</Button>
+								</Link>
+							</Header>
+						</Dimmer>
+						<Dimmer active={!loading && sessionsLimitReached}>
+							<br /><br />
+							<Icon name='warning circle' color='orange' size='big' /><br /><br />
+							<Header as='h2' inverted>
+								Currenlty Scope has reached it's capacity in number of concurrent users.<br /><br />
+								Please try again later or try out our standalone SCope app.<br /><br />
+								More details on our GitHub.<br /><br />
+								<Button color="orange" href="https://github.com/aertslab/SCope">AertsLab GitHub</Button>
+							</Header>
 						</Dimmer>
 						{errorDimmer}
 					</Segment>
@@ -118,8 +134,20 @@ class App extends Component {
 		if (isSidebarVisible == '0') this.setState({isSidebarVisible: false});
 	}
 
+	componentDidMount() {
+		document.addEventListener("click", this.clickHandler.bind(this));
+		document.addEventListener("keypress", this.clickHandler.bind(this));
+	}
+
+	clickHandler() {
+		this.mouseClicks += 1;
+		if (DEBUG) console.log('User click', this.mouseClicks);
+	}
+
 	componentWillUnmount() {
 		if (this.timer) clearInterval(this.timer);
+		document.removeEventListener("click", this.clickHandler);
+		document.removeEventListener("keypress", this.clickHandler);
 	}
 
 	componentWillReceiveProps(nextProps) {
@@ -178,7 +206,8 @@ class App extends Component {
 		BackendAPI.getConnection().then((gbc, ws) => {
 			let query = {
 				ip: ip,
-				UUID: uuid
+				UUID: uuid,
+				mouseEvents: this.mouseClicks,
 			}
 			gbc.ws.onclose = (err) => {
 				ReactGA.event({
@@ -189,29 +218,37 @@ class App extends Component {
 			}
 			if (DEBUG) console.log('getRemainingUUIDTime', query);
 			gbc.services.scope.Main.getRemainingUUIDTime(query, (err, response) => {
-				if (DEBUG) console.log('getRemainingUUIDTime', response);				
-				this.timeout = response ? parseInt(response.timeRemaining * 1000) : 0;
-				cookies.set(cookieName, uuid, { path: '/', maxAge: this.timeout });
-				this.setState({loading: false, uuid: uuid});
-				if (!this.timer) {
-					this.timer = setInterval(() => {
-						this.timeout -= timer;
-						if (this.timeout < 0) {
-							if (DEBUG) console.log('Session timed out');
-							cookies.remove(cookieName);
-							clearInterval(this.timer);
-							this.timer = null;
-							if (!BackendAPI.isConnected()) {
-								this.setState({error: true});
+				this.mouseClicks = 0;
+				if (DEBUG) console.log('getRemainingUUIDTime', response);
+				if (response.sessionsLimitReached) {
+					this.setState({sessionsLimitReached: true});
+				} else {
+					this.timeout = response ? parseInt(response.timeRemaining * 1000) : 0;
+					cookies.set(cookieName, uuid, { path: '/', maxAge: this.timeout });
+					this.setState({loading: false, uuid: uuid});
+					if (!this.timer) {
+						this.timer = setInterval(() => {
+							this.timeout -= timer;
+							if (this.timeout < 0) {
+								if (DEBUG) console.log('Session timed out');
+								cookies.remove(cookieName);
+								clearInterval(this.timer);
+								this.timer = null;
+								if (!BackendAPI.isConnected()) {
+									this.setState({error: true});
+								}
+								this.forceUpdate();
+							} else {
+								if (DEBUG) console.log('Session socket ping @ ', this.timeout);
+								this.checkUUID(ip, uuid);
 							}
-							this.forceUpdate();
-						}
-					}, timer);
+						}, timer);
+					}
+					ReactGA.set({ userId: uuid });
+					let loom = match.params.loom ? decodeURIComponent(match.params.loom) : '*';
+					let page = match.params.page ? decodeURIComponent(match.params.page) : 'welcome';
+					history.replace('/' + [uuid, encodeURIComponent(loom), encodeURIComponent(page)].join('/'));
 				}
-				ReactGA.set({ userId: uuid });
-				let loom = match.params.loom ? decodeURIComponent(match.params.loom) : '*';
-				let page = match.params.page ? decodeURIComponent(match.params.page) : 'welcome';
-				history.replace('/' + [uuid, encodeURIComponent(loom), encodeURIComponent(page)].join('/'));
 			});
 		}, () => {
 			this.setState({error: true});
