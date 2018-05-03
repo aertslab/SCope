@@ -45,10 +45,12 @@ class App extends Component {
 
 		let errorDimmer = (
 			<Dimmer active={error} >
-				<Icon name='warning circle' color='red' size='huge' /><br /><br />
+				<br /><br />
+				<Icon name='warning circle' color='orange' size='big' /><br /><br />
 				<Header as='h2' inverted>
-				An error occured when connecting to SCope back-end.<br /><br />
-				Please check your Internet connection.
+					An error occured when connecting to SCope back-end.<br /><br />
+					Please check your Internet connection.<br /><br />
+					<Button color='orange' onClick={() => {window.location.reload()}}>Refresh</Button>
 				</Header>
 			</Dimmer>
 		);

@@ -158,7 +158,7 @@ class AppSidebar extends Component {
 		this.getLoomFiles();
 	}
 
-	getLoomFiles(page) {
+	getLoomFiles(loom, page) {
 		const { match } = this.props;
 		let query = {
 			UUID: match.params.uuid
@@ -231,8 +231,8 @@ class AppSidebar extends Component {
 		});
 	}
 
-	onLoomUploaded() {
-		this.getLoomFiles('gene');
+	onLoomUploaded(filename) {
+		this.getLoomFiles(filename, 'gene');
 		this.toggleUploadModal();
 		ReactGA.event({
 			category: 'upload',
