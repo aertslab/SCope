@@ -4,7 +4,7 @@
   "description": "Visualization tool for large-scale and high dimensional single-cell data",
   "main": "index.js",
   "scripts": {
-    "preinstall": "npm install ./opt/scopeserver/bindserver --prefix . && cd ./opt; python setup.py develop",
+    "preinstall": "npm install ./opt/scopeserver/bindserver --prefix . && cd ./opt; python3 setup.py develop",
     "dev": "cross-env NODE_ENV=development webpack-dev-server --hot",
     "build": "cross-env NODE_ENV=production webpack",
     "test": "echo \"Error: no test specified\"",
