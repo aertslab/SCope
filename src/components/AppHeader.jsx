@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
-import { Icon, Button, Menu } from 'semantic-ui-react';
+import { Icon, Label, Button, Menu } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
 const moment = require('moment');
 const timer = 60 * 1000;
@@ -33,7 +33,7 @@ class AppHeader extends Component {
 								{item.icon &&
 									<Icon name={item.icon} />
 								}
-								{item.title}
+								{item.title} &nbsp; {item.path == 'geneset' && <Label color='violet' size='mini'>beta</Label>}
 							</Button>
 						</Link>
 					</Menu.Item>
@@ -94,12 +94,14 @@ class AppHeader extends Component {
 				title: 'SCope',
 				icon: 'home'
 			},
+			/*
 			{
 				display: metadata ? true : false,
 				path: 'dataset',
 				title: 'Dataset info',
 				icon: false
 			},
+			*/
 			{
 				display: metadata ? true : false,
 				path: 'gene',
