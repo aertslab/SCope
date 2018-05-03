@@ -142,7 +142,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def activeSessionCheck():
         curTime = time.time()
         for UUID in list(activeSessions.keys()):
-            if curTime - activeSessions[UUID] < _SESSION_TIMEOUT or UUID not in curUUIDs:
+            if curTime - activeSessions[UUID] > _SESSION_TIMEOUT or UUID not in curUUIDs:
                 del(activeSessions[UUID])
 
     @staticmethod
@@ -845,6 +845,8 @@ class SCope(s_pb2_grpc.MainServicer):
         if len(activeSessions.keys()) >= _ACTIVE_SESSIONS_LIMIT and uid not in permUUIDs:
             sessionsLimitReached = True
 
+        if uid not in activeSessions.keys() and not sessionsLimitReached:
+            self.resetActiveSessionTimeout(uid)
         return s_pb2.RemainingUUIDTimeReply(UUID=uid, timeRemaining=timeRemaining, sessionsLimitReached=sessionsLimitReached)
 
     def translateLassoSelection(self, request, context):
