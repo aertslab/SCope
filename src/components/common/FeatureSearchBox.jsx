@@ -24,7 +24,7 @@ export default class FeatureSearch extends React.Component {
 		const { locked, color, options } = this.props;
 
 		return (
-			<Segment color={color} inverted className="noPadding">
+			<Segment color={color} inverted={color ? true : false} className={ color ? "noPadding" : "noFrame" }>
 				<FeatureSearchInput
 					category
 					loading={isLoading}
@@ -135,7 +135,11 @@ export default class FeatureSearch extends React.Component {
 		e.stopPropagation();
 		e.preventDefault();
 		if (DEBUG) console.log('handleResultSelect', e, result);
-		this.updateFeature(result.title, result.type, result.description);
+		if (this.props.onResultSelect) {
+			this.props.onResultSelect(result);
+		} else {
+			this.updateFeature(result.title, result.type, result.description);
+		}
 	}
 
 	handleTypeChange(type) {
