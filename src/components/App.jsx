@@ -17,6 +17,7 @@ import Compare from './pages/Compare';
 import Tutorial from './pages/Tutorial';
 import About from './pages/About';
 
+const pako = require('pako');
 const publicIp = require('public-ip');
 const timer = 60 * 1000;
 const cookieName = 'SCOPE_UUID';
@@ -56,6 +57,7 @@ class App extends Component {
 				</Header>
 			</Dimmer>
 		);
+
 		let limitReachedDimmer = (
 			<Dimmer active={!loading && sessionsLimitReached}>
 				<br /><br />
@@ -177,8 +179,13 @@ class App extends Component {
 		const { cookies, match } = props;
 
 		if (match.params.uuid) {
-			if (DEBUG) console.log('Params UUID detected');
-			this.checkUUID(ip, match.params.uuid);
+			if (match.params.uuid == 'permalink') {
+				if (DEBUG) console.log('Permalink detected');
+				this.restoreSession(match.params.loom);
+			} else {
+				if (DEBUG) console.log('Params UUID detected');
+				this.checkUUID(ip, match.params.uuid);
+			}
 		} else if (cookies.get(cookieName)) {
 			if (DEBUG) console.log('Cookie UUID detected');
 			this.checkUUID(ip, cookies.get(cookieName));
@@ -272,6 +279,33 @@ class App extends Component {
 
 	onResize() {
 		this.forceUpdate();
+	}
+
+	restoreSession(permalink) {
+		const { history } = this.props;
+		try {
+			permalink = decodeURIComponent(permalink);
+			let base64 = permalink.replace(/\$/g, '/');
+			let deflated = window.atob(base64);
+			let settings = JSON.parse(pako.inflate(deflated, { to: 'string' }));
+			if (DEBUG) console.log(settings);
+			BackendAPI.importObject(settings);
+			BackendAPI.queryLoomFiles(settings.uuid, () => {
+				Object.keys(settings.features).map((page) => {			
+					settings.features[page].map((f, i) => {
+						console.log(page, i, f);
+						BackendAPI.updateFeature(i, f.type, f.feature, f.featureType, f.metadata ? f.metadata.description : null, page);
+					})
+				})
+				if (settings.uuid && settings.page && settings.loom) {
+					history.replace('/' + [settings.uuid, encodeURIComponent(settings.loom), encodeURIComponent(settings.page)].join('/'));
+				} else {
+					throw "URL params are missing";
+				}
+			});
+		} catch (ex) {
+			window.location.href='/';
+		}
 	}
 };
 

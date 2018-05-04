@@ -160,24 +160,9 @@ class AppSidebar extends Component {
 
 	getLoomFiles(loom, page) {
 		const { match } = this.props;
-		let query = {
-			UUID: match.params.uuid
-		};
-		BackendAPI.getConnection().then((gbc) => {
-			if (DEBUG) console.log("getMyLooms", query);
-			gbc.services.scope.Main.getMyLooms(query, (error, response) => {
-				if (response !== null) {
-					if (DEBUG) console.log("getMyLooms", response);
-					this.setState({ loomFiles: response.myLooms, loading: false });
-					BackendAPI.setLoomFiles(response.myLooms);
-					this.props.onMetadataChange(BackendAPI.getActiveLoomMetadata());
-				} else {
-					this.setState({loading: false});
-					console.log("No loom files detected");
-				}
-			});
-		}, () => {
-			BackendAPI.showError();
+		BackendAPI.queryLoomFiles(match.params.uuid, (loomFiles) => {
+			this.setState({ loomFiles: loomFiles, loading: false });
+			this.props.onMetadataChange(BackendAPI.getActiveLoomMetadata());
 		});
 	}
 
