@@ -63,7 +63,7 @@ class AppSidebar extends Component {
 			let children = Object.keys(t.children).map((level) => {
 				return (
 					<div>
-						<Menu.Header className={'level'+l}><Icon name={t.children[level].collapsed ? "arrow circle right" : "arrow circle down"} onClick={() => {
+						<Menu.Header className={'level'+l}><Icon className="pointer" name={t.children[level].collapsed ? "arrow circle right" : "arrow circle down"} onClick={() => {
 							t.children[level].collapsed = !t.children[level].collapsed;
 							this.forceUpdate();
 						}} />{level}</Menu.Header>
@@ -182,6 +182,11 @@ class AppSidebar extends Component {
 
 	componentWillMount() {
 		this.getLoomFiles();
+		BackendAPI.onUpdate(this.onSettingsUpdate.bind(this));
+	}
+
+	componentWillUnmount() {
+		BackendAPI.removeOnUpdate(this.onSettingsUpdate);
 	}
 
 	getLoomFiles(loom, page) {
@@ -287,6 +292,10 @@ class AppSidebar extends Component {
 	handleUpdateSprite(scale, alpha) {
 		this.setState({spriteScale: scale, spriteAlpha: alpha})
 		BackendAPI.setSpriteSettings(scale, alpha);
+	}
+
+	onSettingsUpdate() {
+		this.setState({settings: BackendAPI.getSettings()});
 	}
 }
 

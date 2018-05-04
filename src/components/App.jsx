@@ -298,6 +298,7 @@ class App extends Component {
 					})
 				})
 				if (settings.uuid && settings.page && settings.loom) {
+					BackendAPI.forceUpdate();
 					history.replace('/' + [settings.uuid, encodeURIComponent(settings.loom), encodeURIComponent(settings.page)].join('/'));
 				} else {
 					throw "URL params are missing";
