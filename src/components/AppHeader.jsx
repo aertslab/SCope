@@ -71,9 +71,10 @@ class AppHeader extends Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		console.log('componentWillReceiveProps', nextProps);
+		if (DEBUG) console.log('componentWillReceiveProps', nextProps);
 		const { timeout, metadata, match, history, loaded } = nextProps;
 		this.setState({timeout: timeout});
+		/*
 		if (loaded) {
 			let menu = this.menuList(metadata);
 			menu.map((item) => {
@@ -86,6 +87,7 @@ class AppHeader extends Component {
 				}
 			});
 		}
+		*/
 	}
 
 	componentWillUnmount() {

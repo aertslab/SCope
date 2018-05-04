@@ -246,7 +246,7 @@ export default class Viewer extends Component {
 		s.scale.y = settings.scale / 50;
 		s.alpha = settings.alpha;
 		s.anchor = { x: .5, y: .5 };
-		if (c == '000000') c = DEFAULT_POINT_COLOR;
+		if (c == 'XXXXXX') c = DEFAULT_POINT_COLOR;
 		s.tint = "0x"+ c;
 		// Decompressing the color not working as without compression
 		// tint request a full 6 hexadecimal digits format

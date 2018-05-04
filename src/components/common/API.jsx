@@ -54,6 +54,7 @@ class API {
 		this.customValuesChangeListeners = [];
 
 		this.uuid = null;
+		this.updateListeners = [];
 	}
 
 	importObject(api) {
@@ -93,6 +94,23 @@ class API {
 			'maxValues', 
 			'customValues'
 		];
+	}
+
+	onUpdate(listener) {
+		this.updateListeners.push(listener);
+	}
+	
+	removeOnUpdate(listener) {
+		let i = this.updateListeners.indexOf(listener)
+		if (i > -1) {
+			this.updateListeners.splice(i, 1);
+		}
+	};
+
+	forceUpdate() {
+		this.updateListeners.forEach((listener) => {
+			listener(this.settings);
+		})
 	}
 
 	isConnected() {
