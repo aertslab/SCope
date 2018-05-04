@@ -788,6 +788,13 @@ class SCope(s_pb2_grpc.MainServicer):
                     annotations = meta['annotations']
                     embeddings = meta['embeddings']
                     clusterings = meta['clusterings']
+                try:
+                    L1 = loom.attrs.SCopeTreeL1
+                    L2 = loom.attrs.SCopeTreeL2
+                    L3 = loom.attrs.SCopeTreeL3
+                except AttributeError:
+                    L1 = L2 = L3 = ''
+
                 else:
                     annotations = []
                     embeddings = []
@@ -797,7 +804,12 @@ class SCope(s_pb2_grpc.MainServicer):
                                              cellMetaData=s_pb2.CellMetaData(annotations=annotations,
                                                                              embeddings=embeddings,
                                                                              clusterings=clusterings),
-                                             fileMetaData=fileMeta))
+                                             fileMetaData=fileMeta,
+                                             loomHeierarchy=s_pb2.LoomHeierarchy(L1=L1,
+                                                                                 L2=L2,
+                                                                                 L3=L3)
+                                             )
+                                )
         print(curUUIDs)
         self.updateUUIDdb()
 
@@ -842,7 +854,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
         sessionsLimitReached = False
 
-        if len(activeSessions.keys()) >= _ACTIVE_SESSIONS_LIMIT and uid not in permUUIDs:
+        if len(activeSessions.keys()) >= _ACTIVE_SESSIONS_LIMIT and uid not in permUUIDs and uid not in activeSessions.keys():
             sessionsLimitReached = True
 
         if uid not in activeSessions.keys() and not sessionsLimitReached:
