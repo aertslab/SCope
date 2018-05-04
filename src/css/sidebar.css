@@ -91,3 +91,32 @@
 .rc-slider {
 	margin: 0px !important;
 }
+.level0 {
+	font-weight: bold;
+	padding-left: 5px !important;
+	font-size: 1.2em;
+}
+.level1 {
+	padding-left: 10px !important;
+	font-size: 1.15em;
+}
+.level1:before {
+	content: '\003e ';
+}
+.level2 {
+	padding-left: 15px !important;
+	font-size: 1.1em;
+}
+.level2:before {
+	content: '\0226B ';
+}
+.level3 {
+	padding-left: 20px !important;
+	font-size: 1.05em;
+}
+.level3:before {
+	content: '\02666 ';
+}
+.level4 {
+	padding-left: 25px !important;
+}
