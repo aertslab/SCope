@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { withRouter, Link } from 'react-router-dom';
-import { Button, Grid, Menu, Icon, Dimmer, Loader, Input } from 'semantic-ui-react'
+import { Button, Grid, Menu, Icon, Dimmer, Loader, Input, TextArea } from 'semantic-ui-react'
 import FeatureSearchBox from '../common/FeatureSearchBox'
 import { BackendAPI } from '../common/API'
 import Viewer from '../common/Viewer'
@@ -93,30 +93,35 @@ class Geneset extends Component {
                             <Menu.Menu>
                                 <Menu.Item key="create">
                                     <Icon name="add" />
-                                    <em>or create it yourself</em>
+                                    <em>or paste a list of genes</em>
                                 </Menu.Item>
                             </Menu.Menu>
                         </Menu>
                     </Grid.Column>
                     <Grid.Column width="2" textAlign="right">
-                        <Input placeholder="Geneset name" size="mini" 
+                        <Input placeholder="Geneset name" size="mini" value={this.state.genesetName}
                             onChange={(evt, data) => {
                                 this.setState({genesetName: data.value});
                             }}/>
                     </Grid.Column>
                     <Grid.Column width="7">
+                        {/*
                         <FeatureSearchBox type='gene' size="huge" onResultSelect={(result) => {
                             let geneset = this.state.geneset;
                             geneset.push(result.title);
                             this.setState({geneset});
                         }} />
+                        */}
+                        <TextArea placeholder="Gene1&#10;Gene2&#10;Gene3&#10;..." rows={4} onChange={(evt, data) => {
+                            this.setState({geneset: data.value});
+                        }} value={this.state.geneset} style={{width: '100%'}} />
                     </Grid.Column>
                     <Grid.Column width="2" textAlign="right">
                         <Button color="" onClick={this.saveGeneset.bind(this)} disabled={this.state.genesetName.length==0||this.state.geneset.length==0} >Save as geneset</Button>
                     </Grid.Column>
                     <Grid.Column width="3">&nbsp;</Grid.Column>
                 </Grid.Row>
-                <Grid.Row colums="3">
+                {/*<Grid.Row colums="3">
                     <Grid.Column width="4">&nbsp;</Grid.Column>
                     <Grid.Column width="7">
                         <span key={this.state.genesetName}><b>{this.state.genesetName}</b> </span>
@@ -130,7 +135,7 @@ class Geneset extends Component {
                         </ReactCSSTransitionGroup>
                     </Grid.Column>
                     <Grid.Column width="5">&nbsp;</Grid.Column>
-                </Grid.Row>
+                </Grid.Row>*/}
                 <Grid.Row columns="4" stretched className="viewerFlex flexRow">
                     <Grid.Column width={1}>
                         <ViewerToolbar />
@@ -193,8 +198,7 @@ class Geneset extends Component {
     saveGeneset() {
         const { match } = this.props;
         let uploader = new Uploader();
-        let fileContent = [this.state.genesetName].concat(this.state.geneset).join("\n");        
-        console.log(fileContent);
+        let fileContent = this.state.genesetName + "\n" + this.state.geneset;
         uploader.upload(match.params.uuid, 'GeneSet', new File([fileContent], this.state.genesetName, {type: "text/plain"}), () => {
         }, this.onGenesetUploaded.bind(this));
     }
@@ -259,7 +263,7 @@ class Geneset extends Component {
         this.getGeneSets();
         this.hideUploadModal();
         this.setState({
-            geneset: [],
+            geneset: '',
             genesetName: '',
         })
         ReactGA.event({

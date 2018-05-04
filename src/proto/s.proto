@@ -50,10 +50,12 @@ message CellColorByFeaturesRequest {
 }
 
 message CellColorByFeaturesReply {
-  repeated string color=1;
-  repeated float vmax=2;
-  repeated float maxVmax=3;
-  repeated int32 cellIndices=4;
+  bool hasAddCompressionLayer=1;
+  bytes compressedColor=2;
+  repeated string color=3;
+  repeated float vmax=4;
+  repeated float maxVmax=5;
+  repeated int32 cellIndices=6;
 }
 
 message CellAUCValuesByFeaturesRequest {
@@ -193,11 +195,20 @@ message MyLoomsRequest {
   string UUID=1;
 }
 
+message LoomHeierarchy {
+  string L1=1;
+  string L2=2;
+  string L3=3;
+
+}
+
 message MyLoom {
   string loomFilePath=1;
   string loomDisplayName=2;
   CellMetaData cellMetaData=3;
   FileMetaData fileMetaData=4;
+  LoomHeierarchy loomHeierarchy=5;
+
 }
 
 message MyLoomsReply {

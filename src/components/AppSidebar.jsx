@@ -17,7 +17,9 @@ class AppSidebar extends Component {
 		this.state = {
 			activeCoordinates: BackendAPI.getActiveCoordinates(),
 			settings: BackendAPI.getSettings(),
-			loomFiles: [],
+			loomFiles: BackendAPI.getLoomFiles(),
+			userLoomTree: null,
+			generalLoomTree: null, 
 			spriteScale: sprite.scale,
 			spriteAlpha: sprite.alpha,
 			uploadModalOpened: false,
@@ -27,11 +29,11 @@ class AppSidebar extends Component {
 
 	render () {
 		const { match } = this.props;
-		const { activeCoordinates, settings, loading, loomFiles, uploadModalOpened, spriteScale, spriteAlpha } = this.state;
+		const { activeCoordinates, settings, loading, loomFiles, userLoomTree, generalLoomTree, uncategorizedLoomFiles, uploadModalOpened, spriteScale, spriteAlpha } = this.state;
 		let metadata = {}, coordinates = [];
-		loomFiles.map(loomFile => {
-			if (loomFile.loomFilePath == decodeURIComponent(match.params.loom)) {
-				metadata = loomFile;
+		Object.keys(loomFiles).map(loomFilePath => {
+			if (loomFilePath == decodeURIComponent(match.params.loom)) {
+				metadata = loomFiles[loomFilePath];
 				coordinates = metadata.cellMetaData.embeddings.map(coords => {
 					return {
 						text: coords.name,
@@ -42,6 +44,41 @@ class AppSidebar extends Component {
 		})
 		let showTransforms = metadata && (['welcome', 'dataset', 'tutorial', 'about'].indexOf(match.params.page) == -1) ? true : false;
 		let showCoordinatesSelection = showTransforms && metadata.fileMetaData && metadata.fileMetaData.hasExtraEmbeddings ? true : false;
+		let renderLevel = (t, l, name) => {
+			if (!t) return;
+			let nodes = t.nodes.map((file, i) => {
+				let loomUri = encodeURIComponent(file.loomFilePath);
+				let active = (match.params.loom == loomUri) || (encodeURIComponent(match.params.loom) == loomUri);
+				return (
+					<Link key={l + '-node- ' + i} to={'/' + [match.params.uuid, loomUri, match.params.page == 'welcome' ? 'gene' : match.params.page ].join('/')} onClick={() => {
+						this.props.onMetadataChange(file);
+					}}  >
+						<Menu.Item className={'level'+l} active={active} key={file.loomFilePath} >
+							<Icon name={active ? "selected radio" : "radio"} />
+							{file.loomDisplayName}
+						</Menu.Item>
+					</Link>
+				)
+			})
+			let children = Object.keys(t.children).map((level) => {
+				return (
+					<div key={l + '-level-' + level}>
+						<Menu.Header className={'level'+l}><Icon className="pointer" name={t.children[level].collapsed ? "arrow circle right" : "arrow circle down"} onClick={() => {
+							t.children[level].collapsed = !t.children[level].collapsed;
+							this.forceUpdate();
+						}} />{level}</Menu.Header>
+						{!t.children[level].collapsed ? renderLevel(t.children[level], l+1) : ''}
+					</div>
+				)
+			}) 
+			return (
+				<div key={name}>
+					{name ? <Menu.Header className={'level'+(l-1)}>{name}</Menu.Header> : '' }
+					{nodes}
+					{children}
+				</div>
+			);
+		}
 
 		return (
 			<Sidebar as={Menu} animation="push" visible={this.props.visible} vertical className="clearfix">
@@ -54,20 +91,8 @@ class AppSidebar extends Component {
 								<Icon name="add" />
 								<em>Upload new dataset</em>
 							</Menu.Item>
-							{loomFiles.map((loomFile, i) => {
-								let loomUri = encodeURIComponent(loomFile.loomFilePath);
-								let active = (match.params.loom == loomUri) || (encodeURIComponent(match.params.loom) == loomUri);
-								return (
-									<Link key={i} to={'/' + [match.params.uuid, loomUri, match.params.page == 'welcome' ? 'gene' : match.params.page ].join('/')} onClick={() => {
-										this.props.onMetadataChange(loomFile);
-									}}  >
-										<Menu.Item active={active} key={loomFile.loomFilePath} >
-											<Icon name={active ? "selected radio" : "radio"} />
-											{loomFile.loomDisplayName}
-										</Menu.Item>
-									</Link>
-								);
-							})}
+							{renderLevel(userLoomTree, 1, 'User uploaded')}
+							{renderLevel(generalLoomTree, 1, 'Publicly available')}
 							<Dimmer active={loading} inverted>
 								<Loader inverted>Loading</Loader>
 							</Dimmer>
@@ -156,29 +181,65 @@ class AppSidebar extends Component {
 
 	componentWillMount() {
 		this.getLoomFiles();
+		BackendAPI.onUpdate(this.onSettingsUpdate.bind(this));
 	}
 
-	getLoomFiles(loom, page) {
+	componentWillUnmount() {
+		BackendAPI.removeOnUpdate(this.onSettingsUpdate.bind(this));
+	}
+
+	onSettingsUpdate() {
+		if (DEBUG) console.log('onSettingsUpdate');
+		let sprite = BackendAPI.getSpriteSettings();
+		this.setState({
+			settings: BackendAPI.getSettings(),
+			activeCoordinates: BackendAPI.getActiveCoordinates(),
+			spriteAlpha: sprite.alpha,
+			spriteScale: sprite.scale,
+		});
+		this.getLoomFiles();
+	}
+
+	getLoomFiles() {
 		const { match } = this.props;
-		let query = {
-			UUID: match.params.uuid
-		};
-		BackendAPI.getConnection().then((gbc) => {
-			if (DEBUG) console.log("getMyLooms", query);
-			gbc.services.scope.Main.getMyLooms(query, (error, response) => {
-				if (response !== null) {
-					if (DEBUG) console.log("getMyLooms", response);
-					this.setState({ loomFiles: response.myLooms, loading: false });
-					BackendAPI.setLoomFiles(response.myLooms);
-					this.props.onMetadataChange(BackendAPI.getActiveLoomMetadata());
+		if (DEBUG) console.log('getLoomFiles', match);
+		if (match.params.uuid == 'permalink') return;
+		BackendAPI.queryLoomFiles(match.params.uuid, (files) => {
+			let userFiles = [], generalFiles = [];
+			files.map((file) => {
+				if (file.loomFilePath.match(/[\\\/]/)) {
+					userFiles.push(file);
 				} else {
-					this.setState({loading: false});
-					console.log("No loom files detected");
+					generalFiles.push(file);
 				}
 			});
-		}, () => {
-			BackendAPI.showError();
+			let userLoomTree = this.getEmptyNode();
+			let generalLoomTree = this.getEmptyNode();
+			let addChildren = (t, l, f) => {
+				if (f.loomHeierarchy['L'+l]) {
+					t.children[f.loomHeierarchy['L'+l]] = t.children[f.loomHeierarchy['L'+l]] || this.getEmptyNode();
+					addChildren(t.children[f.loomHeierarchy['L'+l]], l+1, f);
+				} else {
+					t.nodes.push(f);
+				}
+			}
+			userFiles.forEach((file, i) => {
+				addChildren(userLoomTree, 1, file);
+			});
+			generalFiles.forEach((file, i) => {
+				addChildren(generalLoomTree, 1, file);
+			});
+			this.setState({ loomFiles: files, loading: false, userLoomTree: userLoomTree, generalLoomTree: generalLoomTree});
+			this.props.onMetadataChange(BackendAPI.getActiveLoomMetadata());
 		});
+	}
+
+	getEmptyNode() {
+		return {
+			nodes: [],
+			children: {},
+			collapsed: true,
+		}
 	}
 
 	toggleUploadModal(event) {

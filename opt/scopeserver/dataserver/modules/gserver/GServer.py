@@ -1,4 +1,5 @@
 from concurrent import futures
+import sys
 import time
 import grpc
 import loompy as lp
@@ -175,6 +176,17 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def create_uuid_log(self):
         SCope.uuid_log = open(os.path.join(self.logs_dir, 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()))), 'w')
+
+    @staticmethod
+    def compress_str_array(str_arr):
+        print("Compressing... ")
+        str_array_size = sys.getsizeof(str_arr)
+        str_array_joint = bytes(''.join(str_arr), 'utf-8')
+        str_array_joint_compressed = zlib.compress(str_array_joint, 1)
+        str_array_joint_compressed_size = sys.getsizeof(str_array_joint_compressed)
+        savings_percent = 1-str_array_joint_compressed_size/str_array_size
+        print("Saving "+"{:.2%} of space".format(savings_percent));
+        return str_array_joint_compressed
 
     def set_global_data(self):
         self.globalLooms = [x for x in os.listdir(self.loom_dir) if not os.path.isdir(os.path.join(self.loom_dir, x))]
@@ -668,12 +680,22 @@ class SCope(s_pb2_grpc.MainServicer):
             else:
                 features.append([_LOWER_LIMIT_RGB for n in range(n_cells)])
         if len(features) > 0 and len(hex_vec) == 0:
-            hex_vec = ["null" if r == g == b == 0
+            hex_vec = ["XXXXXX" if r == g == b == 0 # previously null: ???
                        else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
                        for r, g, b in zip(features[0], features[1], features[2])]
 
+        # Compress
+        comp_start_time = time.time()
+        hex_vec_compressed = SCope.compress_str_array(str_arr=hex_vec)
+        print("Debug: %s seconds elapsed (compression) ---" % (time.time() - comp_start_time))
+
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax, maxVmax=maxVmax, cellIndices=cellIndices)
+        return s_pb2.CellColorByFeaturesReply(color=hex_vec, 
+                                              compressedColor=None, 
+                                              hasAddCompressionLayer=False, 
+                                              vmax=vmax, 
+                                              maxVmax=maxVmax, 
+                                              cellIndices=cellIndices)
 
     def getCellAUCValuesByFeatures(self, request, context):
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
@@ -785,9 +807,22 @@ class SCope(s_pb2_grpc.MainServicer):
                         meta = json.loads(SCope.get_meta_data(loom))
                     except ValueError:
                         meta = self.decompress_meta(SCope.get_meta_data(loom))
-                    annotations = meta['annotations']
-                    embeddings = meta['embeddings']
-                    clusterings = meta['clusterings']
+                    try:
+                        annotations = meta['annotations']
+                        embeddings = meta['embeddings']
+                        for e in embeddings:  # Fix for malformed embeddings json (R problem)
+                            e['id'] = int(e['id'])
+                        clusterings = meta['clusterings']
+                    except KeyError:
+                        annotations = embeddings = clusterings = []
+                try:
+                    L1 = loom.attrs.SCopeTreeL1
+                    L2 = loom.attrs.SCopeTreeL2
+                    L3 = loom.attrs.SCopeTreeL3
+                except AttributeError:
+                    L1 = 'Uncategorized'
+                    L2 = L3 = ''
+#
                 else:
                     annotations = []
                     embeddings = []
@@ -797,7 +832,12 @@ class SCope(s_pb2_grpc.MainServicer):
                                              cellMetaData=s_pb2.CellMetaData(annotations=annotations,
                                                                              embeddings=embeddings,
                                                                              clusterings=clusterings),
-                                             fileMetaData=fileMeta))
+                                             fileMetaData=fileMeta,
+                                             loomHeierarchy=s_pb2.LoomHeierarchy(L1=L1,
+                                                                                 L2=L2,
+                                                                                 L3=L3)
+                                             )
+                                )
         print(curUUIDs)
         self.updateUUIDdb()
 
@@ -811,7 +851,7 @@ class SCope(s_pb2_grpc.MainServicer):
             curUUIDs[newUUID] = time.time()
         return s_pb2.UUIDReply(UUID=newUUID)
 
-    def getRemainingUUIDTime(self, request, context):  # This function will be called a lot more often, we should reduce what it does.
+    def getRemainingUUIDTime(self, request, context):  # TODO: his function will be called a lot more often, we should reduce what it does.
         curUUIDSet = set(list(curUUIDs.keys()))
         for uid in curUUIDSet:
             timeRemaining = int(_UUID_TIMEOUT - (time.time() - curUUIDs[uid]))

@@ -16,7 +16,6 @@ export default class Regulon extends Component {
             activeLoom: BackendAPI.getActiveLoom(),
             activeCoordinates: BackendAPI.getActiveCoordinates(),
             activeFeatures: BackendAPI.getActiveFeatures(),
-            regulonMetadata: [],
             sidebar: BackendAPI.getSidebarVisible(),
             colors: BackendAPI.getColors()
         };
