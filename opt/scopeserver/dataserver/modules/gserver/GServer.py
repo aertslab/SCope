@@ -680,7 +680,7 @@ class SCope(s_pb2_grpc.MainServicer):
             else:
                 features.append([_LOWER_LIMIT_RGB for n in range(n_cells)])
         if len(features) > 0 and len(hex_vec) == 0:
-            hex_vec = ["000000" if r == g == b == 0 # previously null: ???
+            hex_vec = ["XXXXXX" if r == g == b == 0 # previously null: ???
                        else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
                        for r, g, b in zip(features[0], features[1], features[2])]
 
