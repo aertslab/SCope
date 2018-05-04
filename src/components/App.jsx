@@ -56,6 +56,18 @@ class App extends Component {
 				</Header>
 			</Dimmer>
 		);
+		let limitReachedDimmer = (
+			<Dimmer active={!loading && sessionsLimitReached}>
+				<br /><br />
+				<Icon name='warning circle' color='orange' size='big' /><br /><br />
+				<Header as='h2' inverted>
+					Currenlty Scope has reached it's capacity in number of concurrent users.<br /><br />
+					Please try again later or try out our standalone SCope app.<br /><br />
+					More details on our GitHub.<br /><br />
+					<Button color="orange" href="https://github.com/aertslab/SCope">AertsLab GitHub</Button>
+				</Header>
+			</Dimmer>
+		)
 
 		console.log('isSidebarVisible', isSidebarVisible);
 
@@ -65,12 +77,9 @@ class App extends Component {
 					<Segment textAlign='center' className="parentView">
 						<Segment vertical>
 							<Header as='h1'>SCope</Header>
-							{/*for Fly Cell Atlas
-							<br /><br />
-							<Image src='src/images/flycellatlas.png' size="small" centered />
-							<br /><br />*/}
 						</Segment>
 						{errorDimmer}
+						{limitReachedDimmer}
 					</Segment>
 				} />
 				<Route path="/:uuid/:loom?/:page?" render={({history}) =>
@@ -108,17 +117,8 @@ class App extends Component {
 								</Link>
 							</Header>
 						</Dimmer>
-						<Dimmer active={!loading && sessionsLimitReached}>
-							<br /><br />
-							<Icon name='warning circle' color='orange' size='big' /><br /><br />
-							<Header as='h2' inverted>
-								Currenlty Scope has reached it's capacity in number of concurrent users.<br /><br />
-								Please try again later or try out our standalone SCope app.<br /><br />
-								More details on our GitHub.<br /><br />
-								<Button color="orange" href="https://github.com/aertslab/SCope">AertsLab GitHub</Button>
-							</Header>
-						</Dimmer>
 						{errorDimmer}
+						{limitReachedDimmer}
 					</Segment>
 				} />
 			</Segment>
@@ -221,7 +221,7 @@ class App extends Component {
 				this.mouseClicks = 0;
 				if (DEBUG) console.log('getRemainingUUIDTime', response);
 				if (response.sessionsLimitReached) {
-					this.setState({sessionsLimitReached: true});
+					this.setState({loading: false, sessionsLimitReached: true});
 				} else {
 					this.timeout = response ? parseInt(response.timeRemaining * 1000) : 0;
 					cookies.set(cookieName, uuid, { path: '/', maxAge: this.timeout });
