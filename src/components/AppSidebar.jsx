@@ -18,6 +18,8 @@ class AppSidebar extends Component {
 			activeCoordinates: BackendAPI.getActiveCoordinates(),
 			settings: BackendAPI.getSettings(),
 			loomFiles: [],
+			userLoomFiles: [],
+			generalLoomFiles: [], 
 			spriteScale: sprite.scale,
 			spriteAlpha: sprite.alpha,
 			uploadModalOpened: false,
@@ -27,7 +29,7 @@ class AppSidebar extends Component {
 
 	render () {
 		const { match } = this.props;
-		const { activeCoordinates, settings, loading, loomFiles, uploadModalOpened, spriteScale, spriteAlpha } = this.state;
+		const { activeCoordinates, settings, loading, loomFiles, userLoomFiles, generalLoomFiles, uncategorizedLoomFiles, uploadModalOpened, spriteScale, spriteAlpha } = this.state;
 		let metadata = {}, coordinates = [];
 		loomFiles.map(loomFile => {
 			if (loomFile.loomFilePath == decodeURIComponent(match.params.loom)) {
@@ -42,6 +44,54 @@ class AppSidebar extends Component {
 		})
 		let showTransforms = metadata && (['welcome', 'dataset', 'tutorial', 'about'].indexOf(match.params.page) == -1) ? true : false;
 		let showCoordinatesSelection = showTransforms && metadata.fileMetaData && metadata.fileMetaData.hasExtraEmbeddings ? true : false;
+		let renderLoomFiles = (files) => {
+			let tree = {
+				nodes: [],
+				children: {},
+			}
+			let addChildren = (t, l, f) => {
+				if (f.loomHeierarchy['L'+l]) {
+					t.children[f.loomHeierarchy['L'+l]] = t.children[f.loomHeierarchy['L'+l]] || {nodes: [], children: {}}
+					addChildren(t.children[f.loomHeierarchy['L'+l]], l+1, f);
+				} else {
+					t.nodes.push(f);
+				}
+			}
+			files.forEach((file, i) => {
+				addChildren(tree, 1, file);
+			});
+			let renderLevel = (t, l) => {
+				let nodes = t.nodes.map((file, i) => {
+					let loomUri = encodeURIComponent(file.loomFilePath);
+					let active = (match.params.loom == loomUri) || (encodeURIComponent(match.params.loom) == loomUri);
+					return (
+						<Link key={i} to={'/' + [match.params.uuid, loomUri, match.params.page == 'welcome' ? 'gene' : match.params.page ].join('/')} onClick={() => {
+							this.props.onMetadataChange(file);
+						}}  >
+							<Menu.Item className={'level'+l} active={active} key={file.loomFilePath} >
+								<Icon name={active ? "selected radio" : "radio"} />
+								{file.loomDisplayName}
+							</Menu.Item>
+						</Link>
+					)
+				})
+				let children = Object.keys(t.children).map((level) => {
+					return (
+						<div>
+							<Menu.Header className={'level'+l}>{level}</Menu.Header>
+							{renderLevel(t.children[level], l+1)}
+						</div>
+					)
+				}) 
+				return (
+					<div>
+						{nodes}
+						{children}
+					</div>
+				);
+			}
+			return renderLevel(tree, 1);
+		}
 
 		return (
 			<Sidebar as={Menu} animation="push" visible={this.props.visible} vertical className="clearfix">
@@ -50,24 +100,14 @@ class AppSidebar extends Component {
 					</Segment>
 					<Menu.Header>DATASETS</Menu.Header>
 						<Menu.Menu>
+							<Menu.Header className="level0">User uploaded</Menu.Header>
 							<Menu.Item key="new" onClick={this.toggleUploadModal.bind(this)}>
 								<Icon name="add" />
 								<em>Upload new dataset</em>
 							</Menu.Item>
-							{loomFiles.map((loomFile, i) => {
-								let loomUri = encodeURIComponent(loomFile.loomFilePath);
-								let active = (match.params.loom == loomUri) || (encodeURIComponent(match.params.loom) == loomUri);
-								return (
-									<Link key={i} to={'/' + [match.params.uuid, loomUri, match.params.page == 'welcome' ? 'gene' : match.params.page ].join('/')} onClick={() => {
-										this.props.onMetadataChange(loomFile);
-									}}  >
-										<Menu.Item active={active} key={loomFile.loomFilePath} >
-											<Icon name={active ? "selected radio" : "radio"} />
-											{loomFile.loomDisplayName}
-										</Menu.Item>
-									</Link>
-								);
-							})}
+							{renderLoomFiles(userLoomFiles)}
+							{generalLoomFiles.length ? <Menu.Header className="level0">Publicly available</Menu.Header> : '' }
+							{renderLoomFiles(generalLoomFiles)}
 							<Dimmer active={loading} inverted>
 								<Loader inverted>Loading</Loader>
 							</Dimmer>
@@ -160,8 +200,16 @@ class AppSidebar extends Component {
 
 	getLoomFiles(loom, page) {
 		const { match } = this.props;
-		BackendAPI.queryLoomFiles(match.params.uuid, (loomFiles) => {
-			this.setState({ loomFiles: loomFiles, loading: false });
+		let { generalLoomFiles, userLoomFiles, uncategorizedLoomFiles } = this.state;
+		BackendAPI.queryLoomFiles(match.params.uuid, (files) => {
+			files.map((file) => {
+				if (file.loomFilePath.indexOf('\\') != -1) {
+					userLoomFiles.push(file);
+				} else {
+					generalLoomFiles.push(file);
+				}
+			});
+			this.setState({ loomFiles: files, loading: false });
 			this.props.onMetadataChange(BackendAPI.getActiveLoomMetadata());
 		});
 	}
