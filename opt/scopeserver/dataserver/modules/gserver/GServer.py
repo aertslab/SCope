@@ -807,16 +807,22 @@ class SCope(s_pb2_grpc.MainServicer):
                         meta = json.loads(SCope.get_meta_data(loom))
                     except ValueError:
                         meta = self.decompress_meta(SCope.get_meta_data(loom))
-                    annotations = meta['annotations']
-                    embeddings = meta['embeddings']
-                    clusterings = meta['clusterings']
+                    try:
+                        annotations = meta['annotations']
+                        embeddings = meta['embeddings']
+                        for e in embeddings:  # Fix for malformed embeddings json (R problem)
+                            e['id'] = int(e['id'])
+                        clusterings = meta['clusterings']
+                    except KeyError:
+                        annotations = embeddings = clusterings = []
                 try:
                     L1 = loom.attrs.SCopeTreeL1
                     L2 = loom.attrs.SCopeTreeL2
                     L3 = loom.attrs.SCopeTreeL3
                 except AttributeError:
-                    L1 = L2 = L3 = ''
-
+                    L1 = 'Uncategorized'
+                    L2 = L3 = ''
+#
                 else:
                     annotations = []
                     embeddings = []
@@ -845,7 +851,7 @@ class SCope(s_pb2_grpc.MainServicer):
             curUUIDs[newUUID] = time.time()
         return s_pb2.UUIDReply(UUID=newUUID)
 
-    def getRemainingUUIDTime(self, request, context):  # This function will be called a lot more often, we should reduce what it does.
+    def getRemainingUUIDTime(self, request, context):  # TODO: his function will be called a lot more often, we should reduce what it does.
         curUUIDSet = set(list(curUUIDs.keys()))
         for uid in curUUIDSet:
             timeRemaining = int(_UUID_TIMEOUT - (time.time() - curUUIDs[uid]))
