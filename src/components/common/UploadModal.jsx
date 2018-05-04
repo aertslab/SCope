@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Modal, Grid, Input, Progress } from 'semantic-ui-react';
 import FileReaderInput from 'react-file-reader-input';
+import Uploader from '../common/Uploader';
 
 export default class UploadModal extends Component {
     constructor() {
@@ -47,38 +48,20 @@ export default class UploadModal extends Component {
     }
 
     selectLoomFile(event, selection) {
-		selection.forEach((selected) => {
-			const [event, file] = selected;
-			this.setState({ uploadLoomFile: file })
-		})
-	}
+        selection.forEach((selected) => {
+            const [event, file] = selected;
+            this.setState({ uploadLoomFile: file })
+        })
+    }
 
     uploadLoomFile() {
-		let file = this.state.uploadLoomFile;
-
-		if (file == null) {
-			alert("Please select a .loom file first")
-			return
-		}
-
-		let form = new FormData();
-		form.append('UUID', this.props.uuid);
-		form.append('file-type', this.props.type);
-		form.append('file', file);
-
-		let xhr = new XMLHttpRequest();
-		xhr.open("POST", BACKEND.proto + "://" + BACKEND.host + ":" + BACKEND.XHRport + "/");
-		xhr.upload.addEventListener('progress', (event) => {
-			if (DEBUG) console.log("Data uploaded: " + event.loaded + "/" + event.total);
-			let progress = (event.loaded / event.total * 100).toPrecision(1);
-			this.setState({ uploadLoomProgress: progress });
-		});
-		xhr.upload.addEventListener('load', (event) => {
-			if (DEBUG) console.log("file uploaded: " + file.name);
+        let file = this.state.uploadLoomFile;
+        let uploader = new Uploader();
+        uploader.upload(this.props.uuid, this.props.type, file, (progress) =>{
+            this.setState({ uploadLoomProgress: progress });
+        }, (filename) => {
             this.setState({ uploadLoomFile: null, uploadLoomProgress: 0 })
-            setTimeout(this.props.onUploaded, 1000);
-		})
-		xhr.setRequestHeader("Content-Disposition", "attachment;filename=" + file.name)
-		xhr.send(form);
-	}
+            this.props.onUploaded(filename);
+        });
+    }
 }

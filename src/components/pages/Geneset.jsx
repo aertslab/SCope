@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { withRouter, Link } from 'react-router-dom';
-import { Button, Grid, Menu, Icon, Dimmer, Loader } from 'semantic-ui-react'
+import { Button, Grid, Menu, Icon, Dimmer, Loader, Input } from 'semantic-ui-react'
 import FeatureSearchBox from '../common/FeatureSearchBox'
 import { BackendAPI } from '../common/API'
 import Viewer from '../common/Viewer'
@@ -9,7 +9,9 @@ import ViewerSidebar from '../common/ViewerSidebar'
 import ViewerToolbar from '../common/ViewerToolbar'
 import Histogram from '../common/Histogram'
 import UploadModal from '../common/UploadModal';
+import Uploader from '../common/Uploader';
 import ReactGA from 'react-ga';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 class Geneset extends Component {
 
@@ -19,6 +21,8 @@ class Geneset extends Component {
             activeLoom: BackendAPI.getActiveLoom(),
             activeCoordinates: BackendAPI.getActiveCoordinates(),
             activeFeatures: BackendAPI.getActiveFeatures(),
+            genesetName: '',
+            geneset: [],
             regulonMetadata: [],
             genesets: [],
             loading: true,
@@ -58,29 +62,74 @@ class Geneset extends Component {
                 <Grid.Row columns="3" centered>
                     <Grid.Column width="11" stretched>
                         <Menu secondary>
-						<Menu.Menu>
-							<Menu.Item key="new" onClick={this.toggleUploadModal.bind(this)}>
-								<Icon name="add" />
-								<em>Upload new geneset</em>
-							</Menu.Item>
-							{genesets.map((set, i) => {
-								let active = selectedGeneset == set.geneSetFilePath;
-								return (
-										<Menu.Item active={active} key={set.geneSetFilePath} onClick={() => {
+                        <Menu.Menu>
+                            <Menu.Item key="upload" onClick={this.showUploadModal.bind(this)}>
+                                <Icon name="upload" />
+                                <em>Upload a geneset file</em>
+                            </Menu.Item>
+                            {genesets.map((set, i) => {
+                                let active = selectedGeneset == set.geneSetFilePath ? true : false;
+                                console.log(selectedGeneset, set.geneSetFilePath, active);
+                                return (
+                                        <Menu.Item active={active} key={set.geneSetFilePath} onClick={() => {
                                             this.setState({selectedGeneset: set.geneSetFilePath});
                                         }} >
-											<Icon name={active ? "selected radio" : "radio"} />
-											{set.geneSetDisplayName}
-										</Menu.Item>
-								);
-							})}
-						</Menu.Menu>
+                                            <Icon name={active ? "selected radio" : "radio"} />
+                                            {set.geneSetDisplayName}
+                                        </Menu.Item>
+                                );
+                            })}
+                        </Menu.Menu>
                         </Menu>
                     </Grid.Column>
                     <Grid.Column width="2" textAlign='right'>
                         <Button color="orange" onClick={this.runGeneEnrichment.bind(this)} disabled={!selectedGeneset} >Run gene enrichment</Button>
                     </Grid.Column>
                     <Grid.Column width="3">&nbsp;</Grid.Column>
+                </Grid.Row>
+                <Grid.Row columns="5" centered>
+                    <Grid.Column width="2">
+                        <Menu secondary>
+                            <Menu.Menu>
+                                <Menu.Item key="create">
+                                    <Icon name="add" />
+                                    <em>or create it yourself</em>
+                                </Menu.Item>
+                            </Menu.Menu>
+                        </Menu>
+                    </Grid.Column>
+                    <Grid.Column width="2" textAlign="right">
+                        <Input placeholder="Geneset name" size="mini" 
+                            onChange={(evt, data) => {
+                                this.setState({genesetName: data.value});
+                            }}/>
+                    </Grid.Column>
+                    <Grid.Column width="7">
+                        <FeatureSearchBox type='gene' size="huge" onResultSelect={(result) => {
+                            let geneset = this.state.geneset;
+                            geneset.push(result.title);
+                            this.setState({geneset});
+                        }} />
+                    </Grid.Column>
+                    <Grid.Column width="2" textAlign="right">
+                        <Button color="" onClick={this.saveGeneset.bind(this)} disabled={this.state.genesetName.length==0||this.state.geneset.length==0} >Save as geneset</Button>
+                    </Grid.Column>
+                    <Grid.Column width="3">&nbsp;</Grid.Column>
+                </Grid.Row>
+                <Grid.Row colums="3">
+                    <Grid.Column width="4">&nbsp;</Grid.Column>
+                    <Grid.Column width="7">
+                        <span key={this.state.genesetName}><b>{this.state.genesetName}</b> </span>
+                        <ReactCSSTransitionGroup transitionName="highlight" transitionEnterTimeout={500} transitionLeave={false}>
+                            {this.state.geneset.map((gene) => {
+                                console.log(gene);
+                                return (
+                                    <span key={gene}>{gene}, </span>
+                                )
+                            })}
+                        </ReactCSSTransitionGroup>
+                    </Grid.Column>
+                    <Grid.Column width="5">&nbsp;</Grid.Column>
                 </Grid.Row>
                 <Grid.Row columns="4" stretched className="viewerFlex flexRow">
                     <Grid.Column width={1}>
@@ -104,7 +153,7 @@ class Geneset extends Component {
                         }} />
                     </Grid.Column>
                 </Grid.Row>
-				<UploadModal title="Import a geneset file" type='GeneSet' uuid={match.params.uuid} opened={uploadModalOpened} onClose={this.toggleUploadModal.bind(this)} onUploaded={this.onGenesetUploaded.bind(this)} />
+                <UploadModal title="Import a geneset file" type='GeneSet' uuid={match.params.uuid} opened={uploadModalOpened} onClose={this.hideUploadModal.bind(this)} onUploaded={this.onGenesetUploaded.bind(this)} />
             </Grid>
         );
     }
@@ -125,31 +174,48 @@ class Geneset extends Component {
         this.getGeneSets();
     }
 
-    toggleUploadModal(event) {
-		this.setState({ uploadModalOpened: !this.state.uploadModalOpened })
-		ReactGA.event({
-			category: 'upload',
-			action: 'toggle geneset upload modal'
-		});
-	}
+    showUploadModal(event) {
+        this.setState({ uploadModalOpened: true })
+        ReactGA.event({
+            category: 'upload',
+            action: 'toggle geneset upload modal'
+        });
+    }
 
-	getGeneSets() {
-		const { match } = this.props;
-		let query = {
-			UUID: match.params.uuid
-		};
-		BackendAPI.getConnection().then((gbc) => {
-			if (DEBUG) console.log("getMyGeneSets", query);
-			gbc.services.scope.Main.getMyGeneSets(query, (error, response) => {
-				if (response !== null) {
-					if (DEBUG) console.log("getMyGeneSets", response);
-					this.setState({ genesets: response.myGeneSets, loading: false });
-				} else {
-					this.setState({ loading: false });
-					console.log("No geneset files detected");
-				}
-			});
-		}, () => {
+    hideUploadModal(event) {
+        this.setState({ uploadModalOpened: false })
+        ReactGA.event({
+            category: 'upload',
+            action: 'toggle geneset upload modal'
+        });
+    }
+
+    saveGeneset() {
+        const { match } = this.props;
+        let uploader = new Uploader();
+        let fileContent = [this.state.genesetName].concat(this.state.geneset).join("\n");        
+        console.log(fileContent);
+        uploader.upload(match.params.uuid, 'GeneSet', new File([fileContent], this.state.genesetName, {type: "text/plain"}), () => {
+        }, this.onGenesetUploaded.bind(this));
+    }
+
+    getGeneSets() {
+        const { match } = this.props;
+        let query = {
+            UUID: match.params.uuid
+        };
+        BackendAPI.getConnection().then((gbc) => {
+            if (DEBUG) console.log("getMyGeneSets", query);
+            gbc.services.scope.Main.getMyGeneSets(query, (error, response) => {
+                if (response !== null) {
+                    if (DEBUG) console.log("getMyGeneSets", response);
+                    this.setState({ genesets: response.myGeneSets, loading: false });
+                } else {
+                    this.setState({ loading: false });
+                    console.log("No geneset files detected");
+                }
+            });
+        }, () => {
             BackendAPI.showError();	
         });
     }
@@ -163,41 +229,45 @@ class Geneset extends Component {
         BackendAPI.getConnection().then((gbc) => {
             this.setState({loading: true});
             if (DEBUG) console.log('doGeneSetEnrichment', query);
-    	    var call = gbc.services.scope.Main.doGeneSetEnrichment(query);
-	        call.on('data', (gse) => {
+            var call = gbc.services.scope.Main.doGeneSetEnrichment(query);
+            call.on('data', (gse) => {
                 if (DEBUG) console.log('doGeneSetEnrichment data', gse);
                 if (gse.isDone) {
                     this.setState({loading: false, colors: gse.cellValues.color});
                 } else {
                     this.setState({loadingMessage: gse.progress.status});
                 }
-	        });
-	        call.on('end', () => {
-		        if (DEBUG) console.log('doGeneSetEnrichment end');
+            });
+            call.on('end', () => {
+                if (DEBUG) console.log('doGeneSetEnrichment end');
                 ReactGA.event({
                     category: 'geneset',
                     action: 'enrichment finished',
                     nonInteraction: true
                 });
-	        });
+            });
         }, () => {
             BackendAPI.showError();	
         })
-		ReactGA.event({
-			category: 'geneset',
-			action: 'enrichment started'
-		});
+        ReactGA.event({
+            category: 'geneset',
+            action: 'enrichment started'
+        });
     }
 
     onGenesetUploaded() {
-		this.getGeneSets();
-		this.toggleUploadModal();
-		ReactGA.event({
-			category: 'upload',
+        this.getGeneSets();
+        this.hideUploadModal();
+        this.setState({
+            geneset: [],
+            genesetName: '',
+        })
+        ReactGA.event({
+            category: 'upload',
             action: 'uploaded geneset file',
             nonInteraction: true
-		});
-	}
+        });
+    }
 
 }
 export default withRouter(Geneset);

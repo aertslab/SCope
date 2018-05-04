@@ -6,3 +6,26 @@
 a.active.item.annotation {
 	font-weight: bold !important;
 }
+
+.noFrame {
+	padding: 0px !important;
+}
+
+  .highlight-enter {
+	background: white;
+  }
+  
+  .highlight-enter.highlight-enter-active {
+	background: yellow;
+  }
+  
+  .highlight-leave {
+	background: yellow;
+	opacity: 1;
+  }
+  
+  .highlight-leave.highlight-leave-active {
+	background: white;
+	opacity: 0;
+	transition: opacity 10ms ease-in;
+  }
