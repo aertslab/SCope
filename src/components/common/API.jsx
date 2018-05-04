@@ -109,7 +109,7 @@ class API {
 
 	forceUpdate() {
 		this.updateListeners.forEach((listener) => {
-			listener(this.spriteSettings);
+			listener(this.settings);
 		})
 	}
 

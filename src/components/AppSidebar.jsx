@@ -17,7 +17,7 @@ class AppSidebar extends Component {
 		this.state = {
 			activeCoordinates: BackendAPI.getActiveCoordinates(),
 			settings: BackendAPI.getSettings(),
-			loomFiles: [],
+			loomFiles: BackendAPI.getLoomFiles(),
 			userLoomTree: null,
 			generalLoomTree: null, 
 			spriteScale: sprite.scale,
@@ -31,9 +31,9 @@ class AppSidebar extends Component {
 		const { match } = this.props;
 		const { activeCoordinates, settings, loading, loomFiles, userLoomTree, generalLoomTree, uncategorizedLoomFiles, uploadModalOpened, spriteScale, spriteAlpha } = this.state;
 		let metadata = {}, coordinates = [];
-		loomFiles.map(loomFile => {
-			if (loomFile.loomFilePath == decodeURIComponent(match.params.loom)) {
-				metadata = loomFile;
+		Object.keys(loomFiles).map(loomFilePath => {
+			if (loomFilePath == decodeURIComponent(match.params.loom)) {
+				metadata = loomFiles[loomFilePath];
 				coordinates = metadata.cellMetaData.embeddings.map(coords => {
 					return {
 						text: coords.name,
@@ -44,13 +44,13 @@ class AppSidebar extends Component {
 		})
 		let showTransforms = metadata && (['welcome', 'dataset', 'tutorial', 'about'].indexOf(match.params.page) == -1) ? true : false;
 		let showCoordinatesSelection = showTransforms && metadata.fileMetaData && metadata.fileMetaData.hasExtraEmbeddings ? true : false;
-		let renderLevel = (t, l) => {
+		let renderLevel = (t, l, name) => {
 			if (!t) return;
 			let nodes = t.nodes.map((file, i) => {
 				let loomUri = encodeURIComponent(file.loomFilePath);
 				let active = (match.params.loom == loomUri) || (encodeURIComponent(match.params.loom) == loomUri);
 				return (
-					<Link key={i} to={'/' + [match.params.uuid, loomUri, match.params.page == 'welcome' ? 'gene' : match.params.page ].join('/')} onClick={() => {
+					<Link key={l + '-node- ' + i} to={'/' + [match.params.uuid, loomUri, match.params.page == 'welcome' ? 'gene' : match.params.page ].join('/')} onClick={() => {
 						this.props.onMetadataChange(file);
 					}}  >
 						<Menu.Item className={'level'+l} active={active} key={file.loomFilePath} >
@@ -62,7 +62,7 @@ class AppSidebar extends Component {
 			})
 			let children = Object.keys(t.children).map((level) => {
 				return (
-					<div>
+					<div key={l + '-level-' + level}>
 						<Menu.Header className={'level'+l}><Icon className="pointer" name={t.children[level].collapsed ? "arrow circle right" : "arrow circle down"} onClick={() => {
 							t.children[level].collapsed = !t.children[level].collapsed;
 							this.forceUpdate();
@@ -72,7 +72,8 @@ class AppSidebar extends Component {
 				)
 			}) 
 			return (
-				<div>
+				<div key={name}>
+					{name ? <Menu.Header className={'level'+(l-1)}>{name}</Menu.Header> : '' }
 					{nodes}
 					{children}
 				</div>
@@ -86,14 +87,12 @@ class AppSidebar extends Component {
 					</Segment>
 					<Menu.Header>DATASETS</Menu.Header>
 						<Menu.Menu>
-							<Menu.Header className="level0">User uploaded</Menu.Header>
 							<Menu.Item key="new" onClick={this.toggleUploadModal.bind(this)}>
 								<Icon name="add" />
 								<em>Upload new dataset</em>
 							</Menu.Item>
-							{renderLevel(userLoomTree, 1)}
-							<Menu.Header className="level0">Publicly available</Menu.Header>
-							{renderLevel(generalLoomTree, 1)}
+							{renderLevel(userLoomTree, 1, 'User uploaded')}
+							{renderLevel(generalLoomTree, 1, 'Publicly available')}
 							<Dimmer active={loading} inverted>
 								<Loader inverted>Loading</Loader>
 							</Dimmer>
@@ -186,11 +185,25 @@ class AppSidebar extends Component {
 	}
 
 	componentWillUnmount() {
-		BackendAPI.removeOnUpdate(this.onSettingsUpdate);
+		BackendAPI.removeOnUpdate(this.onSettingsUpdate.bind(this));
 	}
 
-	getLoomFiles(loom, page) {
+	onSettingsUpdate() {
+		if (DEBUG) console.log('onSettingsUpdate');
+		let sprite = BackendAPI.getSpriteSettings();
+		this.setState({
+			settings: BackendAPI.getSettings(),
+			activeCoordinates: BackendAPI.getActiveCoordinates(),
+			spriteAlpha: sprite.alpha,
+			spriteScale: sprite.scale,
+		});
+		this.getLoomFiles();
+	}
+
+	getLoomFiles() {
 		const { match } = this.props;
+		if (DEBUG) console.log('getLoomFiles', match);
+		if (match.params.uuid == 'permalink') return;
 		BackendAPI.queryLoomFiles(match.params.uuid, (files) => {
 			let userFiles = [], generalFiles = [];
 			files.map((file) => {
@@ -292,10 +305,6 @@ class AppSidebar extends Component {
 	handleUpdateSprite(scale, alpha) {
 		this.setState({spriteScale: scale, spriteAlpha: alpha})
 		BackendAPI.setSpriteSettings(scale, alpha);
-	}
-
-	onSettingsUpdate() {
-		this.setState({settings: BackendAPI.getSettings()});
 	}
 }
 
