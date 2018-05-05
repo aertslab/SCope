@@ -519,8 +519,17 @@ class SCope(s_pb2_grpc.MainServicer):
         return loom.attrs.MetaData
 
     def get_file_metadata(self, loom_file_path):
+        """Summarize in a dict what feature data the loom file contains.
+
+        Args:
+            loom_file_path (str): The file path to the loom file.
+
+        Returns:
+            dict: A dictionary defining whether the current implemented features in SCope are available for the loom file with the given loom_file_path.
+
+        """
         loom = self.get_loom_connection(loom_file_path)
-        attr_margins = [1,1,1,1,0]
+        attr_margins = [2,2,2,2,0]
         attr_names = ["RegulonsAUC", "Clusterings", "Embeddings_X", "GeneSets", "MetaData"]
         attr_keys = ["RegulonsAUC", "Clusterings", "ExtraEmbeddings", "GeneSets", "GlobalMeta"]
 
