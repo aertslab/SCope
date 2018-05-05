@@ -520,31 +520,29 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def get_file_metadata(self, loom_file_path):
         loom = self.get_loom_connection(loom_file_path)
-        meta = {}
-        if hasattr(loom.ca, "RegulonsAUC"):
-            meta['hasRegulonsAUC'] = True
-        else:
-            meta['hasRegulonsAUC'] = False
-        if hasattr(loom.ca, "Clusterings"):
-            meta['hasClusterings'] = True
-        else:
-            meta['hasClusterings'] = False
-        if hasattr(loom.ca, "Embeddings_X"):
-            meta['hasExtraEmbeddings'] = True
-        else:
-            meta['hasExtraEmbeddings'] = False
-        if hasattr(loom.ra, "GeneSets"):
-            meta['hasGeneSets'] = True
-        else:
-            meta['hasGeneSets'] = False
-        try:
-            try:
-                metaData = json.loads(SCope.get_meta_data(loom))
-            except ValueError:
-                metaData = self.decompress_meta(SCope.get_meta_data(loom))
-            meta['hasGlobalMeta'] = True
-        except (KeyError, AttributeError):
-            meta['hasGlobalMeta'] = False
+        attr_margins = [1,1,1,1,0]
+        attr_names = ["RegulonsAUC", "Clusterings", "Embeddings_X", "GeneSets", "MetaData"]
+        attr_keys = ["RegulonsAUC", "Clusterings", "ExtraEmbeddings", "GeneSets", "GlobalMeta"]
+
+        def loom_attr_exists(x):
+            tmp = {}
+            idx = attr_names.index(x)
+            margin = attr_margins[idx]
+            ha = False
+            if margin == 0:
+                ha = hasattr(loom.attrs, x)
+            elif margin == 1:
+                ha = hasattr(loom.ra, x)
+            elif margin == 2:
+                ha = hasattr(loom.ca, x)
+            else:
+                raise ValueError("Invalid margin value: "+ margin)
+            tmp["has"+attr_keys[idx]] = ha
+            return tmp
+        
+        md = map(loom_attr_exists, attr_names)
+        meta = { k: v for d in md for k, v in d.items() }
+        print(meta)
         return meta
 
     def compressHexColor(self, a):
