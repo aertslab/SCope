@@ -44,19 +44,21 @@ class AppSidebar extends Component {
 		})
 		let showTransforms = metadata && (['welcome', 'dataset', 'tutorial', 'about'].indexOf(match.params.page) == -1) ? true : false;
 		let showCoordinatesSelection = showTransforms && metadata.fileMetaData && metadata.fileMetaData.hasExtraEmbeddings ? true : false;
-		let renderLevel = (t, l, name) => {
+		let renderLevel = (t, l, name, canRemove) => {
 			if (!t) return;
 			let nodes = t.nodes.map((file, i) => {
 				let loomUri = encodeURIComponent(file.loomFilePath);
 				let active = (match.params.loom == loomUri) || (encodeURIComponent(match.params.loom) == loomUri);
 				return (
 					<Link key={l + '-node- ' + i} to={'/' + [match.params.uuid, loomUri, match.params.page == 'welcome' ? 'gene' : match.params.page ].join('/')} onClick={() => {
-						console.log('onclick');
 						this.setState({activeCoordinates: -1});
 						this.props.onMetadataChange(file);
 					}}  >
 						<Menu.Item className={'level'+l} active={active} key={file.loomFilePath} >
-							<Icon name={active ? "selected radio" : "radio"} />
+							{canRemove && 
+								<Icon name='trash' title='delete this loom file' style={{display: 'inline'}} onClick={(e,d) => this.deleteLoomFile(file.loomFilePath, file.loomDisplayName)} className="pointer"  /> 
+							}
+							<Icon name={active ? "selected radio" : "radio"} className="pointer" title="select this loom file" />
 							{file.loomDisplayName}
 						</Menu.Item>
 					</Link>
@@ -69,7 +71,7 @@ class AppSidebar extends Component {
 							t.children[level].collapsed = !t.children[level].collapsed;
 							this.forceUpdate();
 						}} />{level}</Menu.Header>
-						{!t.children[level].collapsed ? renderLevel(t.children[level], l+1) : ''}
+						{!t.children[level].collapsed ? renderLevel(t.children[level], l+1, null, canRemove) : ''}
 					</div>
 				)
 			}) 
@@ -93,7 +95,7 @@ class AppSidebar extends Component {
 								<Icon name="add" />
 								<em>Upload new dataset</em>
 							</Menu.Item>
-							{renderLevel(userLoomTree, 1, 'User uploaded')}
+							{renderLevel(userLoomTree, 1, 'User uploaded', 1)}
 							{renderLevel(generalLoomTree, 1, 'Publicly available')}
 							<Dimmer active={loading} inverted>
 								<Loader inverted>Loading</Loader>
@@ -241,6 +243,31 @@ class AppSidebar extends Component {
 			nodes: [],
 			children: {},
 			collapsed: true,
+		}
+	}
+
+	deleteLoomFile(loomFilePath, loomDisplayName) {
+		const { match } = this.props;
+		ReactGA.event({
+			category: 'upload',
+			action: 'removed loom file',
+		});
+		let execute = confirm("Are you sure that you want to remove the file: " + loomDisplayName + " ?");
+		if (execute) {
+			let query = {
+				UUID: match.params.uuid,
+				filePath: loomFilePath,
+				fileType: 'Loom'
+			};
+			BackendAPI.getConnection().then((gbc) => {
+				if (DEBUG) console.log("deleteUserFile", query);
+				gbc.services.scope.Main.deleteUserFile(query, (error, response) => {
+					if (DEBUG) console.log("deleteUserFile", response);
+					if ((response !== null) && (response.deletedSuccessfully)) {
+						this.getLoomFiles();
+					}
+				});
+			});
 		}
 	}
 

@@ -72,7 +72,6 @@ class API {
 	}
 
 	getExportObject(params) {
-		this.uuid = params.uuid;
 		this.loom = params.loom;
 		this.page = params.page;
 		return this;
@@ -80,7 +79,7 @@ class API {
 
 	getExportKeys() {
 		return [
-			'uuid', 'loom', 'page',
+			'loom', 'page',
 			'spriteSettings', 'scale', 'alpha', 
 			'activePage', 
 			'activeLooms', 

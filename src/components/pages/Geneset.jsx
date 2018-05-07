@@ -74,8 +74,9 @@ class Geneset extends Component {
                                         <Menu.Item active={active} key={set.geneSetFilePath} onClick={() => {
                                             this.setState({selectedGeneset: set.geneSetFilePath});
                                         }} >
-                                            <Icon name={active ? "selected radio" : "radio"} />
-                                            {set.geneSetDisplayName}
+                                            <Icon name={active ? "selected radio" : "radio"} className="pointer" title="select this file" />
+                                            {set.geneSetDisplayName} &nbsp;
+                                            <Icon name='trash' title='delete this file' style={{display: 'inline'}} onClick={(e,d) => this.deleteGeneSets(set.geneSetFilePath, set.geneSetDisplayName)} className="pointer"  /> 
                                         </Menu.Item>
                                 );
                             })}
@@ -223,6 +224,31 @@ class Geneset extends Component {
             BackendAPI.showError();	
         });
     }
+
+    deleteGeneSets(geneSetFilePath, geneSetDisplayName) {
+		const { match } = this.props;
+		ReactGA.event({
+			category: 'geneset',
+			action: 'removed geneset file',
+		});
+		let execute = confirm("Are you sure that you want to remove the file: " + geneSetDisplayName + " ?");
+		if (execute) {
+			let query = {
+				UUID: match.params.uuid,
+				filePath: geneSetFilePath,
+				fileType: 'GeneSet'
+			};
+			BackendAPI.getConnection().then((gbc) => {
+				if (DEBUG) console.log("deleteUserFile", query);
+				gbc.services.scope.Main.deleteUserFile(query, (error, response) => {
+					if ((response !== null) && (response.deletedSuccessfully)) {
+						if (DEBUG) console.log("deleteUserFile", response);
+						this.getGeneSets();
+					}
+				});
+			});
+		}
+	}
     
     runGeneEnrichment() {
         let query = {
