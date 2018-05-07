@@ -803,6 +803,8 @@ class SCope(s_pb2_grpc.MainServicer):
             for i in ['Loom', 'GeneSet', 'LoomAUCellRankings']:
                 os.mkdir(os.path.join(data_dirs[i]['path'], request.UUID))
 
+        self.set_global_data()
+
         loomsToProcess = sorted(self.globalLooms) + sorted([os.path.join(request.UUID, x) for x in os.listdir(userDir)])
 
         for f in loomsToProcess:
