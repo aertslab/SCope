@@ -548,7 +548,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 raise ValueError("Invalid margin value: "+ margin)
             tmp["has"+attr_keys[idx]] = ha
             return tmp
-        
+
         md = map(loom_attr_exists, attr_names)
         meta = { k: v for d in md for k, v in d.items() }
         print(meta)
@@ -697,11 +697,11 @@ class SCope(s_pb2_grpc.MainServicer):
         print("Debug: %s seconds elapsed (compression) ---" % (time.time() - comp_start_time))
 
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        return s_pb2.CellColorByFeaturesReply(color=hex_vec, 
-                                              compressedColor=None, 
-                                              hasAddCompressionLayer=False, 
-                                              vmax=vmax, 
-                                              maxVmax=maxVmax, 
+        return s_pb2.CellColorByFeaturesReply(color=hex_vec,
+                                              compressedColor=None,
+                                              hasAddCompressionLayer=False,
+                                              vmax=vmax,
+                                              maxVmax=maxVmax,
                                               cellIndices=cellIndices)
 
     def getCellAUCValuesByFeatures(self, request, context):
@@ -866,7 +866,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 print('Removing UUID: {0}'.format(uid))
                 del(curUUIDs[uid])
                 for i in ['Loom', 'GeneSet', 'LoomAUCellRankings']:
-                    shutil.rmtree(os.path.join(data_dirs[i]['path'], request.UUID))
+                    shutil.rmtree(os.path.join(data_dirs[i]['path'], uid))
         uid = request.UUID
         if uid in curUUIDs:
             startTime = curUUIDs[uid]
