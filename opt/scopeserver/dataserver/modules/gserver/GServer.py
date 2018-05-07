@@ -519,32 +519,39 @@ class SCope(s_pb2_grpc.MainServicer):
         return loom.attrs.MetaData
 
     def get_file_metadata(self, loom_file_path):
+        """Summarize in a dict what feature data the loom file contains.
+
+        Args:
+            loom_file_path (str): The file path to the loom file.
+
+        Returns:
+            dict: A dictionary defining whether the current implemented features in SCope are available for the loom file with the given loom_file_path.
+
+        """
         loom = self.get_loom_connection(loom_file_path)
-        meta = {}
-        if hasattr(loom.ca, "RegulonsAUC"):
-            meta['hasRegulonsAUC'] = True
-        else:
-            meta['hasRegulonsAUC'] = False
-        if hasattr(loom.ca, "Clusterings"):
-            meta['hasClusterings'] = True
-        else:
-            meta['hasClusterings'] = False
-        if hasattr(loom.ca, "Embeddings_X"):
-            meta['hasExtraEmbeddings'] = True
-        else:
-            meta['hasExtraEmbeddings'] = False
-        if hasattr(loom.ra, "GeneSets"):
-            meta['hasGeneSets'] = True
-        else:
-            meta['hasGeneSets'] = False
-        try:
-            try:
-                metaData = json.loads(SCope.get_meta_data(loom))
-            except ValueError:
-                metaData = self.decompress_meta(SCope.get_meta_data(loom))
-            meta['hasGlobalMeta'] = True
-        except (KeyError, AttributeError):
-            meta['hasGlobalMeta'] = False
+        attr_margins = [2,2,2,2,0]
+        attr_names = ["RegulonsAUC", "Clusterings", "Embeddings_X", "GeneSets", "MetaData"]
+        attr_keys = ["RegulonsAUC", "Clusterings", "ExtraEmbeddings", "GeneSets", "GlobalMeta"]
+
+        def loom_attr_exists(x):
+            tmp = {}
+            idx = attr_names.index(x)
+            margin = attr_margins[idx]
+            ha = False
+            if margin == 0:
+                ha = hasattr(loom.attrs, x)
+            elif margin == 1:
+                ha = hasattr(loom.ra, x)
+            elif margin == 2:
+                ha = hasattr(loom.ca, x)
+            else:
+                raise ValueError("Invalid margin value: "+ margin)
+            tmp["has"+attr_keys[idx]] = ha
+            return tmp
+
+        md = map(loom_attr_exists, attr_names)
+        meta = { k: v for d in md for k, v in d.items() }
+        print(meta)
         return meta
 
     def compressHexColor(self, a):
@@ -690,11 +697,11 @@ class SCope(s_pb2_grpc.MainServicer):
         print("Debug: %s seconds elapsed (compression) ---" % (time.time() - comp_start_time))
 
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        return s_pb2.CellColorByFeaturesReply(color=hex_vec, 
-                                              compressedColor=None, 
-                                              hasAddCompressionLayer=False, 
-                                              vmax=vmax, 
-                                              maxVmax=maxVmax, 
+        return s_pb2.CellColorByFeaturesReply(color=hex_vec,
+                                              compressedColor=None,
+                                              hasAddCompressionLayer=False,
+                                              vmax=vmax,
+                                              maxVmax=maxVmax,
                                               cellIndices=cellIndices)
 
     def getCellAUCValuesByFeatures(self, request, context):
@@ -796,6 +803,8 @@ class SCope(s_pb2_grpc.MainServicer):
             for i in ['Loom', 'GeneSet', 'LoomAUCellRankings']:
                 os.mkdir(os.path.join(data_dirs[i]['path'], request.UUID))
 
+        self.set_global_data()
+
         loomsToProcess = sorted(self.globalLooms) + sorted([os.path.join(request.UUID, x) for x in os.listdir(userDir)])
 
         for f in loomsToProcess:
@@ -807,16 +816,22 @@ class SCope(s_pb2_grpc.MainServicer):
                         meta = json.loads(SCope.get_meta_data(loom))
                     except ValueError:
                         meta = self.decompress_meta(SCope.get_meta_data(loom))
-                    annotations = meta['annotations']
-                    embeddings = meta['embeddings']
-                    clusterings = meta['clusterings']
+                    try:
+                        annotations = meta['annotations']
+                        embeddings = meta['embeddings']
+                        for e in embeddings:  # Fix for malformed embeddings json (R problem)
+                            e['id'] = int(e['id'])
+                        clusterings = meta['clusterings']
+                    except KeyError:
+                        annotations = embeddings = clusterings = []
                 try:
                     L1 = loom.attrs.SCopeTreeL1
                     L2 = loom.attrs.SCopeTreeL2
                     L3 = loom.attrs.SCopeTreeL3
                 except AttributeError:
-                    L1 = L2 = L3 = ''
-
+                    L1 = 'Uncategorized'
+                    L2 = L3 = ''
+#
                 else:
                     annotations = []
                     embeddings = []
@@ -845,7 +860,7 @@ class SCope(s_pb2_grpc.MainServicer):
             curUUIDs[newUUID] = time.time()
         return s_pb2.UUIDReply(UUID=newUUID)
 
-    def getRemainingUUIDTime(self, request, context):  # This function will be called a lot more often, we should reduce what it does.
+    def getRemainingUUIDTime(self, request, context):  # TODO: his function will be called a lot more often, we should reduce what it does.
         curUUIDSet = set(list(curUUIDs.keys()))
         for uid in curUUIDSet:
             timeRemaining = int(_UUID_TIMEOUT - (time.time() - curUUIDs[uid]))
@@ -853,7 +868,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 print('Removing UUID: {0}'.format(uid))
                 del(curUUIDs[uid])
                 for i in ['Loom', 'GeneSet', 'LoomAUCellRankings']:
-                    shutil.rmtree(os.path.join(data_dirs[i]['path'], request.UUID))
+                    shutil.rmtree(os.path.join(data_dirs[i]['path'], uid))
         uid = request.UUID
         if uid in curUUIDs:
             startTime = curUUIDs[uid]
@@ -896,6 +911,17 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
         cell_ids = [loom.ca['CellID'][i] for i in request.cellIndices]
         return s_pb2.CellIDsReply(cellIds=cell_ids)
+
+    def deleteUserFile(self, request, context):
+        basename = os.path.basename(request.filePath)
+        finalPath = os.path.join(data_dirs[request.fileType], request.UUID, basename)
+        if os.path.isfile(finalPath) and (basename.endswith('.loom') or basename.endswith('.txt')):
+            sys.remove(finalPath)
+            success = True
+        else:
+            success = False
+
+        return s_pb2.DeleteUserFileReply(deletedSuccessfully=success)
 
     # Gene set enrichment
     #
