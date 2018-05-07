@@ -44,7 +44,6 @@ class AppSidebar extends Component {
 		})
 		let showTransforms = metadata && (['welcome', 'dataset', 'tutorial', 'about'].indexOf(match.params.page) == -1) ? true : false;
 		let showCoordinatesSelection = showTransforms && metadata.fileMetaData && metadata.fileMetaData.hasExtraEmbeddings ? true : false;
-		console.log('mm', coordinates, showCoordinatesSelection);
 		let renderLevel = (t, l, name) => {
 			if (!t) return;
 			let nodes = t.nodes.map((file, i) => {
@@ -52,6 +51,8 @@ class AppSidebar extends Component {
 				let active = (match.params.loom == loomUri) || (encodeURIComponent(match.params.loom) == loomUri);
 				return (
 					<Link key={l + '-node- ' + i} to={'/' + [match.params.uuid, loomUri, match.params.page == 'welcome' ? 'gene' : match.params.page ].join('/')} onClick={() => {
+						console.log('onclick');
+						this.setState({activeCoordinates: -1});
 						this.props.onMetadataChange(file);
 					}}  >
 						<Menu.Item className={'level'+l} active={active} key={file.loomFilePath} >
@@ -107,7 +108,7 @@ class AppSidebar extends Component {
 						<Menu.Menu>
 							<Menu.Item>Coordinates</Menu.Item>
 							<Menu.Item>
-								<Dropdown inline defaultValue={activeCoordinates} options={coordinates} onChange={this.setActiveCoordinates.bind(this)} />
+								<Dropdown inline value={activeCoordinates} options={coordinates} onChange={this.setActiveCoordinates.bind(this)} />
 							</Menu.Item>
 						</Menu.Menu>
 					}
