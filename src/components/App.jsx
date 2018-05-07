@@ -181,7 +181,7 @@ class App extends Component {
 		if (match.params.uuid) {
 			if (match.params.uuid == 'permalink') {
 				if (DEBUG) console.log('Permalink detected');
-				this.restoreSession(ip, match.params.loom);
+				this.restoreSession(ip, cookies.get(cookieName), match.params.loom);
 			} else {
 				if (DEBUG) console.log('Params UUID detected');
 				this.checkUUID(ip, match.params.uuid);
@@ -288,27 +288,30 @@ class App extends Component {
 		this.forceUpdate();
 	}
 
-	restoreSession(ip, permalink) {
+	restoreSession(ip, uuid, permalink) {
 		const { history } = this.props;
 		try {
 			permalink = decodeURIComponent(permalink);
 			let base64 = permalink.replace(/\$/g, '/');
 			let deflated = window.atob(base64);
 			let settings = JSON.parse(pako.inflate(deflated, { to: 'string' }));
-			if (DEBUG) console.log(settings);
 			BackendAPI.importObject(settings);
 			BackendAPI.queryLoomFiles(settings.uuid, () => {
 				Object.keys(settings.features).map((page) => {			
 					settings.features[page].map((f, i) => {
-						console.log(page, i, f);
 						BackendAPI.updateFeature(i, f.type, f.feature, f.featureType, f.metadata ? f.metadata.description : null, page);
 					})
 				})
 				if (settings.page && settings.loom) {
-					this.obtainNewUUID(ip, (uuid) => {
+					let permalinkRedirect = (uuid) => {
 						history.replace('/' + [uuid, encodeURIComponent(settings.loom), encodeURIComponent(settings.page)].join('/'));
 						BackendAPI.forceUpdate();
-					})
+					}
+					if (!uuid) {
+						this.obtainNewUUID(ip, permalinkRedirect);
+					} else {
+						permalinkRedirect(uuid);
+					}
 				} else {
 					throw "URL params are missing";
 				}
