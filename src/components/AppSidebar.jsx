@@ -30,20 +30,21 @@ class AppSidebar extends Component {
 	render () {
 		const { match } = this.props;
 		const { activeCoordinates, settings, loading, loomFiles, userLoomTree, generalLoomTree, uncategorizedLoomFiles, uploadModalOpened, spriteScale, spriteAlpha } = this.state;
-		let metadata = {}, coordinates = [];
-		Object.keys(loomFiles).map(loomFilePath => {
-			if (loomFilePath == decodeURIComponent(match.params.loom)) {
-				metadata = loomFiles[loomFilePath];
-				coordinates = metadata.cellMetaData.embeddings.map(coords => {
+		let metadata = BackendAPI.getActiveLoomMetadata(), coordinates = [];
+		Object.keys(loomFiles).forEach(key => {
+			let loom = loomFiles[key];			
+			if (loom.loomFilePath == decodeURIComponent(match.params.loom)) {
+				coordinates = loom.cellMetaData.embeddings.map(coords => {
 					return {
 						text: coords.name,
 						value: coords.id
 					}
-				})
+				});
 			}
 		})
 		let showTransforms = metadata && (['welcome', 'dataset', 'tutorial', 'about'].indexOf(match.params.page) == -1) ? true : false;
 		let showCoordinatesSelection = showTransforms && metadata.fileMetaData && metadata.fileMetaData.hasExtraEmbeddings ? true : false;
+		console.log('mm', coordinates, showCoordinatesSelection);
 		let renderLevel = (t, l, name) => {
 			if (!t) return;
 			let nodes = t.nodes.map((file, i) => {
@@ -206,7 +207,7 @@ class AppSidebar extends Component {
 		if (match.params.uuid == 'permalink') return;
 		BackendAPI.queryLoomFiles(match.params.uuid, (files) => {
 			let userFiles = [], generalFiles = [];
-			files.map((file) => {
+			files.forEach((file) => {
 				if (file.loomFilePath.match(/[\\\/]/)) {
 					userFiles.push(file);
 				} else {
