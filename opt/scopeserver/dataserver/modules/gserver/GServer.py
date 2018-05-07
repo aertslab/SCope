@@ -914,7 +914,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def deleteUserFile(self, request, context):
         basename = os.path.basename(request.filePath)
-        finalPath = os.path.join(data_dirs[request.fileType], request.UUID, basename)
+        finalPath = os.path.join(data_dirs[request.fileType]['path'], request.UUID, basename)
         if os.path.isfile(finalPath) and (basename.endswith('.loom') or basename.endswith('.txt')):
             sys.remove(finalPath)
             success = True
