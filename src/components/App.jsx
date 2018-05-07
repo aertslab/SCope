@@ -181,7 +181,7 @@ class App extends Component {
 		if (match.params.uuid) {
 			if (match.params.uuid == 'permalink') {
 				if (DEBUG) console.log('Permalink detected');
-				this.restoreSession(match.params.loom);
+				this.restoreSession(ip, match.params.loom);
 			} else {
 				if (DEBUG) console.log('Params UUID detected');
 				this.checkUUID(ip, match.params.uuid);
@@ -191,21 +191,28 @@ class App extends Component {
 			this.checkUUID(ip, cookies.get(cookieName));
 		} else {
 			if (DEBUG) console.log('No UUID detected');
-			BackendAPI.getConnection().then((gbc) => {
-				let query = {
-					ip: ip
-				}
-				if (DEBUG) console.log('getUUID', query);
-				gbc.services.scope.Main.getUUID(query, (err, response) => {
-					if (DEBUG) console.log('getUUID', response);
-					if (response != null) 
-						this.checkUUID(ip, response.UUID);
-				})
-			}, () => {
-				this.setState({error: true});
+			this.obtainNewUUID(ip, (uuid) => {
+				this.checkUUID(ip, uuid);
 			})
 		}
 	}
+	
+	obtainNewUUID(ip, onSuccess) {
+		BackendAPI.getConnection().then((gbc) => {
+			let query = {
+				ip: ip
+			}
+			if (DEBUG) console.log('getUUID', query);
+			gbc.services.scope.Main.getUUID(query, (err, response) => {
+				if (DEBUG) console.log('getUUID', response);
+				if (response != null) 
+					onSuccess(response.UUID);
+			})
+		}, () => {
+			this.setState({error: true});
+		})
+	}	
+
 
 	checkUUID(ip, uuid) {
 		const { cookies, history, match } = this.props;
@@ -281,7 +288,7 @@ class App extends Component {
 		this.forceUpdate();
 	}
 
-	restoreSession(permalink) {
+	restoreSession(ip, permalink) {
 		const { history } = this.props;
 		try {
 			permalink = decodeURIComponent(permalink);
@@ -297,9 +304,11 @@ class App extends Component {
 						BackendAPI.updateFeature(i, f.type, f.feature, f.featureType, f.metadata ? f.metadata.description : null, page);
 					})
 				})
-				if (settings.uuid && settings.page && settings.loom) {
-					history.replace('/' + [settings.uuid, encodeURIComponent(settings.loom), encodeURIComponent(settings.page)].join('/'));
-					BackendAPI.forceUpdate();
+				if (settings.page && settings.loom) {
+					this.obtainNewUUID(ip, (uuid) => {
+						history.replace('/' + [uuid, encodeURIComponent(settings.loom), encodeURIComponent(settings.page)].join('/'));
+						BackendAPI.forceUpdate();
+					})
 				} else {
 					throw "URL params are missing";
 				}
