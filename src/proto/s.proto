@@ -33,6 +33,7 @@ service Main {
   rpc getRemainingUUIDTime (RemainingUUIDTimeRequest) returns (RemainingUUIDTimeReply) {}
   rpc loomUploaded (LoomUploadedRequest) returns (LoomUploadedReply) {}
   rpc getMyGeneSets (MyGeneSetsRequest) returns (MyGeneSetsReply) {}
+  rpc deleteUserFile (DeleteUserFileRequest) returns (DeleteUserFileReply) {}
 }
 
 
@@ -302,4 +303,14 @@ message MyGeneSetsRequest {
 
 message MyGeneSetsReply {
   repeated MyGeneSet myGeneSets=1;
+}
+
+message DeleteUserFileRequest {
+  string UUID=1;
+  string filePath=2;
+  string fileType=3;
+}
+
+message DeleteUserFileReply {
+  bool deletedSuccessfully=1;
 }

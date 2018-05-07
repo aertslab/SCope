@@ -910,6 +910,17 @@ class SCope(s_pb2_grpc.MainServicer):
         cell_ids = [loom.ca['CellID'][i] for i in request.cellIndices]
         return s_pb2.CellIDsReply(cellIds=cell_ids)
 
+    def deleteUserFile(self, request, context):
+        basename = os.path.basename(request.filePath)
+        finalPath = os.path.join(data_dirs[request.fileType], request.UUID, basename)
+        if os.path.isfile(finalPath) and (basename.endswith('.loom') or basename.endswith('.txt')):
+            sys.remove(finalPath)
+            success = True
+        else:
+            success = False
+
+        return s_pb2.DeleteUserFileReply(deletedSuccessfully=success)
+
     # Gene set enrichment
     #
     # Threaded makes it slower because of GIL
