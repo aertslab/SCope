@@ -235,10 +235,10 @@ class Geneset extends Component {
 		if (execute) {
 			let query = {
 				UUID: match.params.uuid,
-				loomFilePath: geneSetFilePath,
+				filePath: geneSetFilePath,
 				fileType: 'GeneSet'
 			};
-			this.getConnection().then((gbc) => {
+			BackendAPI.getConnection().then((gbc) => {
 				if (DEBUG) console.log("deleteUserFile", query);
 				gbc.services.scope.Main.deleteUserFile(query, (error, response) => {
 					if ((response !== null) && (response.deletedSuccessfully)) {

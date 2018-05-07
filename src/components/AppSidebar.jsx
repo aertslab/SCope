@@ -71,7 +71,7 @@ class AppSidebar extends Component {
 							t.children[level].collapsed = !t.children[level].collapsed;
 							this.forceUpdate();
 						}} />{level}</Menu.Header>
-						{!t.children[level].collapsed ? renderLevel(t.children[level], l+1) : ''}
+						{!t.children[level].collapsed ? renderLevel(t.children[level], l+1, null, canRemove) : ''}
 					</div>
 				)
 			}) 
@@ -256,14 +256,14 @@ class AppSidebar extends Component {
 		if (execute) {
 			let query = {
 				UUID: match.params.uuid,
-				loomFilePath: loomFilePath,
+				filePath: loomFilePath,
 				fileType: 'Loom'
 			};
-			this.getConnection().then((gbc) => {
+			BackendAPI.getConnection().then((gbc) => {
 				if (DEBUG) console.log("deleteUserFile", query);
 				gbc.services.scope.Main.deleteUserFile(query, (error, response) => {
+					if (DEBUG) console.log("deleteUserFile", response);
 					if ((response !== null) && (response.deletedSuccessfully)) {
-						if (DEBUG) console.log("deleteUserFile", response);
 						this.getLoomFiles();
 					}
 				});
