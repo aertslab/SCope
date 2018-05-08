@@ -7,17 +7,24 @@ import os
 import time
 from urllib.request import urlopen
 import http
-import sys
+import argparse
+
+parser = argparse.ArgumentParser(description='Launch the scope server')
+parser.add_argument('-g_port', metavar='gPort', type=int, help='gPort', default=50052)
+parser.add_argument('-p_port', metavar='pPort', type=int, help='pPort', default=50051)
+parser.add_argument('-x_port', metavar='xPort', type=int, help='xPort', default=8081)
+
+args = parser.parse_args()
 
 
 class SCopeServer():
 
-    def __init__(self, g_port=50052, p_port=50051, x_port=8081, dev_env=True):
+    def __init__(self, dev_env=True):
         self.run_event = threading.Event()
         self.run_event.set()
-        self.g_port = g_port
-        self.p_port = p_port
-        self.x_port = x_port
+        self.g_port = args.g_port
+        self.p_port = args.p_port
+        self.x_port = args.x_port
         self.dev_env = dev_env
 
     def start_bind_server(self):
@@ -72,8 +79,7 @@ class SCopeServer():
 
 def run(dev_env=False):
     filename, file_extension = os.path.splitext(__file__)
-    if "--bind" in sys.argv:
-        dev_env = True
+
     scope_server = SCopeServer(dev_env=dev_env)
     scope_server.run()
 

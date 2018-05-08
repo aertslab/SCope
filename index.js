@@ -4,6 +4,7 @@ const BrowserWindow = electron.BrowserWindow
 const path = require('path')
 const fs = require('fs-extra')
 const process = require("process")
+const getPorts = require('get-ports')
 
 /* Create SCope data directories */
 const home = process.env['HOME']
@@ -13,12 +14,16 @@ dataDirs.forEach(function(value){
   fs.mkdirp(path.join(home, '.scope', 'data', value))
 });
 
+var bindServerPort
+var gServerPort
+var pServerPort
+
 /*************************************************************
  * Data Server process
  *************************************************************/
 
 // const DATASERVER_DIST_FOLDER = 'opt/scopeserver/dataserver/dist'
-const DATASERVER_DIST_FOLDER = path.join(app.getAppPath(), "opt", "scopeserver", "dataserver", "dist")
+const DATASERVER_DIST_FOLDER = path.join(/*app.getAppPath(), */"opt", "scopeserver", "dataserver", "dist")
 const DATASERVER_FOLDER = '__init__'
 const DATASERVER_MODULE = '__init__' // without .py suffix
 
@@ -43,20 +48,24 @@ const startDataServer = () => {
   let script = getScopeServerScriptPath()
   if(isPackaged()) {
     console.log("SCope Server Packaged.")
-    dataServerProc = require('child_process').execFile(script, [], (err, stdout, stderr) => {
+    dataServerProc = require('child_process').execFile(script, ["-g_port", gServerPort, "-p_port", pServerPort, "-x_port", bindServerPort], (err, stdout, stderr) => {
       if (err) throw err;
       console.log(stdout, stderr);
     });
   } else {
-    dataServerProc = require('child_process').spawn('python', [script])
+    dataServerProc = require('child_process').spawn('python', [script, "-g_port", gServerPort, "-p_port", pServerPort, "-x_port", bindServerPort])
   }
   if (dataServerProc != null) {
     console.log('Scope Server started!')
+    dataServerProc.stdout.on('data', (chunk) => {
+      console.log(`Received ${chunk.length} bytes of data.`);
+      console.log(chunk)
+    })
   }
 }
 
 const stopDataServer = () => {
-  dataServerProc.kill()
+  dataServerProc.kill('SIGINT')
   dataServerProc = null
   dataServerProc = null
 }
@@ -66,29 +75,21 @@ const stopDataServer = () => {
  *************************************************************/
 
 // const BINDSERVER_FOLDER = 'opt/scopeserver/bindserver'
-const BINDSERVER_FOLDER = path.join(app.getAppPath(), "opt", "scopeserver", "bindserver")
+const BINDSERVER_FOLDER = path.join(/*app.getAppPath(), */"opt", "scopeserver", "bindserver")
 const BINDSERVER_MODULE = 'server.js'
 
 let bindServerProc = null
-let bindServerPort = 8081
 
 const getBindServerScriptPath = () => {
   return path.join(__dirname, BINDSERVER_FOLDER, BINDSERVER_MODULE)
 }
 
-const getBindServerPort = () => {
-  return bindServerPort
-}
-
 const startBindServer = () => {
   const exec = require('child_process').exec;
-  const bindServerProc = exec('cd '+ BINDSERVER_FOLDER +'; node '+ BINDSERVER_MODULE +" "+ getBindServerPort(), (e, stdout, stderr)=> {
+  // const bindServerProc = exec('cd '+ BINDSERVER_FOLDER +'; node '+ BINDSERVER_MODULE +" "+ getBindServerPort(), (e, stdout, stderr)=> {
+  bindServerProc = exec('cd '+ BINDSERVER_FOLDER +'; node '+ BINDSERVER_MODULE +" "+ bindServerPort, (e, stdout, stderr)=> {
       if (e instanceof Error) {
-          // Error when loading .loom file: Error: stdout maxBuffer exceeded
-          // console.error(e);
-          // throw e;
       }
-      // console.log('stdout ', stdout);
       console.log('stderr: ', stderr);
   });
   if (bindServerProc != null) {
@@ -98,26 +99,33 @@ const startBindServer = () => {
 
 const stopBindServer = () => {
   bindServerProc.kill()
-  bindServerProc = null
-  bindServerProc = null
 }
 
 const startSCopeServer = () => {
-  // Start Data Server
-  startDataServer()
-  // Start Bind Server
-  startBindServer()
+  getPorts([ 9081, 50951, 50952 ], function (err, ports) {
+    if (err) {
+      throw new Error('could not open servers')
+    }
+    bindServerPort = ports[0]
+    gServerPort = ports[1]
+    pServerPort = ports[2]
+    console.log(bindServerPort, gServerPort, pServerPort)
+    startDataServer()
+    startBindServer()
+    createWindow()
+
+  })
 }
 
-
 const stopSCopeServer = () => {
-  // Start Data Server
   stopDataServer()
-  // Start Bind Server
   stopBindServer()
 }
 
-app.on('ready', startSCopeServer)
+app.on('ready', () => {
+  startSCopeServer()
+})
+
 app.on('will-quit', stopSCopeServer)
 
 
@@ -131,13 +139,14 @@ const createWindow = () => {
   // Set the size of the window to the size of the available screen
   const {width, height} = electron.screen.getPrimaryDisplay().workAreaSize
   mainWindow = new BrowserWindow({width: width, height: height, webPreferences: {
-    devTools: false
+    devTools: true
   }})
   mainWindow.loadURL(require('url').format({
     pathname: path.join(__dirname, 'index.html'),
     protocol: 'file:',
     slashes: true
-  }))
+  // }))
+  }) + "?WSport=" + bindServerPort + "&XHRport=" + gServerPort + "&RPCport=" + pServerPort)
   mainWindow.webContents.openDevTools()
 
   mainWindow.on('closed', () => {
@@ -145,7 +154,7 @@ const createWindow = () => {
   })
 }
 
-app.on('ready', createWindow)
+// app.on('ready', createWindow)
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

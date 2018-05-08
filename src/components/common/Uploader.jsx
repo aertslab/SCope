@@ -10,8 +10,16 @@ export default class Uploader {
         form.append('file-type', type);
         form.append('file', file);
 
+        try {
+          this.XHRport = document.head.querySelector("[name=scope-xhrport]").getAttribute('port')
+          console.log('Using meta XHRport')
+        } catch (ex) {
+          console.log('Using config XHRport')
+          this.WSport = BACKEND.XHRport;
+        }
+
         let xhr = new XMLHttpRequest();
-        xhr.open("POST", BACKEND.proto + "://" + BACKEND.host + ":" + BACKEND.XHRport + "/");
+        xhr.open("POST", BACKEND.proto + "://" + BACKEND.host + ":" + this.XHRport + "/");
         xhr.upload.addEventListener('progress', (event) => {
             if (DEBUG) console.log("Data uploaded: " + event.loaded + "/" + event.total);
             let progress = (event.loaded / event.total * 100).toPrecision(1);
