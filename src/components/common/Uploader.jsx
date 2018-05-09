@@ -15,7 +15,7 @@ export default class Uploader {
           console.log('Using meta XHRport')
         } catch (ex) {
           console.log('Using config XHRport')
-          this.WSport = BACKEND.XHRport;
+          this.XHRport = BACKEND.XHRport;
         }
 
         let xhr = new XMLHttpRequest();
