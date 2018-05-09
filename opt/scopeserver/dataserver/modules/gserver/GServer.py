@@ -824,6 +824,11 @@ class SCope(s_pb2_grpc.MainServicer):
                         clusterings = meta['clusterings']
                     except KeyError:
                         annotations = embeddings = clusterings = []
+#
+                else:
+                    annotations = []
+                    embeddings = []
+                    clusterings = []
                 try:
                     L1 = loom.attrs.SCopeTreeL1
                     L2 = loom.attrs.SCopeTreeL2
@@ -831,11 +836,6 @@ class SCope(s_pb2_grpc.MainServicer):
                 except AttributeError:
                     L1 = 'Uncategorized'
                     L2 = L3 = ''
-#
-                else:
-                    annotations = []
-                    embeddings = []
-                    clusterings = []
                 my_looms.append(s_pb2.MyLoom(loomFilePath=f,
                                              loomDisplayName=os.path.splitext(os.path.basename(f))[0],
                                              cellMetaData=s_pb2.CellMetaData(annotations=annotations,
