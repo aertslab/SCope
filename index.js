@@ -146,7 +146,7 @@ const createWindow = () => {
     protocol: 'file:',
     slashes: true
   // }))
-  }) + "?WSport=" + bindServerPort + "&XHRport=" + gServerPort + "&RPCport=" + pServerPort)
+  }) + "?WSport=" + bindServerPort + "&XHRport=" + pServerPort + "&RPCport=" + gServerPort)
   mainWindow.webContents.openDevTools()
 
   mainWindow.on('closed', () => {
