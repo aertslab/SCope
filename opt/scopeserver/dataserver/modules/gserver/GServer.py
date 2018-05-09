@@ -489,16 +489,31 @@ class SCope(s_pb2_grpc.MainServicer):
                 x = embedding['_X']
                 y = embedding['_Y']
             except AttributeError:
-                for ca in loom.ca:
-                    if 'tSNE'.casefold() in ca.casefold():
-                        if dims == 0:
-                            x = loom.ca[ca]
-                            dims += 1
-                            continue
-                        if dims == 1:
-                            y = loom.ca[ca]
-                            dims += 1
-                            continue
+                try:
+                    x = loom.ca['_tSNE1']
+                    y = loom.ca['_tSNE2']
+                    if len(set(x)) == 1 or len(set(y)) == 1:
+                        raise AttributeError
+                except AttributeError:
+                    try:
+                        x = loom.ca['_X']
+                        y = loom.ca['_Y']
+                        if len(set(x)) == 1 or len(set(y)) == 1:
+                            raise AttributeError
+                    except AttributeError:
+                        x = [n for n in range(len(loom.shape[0]))]
+                        y = [n for n in range(len(loom.shape[0]))]
+                # for ca in loom.ca.keys():
+                    # if 'tSNE'.casefold() in ca.casefold():
+                    #     print(ca)
+                    #     if dims == 0:
+                    #         x = loom.ca[ca]
+                    #         dims += 1
+                    #         continue
+                    #     if dims == 1:
+                    #         y = loom.ca[ca]
+                    #         dims += 1
+                    #         continue
         else:
             x = loom.ca.Embeddings_X[str(coordinatesID)]
             y = loom.ca.Embeddings_Y[str(coordinatesID)]
