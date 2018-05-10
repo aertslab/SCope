@@ -1,6 +1,7 @@
 from scopeserver.dataserver.modules.gserver import GServer as gs
 from scopeserver.dataserver.modules.pserver import PServer as ps
 from scopeserver.bindserver import XServer as xs
+from scopeserver.utils import SysUtils as su
 
 import threading
 import os
@@ -70,9 +71,12 @@ class SCopeServer():
         self.wait()
 
 def run(dev_env=False):
-    filename, file_extension = os.path.splitext(__file__)
+    # Unbuffer the standard output: important for process communication
+    sys.stdout = su.Unbuffered(sys.stdout)
+
     if "--bind" in sys.argv:
         dev_env = True
+    # Start an instance of SCope Server
     scope_server = SCopeServer(dev_env=dev_env)
     scope_server.run()
 

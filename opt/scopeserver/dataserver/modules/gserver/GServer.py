@@ -19,6 +19,8 @@ from pathlib import Path
 
 from scopeserver.dataserver.modules.gserver import s_pb2
 from scopeserver.dataserver.modules.gserver import s_pb2_grpc
+from scopeserver.utils import SysUtils as su
+
 from pyscenic.genesig import GeneSignature
 from pyscenic.aucell import create_rankings, enrichment, enrichment4cells
 
@@ -969,9 +971,10 @@ def serve(run_event, dev_env, port=50052):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     s_pb2_grpc.add_MainServicer_to_server(SCope(), server)
     server.add_insecure_port('[::]:{0}'.format(port))
-    print('Starting GServer on port {0}...'.format(port))
-
+    # print('Starting GServer on port {0}...'.format(port))
     server.start()
+    # Let the main process know that GServer has started.
+    su.send_msg("GServer","SIGSTART")
 
     while run_event.is_set():
         time.sleep(0.1)

@@ -10,11 +10,14 @@ import base64
 import functools
 import cgi
 import tempfile
+import time
 from http import server as httpserver
 import socketserver
 from urllib import parse as urllibparse
 from pathlib import Path
+
 from scopeserver.dataserver.modules.gserver import GServer
+from scopeserver.utils import SysUtils as su
 
 unicode = str
 
@@ -356,6 +359,8 @@ def run(run_event,
       https://hynek.me/articles/hardening-your-web-servers-ssl-ciphers/
     ..with DH-only ciphers removed because of precomputation hazard.
     """
+    # print('Starting PServer on port '+ str(port) +'...')
+
     # if templates is None or localisations is None:
     #     raise ValueError("Must provide templates *and* localisations.")
     socket.setdefaulttimeout(timeout)
@@ -379,7 +384,13 @@ def run(run_event,
             certfile=certfile,
             ciphers=permitted_ciphers,
             server_side=True)
-    print('Starting PServer on port '+ str(port) +'...')
+
+    # # # Wait a little bit
+    # time.sleep(0.5)
+    # Let the main process know that PServer has started.
+    su.send_msg("PServer","SIGSTART")
+
+    # Loop 
     while run_event.is_set():
         httpd.handle_request()
     # httpd.serve_forever()
