@@ -931,7 +931,7 @@ class SCope(s_pb2_grpc.MainServicer):
         basename = os.path.basename(request.filePath)
         finalPath = os.path.join(data_dirs[request.fileType]['path'], request.UUID, basename)
         if os.path.isfile(finalPath) and (basename.endswith('.loom') or basename.endswith('.txt')):
-            sys.remove(finalPath)
+            os.remove(finalPath)
             success = True
         else:
             success = False
