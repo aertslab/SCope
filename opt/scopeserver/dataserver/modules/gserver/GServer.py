@@ -5,6 +5,7 @@ import grpc
 import loompy as lp
 import hashlib
 import os
+import re
 import numpy as np
 import pandas as pd
 import shutil
@@ -107,6 +108,13 @@ class SCope(s_pb2_grpc.MainServicer):
         self.readUUIDdb()
 
     @staticmethod
+    def dfToNamedMatrix(df):
+        arr_ip = [tuple(i) for i in df.as_matrix()]
+        dtyp = np.dtype(list(zip(df.dtypes.index, df.dtypes)))
+        arr = np.array(arr_ip, dtype=dtyp)
+        return arr
+
+    @staticmethod
     def load_gene_mappings():
         gene_mappings_dir_path = os.path.join(Path(__file__).parents[3], 'dataserver', 'data', 'gene_mappings') if SCope.DEV_ENV else os.path.join(Path(__file__).parents[6], 'data', 'gene_mappings')
         SCope.dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'terminal_mappings.pickle'), 'rb'))
@@ -139,6 +147,25 @@ class SCope(s_pb2_grpc.MainServicer):
                 f.seek(- last_n_kb * 1024, 2)
             return hashlib.md5(f.read()).hexdigest()
 
+    def changeLoomMode(self, loom_file_path, mode):
+        print(loom_file_path)
+        if not os.path.exists(loom_file_path):
+            raise ValueError('The file located at ' +
+                             loom_file_path + ' does not exist.')
+        print('{0} getting md5'.format(loom_file_path))
+        partial_md5_hash = SCope.get_partial_md5_hash(loom_file_path, 10000)
+        print('{0} md5 is {1}'.format(loom_file_path, partial_md5_hash))
+
+        if partial_md5_hash in self.active_loom_connections:
+            self.active_loom_connections[partial_md5_hash].close()
+        if mode == 'rw':
+            self.active_loom_connections[partial_md5_hash] = self.get_loom_connection(loom_file_path, rw=True)
+            print('{0} now rw'.format(loom_file_path))
+        else:
+            self.active_loom_connections[partial_md5_hash] = self.get_loom_connection(loom_file_path, rw=False)
+            print('{0} now ro'.format(loom_file_path))
+
+
     @staticmethod
     def activeSessionCheck():
         curTime = time.time()
@@ -156,7 +183,6 @@ class SCope(s_pb2_grpc.MainServicer):
                 for line in fh.readlines():
                     ls = line.rstrip('\n').split('\t')
                     curUUIDs[ls[0]] = float(ls[1])
-        print(curUUIDs)
         if os.path.isfile(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt')):
             with open(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt'), 'r') as fh:
                 for line in fh.readlines():
@@ -199,8 +225,12 @@ class SCope(s_pb2_grpc.MainServicer):
     def get_loom_filepath(self, loom_file_name):
         return os.path.join(self.loom_dir, loom_file_name)
 
-    def load_loom_file(self, partial_md5_hash, loom_file_path):
-        loom = lp.connect(loom_file_path)
+    def load_loom_file(self, partial_md5_hash, loom_file_path, rw=False):
+        # if rw:
+        #     loom = lp.connect(loom_file_path, mode='r+')
+        # else:
+        #     loom = lp.connect(loom_file_path, mode='r')
+        loom = lp.connect(loom_file_path, mode='r+')
         self.add_loom_connection(partial_md5_hash, loom)
         return loom
 
@@ -501,8 +531,8 @@ class SCope(s_pb2_grpc.MainServicer):
                         if len(set(x)) == 1 or len(set(y)) == 1:
                             raise AttributeError
                     except AttributeError:
-                        x = [n for n in range(len(loom.shape[0]))]
-                        y = [n for n in range(len(loom.shape[0]))]
+                        x = [n for n in range(len(loom.shape[1]))]
+                        y = [n for n in range(len(loom.shape[1]))]
                 # for ca in loom.ca.keys():
                     # if 'tSNE'.casefold() in ca.casefold():
                     #     print(ca)
@@ -675,7 +705,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     features.append(np.zeros(n_cells))
             elif request.featureType[n].startswith('Clustering: '):
                 for clustering in metaData['clusterings']:
-                    if clustering['name'] == request.featureType[n].lstrip('Clustering: '):
+                    if clustering['name'] == re.sub('^Clustering: ', '', request.featureType[n]):
                         clusteringID = str(clustering['id'])
                         if request.feature[n] == 'All Clusters':
                             numClusters = max(loom.ca.Clusterings[clusteringID])
@@ -811,6 +841,55 @@ class SCope(s_pb2_grpc.MainServicer):
         gene_sets = [s_pb2.MyGeneSet(geneSetFilePath=f, geneSetDisplayName=os.path.splitext(os.path.basename(f))[0]) for f in geneSetsToProcess]
         return s_pb2.MyGeneSetsReply(myGeneSets=gene_sets)
 
+    def generateMetaData(self, loom_file_path):
+        # Designed to generate metadata from linnarson loom files
+        print('Making metadata for {0}'.format(loom_file_path))
+        metaJson = {}
+
+        # self.changeLoomMode(loom_file_path, rw=True)
+        loom = self.get_loom_connection(loom_file_path)
+
+        # Embeddings
+        # Find PCA / tSNE - Catch all 0's ERROR
+        metaJson['embeddings'] = [
+            {
+                "id": -1,
+                "name": "Default (_tSNE1/_tSNE2 or _X/_Y)"
+            }
+        ]
+
+        # Annotations - What goes here?
+        metaJson["annotations"] = []
+        for anno in ['Age', 'ClusterName', 'Sex', 'Species', 'Strain', 'Tissue']:
+            if anno in loom.ca.keys():
+                print("Anno: {0} in loom".format(anno))
+                if len(set(loom.ca[anno])) != loom.shape[1] and len(set(loom.ca[anno])) > 0:
+                    metaJson["annotations"].append({"name": anno, "values": sorted(list(set(loom.ca[anno])))})
+                    print(metaJson["annotations"])
+
+        # Clusterings - Anything with cluster in name?
+        metaJson["clusterings"] = []
+        if 'Clusters' in loom.ca.keys() and 'ClusterName' in loom.ca.keys():
+            clusters = set(zip(loom.ca['Clusters'], loom.ca['ClusterName']))
+            clusters = [{"id": int(x[0]), "description": x[1]} for x in clusters]
+
+            # loom.ca['Clusterings'] = SCope.dfToNamedMatrix(pd.DataFrame(columns=[0], index=[x for x in range(loom.shape[1])], data=[int(x) for x in loom.ca['Clusters']]))
+
+            clusterDF = pd.DataFrame(columns=["0"], index=[x for x in range(loom.shape[1])])
+            clusterDF["0"] = [int(x) for x in loom.ca['Clusters']]
+            loom.ca['Clusterings'] = SCope.dfToNamedMatrix(clusterDF)
+            print(loom.ca["Clusterings"])
+        metaJson["clusterings"].append({
+                    "id": 0,
+                    "group": "Interpreted",
+                    "name": "Clusters + ClusterName",
+                    "clusters": clusters
+                })
+        print(metaJson)
+
+        loom.attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
+        # self.changeLoomMode(loom_file_path, rw=False)
+
     def getMyLooms(self, request, context):
         my_looms = []
         userDir = self.get_data_dir_path_by_file_type('Loom', UUID=request.UUID)
@@ -826,24 +905,25 @@ class SCope(s_pb2_grpc.MainServicer):
             if f.endswith('.loom'):
                 loom = self.get_loom_connection(self.get_loom_filepath(f))
                 fileMeta = self.get_file_metadata(self.get_loom_filepath(f))
-                if fileMeta['hasGlobalMeta']:
+                if not fileMeta['hasGlobalMeta']:
                     try:
-                        meta = json.loads(SCope.get_meta_data(loom))
-                    except ValueError:
-                        meta = self.decompress_meta(SCope.get_meta_data(loom))
-                    try:
-                        annotations = meta['annotations']
-                        embeddings = meta['embeddings']
-                        for e in embeddings:  # Fix for malformed embeddings json (R problem)
-                            e['id'] = int(e['id'])
-                        clusterings = meta['clusterings']
-                    except KeyError:
-                        annotations = embeddings = clusterings = []
-#
-                else:
-                    annotations = []
-                    embeddings = []
-                    clusterings = []
+                        self.generateMetaData(self.get_loom_filepath(f))
+                    except Exception as e:
+                        print(e)
+
+                    annotations = embeddings = clusterings = []
+                try:
+                    meta = json.loads(SCope.get_meta_data(loom))
+                except ValueError:
+                    meta = self.decompress_meta(SCope.get_meta_data(loom))
+                try:
+                    annotations = meta['annotations']
+                    embeddings = meta['embeddings']
+                    for e in embeddings:  # Fix for malformed embeddings json (R problem)
+                        e['id'] = int(e['id'])
+                    clusterings = meta['clusterings']
+                except KeyError:
+                    annotations = embeddings = clusterings = []
                 try:
                     L1 = loom.attrs.SCopeTreeL1
                     L2 = loom.attrs.SCopeTreeL2
@@ -862,7 +942,6 @@ class SCope(s_pb2_grpc.MainServicer):
                                                                                  L3=L3)
                                              )
                                 )
-        print(curUUIDs)
         self.updateUUIDdb()
 
         return s_pb2.MyLoomsReply(myLooms=my_looms)
