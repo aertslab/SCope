@@ -190,6 +190,11 @@ class SCope(s_pb2_grpc.MainServicer):
                 for line in fh.readlines():
                     permUUIDs.add(line.rstrip('\n'))
                     curUUIDs[line.rstrip('\n')] = time.time() + (_ONE_DAY_IN_SECONDS * 365)
+        else:
+            with open(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt'), 'w') as fh:
+                newUUID = 'SCopeApp__{0}'.format(str(uuid.uuid4()))
+                fh.write('{0}\n'.format(newUUID))
+                curUUIDs[newUUID] = time.time() + (_ONE_DAY_IN_SECONDS * 365)
 
     def updateUUIDdb(self):
         with open(os.path.join(self.config_dir, 'UUID_Timeouts.tsv'), 'w') as fh:
