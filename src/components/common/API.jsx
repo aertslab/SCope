@@ -246,6 +246,7 @@ class API {
 					callback(response.myLooms);
 				} else {
 					console.log("No loom files detected");
+					callback([]);
 				}
 			});
 		}, () => {
