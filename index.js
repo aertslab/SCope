@@ -84,13 +84,16 @@ class SCopeServer extends EventEmitter {
  * Data Server
  *************************************************************/
 
+console.log(process.argv[2])
 // const DATASERVER_DIST_FOLDER = 'opt/scopeserver/dataserver/dist'
 try {
   if (process.argv[2] == 'electronTest') {
-    const DATASERVER_DIST_FOLDER = path.join("opt", "scopeserver", "dataserver", "dist");
+    var DATASERVER_DIST_FOLDER = path.join("opt", "scopeserver", "dataserver", "dist");
+  } else {
+    throw 'Not testing'
   }
 } catch (e) {
-  const DATASERVER_DIST_FOLDER = path.join(app.getAppPath(), "opt", "scopeserver", "dataserver", "dist");
+  var DATASERVER_DIST_FOLDER = path.join(app.getAppPath(), "opt", "scopeserver", "dataserver", "dist");
 }
 const DATASERVER_FOLDER = '__init__';
 const DATASERVER_MODULE = '__init__'; // without .py suffix
@@ -198,10 +201,12 @@ class DataServer {
 // const BINDSERVER_FOLDER = 'opt/scopeserver/bindserver'
 try {
   if (process.argv[2] == 'electronTest') {
-    const BINDSERVER_FOLDER = path.join("opt", "scopeserver", "bindserver")
+    var BINDSERVER_FOLDER = path.join("opt", "scopeserver", "bindserver")
+  } else {
+    throw 'Not testing'
   }
 } catch (e) {
-const BINDSERVER_FOLDER = path.join(app.getAppPath(), "opt", "scopeserver", "bindserver")
+  var BINDSERVER_FOLDER = path.join(app.getAppPath(), "opt", "scopeserver", "bindserver")
 }
 const BINDSERVER_MODULE = 'server.js'
 
