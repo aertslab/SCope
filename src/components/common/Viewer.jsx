@@ -5,6 +5,7 @@ import { BackendAPI } from './API'
 import { Dimmer, Loader } from 'semantic-ui-react'
 import ReactResizeDetector from 'react-resize-detector';
 import ReactGA from 'react-ga';
+import zlib from 'zlib';
 
 const DEFAULT_POINT_COLOR = 'A6A6A6';
 const VIEWER_MARGIN = 5;
@@ -77,7 +78,7 @@ export default class Viewer extends Component {
 			<div className="stretched">
 				<canvas id={"viewer"+this.props.name}  >
 				</canvas>
-				<ReactResizeDetector handleWidth skipOnMount onResize={this.onResize.bind(this)} />
+				<ReactResizeDetector skipOnMount handleWidth handleHeight onResize={this.onResize.bind(this)} />
 				<Dimmer active={this.state.loading} inverted>
 					<Loader inverted>Loading</Loader>
 				</Dimmer>
@@ -96,11 +97,13 @@ export default class Viewer extends Component {
 	}
 
 	componentDidMount() {
+		if (DEBUG) console.log(this.props.name, 'componentDidMount', this.props);
 		this.zoomSelection = d3.select('#viewer'+this.props.name);
+
 		let bbox = this.zoomSelection.select(function() {return this.parentNode}).node().getBoundingClientRect();
-		if (DEBUG) console.log(this.props.name, 'componentDidMount', this.props, bbox);
 		this.w = bbox.width - VIEWER_MARGIN;
 		this.h = bbox.height - VIEWER_MARGIN;
+
 		this.initGraphics();
 		if (this.props.loomFile != null) {
 			this.getPoints(this.props.loomFile, this.props.activeCoordinates, this.props.activeAnnotations, this.props.superposition, () => {
@@ -122,13 +125,16 @@ export default class Viewer extends Component {
 		if (DEBUG) console.log(this.props.name, 'componentWillReceiveProps', nextProps);
 
 		// TODO: dirty hacks
+		/*
 		let bbox = this.zoomSelection.select(function() {return this.parentNode}).node().getBoundingClientRect();
 		if ((parseInt(this.w) != parseInt(bbox.width - VIEWER_MARGIN)) || (parseInt(this.h) != parseInt(bbox.height - VIEWER_MARGIN))) {
 			if (DEBUG) console.log(nextProps.name, 'changing size', bbox);
 			this.w = bbox.width - VIEWER_MARGIN;
 			this.h = bbox.height - VIEWER_MARGIN;
-			//this.resizeContainer();
+			this.resizeContainer();
 		}
+		*/
+		this.onResize();
 
 		if (this.props.loomFile != nextProps.loomFile || this.props.activeCoordinates != nextProps.activeCoordinates || this.props.superposition != nextProps.superposition ||
 			(JSON.stringify(nextProps.activeAnnotations) != JSON.stringify(this.state.activeAnnotations)) ) {
@@ -178,16 +184,20 @@ export default class Viewer extends Component {
 		return false;
 	}
 */
-	onResize() {
-		let brect = this.zoomSelection.node().getBoundingClientRect();
-		if ((brect.width != 0) && (brect.width != this.w)) {
-			this.w = brect.width;
+	onResize(width, height) {
+		let bbox = this.zoomSelection.select(function() {return this.parentNode}).node().getBoundingClientRect();
+		console.log(this.props.name, 'onResize', width, height, bbox);
+		let dw = bbox.width - this.w - VIEWER_MARGIN;
+		let dh = bbox.height - this.h - VIEWER_MARGIN;
+		if (((bbox.width != 0) && (2*VIEWER_MARGIN < dw || dw < -2*VIEWER_MARGIN)) || ((bbox.height != 0) && (2*VIEWER_MARGIN < dh || dh < -2*VIEWER_MARGIN))) {
+			this.w = bbox.width - VIEWER_MARGIN;
+			this.h = bbox.height - VIEWER_MARGIN;
 			this.resizeContainer();
 		}
 	}
 
 	resizeContainer() {
-		if (DEBUG) console.log(this.props.name, 'new dimensions', this.w, this.h);
+		if (DEBUG) console.log(this.props.name, 'resizeContainer', this.w, this.h);
 		this.forceUpdate();
 		this.renderer.resize(this.w, this.h);
 		this.renderer.reset();
@@ -236,7 +246,7 @@ export default class Viewer extends Component {
 		s.scale.y = settings.scale / 50;
 		s.alpha = settings.alpha;
 		s.anchor = { x: .5, y: .5 };
-		if (c == 'null') c = DEFAULT_POINT_COLOR;
+		if (c == 'XXXXXX') c = DEFAULT_POINT_COLOR;
 		s.tint = "0x"+ c;
 		// Decompressing the color not working as without compression
 		// tint request a full 6 hexadecimal digits format
@@ -554,16 +564,16 @@ export default class Viewer extends Component {
 				if (DEBUG) console.log(this.props.name, 'getCoordinates', response);
 				this.container.removeChildren();
 				if (response) {
-					let c = {
+					let coord = {
+						idx: response.cellIndices,
 						x: response.x,
-						y: response.y,
-						idx: response.cellIndices
+						y: response.y
 					}
-					this.setState({ coord: c });
+					this.setState({ coord });
 					this.setScalingFactor();
 				} else {
 					console.log('Could not get the coordinates - empty response!')
-					this.setState({ coord:  {x: [], y: []}});
+					this.setState({ coord:  { idx: [], x: [], y: [] } });
 				}
 				this.endBenchmark("getCoordinates");
 				this.initializeDataPoints(callback ? true : false);
@@ -628,6 +638,19 @@ export default class Viewer extends Component {
 		this.endBenchmark("transformPoints");
 	}
 
+	chunkString(str, length) {
+		return str.match(new RegExp('.{1,' + length + '}', 'g'));
+	}
+
+	updateColors = (response, colors) => {
+		if(response !== null) {
+			this.setState({colors: colors});
+			this.updateDataPoints();
+		} else {
+			this.resetDataPoints();
+		}
+	}
+
 	getFeatureColors(features, loomFile, thresholds, annotations, scale, superposition) {
 		if (scale) {
 			this.setState({activeFeatures: JSON.parse(JSON.stringify(features)), customScale: scale.slice(0)});
@@ -671,12 +694,20 @@ export default class Viewer extends Component {
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
 				if (DEBUG) console.log(this.props.name, 'getFeatureColors', response);
-				this.endBenchmark("getFeatureColors")
-				if(response !== null) {
-					this.setState({colors: response.color});
-					this.updateDataPoints();
+				// Convert object to ArrayBuffer
+				let responseBuffered = new Buffer(response.compressedColor.toArrayBuffer())
+				// Uncompress
+				if(response.hasAddCompressionLayer) {
+					zlib.inflate(responseBuffered, (err, uncompressedMessage) => {
+						if(err) console.log(err)
+						else {
+							this.endBenchmark("getFeatureColors")
+							this.updateColors(response, this.chunkString(uncompressedMessage.toString(), 6))
+						}
+					});
 				} else {
-					this.resetDataPoints();
+					this.endBenchmark("getFeatureColors")
+					this.updateColors(response, response.color)
 				}
 			});
 		}, () => {
@@ -699,18 +730,33 @@ export default class Viewer extends Component {
 		this.container.removeChildren(0, n).map((p) => {
 			p.destroy();
 		})
-		let pts = _.zip(this.state.coord.idx, this.state.coord.x, this.state.coord.y, colors ? colors : this.state.colors);
-		pts.sort((a, b) =>{
-			let ca = this.hexToRgb(a[3]);
-			let cb = this.hexToRgb(b[3]);
-			let r = (ca ? (ca.r + ca.g + ca.b) : 0) - (cb ? (cb.r + cb.g + cb.b) : 0);
-			return r;
-		})
-		pts.map((p, i) => {
-			let point = this.getTexturedColorPoint(p[1], p[2], p[3])
-			point._originalData.idx = p[0];
-			this.container.addChildAt(point, i);
-		})
+		let settings = BackendAPI.getSettings();
+		if (settings.sortCells) {
+			let pts = _.zip(this.state.coord.idx, this.state.coord.x, this.state.coord.y, colors ? colors : this.state.colors);
+			this.startBenchmark("sort")
+			pts.sort((a, b) =>{
+				let ca = this.hexToRgb(a[3]);
+				let cb = this.hexToRgb(b[3]);
+				let r = (ca ? (ca.r + ca.g + ca.b) : 0) - (cb ? (cb.r + cb.g + cb.b) : 0);
+				return r;
+			})
+			this.endBenchmark("sort")
+			this.startBenchmark("map")
+			pts.map((p, i) => {
+				let point = this.getTexturedColorPoint(p[1], p[2], p[3])
+				point._originalData.idx = p[0];
+				this.container.addChildAt(point, i);
+			})
+			this.endBenchmark("map")
+		} else {
+			this.startBenchmark("map")
+			this.state.coord.idx.map((ci, i) => {
+				let point = this.getTexturedColorPoint(this.state.coord.x[i], this.state.coord.y[i], this.state.colors[i])
+				point._originalData.idx = ci;
+				this.container.addChildAt(point, i);
+			})
+			this.endBenchmark("map")
+		}
 		this.endBenchmark("updateDataPoints");
 		this.transformDataPoints();
 	}

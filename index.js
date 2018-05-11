@@ -1,160 +1,300 @@
-const electron = require('electron')
-const app = electron.app
-const BrowserWindow = electron.BrowserWindow
-const path = require('path')
-const fs = require('fs-extra')
-const process = require("process")
+const EventEmitter = require( 'events' );
+const electron = require('electron');
+const path = require('path');
+const fs = require('fs-extra');
+const process = require("process");
+const cp = require('child_process');
+const getPorts = require('get-ports');
 
 /* Create SCope data directories */
-const home = process.env['HOME']
-const dataDirs = ['my-looms','my-gene-sets','my-aucell-rankings']
+const home = process.env['HOME'];
+const dataDirs = ['my-looms','my-gene-sets','my-aucell-rankings'];
 
-dataDirs.forEach(function(value){
-  fs.mkdirp(path.join(home, '.scope', 'data', value))
+dataDirs.forEach(function(value) {
+  fs.mkdirp(path.join(home, '.scope', 'data', value));
 });
 
 /*************************************************************
- * Data Server process
+ * SCope Server
+ *************************************************************/
+
+class SCopeServer extends EventEmitter {
+
+  constructor() {
+    super()
+    this.dataServer = null;
+    this.bindServer = null;
+    this.xPort = 9081;
+    this.gPort = 50951;
+    this.pPort = 50952;
+    this.start = this.start.bind(this);
+    this.stop = this.stop.bind(this);
+    this.handleMessage = this.handleMessage.bind(this);
+    this.setPorts()
+  }
+
+  setPorts() {
+    getPorts([ this.xPort, this.gPort, this.pPort ], (err, ports) => {
+      if (err) {
+        throw new Error('could not open servers');
+      }
+      this.xPort = ports[0];
+      this.gPort = ports[1];
+      this.pPort = ports[2];
+      console.log(this.xPort, this.gPort, this.pPort);
+    })
+  }
+
+  start() {
+    this.dataServer = new DataServer(this);
+    this.dataServer.start();
+  }
+
+  stop() {
+    // Stop Bind Server
+    this.bindServer.stop()
+    // Stop Data Server
+    this.dataServer.stop()
+  }
+
+  handleMessage(msg) {
+    if(msg.hasOwnProperty('origin')) {
+      this.dataServer.setStarted(msg)
+      // Start the bind server if 
+      // 1) Not already started
+      // 2) Data Server has started
+      if(this.bindServer == null & this.dataServer.isStarted()) {
+        console.log("Bind Server can start now...")
+        console.log("Starting the Bind Server...")
+        this.bindServer = new BindServer(this);
+        this.bindServer.start()
+        this.emit('started', true)
+      }
+    }
+  }
+
+}
+
+/*************************************************************
+ * Data Server
  *************************************************************/
 
 // const DATASERVER_DIST_FOLDER = 'opt/scopeserver/dataserver/dist'
-const DATASERVER_DIST_FOLDER = path.join(app.getAppPath(), "opt", "scopeserver", "dataserver", "dist")
-const DATASERVER_FOLDER = '__init__'
-const DATASERVER_MODULE = '__init__' // without .py suffix
+const DATASERVER_DIST_FOLDER = path.join(/*app.getAppPath(), */"opt", "scopeserver", "dataserver", "dist");
+const DATASERVER_FOLDER = '__init__';
+const DATASERVER_MODULE = '__init__'; // without .py suffix
 
-let dataServerProc = null
+class DataServer {
 
-const isPackaged = () => {
-  const fullPath = path.join(DATASERVER_DIST_FOLDER)
-  return require('fs').existsSync(fullPath)
-}
-
-const getScopeServerScriptPath = () => {
-  if (!isPackaged()) {
-    return path.join(DATASERVER_FOLDER, DATASERVER_MODULE + '.py')
+  constructor(scopeServer) {
+    this.scopeServer = scopeServer;
+    this.gPort = this.scopeServer.gPort;
+    this.pPort = this.scopeServer.pPort;
+    this.xPort = this.scopeServer.xPort;
+    this.proc = null;
+    this.isGServerStarted = false;
+    this.isPServerStarted = false;
+    this.isPackaged = this.isPackaged.bind(this);
+    this.getExecPath = this.getExecPath.bind(this);
+    this.setGServerStarted = this.setGServerStarted.bind(this);
+    this.setPServerStarted = this.setPServerStarted.bind(this);
+    this.setStarted = this.setStarted.bind(this);
+    this.isStarted = this.isStarted.bind(this);
+    this.start = this.start.bind(this);
+    this.stop = this.stop.bind(this);
   }
-  if (process.platform === 'win32') {
-    return path.join(DATASERVER_DIST_FOLDER, DATASERVER_MODULE, DATASERVER_MODULE + '.exe')
-  }
-  return path.join(DATASERVER_DIST_FOLDER, DATASERVER_MODULE, DATASERVER_MODULE)
-}
 
-const startDataServer = () => {
-  let script = getScopeServerScriptPath()
-  if(isPackaged()) {
-    console.log("SCope Server Packaged.")
-    dataServerProc = require('child_process').execFile(script, [], (err, stdout, stderr) => {
-      if (err) throw err;
-      console.log(stdout, stderr);
-    });
-  } else {
-    dataServerProc = require('child_process').spawn('python', [script])
+  isPackaged() {
+    const fullPath = path.join(DATASERVER_DIST_FOLDER)
+    return require('fs').existsSync(fullPath)
   }
-  if (dataServerProc != null) {
-    console.log('Scope Server started!')
-  }
-}
 
-const stopDataServer = () => {
-  dataServerProc.kill()
-  dataServerProc = null
-  dataServerProc = null
+  getExecPath() {
+    if (!this.isPackaged()) {
+      return path.join(DATASERVER_FOLDER, DATASERVER_MODULE + '.py')
+    }
+    if (process.platform === 'win32') {
+      return path.join(DATASERVER_DIST_FOLDER, DATASERVER_MODULE, DATASERVER_MODULE + '.exe')
+    }
+    return path.join(DATASERVER_DIST_FOLDER, DATASERVER_MODULE, DATASERVER_MODULE)
+  }
+
+  setGServerStarted() {
+    this.isGServerStarted = true
+  }
+
+  setPServerStarted() {
+    this.isPServerStarted = true
+  }
+
+  setStarted(msg) {
+    switch(msg['origin']) {
+      case "GServer":
+          console.log("GServer is on!")
+          this.setGServerStarted()
+          break;
+      case "PServer":
+          console.log("PServer is on!")
+          this.setPServerStarted()
+          break;
+      default:
+          // nothing
+    }
+  }
+
+  isStarted() {
+    return this.isGServerStarted & this.isPServerStarted;
+  }
+
+  start() {
+    let script = this.getExecPath()
+    if(this.isPackaged()) {
+      console.log("SCope Server Packaged.")
+      this.proc = cp.spawn(script, ["-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort], {});
+      this.proc.stdout.on('data', (data) => {
+        let buff = new Buffer(data).toString('utf8');
+        let buff_json ;
+        // console.log(buff)
+        try {
+          let buff_json = JSON.parse(buff);
+          if(buff_json.hasOwnProperty('msg')) {
+            this.scopeServer.handleMessage(buff_json['msg'])
+          }
+        } catch (e) { 
+          // do nothing
+          // console.log(e)
+        }
+      });
+    } else {
+      this.proc = cp.spawn('python', [script, "-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort])
+    }
+    if (this.proc == null) {
+      throw "Null pointer exception for Data Server."
+    }
+  }
+
+  stop() {
+    this.proc.kill('SIGINT')
+    this.proc = null
+  }
+
 }
 
 /*************************************************************
- * Bind Server process
+ * Bind Server
  *************************************************************/
 
 // const BINDSERVER_FOLDER = 'opt/scopeserver/bindserver'
-const BINDSERVER_FOLDER = path.join(app.getAppPath(), "opt", "scopeserver", "bindserver")
+const BINDSERVER_FOLDER = path.join(/*app.getAppPath(), */"opt", "scopeserver", "bindserver")
 const BINDSERVER_MODULE = 'server.js'
 
-let bindServerProc = null
-let bindServerPort = 8081
+class BindServer {
 
-const getBindServerScriptPath = () => {
-  return path.join(__dirname, BINDSERVER_FOLDER, BINDSERVER_MODULE)
-}
-
-const getBindServerPort = () => {
-  return bindServerPort
-}
-
-const startBindServer = () => {
-  const exec = require('child_process').exec;
-  const bindServerProc = exec('cd '+ BINDSERVER_FOLDER +'; node '+ BINDSERVER_MODULE +" "+ getBindServerPort(), (e, stdout, stderr)=> {
-      if (e instanceof Error) {
-          // Error when loading .loom file: Error: stdout maxBuffer exceeded
-          // console.error(e);
-          // throw e;
-      }
-      // console.log('stdout ', stdout);
-      console.log('stderr: ', stderr);
-  });
-  if (bindServerProc != null) {
-    console.log('Bind Server started!')
+  constructor(scopeServer) {
+    this.scopeServer = scopeServer
+    this.port = this.scopeServer.xPort
+    this.proc = null
+    this.started = false
+    this.setStarted = this.setStarted.bind(this)
+    this.isStarted = this.isStarted.bind(this)
+    this.start = this.start.bind(this)
+    this.stop = this.stop.bind(this)
   }
+
+  setStarted() {
+    this.started = true
+  }
+
+  isStarted() {
+    return this.started;
+  }
+
+  start() {
+    const exec = cp.exec;
+    this.proc = exec('cd '+ BINDSERVER_FOLDER +'; node '+ BINDSERVER_MODULE +" "+ this.port, (e, stdout, stderr) => {
+        if (e instanceof Error) {
+            // Error when loading .loom file: Error: stdout maxBuffer exceeded
+            // console.error(e);
+            // throw e;
+        }
+    });
+    if (this.proc == null) {
+      throw "Null pointer exception for Bind Server."
+    }
+    console.log("Bind Server has started.")
+    this.setStarted()
+  }
+
+  stop() {
+    this.proc.kill()
+    this.proc = null
+  }
+
 }
-
-const stopBindServer = () => {
-  bindServerProc.kill()
-  bindServerProc = null
-  bindServerProc = null
-}
-
-const startSCopeServer = () => {
-  // Start Data Server
-  startDataServer()
-  // Start Bind Server
-  startBindServer()
-}
-
-
-const stopSCopeServer = () => {
-  // Start Data Server
-  stopDataServer()
-  // Start Bind Server
-  stopBindServer()
-}
-
-app.on('ready', startSCopeServer)
-app.on('will-quit', stopSCopeServer)
-
 
 /*************************************************************
- * window management
+ * SCope
  *************************************************************/
 
-let mainWindow = null
+class SCope {
 
-const createWindow = () => {
-  // Set the size of the window to the size of the available screen
-  const {width, height} = electron.screen.getPrimaryDisplay().workAreaSize
-  mainWindow = new BrowserWindow({width: width, height: height, webPreferences: {
-    devTools: false
-  }})
-  mainWindow.loadURL(require('url').format({
-    pathname: path.join(__dirname, 'index.html'),
-    protocol: 'file:',
-    slashes: true
-  }))
-  mainWindow.webContents.openDevTools()
+  constructor() {
+    this.model = null
+    this.view = null
+    this.start = this.start.bind(this)
+    this.stop = this.stop.bind(this)
+  }
 
-  mainWindow.on('closed', () => {
-    mainWindow = null
-  })
+  start() {
+    this.model = new SCopeServer();
+    this.model.start()
+    this.model.on('started', (isStarted) => {
+      if(isStarted) {
+        this.createView()
+      }
+    })
+  }
+
+  stop() {
+    this.model.stop()
+  }
+
+  createView() {
+    // Set the size of the window to the size of the available screen
+    const {width, height} = electron.screen.getPrimaryDisplay().workAreaSize
+    this.view = new electron.BrowserWindow({width: width, height: height, webPreferences: {
+      devTools: false
+    }})
+    this.view.loadURL(require('url').format({
+      pathname: path.join(__dirname, 'index.html'),
+      protocol: 'file:',
+      slashes: true
+    }) + "?WSport=" + this.model.xPort + "&XHRport=" + this.model.pPort + "&RPCport=" + this.model.gPort)
+    this.view.webContents.openDevTools()
+
+    this.view.on('closed', () => {
+      this.view = null
+    })
+  }
+
 }
 
-app.on('ready', createWindow)
+/*************************************************************
+ * Electron App
+ *************************************************************/
 
+const scope = new SCope();
+const app = electron.app
+app.on('ready', scope.start)
+app.on('will-quit', scope.stop)
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
 })
 
-app.on('activate', () => {
-  if (mainWindow === null) {
-    createWindow()
-  }
-})
+// app.on('activate', () => {
+//   if (mainWindow === null) {
+//     createWindow()
+//   }
+// })

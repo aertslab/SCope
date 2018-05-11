@@ -9,9 +9,9 @@ export default class About extends Component {
                 <Grid.Row>
                     <Grid.Column>
                         <Header as='h1'>About SCope</Header>
-                        SCope was made as a joint effort of <a href='https://aertslab.org'>Laboratory of Computation Biology</a> from <a href='https://cbd.vib.be/'>VIB-KU Leuven Center for Brain & Disease Research</a> and the <a href='https://www.bits.vib.be'>VIB Bioinformatics Core</a>.<br />
-                        The developers team: <b>Kristofer Davie</b> <em>&lt;kristofer.davie@kuleuven.vib.be&gt;</em>, <b>Maxime De Waegeneer</b> <em>&lt;maxime.dewaegeneer@kuleuven.vib.be&gt;</em>, <b>Łukasz Kreft</b> <em>&lt;lukasz.kreft@vib.be&gt;</em><br />
-                        The supervising PI: <b>Stein Aerts</b> <em>&lt;stein.aerts@kuleuven.vib.be&gt;</em><br /><br />
+                        The original version of SCope was designed and developed by Maxime De Waegeneer.
+                        The current version was made as a joint effort of <a href='https://aertslab.org'>Laboratory of Computation Biology</a> from <a href='https://cbd.vib.be/'>VIB-KU Leuven Center for Brain & Disease Research</a> and the <a href='https://www.bits.vib.be'>VIB Bioinformatics Core</a>.<br />
+                        The developers team: <b>Kristofer Davie</b> <em>&lt;kristofer.davie@kuleuven.vib.be&gt;</em>, <b>Maxime De Waegeneer</b> <em>&lt;maxime.dewaegeneer@kuleuven.vib.be&gt;</em>, <b>Łukasz Kreft</b> <em>&lt;lukasz.kreft@vib.be&gt;</em><br /><br />
                         SCope is licensed under <a href='https://www.gnu.org/licenses/gpl-3.0.en.html'>GPL-3.0</a><br />
                         The source code is available under <a href='https://github.com/aertslab/SCope'>https://github.com/aertslab/SCope</a><br />
                         This software makes use of open source packages (i.e. <a href='https://www.npmjs.com/package/caniuse-db'>caniuse-db</a>) and standards (i.e. <a href='https://www.npmjs.com/package/spdx-expression-parse' >SPDX</a>).<br />

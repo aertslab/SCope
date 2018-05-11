@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
-import { Icon, Button, Menu } from 'semantic-ui-react';
+import { Icon, Label, Button, Menu, Input } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
+import Bitly from 'bitlyapi';
 const moment = require('moment');
+const pako = require('pako');
+let bitly = new Bitly(BITLY.token);
 const timer = 60 * 1000;
 
 class AppHeader extends Component {
@@ -10,14 +13,15 @@ class AppHeader extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			timeout: props.timeout
+			timeout: props.timeout,
+			shortUrl: null,
 		}
 	}
 
 	render() {
 		const { match, location } = this.props;
-		const { timeout } = this.state;
-		let metadata = BackendAPI.getLoomMetadata(match.params.loom);
+		const { timeout, shortUrl } = this.state;
+		let metadata = BackendAPI.getLoomMetadata(decodeURIComponent(match.params.loom));
 		let menu = this.menuList(metadata);
 
 		return (
@@ -33,11 +37,18 @@ class AppHeader extends Component {
 								{item.icon &&
 									<Icon name={item.icon} />
 								}
-								{item.title}
+								{item.title} &nbsp; {item.path == 'geneset' && <Label color='violet' size='mini'>beta</Label>}
 							</Button>
 						</Link>
 					</Menu.Item>
 				)}
+
+				<Menu.Item>
+					<Icon name="linkify" onClick={this.getPermalink.bind(this)} className="pointer" title="Get permalink" />
+					{shortUrl &&
+						<Label className="permalink">{shortUrl}</Label>
+					}
+				</Menu.Item>
 
 				<Menu.Item className="sessionInfo">
 					Your session will be deleted in {moment.duration(timeout).humanize()} &nbsp;
@@ -60,21 +71,23 @@ class AppHeader extends Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		console.log('componentWillReceiveProps', nextProps);
+		if (DEBUG) console.log('componentWillReceiveProps', nextProps);
 		const { timeout, metadata, match, history, loaded } = nextProps;
 		this.setState({timeout: timeout});
+		/*
 		if (loaded) {
 			let menu = this.menuList(metadata);
 			menu.map((item) => {
 				if ((item.path == match.params.page) && (!item.display))  {
 					if (metadata) {
-						history.replace('/'+ [match.params.uuid, encodeURIComponent(match.params.loom), 'dataset' ].join('/'));
+						history.replace('/'+ [match.params.uuid, match.params.loom, 'dataset' ].join('/'));
 					} else {
-						history.replace('/'+ [match.params.uuid, encodeURIComponent(match.params.loom), 'welcome' ].join('/'));
+						history.replace('/'+ [match.params.uuid, match.params.loom, 'welcome' ].join('/'));
 					}
 				}
 			});
 		}
+		*/
 	}
 
 	componentWillUnmount() {
@@ -94,12 +107,14 @@ class AppHeader extends Component {
 				title: 'SCope',
 				icon: 'home'
 			},
+			/*
 			{
 				display: metadata ? true : false,
 				path: 'dataset',
 				title: 'Dataset info',
 				icon: false
 			},
+			*/
 			{
 				display: metadata ? true : false,
 				path: 'gene',
@@ -138,7 +153,21 @@ class AppHeader extends Component {
 			},
 		];
 	}
-
+	
+	getPermalink() {
+		const { match } = this.props;
+		console.log(BackendAPI);
+		let j = JSON.stringify(BackendAPI.getExportObject(match.params), BackendAPI.getExportKeys());
+		let d = pako.deflate(j, { to: 'string' });
+		let b = encodeURIComponent(window.btoa(d).replace(/\//g,'$'));
+		bitly.shorten(BITLY.baseURL + "/#/permalink/" + b)
+		.then((result) => {
+			this.setState({shortUrl: result.data.url});
+			this.forceUpdate();
+		}).then((error) => {
+			console.log(error);
+		});
+	}
 }
 
 export default withRouter(AppHeader);

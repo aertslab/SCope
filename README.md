@@ -7,7 +7,7 @@ Currently the format of the datasets supported by SCope is .loom.
 
 - Miniconda:
 
-Download minicond3 from https://conda.io/miniconda.html or use the command line:
+Download miniconda3 from https://conda.io/miniconda.html or use the command line:
 ```
 wget --content-disposition http://bit.ly/miniconda3
 ```
@@ -65,12 +65,25 @@ cd opt
 python setup.py develop
 ```
 
-Package the SCope Data Server:
+Install PyInstaller:
 ```
 cd scopeserver/dataserver
 pip install pyinstaller
-pyinstaller --onedir --hidden-import=scipy._lib.messagestream --hidden-import=pandas._libs.tslibs.timedeltas  --hidden-import=cytoolz.utils --hidden-import=cytoolz._signatures __init__.py
 ```
+
+Package the SCope Data Server:
+```
+LD_LIBRARY_PATH=${CONDA_PATH}/lib pyinstaller \
+	--onedir \
+	--hidden-import=scipy._lib.messagestream \
+	--hidden-import=pandas._libs.tslibs.timedeltas  \
+	--hidden-import=cytoolz.utils \
+	--hidden-import=cytoolz._signatures __init__.py \
+	--hidden-import=pandas._libs.tslibs.np_datetime \
+	--hidden-import=pandas._libs.tslibs.nattype \
+	--hidden-import=pandas._libs.skiplist
+```
+`${CONDA_PATH}` is the path where Miniconda has been installed.
 
 ### 2) Packaging SCope
 
