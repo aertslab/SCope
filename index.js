@@ -5,6 +5,11 @@ const fs = require('fs-extra');
 const process = require("process");
 const cp = require('child_process');
 const getPorts = require('get-ports');
+const fixPath = require('fix-path');
+
+fixPath();
+
+const app = electron.app
 
 /* Create SCope data directories */
 const home = process.env['HOME'];
@@ -60,7 +65,7 @@ class SCopeServer extends EventEmitter {
   handleMessage(msg) {
     if(msg.hasOwnProperty('origin')) {
       this.dataServer.setStarted(msg)
-      // Start the bind server if 
+      // Start the bind server if
       // 1) Not already started
       // 2) Data Server has started
       if(this.bindServer == null & this.dataServer.isStarted()) {
@@ -80,7 +85,13 @@ class SCopeServer extends EventEmitter {
  *************************************************************/
 
 // const DATASERVER_DIST_FOLDER = 'opt/scopeserver/dataserver/dist'
-const DATASERVER_DIST_FOLDER = path.join(/*app.getAppPath(), */"opt", "scopeserver", "dataserver", "dist");
+try {
+  if (process.argv[2] == 'electronTest') {
+    const DATASERVER_DIST_FOLDER = path.join("opt", "scopeserver", "dataserver", "dist");
+  }
+} catch (e) {
+  const DATASERVER_DIST_FOLDER = path.join(app.getAppPath(), "opt", "scopeserver", "dataserver", "dist");
+}
 const DATASERVER_FOLDER = '__init__';
 const DATASERVER_MODULE = '__init__'; // without .py suffix
 
@@ -150,7 +161,7 @@ class DataServer {
     let script = this.getExecPath()
     if(this.isPackaged()) {
       console.log("SCope Server Packaged.")
-      this.proc = cp.spawn(script, ["-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort], {});
+      this.proc = cp.spawn(script, ["-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort, '--appMode'], {});
       this.proc.stdout.on('data', (data) => {
         let buff = new Buffer(data).toString('utf8');
         let buff_json ;
@@ -160,13 +171,13 @@ class DataServer {
           if(buff_json.hasOwnProperty('msg')) {
             this.scopeServer.handleMessage(buff_json['msg'])
           }
-        } catch (e) { 
+        } catch (e) {
           // do nothing
           // console.log(e)
         }
       });
     } else {
-      this.proc = cp.spawn('python', [script, "-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort])
+      this.proc = cp.spawn('python', [script, "-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort, '--appMode'])
     }
     if (this.proc == null) {
       throw "Null pointer exception for Data Server."
@@ -185,7 +196,13 @@ class DataServer {
  *************************************************************/
 
 // const BINDSERVER_FOLDER = 'opt/scopeserver/bindserver'
-const BINDSERVER_FOLDER = path.join(/*app.getAppPath(), */"opt", "scopeserver", "bindserver")
+try {
+  if (process.argv[2] == 'electronTest') {
+    const BINDSERVER_FOLDER = path.join("opt", "scopeserver", "bindserver")
+  }
+} catch (e) {
+const BINDSERVER_FOLDER = path.join(app.getAppPath(), "opt", "scopeserver", "bindserver")
+}
 const BINDSERVER_MODULE = 'server.js'
 
 class BindServer {
@@ -211,13 +228,7 @@ class BindServer {
 
   start() {
     const exec = cp.exec;
-    this.proc = exec('cd '+ BINDSERVER_FOLDER +'; node '+ BINDSERVER_MODULE +" "+ this.port, (e, stdout, stderr) => {
-        if (e instanceof Error) {
-            // Error when loading .loom file: Error: stdout maxBuffer exceeded
-            // console.error(e);
-            // throw e;
-        }
-    });
+    this.proc = cp.spawn('node', [path.join(BINDSERVER_FOLDER, BINDSERVER_MODULE), this.port])
     if (this.proc == null) {
       throw "Null pointer exception for Bind Server."
     }
@@ -263,7 +274,7 @@ class SCope {
     // Set the size of the window to the size of the available screen
     const {width, height} = electron.screen.getPrimaryDisplay().workAreaSize
     this.view = new electron.BrowserWindow({width: width, height: height, webPreferences: {
-      devTools: false
+      devTools: true
     }})
     this.view.loadURL(require('url').format({
       pathname: path.join(__dirname, 'index.html'),
@@ -284,7 +295,6 @@ class SCope {
  *************************************************************/
 
 const scope = new SCope();
-const app = electron.app
 app.on('ready', scope.start)
 app.on('will-quit', scope.stop)
 app.on('window-all-closed', () => {

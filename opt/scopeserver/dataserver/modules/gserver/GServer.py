@@ -954,7 +954,11 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.MyLoomsReply(myLooms=my_looms)
 
     def getUUID(self, request, context):
-        newUUID = str(uuid.uuid4())
+        if SCope.appMode:
+            with open(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt'), 'r') as fh:
+                newUUID = fh.readline().rstrip('\n')
+        else:
+            newUUID = str(uuid.uuid4())
         if newUUID not in curUUIDs.keys():
             SCope.uuid_log.write("{0} :: {1} :: New UUID ({2}) assigned.\n".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, newUUID))
             SCope.uuid_log.flush()
@@ -1172,8 +1176,9 @@ class GeneSetEnrichment:
         return s_pb2.LoomUploadedReply()
 
 
-def serve(run_event, dev_env, port=50052):
+def serve(run_event, dev_env, port=50052, appMode=False):
     SCope.DEV_ENV = dev_env
+    SCope.appMode = appMode
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     s_pb2_grpc.add_MainServicer_to_server(SCope(), server)
     server.add_insecure_port('[::]:{0}'.format(port))

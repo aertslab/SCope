@@ -15,6 +15,7 @@ parser = argparse.ArgumentParser(description='Launch the scope server')
 parser.add_argument('-g_port', metavar='gPort', type=int, help='gPort', default=50052)
 parser.add_argument('-p_port', metavar='pPort', type=int, help='pPort', default=50051)
 parser.add_argument('-x_port', metavar='xPort', type=int, help='xPort', default=8081)
+parser.add_argument('--appMode', action='store_true', help='Run in app mode (Fixed UUID)', default=False)
 
 args = parser.parse_args()
 
@@ -27,6 +28,7 @@ class SCopeServer():
         self.g_port = args.g_port
         self.p_port = args.p_port
         self.x_port = args.x_port
+        self.appMode = args.appMode
         self.dev_env = dev_env
 
     def start_bind_server(self):
@@ -34,7 +36,7 @@ class SCopeServer():
         self.xs_thread.start()
 
     def start_data_server(self):
-        self.gs_thread = threading.Thread(target=gs.serve, args=(self.run_event, self.dev_env), kwargs={'port': self.g_port})
+        self.gs_thread = threading.Thread(target=gs.serve, args=(self.run_event, self.dev_env,), kwargs={'port': self.g_port, 'appMode': self.appMode})
         self.ps_thread = threading.Thread(target=ps.run, args=(self.run_event,), kwargs={'port': self.p_port})
         self.gs_thread.start()
         self.ps_thread.start()

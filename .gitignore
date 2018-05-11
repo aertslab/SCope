@@ -38,7 +38,6 @@ opt/scopeserver/dataserver/build
 opt/scopeserver/dataserver/logs
 opt/scope_server.egg-info
 
-index.html
 assets/*.js
 
 
