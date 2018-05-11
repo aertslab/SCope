@@ -2,7 +2,24 @@ class API {
 	constructor() {
 		this.GBC = require("grpc-bus-websocket-client");
 		try {
-			this.GBCConnection = new this.GBC("ws://" + BACKEND.host + ":" + BACKEND.WSport + "/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + BACKEND.RPCport } }).connect();
+			this.WSport = document.head.querySelector("[name=scope-wsport]").getAttribute('port')
+			console.log('Using meta WSport')
+		} catch (ex) {
+			console.log('Using config WSport')
+			this.WSport = BACKEND.WSport;
+		}
+		try {
+			this.RPCport = document.head.querySelector("[name=scope-rpcport]").getAttribute('port')
+			console.log('Using meta RPCport')
+		} catch (ex) {
+			this.RPCport = BACKEND.RPCport;
+			console.log('Using config RPCport')
+		}
+		console.log(this.WSport, this.RPCport)
+
+		try {
+			this.GBCConnection = new this.GBC("ws://" + BACKEND.host + ":" + this.WSport + "/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + this.RPCport } }).connect();
+			console.log(this.GBCConnection)
 			this.connected = true;
 		} catch (ex) {
 			this.GBCConnection = null;
@@ -24,7 +41,7 @@ class API {
 
 		this.features = {};
 		this.emptyFeature = {type: '', featureType: '', feature: '', threshold: 0};
-		
+
 		this.featureChangeListeners = {};
 
 		this.settings = {
@@ -54,6 +71,62 @@ class API {
 		this.customValuesChangeListeners = [];
 
 		this.uuid = null;
+		this.updateListeners = [];
+	}
+
+	importObject(api) {
+		this.spriteSettings = api.spriteSettings;
+		this.activePage = api.activePage;
+		this.activeLooms = api.activeLooms;
+		this.activeCoordinates = api.activeCoordinates;
+		this.features = api.features;
+		this.settings = api.settings;
+		this.viewerTool = api.viewerTool;
+		this.viewerSelections = api.viewerSelections;
+		this.sidebarVisible = api.sidebarVisible;
+		this.maxValues = api.maxValues;
+		this.customValues = api.customValues;
+	}
+
+	getExportObject(params) {
+		this.loom = params.loom;
+		this.page = params.page;
+		return this;
+	}
+
+	getExportKeys() {
+		return [
+			'loom', 'page',
+			'spriteSettings', 'scale', 'alpha',
+			'activePage',
+			'activeLooms',
+			'activeCoordinates',
+			'features', 'gene', 'regulon', 'compare', 'feature', 'featureType', 'threshold', 'type', 'metadata', 'description',
+			'settings', 'hasCpmNormalization', 'hasLogTransform', 'sortCells',
+			'viewerTool',
+			'viewerSelections',
+			'viewerTransform',
+			'sidebarVisible',
+			'maxValues',
+			'customValues'
+		];
+	}
+
+	onUpdate(listener) {
+		this.updateListeners.push(listener);
+	}
+
+	removeOnUpdate(listener) {
+		let i = this.updateListeners.indexOf(listener)
+		if (i > -1) {
+			this.updateListeners.splice(i, 1);
+		}
+	};
+
+	forceUpdate() {
+		this.updateListeners.forEach((listener) => {
+			listener(this.settings);
+		})
 	}
 
 	isConnected() {
@@ -84,7 +157,7 @@ class API {
 	onSpriteSettingsChange(listener) {
 		this.spriteSettingsChangeListeners.push(listener);
 	}
-	
+
 	removeSpriteSettingsChange(listener) {
 		let i = this.spriteSettingsChangeListeners.indexOf(listener)
 		if (i > -1) {
@@ -160,12 +233,32 @@ class API {
 		return this.activeCoordinates;
 	}
 
+	queryLoomFiles(uuid, callback) {
+		let query = {
+			UUID: uuid
+		};
+		this.getConnection().then((gbc) => {
+			if (DEBUG) console.log("getMyLooms", query);
+			gbc.services.scope.Main.getMyLooms(query, (error, response) => {
+				if (response !== null) {
+					if (DEBUG) console.log("getMyLooms", response);
+					BackendAPI.setLoomFiles(response.myLooms);
+					callback(response.myLooms);
+				} else {
+					console.log("No loom files detected");
+					callback([]);
+				}
+			});
+		}, () => {
+			this.showError();
+		});
+	}
 
 	getLoomFiles() {
 		return this.loomFiles;
 	}
 
-	setLoomFiles(files) {		
+	setLoomFiles(files) {
 		this.loomFiles = {};
 		Object.keys(files).map((i) => {
 			let file = files[i];
@@ -180,8 +273,8 @@ class API {
 		return this.features[this.activePage] ? this.features[this.activePage] : [];
 	}
 
-	setActiveFeature(featureId, type, featureType, feature, threshold, metadata) {
-		let page = this.activePage;
+	setActiveFeature(featureId, type, featureType, feature, threshold, metadata, page) {
+		page = page || this.activePage;
 		let selectedFeatures = this.features[page] || [this.emptyFeature, this.emptyFeature, this.emptyFeature];
 		selectedFeatures[featureId] = {type: type, featureType: featureType ? featureType : '', feature: feature ? feature : '', threshold: threshold, metadata: metadata};
 		this.features[page] = selectedFeatures;
@@ -190,6 +283,67 @@ class API {
 				listener(selectedFeatures, featureId, customValues, maxValues);
 			})
 		})
+	}
+
+	updateFeature(field, type, feature, featureType, featureDescription, page) {
+		if (featureType == 'regulon') {
+			let regulonQuery = {
+				loomFilePath: this.getActiveLoom(),
+				regulon: feature
+			}
+			this.getConnection().then((gbc) => {
+				if (DEBUG) console.log('getRegulonMetaData', regulonQuery);
+				gbc.services.scope.Main.getRegulonMetaData(regulonQuery, (regulonErr, regulonResponse) => {
+					if (DEBUG) console.log('getRegulonMetaData', regulonResponse);
+					let metadata = regulonResponse ? regulonResponse.regulonMeta : {};
+					let threshold = 0;
+					if (metadata.autoThresholds) {
+						metadata.autoThresholds.map((t) => {
+							if (t.name == metadata.defaultThreshold) threshold = t.threshold;
+						})
+					}
+					metadata.description = featureDescription;
+					this.setActiveFeature(field, type, featureType, feature, threshold, metadata, page);
+				});
+			}, () => {
+				this.showError();
+			});
+		} else if (featureType.indexOf('Clustering:') == 0) {
+			let loomMetadata = this.getActiveLoomMetadata();
+			let clusteringID, clusterID;
+			loomMetadata.cellMetaData.clusterings.map(clustering => {
+				if (featureType.indexOf(clustering.name) != -1) {
+					clusteringID = clustering.id
+					clustering.clusters.map(c => {
+						if (c.description == feature) {
+							clusterID = c.id;
+						}
+					})
+				}
+			})
+			if (clusterID != null) {
+				let markerQuery = {
+					loomFilePath: this.getActiveLoom(),
+					clusterID: clusterID,
+					clusteringID: clusteringID,
+				}
+				this.getConnection().then((gbc) => {
+					if (DEBUG) console.log('getMarkerGenes', markerQuery);
+					gbc.services.scope.Main.getMarkerGenes(markerQuery, (markerErr, markerResponse) => {
+						if (DEBUG) console.log('getMarkerGenes', markerResponse);
+						if (!markerResponse) markerResponse = {};
+						markerResponse.description = featureDescription
+						this.setActiveFeature(field, type, featureType, feature, 0, markerResponse, page);
+					});
+				}, () => {
+					this.showError();
+				});
+			} else {
+				this.setActiveFeature(field, type, featureType, feature, 0, {description: featureDescription}, page);
+			}
+		} else {
+			this.setActiveFeature(field, type, featureType, feature, 0, {description: featureDescription}, page);
+		}
 	}
 
 	setFeatureThreshold(id, threshold) {
@@ -228,7 +382,7 @@ class API {
 				callback(this.customValues[page], this.maxValues[page]);
 			})
 		}, () => {
-			BackendAPI.showError();	
+			BackendAPI.showError();
 		});
 	}
 
@@ -308,10 +462,10 @@ class API {
 		}
 	}
 
-	
+
 
 	getActivePage() {
-		return this.activePage;		
+		return this.activePage;
 	}
 
 	setActivePage(page) {
@@ -333,7 +487,7 @@ class API {
 			this.activePageListeners.splice(i, 1);
 		}
 	}
-	
+
 
 	getSettings() {
 		return this.settings;
@@ -352,15 +506,15 @@ class API {
 	onSettingsChange(listener) {
 		this.settingsChangeListeners.push(listener);
 	}
-	
+
 	removeSettingsChange(listener) {
 		let i = this.settingsChangeListeners.indexOf(listener)
 		if (i > -1) {
 			this.settingsChangeListeners.splice(i, 1);
 		}
 	};
-	
-	
+
+
 
 	getViewerTool() {
 		return this.viewerTool;
@@ -383,9 +537,9 @@ class API {
 			this.viewerToolChangeListeners.splice(i, 1);
 		}
 	};
-	
 
-	
+
+
 	getViewerSelections() {
 		return this.viewerSelections[this.activePage] || [];
 	}
@@ -431,7 +585,7 @@ class API {
 	}
 
 
-	
+
 	setViewerTransform(transform) {
 		this.viewerTransform = transform;
 		this.viewerTransformChangeListeners.forEach((listener) => {
@@ -455,7 +609,7 @@ class API {
 	}
 
 
-	
+
 	getSidebarVisible() {
 		return this.sidebarVisible;
 	}
@@ -477,7 +631,7 @@ class API {
 			this.sidebarListeners.splice(i, 1);
 		}
 	}
-	
+
 	setUUID(uuid) {
 		this.uuid = uuid;
 	}
@@ -485,7 +639,7 @@ class API {
 	getUUID() {
 		return this.uuid;
 	}
-	
+
 
 	getColors() {
 		return this.colors;

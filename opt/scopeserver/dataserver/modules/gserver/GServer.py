@@ -1,17 +1,21 @@
 from concurrent import futures
+import sys
 import time
 import grpc
 import loompy as lp
 import hashlib
 import os
+import re
 import numpy as np
 import pandas as pd
+import shutil
 import json
 import zlib
 import base64
 import threading
 import pickle
 import uuid
+from appdirs import AppDirs
 from collections import OrderedDict, defaultdict
 from functools import lru_cache
 from itertools import compress
@@ -26,9 +30,17 @@ from pyscenic.aucell import create_rankings, enrichment, enrichment4cells
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 _UUID_TIMEOUT = _ONE_DAY_IN_SECONDS * 5
+_SESSION_TIMEOUT = 60 * 5
+_ACTIVE_SESSIONS_LIMIT = 25
+_MOUSE_EVENTS_THRESHOLD = 1
 _LOWER_LIMIT_RGB = 0
 _UPPER_LIMIT_RGB = 225
 _NO_EXPR_RGB = 166
+
+appName = 'SCope'
+appAuthor = 'Aertslab'
+appVersion = '1.0'
+
 
 BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "bf9360", "1d331a", "79baf2", "deb6f2",
                   "990000", "7f6240", "283326", "2d4459", "8f00b3", "4c0000", "ccb499", "00f220", "accbe6", "520066",
@@ -58,36 +70,51 @@ BIG_COLOR_LIST = ["ff0000", "ffc480", "149900", "307cbf", "d580ff", "cc0000", "b
 
 hexarr = np.vectorize('{:02x}'.format)
 
-# globalLooms = set([
-#                    'FlyBrain_56k_v6.loom',
-#                    'Desplan_OpticLobe_V1.loom',
-#                    'Luo_OPN_v1.loom',
-#                    'FlyBrain_157k_v1.loom',
-#                    'dentate_gyrus_C_10X_V2_update.loom'
-#                    ])
+platformDirs = AppDirs(appname=appName, appauthor=appAuthor)
 
-data_dirs = {"Loom": {"path": os.path.join("data", "my-looms"), "message": "No data folder detected. Making loom data folder in current directory."},
-             "GeneSet": {"path": os.path.join("data", "my-gene-sets"), "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."},
-             "LoomAUCellRankings": {"path": os.path.join("data", "my-aucell-rankings"), "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
+data_dirs = {"Loom": {"path": os.path.join(platformDirs.user_data_dir, "my-looms"),
+                      "message": "No data folder detected. Making loom data folder: {0}.".format(str(os.path.join(platformDirs.user_data_dir, "my-looms")))},
+             "GeneSet": {"path": os.path.join(platformDirs.user_data_dir, "my-gene-sets"),
+                         "message": "No gene-sets folder detected. Making gene-sets data folder in current directory: {0}.".format(str(os.path.join(platformDirs.user_data_dir, "my-gene-sets")))},
+             "LoomAUCellRankings": {"path": os.path.join(platformDirs.user_data_dir, "my-aucell-rankings"),
+                                    "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory: {0}.".format(str(os.path.join(platformDirs.user_data_dir, "my-aucell-rankings")))},
+             "Config": {"path": os.path.join(platformDirs.user_config_dir),
+                        "message": "No Config folder detected. Making Config folder: {0}.".format(str(os.path.join(platformDirs.user_config_dir)))},
+             "Logs": {"path": os.path.join(platformDirs.user_log_dir),
+                      "message": "No Logs folder detected. Making Logs folder: {0}.".format(str(os.path.join(platformDirs.user_log_dir)))}}
 
+print(data_dirs)
 curUUIDs = {}
+permUUIDs = set()
 uploadedLooms = defaultdict(lambda: set())
+activeSessions = {}
 
 
 class SCope(s_pb2_grpc.MainServicer):
 
     def __init__(self):
-        # Create the data directories
-        SCope.set_root_dir()
-        SCope.set_data_dirs()
+
         SCope.create_global_dirs()
-        SCope.create_uuid_log()
-        SCope.load_gene_mappings()
+
+        self.data_dirs = data_dirs
         self.active_loom_connections = {}
         self.loom_dir = SCope.get_data_dir_path_by_file_type("Loom")
         self.gene_sets_dir = SCope.get_data_dir_path_by_file_type("GeneSet")
         self.rankings_dir = SCope.get_data_dir_path_by_file_type("LoomAUCellRankings")
+        self.config_dir = SCope.get_data_dir_path_by_file_type("Config")
+        self.logs_dir = SCope.get_data_dir_path_by_file_type("Logs")
+
+        SCope.load_gene_mappings()
+        self.create_uuid_log()
         self.set_global_data()
+        self.readUUIDdb()
+
+    @staticmethod
+    def dfToNamedMatrix(df):
+        arr_ip = [tuple(i) for i in df.as_matrix()]
+        dtyp = np.dtype(list(zip(df.dtypes.index, df.dtypes)))
+        arr = np.array(arr_ip, dtype=dtyp)
+        return arr
 
     @staticmethod
     def load_gene_mappings():
@@ -97,40 +124,20 @@ class SCope(s_pb2_grpc.MainServicer):
         SCope.mmus_to_dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'mmus_to_dmel_mappings.pickle'), 'rb'))
 
     @staticmethod
-    def set_root_dir():
-        SCope.root = os.path.join(Path(__file__).parents[3], 'dataserver') if SCope.DEV_ENV else os.path.join(str(Path.home()), ".scope")
-    
-    @staticmethod
-    def set_data_dirs():
-        SCope.data_dirs = {"Loom": {"path":os.path.join(SCope.root,"data","my-looms"), "message": "No data folder detected. Making loom data folder in current directory."}
-                         , "GeneSet": {"path":os.path.join(SCope.root,"data","my-gene-sets"), "message": "No gene-sets folder detected. Making gene-sets data folder in current directory."}
-                         , "LoomAUCellRankings": {"path":os.path.join(SCope.root,"data","my-aucell-rankings"), "message": "No AUCell rankings folder detected. Making AUCell rankings data folder in current directory."}}
-
-    @staticmethod
-    def get_logs_dir():
-        return os.path.join(SCope.root,"logs")
-    
-    @staticmethod
     def get_data_dir_path_by_file_type(file_type, UUID=None):
-        if UUID is not None:
-            globalDir = SCope.data_dirs[file_type]["path"]
-            UUIDDir = os.path.join(globalDir, UUID)
-            return UUIDDir
+        if file_type in ['Loom', 'GeneSet', 'LoomAUCellRankings'] and UUID is not None:
+                globalDir = data_dirs[file_type]["path"]
+                UUIDDir = os.path.join(globalDir, UUID)
+                return UUIDDir
         else:
-            return SCope.data_dirs[file_type]["path"]
+            return data_dirs[file_type]["path"]
 
     @staticmethod
     def create_global_dirs():
-        # Create data directories if not exists
-        for data_type in SCope.data_dirs.keys():
-            if not os.path.isdir(SCope.data_dirs[data_type]["path"]):
-                print(SCope.data_dirs[data_type]["message"])
-                os.makedirs(SCope.data_dirs[data_type]["path"])
-        # Create log directory if not exists
-        logs_dir = SCope.get_logs_dir()
-        if not os.path.isdir(logs_dir):
-            print('No log folder detected. Making log folder in current directory.')
-            os.makedirs(logs_dir)
+        for data_type in data_dirs.keys():
+            if not os.path.isdir(data_dirs[data_type]["path"]):
+                print(data_dirs[data_type]["message"])
+                os.makedirs(data_dirs[data_type]["path"])
 
     @staticmethod
     def get_partial_md5_hash(file_path, last_n_kb):
@@ -142,8 +149,72 @@ class SCope(s_pb2_grpc.MainServicer):
                 f.seek(- last_n_kb * 1024, 2)
             return hashlib.md5(f.read()).hexdigest()
 
-    def create_uuid_log():
-        SCope.uuid_log = open(os.path.join(SCope.get_logs_dir(), 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()))), 'w')
+    def changeLoomMode(self, loom_file_path, mode):
+        print(loom_file_path)
+        if not os.path.exists(loom_file_path):
+            raise ValueError('The file located at ' +
+                             loom_file_path + ' does not exist.')
+        print('{0} getting md5'.format(loom_file_path))
+        partial_md5_hash = SCope.get_partial_md5_hash(loom_file_path, 10000)
+        print('{0} md5 is {1}'.format(loom_file_path, partial_md5_hash))
+
+        if partial_md5_hash in self.active_loom_connections:
+            self.active_loom_connections[partial_md5_hash].close()
+        if mode == 'rw':
+            self.active_loom_connections[partial_md5_hash] = self.get_loom_connection(loom_file_path, rw=True)
+            print('{0} now rw'.format(loom_file_path))
+        else:
+            self.active_loom_connections[partial_md5_hash] = self.get_loom_connection(loom_file_path, rw=False)
+            print('{0} now ro'.format(loom_file_path))
+
+
+    @staticmethod
+    def activeSessionCheck():
+        curTime = time.time()
+        for UUID in list(activeSessions.keys()):
+            if curTime - activeSessions[UUID] > _SESSION_TIMEOUT or UUID not in curUUIDs:
+                del(activeSessions[UUID])
+
+    @staticmethod
+    def resetActiveSessionTimeout(UUID):
+        activeSessions[UUID] = time.time()
+
+    def readUUIDdb(self):
+        if os.path.isfile(os.path.join(self.config_dir, 'UUID_Timeouts.tsv')):
+            with open(os.path.join(self.config_dir, 'UUID_Timeouts.tsv'), 'r') as fh:
+                for line in fh.readlines():
+                    ls = line.rstrip('\n').split('\t')
+                    curUUIDs[ls[0]] = float(ls[1])
+        if os.path.isfile(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt')):
+            with open(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt'), 'r') as fh:
+                for line in fh.readlines():
+                    permUUIDs.add(line.rstrip('\n'))
+                    curUUIDs[line.rstrip('\n')] = time.time() + (_ONE_DAY_IN_SECONDS * 365)
+
+    def updateUUIDdb(self):
+        with open(os.path.join(self.config_dir, 'UUID_Timeouts.tsv'), 'w') as fh:
+            for UUID in curUUIDs.keys():
+                if UUID not in permUUIDs:
+                    fh.write('{0}\t{1}\n'.format(UUID, curUUIDs[UUID]))
+        if os.path.isfile(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt')):
+            with open(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt'), 'r') as fh:
+                for line in fh.readlines():
+                    permUUIDs.add(line.rstrip('\n'))
+                    curUUIDs[line.rstrip('\n')] = time.time() + (_ONE_DAY_IN_SECONDS * 365)
+
+    def create_uuid_log(self):
+        SCope.uuid_log = open(os.path.join(self.logs_dir, 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()))), 'w')
+
+    @staticmethod
+    def compress_str_array(str_arr):
+        print("Compressing... ")
+        str_array_size = sys.getsizeof(str_arr)
+        str_array_joint = bytes(''.join(str_arr), 'utf-8')
+        str_array_joint_compressed = zlib.compress(str_array_joint, 1)
+        str_array_joint_compressed_size = sys.getsizeof(str_array_joint_compressed)
+        savings_percent = 1-str_array_joint_compressed_size/str_array_size
+        print("Saving "+"{:.2%} of space".format(savings_percent));
+        return str_array_joint_compressed
 
     def set_global_data(self):
         self.globalLooms = [x for x in os.listdir(self.loom_dir) if not os.path.isdir(os.path.join(self.loom_dir, x))]
@@ -156,8 +227,12 @@ class SCope(s_pb2_grpc.MainServicer):
     def get_loom_filepath(self, loom_file_name):
         return os.path.join(self.loom_dir, loom_file_name)
 
-    def load_loom_file(self, partial_md5_hash, loom_file_path):
-        loom = lp.connect(loom_file_path)
+    def load_loom_file(self, partial_md5_hash, loom_file_path, rw=False):
+        # if rw:
+        #     loom = lp.connect(loom_file_path, mode='r+')
+        # else:
+        #     loom = lp.connect(loom_file_path, mode='r')
+        loom = lp.connect(loom_file_path, mode='r+')
         self.add_loom_connection(partial_md5_hash, loom)
         return loom
 
@@ -446,16 +521,31 @@ class SCope(s_pb2_grpc.MainServicer):
                 x = embedding['_X']
                 y = embedding['_Y']
             except AttributeError:
-                for ca in loom.ca:
-                    if 'tSNE'.casefold() in ca.casefold():
-                        if dims == 0:
-                            x = loom.ca[ca]
-                            dims += 1
-                            continue
-                        if dims == 1:
-                            y = loom.ca[ca]
-                            dims += 1
-                            continue
+                try:
+                    x = loom.ca['_tSNE1']
+                    y = loom.ca['_tSNE2']
+                    if len(set(x)) == 1 or len(set(y)) == 1:
+                        raise AttributeError
+                except AttributeError:
+                    try:
+                        x = loom.ca['_X']
+                        y = loom.ca['_Y']
+                        if len(set(x)) == 1 or len(set(y)) == 1:
+                            raise AttributeError
+                    except AttributeError:
+                        x = [n for n in range(len(loom.shape[1]))]
+                        y = [n for n in range(len(loom.shape[1]))]
+                # for ca in loom.ca.keys():
+                    # if 'tSNE'.casefold() in ca.casefold():
+                    #     print(ca)
+                    #     if dims == 0:
+                    #         x = loom.ca[ca]
+                    #         dims += 1
+                    #         continue
+                    #     if dims == 1:
+                    #         y = loom.ca[ca]
+                    #         dims += 1
+                    #         continue
         else:
             x = loom.ca.Embeddings_X[str(coordinatesID)]
             y = loom.ca.Embeddings_Y[str(coordinatesID)]
@@ -466,7 +556,7 @@ class SCope(s_pb2_grpc.MainServicer):
         else:
             cellIndices = list(range(self.get_nb_cells(loom_file_path)))
         return {"x": x,
-                "y": y,
+                "y": -y,
                 "cellIndices": cellIndices}
 
     @staticmethod
@@ -476,32 +566,39 @@ class SCope(s_pb2_grpc.MainServicer):
         return loom.attrs.MetaData
 
     def get_file_metadata(self, loom_file_path):
+        """Summarize in a dict what feature data the loom file contains.
+
+        Args:
+            loom_file_path (str): The file path to the loom file.
+
+        Returns:
+            dict: A dictionary defining whether the current implemented features in SCope are available for the loom file with the given loom_file_path.
+
+        """
         loom = self.get_loom_connection(loom_file_path)
-        meta = {}
-        if hasattr(loom.ca, "RegulonsAUC"):
-            meta['hasRegulonsAUC'] = True
-        else:
-            meta['hasRegulonsAUC'] = False
-        if hasattr(loom.ca, "Clusterings"):
-            meta['hasClusterings'] = True
-        else:
-            meta['hasClusterings'] = False
-        if hasattr(loom.ca, "Embeddings_X"):
-            meta['hasExtraEmbeddings'] = True
-        else:
-            meta['hasExtraEmbeddings'] = False
-        if hasattr(loom.ra, "GeneSets"):
-            meta['hasGeneSets'] = True
-        else:
-            meta['hasGeneSets'] = False
-        try:
-            try:
-                metaData = json.loads(SCope.get_meta_data(loom))
-            except ValueError:
-                metaData = self.decompress_meta(SCope.get_meta_data(loom))
-            meta['hasGlobalMeta'] = True
-        except (KeyError, AttributeError):
-            meta['hasGlobalMeta'] = False
+        attr_margins = [2,2,2,2,0]
+        attr_names = ["RegulonsAUC", "Clusterings", "Embeddings_X", "GeneSets", "MetaData"]
+        attr_keys = ["RegulonsAUC", "Clusterings", "ExtraEmbeddings", "GeneSets", "GlobalMeta"]
+
+        def loom_attr_exists(x):
+            tmp = {}
+            idx = attr_names.index(x)
+            margin = attr_margins[idx]
+            ha = False
+            if margin == 0:
+                ha = hasattr(loom.attrs, x)
+            elif margin == 1:
+                ha = hasattr(loom.ra, x)
+            elif margin == 2:
+                ha = hasattr(loom.ca, x)
+            else:
+                raise ValueError("Invalid margin value: "+ margin)
+            tmp["has"+attr_keys[idx]] = ha
+            return tmp
+
+        md = map(loom_attr_exists, attr_names)
+        meta = { k: v for d in md for k, v in d.items() }
+        print(meta)
         return meta
 
     def compressHexColor(self, a):
@@ -610,7 +707,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     features.append(np.zeros(n_cells))
             elif request.featureType[n].startswith('Clustering: '):
                 for clustering in metaData['clusterings']:
-                    if clustering['name'] == request.featureType[n].lstrip('Clustering: '):
+                    if clustering['name'] == re.sub('^Clustering: ', '', request.featureType[n]):
                         clusteringID = str(clustering['id'])
                         if request.feature[n] == 'All Clusters':
                             numClusters = max(loom.ca.Clusterings[clusteringID])
@@ -637,12 +734,22 @@ class SCope(s_pb2_grpc.MainServicer):
             else:
                 features.append([_LOWER_LIMIT_RGB for n in range(n_cells)])
         if len(features) > 0 and len(hex_vec) == 0:
-            hex_vec = ["null" if r == g == b == 0
+            hex_vec = ["XXXXXX" if r == g == b == 0 # previously null: ???
                        else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
                        for r, g, b in zip(features[0], features[1], features[2])]
 
+        # Compress
+        comp_start_time = time.time()
+        hex_vec_compressed = SCope.compress_str_array(str_arr=hex_vec)
+        print("Debug: %s seconds elapsed (compression) ---" % (time.time() - comp_start_time))
+
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax, maxVmax=maxVmax, cellIndices=cellIndices)
+        return s_pb2.CellColorByFeaturesReply(color=hex_vec,
+                                              compressedColor=None,
+                                              hasAddCompressionLayer=False,
+                                              vmax=vmax,
+                                              maxVmax=maxVmax,
+                                              cellIndices=cellIndices)
 
     def getCellAUCValuesByFeatures(self, request, context):
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
@@ -729,19 +836,70 @@ class SCope(s_pb2_grpc.MainServicer):
     def getMyGeneSets(self, request, context):
         userDir = self.get_data_dir_path_by_file_type('GeneSet', UUID=request.UUID)
         if not os.path.isdir(userDir):
-            for i in SCope.data_dirs.keys():
-                os.mkdir(os.path.join(SCope.data_dirs[i]['path'], request.UUID))
+            for i in ['Loom', 'GeneSet', 'LoomAUCellRankings']:
+                os.mkdir(os.path.join(data_dirs[i]['path'], request.UUID))
 
         geneSetsToProcess = sorted(self.globalSets) + sorted([os.path.join(request.UUID, x) for x in os.listdir(userDir)])
         gene_sets = [s_pb2.MyGeneSet(geneSetFilePath=f, geneSetDisplayName=os.path.splitext(os.path.basename(f))[0]) for f in geneSetsToProcess]
         return s_pb2.MyGeneSetsReply(myGeneSets=gene_sets)
 
+    def generateMetaData(self, loom_file_path):
+        # Designed to generate metadata from linnarson loom files
+        print('Making metadata for {0}'.format(loom_file_path))
+        metaJson = {}
+
+        # self.changeLoomMode(loom_file_path, rw=True)
+        loom = self.get_loom_connection(loom_file_path)
+
+        # Embeddings
+        # Find PCA / tSNE - Catch all 0's ERROR
+        metaJson['embeddings'] = [
+            {
+                "id": -1,
+                "name": "Default (_tSNE1/_tSNE2 or _X/_Y)"
+            }
+        ]
+
+        # Annotations - What goes here?
+        metaJson["annotations"] = []
+        for anno in ['Age', 'ClusterName', 'Sex', 'Species', 'Strain', 'Tissue']:
+            if anno in loom.ca.keys():
+                print("Anno: {0} in loom".format(anno))
+                if len(set(loom.ca[anno])) != loom.shape[1] and len(set(loom.ca[anno])) > 0:
+                    metaJson["annotations"].append({"name": anno, "values": sorted(list(set(loom.ca[anno])))})
+                    print(metaJson["annotations"])
+
+        # Clusterings - Anything with cluster in name?
+        metaJson["clusterings"] = []
+        if 'Clusters' in loom.ca.keys() and 'ClusterName' in loom.ca.keys():
+            clusters = set(zip(loom.ca['Clusters'], loom.ca['ClusterName']))
+            clusters = [{"id": int(x[0]), "description": x[1]} for x in clusters]
+
+            # loom.ca['Clusterings'] = SCope.dfToNamedMatrix(pd.DataFrame(columns=[0], index=[x for x in range(loom.shape[1])], data=[int(x) for x in loom.ca['Clusters']]))
+
+            clusterDF = pd.DataFrame(columns=["0"], index=[x for x in range(loom.shape[1])])
+            clusterDF["0"] = [int(x) for x in loom.ca['Clusters']]
+            loom.ca['Clusterings'] = SCope.dfToNamedMatrix(clusterDF)
+            print(loom.ca["Clusterings"])
+        metaJson["clusterings"].append({
+                    "id": 0,
+                    "group": "Interpreted",
+                    "name": "Clusters + ClusterName",
+                    "clusters": clusters
+                })
+        print(metaJson)
+
+        loom.attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
+        # self.changeLoomMode(loom_file_path, rw=False)
+
     def getMyLooms(self, request, context):
         my_looms = []
         userDir = self.get_data_dir_path_by_file_type('Loom', UUID=request.UUID)
         if not os.path.isdir(userDir):
-            for i in SCope.data_dirs.keys():
-                os.mkdir(os.path.join(SCope.data_dirs[i]['path'], request.UUID))
+            for i in ['Loom', 'GeneSet', 'LoomAUCellRankings']:
+                os.mkdir(os.path.join(data_dirs[i]['path'], request.UUID))
+
+        self.set_global_data()
 
         loomsToProcess = sorted(self.globalLooms) + sorted([os.path.join(request.UUID, x) for x in os.listdir(userDir)])
 
@@ -749,24 +907,45 @@ class SCope(s_pb2_grpc.MainServicer):
             if f.endswith('.loom'):
                 loom = self.get_loom_connection(self.get_loom_filepath(f))
                 fileMeta = self.get_file_metadata(self.get_loom_filepath(f))
-                if fileMeta['hasGlobalMeta']:
+                if not fileMeta['hasGlobalMeta']:
                     try:
-                        meta = json.loads(SCope.get_meta_data(loom))
-                    except ValueError:
-                        meta = self.decompress_meta(SCope.get_meta_data(loom))
+                        self.generateMetaData(self.get_loom_filepath(f))
+                    except Exception as e:
+                        print(e)
+
+                    annotations = embeddings = clusterings = []
+                try:
+                    meta = json.loads(SCope.get_meta_data(loom))
+                except ValueError:
+                    meta = self.decompress_meta(SCope.get_meta_data(loom))
+                try:
                     annotations = meta['annotations']
                     embeddings = meta['embeddings']
+                    for e in embeddings:  # Fix for malformed embeddings json (R problem)
+                        e['id'] = int(e['id'])
                     clusterings = meta['clusterings']
-                else:
-                    annotations = []
-                    embeddings = []
-                    clusterings = []
+                except KeyError:
+                    annotations = embeddings = clusterings = []
+                try:
+                    L1 = loom.attrs.SCopeTreeL1
+                    L2 = loom.attrs.SCopeTreeL2
+                    L3 = loom.attrs.SCopeTreeL3
+                except AttributeError:
+                    L1 = 'Uncategorized'
+                    L2 = L3 = ''
                 my_looms.append(s_pb2.MyLoom(loomFilePath=f,
                                              loomDisplayName=os.path.splitext(os.path.basename(f))[0],
                                              cellMetaData=s_pb2.CellMetaData(annotations=annotations,
                                                                              embeddings=embeddings,
                                                                              clusterings=clusterings),
-                                             fileMetaData=fileMeta))
+                                             fileMetaData=fileMeta,
+                                             loomHeierarchy=s_pb2.LoomHeierarchy(L1=L1,
+                                                                                 L2=L2,
+                                                                                 L3=L3)
+                                             )
+                                )
+        self.updateUUIDdb()
+
         return s_pb2.MyLoomsReply(myLooms=my_looms)
 
     def getUUID(self, request, context):
@@ -777,16 +956,15 @@ class SCope(s_pb2_grpc.MainServicer):
             curUUIDs[newUUID] = time.time()
         return s_pb2.UUIDReply(UUID=newUUID)
 
-    def getRemainingUUIDTime(self, request, context):
-        print(curUUIDs)
-        print(request.UUID)
+    def getRemainingUUIDTime(self, request, context):  # TODO: his function will be called a lot more often, we should reduce what it does.
         curUUIDSet = set(list(curUUIDs.keys()))
         for uid in curUUIDSet:
             timeRemaining = int(_UUID_TIMEOUT - (time.time() - curUUIDs[uid]))
             if timeRemaining < 0:
                 print('Removing UUID: {0}'.format(uid))
                 del(curUUIDs[uid])
-                # os.rmdir()  # TODO: Remove the users loom files
+                for i in ['Loom', 'GeneSet', 'LoomAUCellRankings']:
+                    shutil.rmtree(os.path.join(data_dirs[i]['path'], uid))
         uid = request.UUID
         if uid in curUUIDs:
             startTime = curUUIDs[uid]
@@ -802,7 +980,19 @@ class SCope(s_pb2_grpc.MainServicer):
             SCope.uuid_log.flush()
             curUUIDs[uid] = time.time()
             timeRemaining = int(_UUID_TIMEOUT)
-        return s_pb2.RemainingUUIDTimeReply(UUID=uid, timeRemaining=timeRemaining)
+
+        SCope.activeSessionCheck()
+        if request.mouseEvents >= _MOUSE_EVENTS_THRESHOLD:
+            SCope.resetActiveSessionTimeout(uid)
+
+        sessionsLimitReached = False
+
+        if len(activeSessions.keys()) >= _ACTIVE_SESSIONS_LIMIT and uid not in permUUIDs and uid not in activeSessions.keys():
+            sessionsLimitReached = True
+
+        if uid not in activeSessions.keys() and not sessionsLimitReached:
+            self.resetActiveSessionTimeout(uid)
+        return s_pb2.RemainingUUIDTimeReply(UUID=uid, timeRemaining=timeRemaining, sessionsLimitReached=sessionsLimitReached)
 
     def translateLassoSelection(self, request, context):
         src_loom = self.get_loom_connection(self.get_loom_filepath(request.srcLoomFilePath))
@@ -818,12 +1008,23 @@ class SCope(s_pb2_grpc.MainServicer):
         cell_ids = [loom.ca['CellID'][i] for i in request.cellIndices]
         return s_pb2.CellIDsReply(cellIds=cell_ids)
 
+    def deleteUserFile(self, request, context):
+        basename = os.path.basename(request.filePath)
+        finalPath = os.path.join(data_dirs[request.fileType]['path'], request.UUID, basename)
+        if os.path.isfile(finalPath) and (basename.endswith('.loom') or basename.endswith('.txt')):
+            os.remove(finalPath)
+            success = True
+        else:
+            success = False
+
+        return s_pb2.DeleteUserFileReply(deletedSuccessfully=success)
+
     # Gene set enrichment
     #
     # Threaded makes it slower because of GIL
     #
     def doGeneSetEnrichment(self, request, context):
-        gene_set_file_path = os.path.join("data", "my-gene-sets", request.geneSetFilePath)
+        gene_set_file_path = os.path.join(self.gene_sets_dir, request.geneSetFilePath)
         gse = GeneSetEnrichment(scope=self,
                                 method="AUCell",
                                 loom_file_name=request.loomFilePath,
@@ -869,7 +1070,7 @@ class SCope(s_pb2_grpc.MainServicer):
         # Calculating AUCell enrichment...
         start_time = time.time()
         yield gse.update_state(step=3, status_code=200, status_message="Calculating AUCell enrichment...", values=None)
-        aucs = enrichment(rnk_mtx, gs, rank_threshold=5000).loc[:, "AUC"].values
+        aucs = enrichment(rnk_mtx, gs).loc[:, "AUC"].values
 
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
         yield gse.update_state(step=4, status_code=200, status_message=gse.get_method() + " enrichment done!", values=aucs)
@@ -890,7 +1091,7 @@ class GeneSetEnrichment:
         self.loom_file_path = self.scope.get_loom_filepath(loom_file_name)
         self.gene_set_file_path = gene_set_file_path
         self.annotation = annotation
-        self.AUCell_rankings_dir = os.path.join("data", "my-aucell-rankings")
+        self.AUCell_rankings_dir = SCope.get_data_dir_path_by_file_type('LoomAUCellRankings')
 
     class State:
         def __init__(self, step, status_code, status_message, values):
@@ -931,15 +1132,15 @@ class GeneSetEnrichment:
                        else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
                        for r, g, b in zip(vals, np.zeros(len(aucs)), np.zeros(len(aucs)))]
             if len(self.annotation) > 0:
-                cell_indices = self.get_anno_cells(loom_file_path=self.loom_file_path, annotations=annotation, logic=logic)
+                cell_indices = self.get_anno_cells(loom_file_path=self.loom_file_path, annotations=annotation, logic=logic)  # This is broken and/or not neccessary
             else:
                 cell_indices = list(range(self.scope.get_nb_cells(self.loom_file_path)))
             return s_pb2.GeneSetEnrichmentReply(progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message()),
                                                 isDone=True,
-                                                cellValues=s_pb2.CellColorByFeaturesReply(color=hex_vec
-                                                                                        , vmax=vmax
-                                                                                        , maxVmax=max_vmax
-                                                                                        , cellIndices=cell_indices))
+                                                cellValues=s_pb2.CellColorByFeaturesReply(color=hex_vec,
+                                                                                          vmax=vmax,
+                                                                                          maxVmax=max_vmax,
+                                                                                          cellIndices=cell_indices))
 
     def get_method(self):
             return self.method
@@ -981,6 +1182,7 @@ def serve(run_event, dev_env, port=50052):
 
     # Write UUIDs to file here
     SCope.uuid_log.close()
+    SCope.updateUUIDdb(SCope())
     server.stop(0)
 
 

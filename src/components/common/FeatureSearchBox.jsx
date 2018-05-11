@@ -24,7 +24,7 @@ export default class FeatureSearch extends React.Component {
 		const { locked, color, options } = this.props;
 
 		return (
-			<Segment color={color} inverted className="noPadding">
+			<Segment color={color} inverted={color ? true : false} className={ color ? "noPadding" : "noFrame" }>
 				<FeatureSearchInput
 					category
 					loading={isLoading}
@@ -55,68 +55,7 @@ export default class FeatureSearch extends React.Component {
 
 	updateFeature(feature, featureType, featureDescription) {
 		this.setState({ value: feature, selection: null })
-		if (featureType == 'regulon') {
-			let regulonQuery = {
-				loomFilePath: BackendAPI.getActiveLoom(),
-				regulon: feature
-			}
-			BackendAPI.getConnection().then((gbc) => {
-				if (DEBUG) console.log('getRegulonMetaData', regulonQuery);
-				gbc.services.scope.Main.getRegulonMetaData(regulonQuery, (regulonErr, regulonResponse) => {
-					if (DEBUG) console.log('getRegulonMetaData', regulonResponse);
-					let metadata = regulonResponse ? regulonResponse.regulonMeta : {};
-					let threshold = 0;
-					if (metadata.autoThresholds) {
-						metadata.autoThresholds.map((t) => {
-							if (t.name == metadata.defaultThreshold) threshold = t.threshold;
-						})
-					}
-					metadata.description = featureDescription;
-					BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, threshold, metadata);
-				});
-			}, () => {
-				BackendAPI.showError();	
-			});
-		} else if (featureType.indexOf('Clustering:') == 0) {
-			let loomMetadata = BackendAPI.getActiveLoomMetadata();
-			let clusteringID, clusterID;
-			loomMetadata.cellMetaData.clusterings.map(clustering => {
-				if (featureType.indexOf(clustering.name) != -1) {
-					clusteringID = clustering.id
-					clustering.clusters.map(c => {
-						if (c.description == feature) {
-							clusterID = c.id;
-						}
-					})
-				}
-			})
-			if (clusterID != null) {
-				let markerQuery = {
-					loomFilePath: BackendAPI.getActiveLoom(),
-					clusterID: clusterID,
-					clusteringID: clusteringID, 
-				}
-				BackendAPI.getConnection().then((gbc) => {
-					if (DEBUG) console.log('getMarkerGenes', markerQuery);
-					gbc.services.scope.Main.getMarkerGenes(markerQuery, (markerErr, markerResponse) => {
-						if (DEBUG) console.log('getMarkerGenes', markerResponse);
-						if (!markerResponse) markerResponse = {};
-						markerResponse.description = featureDescription
-						BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, markerResponse);
-					});
-				}, () => {
-					BackendAPI.showError();	
-				});
-			} else {
-				setTimeout(() => {
-					BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, {description: featureDescription});
-				}, 50);
-			}
-		} else {
-			setTimeout(() => {
-				BackendAPI.setActiveFeature(this.props.field, this.state.type, featureType, feature, 0, {description: featureDescription});
-			}, 50);
-		}
+		BackendAPI.updateFeature(this.props.field, this.state.type, feature, featureType, featureDescription);
 		ReactGA.event({
 			category: 'action',
 			action: 'feature selected',
@@ -135,7 +74,11 @@ export default class FeatureSearch extends React.Component {
 		e.stopPropagation();
 		e.preventDefault();
 		if (DEBUG) console.log('handleResultSelect', e, result);
-		this.updateFeature(result.title, result.type, result.description);
+		if (this.props.onResultSelect) {
+			this.props.onResultSelect(result);
+		} else {
+			this.updateFeature(result.title, result.type, result.description);
+		}
 	}
 
 	handleTypeChange(type) {

@@ -31,7 +31,7 @@ opt/scopeserver/dataserver/__pycache__
 opt/scopeserver/scope_server.egg-info
 opt/scopeserver/data/my-looms
 opt/scopeserver/dataserver/test
-opt/scopeserver/dataserver/data/my-looms
+opt/scopeserver/dataserver/data
 opt/scopeserver/dataserver/dist/
 opt/scopeserver/dataserver/pyvenv
 opt/scopeserver/dataserver/build

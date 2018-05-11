@@ -1,16 +1,17 @@
 const EventEmitter = require( 'events' );
-const electron = require('electron')
-const path = require('path')
-const fs = require('fs-extra')
-const process = require("process")
+const electron = require('electron');
+const path = require('path');
+const fs = require('fs-extra');
+const process = require("process");
 const cp = require('child_process');
+const getPorts = require('get-ports');
 
 /* Create SCope data directories */
-const home = process.env['HOME']
-const dataDirs = ['my-looms','my-gene-sets','my-aucell-rankings']
+const home = process.env['HOME'];
+const dataDirs = ['my-looms','my-gene-sets','my-aucell-rankings'];
 
-dataDirs.forEach(function(value){
-  fs.mkdirp(path.join(home, '.scope', 'data', value))
+dataDirs.forEach(function(value) {
+  fs.mkdirp(path.join(home, '.scope', 'data', value));
 });
 
 /*************************************************************
@@ -23,9 +24,25 @@ class SCopeServer extends EventEmitter {
     super()
     this.dataServer = null;
     this.bindServer = null;
-    this.start = this.start.bind(this)
-    this.stop = this.stop.bind(this)
+    this.xPort = 9081;
+    this.gPort = 50951;
+    this.pPort = 50952;
+    this.start = this.start.bind(this);
+    this.stop = this.stop.bind(this);
     this.handleMessage = this.handleMessage.bind(this);
+    this.setPorts()
+  }
+
+  setPorts() {
+    getPorts([ this.xPort, this.gPort, this.pPort ], (err, ports) => {
+      if (err) {
+        throw new Error('could not open servers');
+      }
+      this.xPort = ports[0];
+      this.gPort = ports[1];
+      this.pPort = ports[2];
+      console.log(this.xPort, this.gPort, this.pPort);
+    })
   }
 
   start() {
@@ -49,7 +66,7 @@ class SCopeServer extends EventEmitter {
       if(this.bindServer == null & this.dataServer.isStarted()) {
         console.log("Bind Server can start now...")
         console.log("Starting the Bind Server...")
-        this.bindServer = new BindServer();
+        this.bindServer = new BindServer(this);
         this.bindServer.start()
         this.emit('started', true)
       }
@@ -63,25 +80,28 @@ class SCopeServer extends EventEmitter {
  *************************************************************/
 
 // const DATASERVER_DIST_FOLDER = 'opt/scopeserver/dataserver/dist'
-const DATASERVER_DIST_FOLDER = path.join(/*app.getAppPath(), */"opt", "scopeserver", "dataserver", "dist")
-const DATASERVER_FOLDER = '__init__'
-const DATASERVER_MODULE = '__init__' // without .py suffix
+const DATASERVER_DIST_FOLDER = path.join(/*app.getAppPath(), */"opt", "scopeserver", "dataserver", "dist");
+const DATASERVER_FOLDER = '__init__';
+const DATASERVER_MODULE = '__init__'; // without .py suffix
 
 class DataServer {
 
   constructor(scopeServer) {
-    this.scopeServer = scopeServer
-    this.proc = null
+    this.scopeServer = scopeServer;
+    this.gPort = this.scopeServer.gPort;
+    this.pPort = this.scopeServer.pPort;
+    this.xPort = this.scopeServer.xPort;
+    this.proc = null;
     this.isGServerStarted = false;
     this.isPServerStarted = false;
-    this.isPackaged = this.isPackaged.bind(this)
-    this.getExecPath = this.getExecPath.bind(this)
-    this.setGServerStarted = this.setGServerStarted.bind(this)
-    this.setPServerStarted = this.setPServerStarted.bind(this)
-    this.setStarted = this.setStarted.bind(this)
-    this.isStarted = this.isStarted.bind(this)
-    this.start = this.start.bind(this)
-    this.stop = this.stop.bind(this)
+    this.isPackaged = this.isPackaged.bind(this);
+    this.getExecPath = this.getExecPath.bind(this);
+    this.setGServerStarted = this.setGServerStarted.bind(this);
+    this.setPServerStarted = this.setPServerStarted.bind(this);
+    this.setStarted = this.setStarted.bind(this);
+    this.isStarted = this.isStarted.bind(this);
+    this.start = this.start.bind(this);
+    this.stop = this.stop.bind(this);
   }
 
   isPackaged() {
@@ -130,7 +150,7 @@ class DataServer {
     let script = this.getExecPath()
     if(this.isPackaged()) {
       console.log("SCope Server Packaged.")
-      this.proc = cp.spawn(script, [], {});
+      this.proc = cp.spawn(script, ["-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort], {});
       this.proc.stdout.on('data', (data) => {
         let buff = new Buffer(data).toString('utf8');
         let buff_json ;
@@ -146,7 +166,7 @@ class DataServer {
         }
       });
     } else {
-      this.proc = cp.spawn('python', [script])
+      this.proc = cp.spawn('python', [script, "-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort])
     }
     if (this.proc == null) {
       throw "Null pointer exception for Data Server."
@@ -154,7 +174,7 @@ class DataServer {
   }
 
   stop() {
-    this.proc.kill()
+    this.proc.kill('SIGINT')
     this.proc = null
   }
 
@@ -170,9 +190,10 @@ const BINDSERVER_MODULE = 'server.js'
 
 class BindServer {
 
-  constructor() {
+  constructor(scopeServer) {
+    this.scopeServer = scopeServer
+    this.port = this.scopeServer.xPort
     this.proc = null
-    this.port = 8081
     this.started = false
     this.setStarted = this.setStarted.bind(this)
     this.isStarted = this.isStarted.bind(this)
@@ -225,9 +246,9 @@ class SCope {
   }
 
   start() {
-    let model = new SCopeServer();
-    model.start()
-    model.on('started', (isStarted) => {
+    this.model = new SCopeServer();
+    this.model.start()
+    this.model.on('started', (isStarted) => {
       if(isStarted) {
         this.createView()
       }
@@ -248,7 +269,7 @@ class SCope {
       pathname: path.join(__dirname, 'index.html'),
       protocol: 'file:',
       slashes: true
-    }))
+    }) + "?WSport=" + this.model.xPort + "&XHRport=" + this.model.pPort + "&RPCport=" + this.model.gPort)
     this.view.webContents.openDevTools()
 
     this.view.on('closed', () => {
@@ -257,7 +278,6 @@ class SCope {
   }
 
 }
-
 
 /*************************************************************
  * Electron App

@@ -3,7 +3,6 @@ import grpc
 
 from scopeserver.dataserver.modules.gserver import s_pb2 as s__pb2
 
-
 class MainStub(object):
   # missing associated documentation comment in .proto file
   pass
@@ -93,6 +92,11 @@ class MainStub(object):
         '/scope.Main/getMyGeneSets',
         request_serializer=s__pb2.MyGeneSetsRequest.SerializeToString,
         response_deserializer=s__pb2.MyGeneSetsReply.FromString,
+        )
+    self.deleteUserFile = channel.unary_unary(
+        '/scope.Main/deleteUserFile',
+        request_serializer=s__pb2.DeleteUserFileRequest.SerializeToString,
+        response_deserializer=s__pb2.DeleteUserFileReply.FromString,
         )
 
 
@@ -212,6 +216,13 @@ class MainServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def deleteUserFile(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_MainServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -294,6 +305,11 @@ def add_MainServicer_to_server(servicer, server):
           servicer.getMyGeneSets,
           request_deserializer=s__pb2.MyGeneSetsRequest.FromString,
           response_serializer=s__pb2.MyGeneSetsReply.SerializeToString,
+      ),
+      'deleteUserFile': grpc.unary_unary_rpc_method_handler(
+          servicer.deleteUserFile,
+          request_deserializer=s__pb2.DeleteUserFileRequest.FromString,
+          response_serializer=s__pb2.DeleteUserFileReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

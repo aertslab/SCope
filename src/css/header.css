@@ -50,3 +50,10 @@ VIB colours:
 .message.empty .header {
 	font-size: 0.75rem !important;
 }
+
+.permalink {
+	user-select: all !important;
+}
+.ui.label {
+	padding: 4px !important;
+}
