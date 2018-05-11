@@ -1,0 +1,80 @@
+diff --git a/opt/scopeserver/dataserver/__init__.py b/opt/scopeserver/dataserver/__init__.py
+index 96de881..9f46869 100644
+--- a/opt/scopeserver/dataserver/__init__.py
++++ b/opt/scopeserver/dataserver/__init__.py
+@@ -10,9 +10,9 @@ import http
+ import argparse
+ 
+ parser = argparse.ArgumentParser(description='Launch the scope server')
+-parser.add_argument('-g_port', metavar='gPort', type=int, help='gPort', default=50052)
+-parser.add_argument('-p_port', metavar='pPort', type=int, help='pPort', default=50051)
+-parser.add_argument('-x_port', metavar='xPort', type=int, help='xPort', default=8081)
++parser.add_argument('-g_port', metavar='gPort', type=int, help='gPort', default=55853)
++parser.add_argument('-p_port', metavar='pPort', type=int, help='pPort', default=55851)
++parser.add_argument('-x_port', metavar='xPort', type=int, help='xPort', default=55852)
+ 
+ args = parser.parse_args()
+ 
+diff --git a/src/components/common/API.jsx b/src/components/common/API.jsx
+index 64381ce..ea6a0fd 100644
+--- a/src/components/common/API.jsx
++++ b/src/components/common/API.jsx
+@@ -18,8 +18,7 @@ class API {
+ 		console.log(this.WSport, this.RPCport)
+ 
+ 		try {
+-			this.GBCConnection = new this.GBC("ws://" + BACKEND.host + ":" + this.WSport + "/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + this.RPCport } }).connect();
+-			console.log(this.GBCConnection)
++			this.GBCConnection = new this.GBC("ws://" + FRONTEND.host + "/protobuf/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + this.RPCport } }).connect();			console.log(this.GBCConnection)
+ 			this.connected = true;
+ 		} catch (ex) {
+ 			this.GBCConnection = null;
+diff --git a/src/components/common/Uploader.jsx b/src/components/common/Uploader.jsx
+index 933986b..82aadbb 100644
+--- a/src/components/common/Uploader.jsx
++++ b/src/components/common/Uploader.jsx
+@@ -19,7 +19,7 @@ export default class Uploader {
+         }
+ 
+         let xhr = new XMLHttpRequest();
+-        xhr.open("POST", BACKEND.proto + "://" + BACKEND.host + ":" + this.XHRport + "/");
++        xhr.open("POST", "http://" + FRONTEND.host + "/upload/")
+         xhr.upload.addEventListener('progress', (event) => {
+             if (DEBUG) console.log("Data uploaded: " + event.loaded + "/" + event.total);
+             let progress = (event.loaded / event.total * 100).toPrecision(1);
+diff --git a/webpack.config.js b/webpack.config.js
+index b34b14f..3da3989 100644
+--- a/webpack.config.js
++++ b/webpack.config.js
+@@ -8,7 +8,8 @@ let config = {
+     entry: './src/main.jsx',
+     devServer: {
+       host: '0.0.0.0',
+-      port: 8080
++      port: 55850,
++      disableHostCheck: true
+     },
+     output: {
+         path: path.resolve('assets'),
+@@ -52,9 +53,18 @@ let config = {
+             BACKEND: JSON.stringify({
+                 proto: "http",
+                 host: "127.0.0.1",
+-                WSport: "8081",
+-                XHRport: "50051",
+-                RPCport: "50052"
++                WSport: "55852",
++                XHRport: "55851",
++                RPCport: "55853"
++            })
++        }),
++        new webpack.DefinePlugin({
++            FRONTEND: JSON.stringify({
++                proto: "http",
++                host: "scope.aertslab.org",
++                WSport: "55852",
++                XHRport: "55851",
++                RPCport: "55853"
+             })
+         }),
+         new WebpackGitHash({
