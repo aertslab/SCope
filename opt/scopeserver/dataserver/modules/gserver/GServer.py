@@ -83,7 +83,6 @@ data_dirs = {"Loom": {"path": os.path.join(platformDirs.user_data_dir, "my-looms
              "Logs": {"path": os.path.join(platformDirs.user_log_dir),
                       "message": "No Logs folder detected. Making Logs folder: {0}.".format(str(os.path.join(platformDirs.user_log_dir)))}}
 
-print(data_dirs)
 curUUIDs = {}
 permUUIDs = set()
 uploadedLooms = defaultdict(lambda: set())

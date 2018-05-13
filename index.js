@@ -6,18 +6,18 @@ const process = require("process");
 const cp = require('child_process');
 const getPorts = require('get-ports');
 const fixPath = require('fix-path');
+const glob = require('glob');
+const appdirs = require('appdirs')
 
-fixPath();
+if (process.platform == 'darwin') {
+  fixPath();
+}
 
 const app = electron.app
+const Menu = electron.Menu
+const dataDir = appdirs.userDataDir(appname='SCope', appauthor='Aertslab')
 
-/* Create SCope data directories */
 const home = process.env['HOME'];
-const dataDirs = ['my-looms','my-gene-sets','my-aucell-rankings'];
-
-dataDirs.forEach(function(value) {
-  fs.mkdirp(path.join(home, '.scope', 'data', value));
-});
 
 /*************************************************************
  * SCope Server
@@ -84,8 +84,6 @@ class SCopeServer extends EventEmitter {
  * Data Server
  *************************************************************/
 
-console.log(process.argv[2])
-// const DATASERVER_DIST_FOLDER = 'opt/scopeserver/dataserver/dist'
 try {
   if (process.argv[2] == 'electronTest') {
     var DATASERVER_DIST_FOLDER = path.join("opt", "scopeserver", "dataserver", "dist");
@@ -168,7 +166,6 @@ class DataServer {
       this.proc.stdout.on('data', (data) => {
         let buff = new Buffer(data).toString('utf8');
         let buff_json ;
-        // console.log(buff)
         try {
           let buff_json = JSON.parse(buff);
           if(buff_json.hasOwnProperty('msg')) {
@@ -300,7 +297,99 @@ class SCope {
  *************************************************************/
 
 const scope = new SCope();
-app.on('ready', scope.start)
+
+function setMainMenu() {
+  const template = [
+      {
+        label: 'File',
+        submenu: [
+          {
+            label: 'Open Loom Folder',
+            click () {glob(path.join(dataDir, 'my-looms', 'SCopeApp_*'), (er, files) => {
+              electron.shell.openItem(files[0])
+            })}
+          }
+        ]
+      },
+      {
+        label: 'Edit',
+        submenu: [
+          {role: 'undo'},
+          {role: 'redo'},
+          {type: 'separator'},
+          {role: 'cut'},
+          {role: 'copy'},
+          {role: 'paste'},
+          {role: 'pasteandmatchstyle'},
+          {role: 'delete'},
+          {role: 'selectall'}
+        ]
+      },
+      {
+        label: 'View',
+        submenu: [
+          {role: 'reload'},
+          {role: 'forcereload'},
+          {role: 'toggledevtools'},
+          {type: 'separator'},
+          {role: 'resetzoom'},
+          {role: 'zoomin'},
+          {role: 'zoomout'},
+          {type: 'separator'},
+          {role: 'togglefullscreen'}
+        ]
+      },
+      {
+        role: 'window',
+        submenu: [
+          {role: 'minimize'},
+          {role: 'close'}
+        ]
+      },
+      {
+        role: 'help',
+        submenu: [
+          {
+            label: 'Learn More',
+            click () { require('electron').shell.openExternal('https://electronjs.org') }
+          }
+        ]
+      }
+    ]
+
+    if (process.platform === 'darwin') {
+      template.unshift({
+        label: app.getName(),
+        submenu: [
+          {role: 'about'},
+          {type: 'separator'},
+          {role: 'services', submenu: []},
+          {type: 'separator'},
+          {role: 'hide'},
+          {role: 'hideothers'},
+          {role: 'unhide'},
+          {type: 'separator'},
+          {role: 'quit'}
+        ]
+      })
+
+      // Window menu
+      template[4].submenu = [
+        {role: 'close'},
+        {role: 'minimize'},
+        {role: 'zoom'},
+        {type: 'separator'},
+        {role: 'front'}
+      ]
+    }
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
+
+
+app.on('ready', () => {
+ scope.start()
+ setMainMenu()
+ })
 app.on('will-quit', scope.stop)
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
