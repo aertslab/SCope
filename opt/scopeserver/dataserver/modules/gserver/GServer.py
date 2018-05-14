@@ -117,7 +117,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     @staticmethod
     def load_gene_mappings():
-        gene_mappings_dir_path = os.path.join(Path(__file__).parents[3], 'dataserver', 'data', 'gene_mappings') if SCope.DEV_ENV else os.path.join(Path(__file__).parents[6], 'data', 'gene_mappings')
+        gene_mappings_dir_path = os.path.join(Path(__file__).parents[3], 'dataserver', 'data', 'gene_mappings') if SCope.devEnv else os.path.join(Path(__file__).parents[6], 'data', 'gene_mappings')
         SCope.dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'terminal_mappings.pickle'), 'rb'))
         SCope.hsap_to_dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'hsap_to_dmel_mappings.pickle'), 'rb'))
         SCope.mmus_to_dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'mmus_to_dmel_mappings.pickle'), 'rb'))
@@ -1175,8 +1175,8 @@ class GeneSetEnrichment:
         return s_pb2.LoomUploadedReply()
 
 
-def serve(run_event, dev_env, port=50052, appMode=False):
-    SCope.DEV_ENV = dev_env
+def serve(run_event, devEnv=False, port=50052, appMode=False):
+    SCope.devEnv = devEnv
     SCope.appMode = appMode
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     s_pb2_grpc.add_MainServicer_to_server(SCope(), server)
@@ -1184,7 +1184,8 @@ def serve(run_event, dev_env, port=50052, appMode=False):
     # print('Starting GServer on port {0}...'.format(port))
     server.start()
     # Let the main process know that GServer has started.
-    su.send_msg("GServer","SIGSTART")
+
+    su.send_msg("GServer", "SIGSTART")
 
     while run_event.is_set():
         time.sleep(0.1)

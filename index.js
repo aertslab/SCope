@@ -86,14 +86,14 @@ class SCopeServer extends EventEmitter {
 
 try {
   if (process.argv[2] == 'electronTest') {
-    var DATASERVER_DIST_FOLDER = path.join("opt", "scopeserver", "dataserver", "dist");
+    var DATASERVER_FOLDER = path.join("opt", "scopeserver", "dataserver");
   } else {
     throw 'Not testing'
   }
 } catch (e) {
-  var DATASERVER_DIST_FOLDER = path.join(app.getAppPath(), "opt", "scopeserver", "dataserver", "dist");
+  var DATASERVER_FOLDER = path.join(app.getAppPath(), "opt", "scopeserver", "dataserver", "dist", "__init__");
 }
-const DATASERVER_FOLDER = '__init__';
+// const DATASERVER_FOLDER = '__init__';
 const DATASERVER_MODULE = '__init__'; // without .py suffix
 
 class DataServer {
@@ -117,18 +117,18 @@ class DataServer {
   }
 
   isPackaged() {
-    const fullPath = path.join(DATASERVER_DIST_FOLDER)
+    const fullPath = path.join(DATASERVER_FOLDER)
     return require('fs').existsSync(fullPath)
   }
 
   getExecPath() {
-    if (!this.isPackaged()) {
+    if (!this.isPackaged() | (process.argv[2] == 'electronTest')) {
       return path.join(DATASERVER_FOLDER, DATASERVER_MODULE + '.py')
     }
     if (process.platform === 'win32') {
-      return path.join(DATASERVER_DIST_FOLDER, DATASERVER_MODULE, DATASERVER_MODULE + '.exe')
+      return path.join(DATASERVER_FOLDER, DATASERVER_MODULE, DATASERVER_MODULE + '.exe')
     }
-    return path.join(DATASERVER_DIST_FOLDER, DATASERVER_MODULE, DATASERVER_MODULE)
+    return path.join(DATASERVER_FOLDER, DATASERVER_MODULE, DATASERVER_MODULE)
   }
 
   setGServerStarted() {
@@ -160,25 +160,28 @@ class DataServer {
 
   start() {
     let script = this.getExecPath()
-    if(this.isPackaged()) {
+    console.log(script)
+    if (this.isPackaged() & process.argv[2] != 'electronTest') {
       console.log("SCope Server Packaged.")
       this.proc = cp.spawn(script, ["-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort, '--appMode'], {});
-      this.proc.stdout.on('data', (data) => {
-        let buff = new Buffer(data).toString('utf8');
-        let buff_json ;
-        try {
-          let buff_json = JSON.parse(buff);
-          if(buff_json.hasOwnProperty('msg')) {
-            this.scopeServer.handleMessage(buff_json['msg'])
-          }
-        } catch (e) {
-          // do nothing
-          // console.log(e)
-        }
-      });
     } else {
-      this.proc = cp.spawn('python', [script, "-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort, '--appMode'])
+      console.log("SCope Server Not packaged or electronTest.")
+      this.proc = cp.spawn('python3', [script, "-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort, '--appMode', '--devEnv'], {});
     }
+    this.proc.stdout.on('data', (data) => {
+      let buff = new Buffer(data).toString('utf8');
+      let buff_json ;
+      console.log(buff)
+      try {
+        let buff_json = JSON.parse(buff);
+        if(buff_json.hasOwnProperty('msg')) {
+          this.scopeServer.handleMessage(buff_json['msg'])
+        }
+      } catch (e) {
+        // do nothing
+        // console.log(e)
+      }
+    });
     if (this.proc == null) {
       throw "Null pointer exception for Data Server."
     }
