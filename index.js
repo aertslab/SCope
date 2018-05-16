@@ -126,9 +126,9 @@ class DataServer {
       return path.join(DATASERVER_FOLDER, DATASERVER_MODULE + '.py')
     }
     if (process.platform === 'win32') {
-      return path.join(DATASERVER_FOLDER, DATASERVER_MODULE, DATASERVER_MODULE + '.exe')
+      return path.join(DATASERVER_FOLDER, DATASERVER_MODULE + '.exe')
     }
-    return path.join(DATASERVER_FOLDER, DATASERVER_MODULE, DATASERVER_MODULE)
+    return path.join(DATASERVER_FOLDER, DATASERVER_MODULE)
   }
 
   setGServerStarted() {
