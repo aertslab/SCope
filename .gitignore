@@ -38,6 +38,10 @@ opt/scopeserver/dataserver/build
 opt/scopeserver/dataserver/logs
 opt/scope_server.egg-info
 
+opt/scopeserver/bindserver/pbjs*
+opt/scopeserver/bindserver/window-size*
+
+
 assets/*.js
 
 
