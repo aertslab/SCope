@@ -273,17 +273,14 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                 # newline translations, making the actual size of the content
                 # transmitted *less* than the content-length!
                 if form.getvalue('file-type') == 'Loom':
-                    print('Got a loom file')
                     try:
                         with lp.connect(localpath, 'r') as f:
                             print(f.shape)
                             if not (f.shape[0] > 0 and f.shape[1] > 0):
                                 raise KeyError
                             else:
-                                print('Got a valid loom file')
-
+                                f = open(localpath, 'rb')
                     except (KeyError, OSError):
-                        print('Not a valid loom file')
                         os.remove(localpath)
                         self.send_error(416, "Upload corrupt")
                         return None
@@ -296,6 +293,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
             # Send correct HTTP headers and Allow CROS Origin
             fs = os.fstat(f.fileno())
             headers = {'Location': '/',
+                       'File-Path': localpath,
                        'Access-Control-Allow-Origin': '*',
                        'Content-type': ctype,
                        'Content-Length': os.fstat(f.fileno())[6],
