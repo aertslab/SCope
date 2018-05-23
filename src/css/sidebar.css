@@ -79,14 +79,17 @@
 
 .ui.accordion {
 	flex-grow: 0 !important;
-} 
+}
 
 .ui.pointing.secondary.menu {
 	margin: 0px;
 }
 
 .ui.modal.transition.visible.active {
-	margin-top: 0px !important;
+	margin-top: 5% !important;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: auto
 }
 .rc-slider {
 	margin: 0px !important;
