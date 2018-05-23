@@ -14,12 +14,14 @@ import time
 from http import server as httpserver
 import socketserver
 from urllib import parse as urllibparse
+import loompy as lp
 from pathlib import Path
 
 from scopeserver.dataserver.modules.gserver import GServer
 from scopeserver.utils import SysUtils as su
 
 unicode = str
+
 
 def _decode_str_if_py2(inputstr, encoding='utf-8'):
     "Will return decoded with given encoding *if* input is a string and it's Py2."
@@ -28,6 +30,7 @@ def _decode_str_if_py2(inputstr, encoding='utf-8'):
     else:
         return inputstr
 
+
 def _encode_str_if_py2(inputstr, encoding='utf-8'):
     "Will return encoded with given encoding *if* input is a string and it's Py2"
     if sys.version_info < (3,) and isinstance(inputstr, str):
@@ -35,15 +38,18 @@ def _encode_str_if_py2(inputstr, encoding='utf-8'):
     else:
         return inputstr
 
+
 def fullpath(path):
     "Shortcut for os.path abspath(expanduser())"
     return os.path.abspath(os.path.expanduser(path))
+
 
 def basename(path):
     "Extract the file base name (some browsers send the full file path)."
     for mod in posixpath, macpath, ntpath:
         path = mod.basename(path)
     return path
+
 
 def check_auth(method):
     "Wraps methods on the request handler to require simple auth checks."
@@ -115,6 +121,7 @@ class DroopyFieldStorage(cgi.FieldStorage):
         self.tmpfile = os.fdopen(fd, 'w+b')
         self.tmpfilename = name
         return self.tmpfile
+
 
 class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
     "The guts of Droopy-a custom handler that accepts files & serves templates"
@@ -231,7 +238,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
             print("Saving uploaded file in " + self.directory)
             file_items = form[self.form_field]
 
-            #-- Handle multiple file upload
+            # Handle multiple file upload
             if not isinstance(file_items, list):
                 file_items = [file_items]
             for item in file_items:
@@ -265,22 +272,39 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                 # Always read in binary mode. Opening files in text mode may cause
                 # newline translations, making the actual size of the content
                 # transmitted *less* than the content-length!
-                f = open(localpath, 'rb')
+                if form.getvalue('file-type') == 'Loom':
+                    print('Got a loom file')
+                    try:
+                        with lp.connect(localpath, 'r') as f:
+                            print(f.shape)
+                            if not (f.shape[0] > 0 and f.shape[1] > 0):
+                                raise KeyError
+                            else:
+                                print('Got a valid loom file')
+
+                    except (KeyError, OSError):
+                        print('Not a valid loom file')
+                        os.remove(localpath)
+                        self.send_error(416, "Upload corrupt")
+                        return None
+                else:
+                    print('Not a loom: {0}'.format(form.getvalue('file-type')))
+                    f = open(localpath, 'rb')
             except IOError:
                 self.send_error(404, "File not found")
                 return None
             # Send correct HTTP headers and Allow CROS Origin
             fs = os.fstat(f.fileno())
-            headers = {'Location': '/'
-                     , 'Access-Control-Allow-Origin': '*'
-                     , 'Content-type': ctype
-                     , 'Content-Length': os.fstat(f.fileno())[6]
-                     , 'Last-modified': self.date_time_string(fs.st_mtime)
-            }
+            headers = {'Location': '/',
+                       'Access-Control-Allow-Origin': '*',
+                       'Content-type': ctype,
+                       'Content-Length': os.fstat(f.fileno())[6],
+                       'Last-modified': self.date_time_string(fs.st_mtime)
+                       }
             self.send_resp_headers(200, headers, end=True)
 
         except Exception as e:
-            self.log_message(">"+ repr(e))
+            self.log_message(">" + repr(e))
 
     def send_resp_headers(self, response_code, headers_dict, end=False):
         "Just a shortcut for a common operation."
@@ -332,7 +356,7 @@ class ThreadedHTTPServer(socketserver.ThreadingMixIn,
     def handle_error(self, request, client_address):
         "Override socketserver.handle_error"
         exctype = sys.exc_info()[0]
-        if not exctype is Abort:
+        if exctype is not Abort:
             httpserver.HTTPServer.handle_error(self, request, client_address)
 
 
@@ -376,24 +400,25 @@ def run(run_event,
     if certfile:
         try:
             import ssl
-        except:
+        except Exception:
             print("Error: Could not import module 'ssl', exiting.")
             sys.exit(2)
-        httpd.socket = ssl.wrap_socket(
-            httpd.socket,
-            certfile=certfile,
-            ciphers=permitted_ciphers,
-            server_side=True)
+
+        httpd.socket = ssl.wrap_socket(httpd.socket,
+                                       certfile=certfile,
+                                       ciphers=permitted_ciphers,
+                                       server_side=True)
 
     # # # Wait a little bit
     # time.sleep(0.5)
     # Let the main process know that PServer has started.
-    su.send_msg("PServer","SIGSTART")
+    su.send_msg("PServer", "SIGSTART")
 
-    # Loop 
+    # Loop
     while run_event.is_set():
         httpd.handle_request()
     # httpd.serve_forever()
+
 
 def main():
     try:
