@@ -235,8 +235,13 @@ class SCope(s_pb2_grpc.MainServicer):
         # if rw:
         #     loom = lp.connect(loom_file_path, mode='r+')
         # else:
-        #     loom = lp.connect(loom_file_path, mode='r')
-        loom = lp.connect(loom_file_path, mode='r+')
+        #     loom = lp.connect(loom_file_path, mode='r')\
+        try:
+            loom = lp.connect(loom_file_path, mode='r+')
+        except KeyError as e:
+            print(e)
+            os.remove(loom_file_path)
+            return None
         self.add_loom_connection(partial_md5_hash, loom)
         return loom
 
@@ -910,6 +915,8 @@ class SCope(s_pb2_grpc.MainServicer):
         for f in loomsToProcess:
             if f.endswith('.loom'):
                 loom = self.get_loom_connection(self.get_loom_filepath(f))
+                if loom is None:
+                    continue
                 fileMeta = self.get_file_metadata(self.get_loom_filepath(f))
                 if not fileMeta['hasGlobalMeta']:
                     try:
