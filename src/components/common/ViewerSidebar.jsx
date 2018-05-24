@@ -92,73 +92,76 @@ class ViewerSidebar extends Component {
 				let image = md.motifName ? (<Image src={'http://motifcollections.aertslab.org/v8/logos/'+md.motifName} />) : '';
 				let markerTable = "";
 
-				let newMarkerTableGeneCell = (props) => {
-					return (
-						<a className="pointer"
-							onClick={() => {
-								let query = {
-									loomFilePath: BackendAPI.getActiveLoom(),
-									query: props.value
-								};
-								if (activePage == 'regulon') {
-									this.setState({currentPage: 'gene'});
-									BackendAPI.setActivePage('gene');
-									history.push('/' + [match.params.uuid, match.params.loom ? match.params.loom : '*', 'gene' ].join('/'));
-								}											
-								BackendAPI.getConnection().then((gbc) => {
-									gbc.services.scope.Main.getFeatures(query, (err, response) => {
-									BackendAPI.setActiveFeature(i, activeFeatures[i].type, "gene", props.value, 0, {description: response.featureDescription[0]});
-								});
-								}, () => {
-									BackendAPI.showError();	
-								})
-								ReactGA.event({
-									category: 'action',
-									action: 'gene clicked',
-									label: props.value,
-									value: i
-								});
-							}}>{props.value}
-						</a>
-					)
-				}
-
-				let newMarkerTableColumn = (header, id, accessor, cell) => {
-					let column = {
-						Header: header,
-						id: id,
+				if (md.genes) {
+					let newMarkerTableGeneCell = (props) => {
+						return (
+							<a className="pointer"
+								onClick={() => {
+									let query = {
+										loomFilePath: BackendAPI.getActiveLoom(),
+										query: props.value
+									};
+									if (activePage == 'regulon') {
+										this.setState({currentPage: 'gene'});
+										BackendAPI.setActivePage('gene');
+										history.push('/' + [match.params.uuid, match.params.loom ? match.params.loom : '*', 'gene' ].join('/'));
+									}											
+									BackendAPI.getConnection().then((gbc) => {
+										gbc.services.scope.Main.getFeatures(query, (err, response) => {
+										BackendAPI.setActiveFeature(i, activeFeatures[i].type, "gene", props.value, 0, {description: response.featureDescription[0]});
+									});
+									}, () => {
+										BackendAPI.showError();	
+									})
+									ReactGA.event({
+										category: 'action',
+										action: 'gene clicked',
+										label: props.value,
+										value: i
+									});
+								}}>{props.value}
+							</a>
+						)
 					}
-					if(accessor != null) {
-						column["accessor"] = d => d[accessor]
-					}
-					if(cell != null) {
-						column["Cell"] = props => cell(props)
-					}
-					return column
-				}
 
-				// Define the marker table columns
-				// Add at least the gene column
-				let markerTableColumns = [
-					newMarkerTableColumn("Gene", "gene", "gene", newMarkerTableGeneCell)
-				]
+					let newMarkerTableColumn = (header, id, accessor, cell) => {
+						let column = {
+							Header: header,
+							id: id,
+						}
+						if(accessor != null) {
+							column["accessor"] = d => d[accessor]
+						}
+						if(cell != null) {
+							column["Cell"] = props => cell(props)
+						}
+						return column
+					}
 
-				// Add extra columns (metrics like logFC, p-value, ...)
-				for(let metric of md.metrics) {
-					markerTableColumns = [...markerTableColumns
-										, newMarkerTableColumn(metric.name, metric.accessor, metric.accessor, null)
+					// Define the marker table columns
+					// Add at least the gene column
+					let markerTableColumns = [
+						newMarkerTableColumn("Gene", "gene", "gene", newMarkerTableGeneCell)
 					]
-				}
 
-				let markerTableData = md.genes.map( (g, j) => {
-					let markerTableRowData = { gene: g }
-					for(let metric of md.metrics) {
-						markerTableRowData[metric.accessor] = metric.values[j]
+					if ('metrics' in md) {
+						// Add extra columns (metrics like logFC, p-value, ...)
+						for(let metric of md.metrics) {
+							markerTableColumns = [...markerTableColumns
+												, newMarkerTableColumn(metric.name, metric.accessor, metric.accessor, null)
+							]
+						}
 					}
-					return (markerTableRowData)
-				});
-				
-				if(md.genes) {
+
+					let markerTableData = md.genes.map( (g, j) => {
+						let markerTableRowData = { gene: g }
+						if (!('metrics' in md))
+							return markerTableRowData
+						for(let metric of md.metrics)
+							markerTableRowData[metric.accessor] = metric.values[j]
+						return (markerTableRowData)
+					});
+					
 					markerTable = (
 						<div style={{marginBottom: "15px"}}>
 							<ReactTable
