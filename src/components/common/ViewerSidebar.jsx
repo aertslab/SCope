@@ -177,45 +177,6 @@ class ViewerSidebar extends Component {
 					);
 				}
 
-				// if (activeFeatures[i].metadata.genes) {
-				// 	genes = (
-				// 		<Grid columns="4" className="geneInfo blockDisplay">
-				// 			{ activeFeatures[i].metadata.genes.map( (g, j) => (
-				// 				<Grid.Column key={j} className="viewerCell">
-				// 					<a
-				// 						className="pointer"
-				// 						onClick={() => {
-				// 							let query = {
-				// 								loomFilePath: BackendAPI.getActiveLoom(),
-				// 								query: g
-				// 							};
-				// 							if (activePage == 'regulon') {
-				// 								this.setState({currentPage: 'gene'});
-				// 								BackendAPI.setActivePage('gene');
-				// 								history.push('/' + [match.params.uuid, match.params.loom ? match.params.loom : '*', 'gene' ].join('/'));
-				// 							}											
-				// 							BackendAPI.getConnection().then((gbc) => {
-				// 								gbc.services.scope.Main.getFeatures(query, (err, response) => {
-				// 									BackendAPI.setActiveFeature(i, activeFeatures[i].type, "gene", g, 0, {description: response.featureDescription[0]});
-				// 								});
-				// 							}, () => {
-				// 								BackendAPI.showError();	
-				// 							})
-				// 							ReactGA.event({
-				// 								category: 'action',
-				// 								action: 'gene clicked',
-				// 								label: g,
-				// 								value: i
-				// 							});
-				// 						}} >
-				// 						{g}
-				// 					</a>
-				// 				</Grid.Column>
-				// 			))}
-				// 		</Grid>
-				// 	);
-				// }
-
 				metadata = (
 					<Grid.Row columns="1" centered className='viewerRow'>
 						<Grid.Column stretched className='viewerCell'>
