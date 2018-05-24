@@ -116,6 +116,12 @@ message Embedding {
   string name=2;
 }
 
+message ClusterMarkerMetric {
+  string accessor=1;
+  string name=2;
+  string description=3;
+}
+
 message ClusterAnnotation {
   int32 id=1;
   string description=2;
@@ -125,7 +131,8 @@ message Clustering {
   int32 id=1;
   string group=2;
   string name=3;
-  repeated ClusterAnnotation clusters=4;
+  repeated ClusterMarkerMetric clusterMarkerMetrics=4;
+  repeated ClusterAnnotation clusters=5;
 }
 
 message CellMetaData {
@@ -188,8 +195,16 @@ message MarkerGenesRequest {
   int32 clusterID=3;
 }
 
+message MarkerGenesMetric {
+  string accessor=1;
+  string name=2;
+  string description=3;
+  repeated float values=4;
+}
+
 message MarkerGenesReply {
   repeated string genes=1;
+  repeated MarkerGenesMetric metrics=2;
 }
 
 message MyLoomsRequest {

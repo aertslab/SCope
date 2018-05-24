@@ -3,6 +3,7 @@ import grpc
 
 from scopeserver.dataserver.modules.gserver import s_pb2 as s__pb2
 
+
 class MainStub(object):
   # missing associated documentation comment in .proto file
   pass

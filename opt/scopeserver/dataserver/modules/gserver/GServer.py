@@ -258,12 +258,79 @@ class SCope(s_pb2_grpc.MainServicer):
             print("Debug: loading the loom file from " + loom_file_path + "...")
             return self.load_loom_file(partial_md5_hash, loom_file_path)
 
-    def decompress_meta(self, meta):
+    @staticmethod
+    def get_meta_data_clustering_by_id(loom, id):
+        md_clusterings = SCope.get_meta_data_by_key(loom=loom, key="clusterings")
+        md_clustering = list(filter(lambda x: x["id"] == id, md_clusterings))
+        if(len(md_clustering) > 1):
+            raise ValueError('Multiple clusterings matches the given id '+id)
+        return md_clustering[0]
+
+    @staticmethod
+    def get_meta_data_by_key(loom, key):
+        meta_data = SCope.get_meta_data(loom=loom)
+        if key in meta_data.keys():
+            md = meta_data[key]
+            if key == "embeddings":
+                for e in md:  # Fix for malformed embeddings json (R problem)
+                    e['id'] = int(e['id'])
+            return md
+        return []
+
+    @staticmethod
+    def has_meta_data(loom):
+        return "MetaData" in loom.attrs.keys()
+
+    @staticmethod
+    def decompress_meta(meta):
         try:
             meta = meta.decode('ascii')
             return json.loads(zlib.decompress(base64.b64decode(meta)))
         except AttributeError:
             return json.loads(zlib.decompress(base64.b64decode(meta.encode('ascii'))).decode('ascii'))
+    
+    @staticmethod
+    def get_meta_data(loom):
+        md = loom.attrs.MetaData
+        if type(md) is np.ndarray:
+            md = loom.attrs.MetaData[0]
+        return SCope.decompress_meta(meta=md)
+
+    def get_file_metadata(self, loom_file_path):
+        """Summarize in a dict what feature data the loom file contains.
+
+        Args:
+            loom_file_path (str): The file path to the loom file.
+
+        Returns:
+            dict: A dictionary defining whether the current implemented features in SCope are available for the loom file with the given loom_file_path.
+
+        """
+        loom = self.get_loom_connection(loom_file_path)
+        attr_margins = [2,2,2,2,0]
+        attr_names = ["RegulonsAUC", "Clusterings", "Embeddings_X", "GeneSets", "MetaData"]
+        attr_keys = ["RegulonsAUC", "Clusterings", "ExtraEmbeddings", "GeneSets", "GlobalMeta"]
+
+        def loom_attr_exists(x):
+            tmp = {}
+            idx = attr_names.index(x)
+            margin = attr_margins[idx]
+            ha = False
+            if margin == 0:
+                ha = hasattr(loom.attrs, x)
+            elif margin == 1:
+                ha = hasattr(loom.ra, x)
+            elif margin == 2:
+                ha = hasattr(loom.ca, x)
+            else:
+                raise ValueError("Invalid margin value: "+ margin)
+            tmp["has"+attr_keys[idx]] = ha
+            return tmp
+
+        md = map(loom_attr_exists, attr_names)
+        meta = { k: v for d in md for k, v in d.items() }
+        print(meta)
+        return meta
 
     @lru_cache(maxsize=32)
     def infer_species(self, loom_file_path):
@@ -356,13 +423,8 @@ class SCope(s_pb2_grpc.MainServicer):
         start_time = time.time()
         species, geneMappings = self.infer_species(loom_file_path)
         loom = self.get_loom_connection(loom_file_path)
-        meta = True
-        try:
-            metaData = json.loads(SCope.get_meta_data(loom))
-        except ValueError:
-            metaData = self.decompress_meta(SCope.get_meta_data(loom))
-        except AttributeError:
-            meta = False
+        if SCope.has_meta_data(loom):
+            meta_data = SCope.get_meta_data(loom)
 
         def add_element(searchSpace, elements, elementName):
             if type(elements) != str:
@@ -394,8 +456,8 @@ class SCope(s_pb2_grpc.MainServicer):
             else:
                 searchSpace = add_element(searchSpace, SCope.get_genes(loom), 'gene')
 
-            if meta:
-                for clustering in metaData['clusterings']:
+            if SCope.has_meta_data(loom):
+                for clustering in meta_data['clusterings']:
                     allClusters = ['All Clusters']
                     for cluster in clustering['clusters']:
                         allClusters.append(cluster['description'])
@@ -568,48 +630,6 @@ class SCope(s_pb2_grpc.MainServicer):
                 "y": -y,
                 "cellIndices": cellIndices}
 
-    @staticmethod
-    def get_meta_data(loom):
-        if type(loom.attrs.MetaData) is np.ndarray:
-            return loom.attrs.MetaData[0]
-        return loom.attrs.MetaData
-
-    def get_file_metadata(self, loom_file_path):
-        """Summarize in a dict what feature data the loom file contains.
-
-        Args:
-            loom_file_path (str): The file path to the loom file.
-
-        Returns:
-            dict: A dictionary defining whether the current implemented features in SCope are available for the loom file with the given loom_file_path.
-
-        """
-        loom = self.get_loom_connection(loom_file_path)
-        attr_margins = [2,2,2,2,0]
-        attr_names = ["RegulonsAUC", "Clusterings", "Embeddings_X", "GeneSets", "MetaData"]
-        attr_keys = ["RegulonsAUC", "Clusterings", "ExtraEmbeddings", "GeneSets", "GlobalMeta"]
-
-        def loom_attr_exists(x):
-            tmp = {}
-            idx = attr_names.index(x)
-            margin = attr_margins[idx]
-            ha = False
-            if margin == 0:
-                ha = hasattr(loom.attrs, x)
-            elif margin == 1:
-                ha = hasattr(loom.ra, x)
-            elif margin == 2:
-                ha = hasattr(loom.ca, x)
-            else:
-                raise ValueError("Invalid margin value: "+ margin)
-            tmp["has"+attr_keys[idx]] = ha
-            return tmp
-
-        md = map(loom_attr_exists, attr_names)
-        meta = { k: v for d in md for k, v in d.items() }
-        print(meta)
-        return meta
-
     def compressHexColor(self, a):
         a = int(a, 16)
         a_hex3d = hex(a >> 20 << 8 | a >> 8 & 240 | a >> 4 & 15)
@@ -659,12 +679,7 @@ class SCope(s_pb2_grpc.MainServicer):
         start_time = time.time()
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
         loom = self.get_loom_connection(loomFilePath)
-        try:
-            metaData = json.loads(SCope.get_meta_data(loom))
-        except ValueError:
-            metaData = self.decompress_meta(SCope.get_meta_data(loom))
-        except AttributeError:
-            pass
+        meta_data = SCope.get_meta_data(loom)
         if not os.path.isfile(loomFilePath):
             return
         n_cells = self.get_nb_cells(loomFilePath)
@@ -715,7 +730,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 else:
                     features.append(np.zeros(n_cells))
             elif request.featureType[n].startswith('Clustering: '):
-                for clustering in metaData['clusterings']:
+                for clustering in meta_data['clusterings']:
                     if clustering['name'] == re.sub('^Clustering: ', '', request.featureType[n]):
                         clusteringID = str(clustering['id'])
                         if request.feature[n] == 'All Clusters':
@@ -816,11 +831,8 @@ class SCope(s_pb2_grpc.MainServicer):
     def getRegulonMetaData(self, request, context):
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
         regulonGenes = SCope.get_genes(loom)[loom.ra.Regulons[request.regulon] == 1]
-        try:
-            metaData = json.loads(SCope.get_meta_data(loom))
-        except ValueError:
-            metaData = self.decompress_meta(SCope.get_meta_data(loom))
-        for regulon in metaData['regulonThresholds']:
+        meta_data = SCope.get_meta_data(loom=loom)
+        for regulon in meta_data['regulonThresholds']:
             if regulon['regulon'] == request.regulon:
                 autoThresholds = []
                 for threshold in regulon['allThresholds'].keys():
@@ -840,7 +852,23 @@ class SCope(s_pb2_grpc.MainServicer):
     def getMarkerGenes(self, request, context):
         loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
         genes = SCope.get_genes(loom)[loom.ra["ClusterMarkers_{0}".format(request.clusteringID)][str(request.clusterID)] == 1]
-        return(s_pb2.MarkerGenesReply(genes=genes))
+        # Filter the MD clusterings by ID
+        md_clustering = SCope.get_meta_data_clustering_by_id(loom=loom, id=request.clusteringID)
+        cluster_marker_metrics = None
+
+        if "clusterMarkerMetrics" in md_clustering.keys():
+            md_cmm = md_clustering["clusterMarkerMetrics"]
+            def create_cluster_marker_metric(metric):
+                cluster_marker_metric = loom.row_attrs["ClusterMarkers_{0}_{1}".format(request.clusteringID, metric["accessor"])][str(request.clusterID)]
+                cluster_marker_metric_nz =  cluster_marker_metric[cluster_marker_metric != 0]
+                return s_pb2.MarkerGenesMetric(accessor=metric["accessor"],
+                                               name=metric["name"],
+                                               description=metric["description"],
+                                               values=cluster_marker_metric_nz)
+
+            cluster_marker_metrics = list(map(create_cluster_marker_metric, md_cmm))
+
+        return(s_pb2.MarkerGenesReply(genes=genes, metrics=cluster_marker_metrics))
 
     def getMyGeneSets(self, request, context):
         userDir = self.get_data_dir_path_by_file_type('GeneSet', UUID=request.UUID)
@@ -917,26 +945,13 @@ class SCope(s_pb2_grpc.MainServicer):
                 loom = self.get_loom_connection(self.get_loom_filepath(f))
                 if loom is None:
                     continue
-                fileMeta = self.get_file_metadata(self.get_loom_filepath(f))
-                if not fileMeta['hasGlobalMeta']:
+                file_meta = self.get_file_metadata(self.get_loom_filepath(f))
+                if not file_meta['hasGlobalMeta']:
                     try:
                         self.generateMetaData(self.get_loom_filepath(f))
                     except Exception as e:
                         print(e)
 
-                    annotations = embeddings = clusterings = []
-                try:
-                    meta = json.loads(SCope.get_meta_data(loom))
-                except ValueError:
-                    meta = self.decompress_meta(SCope.get_meta_data(loom))
-                try:
-                    annotations = meta['annotations']
-                    embeddings = meta['embeddings']
-                    for e in embeddings:  # Fix for malformed embeddings json (R problem)
-                        e['id'] = int(e['id'])
-                    clusterings = meta['clusterings']
-                except KeyError:
-                    annotations = embeddings = clusterings = []
                 try:
                     L1 = loom.attrs.SCopeTreeL1
                     L2 = loom.attrs.SCopeTreeL2
@@ -946,10 +961,10 @@ class SCope(s_pb2_grpc.MainServicer):
                     L2 = L3 = ''
                 my_looms.append(s_pb2.MyLoom(loomFilePath=f,
                                              loomDisplayName=os.path.splitext(os.path.basename(f))[0],
-                                             cellMetaData=s_pb2.CellMetaData(annotations=annotations,
-                                                                             embeddings=embeddings,
-                                                                             clusterings=clusterings),
-                                             fileMetaData=fileMeta,
+                                             cellMetaData=s_pb2.CellMetaData(annotations=SCope.get_meta_data_by_key(loom=loom, key="annotations"),
+                                                                             embeddings=SCope.get_meta_data_by_key(loom=loom, key="embeddings"),
+                                                                             clusterings=SCope.get_meta_data_by_key(loom=loom, key="clusterings")),
+                                             fileMetaData=file_meta,
                                              loomHeierarchy=s_pb2.LoomHeierarchy(L1=L1,
                                                                                  L2=L2,
                                                                                  L3=L3)

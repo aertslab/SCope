@@ -6,6 +6,9 @@ import { BackendAPI } from '../common/API'
 import Metadata from '../common/Metadata'
 import ReactGA from 'react-ga';
 
+import ReactTable from "react-table";
+import "react-table/react-table.css";
+
 class ViewerSidebar extends Component {
 
 	constructor() {
@@ -85,53 +88,101 @@ class ViewerSidebar extends Component {
 			let metadata = activeFeatures[i] && activeFeatures[i].feature ? "" : "Please use the inputs above to select a feature";
 
 			if (activeFeatures[i] && activeFeatures[i].metadata) {
-				let image = activeFeatures[i].metadata.motifName ? (<Image src={'http://motifcollections.aertslab.org/v8/logos/'+activeFeatures[i].metadata.motifName} />) : '';
-				let genes = "";
-				if (activeFeatures[i].metadata.genes) {
-					genes = (
-						<Grid columns="4" className="geneInfo blockDisplay">
-							{ activeFeatures[i].metadata.genes.map( (g, j) => (
-								<Grid.Column key={j} className="viewerCell">
-									<a
-										className="pointer"
-										onClick={() => {
-											let query = {
-												loomFilePath: BackendAPI.getActiveLoom(),
-												query: g
-											};
-											if (activePage == 'regulon') {
-												this.setState({currentPage: 'gene'});
-												BackendAPI.setActivePage('gene');
-												history.push('/' + [match.params.uuid, match.params.loom ? match.params.loom : '*', 'gene' ].join('/'));
-											}											
-											BackendAPI.getConnection().then((gbc) => {
-												gbc.services.scope.Main.getFeatures(query, (err, response) => {
-													BackendAPI.setActiveFeature(i, activeFeatures[i].type, "gene", g, 0, {description: response.featureDescription[0]});
-												});
-											}, () => {
-												BackendAPI.showError();	
-											})
-											ReactGA.event({
-												category: 'action',
-												action: 'gene clicked',
-												label: g,
-												value: i
-											});
-										}} >
-										{g}
-									</a>
-								</Grid.Column>
-							))}
-						</Grid>
+				let md = activeFeatures[i].metadata
+				let image = md.motifName ? (<Image src={'http://motifcollections.aertslab.org/v8/logos/'+md.motifName} />) : '';
+				let markerTable = "";
+
+				let newMarkerTableGeneCell = (props) => {
+					return (
+						<a className="pointer"
+							onClick={() => {
+								let query = {
+									loomFilePath: BackendAPI.getActiveLoom(),
+									query: props.value
+								};
+								if (activePage == 'regulon') {
+									this.setState({currentPage: 'gene'});
+									BackendAPI.setActivePage('gene');
+									history.push('/' + [match.params.uuid, match.params.loom ? match.params.loom : '*', 'gene' ].join('/'));
+								}											
+								BackendAPI.getConnection().then((gbc) => {
+									gbc.services.scope.Main.getFeatures(query, (err, response) => {
+									BackendAPI.setActiveFeature(i, activeFeatures[i].type, "gene", props.value, 0, {description: response.featureDescription[0]});
+								});
+								}, () => {
+									BackendAPI.showError();	
+								})
+								ReactGA.event({
+									category: 'action',
+									action: 'gene clicked',
+									label: props.value,
+									value: i
+								});
+							}}>{props.value}
+						</a>
+					)
+				}
+
+				let newMarkerTableColumn = (header, id, accessor, cell) => {
+					let column = {
+						Header: header,
+						id: id,
+					}
+					if(accessor != null) {
+						column["accessor"] = d => d[accessor]
+					}
+					if(cell != null) {
+						column["Cell"] = props => cell(props)
+					}
+					return column
+				}
+
+				// Define the marker table columns
+				// Add at least the gene column
+				let markerTableColumns = [
+					newMarkerTableColumn("Gene", "gene", "gene", newMarkerTableGeneCell)
+				]
+
+				// Add extra columns (metrics like logFC, p-value, ...)
+				for(let metric of md.metrics) {
+					markerTableColumns = [...markerTableColumns
+										, newMarkerTableColumn(metric.name, metric.accessor, metric.accessor, null)
+					]
+				}
+
+				let markerTableData = md.genes.map( (g, j) => {
+					let markerTableRowData = { gene: g }
+					for(let metric of md.metrics) {
+						markerTableRowData[metric.accessor] = metric.values[j]
+					}
+					return (markerTableRowData)
+				});
+				
+				if(md.genes) {
+					markerTable = (
+						<div style={{marginBottom: "15px"}}>
+							<ReactTable
+								data={markerTableData}
+								columns={[
+									{
+									Header: "Markers",
+									columns: markerTableColumns
+									}
+								]}
+								pageSizeOptions={[5, 10, 20]}
+								defaultPageSize={10}
+								className="-striped -highlight"
+								/>
+						</div>
 					);
 				}
 
 				metadata = (
 					<Grid.Row columns="1" centered className='viewerRow'>
 						<Grid.Column stretched className='viewerCell'>
-							{activeFeatures[i].metadata.description}<br />
+							{md.description}<br />
 							{image}
-							{genes}
+							{markerTable}
 						</Grid.Column>
 					</Grid.Row>
 				);
