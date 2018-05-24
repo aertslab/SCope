@@ -213,7 +213,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(200, "ok")
         self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS, POST')
         self.send_header("Access-Control-Allow-Headers", "X-Requested-With")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.send_header("Access-Control-Allow-Headers", "Content-Disposition")
@@ -235,7 +235,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                 self.send_error(415, "Unsupported file tyype")
             # Update the directory of DroopyFieldStorage
             form.directory = self.directory
-            print("Saving uploaded file in " + self.directory)
+            self.log_message("Saving uploaded file in " + self.directory)
             file_items = form[self.form_field]
 
             # Handle multiple file upload
@@ -275,28 +275,31 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                 if form.getvalue('file-type') == 'Loom':
                     try:
                         with lp.connect(localpath, 'r') as f:
-                            print(f.shape)
+                            self.log_message('Loom dimensions: {0}'.format(f.shape))
                             if not (f.shape[0] > 0 and f.shape[1] > 0):
                                 raise KeyError
                             else:
                                 f = open(localpath, 'rb')
                     except (KeyError, OSError):
                         os.remove(localpath)
-                        self.send_error(416, "Upload corrupt")
+                        self.send_response(415, message='Upload Corrupt')
+                        self.send_header('Access-Control-Allow-Origin', '*')
+                        self.end_headers()
                         return None
                 else:
-                    print('Not a loom: {0}'.format(form.getvalue('file-type')))
+                    self.log_message('Not a loom: {0}'.format(form.getvalue('file-type')))
                     f = open(localpath, 'rb')
             except IOError:
                 self.send_error(404, "File not found")
                 return None
             # Send correct HTTP headers and Allow CROS Origin
             fs = os.fstat(f.fileno())
-            headers = {'Location': '/',
-                       'File-Path': localpath,
+            headers = {
+                       # 'Location': '/',
+                       # 'File-Path': localpath,
                        'Access-Control-Allow-Origin': '*',
-                       'Content-type': ctype,
-                       'Content-Length': os.fstat(f.fileno())[6],
+                       'Content-Type': 'application/json',
+                       'Content-Length': 0,
                        'Last-modified': self.date_time_string(fs.st_mtime)
                        }
             self.send_resp_headers(200, headers, end=True)
@@ -359,7 +362,7 @@ class ThreadedHTTPServer(socketserver.ThreadingMixIn,
 
 
 def run(run_event,
-        hostname='',
+        hostname='localhost',
         port=50051,
         templates=None,
         localisations=None,

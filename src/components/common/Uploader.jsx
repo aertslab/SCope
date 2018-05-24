@@ -25,12 +25,18 @@ export default class Uploader {
             let progress = (event.loaded / event.total * 100).toPrecision(1);
             onProgress(progress);
         });
+
         xhr.upload.addEventListener('load', (event) => {
             if (DEBUG) console.log("file uploaded: " + file.name);
-            setTimeout(() => {
-                onUploaded(file.name);
-            }, 1000);
         })
+
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState == 4) {
+            setTimeout(() => {
+                onUploaded(file.name, xhr.status);
+            }, 1000);
+          }
+        }
         xhr.setRequestHeader("Content-Disposition", "attachment;filename=" + file.name)
         xhr.send(form);
     }

@@ -8,10 +8,12 @@ export default class UploadModal extends Component {
         super();
         this.state = {
             uploadLoomFile: null,
+            uploadLoomFileName: null,
             uploadLoomProgress: 0,
+            uploadError: false,
         }
     }
-    
+
     render() {
         return (
             <Modal open={this.props.opened} onClose={this.props.onClose} closeIcon>
@@ -23,8 +25,8 @@ export default class UploadModal extends Component {
                                 <Grid.Column width={13}>
                                     <FileReaderInput as="binary" id="my-file-input" onChange={this.selectLoomFile.bind(this)}>
                                         <Input
-                                            label="File to be uploaded:" labelPosition='left' action={{ color: this.state.uploadLoomFile ? 'grey' : 'orange', content:"Select a file..."}} fluid 
-                                            placeholder={ this.state.uploadLoomFile ? this.state.uploadLoomFile.name : ""}
+                                            label="File to be uploaded:" labelPosition='left' action={{ color: this.state.uploadLoomFile ? 'grey' : 'orange', content:"Select a file..."}} fluid
+                                            placeholder={this.state.uploadLoomFileName} error={this.state.uploadError}
                                         />
                                     </FileReaderInput>
                                 </Grid.Column>
@@ -37,7 +39,7 @@ export default class UploadModal extends Component {
                                     Upload progress:
                                 </Grid.Column>
                                 <Grid.Column width={13}>
-                                    <Progress percent={this.state.uploadLoomProgress} indicating progress disabled></Progress>
+                                    <Progress percent={this.state.uploadLoomProgress} error={this.state.uploadError} indicating progress disabled></Progress>
                                 </Grid.Column>
                             </Grid.Row>
                         </Grid>
@@ -50,7 +52,7 @@ export default class UploadModal extends Component {
     selectLoomFile(event, selection) {
         selection.forEach((selected) => {
             const [event, file] = selected;
-            this.setState({ uploadLoomFile: file })
+            this.setState({ uploadLoomFile: file, uploadLoomFileName: file.name, uploadError: false })
         })
     }
 
@@ -59,9 +61,14 @@ export default class UploadModal extends Component {
         let uploader = new Uploader();
         uploader.upload(this.props.uuid, this.props.type, file, (progress) =>{
             this.setState({ uploadLoomProgress: progress });
-        }, (filename) => {
-            this.setState({ uploadLoomFile: null, uploadLoomProgress: 0 })
-            this.props.onUploaded(filename);
+        }, (filename, status_code) => {
+            if (status_code == 200) {
+              this.setState({ uploadLoomFile: null, uploadLoomProgress: 0 })
+              this.props.onUploaded(filename);
+            } else if (status_code == 415) {
+              this.setState({ uploadLoomFile: null, uploadLoomFileName: "Error with upload. Please try again or another file." , uploadLoomProgress: -1, uploadError: true })
+            }
+
         });
     }
 }
