@@ -288,13 +288,16 @@ class SCope(s_pb2_grpc.MainServicer):
             return json.loads(zlib.decompress(base64.b64decode(meta)))
         except AttributeError:
             return json.loads(zlib.decompress(base64.b64decode(meta.encode('ascii'))).decode('ascii'))
-    
+
     @staticmethod
     def get_meta_data(loom):
         md = loom.attrs.MetaData
         if type(md) is np.ndarray:
             md = loom.attrs.MetaData[0]
-        return SCope.decompress_meta(meta=md)
+        try:
+            return json.loads(md)
+        except json.decoder.JSONDecodeError:
+            return SCope.decompress_meta(meta=md)
 
     def get_file_metadata(self, loom_file_path):
         """Summarize in a dict what feature data the loom file contains.
