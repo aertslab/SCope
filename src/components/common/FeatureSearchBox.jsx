@@ -13,14 +13,14 @@ export default class FeatureSearch extends React.Component {
 			results: [],
 			value: props.value,
 			selection: null,
-			type: props.type
+			type: props.type,
 		};
 		this.call = null;
 	}
 
 	render() {
 
-		const { isLoading, value, results, type } = this.state;
+		const { isLoading, value, results, type, disabled } = this.state;
 		const { locked, color, options } = this.props;
 
 		return (
