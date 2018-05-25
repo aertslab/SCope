@@ -788,11 +788,12 @@ class SCope(s_pb2_grpc.MainServicer):
                 ca_annotation_as_int = list(map(lambda x: md_annotation_values.index(x), ca_annotation))
                 num_annotations = max(ca_annotation_as_int)
                 if num_annotations <= len(BIG_COLOR_LIST):
-                    for i in ca_annotation_as_int:
-                       hex_vec.append(BIG_COLOR_LIST[i])
+                    hex_vec = list(map(lambda x: BIG_COLOR_LIST[x], ca_annotation_as_int))
                 else:
                     raise ValueError("The annotation {0} has too many unique values.".format(feature))
-                return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax)
+                return s_pb2.CellColorByFeaturesReply(color=hex_vec, 
+                                                      vmax=vmax,
+                                                      legend=s_pb2.ColorLegend(values=md_annotation_values, colors=BIG_COLOR_LIST[:len(md_annotation_values)]))
             elif request.featureType[n].startswith('Clustering: '):
                 for clustering in meta_data['clusterings']:
                     if clustering['name'] == re.sub('^Clustering: ', '', request.featureType[n]):

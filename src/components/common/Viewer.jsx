@@ -710,6 +710,10 @@ export default class Viewer extends Component {
 					this.endBenchmark("getFeatureColors")
 					this.updateColors(response, response.color)
 				}
+
+				if(this.props.onActiveLegendChange != null) {
+					this.props.onActiveLegendChange(response.legend)
+				}
 			});
 		}, () => {
 			BackendAPI.showError();	

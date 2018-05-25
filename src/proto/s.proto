@@ -50,6 +50,11 @@ message CellColorByFeaturesRequest {
   string logic=10;
 }
 
+message ColorLegend {
+  repeated string values=1;
+  repeated string colors=2;
+}
+
 message CellColorByFeaturesReply {
   bool hasAddCompressionLayer=1;
   bytes compressedColor=2;
@@ -57,6 +62,7 @@ message CellColorByFeaturesReply {
   repeated float vmax=4;
   repeated float maxVmax=5;
   repeated int32 cellIndices=6;
+  ColorLegend legend=7;
 }
 
 message CellAUCValuesByFeaturesRequest {

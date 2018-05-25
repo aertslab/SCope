@@ -90,7 +90,21 @@ class ViewerSidebar extends Component {
 			if (activeFeatures[i] && activeFeatures[i].metadata) {
 				let md = activeFeatures[i].metadata
 				let image = md.motifName ? (<Image src={'http://motifcollections.aertslab.org/v8/logos/'+md.motifName} />) : '';
-				let markerTable = "";
+				let markerTable = "", legendTable = "";
+
+				let newMarkerTableColumn = (header, id, accessor, cell) => {
+					let column = {
+						Header: header,
+						id: id,
+					}
+					if(accessor != null) {
+						column["accessor"] = d => d[accessor]
+					}
+					if(cell != null) {
+						column["Cell"] = props => cell(props)
+					}
+					return column
+				}
 
 				if (md.genes) {
 					let newMarkerTableGeneCell = (props) => {
@@ -122,20 +136,6 @@ class ViewerSidebar extends Component {
 								}}>{props.value}
 							</a>
 						)
-					}
-
-					let newMarkerTableColumn = (header, id, accessor, cell) => {
-						let column = {
-							Header: header,
-							id: id,
-						}
-						if(accessor != null) {
-							column["accessor"] = d => d[accessor]
-						}
-						if(cell != null) {
-							column["Cell"] = props => cell(props)
-						}
-						return column
 					}
 
 					// Define the marker table columns
@@ -180,12 +180,49 @@ class ViewerSidebar extends Component {
 					);
 				}
 
+				if(this.props.activeLegend != null & activeFeatures[i].featureType == "annotation") {
+					let aL = this.props.activeLegend
+					let legendTableData = aL.values.map( (v, j) => ({ value: v, color: aL.colors[j] }) )
+					let newLegendTableColorCell = (props) => {
+						let colorLegendStyle = {
+							"width": "25px",
+							"height": "25px",
+							"-webkit-mask-box-image": "url('src/images/dot.png')",
+							"backgroundColor": "#"+ props.value
+						}
+						console.error(colorLegendStyle)
+						return (
+							<div style={colorLegendStyle}>
+							</div>
+						)
+					}
+					let legendTableColumns = [newMarkerTableColumn("Value", "value", "value", null)
+										 	, newMarkerTableColumn("Color", "color", "color", newLegendTableColorCell)]
+					legendTable = (
+						<div style={{marginBottom: "15px"}}>
+							<ReactTable
+								data={legendTableData}
+								columns={[
+									{
+									Header: "Legend",
+									columns: legendTableColumns
+									}
+								]}
+								pageSizeOptions={[5, 10, 20]}
+								defaultPageSize={10}
+								className="-striped -highlight"
+								/>
+						</div>
+					);
+				}
+
 				metadata = (
 					<Grid.Row columns="1" centered className='viewerRow'>
 						<Grid.Column stretched className='viewerCell'>
 							{md.description}<br />
 							{image}
 							{markerTable}
+							{legendTable}
 						</Grid.Column>
 					</Grid.Row>
 				);

@@ -14,6 +14,7 @@ export default class Gene extends Component {
             activeCoordinates: BackendAPI.getActiveCoordinates(),
             activeMetadata: BackendAPI.getActiveLoomMetadata(),
             activeFeatures: BackendAPI.getActiveFeatures(),
+            activeLegend: null, 
             sidebar: BackendAPI.getSidebarVisible(),
             colors: BackendAPI.getColors()
         }
@@ -28,7 +29,7 @@ export default class Gene extends Component {
     }
 
     render() {
-        const { activeLoom, activeFeatures, activeCoordinates, sidebar, activeMetadata, colors } = this.state;
+        const { activeLoom, activeFeatures, activeCoordinates, sidebar, activeMetadata, colors, activeLegend } = this.state;
         const isQueryingAnnotation = activeFeatures.some((e) => { return e.featureType == "annotation" })
 
         const featureSearch = () => _.times(3, i => {
@@ -73,16 +74,18 @@ export default class Gene extends Component {
                             name="expr" 
                             loomFile={activeLoom} 
                             activeFeatures={activeFeatures} 
-                            activeCoordinates={activeCoordinates} 
+                            activeCoordinates={activeCoordinates}
+                            onActiveLegendChange={(legend) => {
+                                this.setState({activeLegend: legend})
+                            }}
                             customScale={true} 
                             settings={true}
                             scale={true}
                         />
                     </Grid.Column>
                     <Grid.Column width={3}>
-                        <ViewerSidebar  onActiveFeaturesChange={(features, id) => {
-                            this.setState({activeFeatures: features});
-                        }}
+                        <ViewerSidebar onActiveFeaturesChange={(features, id) => { this.setState({activeFeatures: features}); }}
+                                       activeLegend={activeLegend}
                         />
                     </Grid.Column>
                 </Grid.Row>
