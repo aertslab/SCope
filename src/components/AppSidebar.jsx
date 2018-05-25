@@ -7,6 +7,7 @@ import Slider, { Range } from 'rc-slider';
 import ReactGA from 'react-ga';
 
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
+const path = require('path')
 const TooltipSlider = createSliderWithTooltip(Slider);
 
 class AppSidebar extends Component {
@@ -19,7 +20,7 @@ class AppSidebar extends Component {
 			settings: BackendAPI.getSettings(),
 			loomFiles: BackendAPI.getLoomFiles(),
 			userLoomTree: null,
-			generalLoomTree: null, 
+			generalLoomTree: null,
 			spriteScale: sprite.scale,
 			spriteAlpha: sprite.alpha,
 			uploadModalOpened: false,
@@ -32,7 +33,7 @@ class AppSidebar extends Component {
 		const { activeCoordinates, settings, loading, loomFiles, userLoomTree, generalLoomTree, uncategorizedLoomFiles, uploadModalOpened, spriteScale, spriteAlpha } = this.state;
 		let metadata = BackendAPI.getActiveLoomMetadata(), coordinates = [];
 		Object.keys(loomFiles).forEach(key => {
-			let loom = loomFiles[key];			
+			let loom = loomFiles[key];
 			if (loom.loomFilePath == decodeURIComponent(match.params.loom)) {
 				coordinates = loom.cellMetaData.embeddings.map(coords => {
 					return {
@@ -55,10 +56,10 @@ class AppSidebar extends Component {
 						this.props.onMetadataChange(file);
 					}}  >
 						<Menu.Item className={'level'+l} active={active} key={file.loomFilePath} >
-							{canRemove && 
-								<Icon name='trash' title='delete this loom file' style={{display: 'inline'}} onClick={(e,d) => this.deleteLoomFile(file.loomFilePath, file.loomDisplayName)} className="pointer"  /> 
+							{canRemove &&
+								<Icon name='trash' title='delete this loom file' style={{display: 'inline'}} onClick={(e,d) => this.deleteLoomFile(file.loomFilePath, file.loomDisplayName)} className="pointer"  />
 							}
-							<Icon name={active ? "selected radio" : "radio"} className="pointer" title="select this loom file" />
+							<Icon name='save' title='donwload this loom file' style={{display: 'inline'}} onClick={(e,d) => this.downloadLoomFile(file.loomFilePath)} className="pointer"  />
 							{file.loomDisplayName}
 						</Menu.Item>
 					</Link>
@@ -74,7 +75,7 @@ class AppSidebar extends Component {
 						{!t.children[level].collapsed ? renderLevel(t.children[level], l+1, null, canRemove) : ''}
 					</div>
 				)
-			}) 
+			})
 			return (
 				<div key={name}>
 					{name ? <Menu.Header className={'level'+(l-1)}>{name}</Menu.Header> : '' }
@@ -105,7 +106,7 @@ class AppSidebar extends Component {
 					{(showTransforms || showCoordinatesSelection) &&
 						<Menu.Header>SETTINGS</Menu.Header>
 					}
-						
+
 					{showCoordinatesSelection &&
 						<Menu.Menu>
 							<Menu.Item>Coordinates</Menu.Item>
@@ -114,7 +115,7 @@ class AppSidebar extends Component {
 							</Menu.Item>
 						</Menu.Menu>
 					}
-					{ showTransforms && 
+					{ showTransforms &&
 						<Menu.Menu>
 							<Menu.Item>Gene expression</Menu.Item>
 							<Menu.Item>
@@ -130,7 +131,7 @@ class AppSidebar extends Component {
 							<Menu.Item>Point size</Menu.Item>
 							<Menu.Item>
 								<TooltipSlider
-								style={{margin: '5px'}} 
+								style={{margin: '5px'}}
 								max={20}
 								defaultValue={spriteScale}
 								onAfterChange={(v) => {
@@ -151,7 +152,7 @@ class AppSidebar extends Component {
 							<Menu.Item>Point alpha</Menu.Item>
 							<Menu.Item>
 								<TooltipSlider
-								style={{margin: '5px'}} 
+								style={{margin: '5px'}}
 								max={1}
 								defaultValue={spriteAlpha}
 								onAfterChange={(v) => {
@@ -246,6 +247,51 @@ class AppSidebar extends Component {
 		}
 	}
 
+	downloadLoomFile(loomFilePath) {
+		const { match } = this.props;
+
+
+		let form = new FormData();
+		form.append('loomFilePath', loomFilePath);
+		form.append('UUID', match.params.uuid);
+		form.append('file-type', 'Loom');
+
+		try {
+			this.XHRport = document.head.querySelector("[name=scope-xhrport]").getAttribute('port')
+			console.log('Using meta XHRport')
+		} catch (ex) {
+			console.log('Using config XHRport')
+			this.XHRport = BACKEND.XHRport;
+		}
+
+		let xhr = new XMLHttpRequest();
+		xhr.open("POST", BACKEND.proto + "://" + BACKEND.host + ":" + this.XHRport + "/");
+		xhr.responseType = 'blob';
+
+		xhr.upload.addEventListener('load', (event) => {
+				if (DEBUG) console.log("file donwload")
+				console.log(xhr, xhr.status, xhr.readyState, xhr.response)
+		})
+		xhr.onreadystatechange = function() {
+			if (DEBUG) console.log("DL State change")
+			console.log(xhr, xhr.status, xhr.readyState, xhr.response)
+			if ((xhr.readyState == 4) && (xhr.status == 200)) {
+				console.log('Will download blob')
+				var blob = new Blob([xhr.response], {type: 'application/x-hdf5'});
+				let a = document.createElement("a");
+				a.style = "display: none";
+				document.body.appendChild(a);
+				let url = window.URL.createObjectURL(blob);
+				a.href = url;
+				a.download = path.basename(loomFilePath);
+				a.click();
+				window.URL.revokeObjectURL(url);
+			}
+		}
+		xhr.send(form)
+
+	}
+
 	deleteLoomFile(loomFilePath, loomDisplayName) {
 		const { match } = this.props;
 		ReactGA.event({
@@ -281,7 +327,7 @@ class AppSidebar extends Component {
 		});
 	}
 
-	toggleSortCells() {	
+	toggleSortCells() {
 		let settings = BackendAPI.setSetting('sortCells', !this.state.settings.sortCells);
 		this.setState({settings: settings});
 		ReactGA.event({
@@ -291,7 +337,7 @@ class AppSidebar extends Component {
 		});
 	}
 
-	toggleCpmNormization() {	
+	toggleCpmNormization() {
 		let settings = BackendAPI.setSetting('hasCpmNormalization', !this.state.settings.hasCpmNormalization);
 		this.setState({settings: settings});
 		ReactGA.event({

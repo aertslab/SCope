@@ -229,80 +229,92 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                                       headers=self.headers,
                                       environ={'REQUEST_METHOD': self.command})
 
-            if form.getvalue('file-type') in GServer.data_dirs.keys():
-                self.directory = GServer.SCope.get_data_dir_path_by_file_type(file_type=form.getvalue('file-type'), UUID=form.getvalue('UUID'))
+            if 'loomFilePath' in form.keys():
+                self.directory = GServer.SCope.get_data_dir_path_by_file_type(file_type=form.getvalue('file-type'))
+                localpath = _encode_str_if_py2(os.path.join(self.directory, form.getvalue('loomFilePath')), "utf-8")
+                print(localpath)
+                with open(localpath, 'rb') as f:
+                    self.send_resp_headers(200,
+                                           {'Content-length': os.fstat(f.fileno())[6],
+                                            'Access-Control-Allow-Origin': '*',
+                                            'Content-type': 'application/x-hdf5'},
+                                           end=True)
+                    shutil.copyfileobj(f, self.wfile)
             else:
-                self.send_error(415, "Unsupported file tyype")
-            # Update the directory of DroopyFieldStorage
-            form.directory = self.directory
-            self.log_message("Saving uploaded file in " + self.directory)
-            file_items = form[self.form_field]
-
-            # Handle multiple file upload
-            if not isinstance(file_items, list):
-                file_items = [file_items]
-            for item in file_items:
-                filename = _decode_str_if_py2(basename(item.filename), "utf-8")
-                if filename == "":
-                    continue
-                localpath = _encode_str_if_py2(os.path.join(self.directory, filename), "utf-8")
-                root, ext = os.path.splitext(localpath)
-                i = 1
-                # TODO: race condition...
-                while os.path.exists(localpath):
-                    localpath = "%s-%d%s" % (root, i, ext)
-                    i = i + 1
-                if hasattr(item, 'tmpfile'):
-                    # DroopyFieldStorage.make_file() has been called
-                    item.tmpfile.close()
-                    shutil.move(item.tmpfilename, localpath)
+                if form.getvalue('file-type') in GServer.data_dirs.keys():
+                    self.directory = GServer.SCope.get_data_dir_path_by_file_type(file_type=form.getvalue('file-type'), UUID=form.getvalue('UUID'))
                 else:
-                    # no temporary file, self.file is a StringIO()
-                    # see cgi.FieldStorage.read_lines()
-                    with open(localpath, "wb") as fout:
-                        shutil.copyfileobj(item.file, fout)
-                if self.file_mode is not None:
-                    os.chmod(localpath, self.file_mode)
-                self.log_message("Received: %s", os.path.basename(localpath))
+                    self.send_error(415, "Unsupported file tyype")
+                # Update the directory of DroopyFieldStorage
+                form.directory = self.directory
+                self.log_message("Saving uploaded file in " + self.directory)
+                file_items = form[self.form_field]
 
-            # -- Reply
-            # The file list gives a feedback for the upload success
-            ctype = mimetypes.guess_type(localpath)[0]
-            try:
-                # Always read in binary mode. Opening files in text mode may cause
-                # newline translations, making the actual size of the content
-                # transmitted *less* than the content-length!
-                if form.getvalue('file-type') == 'Loom':
-                    try:
-                        with lp.connect(localpath, 'r') as f:
-                            self.log_message('Loom dimensions: {0}'.format(f.shape))
-                            if not (f.shape[0] > 0 and f.shape[1] > 0):
-                                raise KeyError
-                            else:
-                                f = open(localpath, 'rb')
-                    except (KeyError, OSError):
-                        os.remove(localpath)
-                        self.send_response(415, message='Upload Corrupt')
-                        self.send_header('Access-Control-Allow-Origin', '*')
-                        self.end_headers()
-                        return None
-                else:
-                    self.log_message('Not a loom: {0}'.format(form.getvalue('file-type')))
-                    f = open(localpath, 'rb')
-            except IOError:
-                self.send_error(404, "File not found")
-                return None
-            # Send correct HTTP headers and Allow CROS Origin
-            fs = os.fstat(f.fileno())
-            headers = {
-                       # 'Location': '/',
-                       # 'File-Path': localpath,
-                       'Access-Control-Allow-Origin': '*',
-                       'Content-Type': 'application/json',
-                       'Content-Length': 0,
-                       'Last-modified': self.date_time_string(fs.st_mtime)
-                       }
-            self.send_resp_headers(200, headers, end=True)
+                # Handle multiple file upload
+                if not isinstance(file_items, list):
+                    file_items = [file_items]
+                for item in file_items:
+                    filename = _decode_str_if_py2(basename(item.filename), "utf-8")
+                    if filename == "":
+                        continue
+                    localpath = _encode_str_if_py2(os.path.join(self.directory, filename), "utf-8")
+                    root, ext = os.path.splitext(localpath)
+                    i = 1
+                    # TODO: race condition...
+                    while os.path.exists(localpath):
+                        localpath = "%s-%d%s" % (root, i, ext)
+                        i = i + 1
+                    if hasattr(item, 'tmpfile'):
+                        # DroopyFieldStorage.make_file() has been called
+                        item.tmpfile.close()
+                        shutil.move(item.tmpfilename, localpath)
+                    else:
+                        # no temporary file, self.file is a StringIO()
+                        # see cgi.FieldStorage.read_lines()
+                        with open(localpath, "wb") as fout:
+                            shutil.copyfileobj(item.file, fout)
+                    if self.file_mode is not None:
+                        os.chmod(localpath, self.file_mode)
+                    self.log_message("Received: %s", os.path.basename(localpath))
+
+                # -- Reply
+                # The file list gives a feedback for the upload success
+                ctype = mimetypes.guess_type(localpath)[0]
+                try:
+                    # Always read in binary mode. Opening files in text mode may cause
+                    # newline translations, making the actual size of the content
+                    # transmitted *less* than the content-length!
+                    if form.getvalue('file-type') == 'Loom':
+                        try:
+                            with lp.connect(localpath, 'r') as f:
+                                self.log_message('Loom dimensions: {0}'.format(f.shape))
+                                if not (f.shape[0] > 0 and f.shape[1] > 0):
+                                    raise KeyError
+                                else:
+                                    f = open(localpath, 'rb')
+                        except (KeyError, OSError):
+                            os.remove(localpath)
+                            self.send_response(415, message='Upload Corrupt')
+                            self.send_header('Access-Control-Allow-Origin', '*')
+                            self.end_headers()
+                            return None
+                    else:
+                        self.log_message('Not a loom: {0}'.format(form.getvalue('file-type')))
+                        f = open(localpath, 'rb')
+                except IOError:
+                    self.send_error(404, "File not found")
+                    return None
+                # Send correct HTTP headers and Allow CROS Origin
+                fs = os.fstat(f.fileno())
+                headers = {
+                           # 'Location': '/',
+                           # 'File-Path': localpath,
+                           'Access-Control-Allow-Origin': '*',
+                           'Content-Type': 'application/json',
+                           'Content-Length': 0,
+                           'Last-modified': self.date_time_string(fs.st_mtime)
+                           }
+                self.send_resp_headers(200, headers, end=True)
 
         except Exception as e:
             self.log_message(">" + repr(e))
