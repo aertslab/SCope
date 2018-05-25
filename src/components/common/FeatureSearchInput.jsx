@@ -35,8 +35,8 @@ export default class FeatureSearchInput extends Search {
 				onFocus={this.handleFocus}
 				onClick={this.handleInputClick}
 			>
-				<Icon name='search' disabled={locked == 1 ? true : false} />
-				<input />
+				<Icon name='search' />
+				<input disabled={locked == 1 ? true : false}/>
 				<Select options={options} 
 					defaultValue={type} 
 					className='icon typeSelect' 
