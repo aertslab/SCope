@@ -31,10 +31,10 @@ export default class Gene extends Component {
         const { activeLoom, activeFeatures, activeCoordinates, sidebar, activeMetadata, colors } = this.state;
         const isQueryingAnnotation = activeFeatures.some((e) => { return e.featureType == "annotation" })
 
-        let featureSearch = () => {
-            return (_.times(3, i => {
-                let featureSearchboxDisabled = 0
-                let color = colors[i]
+        const featureSearch = () => _.times(3, i => {
+            let featureSearchboxDisabled = 0
+            let color = colors[i]
+            if(activeFeatures.length == 3) {
                 if (activeFeatures[i].featureType == "annotation")
                     color = "#1b2944"
                 else {
@@ -43,13 +43,13 @@ export default class Gene extends Component {
                         featureSearchboxDisabled = 1
                     }
                 }
-                return (
-                    <Grid.Column key={i}>
-                        <FeatureSearchBox field={i} color={color} type='all' value={activeFeatures[i] ? activeFeatures[i].feature : ''} locked={featureSearchboxDisabled}/>
-                    </Grid.Column>
-                )
-            }));
-        }
+            }
+            return (
+                <Grid.Column key={i}>
+                    <FeatureSearchBox field={i} color={color} type='all' value={activeFeatures[i] ? activeFeatures[i].feature : ''} locked={featureSearchboxDisabled}/>
+                </Grid.Column>
+            )
+        });
 
         if (!activeLoom) return (
             <div>
