@@ -121,17 +121,23 @@ export default class FeatureSearch extends React.Component {
 			this.call = gbc.services.scope.Main.getFeatures(query, (err, response) => {
 				if (DEBUG) console.log("getFeatures", response);
 				if (response != null) {
-					let res = [], genes = [], regulons = [], clusters = {};
+					let res = [], genes = [], regulons = [], clusters = {}, annotations = [];
 					let type = this.state.type;
 
 					for (var i = 0; i < response.feature.length; i++) {
 						let f = response.feature[i];
 						let ft = response.featureType[i];
 						let d = response.featureDescription[i];
+						// Gene
 						if (ft == 'gene') {
 							genes.push({ "title": f, "type": ft, "description": d });
+						// Regulons
 						} else if (ft == 'regulon') {
 							regulons.push({ "title": f, "type": ft, "description": d });
+						// Annotations
+						} else if (ft == 'annotation') {
+							annotations.push({ "title": f, "type": ft, "description": d });
+						// Clustering
 						} else if (ft.indexOf('Clustering:') == 0) {
 							if (!clusters[ft]) clusters[ft] = [];
 							clusters[ft].push({ "title": f, "type": ft, "description": d });
@@ -147,14 +153,20 @@ export default class FeatureSearch extends React.Component {
 						}
 					};
 
+					// Limit to maximum 10 results
 					genes = {"name": "gene", "results": genes.slice(0, 10)}
 					regulons = {"name": "regulon", "results": regulons.slice(0, 10)}
+					annotations = {"name": "annotation", "results": annotations.slice(0, 10)}
 
+					// Only show results for the selected result type (gene | regulon | cluster | annotation)
 					if (genes['results'].length && (type == 'all' || type == 'gene')) {
 						res.push(genes);
 					}
 					if (regulons['results'].length && (type == 'all' || type == 'regulon')) {
 						res.push(regulons);
+					}
+					if (annotations['results'].length && (type == 'all') || type == 'annotation') {
+						res.push(annotations)
 					}
 					if (type == 'all' || type == 'cluster') {
 						Object.keys(clusters).map((ft) => {

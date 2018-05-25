@@ -687,6 +687,7 @@ export default class Viewer extends Component {
 			vmax: [0, 0, 0],
 			logic: superposition
 		};
+		console.error(query)
 		if (this.props.customScale && scale)  {
 			query['vmax'] = scale;
 		}
