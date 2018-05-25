@@ -3,7 +3,6 @@ import sys
 import time
 import grpc
 import loompy as lp
-import hashlib
 import os
 import re
 import numpy as np
@@ -24,6 +23,7 @@ from pathlib import Path
 from scopeserver.dataserver.modules.gserver import s_pb2
 from scopeserver.dataserver.modules.gserver import s_pb2_grpc
 from scopeserver.utils import SysUtils as su
+from scopeserver.utils import LoomFileHandler as lfh
 
 from pyscenic.genesig import GeneSignature
 from pyscenic.aucell import create_rankings, enrichment, enrichment4cells
@@ -96,7 +96,7 @@ class SCope(s_pb2_grpc.MainServicer):
         SCope.create_global_dirs()
 
         self.data_dirs = data_dirs
-        self.active_loom_connections = {}
+        self.lfh = lfh.LoomFileHandler()
         self.loom_dir = SCope.get_data_dir_path_by_file_type("Loom")
         self.gene_sets_dir = SCope.get_data_dir_path_by_file_type("GeneSet")
         self.rankings_dir = SCope.get_data_dir_path_by_file_type("LoomAUCellRankings")
@@ -137,35 +137,6 @@ class SCope(s_pb2_grpc.MainServicer):
             if not os.path.isdir(data_dirs[data_type]["path"]):
                 print(data_dirs[data_type]["message"])
                 os.makedirs(data_dirs[data_type]["path"])
-
-    @staticmethod
-    def get_partial_md5_hash(file_path, last_n_kb):
-        with open(file_path, 'rb') as f:
-            file_size = os.fstat(f.fileno()).st_size
-            if file_size < last_n_kb * 1024:
-                f.seek(- file_size, 2)
-            else:
-                f.seek(- last_n_kb * 1024, 2)
-            return hashlib.md5(f.read()).hexdigest()
-
-    def changeLoomMode(self, loom_file_path, mode):
-        print(loom_file_path)
-        if not os.path.exists(loom_file_path):
-            raise ValueError('The file located at ' +
-                             loom_file_path + ' does not exist.')
-        print('{0} getting md5'.format(loom_file_path))
-        partial_md5_hash = SCope.get_partial_md5_hash(loom_file_path, 10000)
-        print('{0} md5 is {1}'.format(loom_file_path, partial_md5_hash))
-
-        if partial_md5_hash in self.active_loom_connections:
-            self.active_loom_connections[partial_md5_hash].close()
-        if mode == 'rw':
-            self.active_loom_connections[partial_md5_hash] = self.get_loom_connection(loom_file_path, rw=True)
-            print('{0} now rw'.format(loom_file_path))
-        else:
-            self.active_loom_connections[partial_md5_hash] = self.get_loom_connection(loom_file_path, rw=False)
-            print('{0} now ro'.format(loom_file_path))
-
 
     @staticmethod
     def activeSessionCheck():
@@ -225,38 +196,8 @@ class SCope(s_pb2_grpc.MainServicer):
         self.globalSets = [x for x in os.listdir(self.gene_sets_dir) if not os.path.isdir(os.path.join(self.gene_sets_dir, x))]
         self.globalrankings = [x for x in os.listdir(self.rankings_dir) if not os.path.isdir(os.path.join(self.rankings_dir, x))]
 
-    def add_loom_connection(self, partial_md5_hash, loom):
-        self.active_loom_connections[partial_md5_hash] = loom
-
     def get_loom_filepath(self, loom_file_name):
         return os.path.join(self.loom_dir, loom_file_name)
-
-    def load_loom_file(self, partial_md5_hash, loom_file_path, rw=False):
-        # if rw:
-        #     loom = lp.connect(loom_file_path, mode='r+')
-        # else:
-        #     loom = lp.connect(loom_file_path, mode='r')\
-        try:
-            loom = lp.connect(loom_file_path, mode='r+')
-        except KeyError as e:
-            print(e)
-            os.remove(loom_file_path)
-            return None
-        self.add_loom_connection(partial_md5_hash, loom)
-        return loom
-
-    def get_loom_connection(self, loom_file_path):
-        if not os.path.exists(loom_file_path):
-            raise ValueError('The file located at ' +
-                             loom_file_path + ' does not exist.')
-        # To check if the given file path is given specified url!
-        partial_md5_hash = SCope.get_partial_md5_hash(
-            loom_file_path, 10000)
-        if partial_md5_hash in self.active_loom_connections:
-            return self.active_loom_connections[partial_md5_hash]
-        else:
-            print("Debug: loading the loom file from " + loom_file_path + "...")
-            return self.load_loom_file(partial_md5_hash, loom_file_path)
 
     @staticmethod
     def get_meta_data_annotation_by_name(loom, name):
@@ -335,7 +276,7 @@ class SCope(s_pb2_grpc.MainServicer):
             dict: A dictionary defining whether the current implemented features in SCope are available for the loom file with the given loom_file_path.
 
         """
-        loom = self.get_loom_connection(loom_file_path)
+        loom = self.lfh.get_loom_connection(loom_file_path)
         attr_margins = [2,2,2,2,0]
         attr_names = ["RegulonsAUC", "Clusterings", "Embeddings_X", "GeneSets", "MetaData"]
         attr_keys = ["RegulonsAUC", "Clusterings", "ExtraEmbeddings", "GeneSets", "GlobalMeta"]
@@ -363,7 +304,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     @lru_cache(maxsize=32)
     def infer_species(self, loom_file_path):
-        loom = self.get_loom_connection(loom_file_path)
+        loom = self.lfh.get_loom_connection(loom_file_path)
         genes = set(SCope.get_genes(loom))
         maxPerc = 0.0
         maxSpecies = ''
@@ -380,7 +321,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return maxSpecies, mappings[maxSpecies]
 
     def get_nb_cells(self, loom_file_path):
-        loom = self.get_loom_connection(loom_file_path)
+        loom = self.lfh.get_loom_connection(loom_file_path)
         return loom.shape[1]
 
     @staticmethod
@@ -388,7 +329,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return loom.ra.Gene.astype(str)
 
     def get_gene_expression(self, loom_file_path, gene_symbol, log_transform=True, cpm_normalise=False, annotation='', logic='OR'):
-        loom = self.get_loom_connection(loom_file_path)
+        loom = self.lfh.get_loom_connection(loom_file_path)
         if gene_symbol not in set(SCope.get_genes(loom)):
             gene_symbol = self.get_gene_names(loom_file_path)[gene_symbol]
         print("Debug: getting expression of " + gene_symbol + "...")
@@ -427,7 +368,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return loom.ca.RegulonsAUC
 
     def get_auc_values(self, loom_file_path, regulon, annotation='', logic='OR'):
-        loom = self.get_loom_connection(loom_file_path)
+        loom = self.lfh.get_loom_connection(loom_file_path)
         print("Debug: getting AUC values for {0} ...".format(regulon))
         cellIndices = list(range(self.get_nb_cells(loom_file_path)))
         if regulon in SCope.get_regulons_AUC(loom).dtype.names:
@@ -439,16 +380,16 @@ class SCope(s_pb2_grpc.MainServicer):
         return [], cellIndices
 
     def get_clusterIDs(self, loom_file_path, clusterID):
-        loom = self.get_loom_connection(loom_file_path)
+        loom = self.lfh.get_loom_connection(loom_file_path)
         return loom.ca.Clusterings[str(clusterID)]
 
     def get_annotation(self, loom_file_path, annoName):
-        loom = self.get_loom_connection(loom_file_path)
+        loom = self.lfh.get_loom_connection(loom_file_path)
         return loom.ca[annoName]
 
     @lru_cache(maxsize=8)
     def get_gene_names(self, loom_file_path):
-        loom = self.get_loom_connection(loom_file_path)
+        loom = self.lfh.get_loom_connection(loom_file_path)
         genes = SCope.get_genes(loom)
         conversion = {}
         species, geneMappings = self.infer_species(loom_file_path)
@@ -465,7 +406,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def build_searchspace(self, loom_file_path, cross_species=''):
         start_time = time.time()
         species, gene_mappings = self.infer_species(loom_file_path)
-        loom = self.get_loom_connection(loom_file_path)
+        loom = self.lfh.get_loom_connection(loom_file_path)
         if SCope.has_meta_data(loom):
             meta_data = SCope.get_meta_data(loom)
 
@@ -529,11 +470,11 @@ class SCope(s_pb2_grpc.MainServicer):
     def get_features(self, loom_file_path, query):
         print(query)
         if query.startswith('hsap\\'):
-            searchSpace = self.build_searchspace(loom_file_path, crossSpecies='hsap')
+            searchSpace = self.build_searchspace(loom_file_path, cross_species='hsap')
             crossSpecies = 'hsap'
             query = query[5:]
         elif query.startswith('mmus\\'):
-            searchSpace = self.build_searchspace(loom_file_path, crossSpecies='mmus')
+            searchSpace = self.build_searchspace(loom_file_path, cross_species='mmus')
             crossSpecies = 'mmus'
             query = query[5:]
         else:
@@ -617,7 +558,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return res
 
     def get_anno_cells(self, loom_file_path, annotations, logic='OR'):
-        loom = self.get_loom_connection(loom_file_path)
+        loom = self.lfh.get_loom_connection(loom_file_path)
         cellIndices = []
         for anno in annotations:
             annoName = anno.name
@@ -637,7 +578,7 @@ class SCope(s_pb2_grpc.MainServicer):
             return sorted(list(set.union(*cellIndices)))
 
     def get_coordinates(self, loom_file_path, coordinatesID=-1, annotation='', logic='OR'):
-        loom = self.get_loom_connection(loom_file_path)
+        loom = self.lfh.get_loom_connection(loom_file_path)
         dims = 0
         if coordinatesID == -1:
             try:
@@ -731,7 +672,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def getCellColorByFeatures(self, request, context):
         start_time = time.time()
         loomFilePath = self.get_loom_filepath(request.loomFilePath)
-        loom = self.get_loom_connection(loomFilePath)
+        loom = self.lfh.get_loom_connection(loomFilePath)
         meta_data = SCope.get_meta_data(loom)
         if not os.path.isfile(loomFilePath):
             return
@@ -894,7 +835,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.CoordinatesReply(x=c["x"], y=c["y"], cellIndices=c["cellIndices"])
 
     def getRegulonMetaData(self, request, context):
-        loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
+        loom = self.lfh.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
         regulonGenes = SCope.get_genes(loom)[loom.ra.Regulons[request.regulon] == 1]
         meta_data = SCope.get_meta_data(loom=loom)
         for regulon in meta_data['regulonThresholds']:
@@ -915,7 +856,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.RegulonMetaDataReply(regulonMeta=regulon)
 
     def getMarkerGenes(self, request, context):
-        loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
+        loom = self.lfh.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
         genes = SCope.get_genes(loom)[loom.ra["ClusterMarkers_{0}".format(request.clusteringID)][str(request.clusterID)] == 1]
         # Filter the MD clusterings by ID
         md_clustering = SCope.get_meta_data_clustering_by_id(loom=loom, id=request.clusteringID)
@@ -950,8 +891,8 @@ class SCope(s_pb2_grpc.MainServicer):
         print('Making metadata for {0}'.format(loom_file_path))
         metaJson = {}
 
-        # self.changeLoomMode(loom_file_path, rw=True)
-        loom = self.get_loom_connection(loom_file_path)
+        # self.change_loom_mode(loom_file_path, rw=True)
+        loom = self.lfh.get_loom_connection(loom_file_path)
 
         # Embeddings
         # Find PCA / tSNE - Catch all 0's ERROR
@@ -992,7 +933,7 @@ class SCope(s_pb2_grpc.MainServicer):
         print(metaJson)
 
         loom.attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
-        # self.changeLoomMode(loom_file_path, rw=False)
+        # self.change_loom_mode(loom_file_path, rw=False)
 
     def getMyLooms(self, request, context):
         my_looms = []
@@ -1007,7 +948,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
         for f in loomsToProcess:
             if f.endswith('.loom'):
-                loom = self.get_loom_connection(self.get_loom_filepath(f))
+                loom = self.lfh.get_loom_connection(self.get_loom_filepath(f))
                 if loom is None:
                     continue
                 file_meta = self.get_file_metadata(self.get_loom_filepath(f))
@@ -1090,8 +1031,8 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.RemainingUUIDTimeReply(UUID=uid, timeRemaining=timeRemaining, sessionsLimitReached=sessionsLimitReached)
 
     def translateLassoSelection(self, request, context):
-        src_loom = self.get_loom_connection(self.get_loom_filepath(request.srcLoomFilePath))
-        dest_loom = self.get_loom_connection(self.get_loom_filepath(request.destLoomFilePath))
+        src_loom = self.lfh.get_loom_connection(self.get_loom_filepath(request.srcLoomFilePath))
+        dest_loom = self.lfh.get_loom_connection(self.get_loom_filepath(request.destLoomFilePath))
         src_cell_ids = [src_loom.ca['CellID'][i] for i in request.cellIndices]
         src_fast_index = set(src_cell_ids)
         dest_mask = [x in src_fast_index for x in dest_loom.ca['CellID']]
@@ -1099,7 +1040,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.TranslateLassoSelectionReply(cellIndices=dest_cell_indices)
 
     def getCellIDs(self, request, context):
-        loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
+        loom = self.lfh.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
         cell_ids = [loom.ca['CellID'][i] for i in request.cellIndices]
         return s_pb2.CellIDsReply(cellIds=cell_ids)
 
@@ -1141,7 +1082,7 @@ class SCope(s_pb2_grpc.MainServicer):
         if not gse.has_AUCell_rankings():
             # Creating the matrix as DataFrame...
             yield gse.update_state(step=1, status_code=200, status_message="Creating the matrix...", values=None)
-            loom = self.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
+            loom = self.lfh.get_loom_connection(self.get_loom_filepath(request.loomFilePath))
             dgem = np.transpose(loom[:, :])
             ex_mtx = pd.DataFrame(data=dgem,
                                   index=loom.ca.CellID,
@@ -1157,7 +1098,7 @@ class SCope(s_pb2_grpc.MainServicer):
         else:
             # Load the rankings...
             yield gse.update_state(step=2, status_code=200, status_message="Rankings exists: loading...", values=None)
-            rnk_loom = self.get_loom_connection(gse.get_AUCell_ranking_filepath())
+            rnk_loom = self.lfh.get_loom_connection(gse.get_AUCell_ranking_filepath())
             rnk_mtx = pd.DataFrame(data=rnk_loom[:, :],
                                    index=rnk_loom.ra.CellID,
                                    columns=rnk_loom.ca.Gene)
