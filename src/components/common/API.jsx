@@ -342,6 +342,7 @@ class API {
 				this.setActiveFeature(field, type, featureType, feature, 0, {description: featureDescription}, page);
 			}
 		} else {
+			console.log("Active feature: "+feature+" ("+featureType+")")
 			this.setActiveFeature(field, type, featureType, feature, 0, {description: featureDescription}, page);
 		}
 	}

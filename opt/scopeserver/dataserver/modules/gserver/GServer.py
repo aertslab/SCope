@@ -217,7 +217,7 @@ class SCope(s_pb2_grpc.MainServicer):
         str_array_joint_compressed = zlib.compress(str_array_joint, 1)
         str_array_joint_compressed_size = sys.getsizeof(str_array_joint_compressed)
         savings_percent = 1-str_array_joint_compressed_size/str_array_size
-        print("Saving "+"{:.2%} of space".format(savings_percent));
+        print("Saving "+"{:.2%} of space".format(savings_percent))
         return str_array_joint_compressed
 
     def set_global_data(self):
@@ -259,6 +259,14 @@ class SCope(s_pb2_grpc.MainServicer):
             return self.load_loom_file(partial_md5_hash, loom_file_path)
 
     @staticmethod
+    def get_meta_data_annotation_by_name(loom, name):
+        md_annotations = SCope.get_meta_data_by_key(loom=loom, key="annotations")
+        md_annotation = list(filter(lambda x: x["name"] == name, md_annotations))
+        if(len(md_annotation) > 1):
+            raise ValueError('Multiple annotations matches the given name '+name)
+        return md_annotation[0]
+
+    @staticmethod
     def get_meta_data_clustering_by_id(loom, id):
         md_clusterings = SCope.get_meta_data_by_key(loom=loom, key="clusterings")
         md_clustering = list(filter(lambda x: x["id"] == id, md_clusterings))
@@ -276,6 +284,24 @@ class SCope(s_pb2_grpc.MainServicer):
                     e['id'] = int(e['id'])
             return md
         return []
+
+    @staticmethod
+    def has_md_annotations_(meta_data):
+        return "annotations" in meta_data
+
+    @staticmethod
+    def has_md_annotations(loom):
+        if SCope.has_meta_data(loom=loom):
+            return SCope.has_md_annotations_(meta_data=SCope.get_meta_data(loom=loom))
+
+    @staticmethod
+    def has_md_clusterings_(meta_data):
+        return "clusterings" in meta_data
+
+    @staticmethod
+    def has_md_clusterings(loom):
+        if SCope.has_meta_data(loom=loom):
+            return SCope.has_md_clusterings_(meta_data=SCope.get_meta_data(loom=loom))
 
     @staticmethod
     def has_meta_data(loom):
@@ -381,6 +407,20 @@ class SCope(s_pb2_grpc.MainServicer):
         return gene_expr, cellIndices
 
     @staticmethod
+    def has_annotation(loom, name):
+        return name in loom.ca.keys()
+
+    @staticmethod
+    def get_annotation_by_name(loom, name):
+        if SCope.has_annotation(loom=loom, name=name):
+            return loom.ca[name]
+        raise ValueError("The given annotation {0} does not exists in the .loom.".format(name))
+
+    @staticmethod
+    def has_regulons_AUC(loom):
+        return "RegulonsAUC" in loom.ca.keys()
+
+    @staticmethod
     def get_regulons_AUC(loom):
         L = loom.ca.RegulonsAUC.dtype.names
         loom.ca.RegulonsAUC.dtype.names = list(map(lambda s: s.replace(' ', '_'), L))
@@ -422,58 +462,68 @@ class SCope(s_pb2_grpc.MainServicer):
         return conversion
 
     @lru_cache(maxsize=16)
-    def build_searchspace(self, loom_file_path, crossSpecies=''):
+    def build_searchspace(self, loom_file_path, cross_species=''):
         start_time = time.time()
-        species, geneMappings = self.infer_species(loom_file_path)
+        species, gene_mappings = self.infer_species(loom_file_path)
         loom = self.get_loom_connection(loom_file_path)
         if SCope.has_meta_data(loom):
             meta_data = SCope.get_meta_data(loom)
 
-        def add_element(searchSpace, elements, elementName):
+        def add_element(search_space, elements, element_type):
             if type(elements) != str:
                 for element in elements:
-                    if elementName == 'gene' and crossSpecies == '' and len(geneMappings) > 0:
-                        if geneMappings[element] != element:
-                            searchSpace[('{0}'.format(str(element)).casefold(), element, elementName)] = geneMappings[element]
+                    if element_type == 'gene' and cross_species == '' and len(gene_mappings) > 0:
+                        if gene_mappings[element] != element:
+                            search_space[('{0}'.format(str(element)).casefold(), element, element_type)] = gene_mappings[element]
                         else:
-                            searchSpace[(element.casefold(), element, elementName)] = element
+                            search_space[(element.casefold(), element, element_type)] = element
                     else:
-                        searchSpace[(element.casefold(), element, elementName)] = element
+                        search_space[(element.casefold(), element, element_type)] = element
             else:
-                searchSpace[(elements.casefold(), elements, elementName)] = elements
-            return searchSpace
+                search_space[(elements.casefold(), elements, element_type)] = elements
+            return search_space
 
-        searchSpace = {}
+        search_space = {}
 
-        if crossSpecies == 'hsap' and species == 'dmel':
-            searchSpace = add_element(searchSpace, SCope.hsap_to_dmel_mappings.keys(), 'gene')
-        elif crossSpecies == 'mmus' and species == 'dmel':
-            searchSpace = add_element(searchSpace, SCope.mmus_to_dmel_mappings.keys(), 'gene')
-
+        # Include all features (clusterings, regulons, annotations, ...) into the search space
+        # if and only if the query is not a cross-species query
+        if cross_species == 'hsap' and species == 'dmel':
+            search_space = add_element(search_space, SCope.hsap_to_dmel_mappings.keys(), 'gene')
+        elif cross_species == 'mmus' and species == 'dmel':
+            search_space = add_element(search_space, SCope.mmus_to_dmel_mappings.keys(), 'gene')
         else:
-            if len(geneMappings) > 0:
+            if len(gene_mappings) > 0:
                 genes = set(SCope.get_genes(loom))
-                shrinkMappings = set([x for x in SCope.dmel_mappings.keys() if x in genes or SCope.dmel_mappings[x] in genes])
-                # searchSpace = add_element(searchSpace, SCope.dmel_mappings.keys(), 'gene')
-                searchSpace = add_element(searchSpace, shrinkMappings, 'gene')
+                shrink_mappings = set([x for x in SCope.dmel_mappings.keys() if x in genes or SCope.dmel_mappings[x] in genes])
+                # search_space = add_element(search_space, SCope.dmel_mappings.keys(), 'gene')
+                search_space = add_element(search_space, shrink_mappings, 'gene')
             else:
-                searchSpace = add_element(searchSpace, SCope.get_genes(loom), 'gene')
+                search_space = add_element(search_space, SCope.get_genes(loom), 'gene')
 
-            if SCope.has_meta_data(loom):
+            # Add clusterings to the search space if present in .loom
+            if SCope.has_md_clusterings_(meta_data=meta_data):
                 for clustering in meta_data['clusterings']:
                     allClusters = ['All Clusters']
                     for cluster in clustering['clusters']:
                         allClusters.append(cluster['description'])
-                    searchSpace = add_element(searchSpace, allClusters, 'Clustering: {0}'.format(clustering['name']))
-            try:
-                searchSpace = add_element(searchSpace, SCope.get_regulons_AUC(loom).dtype.names, 'regulon')
-            except AttributeError:
-                print('No regulons in file')
-                pass  # No regulons in file
+                    search_space = add_element(search_space, allClusters, 'Clustering: {0}'.format(clustering['name']))
+            
+            # Add regulons to the search space if present in .loom
+            if SCope.has_regulons_AUC(loom=loom):
+                search_space = add_element(search_space, SCope.get_regulons_AUC(loom).dtype.names, 'regulon')
+            else:
+                print("No regulons found in the .loom file.")
+
+            # Add annotations to the search space if present in .loom
+            if SCope.has_md_annotations_(meta_data=meta_data):
+                annotations = []
+                for annotation in meta_data['annotations']:
+                    annotations.append(annotation['name'])
+                search_space = add_element(search_space, annotations, 'annotation')
 
         print("Debug: %s seconds elapsed making search space ---" % (time.time() - start_time))
         #  Dict, keys = tuple(elementCF, element, elementName), values = element/translastedElement
-        return searchSpace
+        return search_space
 
     @lru_cache(maxsize=256)
     def get_features(self, loom_file_path, query):
@@ -732,6 +782,17 @@ class SCope(s_pb2_grpc.MainServicer):
                         features.append([_UPPER_LIMIT_RGB if auc >= request.threshold[n] else 0 for auc in vals])
                 else:
                     features.append(np.zeros(n_cells))
+            elif request.featureType[n] == 'annotation':
+                md_annotation_values = SCope.get_meta_data_annotation_by_name(loom=loom, name=feature)["values"]
+                ca_annotation = SCope.get_annotation_by_name(loom=loom, name=feature)
+                ca_annotation_as_int = list(map(lambda x: md_annotation_values.index(x), ca_annotation))
+                num_annotations = max(ca_annotation_as_int)
+                if num_annotations <= len(BIG_COLOR_LIST):
+                    for i in ca_annotation_as_int:
+                       hex_vec.append(BIG_COLOR_LIST[i])
+                else:
+                    raise ValueError("The annotation {0} has too many unique values.".format(feature))
+                return s_pb2.CellColorByFeaturesReply(color=hex_vec, vmax=vmax)
             elif request.featureType[n].startswith('Clustering: '):
                 for clustering in meta_data['clusterings']:
                     if clustering['name'] == re.sub('^Clustering: ', '', request.featureType[n]):
