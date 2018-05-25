@@ -190,10 +190,8 @@ class ViewerSidebar extends Component {
 							"-webkit-mask-box-image": "url('src/images/dot.png')",
 							"backgroundColor": "#"+ props.value
 						}
-						console.error(colorLegendStyle)
 						return (
-							<div style={colorLegendStyle}>
-							</div>
+							<div style={colorLegendStyle}></div>
 						)
 					}
 					let legendTableColumns = [newMarkerTableColumn("Value", "value", "value", null)
