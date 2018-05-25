@@ -33,13 +33,15 @@ export default class Gene extends Component {
 
         let featureSearch = () => {
             return (_.times(3, i => {
-                let featureSearchboxDisabled = 1
+                let featureSearchboxDisabled = 0
                 let color = colors[i]
                 if (activeFeatures[i].featureType == "annotation")
                     color = "#1b2944"
                 else {
-                    if(isQueryingAnnotation)
+                    if(isQueryingAnnotation) {
+                        color = "grey"
                         featureSearchboxDisabled = 1
+                    }
                 }
                 return (
                     <Grid.Column key={i}>
