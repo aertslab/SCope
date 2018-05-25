@@ -29,11 +29,25 @@ export default class Gene extends Component {
 
     render() {
         const { activeLoom, activeFeatures, activeCoordinates, sidebar, activeMetadata, colors } = this.state;
-        let featureSearch = () =>  _.times(3, i => (
-            <Grid.Column key={i}>
-                <FeatureSearchBox field={i} color={colors[i]} type='all' value={activeFeatures[i] ? activeFeatures[i].feature : ''} />
-            </Grid.Column>
-        ));
+        const isQueryingAnnotation = activeFeatures.some((e) => { return e.featureType == "annotation" })
+
+        let featureSearch = () => {
+            return (_.times(3, i => {
+                let featureSearchboxDisabled = 1
+                let color = colors[i]
+                if (activeFeatures[i].featureType == "annotation")
+                    color = "#1b2944"
+                else {
+                    if(isQueryingAnnotation)
+                        featureSearchboxDisabled = 1
+                }
+                return (
+                    <Grid.Column key={i}>
+                        <FeatureSearchBox field={i} color={color} type='all' value={activeFeatures[i] ? activeFeatures[i].feature : ''} locked={featureSearchboxDisabled}/>
+                    </Grid.Column>
+                )
+            }));
+        }
 
         if (!activeLoom) return (
             <div>
