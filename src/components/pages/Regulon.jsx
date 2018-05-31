@@ -35,7 +35,7 @@ export default class Regulon extends Component {
         const { activeLoom, activeCoordinates, activeFeatures, colors, geneFeatures, sidebar } = this.state;
         let featureSearch = _.times(3, i => (
             <Grid.Column key={i}>
-                <FeatureSearchBox field={i} color={colors[i]} type="regulon" locked="1" value={activeFeatures[i] ? activeFeatures[i].feature : ''} />
+                <FeatureSearchBox field={i} color={colors[i]} type="regulon" selectLocked={true} value={activeFeatures[i] ? activeFeatures[i].feature : ''} />
             </Grid.Column>
         ));
         let featureThreshold = _.times(3, i => (

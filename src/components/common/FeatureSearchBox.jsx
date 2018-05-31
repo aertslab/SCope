@@ -21,7 +21,7 @@ export default class FeatureSearch extends React.Component {
 	render() {
 
 		const { isLoading, value, results, type, disabled } = this.state;
-		const { locked, color, options } = this.props;
+		const { inputLocked, selectLocked, color, options } = this.props;
 
 		return (
 			<Segment color={color} inverted={color ? true : false} className={ color ? "noPadding" : "noFrame" }>
@@ -42,7 +42,8 @@ export default class FeatureSearch extends React.Component {
 					selectFirstResult={true}
 					value={value}
 					type={type}
-					locked={locked}
+					inputLocked={inputLocked}
+					selectLocked={selectLocked}
 				/>
 			</Segment>
 		);

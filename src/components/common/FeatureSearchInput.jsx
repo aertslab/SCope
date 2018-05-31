@@ -5,7 +5,7 @@ import { Search, Input, Select, Icon } from 'semantic-ui-react'
 export default class FeatureSearchInput extends Search {
 
 	renderSearchInput = () => {
-		const { color, type, locked } = this.props
+		const { color, type, inputLocked, selectLocked } = this.props
 		const { value } = this.state		
 		let options = this.props.options;
 		if (!options) {
@@ -36,11 +36,11 @@ export default class FeatureSearchInput extends Search {
 				onClick={this.handleInputClick}
 			>
 				<Icon name='search' />
-				<input disabled={locked == 1 ? true : false}/>
+				<input disabled={inputLocked}/>
 				<Select options={options} 
 					defaultValue={type} 
 					className='icon typeSelect' 
-					disabled={locked == 1 ? true : false} 
+					disabled={selectLocked} 
 					onChange={this.handleTypeChange.bind(this)} 
 					tabIndex={-1} 					
 				/>

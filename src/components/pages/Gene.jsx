@@ -33,7 +33,7 @@ export default class Gene extends Component {
         const isQueryingAnnotation = activeFeatures.some((e) => { return e.featureType == "annotation" })
 
         const featureSearch = () => _.times(3, i => {
-            let featureSearchboxDisabled = 0
+            let featureSearchboxDisabled = false
             let color = colors[i]
             if(activeFeatures.length == 3) {
                 if (activeFeatures[i].featureType == "annotation")
@@ -41,13 +41,13 @@ export default class Gene extends Component {
                 else {
                     if(isQueryingAnnotation) {
                         color = "grey"
-                        featureSearchboxDisabled = 1
+                        featureSearchboxDisabled = true
                     }
                 }
             }
             return (
                 <Grid.Column key={i}>
-                    <FeatureSearchBox field={i} color={color} type='all' value={activeFeatures[i] ? activeFeatures[i].feature : ''} locked={featureSearchboxDisabled}/>
+                    <FeatureSearchBox field={i} color={color} type='all' value={activeFeatures[i] ? activeFeatures[i].feature : ''} inputLocked={featureSearchboxDisabled} selectLocked={featureSearchboxDisabled}/>
                 </Grid.Column>
             )
         });

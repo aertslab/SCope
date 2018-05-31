@@ -26,8 +26,8 @@ class Loom():
         return self.abs_file_path
     
     def get_global_attribute_by_name(self, name):
-        if hasattr(self.loom_connection.attrs, name):
-            raise ValueError("The global attribute {0} does not exist in the .loom file.".format(name))
+        if not hasattr(self.loom_connection.attrs, name):
+            raise AttributeError("The global attribute {0} does not exist in the .loom file.".format(name))
         return self.loom_connection.attrs[name]
 
     @staticmethod
