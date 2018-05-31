@@ -37,7 +37,7 @@ class SCopeServer():
         self.xs_thread.start()
 
     def start_data_server(self):
-        self.gs_thread = threading.Thread(target=gs.serve, args=(self.run_event, self.devEnv,), kwargs={'port': self.g_port, 'appMode': self.appMode})
+        self.gs_thread = threading.Thread(target=gs.serve, args=(self.run_event, self.devEnv,), kwargs={'port': self.g_port, 'app_mode': self.appMode})
         self.ps_thread = threading.Thread(target=ps.run, args=(self.run_event,), kwargs={'port': self.p_port})
         self.gs_thread.start()
         self.ps_thread.start()
