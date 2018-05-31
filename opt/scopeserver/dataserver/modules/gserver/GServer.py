@@ -95,14 +95,6 @@ class SCope(s_pb2_grpc.MainServicer):
         print("Saving "+"{:.2%} of space".format(savings_percent))
         return str_array_joint_compressed
 
-    def get_clusterIDs(self, loom_file_path, clusterID):
-        loom = self.lfh.get_loom_connection(loom_file_path)
-        return loom.ca.Clusterings[str(clusterID)]
-
-    def get_annotation(self, loom_file_path, annoName):
-        loom = self.lfh.get_loom_connection(loom_file_path)
-        return loom.ca[annoName]
-
     @lru_cache(maxsize=16)
     def build_searchspace(self, loom, cross_species=''):
         start_time = time.time()
@@ -370,9 +362,9 @@ class SCope(s_pb2_grpc.MainServicer):
                     if clustering['name'] == re.sub('^Clustering: ', '', request.featureType[n]):
                         clusteringID = str(clustering['id'])
                         if request.feature[n] == 'All Clusters':
-                            numClusters = max(loom.ca.Clusterings[clusteringID])
+                            numClusters = max(loom.get_clustering_by_id(clusteringID))
                             if numClusters <= 245:
-                                for i in loom.ca.Clusterings[clusteringID]:
+                                for i in loom.get_clustering_by_id(clusteringID):
                                     hex_vec.append(BIG_COLOR_LIST[i])
                             else:
                                 interval = int(16581375 / numClusters)
@@ -385,7 +377,7 @@ class SCope(s_pb2_grpc.MainServicer):
                             for cluster in clustering['clusters']:
                                 if request.feature[n] == cluster['description']:
                                     clusterID = int(cluster['id'])
-                clusterIndices = loom.ca.Clusterings[clusteringID] == clusterID
+                clusterIndices = loom.get_clustering_by_id(clusteringID) == clusterID
                 clusterCol = np.array([_UPPER_LIMIT_RGB if x else 0 for x in clusterIndices])
                 if len(request.annotation) > 0:
                     cellIndices = loom.get_anno_cells(annotations=request.annotation, logic=request.logic)
@@ -405,9 +397,9 @@ class SCope(s_pb2_grpc.MainServicer):
         print("Debug: %s seconds elapsed (compression) ---" % (time.time() - comp_start_time))
 
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
-        return s_pb2.CellColorByFeaturesReply(color=hex_vec,
-                                              compressedColor=None,
-                                              hasAddCompressionLayer=False,
+        return s_pb2.CellColorByFeaturesReply(color=None,
+                                              compressedColor=hex_vec_compressed,
+                                              hasAddCompressionLayer=True,
                                               vmax=vmax,
                                               maxVmax=maxVmax,
                                               cellIndices=cellIndices)
@@ -424,9 +416,9 @@ class SCope(s_pb2_grpc.MainServicer):
             cellIndices = list(range(loom.get_nb_cells()))
 
         cellClusters = []
-        for cluster in request.clusterings:
-            if cluster != '':
-                cellClusters.append(loom.get_clusterIDs(clusterID=cluster)[cellIndices])
+        for clustering_id in request.clusterings:
+            if clustering_id != '':
+                cellClusters.append(loom.get_clustering_by_id(clustering_id=clustering_id)[cellIndices])
         geneExp = []
         for gene in request.selectedGenes:
             if gene != '':
@@ -673,7 +665,7 @@ class SCope(s_pb2_grpc.MainServicer):
             rnk_mtx = create_rankings(ex_mtx=ex_mtx)
             # Saving the rankings...
             yield gse.update_state(step=2.2, status_code=200, status_message="Saving the rankings...", values=None)
-            lp.create(gse.get_AUCell_ranking_filepath(), rnk_mtx.as_matrix(), {"CellID": loom.ca.CellID}, {"Gene": loom.get_genes()})
+            lp.create(gse.get_AUCell_ranking_filepath(), rnk_mtx.as_matrix(), {"CellID": loom.get_cell_ids()}, {"Gene": loom.get_genes()})
             print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
         else:
             # Load the rankings...

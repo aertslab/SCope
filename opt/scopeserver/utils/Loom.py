@@ -369,6 +369,13 @@ class Loom():
     # Clusterings #
     ###############
 
+    def get_clustering_by_id(self, clustering_id):
+        return self.loom_connection.ca.Clusterings[str(clustering_id)]
+    
+    # def get_cluster_IDs(self, loom_file_path, clustering_id):
+    #     loom = self.lfh.get_loom_connection(loom_file_path)
+    #     return loom.ca.Clusterings[str(clustering_id)]
+
     def get_cluster_marker_genes(self, clustering_id, cluster_id):
         return self.get_genes()[self.loom_connection.ra["ClusterMarkers_{0}".format(clustering_id)][str(cluster_id)] == 1]
     
