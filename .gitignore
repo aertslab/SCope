@@ -14,17 +14,7 @@
 *.spec
 **/.DS_Store
 
-yarn.lock
-SCope.code-workspace
-
-#scope/assets
 node_modules
-test
-HOWTO.md
-REFERENCES.md
-RELEASES.md
-TODO.md
-NOTES.md
 
 # Server
 opt/scopeserver/dataserver/__pycache__
@@ -41,9 +31,7 @@ opt/scope_server.egg-info
 opt/scopeserver/bindserver/pbjs*
 opt/scopeserver/bindserver/window-size*
 
-
-assets/*.js
-
+assets
 
 release/*
 release/logs
