@@ -19,9 +19,13 @@ bash Miniconda3-latest-[...].sh
 
 - Node.js & npm: 
 ```
-# Using Ubuntu
+# Ubuntu
 curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
 sudo apt-get install -y nodejs
+
+# Enterprise Linux and Fedora
+curl -sL https://rpm.nodesource.com/setup_9.x | sudo bash -
+sudo yum -y install nodejs
 ```
 For more details and other versions please visit https://github.com/nodesource/distributions
 

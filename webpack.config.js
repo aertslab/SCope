@@ -3,6 +3,7 @@ const webpack = require('webpack')
 var WebpackGitHash = require('webpack-git-hash');
 var fs = require('fs')
 var pkg = require('./package.json')
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 
 let config = {
     entry: './src/main.jsx',
@@ -21,7 +22,8 @@ let config = {
         extensions: ['.js', '.jsx', '.css']
     },
     module: {
-        loaders: [{
+        loaders: [
+        {
             test: /\.(js|jsx)$/,
             loader: ['react-hot-loader/webpack', 'babel-loader'],
             exclude: /node_modules/
@@ -58,7 +60,7 @@ let config = {
             })
         }),
         new WebpackGitHash({
-            cleanup: false,
+            cleanup: true,
             callback: function(versionHash) {
                 var indexHtml = fs.readFileSync('./index.html', 'utf8');
                 indexHtml = indexHtml.replace(/src="\.\/assets\/.*\.js"/, 'src="./assets/'+ pkg.name +'-'+ pkg.version +'.' + versionHash + '.js"');
@@ -70,13 +72,14 @@ let config = {
 }
 
 if (process.env.NODE_ENV === 'production') {
-    // config.plugins.push(
-    //    new webpack.optimize.UglifyJsPlugin({
-    //        compress: {
-    //            warnings: true
-    //        }
-    //    })
-    //)
+    config.plugins.push(
+        new UglifyJsPlugin({
+            parallel: 4,
+            uglifyOptions: {
+                warnings: false,
+            }
+        })
+    )
     config.plugins.push(
         new webpack.optimize.OccurrenceOrderPlugin()
     )
