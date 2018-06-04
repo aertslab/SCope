@@ -14,12 +14,13 @@ let scopeServer, scopeClient;
 
 function startSCopeServer() {
     console.log("Starting SCope Server...")
+    const scopeStartCmd = "source activate scope && scope-server"
     if(isDaemon && !isWin) {
-        scopeServer = exec('tmux new-session -d -s scope scope-server', (error, stdout, stderr) => {
+        scopeServer = exec('tmux new-session -d -s scope "'+ scopeStartCmd +'"', (error, stdout, stderr) => {
             // result
         });
     } else {
-        scopeServer = exec('scope-server', (error, stdout, stderr) => {
+        scopeServer = exec(scopeStartCmd, (error, stdout, stderr) => {
             // result
         });
         console.log("SCope Server started as daemon with PID: "+ scopeServer.pid +"!")
@@ -36,7 +37,7 @@ function startSCopeClient() {
             const path = "/var/www/html"
             if (fs.existsSync(path)) {
                 console.log("Copying SCope to Apache Web Server directory...")
-                shell.exec('sudo cp * '+ path);
+                shell.exec('sudo cp -r . '+ path);
             } else {
                 console.log("Cannot find "+ path +". Please install Apache Web Server.")
             }
@@ -50,8 +51,8 @@ function startSCopeClient() {
 }
 
 function openSCopeClient() {
-    console.log("Open SCope in browser...")
     if(!isProd) {
+        console.log("Open SCope in browser...")
         launcher('http://localhost:8080', { browser: ['chrome', 'firefox', 'safari'] }, (e, browser) => {
             if(e) return console.log(e);
             browser.on('stop', (code) => {

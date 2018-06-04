@@ -72,14 +72,16 @@ let config = {
 }
 
 if (process.env.NODE_ENV === 'production') {
-    config.plugins.push(
-        new UglifyJsPlugin({
-            parallel: 4,
-            uglifyOptions: {
-                warnings: false,
-            }
-        })
-    )
+    if(process.env.NODE_TYPE !== 'aws') { // Take huge time on free tier aws
+        config.plugins.push(
+            new UglifyJsPlugin({
+                parallel: true,
+                uglifyOptions: {
+                    warnings: false,
+                }
+            })
+        )
+    }
     config.plugins.push(
         new webpack.optimize.OccurrenceOrderPlugin()
     )

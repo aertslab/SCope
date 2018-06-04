@@ -45,15 +45,19 @@ Install SCope:
 npm install
 ```
 
-### Run 
+### Run
 
-- SCope Server
+- One Command Run:
 ```
+npm run scope
+``` 
+
+- Debug Run:
+```
+# Start SCope Server
 scope-server
-```
 
-- SCope Client
-```
+# Start SCope Client
 npm run dev
 ```
 
