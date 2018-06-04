@@ -12,9 +12,9 @@ import argparse
 import sys
 
 parser = argparse.ArgumentParser(description='Launch the scope server')
-parser.add_argument('-g_port', metavar='gPort', type=int, help='gPort', default=50052)
-parser.add_argument('-p_port', metavar='pPort', type=int, help='pPort', default=50051)
-parser.add_argument('-x_port', metavar='xPort', type=int, help='xPort', default=8081)
+parser.add_argument('-g_port', metavar='gPort', type=int, help='gPort', default=55853)
+parser.add_argument('-p_port', metavar='pPort', type=int, help='pPort', default=55851)
+parser.add_argument('-x_port', metavar='xPort', type=int, help='xPort', default=55852)
 parser.add_argument('--app_mode', action='store_true', help='Run in app mode (Fixed UUID)', default=False)
 parser.add_argument('--dev_env', action='store_true', help='Run in dev mode', default=False)
 

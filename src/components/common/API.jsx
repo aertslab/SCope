@@ -18,7 +18,7 @@ class API {
 		console.log(this.WSport, this.RPCport)
 
 		try {
-			this.GBCConnection = new this.GBC("ws://" + BACKEND.host + ":" + this.WSport + "/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + this.RPCport } }).connect();
+			this.GBCConnection = new this.GBC("ws://" + FRONTEND.host +":"+ this.WSport, 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + this.RPCport } }).connect();	
 			console.log(this.GBCConnection)
 			this.connected = true;
 		} catch (ex) {

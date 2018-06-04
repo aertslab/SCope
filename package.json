@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "preinstall": "npm i shelljs && node bin/install.js",
-    "dev": "cross-env NODE_ENV=development webpack-dev-server --hot",
+    "dev": "cross-env NODE_ENV=development NODE_TYPE=local webpack-dev-server --hot",
     "build": "cross-env NODE_ENV=production NODE_TYPE=local webpack",
     "build-aws": "cross-env NODE_ENV=production NODE_TYPE=aws webpack",
     "test": "echo \"Error: no test specified\"",

@@ -19,7 +19,7 @@ export default class Uploader {
         }
 
         let xhr = new XMLHttpRequest();
-        xhr.open("POST", BACKEND.proto + "://" + BACKEND.host + ":" + this.XHRport + "/");
+        xhr.open("POST", FRONTEND.protocol +"://" + FRONTEND.host + "/upload/")
         xhr.upload.addEventListener('progress', (event) => {
             if (DEBUG) console.log("Data uploaded: " + event.loaded + "/" + event.total);
             let progress = (event.loaded / event.total * 100).toPrecision(1);

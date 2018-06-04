@@ -4,12 +4,15 @@ var WebpackGitHash = require('webpack-git-hash');
 var fs = require('fs')
 var pkg = require('./package.json')
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const _config = require('./config.json');
+console.log(_config)
 
 let config = {
     entry: './src/main.jsx',
     devServer: {
       host: '0.0.0.0',
-      port: 8080
+      port: 8080,
+      disableHostCheck: true
     },
     output: {
         path: path.resolve('assets'),
@@ -40,7 +43,8 @@ let config = {
     plugins: [
         new webpack.DefinePlugin({
             'process.env': {
-                NODE_ENV: JSON.stringify(process.env.NODE_ENV)
+                NODE_ENV: JSON.stringify(process.env.NODE_ENV),
+                NODE_TYPE: JSON.stringify(process.env.NODE_TYPE)
             }
         }),
         new webpack.DefinePlugin({
@@ -52,11 +56,15 @@ let config = {
                 token: "8422dd882b60604d327939997448dd1b5c61f54e"
             }),
             BACKEND: JSON.stringify({
-                proto: "http",
+                protocol: _config.protocol,
                 host: "127.0.0.1",
-                WSport: "8081",
-                XHRport: "50051",
-                RPCport: "50052"
+                WSport: _config.x_port,
+                XHRport: _config.p_port,
+                RPCport: _config.g_port
+            }),
+            FRONTEND: JSON.stringify({
+                protocol: _config.protocol,
+                host: _config.host
             })
         }),
         new WebpackGitHash({
