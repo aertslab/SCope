@@ -1,28 +1,59 @@
 #!/usr/bin/env node
-const shell = require("shelljs");
+// Load node dependencies
 const launcher = require( 'launch-browser' );
-var exec = require('child_process').exec;
-var fs = require('fs');
+const exec = require('child_process').exec;
+const fs = require('fs');
+const path = require('path');
 
+// Load custom dependencies
+const apache = require("./apache/make_scope_conf.js");
+const utils = require("./bin/utils.js")
+
+// Import conig giles
+const _config = require('./config.json');
+
+// Declare variables
 const isWin = process.platform === "win32";
 const isAWS = process.argv.includes("--aws") || false
 const isDaemon = process.argv.includes("--daemon") || isAWS
 const isProd = process.argv.includes("--prod") || isAWS
+
+console.log("Windows: "+ isWin)
+console.log("Running in AWS: "+ isAWS)
+console.log("Running as Daemon: "+ isDaemon)
+console.log("Production Mode: "+ isProd)
+
+// Check if programs are installed
+// scope-server
+if(!utils._commandExists("scope-server")) {
+    console.log("Please install scope-server.")
+    process.exit()
+}
+// tmux
+if(isDaemon) {
+    if(utils._commandExists("tmux")) {
+        console.log("Please install tmux.")
+        process.exit()
+    }
+}
+
+// Create folders
+const assetsDir = './assets';
+if (!fs.existsSync(assetsDir)){
+    fs.mkdirSync(assetsDir);
+}
 
 console.log("Launching SCope...")
 let scopeServer, scopeClient;
 
 function startSCopeServer() {
     console.log("Starting SCope Server...")
-    const scopeStartCmd = "source activate scope && scope-server"
+    const scopeStartCmd = "scope-server"
     if(isDaemon && !isWin) {
-        scopeServer = exec('tmux new-session -d -s scope "'+ scopeStartCmd +'"', (error, stdout, stderr) => {
-            // result
-        });
+        const tmuxScopeStartCmd = 'tmux new-session -d -s scope "'+ scopeStartCmd +'"'
+        scopeServer = utils.runCheckCommand(tmuxScopeStartCmd)
     } else {
-        scopeServer = exec(scopeStartCmd, (error, stdout, stderr) => {
-            // result
-        });
+        scopeServer = utils.runCheckCommand(scopeStartCmd)
         console.log("SCope Server started as daemon with PID: "+ scopeServer.pid +"!")
         console.log("SCope Server daemon can be accessed using 'tmux a -t scope'")
     }
@@ -30,23 +61,22 @@ function startSCopeServer() {
 
 function startSCopeClient() {
     console.log("Starting SCope Client...")
-    if(isProd) {
-        console.log("Compiling SCope Client...")
-        shell.exec('npm run build');
-        if(isAWS) {
-            const path = "/var/www/html"
-            if (fs.existsSync(path)) {
-                console.log("Copying SCope to Apache Web Server directory...")
-                shell.exec('sudo cp -r . '+ path);
-            } else {
-                console.log("Cannot find "+ path +". Please install Apache Web Server.")
-            }
+    if(isAWS) {
+        utils.runCheckCommand("npm run build-aws")
+        if (fs.existsSync(_config.apacheHtmlDir)) {
+            console.log("Copying SCope to Apache Web Server directory...")
+            utils.runCheckCommand("cp -r . "+ _config.apacheHtmlDir);
+        } else {
+            console.log("Cannot find "+ _config.apacheHtmlDir +". Please install HTTP Apache Web Server.")
         }
     } else {
-        scopeClient = exec('npm run dev', (error, stdout, stderr) => {
-            // result
-        });
-        console.log("SCope Client started with PID: "+ scopeClient.pid +"!")
+        if(isProd) {
+            console.log("Compiling SCope Client...")
+            utils.runCheckCommand('npm run build');
+        } else {
+            scopeClient = utils.runCheckCommand("npm run dev")
+            console.log("SCope Client started with PID: "+ scopeClient.pid +"!")
+        }
     }
 }
 
@@ -70,6 +100,10 @@ function openSCopeClient() {
     }
 }
 
+const apacheConfigFilePath = path.join(_config.apacheHttpdDir,"conf.d","scope.config")
+if (!fs.existsSync(apacheConfigFilePath)) {
+    apache.makeApacheConfig()
+}
 startSCopeServer()
 startSCopeClient()
 openSCopeClient()
