@@ -6,24 +6,24 @@
 2. Connect to you Amazon AWS account, go to Instances (left column) and click **Launch instance**
 3. Select Amazon Linux 2 instance
 <br>
-![Step 1](images/scope_aws_deploy_step1.png)
+![Step 1](/tutorials/aws-deployment/images/scope_aws_deploy_step1.png)
 4. Select t2.micro instance type and click **Next: Configure Instance Details**
 <br>
-![Step 2](images/scope_aws_deploy_step2.png)
+![Step 2](/tutorials/aws-deployment/images/scope_aws_deploy_step2.png)
 <br>
 /!\ This is an EBS storage type i.e.: The local instance store volumes that are available to the instance. **The data in an instance store is not permanent** - it persists only during the lifetime of the instance.
 5. Configure instance details and/or click **Next: Add Storage**
 <br>
-![Step 3](images/scope_aws_deploy_step3.png)
+![Step 3](/tutorials/aws-deployment/images/scope_aws_deploy_step3.png)
 6. Type the amount of storage (GiB) you need for this instance and click **Next: Add Tags**
 <br>
-![Step 4](images/scope_aws_deploy_step4.png)
+![Step 4](/tutorials/aws-deployment/images/scope_aws_deploy_step4.png)
 7. Add SCope tag and/or any other tag and click **Next: Create Security Group**
 <br>
-![Step 5](images/scope_aws_deploy_step5.png)
+![Step 5](/tutorials/aws-deployment/images/scope_aws_deploy_step5.png)
 8. Create a security group to control the traffic (e.g.: HTTP inbound connections) of your instance and click **Review and Launch**
 <br>
-![Step 6](images/scope_aws_deploy_step6.png)
+![Step 6](/tutorials/aws-deployment/images/scope_aws_deploy_step6.png)
 
 Since, I already created a security group, I selected an existing one. For more details about authorizing only specific inbound HTTP (or other protocols) connections to your instance, please read: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/authorizing-access-to-an-instance.html
 9. Select **create a new key pair**. Type a name for your key pair. Download it and **store it in a secure and accessible location**. Click on **Launch instances**. You should now be able to see your newly created instance.
@@ -45,17 +45,18 @@ ssh -i [path-to-private-key] ec2-user@[public-dns-ipv4]
 
 ```[public-dns-ipv4]``` should be replaced by the value shown in the Public DNS (IPv4) column of your Amazon WS instance.
 
-- With configuring SSH config file
-   1. Update your ssh config file (```~/.ssh/config```) by adding the following lines:
+Alternatively, you can also configure your SSH config file:
+
+1. Update your ssh config file (```~/.ssh/config```) by adding the following lines:
 ```
 Host aws-scope [public-dns-ipv4]
   User ec2-user
   Hostname [public-dns-ipv4]
   Port 22
   IdentityFile [path-to-private-key]
-```
+``` 
 
-   2. Open a new terminal and type to connect to your AWS instance:
+2. Open a new terminal and type to connect to your AWS instance:
 ```
 ssh aws-scope
 ```
@@ -89,7 +90,7 @@ sudo amazon-linux-extras install lamp-mariadb10.2-php7.2 php7.2
 sudo yum install -y httpd
 ```
 
-3. Allow the ec2-user account to manipulate files in this `/var/www/html`:
+3. Allow the ec2-user account to manipulate files in `/var/www/html` and `/etc/http.d/conf.d`:
 ```
 sudo usermod -a -G apache ec2-user
 exit
@@ -97,8 +98,10 @@ exit
 ssh aws-scope
 # Change the group ownership of /var/www and its contents to the apache group
 sudo chown -R ec2-user:apache /var/www
+sudo chown -R ec2-user:apache /etc/http.d/conf.d
 # Add group write permissions and to set the group ID on future subdirectories
 sudo chmod 2775 /var/www && find /var/www -type d -exec sudo chmod 2775 {} \;
+sudo chmod 2775 /etc/http.d/conf.d
 find /var/www -type f -exec sudo chmod 0664 {} \;
 ```
 

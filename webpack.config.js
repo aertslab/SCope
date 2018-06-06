@@ -48,7 +48,8 @@ let config = {
             }
         }),
         new webpack.DefinePlugin({
-            DEBUG: true
+            DEBUG: _config.debug,
+            REVERSEPROXYON: _config.reverseProxyOn
         }),
         new webpack.DefinePlugin({
             BITLY: JSON.stringify({
@@ -58,13 +59,13 @@ let config = {
             BACKEND: JSON.stringify({
                 protocol: _config.protocol,
                 host: "127.0.0.1",
-                WSport: _config.x_port,
-                XHRport: _config.p_port,
-                RPCport: _config.g_port
+                WSport: _config.xPort,
+                XHRport: _config.pPort,
+                RPCport: _config.gPort
             }),
             FRONTEND: JSON.stringify({
                 protocol: _config.protocol,
-                host: _config.host
+                host: _config.domainName
             })
         }),
         new WebpackGitHash({

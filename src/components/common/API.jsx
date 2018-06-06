@@ -18,7 +18,11 @@ class API {
 		console.log(this.WSport, this.RPCport)
 
 		try {
-			this.GBCConnection = new this.GBC("ws://" + FRONTEND.host + "/protobuf/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + this.RPCport } }).connect();
+			if(REVERSEPROXYON) {
+				this.GBCConnection = new this.GBC("ws://" + FRONTEND.host + "/protobuf/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + this.RPCport } }).connect();
+			} else {
+				this.GBCConnection = new this.GBC("ws://" + BACKEND.host + ":" + this.WSport + "/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + this.RPCport } }).connect();
+			}
 			console.log(this.GBCConnection)
 			this.connected = true;
 		} catch (ex) {
