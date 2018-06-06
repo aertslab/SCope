@@ -1,0 +1,51 @@
+language: python
+matrix:
+  include:
+  - os: linux
+    python: 3.6.5
+    env:
+      - PYTHON=3.6.5
+      - BUILD_NAME=package-linux-x64
+      - DEPLOY_FILE="${TRAVIS_BUILD_DIR}/release/scope-linux-x64.zip"
+    script: echo "The script is a lie."
+    if: tag IS blank
+  - os: osx
+    osx_image: xcode6.4
+    language: generic
+    env:
+      - PYTHON=3.6.5
+      - BUILD_NAME=package-macOS-x64
+      - DEPLOY_FILE="${TRAVIS_BUILD_DIR}/release/scope-macOS-x64.dmg"
+    if: tag IS blank
+before_install:
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then echo "Adding python for OSX"; brew install
+  openssl readline; brew outdated pyenv || brew upgrade pyenv; brew install pyenv-virtualenv;
+  PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install $PYTHON; export PYENV_VERSION=$PYTHON; export PATH="/Users/travis/.pyenv/shims:${PATH}";
+  pyenv-virtualenv venv; source venv/bin/activate; python --version; wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh
+  | bash; source ~/.bashrc; fi
+- nvm install 10.3.0
+- nvm use 10.3.0
+install:
+- npm install
+- pip install pyinstaller
+- cd ${TRAVIS_BUILD_DIR}
+- npm run build
+- cd opt/scopeserver/dataserver
+- LD_LIBRARY_PATH=${VIRTUAL_ENV}/lib pyinstaller --onedir --hidden-import=scipy._lib.messagestream --hidden-import=pandas._libs.tslibs.timedeltas --hidden-import=cytoolz.utils --hidden-import=cytoolz._signatures --hidden-import=pandas._libs.tslibs.np_datetime --hidden-import=pandas._libs.tslibs.nattype --hidden-import=pandas._libs.skiplist --exclude matplotlib --exclude IPython __init__.py
+- cd ${TRAVIS_BUILD_DIR}
+- npm run ${BUILD_NAME}
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+  git clone https://github.com/andreyvit/yoursway-create-dmg.git;
+  ./yoursway-create-dmg/create-dmg --volname "SCope Installer" --volicon "images/SCope_Icon.icns" --background "images/SCope_Background.png" --window-pos 200 120 --window-size 800 400 --icon-size 100 --icon release/scope-darwin-x64/scope.app 192 344 --hide-extension scope.app --app-drop-link 448 344 ${TRAVIS_BUILD_DIR}/release/scope-macOS-x64.dmg release/scope-darwin-x64/scope.app/; else
+  cd release;
+  zip -r scope-linux-x64.zip scope-linux-x64/;
+  fi
+
+deploy:
+  provider: releases
+  api_key:
+    secure: *********** NEEDS FILLING IN ***********
+  file: "${DEPLOY_FILE}"
+  skip_cleanup: true
+  on:
+    repo: aertslab/SCope
