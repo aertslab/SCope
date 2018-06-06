@@ -1,5 +1,7 @@
 const fs = require('fs');
 const path = require('path');
+const exec = require('child_process').execSync;
+
 let _config;
 if (fs.existsSync("config.json")) {
     _config = require("../apache/config.json");
@@ -35,8 +37,8 @@ function makeConfig() {
 
 function setApachConfig() {
     if (fs.existsSync(_config.apacheHttpdDir)) {
-        console.log("Copying SCope HTTP Apache web server config file to "+ apacheConfdDir)
-        exec("cp "+ apacheConfigFilePath +" "+ apacheConfdDir, (error, stdout, stderr) => {
+        console.log("Copying SCope HTTP Apache web server config file "+ apacheSCopeConfigFilePath +" to "+ apacheConfdDir)
+        exec("sudo cp -f "+ apacheSCopeConfigFilePath +" "+ apacheConfdDir, (error, stdout, stderr) => {
             if (error) {
                 return console.log(error);
             }
@@ -47,6 +49,4 @@ function setApachConfig() {
     }
 }
 
-makeConfig()
-
-module.exports = makeConfig
+exports.makeConfig = makeConfig

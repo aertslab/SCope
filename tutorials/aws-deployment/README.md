@@ -1,0 +1,160 @@
+# Setup and Deploy SCope as Amazon instance from Scratch
+
+## Create AWS Amazon Linux 2 instance
+
+1. Create an Amazon AWS account
+2. Connect to you Amazon AWS account, go to Instances (left column) and click **Launch instance**
+3. Select Amazon Linux 2 instance
+<br>
+![Step 1](images/scope_aws_deploy_step1.png)
+4. Select t2.micro instance type and click **Next: Configure Instance Details**
+<br>
+![Step 2](images/scope_aws_deploy_step2.png)
+<br>
+/!\ This is an EBS storage type i.e.: The local instance store volumes that are available to the instance. **The data in an instance store is not permanent** - it persists only during the lifetime of the instance.
+5. Configure instance details and/or click **Next: Add Storage**
+<br>
+![Step 3](images/scope_aws_deploy_step3.png)
+6. Type the amount of storage (GiB) you need for this instance and click **Next: Add Tags**
+<br>
+![Step 4](images/scope_aws_deploy_step4.png)
+7. Add SCope tag and/or any other tag and click **Next: Create Security Group**
+<br>
+![Step 5](images/scope_aws_deploy_step5.png)
+8. Create a security group to control the traffic (e.g.: HTTP inbound connections) of your instance and click **Review and Launch**
+<br>
+![Step 6](images/scope_aws_deploy_step6.png)
+
+Since, I already created a security group, I selected an existing one. For more details about authorizing only specific inbound HTTP (or other protocols) connections to your instance, please read: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/authorizing-access-to-an-instance.html
+9. Select **create a new key pair**. Type a name for your key pair. Download it and **store it in a secure and accessible location**. Click on **Launch instances**. You should now be able to see your newly created instance.
+
+## Connect to AWS instance
+
+Update the permissions of your key pair file:
+```
+chmod 400 [path-to-private-key]
+```
+
+```[path-to-private-key]``` should be replaced by the local path to the private key (.pem) downloaded in previous step **Create AWS instance**.
+
+- Without configuring SSH config file:
+    1. Open a new terminal and type to connect to your AWS instance:
+```
+ssh -i [path-to-private-key] ec2-user@[public-dns-ipv4]
+```
+
+```[public-dns-ipv4]``` should be replaced by the value shown in the Public DNS (IPv4) column of your Amazon WS instance.
+
+- With configuring SSH config file
+   1. Update your ssh config file (```~/.ssh/config```) by adding the following lines:
+```
+Host aws-scope [public-dns-ipv4]
+  User ec2-user
+  Hostname [public-dns-ipv4]
+  Port 22
+  IdentityFile [path-to-private-key]
+```
+
+   2. Open a new terminal and type to connect to your AWS instance:
+```
+ssh aws-scope
+```
+
+You can more detailed explanation at https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstancesLinux.html.
+
+## Install
+
+First and foremost check if your are on a Amazon Linux 2 instance
+```
+cat /etc/system-release
+# Should start with "Amazon Linux 2"
+```
+
+### Install Web Server (e.g.: LAMP)
+
+1. Update softwares
+```
+sudo yum update -y
+```
+
+2. Install a LAMP Web Server on Amazon Linux 2
+
+For all detailed information please read https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-lamp-amazon-linux-2.html
+
+```
+sudo yum update -y
+# Install LAMP
+sudo amazon-linux-extras install lamp-mariadb10.2-php7.2 php7.2
+# Install HTTP Apache Server
+sudo yum install -y httpd
+```
+
+3. Allow the ec2-user account to manipulate files in this `/var/www/html`:
+```
+sudo usermod -a -G apache ec2-user
+exit
+# Connect to your AWS instance
+ssh aws-scope
+# Change the group ownership of /var/www and its contents to the apache group
+sudo chown -R ec2-user:apache /var/www
+# Add group write permissions and to set the group ID on future subdirectories
+sudo chmod 2775 /var/www && find /var/www -type d -exec sudo chmod 2775 {} \;
+find /var/www -type f -exec sudo chmod 0664 {} \;
+```
+
+4. Start the HTTP Apache Server
+```
+IS_ENABLED=$(sudo systemctl is-enabled httpd)
+if [ "${IS_ENABLED}" = "enabled" ]; then
+    echo "Apache Web Server is enabled"
+else
+    # If not enabled start
+    sudo systemctl start httpd && sudo systemctl enable httpd
+fi
+# Check HTTP Apache Web Server is running
+sudo systemctl is-enabled httpd
+# Start HTTP Apache Server at each system boot
+sudo systemctl enable httpd
+```
+
+5. (Optional) To configure Apache Web Server on Amazon Linux 2 to Use SSL/TLS please read https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/SSL-on-an-instance.html.
+
+### Install SCope
+
+1. Install git
+```sudo yum install git```
+
+2. Install node.js
+```
+curl --silent --location https://rpm.nodesource.com/setup_10.x | sudo bash -
+sudo yum -y install nodejs
+```
+
+3. Install development tools
+```
+// https://stackoverflow.com/questions/19816275/no-acceptable-c-compiler-found-in-path-when-installing-python
+sudo yum groupinstall "Development tools"
+```
+
+4. Install tmux
+```sudo yum install tmux```
+
+5. Install Miniconda
+```
+wget --content-disposition http://bit.ly/miniconda3
+# Location: ~/.software/miniconda3
+bash Miniconda3-latest-[...].sh
+```
+
+6. Create conda environment
+```conda create -n scope python=3.6.2```
+
+7. Install & Deploy SCope
+```
+git clone https://github.com/aertslab/SCope.git
+cd SCope
+npm install
+npm run scope-aws
+```
+
+A SCope instance should be running at http://```[public-dns-ipv4]```
