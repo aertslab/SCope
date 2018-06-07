@@ -6,23 +6,29 @@
 2. Connect to you Amazon AWS account, go to Instances (left column) and click **Launch instance**
 3. Select Amazon Linux 2 instance
 <br>
+
 ![Step 1](/tutorials/aws-deployment-source/images/scope_aws_deploy_step1.png)
 4. Select t2.micro instance type and click **Next: Configure Instance Details**
 <br>
+
 ![Step 2](/tutorials/aws-deployment-source/images/scope_aws_deploy_step2.png)
 <br>
 /!\ This is an EBS storage type i.e.: The local instance store volumes that are available to the instance. **The data in an instance store is not permanent** - it persists only during the lifetime of the instance.
 5. Configure instance details and/or click **Next: Add Storage**
 <br>
+
 ![Step 3](/tutorials/aws-deployment-source/images/scope_aws_deploy_step3.png)
 6. Type the amount of storage (GiB) you need for this instance and click **Next: Add Tags**
 <br>
+
 ![Step 4](/tutorials/aws-deployment-source/images/scope_aws_deploy_step4.png)
 7. Add SCope tag and/or any other tag and click **Next: Create Security Group**
 <br>
+
 ![Step 5](/tutorials/aws-deployment-source/images/scope_aws_deploy_step5.png)
 8. Create a security group to control the traffic (e.g.: HTTP inbound connections) of your instance and click **Review and Launch**
 <br>
+
 ![Step 6](/tutorials/aws-deployment-source/images/scope_aws_deploy_step6.png)
 
 Since, I already created a security group, I selected an existing one. For more details about authorizing only specific inbound HTTP (or other protocols) connections to your instance, please read: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/authorizing-access-to-an-instance.html

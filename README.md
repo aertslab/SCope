@@ -133,7 +133,7 @@ Coming soon.
 
 #### Source
 
-To create a SCope AWS instance from scratch can read the tutorial [aws-deployment-source](https://github.com/aertslab/SCope/tutorials/aws-deployment-source/).
+To create a SCope AWS instance from scratch can read the tutorial [aws-deployment-source](https://github.com/aertslab/SCope/tree/master/tutorials/aws-deployment-source).
 
 ## Architecture
 
