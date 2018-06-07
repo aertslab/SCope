@@ -39,7 +39,7 @@ Requirements should be fullfilled (see `Requirements` section).
 Create miniconda (python) virtual environment:
 ```
 conda create -n scope python=3.6.2
-conda activate scope # or source activate scope
+source activate scope # or conda activate scope if higher version of conda
 ```
 
 Install SCope:
