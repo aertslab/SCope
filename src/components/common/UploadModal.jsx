@@ -70,6 +70,7 @@ export default class UploadModal extends Component {
             } else {
               this.setState({ uploadLoomFile: null, uploadLoomProgress: 0 })
               this.props.onUploaded(filename);
+            }
 
         });
     }
