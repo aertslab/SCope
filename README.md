@@ -29,10 +29,12 @@ sudo yum -y install nodejs
 ```
 For more details and other versions please visit https://github.com/nodesource/distributions
 
-## Development Mode
+## Run a Local Instance
+
+### Development Mode
 Requirements should be fullfilled (see `Requirements` section).
 
-### Install
+#### Install
 
 Create miniconda (python) virtual environment:
 ```
@@ -45,7 +47,7 @@ Install SCope:
 npm install
 ```
 
-### Run
+#### Run
 
 - One Command Run:
 ```
@@ -61,9 +63,9 @@ scope-server
 npm run dev
 ```
 
-## Production Mode
+### Production Mode
 
-### 1) Packaging SCope Data Server
+#### 1. Packaging SCope Data Server
 
 Requirements should be fullfilled and a `scope` python virtual should be loaded (see `Development Mode` section).
 
@@ -93,7 +95,7 @@ LD_LIBRARY_PATH=${CONDA_PATH}/lib pyinstaller \
 ```
 `${CONDA_PATH}` is the path where Miniconda has been installed.
 
-### 2) Packaging SCope
+#### 2. Packaging SCope
 
 First install electron-packager node module:
 ```
@@ -111,9 +113,9 @@ Run the binary:
 ./release/scope-linux-x64/scope
 ```
 
-### 3) Creating Single Executable File
+#### 3. Creating Single Executable File
 
-#### Debian package
+##### Debian package
 For more details, follow https://www.christianengvall.se/electron-installer-debian-package/ 
 ```
 npm run create-debian-installer
@@ -121,7 +123,19 @@ npm run create-debian-installer
 
 All the uploaded data from SCope will be put ~/.scope/data
 
-# Architecture
+## Deploy a Cloud-based Instance
+
+### Amazon Web Services
+
+#### Public AMI
+
+Coming soon.
+
+#### Source
+
+To create a SCope AWS instance from scratch can read the tutorial [aws-deployment-source](https://github.com/aertslab/SCope/tutorials/aws-deployment-source/).
+
+## Architecture
 
 SCope architecture can be visualized below:
 

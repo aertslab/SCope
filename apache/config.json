@@ -1,0 +1,13 @@
+{
+    "debug": true,
+    "domainName": "",
+    "protocol": "http",
+    "mPort": "55850",
+    "pPort": "55851",
+    "xPort": "55852",
+    "gPort": "55853",
+    "reverseProxyOn": true,
+    "apacheHtmlDir": "/var/www/html",
+    "apacheLogDir": "/var/log/apache2",
+    "apacheHttpdDir": "/etc/httpd"
+}

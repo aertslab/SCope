@@ -457,7 +457,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def getRegulonMetaData(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
         regulon_genes = loom.get_regulon_genes(regulon=request.regulon)
-        meta_data = loom.get_meta_data(loom=loom)
+        meta_data = loom.get_meta_data()
         for regulon in meta_data['regulonThresholds']:
             if regulon['regulon'] == request.regulon:
                 autoThresholds = []
