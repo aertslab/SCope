@@ -83,7 +83,6 @@ sudo yum update -y
 For all detailed information please read https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-lamp-amazon-linux-2.html
 
 ```
-sudo yum update -y
 # Install LAMP
 sudo amazon-linux-extras install lamp-mariadb10.2-php7.2 php7.2
 # Install HTTP Apache Server
@@ -98,10 +97,10 @@ exit
 ssh aws-scope
 # Change the group ownership of /var/www and its contents to the apache group
 sudo chown -R ec2-user:apache /var/www
-sudo chown -R ec2-user:apache /etc/http.d/conf.d
+sudo chown -R ec2-user:apache /etc/httpd/conf.d
 # Add group write permissions and to set the group ID on future subdirectories
 sudo chmod 2775 /var/www && find /var/www -type d -exec sudo chmod 2775 {} \;
-sudo chmod 2775 /etc/http.d/conf.d
+sudo chmod 2775 /etc/httpd/conf.d
 find /var/www -type f -exec sudo chmod 0664 {} \;
 ```
 
@@ -112,6 +111,7 @@ if [ "${IS_ENABLED}" = "enabled" ]; then
     echo "Apache Web Server is enabled"
 else
     # If not enabled start
+    echo "Apache Web Server is disabled. Starting Apache Web Server..."
     sudo systemctl start httpd && sudo systemctl enable httpd
 fi
 # Check HTTP Apache Web Server is running
@@ -125,7 +125,9 @@ sudo systemctl enable httpd
 ### Install SCope
 
 1. Install git
-```sudo yum install git```
+```
+sudo yum install git
+```
 
 2. Install node.js
 ```
@@ -140,7 +142,9 @@ sudo yum groupinstall "Development tools"
 ```
 
 4. Install tmux
-```sudo yum install tmux```
+```
+sudo yum install tmux
+```
 
 5. Install Miniconda
 ```
@@ -149,14 +153,30 @@ wget --content-disposition http://bit.ly/miniconda3
 bash Miniconda3-latest-[...].sh
 ```
 
-6. Create conda environment
-```conda create -n scope python=3.6.2```
+6. Create conda environment and activate it
+```
+conda create -n scope python=3.6.2
+source activate scope
+```
 
-7. Install & Deploy SCope
+7. Install SCope
 ```
 git clone https://github.com/aertslab/SCope.git
 cd SCope
 npm install
+```
+
+8. Edit config.json file by updating the value of *domainName*
+```
+{
+    [...],
+    "domainName": "[public-dns-ipv4]",
+    [...]
+}
+```
+
+9. Deploy SCope
+```
 npm run scope-aws
 ```
 

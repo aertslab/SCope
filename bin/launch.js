@@ -48,6 +48,8 @@ class Launcher {
         console.log("")
     }
 
+    // begin sanity checks
+
     checkApacheConf() {
         if(isAWS)
             return new apache.ApacheConf().init()
@@ -56,7 +58,6 @@ class Launcher {
         })
     }
 
-    // Check if programs are installed
     checkDirs() {
         return new Promise((resolve) => {
             const assetsDir = './assets';
@@ -185,15 +186,15 @@ class Launcher {
 
     copySCopeToApacheHTMLDir() {
         return new Promise((resolve) => {
-            if (fs.existsSync(_config.apacheHtmlDir)) {
+            if (fs.existsSync(this._config.apacheHtmlDir)) {
                 console.log("Copying SCope to Apache Web Server directory...")
-                exec("cp -rf . "+ _config.apacheHtmlDir, (error, stdout, stderr) => {
+                exec("cp -rf . "+ this._config.apacheHtmlDir, (error, stdout, stderr) => {
                     if (error) return resolve(false);
                     if (stderr) return resolve(false);
                     resolve(true);
                 });
             } else {
-                console.log("Cannot find "+ _config.apacheHtmlDir +". Please install HTTP Apache Web Server.")
+                console.log("Cannot find "+ this._config.apacheHtmlDir +". Please install HTTP Apache Web Server.")
                 resolve(false)
             }
         })
@@ -252,52 +253,3 @@ class Launcher {
 
 let launcher = new Launcher()
 launcher.start()
-
-// function startSCopeClient() {
-//     if(isAWS) {
-// 	    console.log("Compiling SCope Client...")
-//         utils.runCheckCommand("npm run build-aws")
-//         if (fs.existsSync(_config.apacheHtmlDir)) {
-//             console.log("Copying SCope to Apache Web Server directory...")
-//             utils.runCheckCommand("cp -rf . "+ _config.apacheHtmlDir);
-//         } else {
-//             console.log("Cannot find "+ _config.apacheHtmlDir +". Please install HTTP Apache Web Server.")
-//         }
-//     } else {
-//         if(isProd) {
-//             console.log("Compiling SCope Client...")
-//             utils.runCheckCommand('npm run build');
-//         } else {
-// 	    console.log("Starting SCope Client as Dev Server...")
-//             scopeClient = utils.runCheckCommand("npm run dev")
-//             console.log("SCope Client started with PID: "+ scopeClient.pid +"!")
-//         }
-//     }
-// }
-
-// function openSCopeClient() {
-//     if(!isProd) {
-//         console.log("Open SCope in browser...")
-//         launcherBrowser('http://localhost:8080', { browser: ['chrome', 'firefox', 'safari'] }, (e, browser) => {
-//             if(e) return console.log(e);
-//             browser.on('stop', (code) => {
-//                 console.log("Stopping SCope Server...")
-//                 scopeServer.kill('SIGINT')
-//                 scopeServer = null
-//                 console.log("Stopping SCope Client...")
-//                 scopeClient.kill('SIGINT')
-//                 scopeClient = null
-//                 console.log("SCope stopped running!")
-//                 process.exit()
-//             });
-            
-//         })
-//     }
-// }
-
-// function launchSCope() {
-//     console.log("Launching SCope...")
-//     startSCopeServer()
-//     startSCopeClient()
-//     openSCopeClient()
-// }

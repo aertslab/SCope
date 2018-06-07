@@ -1,5 +1,5 @@
 {
-    "debug": true
+    "debug": true,
     "domainName": "",
     "protocol": "http",
     "mPort": "55850",

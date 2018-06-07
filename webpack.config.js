@@ -4,7 +4,14 @@ var WebpackGitHash = require('webpack-git-hash');
 var fs = require('fs')
 var pkg = require('./package.json')
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
-const _config = require('./config.json');
+// Import config file
+let isAWS = process.env.NODE_TYPE == "aws" 
+let _config = null
+if(isAWS) {
+    _config = require('./apache/config.json');
+} else {
+    _config = require('./config.json');
+}
 console.log(_config)
 
 let config = {
