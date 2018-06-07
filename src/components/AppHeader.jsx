@@ -1,20 +1,29 @@
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
-import { Icon, Label, Button, Menu, Input } from 'semantic-ui-react';
+import { Icon, Label, Button, Menu, Input, Popup } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
+import { instanceOf } from 'prop-types';
+import { withCookies, Cookies } from 'react-cookie';
 import Bitly from 'bitlyapi';
 const moment = require('moment');
 const pako = require('pako');
 let bitly = new Bitly(BITLY.token);
+
 const timer = 60 * 1000;
+const cookieName = 'SCOPE_UUID';
+
 
 class AppHeader extends Component {
+	static propTypes = {
+		cookies: instanceOf(Cookies).isRequired
+	}
 
 	constructor(props) {
 		super(props);
 		this.state = {
 			timeout: props.timeout,
 			shortUrl: null,
+			cookies: props.cookies
 		}
 	}
 
@@ -53,9 +62,28 @@ class AppHeader extends Component {
 				<Menu.Item className="sessionInfo">
 					Your session will be deleted in {moment.duration(timeout).humanize()} &nbsp;
 					<Icon name="info circle" inverted title="Our servers can only store that much data. Your files will be removed after the session times out." />
+					<Button data-tooltip="Start with a new session ID. Your old ID will remain until its timeout expires, please store it if you would like to return. It cannot be recovered."
+									data-position="bottom right"
+									onClick={this.resetUUID.bind(this)}>
+						Get new session
+
+					</Button>
+
+
 				</Menu.Item>
 			</Menu>
 		);
+	}
+
+	resetUUID() {
+		const { history, cookies } = this.props;
+		BackendAPI.getUUIDFromIP((uuid, timeRemaining) => {
+			cookies.remove(cookieName);
+			cookies.set(cookieName, uuid, { path: '/'});
+			history.replace('/' + [uuid])
+			BackendAPI.forceUpdate();
+
+		})
 	}
 
 	componentWillMount() {
@@ -93,7 +121,7 @@ class AppHeader extends Component {
 	componentWillUnmount() {
 		if (this.timer)	clearInterval(this.timer);
 	}
-	
+
 	toggleSidebar() {
 		this.props.toggleSidebar();
 		BackendAPI.setSidebarVisible(!BackendAPI.getSidebarVisible());
@@ -153,7 +181,7 @@ class AppHeader extends Component {
 			},
 		];
 	}
-	
+
 	getPermalink() {
 		const { match } = this.props;
 		console.log(BackendAPI);

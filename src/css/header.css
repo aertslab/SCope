@@ -39,6 +39,11 @@ VIB colours:
 	right: 0px;
 }
 
+.sessionReset {
+	position: absolute !important;
+	right: 0px;
+}
+
 .pusher .segment.noPadding {
 	padding: 5px !important;
 }

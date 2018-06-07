@@ -75,7 +75,7 @@ class App extends Component {
 
 		return (
 			<Segment className="parentView">
-				<Route exact path="/" render={() => 
+				<Route exact path="/" render={() =>
 					<Segment textAlign='center' className="parentView">
 						<Segment vertical>
 							<Header as='h1'>SCope</Header>
@@ -87,11 +87,12 @@ class App extends Component {
 				<Route path="/:uuid/:loom?/:page?" render={({history}) =>
 					<Segment className="parentView">
 						<ReactResizeDetector handleHeight skipOnMount onResize={this.onResize.bind(this)} />
-						<AppHeader 
-							toggleSidebar={this.toggleSidebar.bind(this)} 
+						<AppHeader
+							toggleSidebar={this.toggleSidebar.bind(this)}
 							metadata={metadata}
 							loaded={loaded}
-							timeout={this.timeout} 
+							timeout={this.timeout}
+							cookies={this.props.cookies}
 						/>
 						<Sidebar.Pushable>
 							<AppSidebar visible={isSidebarVisible} onMetadataChange={this.onMetadataChange.bind(this)} />
@@ -196,7 +197,7 @@ class App extends Component {
 			})
 		}
 	}
-	
+
 	obtainNewUUID(ip, onSuccess) {
 		BackendAPI.getConnection().then((gbc) => {
 			let query = {
@@ -205,13 +206,13 @@ class App extends Component {
 			if (DEBUG) console.log('getUUID', query);
 			gbc.services.scope.Main.getUUID(query, (err, response) => {
 				if (DEBUG) console.log('getUUID', response);
-				if (response != null) 
+				if (response != null)
 					onSuccess(response.UUID);
 			})
 		}, () => {
 			this.setState({error: true});
 		})
-	}	
+	}
 
 
 	checkUUID(ip, uuid) {
@@ -297,7 +298,7 @@ class App extends Component {
 			let settings = JSON.parse(pako.inflate(deflated, { to: 'string' }));
 			BackendAPI.importObject(settings);
 			BackendAPI.queryLoomFiles(settings.uuid, () => {
-				Object.keys(settings.features).map((page) => {			
+				Object.keys(settings.features).map((page) => {
 					settings.features[page].map((f, i) => {
 						BackendAPI.updateFeature(i, f.type, f.feature, f.featureType, f.metadata ? f.metadata.description : null, page);
 					})

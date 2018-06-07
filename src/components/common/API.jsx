@@ -18,7 +18,7 @@ class API {
 		console.log(this.WSport, this.RPCport)
 
 		try {
-			this.GBCConnection = new this.GBC("ws://" + FRONTEND.host +":"+ this.WSport, 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + this.RPCport } }).connect();	
+			this.GBCConnection = new this.GBC("ws://" + FRONTEND.host +":"+ this.WSport, 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + this.RPCport } }).connect();
 			console.log(this.GBCConnection)
 			this.connected = true;
 		} catch (ex) {
@@ -165,6 +165,26 @@ class API {
 		}
 	};
 
+	getUUIDFromIP(onSuccess) {
+		const publicIp = require('public-ip');
+		publicIp.v4().then(ip => {
+			this.obtainNewUUID(ip, onSuccess)
+		});
+	}
+
+	obtainNewUUID(ip, onSuccess) {
+		BackendAPI.getConnection().then((gbc) => {
+			let query = {
+				ip: ip
+			}
+			if (DEBUG) console.log('getUUIDAPI', query);
+			gbc.services.scope.Main.getUUID(query, (err, response) => {
+				if (DEBUG) console.log('getUUIDAPI', response);
+				if (response != null)
+					onSuccess(response.UUID, response.timeout);
+			})
+		})
+	}
 	getActiveLoom() {
 		return this.activeLooms[0];
 	}
