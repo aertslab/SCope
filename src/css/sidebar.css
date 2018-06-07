@@ -28,6 +28,11 @@
 	background: rgba(255, 104, 30, 1) !important;
 }
 
+.vertical.menu .active.item>i.icon:hover {
+	color: #ffffff !important;
+
+}
+
 .vertical .item:hover {
 	font-weight: bold !important;
 	color: black !important;
@@ -95,6 +100,7 @@
 	margin-right: auto;
 	margin-bottom: auto
 }
+
 .rc-slider {
 	margin: 0px !important;
 }
