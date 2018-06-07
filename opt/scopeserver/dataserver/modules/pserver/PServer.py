@@ -376,7 +376,7 @@ class ThreadedHTTPServer(socketserver.ThreadingMixIn,
 
 
 def run(run_event,
-        hostname='localhost',
+        hostname='',
         port=50051,
         templates=None,
         localisations=None,
