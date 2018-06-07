@@ -8,6 +8,6 @@
     "gPort": "55853",
     "reverseProxyOn": true,
     "apacheHtmlDir": "/var/www/html",
-    "apacheLogDir": "/var/log/apache2",
+    "apacheLogDir": "/var/log/httpd",
     "apacheHttpdDir": "/etc/httpd"
 }
