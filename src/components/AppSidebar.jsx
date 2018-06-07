@@ -265,7 +265,11 @@ class AppSidebar extends Component {
 		}
 
 		let xhr = new XMLHttpRequest();
-		xhr.open("POST", BACKEND.httpProtocol + "://" + BACKEND.host + ":" + this.XHRport + "/");
+		if(REVERSEPROXYON) {
+				xhr.open("POST", FRONTEND.httpProtocol +"://" + FRONTEND.host + "/upload/")
+		} else {
+				xhr.open("POST", BACKEND.httpProtocol + "://" + BACKEND.host + ":" + this.XHRport + "/");
+		}
 		xhr.responseType = 'blob';
 
 		xhr.upload.addEventListener('load', (event) => {
