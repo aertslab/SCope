@@ -60,6 +60,8 @@ class ApacheConf {
                 tmp = tmp.replace(/SCOPE_X_SERVER_PORT/g, this._config.xPort)
                 tmp = tmp.replace(/APACHE_LOG_DIR/g, this._config.apacheLogDir)
                 tmp = tmp.replace(/APACHE_HTML_DIR/g, this._config.apacheHtmlDir)
+                tmp = tmp.replace(/HTTP_PROTOCOL/g, this._config.httpProtocol)
+                tmp = tmp.replace(/WS_PROTOCOL/g, this._config.wsProtocol)
                 fs.writeFile(this.apacheSCopeConfigFilePath, tmp, 'utf8', (err) => {
                     if (err) {
                         console.log(err)
