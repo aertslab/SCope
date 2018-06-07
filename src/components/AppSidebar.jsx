@@ -310,6 +310,7 @@ class AppSidebar extends Component {
 				gbc.services.scope.Main.deleteUserFile(query, (error, response) => {
 					if (DEBUG) console.log("deleteUserFile", response);
 					if ((response !== null) && (response.deletedSuccessfully)) {
+						BackendAPI.forceUpdate();
 						this.getLoomFiles();
 					}
 				});
