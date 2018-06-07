@@ -87,7 +87,7 @@ class ViewerSidebar extends Component {
 
 		let featureTab = (i) => {
 			let colors = ["red", "green", "blue"]
-			let metadata = activeFeatures[i] && activeFeatures[i].feature ? "" : "No additional information shown for the feature queried in the "+ colors[i] +" query box because it is empty. Additional information (e.g.: cluster markers, regulon motif, regulon target genes, ...) can be displayed here when querying clusters or regulons.";
+			let metadata = activeFeatures[i] && activeFeatures[i].feature ? "" : <div>No additional information shown for the feature queried in the <b style={{color: colors[i]}}>{colors[i]}</b> query box because it is empty. Additional information (e.g.: cluster markers, regulon motif, regulon target genes, ...) can be displayed here when querying clusters or regulons.<br/><br/></div>;
 
 			if (activeFeatures[i] && activeFeatures[i].metadata) {
 				let md = activeFeatures[i].metadata
