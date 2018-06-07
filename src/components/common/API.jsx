@@ -19,9 +19,9 @@ class API {
 
 		try {
 			if(REVERSEPROXYON) {
-				this.GBCConnection = new this.GBC("ws://" + FRONTEND.host + "/protobuf/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + this.RPCport } }).connect();
+				this.GBCConnection = new this.GBC(FRONTEND.wsProtocol + "://" + FRONTEND.host + "/protobuf/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + this.RPCport } }).connect();
 			} else {
-				this.GBCConnection = new this.GBC("ws://" + BACKEND.host + ":" + this.WSport + "/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + this.RPCport } }).connect();
+				this.GBCConnection = new this.GBC(BACKEND.wsProtocol + "://" + BACKEND.host + ":" + this.WSport + "/", 'src/proto/s.proto', { scope: { Main: BACKEND.host + ":" + this.RPCport } }).connect();
 			}
 			console.log(this.GBCConnection)
 			this.connected = true;

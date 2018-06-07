@@ -67,6 +67,9 @@ export default class UploadModal extends Component {
               this.props.onUploaded(filename);
             } else if (status_code == 415) {
               this.setState({ uploadLoomFile: null, uploadLoomFileName: "Error with upload. Please try again or another file." , uploadLoomProgress: -1, uploadError: true })
+            } else {
+              this.setState({ uploadLoomFile: null, uploadLoomProgress: 0 })
+              this.props.onUploaded(filename);
             }
 
         });

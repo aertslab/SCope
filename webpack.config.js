@@ -5,7 +5,7 @@ var fs = require('fs')
 var pkg = require('./package.json')
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 // Import config file
-let isAWS = process.env.NODE_TYPE == "aws" 
+let isAWS = process.env.NODE_TYPE == "aws"
 let _config = null
 if(isAWS) {
     _config = require('./apache/config.json');
@@ -64,14 +64,16 @@ let config = {
                 token: "8422dd882b60604d327939997448dd1b5c61f54e"
             }),
             BACKEND: JSON.stringify({
-                protocol: _config.protocol,
+                httpProtocol: _config.httpProtocol,
+                wsProtocol: _config.wsProtocol,
                 host: "127.0.0.1",
                 WSport: _config.xPort,
                 XHRport: _config.pPort,
                 RPCport: _config.gPort
             }),
             FRONTEND: JSON.stringify({
-                protocol: _config.protocol,
+                httpProtocol: _config.httpProtocol,
+                wsProtocol: _config.wsProtocol,
                 host: _config.domainName
             })
         }),

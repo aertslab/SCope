@@ -1,7 +1,8 @@
 {
     "debug": true,
     "domainName": "",
-    "protocol": "http",
+    "httpProtocol": "http",
+    "wsProtocol": "ws",
     "mPort": "55850",
     "pPort": "55851",
     "xPort": "55852",
