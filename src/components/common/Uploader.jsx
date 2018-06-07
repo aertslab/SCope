@@ -20,9 +20,9 @@ export default class Uploader {
 
         let xhr = new XMLHttpRequest();
         if(REVERSEPROXYON) {
-            xhr.open("POST", FRONTEND.protocol +"://" + FRONTEND.host + "/upload/")
+            xhr.open("POST", FRONTEND.httpProtocol +"://" + FRONTEND.host + "/upload/")
         } else {
-            xhr.open("POST", BACKEND.protocol + "://" + BACKEND.host + ":" + this.XHRport + "/");
+            xhr.open("POST", BACKEND.httpProtocol + "://" + BACKEND.host + ":" + this.XHRport + "/");
         }
         xhr.upload.addEventListener('progress', (event) => {
             if (DEBUG) console.log("Data uploaded: " + event.loaded + "/" + event.total);
