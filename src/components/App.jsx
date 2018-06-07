@@ -72,6 +72,7 @@ class App extends Component {
 		)
 
 		console.log('isSidebarVisible', isSidebarVisible);
+		let pusherWidth = isSidebarVisible ? screen.width - 340 : screen.width - 75
 
 		return (
 			<Segment className="parentView">
@@ -96,7 +97,7 @@ class App extends Component {
 						/>
 						<Sidebar.Pushable>
 							<AppSidebar visible={isSidebarVisible} onMetadataChange={this.onMetadataChange.bind(this)} />
-							<Sidebar.Pusher>
+							<Sidebar.Pusher style={{width: pusherWidth}}>
 								<Route path="/:uuid/:loom?/welcome"  component={Welcome}  />
 								<Route path="/:uuid/:loom?/dataset"  component={Dataset}  />
 								<Route path="/:uuid/:loom?/gene"     component={Gene}     />

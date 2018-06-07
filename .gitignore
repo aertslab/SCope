@@ -31,6 +31,8 @@ opt/scope_server.egg-info
 opt/scopeserver/bindserver/pbjs*
 opt/scopeserver/bindserver/window-size*
 
+apache/scope.conf
+
 assets
 
 release/*
