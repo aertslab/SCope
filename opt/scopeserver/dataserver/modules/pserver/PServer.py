@@ -194,16 +194,26 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
     @check_auth
     def do_GET(self):
         "Standard method to override in this Server object."
+        self.directory = dfh.DataFileHandler.get_data_dir_path_by_file_type(file_type='Loom')
+
         name = self.path.lstrip('/')
+        print(name)
+
         name = urllibparse.unquote(name)
         name = _decode_str_if_py2(name, 'utf-8')
 
         # TODO: Refactor special-method handling to make more modular?
         # Include ability to self-define "special method" prefix path?
         # TODO Verify that this is path-injection proof
-        if name in self.published_files():
-            localpath = os.path.join(self.directory, name)
-            self.send_file(localpath)
+        localpath = _encode_str_if_py2(os.path.join(self.directory, name), "utf-8")
+        with open(localpath, 'rb') as f:
+            self.send_resp_headers(200,
+                                    {'Content-length': os.fstat(f.fileno())[6],
+                                    'Access-Control-Allow-Origin': '*',
+                                    'Content-type': 'application/x-hdf5',
+                                    'Content-Disposition': 'attachment; filename="' + os.path.basename(name) + '""'},
+                                    end=True)
+            shutil.copyfileobj(f, self.wfile)
 
     @check_auth
     def _set_headers(self):
