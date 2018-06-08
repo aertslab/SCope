@@ -261,7 +261,7 @@ class AppSidebar extends Component {
 	downloadLoomFile(loomFilePath, loomSize) {
 	  const { match } = this.props;
 
-		if (confirm("This loom file is " + parseInt(loomSize / (1024 * 1024)) + " MB in size. Unlike usual downloads, the file will first be downloaded to memory and then saved to disk. Once download begins, you will be unable to stop it without navigating away from this page.\n\n Would you like to continue downloading? ")) {
+		if (confirm("This loom file is " + parseInt(loomSize / (1000 * 1000)) + " MB in size. Unlike usual downloads, the file will first be downloaded to memory and then saved to disk. Once download begins, you will be unable to stop it without navigating away from this page.\n\n Would you like to continue downloading? ")) {
 			this.setState({downloading: true, loomDownloading: encodeURIComponent(loomFilePath)});
 
 		  let form = new FormData();
