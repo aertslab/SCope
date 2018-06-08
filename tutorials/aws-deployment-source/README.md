@@ -141,7 +141,6 @@ sudo yum -y install nodejs
 
 3. Install development tools
 ```
-// https://stackoverflow.com/questions/19816275/no-acceptable-c-compiler-found-in-path-when-installing-python
 sudo yum groupinstall "Development tools"
 ```
 
@@ -170,7 +169,7 @@ cd SCope
 npm install
 ```
 
-8. Edit config.json file by updating the value of *domainName*
+8. Edit apache/config.json file by updating the value of *domainName*
 ```
 {
     [...],

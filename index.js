@@ -287,6 +287,10 @@ class SCope {
       slashes: true
     }) + "?WSport=" + this.model.xPort + "&XHRport=" + this.model.pPort + "&RPCport=" + this.model.gPort)
     this.view.webContents.openDevTools()
+    this.view.webContents.on('new-window', (e, url) => {
+      e.preventDefault();
+      electron.shell.openExternal(url);
+    });
 
     this.view.on('closed', () => {
       this.view = null

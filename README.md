@@ -1,7 +1,11 @@
 # SCope: Visualization of large-scale and high dimensional single cell data
 
 SCope is a fast visualization tool for large-scale and high dimensional scRNA-seq datasets.
-Currently the format of the datasets supported by SCope is .loom. 
+Currently the format of the datasets supported by SCope is `.loom`. This format of genomic data is maintained by the Linnarsson Lab through `loompy` Python package (https://github.com/linnarsson-lab/loompy). 
+
+## Demo
+
+You can have a look at SCope at http://scope.aertslab.org.
 
 ## Requirements
 
@@ -83,6 +87,7 @@ pip install pyinstaller
 
 Package the SCope Data Server:
 ```
+cd ./opt/scopeserver/dataserver
 LD_LIBRARY_PATH=${CONDA_PATH}/lib pyinstaller \
 	--onedir \
 	--hidden-import=scipy._lib.messagestream \
@@ -133,7 +138,7 @@ Coming soon.
 
 #### Source
 
-To create a SCope AWS instance from scratch can read the tutorial [aws-deployment-source](https://github.com/aertslab/SCope/tree/master/tutorials/aws-deployment-source).
+To create a SCope AWS instance from scratch please read the tutorial [aws-deployment-source](https://github.com/aertslab/SCope/tree/master/tutorials/aws-deployment-source).
 
 ## Architecture
 

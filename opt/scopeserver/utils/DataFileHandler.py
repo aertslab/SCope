@@ -134,7 +134,7 @@ class DataFileHandler():
         self.active_sessions[UUID] = time.time()
 
     def load_gene_mappings(self):
-        gene_mappings_dir_path = os.path.join(Path(__file__).parents[1], 'dataserver', 'data', 'gene_mappings') if self.dev_env else os.path.join(Path(__file__).parents[6], 'data', 'gene_mappings')
+        gene_mappings_dir_path = os.path.join(Path(__file__).parents[1], 'dataserver', 'data', 'gene_mappings') if self.dev_env else os.path.join(Path(__file__).parents[4], 'data', 'gene_mappings')
         DataFileHandler.dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'terminal_mappings.pickle'), 'rb'))
         DataFileHandler.hsap_to_dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'hsap_to_dmel_mappings.pickle'), 'rb'))
         DataFileHandler.mmus_to_dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'mmus_to_dmel_mappings.pickle'), 'rb'))
