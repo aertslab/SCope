@@ -277,6 +277,10 @@ class Compare extends Component {
 			</div>
 		);
 
+		let isConfigurationLocked = this.props.metadata && this.props.metadata.cellMetaData  && this.props.metadata.cellMetaData.annotations.length ? false : true
+		let isSuperpositionLocked = isConfigurationLocked
+		let configurationDefaultValue = isConfigurationLocked ? 'multi' : 'simple'
+
 		return (
 			<Grid>
 				<Grid.Row columns="5">
@@ -285,10 +289,10 @@ class Compare extends Component {
 						<Dropdown inline options={this.displayConf} disabled={configuration=='one'} value={displays} onChange={this.displayNumberChanged.bind(this)}/>
 						<br />
 						Superposition: &nbsp;
-						<Dropdown inline disabled={configuration=='one'} options={this.superpositionConf} value={superposition} onChange={this.superpositionChanged.bind(this)}/>
+						<Dropdown inline disabled={configuration=='one'} disabled={isSuperpositionLocked} options={this.superpositionConf} value={superposition} onChange={this.superpositionChanged.bind(this)}/>
 						<br />
 						Configuration: &nbsp;
-						<Dropdown inline options={this.configurationConf} defaultValue={'simple'} onChange={this.configurationChanged.bind(this)}/>
+						<Dropdown inline options={this.configurationConf} disabled={isConfigurationLocked} defaultValue={configurationDefaultValue} onChange={this.configurationChanged.bind(this)}/>
 					</Grid.Column>
 					{featureSearch}
 					<Grid.Column>&nbsp;</Grid.Column>
@@ -410,15 +414,11 @@ class Compare extends Component {
 	superpositionChanged(proxy, selection) {
 		setTimeout(() => {
 			this.setState({superposition: selection.value});
-			ReactGA.event({
-				category: 'compare',
-				action: 'superposition changed',
-				label: selection.value
-			});
 		}, 100);
 	}
 
 	configurationChanged(proxy, selection) {
+
 		setTimeout(() => {
 			let conf = selection.value;
 			let displays = this.state.displays;
@@ -436,6 +436,12 @@ class Compare extends Component {
 				displays = this.state.rows * this.state.columns;
 				superposition = 'OR';
 			}
+
+			if(conf == 'multi') {
+				displays = 2
+				this.setState({columns: 2, rows: 1, displays: displays});
+			}
+
 			this.setState({configuration: conf, displays: displays, superposition: superposition, crossAnnotations: crossAnnotations});
 			this.getCellMetadata();
 			ReactGA.event({

@@ -181,6 +181,10 @@ class AppSidebar extends Component {
 								}}
 							/>
 							</Menu.Item>
+							<Menu.Item>Mouse events</Menu.Item>
+							<Menu.Item>
+								<Checkbox toggle label="Dissociate viewers" checked={settings.dissociateViewers} onChange={this.toggleDissociateViewers.bind(this)} />
+							</Menu.Item>
 						</Menu.Menu>
 					}
 					<Divider />
@@ -382,6 +386,16 @@ class AppSidebar extends Component {
 			category: 'settings',
 			action: 'toggle log transform',
 			label: settings.hasCpmNormalization ? 'on' : 'off'
+		});
+	}
+
+	toggleDissociateViewers() {
+		let settings = BackendAPI.setSetting('dissociateViewers', !this.state.settings.dissociateViewers);
+		this.setState({settings: settings});
+		ReactGA.event({
+			category: 'settings',
+			action: 'toggle dissociate viewers',
+			label: settings.dissociateViewers ? 'on' : 'off'
 		});
 	}
 

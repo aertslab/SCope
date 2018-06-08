@@ -162,7 +162,7 @@ class AppHeader extends Component {
 				icon: false
 			},
 			{
-				display: metadata && metadata.cellMetaData  && metadata.cellMetaData.annotations.length ? true : false,
+				display: metadata ? true : false,
 				path: 'compare',
 				title: 'Compare',
 				icon: false

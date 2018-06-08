@@ -51,7 +51,8 @@ class API {
 		this.settings = {
 			sortCells: true,
 			hasLogTransform: true,
-			hasCpmNormalization: false
+			hasCpmNormalization: false,
+			dissociateViewers: true,
 		}
 		this.settingsChangeListeners = [];
 
@@ -106,7 +107,7 @@ class API {
 			'activeLooms',
 			'activeCoordinates',
 			'features', 'gene', 'regulon', 'compare', 'feature', 'featureType', 'threshold', 'type', 'metadata', 'description',
-			'settings', 'hasCpmNormalization', 'hasLogTransform', 'sortCells',
+			'settings', 'hasCpmNormalization', 'hasLogTransform', 'sortCells', 'dissociateViewers',
 			'viewerTool',
 			'viewerSelections',
 			'viewerTransform',

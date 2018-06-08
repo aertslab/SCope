@@ -5,6 +5,7 @@ import { withCookies, Cookies } from 'react-cookie';
 import ReactResizeDetector from 'react-resize-detector';
 import ReactGA from 'react-ga';
 import { Sidebar, Header, Image, Segment, Dimmer, Loader, Button, Icon } from 'semantic-ui-react';
+
 import AppHeader from './AppHeader';
 import AppSidebar from './AppSidebar';
 import { BackendAPI } from './common/API';
@@ -74,6 +75,18 @@ class App extends Component {
 		console.log('isSidebarVisible', isSidebarVisible);
 		let pusherWidth = isSidebarVisible ? screen.width - 340 : screen.width - 75
 
+		var sidebarContent = <b>Sidebar content</b>;
+
+		let sidebarStyle = { root: { 
+								position: "relative"
+							}, content: {
+								position: 'relative' 
+							}, sidebar: {
+								position: 'absolute',
+								zIndex: 2
+							}
+		}
+
 		return (
 			<Segment className="parentView">
 				<Route exact path="/" render={() =>
@@ -103,7 +116,7 @@ class App extends Component {
 								<Route path="/:uuid/:loom?/gene"     component={Gene}     />
 								<Route path="/:uuid/:loom?/geneset"  component={Geneset}  />
 								<Route path="/:uuid/:loom?/regulon"  component={Regulon}  />
-								<Route path="/:uuid/:loom?/compare"  component={Compare}  />
+								<Route path="/:uuid/:loom?/compare"  component={() => <Compare metadata={metadata}/>} />
 								<Route path="/:uuid/:loom?/tutorial" component={Tutorial} />
 								<Route path="/:uuid/:loom?/about"    component={About}    />
 							</Sidebar.Pusher>

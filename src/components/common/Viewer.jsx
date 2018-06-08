@@ -37,6 +37,7 @@ export default class Viewer extends Component {
 			y: 0,
 			k: 1
 		};
+		this.bcr = null
 		this.w = parseInt(this.props.width);
 		this.h = parseInt(this.props.height);
 		// Increase the maxSize if displaying more than 1500 (default) objects
@@ -71,6 +72,7 @@ export default class Viewer extends Component {
 		this.activeFeaturesListener = (features, featureID, customScale) => {
 			this.onActiveFeaturesChange(features, featureID, customScale);
 		}
+
 	}
 
 	render() {
@@ -97,9 +99,9 @@ export default class Viewer extends Component {
 	}
 
 	componentDidMount() {
+		let viewerId = 'viewer'+this.props.name
 		if (DEBUG) console.log(this.props.name, 'componentDidMount', this.props);
-		this.zoomSelection = d3.select('#viewer'+this.props.name);
-
+		this.zoomSelection = d3.select('#'+viewerId);
 		let bbox = this.zoomSelection.select(function() {return this.parentNode}).node().getBoundingClientRect();
 		this.w = bbox.width - VIEWER_MARGIN;
 		this.h = bbox.height - VIEWER_MARGIN;
@@ -218,6 +220,8 @@ export default class Viewer extends Component {
 		this.renderer.render(this.stage);
 		this.container = new PIXI.particles.ParticleContainer(this.maxn, [false, true, false, false, true]);
 //		this.container.blendMode = PIXI.BLEND_MODES.NORMAL;
+		this.container.interactive = true
+		this.bcr = document.getElementById("viewer"+this.props.name).getBoundingClientRect()
 		this.stage.addChild(this.container);
 		this.addLassoLayer();
 		this.zoomBehaviour = d3.zoom().scaleExtent([-1, 10]).on("zoom", this.zoom.bind(this));
@@ -428,30 +432,41 @@ export default class Viewer extends Component {
 	}
 
 	zoom(e) {
-		let t1 = d3.event.transform,
-			t0 = this.zoomTransform,
-			dx = (t1.x - t0.x) / (this.renderer.width / 2),
-			dy = (t1.y - t0.y) / (this.renderer.height / 2);
+		let settings = BackendAPI.getSettings();
+		let transform = () => {
+			let t1 = d3.event.transform,
+				t0 = this.zoomTransform,
+				dx = (t1.x - t0.x) / (this.renderer.width / 2),
+				dy = (t1.y - t0.y) / (this.renderer.height / 2);
 
-		this.container.position.x = t1.x;
-		this.container.position.y = t1.y;
-		this.selectionsLayer.position.x = t1.x;
-		this.selectionsLayer.position.y = t1.y;
-		this.zoomTransform = {x: t1.x, y: t1.y, k: t1.k};
+			this.container.position.x = t1.x;
+			this.container.position.y = t1.y;
+			this.selectionsLayer.position.x = t1.x;
+			this.selectionsLayer.position.y = t1.y;
+			this.zoomTransform = {x: t1.x, y: t1.y, k: t1.k};
 
-		if (t0.k != t1.k) {
-			// on zoom
-			// TODO: memory leak: increase in unnecessary listeners
-			this.transformDataPoints();
-		} else {
-			// on move
-			requestAnimationFrame(() => {
-				this.renderer.render(this.stage);
-			});
+			if (t0.k != t1.k) {
+				// on zoom
+				// TODO: memory leak: increase in unnecessary listeners
+				this.transformDataPoints();
+			} else {
+				// on move
+				requestAnimationFrame(() => {
+					this.renderer.render(this.stage);
+				});
+			}
+
+			// notify other viewers only for genuine zoom transforms
+			if (!t1.receivedFromListener) BackendAPI.setViewerTransform({k: t1.k, dx: dx, dy: dy, src: this.props.name});
 		}
 
-		// notify other viewers only for genuine zoom transforms
-		if (!t1.receivedFromListener) BackendAPI.setViewerTransform({k: t1.k, dx: dx, dy: dy, src: this.props.name});
+		if(!settings.dissociateViewers) {
+			transform()
+		} else {
+			if(this.containsPointer())
+				transform()
+		}
+
 	}
 
 	onActiveFeaturesChange(features, featureID, customScale) {
@@ -528,13 +543,21 @@ export default class Viewer extends Component {
 
 	onViewerTransformChange(t) {
 		// only for all zoom events of other components
-		if ((t.src != this.props.name)&&(t.src != 'init')) {
+		let settings = BackendAPI.getSettings();
+		let transform = () => {
 			let k = this.zoomTransform.t,
 				x = this.zoomTransform.x + t.dx * (this.renderer.width / 2),
 				y = this.zoomTransform.y + t.dy * (this.renderer.height / 2),
 				transform = d3.zoomIdentity.translate(x, y).scale(t.k);
 			transform.receivedFromListener = true;
 			this.zoomBehaviour.transform(this.zoomSelection, transform);
+		}
+		if(!settings.dissociateViewers) {
+			if((t.src != this.props.name) && (t.src != 'init'))
+				transform()
+		} else {
+			if((t.src != this.props.name) && (t.src != 'init') && this.containsPointer())
+				transform()
 		}
 	}
 
@@ -624,6 +647,8 @@ export default class Viewer extends Component {
 	}
 
 	transformPoints(container) {
+		let settings = BackendAPI.getSettings();
+		// if(DEBUG) console.log("Points transformed in viewer"+ this.props.name)
 		this.startBenchmark("transformPoints");
 		let k = this.zoomTransform.k;
 		let cx = this.renderer.width / 2;
@@ -799,5 +824,24 @@ export default class Viewer extends Component {
 			value: et,
 			label: this.props.name
 		});
+	}
+
+	containsPointer() {
+		return new Rect(this.bcr.x, this.bcr.y, this.bcr.width, this.bcr.height).contains(event.clientX, event.clientY)
+	}
+}
+
+class Rect {
+
+	constructor(x, y, w, h) {
+		this.x = x;
+		this.y = y;
+		this.width = w;
+		this.height = h;
+	}
+
+	contains = (x, y) => {
+		return this.x <= x && x <= this.x + this.width &&
+			   this.y <= y && y <= this.y + this.height;
 	}
 }
