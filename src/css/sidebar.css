@@ -33,6 +33,11 @@
 
 }
 
+.vertical.menu .progress {
+	/* background-color: #ffffff !important; */
+	opacity: 1 !important;
+}
+
 .vertical .item:hover {
 	font-weight: bold !important;
 	color: black !important;

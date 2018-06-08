@@ -227,9 +227,10 @@ message LoomHeierarchy {
 message MyLoom {
   string loomFilePath=1;
   string loomDisplayName=2;
-  CellMetaData cellMetaData=3;
-  FileMetaData fileMetaData=4;
-  LoomHeierarchy loomHeierarchy=5;
+  int64 loomSize=3;
+  CellMetaData cellMetaData=4;
+  FileMetaData fileMetaData=5;
+  LoomHeierarchy loomHeierarchy=6;
 
 }
 

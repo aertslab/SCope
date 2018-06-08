@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
-import { Segment,  Sidebar, Menu, Icon, Image, Divider,  Checkbox, Dropdown, Grid, Dimmer, Loader } from 'semantic-ui-react';
+import { Segment,  Sidebar, Menu, Icon, Image, Divider,  Checkbox, Dropdown, Grid, Dimmer, Loader, Progress } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
 import UploadModal from './common/UploadModal';
 import Slider, { Range } from 'rc-slider';
@@ -25,7 +25,8 @@ class AppSidebar extends Component {
 			spriteAlpha: sprite.alpha,
 			uploadModalOpened: false,
 			loading: true,
-			downloading: false
+			downloading: false,
+			downloadPercentage: null
 		}
 	}
 
@@ -60,12 +61,16 @@ class AppSidebar extends Component {
 							{canRemove &&
 								<Icon name='trash' title='delete this loom file' style={{display: 'inline'}} onClick={(e,d) => this.deleteLoomFile(file.loomFilePath, file.loomDisplayName)} className="pointer"  />
 							}
-							<Icon
-										name={ this.state.downloading && this.state.loomDownloading == loomUri ? 'circle notch' : 'save' }
+							{this.state.downloadPercentage >= 0 && this.state.loomDownloading == loomUri  &&
+								<Progress percent={this.state.downloadPercentage} indicating progress disabled></Progress>
+							}
+							{! this.state.downloadPercentage &&
+								<Icon
+										name={ this.state.downloading && this.state.loomDownloading == loomUri ? 'circle notched' : 'save' }
 								    loading={ this.state.downloading && this.state.loomDownloading == loomUri ? true : false }
 										title='download this loom file' style={{display: 'inline'}}
-										onClick={(e,d) => this.downloadLoomFile(file.loomFilePath)} className="pointer"
-										data-content="This is a test"/>
+										onClick={(e,d) => this.downloadLoomFile(file.loomFilePath, file.loomSize)} className="pointer"/>
+							}
 							{file.loomDisplayName}
 						</Menu.Item>
 					</Link>
@@ -253,56 +258,63 @@ class AppSidebar extends Component {
 		}
 	}
 
-	downloadLoomFile(loomFilePath) {
+	downloadLoomFile(loomFilePath, loomSize) {
 	  const { match } = this.props;
-		this.setState({downloading: true, loomDownloading: encodeURIComponent(loomFilePath)});
 
-	  let form = new FormData();
-	  form.append('loomFilePath', loomFilePath);
-	  form.append('UUID', match.params.uuid);
-	  form.append('file-type', 'Loom');
+		if (confirm("This loom file is " + parseInt(loomSize / (1024 * 1024)) + " MB in size. Unlike usual downloads, the file will first be downloaded to memory and then saved to disk. Once download begins, you will be unable to stop it without navigating away from this page.\n\n Would you like to continue downloading? ")) {
+			this.setState({downloading: true, loomDownloading: encodeURIComponent(loomFilePath)});
 
-	  try {
-	    this.XHRport = document.head.querySelector("[name=scope-xhrport]").getAttribute('port')
-	    console.log('Using meta XHRport')
-	  } catch (ex) {
-	    console.log('Using config XHRport')
-	    this.XHRport = BACKEND.XHRport;
-	  }
+		  let form = new FormData();
+		  form.append('loomFilePath', loomFilePath);
+		  form.append('UUID', match.params.uuid);
+		  form.append('file-type', 'Loom');
 
-	  let xhr = new XMLHttpRequest();
-	  if(REVERSEPROXYON) {
-	      xhr.open("GET", FRONTEND.httpProtocol +"://" + FRONTEND.host + "/upload/" + loomFilePath)
-	  } else {
-	      xhr.open("GET", BACKEND.httpProtocol + "://" + BACKEND.host + ":" + this.XHRport + "/" + loomFilePath);
-	  }
-	  xhr.send()
-	  xhr.responseType = 'arraybuffer';
-	  //
-	  xhr.upload.addEventListener('load', (event) => {
-	  		if (DEBUG) console.log("file donwload")
-	  		console.log(xhr, xhr.status, xhr.readyState, xhr.response)
-	  })
-	  xhr.onreadystatechange = () => {
-	  	if (DEBUG) console.log("DL State change")
-	  	console.log(xhr, xhr.status, xhr.readyState, xhr.response)
-	  	if ((xhr.readyState == 4) && (xhr.status == 200)) {
-	  		console.log('Will download blob')
-	  		var blob = new Blob([xhr.response], {type: 'application/x-hdf5'});
-	  		let a = document.createElement("a");
-	  		a.style = "display: none";
-	  		document.body.appendChild(a);
-	  		let url = window.URL.createObjectURL(blob);
-	  		a.href = url;
-	  		a.download = path.basename(loomFilePath);
-	  		a.click();
-	  		window.URL.revokeObjectURL(url);
-				this.setState({downloading: false, loomDownloading: null});
+		  try {
+		    this.XHRport = document.head.querySelector("[name=scope-xhrport]").getAttribute('port')
+		    console.log('Using meta XHRport')
+		  } catch (ex) {
+		    console.log('Using config XHRport')
+		    this.XHRport = BACKEND.XHRport;
+		  }
 
-	  	}
+		  let xhr = new XMLHttpRequest();
+		  if(REVERSEPROXYON) {
+		      xhr.open("POST", FRONTEND.httpProtocol +"://" + FRONTEND.host + "/upload/")
+		  } else {
+		      xhr.open("POST", BACKEND.httpProtocol + "://" + BACKEND.host + ":" + this.XHRport);
+		  }
+		  xhr.responseType = 'blob';
+		  xhr.upload.addEventListener('load', (event) => {
+		  		if (DEBUG) console.log("file donwload")
+		  		console.log(xhr, xhr.status, xhr.readyState, xhr.response)
+		  })
 
-	  }
-	  // xhr.send(form)
+			xhr.onprogress = (evt) => {
+				var percent = parseInt((evt.loaded / loomSize) * 100)
+				this.setState({downloadPercentage: percent})
+			}
+
+		  xhr.onreadystatechange = () => {
+		  	if (DEBUG) console.log("DL State change")
+		  	console.log(xhr, xhr.status, xhr.readyState, xhr.response)
+		  	if ((xhr.readyState == 4) && (xhr.status == 200)) {
+		  		console.log('Will download blob')
+		  		var blob = new Blob([xhr.response], {type: 'application/x-hdf5'});
+		  		let a = document.createElement("a");
+		  		a.style = "display: none";
+		  		document.body.appendChild(a);
+		  		let url = window.URL.createObjectURL(blob);
+		  		a.href = url;
+		  		a.download = path.basename(loomFilePath);
+		  		a.click();
+		  		window.URL.revokeObjectURL(url);
+					this.setState({downloading: false, loomDownloading: null, downloadPercentage: null});
+
+		  	}
+
+		  }
+	  	xhr.send(form)
+		}
 
 	}
 

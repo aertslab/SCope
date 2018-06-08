@@ -140,7 +140,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     for cluster in clustering['clusters']:
                         allClusters.append(cluster['description'])
                     search_space = add_element(search_space=search_space, elements=allClusters, element_type='Clustering: {0}'.format(clustering['name']))
-            
+
             # Add regulons to the search space if present in .loom
             if loom.has_regulons_AUC():
                 search_space = add_element(search_space=search_space, elements=loom.get_regulons_AUC().dtype.names, element_type='regulon')
@@ -354,7 +354,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     hex_vec = list(map(lambda x: BIG_COLOR_LIST[x], ca_annotation_as_int))
                 else:
                     raise ValueError("The annotation {0} has too many unique values.".format(feature))
-                return s_pb2.CellColorByFeaturesReply(color=hex_vec, 
+                return s_pb2.CellColorByFeaturesReply(color=hex_vec,
                                                       vmax=vmax,
                                                       legend=s_pb2.ColorLegend(values=md_annotation_values, colors=BIG_COLOR_LIST[:len(md_annotation_values)]))
             elif request.featureType[n].startswith('Clustering: '):
@@ -457,7 +457,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def getRegulonMetaData(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
         regulon_genes = loom.get_regulon_genes(regulon=request.regulon)
-        
+
         if len(regulon_genes) == 0:
             print("Something is wrong in the loom file: no regulon found!")
 
@@ -522,6 +522,8 @@ class SCope(s_pb2_grpc.MainServicer):
 
         for f in loomsToProcess:
             if f.endswith('.loom'):
+                with open(self.lfh.get_loom_absolute_file_path(f), 'r') as fh:
+                    loomSize = os.fstat(fh.fileno())[6]
                 loom = self.lfh.get_loom(loom_file_path=f)
                 if loom is None:
                     continue
@@ -541,6 +543,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     L2 = L3 = ''
                 my_looms.append(s_pb2.MyLoom(loomFilePath=f,
                                              loomDisplayName=os.path.splitext(os.path.basename(f))[0],
+                                             loomSize=loomSize,
                                              cellMetaData=s_pb2.CellMetaData(annotations=loom.get_meta_data_by_key(key="annotations"),
                                                                              embeddings=loom.get_meta_data_by_key(key="embeddings"),
                                                                              clusterings=loom.get_meta_data_by_key(key="clusterings")),
