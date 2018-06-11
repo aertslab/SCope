@@ -233,8 +233,7 @@ class Loom():
 
     @lru_cache(maxsize=8)
     def get_gene_names(self):
-        loom = self.loom_connection
-        genes = loom.get_genes()
+        genes = self.get_genes()
         conversion = {}
         species, geneMappings = self.infer_species()
         for gene in genes:

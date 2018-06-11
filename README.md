@@ -1,11 +1,11 @@
 # SCope: Visualization of large-scale and high dimensional single cell data
 
 SCope is a fast visualization tool for large-scale and high dimensional scRNA-seq datasets.
-Currently the format of the datasets supported by SCope is `.loom`. This format of genomic data is maintained by the Linnarsson Lab through `loompy` Python package (https://github.com/linnarsson-lab/loompy). 
+Currently the data format supported by SCope is `.loom`. This file format for very large omics datasets is maintained by the Linnarsson Lab through the `loompy` Python package (https://github.com/linnarsson-lab/loompy). 
 
 ## Demo
 
-You can have a look at SCope at http://scope.aertslab.org.
+You can have a look and try SCope on different datasets at http://scope.aertslab.org.
 
 ## Requirements
 
