@@ -198,6 +198,8 @@ class App extends Component {
 			if (match.params.uuid == 'permalink') {
 				if (DEBUG) console.log('Permalink detected');
 				this.restoreSession(ip, cookies.get(cookieName), match.params.loom);
+			} else if (match.params.uuid.startswith('permalink')) {
+				this.restoreSession(ip, match.params.uuid.substring(12), match.params.loom);
 			} else {
 				if (DEBUG) console.log('Params UUID detected');
 				this.checkUUID(ip, match.params.uuid);

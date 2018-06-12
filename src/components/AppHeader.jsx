@@ -203,7 +203,7 @@ class AppHeader extends Component {
 		let d = pako.deflate(j, { to: 'string' });
 		let b = encodeURIComponent(window.btoa(d).replace(/\//g,'$'));
 		if (this.state.permalinkUUID) {
-			var uuid = match.params.uuid
+			var uuid = 'permalink__' + match.params.uuid
 		} else {
 			var uuid = 'permalink'
 		}
