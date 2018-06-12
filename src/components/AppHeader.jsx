@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
-import { Icon, Label, Button, Menu, Input, Popup } from 'semantic-ui-react';
+import { Icon, Label, Button, Menu, Input, Popup, Checkbox} from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
 import { instanceOf } from 'prop-types';
 import { withCookies, Cookies } from 'react-cookie';
@@ -23,7 +23,8 @@ class AppHeader extends Component {
 		this.state = {
 			timeout: props.timeout,
 			shortUrl: null,
-			cookies: props.cookies
+			cookies: props.cookies,
+			permalinkUUID: false
 		}
 	}
 
@@ -51,11 +52,20 @@ class AppHeader extends Component {
 						</Link>
 					</Menu.Item>
 				)}
-
 				<Menu.Item>
-					<Icon name="linkify" onClick={this.getPermalink.bind(this)} className="pointer" title="Get permalink" />
+					<Icon name="linkify" onClick={this.getPermalink.bind(this, this.state.permalinkUUID, false)} className="pointer" title="Get permalink" />
 					{shortUrl &&
-						<Label className="permalink">{shortUrl}</Label>
+						<Label className="permalink">{shortUrl}</Label>}
+					{shortUrl &&
+						<Label>
+
+							<Checkbox className="permalink" checked={this.state.permalinkUUID} onChange={this.getPermalink.bind(this, true)}
+												data-tooltip="WARNING: Anyone that uses this link will have read and write access to this session but will be able to see all loom files in this session."
+												data-position="bottom center"
+												data-variation='tiny'/>
+											{"      Include session UUID in permalink?"}
+						</Label>
+
 					}
 				</Menu.Item>
 
@@ -74,6 +84,7 @@ class AppHeader extends Component {
 			</Menu>
 		);
 	}
+
 
 	resetUUID() {
 		const { history, cookies } = this.props;
@@ -182,18 +193,28 @@ class AppHeader extends Component {
 		];
 	}
 
-	getPermalink() {
+	getPermalink(togglePermalinkUUID) {
 		const { match } = this.props;
-		console.log(BackendAPI);
+		if (togglePermalinkUUID) {
+			let state = !this.state.permalinkUUID
+			this.state.permalinkUUID = state
+		}
 		let j = JSON.stringify(BackendAPI.getExportObject(match.params), BackendAPI.getExportKeys());
 		let d = pako.deflate(j, { to: 'string' });
 		let b = encodeURIComponent(window.btoa(d).replace(/\//g,'$'));
-		bitly.shorten(BITLY.baseURL + "/#/permalink/" + b)
+		if (this.state.permalinkUUID) {
+			var uuid = match.params.uuid
+		} else {
+			var uuid = 'permalink'
+		}
+		bitly.shorten(BITLY.baseURL + "/#/" + uuid + "/" + b)
 		.then((result) => {
 			this.setState({shortUrl: result.data.url});
 			this.forceUpdate();
 		}).then((error) => {
-			console.log(error);
+			if (error) {
+				console.log(error);
+			}
 		});
 	}
 }
