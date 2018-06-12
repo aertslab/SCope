@@ -54,6 +54,7 @@ class App extends Component {
 				<Header as='h2' inverted>
 					An error occured when connecting to SCope back-end.<br /><br />
 					Please check your Internet connection.<br /><br />
+					If this error persists, please try a local install from our <a href='https://github.com/aertslab/SCope' target='_blank'>Github page</a> or try our <a href='http://scope-mirror.aertslab.org/' target='_blank'>SCope mirror</a>.<br /><br />
 					<Button color='orange' onClick={() => {window.location.reload()}}>REFRESH</Button>
 				</Header>
 			</Dimmer>
@@ -67,7 +68,7 @@ class App extends Component {
 					Currenlty Scope has reached it's capacity in number of concurrent users.<br /><br />
 					Please try again later or try out our standalone SCope app.<br /><br />
 					More details on our GitHub.<br /><br />
-					<Button color="orange" href="https://github.com/aertslab/SCope">AertsLab GitHub</Button>
+						<Button color="orange" href="https://github.com/aertslab/SCope" target='_blank'>AertsLab GitHub</Button>
 				</Header>
 			</Dimmer>
 		)
@@ -77,10 +78,10 @@ class App extends Component {
 
 		var sidebarContent = <b>Sidebar content</b>;
 
-		let sidebarStyle = { root: { 
+		let sidebarStyle = { root: {
 								position: "relative"
 							}, content: {
-								position: 'relative' 
+								position: 'relative'
 							}, sidebar: {
 								position: 'absolute',
 								zIndex: 2
