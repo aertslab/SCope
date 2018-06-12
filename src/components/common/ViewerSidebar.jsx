@@ -163,6 +163,8 @@ class ViewerSidebar extends Component {
 							markerTableRowData[metric.accessor] = metric.values[j]
 						return (markerTableRowData)
 					});
+
+					let markerTableHeight = screen.availHeight/2
 					
 					markerTable = (
 						<div style={{marginBottom: "15px"}}>
@@ -174,8 +176,11 @@ class ViewerSidebar extends Component {
 									columns: markerTableColumns
 									}
 								]}
-								pageSizeOptions={[5, 10, 20]}
-								defaultPageSize={10}
+								pageSizeOptions={[5, 10, md.genes.length]}
+								defaultPageSize={md.genes.length}
+								style={{
+									height: markerTableHeight +"px" // This will force the table body to overflow and scroll, since there is not enough room
+								}}
 								className="-striped -highlight"
 								/>
 						</div>

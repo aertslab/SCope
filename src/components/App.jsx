@@ -311,7 +311,8 @@ class App extends Component {
 			let deflated = window.atob(base64);
 			let settings = JSON.parse(pako.inflate(deflated, { to: 'string' }));
 			BackendAPI.importObject(settings);
-			BackendAPI.queryLoomFiles(settings.uuid, () => {
+			console.log("Restoring session"+ uuid +"...")
+			BackendAPI.queryLoomFiles(uuid, () => {
 				Object.keys(settings.features).map((page) => {
 					settings.features[page].map((f, i) => {
 						BackendAPI.updateFeature(i, f.type, f.feature, f.featureType, f.metadata ? f.metadata.description : null, page);

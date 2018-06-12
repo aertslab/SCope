@@ -347,7 +347,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     features.append(np.zeros(n_cells))
             elif request.featureType[n] == 'annotation':
                 md_annotation_values = loom.get_meta_data_annotation_by_name(name=feature)["values"]
-                ca_annotation = loom.get_annotation_by_name(name=feature)
+                ca_annotation = loom.get_ca_attr_by_name(name=feature)
                 ca_annotation_as_int = list(map(lambda x: md_annotation_values.index(x), ca_annotation))
                 num_annotations = max(ca_annotation_as_int)
                 if num_annotations <= len(BIG_COLOR_LIST):
@@ -434,7 +434,7 @@ class SCope(s_pb2_grpc.MainServicer):
         annotations = []
         for anno in request.annotations:
             if anno != '':
-                annotations.append(loom.get_annotation_by_name(name=anno)[cellIndices])
+                annotations.append(loom.get_ca_attr_by_name(name=anno)[cellIndices])
 
         return s_pb2.CellMetaDataReply(clusterIDs=[s_pb2.CellClusters(clusters=x) for x in cellClusters],
                                        geneExpression=[s_pb2.FeatureValues(features=x) for x in geneExp],
@@ -664,7 +664,7 @@ class SCope(s_pb2_grpc.MainServicer):
             loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
             dgem = np.transpose(loom.get_connection()[:, :])
             ex_mtx = pd.DataFrame(data=dgem,
-                                  index=loom.get_annotation_by_name("CellID"),
+                                  index=loom.get_ca_attr_by_name("CellID"),
                                   columns=loom.get_genes())
             # Creating the rankings...
             start_time = time.time()
