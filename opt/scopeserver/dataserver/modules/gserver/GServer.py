@@ -577,7 +577,8 @@ class SCope(s_pb2_grpc.MainServicer):
                 print('Removing UUID: {0}'.format(uid))
                 del(self.dfh.get_current_UUIDs()[uid])
                 for i in ['Loom', 'GeneSet', 'LoomAUCellRankings']:
-                    shutil.rmtree(os.path.join(self.dfh.get_data_dirs()[i]['path'], uid))
+                    if os.path.exists(os.path.join(self.dfh.get_data_dirs()[i]['path'], uid)):
+                        shutil.rmtree(os.path.join(self.dfh.get_data_dirs()[i]['path'], uid))
         uid = request.UUID
         if uid in self.dfh.get_current_UUIDs():
             startTime = self.dfh.get_current_UUIDs()[uid]

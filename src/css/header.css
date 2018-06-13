@@ -58,6 +58,7 @@ VIB colours:
 
 .permalink {
 	user-select: all !important;
+	vertical-align: middle !important;
 }
 .ui.label {
 	padding: 4px !important;

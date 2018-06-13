@@ -1,15 +1,44 @@
 # SCope: Visualization of large-scale and high dimensional single cell data
 
 SCope is a fast visualization tool for large-scale and high dimensional scRNA-seq datasets.
-Currently the data format supported by SCope is `.loom`. This file format for very large omics datasets is maintained by the Linnarsson Lab through the `loompy` Python package (https://github.com/linnarsson-lab/loompy). 
+Currently the data format supported by SCope is `.loom`. This file format for very large omics datasets is maintained by the Linnarsson Lab through the `loompy` Python package (https://github.com/linnarsson-lab/loompy).
 
 ## Demo
 
-You can have a look and try SCope on different datasets at http://scope.aertslab.org.
+Visit [http://scope.aertslab.org](http://scope.aertslab.org) to test out SCope on several published datasets! Personal loom file files can be uploaded but will only be kept for 5 days.
+
+## Loom File Generation
+
+Currently there are two packages to generate extended loom files compatible with SCope.
+- R: [SCopeLoomR](https://github.com/aertslab/SCopeLoomR) - Dedicated R package
+- Python: [pySCENIC](https://github.com/aertslab/pySCENIC) - Single function for generation from SCENIC results
+
+Eventually the functionality from pySCENIC will be expanded and put in its own python package.
+
+
 
 ## Requirements
 
-- Miniconda:
+- Node.js:
+
+**Required for standalone apps, command line instances and development.**
+
+```
+# Ubuntu
+curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Enterprise Linux and Fedora
+curl -sL https://rpm.nodesource.com/setup_9.x | sudo bash -
+sudo yum -y install nodejs
+```
+For more details and other versions please visit [https://github.com/nodesource/distributions](https://github.com/nodesource/distributions)
+
+- Python 3 (Developed and tested with 3.6.5):
+
+**Required for commands line instances and development.**
+
+We recommend using miniconda to install SCope and its dependencies in a clean environment.
 
 Download miniconda3 from https://conda.io/miniconda.html or use the command line:
 ```
@@ -21,22 +50,16 @@ Install Minconda (Python 3):
 bash Miniconda3-latest-[...].sh
 ```
 
-- Node.js & npm: 
-```
-# Ubuntu
-curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
-sudo apt-get install -y nodejs
+## Run SCope
 
-# Enterprise Linux and Fedora
-curl -sL https://rpm.nodesource.com/setup_9.x | sudo bash -
-sudo yum -y install nodejs
-```
-For more details and other versions please visit https://github.com/nodesource/distributions
+### Standalone apps
 
-## Run a Local Instance
+Standalone apps for **macOS** and **Linux** can be downloaded from [the releases page.](https://github.com/aertslab/SCope/releases).
 
-### Development Mode
-Requirements should be fullfilled (see `Requirements` section).
+A **Windows** app is under development, but currently has no ETA.
+
+### Development
+Requirements should be fulfilled (see `Requirements` section).
 
 #### Install
 
@@ -56,7 +79,7 @@ npm install
 - One Command Run:
 ```
 npm run scope
-``` 
+```
 
 - Debug Run:
 ```
@@ -66,8 +89,6 @@ scope-server
 # Start SCope Client
 npm run dev
 ```
-
-### Production Mode
 
 #### 1. Packaging SCope Data Server
 
@@ -113,20 +134,53 @@ Finally, bundle the SCope app:
 npm run package-linux-x64
 tar -zcvf scope-linux-x64.tar.gz scope-linux-x64
 ```
+
+- macOS (x64)
+```
+npm run package-macOS-x64
+```
+
 Run the binary:
+- Linux
 ```
 ./release/scope-linux-x64/scope
 ```
 
+- macOS
+
+Run the .app file generated
+
 #### 3. Creating Single Executable File
 
 ##### Debian package
-For more details, follow https://www.christianengvall.se/electron-installer-debian-package/ 
+For more details, follow https://www.christianengvall.se/electron-installer-debian-package/
 ```
 npm run create-debian-installer
 ```
 
-All the uploaded data from SCope will be put ~/.scope/data
+##### dmg for macOS
+```
+git clone https://github.com/andreyvit/yoursway-create-dmg.git
+./yoursway-create-dmg/create-dmg \
+	--volname "SCope Installer" \
+	--volicon "images/SCope_Icon.icns" \
+	--background "images/SCope_Background.png" \
+	--window-pos 200 120 \
+	--window-size 800 400 \
+	--icon-size 100 \
+	--icon release/scope-darwin-x64/scope.app 192 344 \
+	--hide-extension scope.app \
+	--app-drop-link 448 344 \
+	${TRAVIS_BUILD_DIR}/release/scope-macOS-x64.dmg \
+	release/scope-darwin-x64/scope.app/
+```
+
+All uploaded data from SCope will be put in the following folders by default:
+- Linux
+`~/.local/share/scope/`
+
+- macOS
+`~/Library/Application\ Support/scope/`
 
 ## Deploy a Cloud-based Instance
 
@@ -144,4 +198,4 @@ To create a SCope AWS instance from scratch please read the tutorial [aws-deploy
 
 SCope architecture can be visualized below:
 
-![GitHub Logo](/images/SCope_architecture.png)
+![SCope architecture](/images/SCope_architecture.png)

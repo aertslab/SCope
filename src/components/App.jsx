@@ -54,6 +54,7 @@ class App extends Component {
 				<Header as='h2' inverted>
 					An error occured when connecting to SCope back-end.<br /><br />
 					Please check your Internet connection.<br /><br />
+					If this error persists, please try a local install from our <a href='https://github.com/aertslab/SCope' target='_blank'>Github page</a> or try our <a href='http://scope-mirror.aertslab.org/' target='_blank'>SCope mirror</a>.<br /><br />
 					<Button color='orange' onClick={() => {window.location.reload()}}>REFRESH</Button>
 				</Header>
 			</Dimmer>
@@ -67,7 +68,7 @@ class App extends Component {
 					Currenlty Scope has reached it's capacity in number of concurrent users.<br /><br />
 					Please try again later or try out our standalone SCope app.<br /><br />
 					More details on our GitHub.<br /><br />
-					<Button color="orange" href="https://github.com/aertslab/SCope">AertsLab GitHub</Button>
+						<Button color="orange" href="https://github.com/aertslab/SCope" target='_blank'>AertsLab GitHub</Button>
 				</Header>
 			</Dimmer>
 		)
@@ -77,10 +78,10 @@ class App extends Component {
 
 		var sidebarContent = <b>Sidebar content</b>;
 
-		let sidebarStyle = { root: { 
+		let sidebarStyle = { root: {
 								position: "relative"
 							}, content: {
-								position: 'relative' 
+								position: 'relative'
 							}, sidebar: {
 								position: 'absolute',
 								zIndex: 2
@@ -197,6 +198,8 @@ class App extends Component {
 			if (match.params.uuid == 'permalink') {
 				if (DEBUG) console.log('Permalink detected');
 				this.restoreSession(ip, cookies.get(cookieName), match.params.loom);
+			} else if (match.params.uuid.startsWith('permalink')) {
+				this.restoreSession(ip, match.params.uuid.substring(11), match.params.loom);
 			} else {
 				if (DEBUG) console.log('Params UUID detected');
 				this.checkUUID(ip, match.params.uuid);
@@ -229,7 +232,7 @@ class App extends Component {
 	}
 
 
-	checkUUID(ip, uuid) {
+	checkUUID(ip, uuid, ping) {
 		const { cookies, history, match } = this.props;
 		if (!uuid) return;
 		BackendAPI.getConnection().then((gbc, ws) => {
@@ -254,7 +257,9 @@ class App extends Component {
 				} else {
 					this.timeout = response ? parseInt(response.timeRemaining * 1000) : 0;
 					cookies.set(cookieName, uuid, { path: '/', maxAge: this.timeout });
-					this.setState({loading: false, uuid: uuid});
+					if (!ping) {
+						this.setState({loading: false, uuid: uuid});
+					}
 					if (!this.timer) {
 						this.timer = setInterval(() => {
 							this.timeout -= timer;
@@ -269,14 +274,16 @@ class App extends Component {
 								this.forceUpdate();
 							} else {
 								if (DEBUG) console.log('Session socket ping @ ', this.timeout);
-								this.checkUUID(ip, uuid);
+								this.checkUUID(ip, uuid, true);
 							}
 						}, timer);
 					}
-					ReactGA.set({ userId: uuid });
-					let loom = match.params.loom ? decodeURIComponent(match.params.loom) : '*';
-					let page = match.params.page ? decodeURIComponent(match.params.page) : 'welcome';
-					history.replace('/' + [uuid, encodeURIComponent(loom), encodeURIComponent(page)].join('/'));
+					if (!ping) {
+						ReactGA.set({ userId: uuid });
+						let loom = match.params.loom ? decodeURIComponent(match.params.loom) : '*';
+						let page = match.params.page ? decodeURIComponent(match.params.page) : 'welcome';
+						history.replace('/' + [uuid, encodeURIComponent(loom), encodeURIComponent(page)].join('/'));
+					}
 				}
 			});
 		}, () => {
@@ -311,7 +318,8 @@ class App extends Component {
 			let deflated = window.atob(base64);
 			let settings = JSON.parse(pako.inflate(deflated, { to: 'string' }));
 			BackendAPI.importObject(settings);
-			BackendAPI.queryLoomFiles(settings.uuid, () => {
+			console.log("Restoring session"+ uuid +"...")
+			BackendAPI.queryLoomFiles(uuid, () => {
 				Object.keys(settings.features).map((page) => {
 					settings.features[page].map((f, i) => {
 						BackendAPI.updateFeature(i, f.type, f.feature, f.featureType, f.metadata ? f.metadata.description : null, page);
