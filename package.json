@@ -1,6 +1,6 @@
 {
   "name": "scope",
-  "version": "0.0.6",
+  "version": "1.0.0",
   "description": "Visualization tool for large-scale and high dimensional single-cell data",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "scope-aws": "node bin/launch.js --aws",
     "electron": "node_modules/.bin/electron ./index.js electronTest",
     "package-linux-x64": "node_modules/.bin/electron-packager . scope --overwrite --platform=linux --arch=x64 --prune=true --out=release --ignore=assets/scope-client-0.0.[0-5].*.js --ignore=opt/scopeserver/dataserver/pyvenv --ignore=opt/scopeserver/setup.py --ignore=opt/scopeserver/dataserver/build --ignore=opt/scopeserver/dataserver/test --ignore=__pycache__",
-    "package-macOS-x64": "node_modules/.bin/electron-packager . scope --overwrite --platform=darwin --arch=x64 --prune=true --out=release --ignore=assets/scope-client-0.0.[0-5].*.js --ignore=opt/scopeserver/dataserver/pyvenv --ignore=opt/scopeserver/setup.py --ignore=opt/scopeserver/dataserver/build --ignore=opt/scopeserver/dataserver/test --ignore=__pycache__",
+    "package-macOS-x64": "node_modules/.bin/electron-packager . scope --overwrite --platform=darwin --arch=x64 --prune=true --icon=images/SCope_Icon.icns --out=release --ignore=assets/scope-client-0.0.[0-5].*.js --ignore=opt/scopeserver/dataserver/pyvenv --ignore=opt/scopeserver/setup.py --ignore=opt/scopeserver/dataserver/build --ignore=opt/scopeserver/dataserver/test --ignore=__pycache__",
     "create-debian-installer": "electron-installer-debian --src release/scope-linux-x64/ --arch amd64 --config debian.json"
   },
   "keywords": [
@@ -59,6 +59,7 @@
     "react-dnd": "^2.5.4",
     "react-dnd-html5-backend": "^2.5.4",
     "react-dom": "^16.2.0",
+    "react-favicon": "0.0.14",
     "react-file-download": "^0.3.5",
     "react-file-reader-input": "^1.1.4",
     "react-flex-layout": "^0.9.6",

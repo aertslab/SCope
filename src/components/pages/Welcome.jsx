@@ -8,13 +8,14 @@ export default class Welcome extends Component {
             <Grid>
                 <Grid.Row>
                     <Grid.Column>
-                        <Header as='h1'>Welcome to SCope</Header>
+                        <img src="images/SCope_Logo.png" width="480" /><br/><br/>
+
                         SCope is a fast, user-friendly visualization tool for large-scale scRNA-seq datasets, published in Cell.<br/>
                         Datasets can be uploaded using the left sidebar. Files should be in the <a href='http://loompy.org/' target='_blank'>loom file format</a> and will appear under the "User Uploaded" category.<br/>
                         SCope compatible loom files can be generated using the following packages:
                         <ul>
                           <li>R: <a href='https://github.com/aertslab/SCopeLoomR' target='_blank'>SCopeLoomR</a></li>
-                          <li>Python: <a href='https://github.com/aertslab/SCopeLoomPy' target='_blank'>SCopeLoomPy</a></li>
+                          <li>Python: <a href='https://github.com/aertslab/pySCENIC' target='_blank'>pySCENIC</a></li>
                         </ul>
                         <br/>
                         Currently on <a href='http://scope.aertslab.org' target='_blank'>scope.aertslab.org</a> the following datasets can be found preloaded in the left sidebar.

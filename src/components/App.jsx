@@ -4,6 +4,8 @@ import { withRouter, Route, Link } from 'react-router-dom';
 import { withCookies, Cookies } from 'react-cookie';
 import ReactResizeDetector from 'react-resize-detector';
 import ReactGA from 'react-ga';
+import Favicon from 'react-favicon';
+
 import { Sidebar, Header, Image, Segment, Dimmer, Loader, Button, Icon } from 'semantic-ui-react';
 
 import AppHeader from './AppHeader';
@@ -92,6 +94,7 @@ class App extends Component {
 
 		return (
 			<div>
+				<Favicon url="src/images/SCope_favicon.ico" />
 				<Segment className="parentView">
 					<Route exact path="/" render={() =>
 						<Segment textAlign='center' className="parentView">
