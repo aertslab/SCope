@@ -6,6 +6,7 @@ import { Dimmer, Loader } from 'semantic-ui-react'
 import ReactResizeDetector from 'react-resize-detector';
 import ReactGA from 'react-ga';
 import zlib from 'zlib';
+import Popup from 'react-popup'
 
 const DEFAULT_POINT_COLOR = 'A6A6A6';
 const VIEWER_MARGIN = 5;
@@ -81,7 +82,7 @@ export default class Viewer extends Component {
 				<canvas id={"viewer"+this.props.name}  >
 				</canvas>
 				<ReactResizeDetector skipOnMount handleWidth handleHeight onResize={this.onResize.bind(this)} />
-				<Dimmer active={this.state.loading} inverted>
+				<Dimmer active={this.state.loading} inverted style={{zIndex: 0}}>
 					<Loader inverted>Loading</Loader>
 				</Dimmer>
 			</div>
@@ -718,25 +719,29 @@ export default class Viewer extends Component {
 		if (DEBUG) console.log(this.props.name, 'getFeatureColors', query, scale);
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
-				if (DEBUG) console.log(this.props.name, 'getFeatureColors', response);
-				// Convert object to ArrayBuffer
-				let responseBuffered = new Buffer(response.compressedColor.toArrayBuffer())
-				// Uncompress
-				if(response.hasAddCompressionLayer) {
-					zlib.inflate(responseBuffered, (err, uncompressedMessage) => {
-						if(err) console.log(err)
-						else {
-							this.endBenchmark("getFeatureColors")
-							this.updateColors(response, this.chunkString(uncompressedMessage.toString(), 6))
-						}
-					});
+				if(response.error !== null) {
+					Popup.alert(response.error.message, response.error.type);
 				} else {
-					this.endBenchmark("getFeatureColors")
-					this.updateColors(response, response.color)
-				}
+					if (DEBUG) console.log(this.props.name, 'getFeatureColors', response);
+					// Convert object to ArrayBuffer
+					let responseBuffered = new Buffer(response.compressedColor.toArrayBuffer())
+					// Uncompress
+					if(response.hasAddCompressionLayer) {
+						zlib.inflate(responseBuffered, (err, uncompressedMessage) => {
+							if(err) console.log(err)
+							else {
+								this.endBenchmark("getFeatureColors")
+								this.updateColors(response, this.chunkString(uncompressedMessage.toString(), 6))
+							}
+						});
+					} else {
+						this.endBenchmark("getFeatureColors")
+						this.updateColors(response, response.color)
+					}
 
-				if(this.props.onActiveLegendChange != null) {
-					this.props.onActiveLegendChange(response.legend)
+					if(this.props.onActiveLegendChange != null) {
+						this.props.onActiveLegendChange(response.legend)
+					}
 				}
 			});
 		}, () => {

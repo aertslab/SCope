@@ -171,18 +171,18 @@ class ViewerSidebar extends Component {
 					let markerTableHeaderName = () => {
 						if(activeFeatures[i].featureType == "regulon")
 							return "Regulon Genes"
-						else if(activeFeatures[i].featureType.startWith("Clustering"))
+						else if(activeFeatures[i].featureType.startsWith("Clustering"))
 							return "Cluster Markers"
 
 					}, downloadButtonName = () => {
 						if(activeFeatures[i].featureType == "regulon")
 							return "Download "+ activeFeatures[i].feature +" regulon genes"
-						else if(activeFeatures[i].featureType.startWith("Clustering"))
+						else if(activeFeatures[i].featureType.startsWith("Clustering"))
 							return "Download "+ activeFeatures[i].feature +" markers"
 					}, genesFileName = () => {
 						if(activeFeatures[i].featureType == "regulon")
 							return activeFeatures[i].feature +"_regulon_genes.tsv"
-						else if(activeFeatures[i].featureType.startWith("Clustering"))
+						else if(activeFeatures[i].featureType.startsWith("Clustering"))
 							return activeFeatures[i].feature +"_markers.tsv"
 					};
 		

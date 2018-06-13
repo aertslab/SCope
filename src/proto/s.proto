@@ -36,6 +36,10 @@ service Main {
   rpc deleteUserFile (DeleteUserFileRequest) returns (DeleteUserFileReply) {}
 }
 
+message ErrorReply {
+  string type=1;
+  string message=2;
+}
 
 message CellColorByFeaturesRequest {
   string loomFilePath=1;
@@ -63,6 +67,7 @@ message CellColorByFeaturesReply {
   repeated float maxVmax=5;
   repeated int32 cellIndices=6;
   ColorLegend legend=7;
+  ErrorReply error=8;
 }
 
 message CellAUCValuesByFeaturesRequest {

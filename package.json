@@ -65,6 +65,7 @@
     "react-flexbox-grid": "^2.0.0",
     "react-ga": "^2.4.1",
     "react-json-view": "^1.16.0",
+    "react-popup": "^0.9.3",
     "react-resize-detector": "^2.0.0",
     "react-router-dom": "^4.2.2",
     "react-split-pane": "^0.1.74",
