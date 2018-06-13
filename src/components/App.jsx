@@ -232,7 +232,7 @@ class App extends Component {
 	}
 
 
-	checkUUID(ip, uuid) {
+	checkUUID(ip, uuid, ping) {
 		const { cookies, history, match } = this.props;
 		if (!uuid) return;
 		BackendAPI.getConnection().then((gbc, ws) => {
@@ -257,7 +257,9 @@ class App extends Component {
 				} else {
 					this.timeout = response ? parseInt(response.timeRemaining * 1000) : 0;
 					cookies.set(cookieName, uuid, { path: '/', maxAge: this.timeout });
-					this.setState({loading: false, uuid: uuid});
+					if (!ping) {
+						this.setState({loading: false, uuid: uuid});
+					}
 					if (!this.timer) {
 						this.timer = setInterval(() => {
 							this.timeout -= timer;
@@ -272,14 +274,16 @@ class App extends Component {
 								this.forceUpdate();
 							} else {
 								if (DEBUG) console.log('Session socket ping @ ', this.timeout);
-								this.checkUUID(ip, uuid);
+								this.checkUUID(ip, uuid, true);
 							}
 						}, timer);
 					}
-					ReactGA.set({ userId: uuid });
-					let loom = match.params.loom ? decodeURIComponent(match.params.loom) : '*';
-					let page = match.params.page ? decodeURIComponent(match.params.page) : 'welcome';
-					history.replace('/' + [uuid, encodeURIComponent(loom), encodeURIComponent(page)].join('/'));
+					if (!ping) {
+						ReactGA.set({ userId: uuid });
+						let loom = match.params.loom ? decodeURIComponent(match.params.loom) : '*';
+						let page = match.params.page ? decodeURIComponent(match.params.page) : 'welcome';
+						history.replace('/' + [uuid, encodeURIComponent(loom), encodeURIComponent(page)].join('/'));
+					}
 				}
 			});
 		}, () => {
