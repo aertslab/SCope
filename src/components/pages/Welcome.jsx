@@ -9,7 +9,7 @@ export default class Welcome extends Component {
                 <Grid.Row>
                     <Grid.Column>
                         <Header as='h1'>Welcome to SCope</Header>
-                        SCope is a fast, user-friendly visualization tool for large-scale scRNA-seq datasets.<br/>
+                        SCope is a fast, user-friendly visualization tool for large-scale scRNA-seq datasets, published in Cell.<br/>
                         Datasets can be uploaded using the left sidebar. Files should be in the <a href='http://loompy.org/' target='_blank'>loom file format</a> and will appear under the "User Uploaded" category.<br/>
                         SCope compatible loom files can be generated using the following packages:
                         <ul>
@@ -24,11 +24,16 @@ export default class Welcome extends Component {
                               <li><b>A single-cell transcriptome atlas of the ageing Drosophila brain</b>, Davie, Jannssens and Koldere <i>et al.</i>, 2018 (<a href='http://cell.com' target='_blank'>Cell</a>)
                                 <ul>
                                   <li>Whole Adult Brain - Filtered Dataset - 57k Cells</li>
+                                    <ul>
+                                      <li><a href='http://bit.ly/2Jzmqba' target='_blank'>Fig. 1a </a>, <a href='http://bit.ly/2JAtiEW' target='_blank'>Fig. 1b </a>, <a href='http://bit.ly/2sTN304' target='_blank'>Fig. 1c </a>, <a href='http://bit.ly/2JzUTX1' target='_blank'>Fig. 1d </a></li>
+                                      <li><a href='http://bit.ly/2Jzmqba' target='_blank'>Fig. 3a(i)</a>, <a href='http://bit.ly/2sU4Zrc' target='_blank'>Fig. 3a(ii)</a>, <a href='http://bit.ly/2sTmsA6' target='_blank'>Fig. 3a(iii)</a>, <a href='http://bit.ly/2JxGfj8' target='_blank'>Fig. 3a(iiii)</a>, <a href='http://bit.ly/2JzGlXl' target='_blank'>Fig. 3b </a></li>
+                                      <li><a href='http://bit.ly/2JAVFTy' target='_blank'>Fig. 4b </a>, <a href='http://bit.ly/2sTmZlA' target='_blank'>Fig. 4c </a>, <a href='http://bit.ly/2sP38Ef' target='_blank'>Fig. 4d </a></li>
+                                    </ul>
                                   <li>Whole Adult Brain - Unfiltered Dataset - 157k Cells</li>
                                   <li>Whole Adult Brain - Drop-seq Dataset - 2k Cells</li>
                                 </ul>
                               </li>
-                              <li><b>Phenotypic convergence: distinct transcription factors regulate common terminal features</b>, Konstantinides <i>et al.</i>, 2018 (<a href='http://cell.com' target='_blank'>Cell</a>)
+                              <li><b>Phenotypic convergence: distinct transcription factors regulate common terminal features</b>, Konstantinides <i>et al.</i>, 2018 (<a href='https://doi.org/10.1016/j.cell.2018.05.021' target='_blank'>Cell</a>)
                                 <ul>
                                   <li>Adult Optic Lobe - Filtered Dataset - 57k Cells</li>
                                 </ul>
