@@ -1,13 +1,14 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom';
-import { Grid, Input, Icon, Tab, Image } from 'semantic-ui-react'
+import { Grid, Input, Icon, Tab, Image, Button } from 'semantic-ui-react'
 import { BackendAPI } from '../common/API'
 import Metadata from '../common/Metadata'
 import ReactGA from 'react-ga';
 
 import ReactTable from "react-table";
 import "react-table/react-table.css";
+import { delimiter } from 'path';
 
 class ViewerSidebar extends Component {
 
@@ -86,6 +87,7 @@ class ViewerSidebar extends Component {
 		}
 
 		let featureTab = (i) => {
+
 			let colors = ["red", "green", "blue"]
 			let metadata = activeFeatures[i] && activeFeatures[i].feature ? "" : <div>No additional information shown for the feature queried in the <b style={{color: colors[i]}}>{colors[i]}</b> query box because it is empty. Additional information (e.g.: cluster markers, regulon motif, regulon target genes, ...) can be displayed here when querying clusters or regulons.<br/><br/></div>;
 
@@ -143,7 +145,7 @@ class ViewerSidebar extends Component {
 					// Define the marker table columns
 					// Add at least the gene column
 					let markerTableColumns = [
-						newMarkerTableColumn("Gene", "gene", "gene", newMarkerTableGeneCell)
+						newMarkerTableColumn("Gene Symbol", "gene", "gene", newMarkerTableGeneCell)
 					]
 
 					if ('metrics' in md) {
@@ -163,21 +165,53 @@ class ViewerSidebar extends Component {
 							markerTableRowData[metric.accessor] = metric.values[j]
 						return (markerTableRowData)
 					});
-					
+
+					let markerTableHeight = screen.availHeight/2.5
+
+					let markerTableHeaderName = () => {
+						if(activeFeatures[i].featureType == "regulon")
+							return "Regulon Genes"
+						else if(activeFeatures[i].featureType.startWith("Clustering"))
+							return "Cluster Markers"
+
+					}, downloadButtonName = () => {
+						if(activeFeatures[i].featureType == "regulon")
+							return "Download "+ activeFeatures[i].feature +" regulon genes"
+						else if(activeFeatures[i].featureType.startWith("Clustering"))
+							return "Download "+ activeFeatures[i].feature +" markers"
+					}, genesFileName = () => {
+						if(activeFeatures[i].featureType == "regulon")
+							return activeFeatures[i].feature +"_regulon_genes.tsv"
+						else if(activeFeatures[i].featureType.startWith("Clustering"))
+							return activeFeatures[i].feature +"_markers.tsv"
+					};
+		
 					markerTable = (
-						<div style={{marginBottom: "15px"}}>
+						<div style={{marginBottom: "15px", align: "center"}}>
 							<ReactTable
 								data={markerTableData}
 								columns={[
 									{
-									Header: "Markers",
+									Header: markerTableHeaderName(),
 									columns: markerTableColumns
 									}
 								]}
-								pageSizeOptions={[5, 10, 20]}
-								defaultPageSize={10}
+								pageSizeOptions={[5, 10, md.genes.length]}
+								defaultPageSize={md.genes.length}
+								style={{
+									height: markerTableHeight +"px" // This will force the table body to overflow and scroll, since there is not enough room
+								}}
 								className="-striped -highlight"
-								/>
+							/>
+							<Button primary onClick={() => {
+								const opts = { delimiter: "\t", quote: '' };
+								var fileDownload = require('react-file-download');
+								const json2csv  = require('json2csv').parse;
+								const tsv = json2csv(markerTableData, opts);
+								fileDownload(tsv, genesFileName());
+							}} style={{marginTop: "10px", width: "100%"}}>
+							{downloadButtonName()}
+							</Button>
 						</div>
 					);
 				}

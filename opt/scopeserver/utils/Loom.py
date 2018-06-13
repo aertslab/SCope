@@ -4,6 +4,7 @@ import zlib
 import base64
 from functools import lru_cache
 import pandas as pd
+import time
 
 from scopeserver.utils import DataFileHandler as dfh
 
@@ -15,6 +16,8 @@ class Loom():
         self.abs_file_path = abs_file_path
         self.loom_connection = loom_connection
         print("New .loom created.")
+        # Metrics
+        self.nUMI = None
 
     def get_connection(self):
         return self.loom_connection
@@ -250,7 +253,15 @@ class Loom():
     ##############
 
     def get_nUMI(self):
-        return self.loom_connection.ca.nUMI
+        if self.nUMI is not None:
+            return self.nUMI
+        if self.has_ca_attr(name="nUMI"):
+            return self.loom_connection.ca.nUMI
+        # Compute nUMI on the fly
+        calc_nUMI_start_time = time.time()
+        self.nUMI = self.loom_connection[:,:].sum(axis=0)
+        print("Debug: %s seconds elapsed (calculating nUMI) ---" % (time.time() - calc_nUMI_start_time))
+        return self.nUMI
 
     def get_gene_expression_by_gene_symbol(self, gene_symbol):
         return self.loom_connection[self.get_genes() == gene_symbol, :][0]
@@ -355,11 +366,11 @@ class Loom():
     # Annotation #
     ##############
 
-    def has_annotation(self, name):
+    def has_ca_attr(self, name):
         return name in self.loom_connection.ca.keys()
 
-    def get_annotation_by_name(self, name):
-        if self.has_annotation(name=name):
+    def get_ca_attr_by_name(self, name):
+        if self.has_ca_attr(name=name):
             return self.loom_connection.ca[name]
         raise ValueError("The given annotation {0} does not exists in the .loom.".format(name))
 
