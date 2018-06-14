@@ -1,3 +1,7 @@
+.scopeLogo {
+        margin: 0px 0px 0px 150px !important;
+}
+
 .pusher {
 	display: flex;
 	flex-direction: column;
@@ -77,7 +81,7 @@ canvas {
 
 .viewerRow {
 	padding-top: 0px !important;
-	
+
 }
 
 .pusher .segment {

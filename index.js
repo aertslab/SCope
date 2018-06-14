@@ -279,7 +279,7 @@ class SCope {
     // Set the size of the window to the size of the available screen
     const {width, height} = electron.screen.getPrimaryDisplay().workAreaSize
     this.view = new electron.BrowserWindow({width: width, height: height, icon:'images/SCope_Icon.png', webPreferences: {
-      devTools: true
+      devTools: false
     }})
     this.view.loadURL(require('url').format({
       pathname: path.join(__dirname, 'index.html'),
