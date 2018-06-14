@@ -15,7 +15,7 @@ setup(name='scope-server',
       install_requires=[
           'grpcio>=1.7.0',
           'grpcio-tools>=1.7.0',
-          'loompy>=2.0',
+          'loompy==2.0.2',
           'pandas',
           'numpy',
           'pyscenic',
