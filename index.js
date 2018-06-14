@@ -261,6 +261,25 @@ class SCope {
     this.stop = this.stop.bind(this)
   }
 
+  install() {
+    return new Promise((resolve) => {
+      console.log("Installing SCope...")
+      cp.execSync("cd resources/app; npm rebuild");
+      fs.writeFile("INSTALLED", "", function(err) {
+        console.log("Successfully installed!");
+      });
+      resolve(true);
+    })
+  }
+
+  check_install() {
+    if(!fs.existsSync("INSTALLED")) {
+      return this.install()
+    } else {
+      return new Promise((resolve) => { resolve(true) })
+    }
+  }
+
   start() {
     this.model = new SCopeServer();
     this.model.start()
@@ -392,11 +411,11 @@ function setMainMenu() {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
-
 app.on('ready', () => {
- scope.start()
- setMainMenu()
- })
+  scope.check_install().then(() => scope.start())
+  setMainMenu()
+})
+
 app.on('will-quit', scope.stop)
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
