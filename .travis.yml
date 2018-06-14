@@ -30,6 +30,7 @@ before_install:
   - nvm use 10.3.0
 install:
   - npm install
+  - npm rebuild
   - pip install pyinstaller
   - cd ${TRAVIS_BUILD_DIR}
   - VERSION=$(cat VERSION)
