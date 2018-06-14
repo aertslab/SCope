@@ -6,7 +6,7 @@ matrix:
     env:
     - PYTHON=3.6.5
     - BUILD_NAME=package-linux-x64
-    - DEPLOY_FILE="${TRAVIS_BUILD_DIR}/release/scope-linux-x64.zip"
+    - DEPLOY_FILE="${TRAVIS_BUILD_DIR}/release/SCope-linux-x64.zip"
     - RELEASE_NAME="SCope_Linux_x64"
     script: echo "The script is a lie."
     if: tag IS blank
@@ -16,7 +16,7 @@ matrix:
     env:
     - PYTHON=3.6.5
     - BUILD_NAME=package-macOS-x64
-    - DEPLOY_FILE="${TRAVIS_BUILD_DIR}/release/scope-macOS-x64.dmg"
+    - DEPLOY_FILE="${TRAVIS_BUILD_DIR}/release/SCope-macOS-x64.dmg"
     - RELEASE_NAME="SCope_macOS_x64"
     if: tag IS blank
 before_install:
@@ -44,10 +44,10 @@ install:
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then git clone https://github.com/andreyvit/yoursway-create-dmg.git;
     ./yoursway-create-dmg/create-dmg --volname "SCope Installer" --volicon "images/SCope_Icon.icns"
     --background "images/SCope_Background.png" --window-pos 200 120 --window-size 800
-    400 --icon-size 100 --icon release/scope-darwin-x64/scope.app 192 344 --hide-extension
-    scope.app --app-drop-link 448 344 ${TRAVIS_BUILD_DIR}/release/scope-macOS-x64.dmg
-    release/scope-darwin-x64/scope.app/; else cd release; zip -r scope-linux-x64.zip
-    scope-linux-x64/; fi
+    400 --icon-size 100 --icon release/SCope-darwin-x64/SCope.app 192 344 --hide-extension
+    SCope.app --app-drop-link 448 344 ${TRAVIS_BUILD_DIR}/release/SCope-macOS-x64.dmg
+    release/SCope-darwin-x64/SCope.app/; else cd release; zip -r SCope-linux-x64.zip
+    SCope-linux-x64/; fi
 
 deploy:
   provider: releases
