@@ -432,7 +432,7 @@ export default class Viewer extends Component {
 		return color;
 	}
 
-	zoom(e) {
+	zoom() {
 		let settings = BackendAPI.getSettings();
 		let transform = () => {
 			let t1 = d3.event.transform,
@@ -832,7 +832,8 @@ export default class Viewer extends Component {
 	}
 
 	containsPointer() {
-		return new Rect(this.bcr.x, this.bcr.y, this.bcr.width, this.bcr.height).contains(event.clientX, event.clientY)
+		let mX = d3.event.sourceEvent.clientX, mY = d3.event.sourceEvent.clientY
+		return new Rect(this.bcr.x, this.bcr.y, this.bcr.width, this.bcr.height).contains(mX, mY)
 	}
 }
 
