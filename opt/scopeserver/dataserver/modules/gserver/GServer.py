@@ -54,17 +54,6 @@ class SCope(s_pb2_grpc.MainServicer):
         self.dfh.set_global_data()
         self.lfh.set_global_data()
 
-    @staticmethod
-    def compress_str_array(str_arr):
-        print("Compressing... ")
-        str_array_size = sys.getsizeof(str_arr)
-        str_array_joint = bytes(''.join(str_arr), 'utf-8')
-        str_array_joint_compressed = zlib.compress(str_array_joint, 1)
-        str_array_joint_compressed_size = sys.getsizeof(str_array_joint_compressed)
-        savings_percent = 1-str_array_joint_compressed_size/str_array_size
-        print("Saving "+"{:.2%} of space".format(savings_percent))
-        return str_array_joint_compressed
-
     @lru_cache(maxsize=16)
     def build_searchspace(self, loom, cross_species=''):
         start_time = time.time()
@@ -95,6 +84,7 @@ class SCope(s_pb2_grpc.MainServicer):
         elif cross_species == 'mmus' and species == 'dmel':
             search_space = add_element(search_space=search_space, elements=self.dfh.mmus_to_dmel_mappings.keys(), element_type='gene')
         else:
+            # Add genes to search space
             if len(gene_mappings) > 0:
                 genes = set(loom.get_genes())
                 shrink_mappings = set([x for x in self.dfh.dmel_mappings.keys() if x in genes or self.dfh.dmel_mappings[x] in genes])
@@ -287,14 +277,9 @@ class SCope(s_pb2_grpc.MainServicer):
             else:
                 cell_color_by_features.addEmptyFeature()
 
-        # Compress
-        comp_start_time = time.time()
-        hex_vec_compressed = SCope.compress_str_array(str_arr=cell_color_by_features.get_hex_vec())
-        print("Debug: %s seconds elapsed (compression) ---" % (time.time() - comp_start_time))
-
         print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
         return s_pb2.CellColorByFeaturesReply(color=None,
-                                              compressedColor=hex_vec_compressed,
+                                              compressedColor=cell_color_by_features.get_compressed_hex_vec(),
                                               hasAddCompressionLayer=True,
                                               vmax=cell_color_by_features.get_v_max(),
                                               maxVmax=cell_color_by_features.get_max_v_max(),
