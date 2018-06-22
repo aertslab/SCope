@@ -551,8 +551,8 @@ class SCope(s_pb2_grpc.MainServicer):
         yield gse.update_state(step=0, status_code=200, status_message="Reading the gene set...", values=None)
         with open(gse.gene_set_file_path, 'r') as f:
             # Skip first line because it contains the name of the signature
-            gs = GeneSignature('Gene Signature #1',
-                               'FlyBase', [line.strip() for idx, line in enumerate(f) if idx > 0])
+            gs = GeneSignature(name='Gene Signature #1',
+                               gene2weight=[line.strip() for idx, line in enumerate(f) if idx > 0])
         time.sleep(1)
 
         if not gse.has_AUCell_rankings():

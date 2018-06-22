@@ -3,6 +3,7 @@ import numpy as np
 
 from scopeserver.utils import DataFileHandler as dfh
 
+from scopeserver.utils import Constant
 from scopeserver.dataserver.modules.gserver import GServer as gs
 from scopeserver.dataserver.modules.gserver import s_pb2
 
@@ -56,7 +57,7 @@ class GeneSetEnrichment:
             vmax[0] = _vmax[0]
             max_vmax[0] = _vmax[1]
             vals = aucs / vmax[0]
-            vals = (((gs._UPPER_LIMIT_RGB - gs._LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))) + gs._LOWER_LIMIT_RGB
+            vals = (((Constant._UPPER_LIMIT_RGB - Constant._LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))) + Constant._LOWER_LIMIT_RGB
             hex_vec = ["null" if r == g == b == 0
                        else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
                        for r, g, b in zip(vals, np.zeros(len(aucs)), np.zeros(len(aucs)))]
