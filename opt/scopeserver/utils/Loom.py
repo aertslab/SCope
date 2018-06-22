@@ -21,15 +21,15 @@ class Loom():
 
     def get_connection(self):
         return self.loom_connection
-    
+
     def get_file_path(self):
         return self.file_path
-    
+
     def get_abs_file_path(self):
         return self.abs_file_path
-    
+
     def get_global_attribute_by_name(self, name):
-        if not hasattr(self.loom_connection.attrs, name):
+        if name not in self.loom_connection.attrs.keys():
             raise AttributeError("The global attribute {0} does not exist in the .loom file.".format(name))
         return self.loom_connection.attrs[name]
 
@@ -42,7 +42,7 @@ class Loom():
 
     def get_cell_ids(self):
         return self.loom_connection.ca["CellID"]
-    
+
     #############
     # Meta Data #
     #############
@@ -190,7 +190,7 @@ class Loom():
             return json.loads(md)
         except json.decoder.JSONDecodeError:
             return Loom.decompress_meta(meta=md)
-    
+
     def get_nb_cells(self):
         return self.loom_connection.shape[1]
 
@@ -283,7 +283,7 @@ class Loom():
         else:
             cellIndices = list(range(self.get_nb_cells()))
         return gene_expr, cellIndices
-    
+
     ############
     # Regulons #
     ############
@@ -310,7 +310,7 @@ class Loom():
                 vals = vals[cellIndices]
             return vals, cellIndices
         return [], cellIndices
-    
+
     ##############
     # Embeddings #
     ##############
@@ -381,14 +381,14 @@ class Loom():
 
     def get_clustering_by_id(self, clustering_id):
         return self.loom_connection.ca.Clusterings[str(clustering_id)]
-    
+
     # def get_cluster_IDs(self, loom_file_path, clustering_id):
     #     loom = self.lfh.get_loom_connection(loom_file_path)
     #     return loom.ca.Clusterings[str(clustering_id)]
 
     def get_cluster_marker_genes(self, clustering_id, cluster_id):
         return self.get_genes()[self.loom_connection.ra["ClusterMarkers_{0}".format(clustering_id)][str(cluster_id)] == 1]
-    
+
     def get_cluster_marker_metrics(self, clustering_id, cluster_id, metric_accessor):
         cluster_marker_metric = self.loom_connection.row_attrs["ClusterMarkers_{0}_{1}".format(clustering_id, metric_accessor)][str(cluster_id)]
         # Return non-zero values
