@@ -121,12 +121,12 @@ class Loom():
             idx = attr_names.index(x)
             margin = attr_margins[idx]
             ha = False
-            if margin == 0:
-                ha = hasattr(loom.attrs, x)
-            elif margin == 1:
-                ha = hasattr(loom.ra, x)
-            elif margin == 2:
-                ha = hasattr(loom.ca, x)
+            if margin == 0 and x in loom.attrs.keys():
+                ha = True
+            elif margin == 1 and x in loom.ra.keys():
+                ha = True
+            elif margin == 2 and x in loom.ca.keys():
+                ha = True
             else:
                 raise ValueError("Invalid margin value: "+ margin)
             tmp["has"+attr_keys[idx]] = ha
