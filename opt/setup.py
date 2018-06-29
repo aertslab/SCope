@@ -5,7 +5,7 @@ setup(name='scope-server',
                         'scope-server = scopeserver.dataserver:dev'
                         ]
                     },
-      version='1.0.1',
+      version='1.0.3',
       description='SCope Data Server: a server to load and serve the data to the SCope Client',
       url='',
       author='Maxime De Waegeneer',
