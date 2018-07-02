@@ -62,7 +62,7 @@ class SCope(s_pb2_grpc.MainServicer):
         str_array_joint_compressed = zlib.compress(str_array_joint, 1)
         str_array_joint_compressed_size = sys.getsizeof(str_array_joint_compressed)
         savings_percent = 1-str_array_joint_compressed_size/str_array_size
-        print("Saving "+"{:.2%} of space".format(savings_percent))
+        print("Saving {:.2%} of space".format(savings_percent))
         return str_array_joint_compressed
 
     @lru_cache(maxsize=16)

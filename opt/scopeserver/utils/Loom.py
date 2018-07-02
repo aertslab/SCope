@@ -128,8 +128,8 @@ class Loom():
             elif margin == 2 and x in loom.ca.keys():
                 ha = True
             else:
-                raise ValueError("Invalid margin value: "+ margin)
-            tmp["has"+attr_keys[idx]] = ha
+                raise ValueError("Invalid margin value: {0}".format(margin))
+            tmp["has{0}".format(attr_keys[idx])] = ha
             return tmp
 
         md = map(loom_attr_exists, attr_names)
@@ -141,14 +141,14 @@ class Loom():
         md_annotations = self.get_meta_data_by_key(key="annotations")
         md_annotation = list(filter(lambda x: x["name"] == name, md_annotations))
         if(len(md_annotation) > 1):
-            raise ValueError('Multiple annotations matches the given name '+name)
+            raise ValueError('Multiple annotations matches the given name: {0}'.format(name))
         return md_annotation[0]
 
     def get_meta_data_clustering_by_id(self, id):
         md_clusterings = self.get_meta_data_by_key(key="clusterings")
         md_clustering = list(filter(lambda x: x["id"] == id, md_clusterings))
         if(len(md_clustering) > 1):
-            raise ValueError('Multiple clusterings matches the given id '+id)
+            raise ValueError('Multiple clusterings matches the given id: {0}'.format(id))
         return md_clustering[0]
 
     def get_meta_data_by_key(self, key):
