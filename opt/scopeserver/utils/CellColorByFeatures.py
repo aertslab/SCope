@@ -106,7 +106,7 @@ class CellColorByFeatures():
     def setClusteringFeature(self, request, feature, n):
         clusteringID = None
         clusterID = None
-        print("Getting clustering: "+ str(request.feature[n]))
+        print("Getting clustering: {0}".format(request.feature[n]))
         for clustering in self.meta_data['clusterings']:
             if clustering['name'] == re.sub('^Clustering: ', '', request.featureType[n]):
                 clusteringID = str(clustering['id'])
