@@ -93,14 +93,12 @@ class Loom():
             clusterDF["0"] = [int(x) for x in loom.ca['Clusters']]
             loom.ca['Clusterings'] = Loom.dfToNamedMatrix(clusterDF)
             print(loom.ca["Clusterings"])
-        metaJson["clusterings"].append({
-                    "id": 0,
-                    "group": "Interpreted",
-                    "name": "Clusters + ClusterName",
-                    "clusters": clusters
-                })
-        print(metaJson)
-
+            metaJson["clusterings"].append({
+                        "id": 0,
+                        "group": "Interpreted",
+                        "name": "Clusters + ClusterName",
+                        "clusters": clusters
+                    })
         loom.attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
         # self.change_loom_mode(loom_file_path, rw=False)
 
@@ -127,14 +125,11 @@ class Loom():
                 ha = True
             elif margin == 2 and x in loom.ca.keys():
                 ha = True
-            else:
-                raise ValueError("Invalid margin value: {0}".format(margin))
             tmp["has{0}".format(attr_keys[idx])] = ha
             return tmp
 
         md = map(loom_attr_exists, attr_names)
         meta = { k: v for d in md for k, v in d.items() }
-        print(meta)
         return meta
 
     def get_meta_data_annotation_by_name(self, name):
