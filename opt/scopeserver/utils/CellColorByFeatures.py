@@ -91,7 +91,7 @@ class CellColorByFeatures():
     def setAnnotationFeature(self, feature):
         md_annotation_values = self.loom.get_meta_data_annotation_by_name(name=feature)["values"]
         ca_annotation = self.loom.get_ca_attr_by_name(name=feature)
-        ca_annotation_as_int = list(map(lambda x: md_annotation_values.index(x), ca_annotation))
+        ca_annotation_as_int = list(map(lambda x: md_annotation_values.index(str(x)), ca_annotation))
         num_annotations = max(ca_annotation_as_int)
         if num_annotations <= len(Constant.BIG_COLOR_LIST):
             self.hex_vec = list(map(lambda x: Constant.BIG_COLOR_LIST[x], ca_annotation_as_int))
