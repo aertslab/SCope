@@ -122,9 +122,15 @@ message Annotation {
   repeated string values=2;
 }
 
+message Trajectory {
+  repeated float x=1;
+  repeated float y=2;
+}
+
 message Embedding {
   int32 id=1;
   string name=2;
+  Trajectory trajectory=3;
 }
 
 message ClusterMarkerMetric {
