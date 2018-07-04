@@ -3,11 +3,21 @@ from functools import lru_cache
 
 from scopeserver.utils import DataFileHandler as dfh
 
-class SearchSpace():
+class SearchSpace(dict):
 
-    @lru_cache(maxsize=16)
+    '''
+    SearchSpace class is used to build the search space that contain all the queryable elements:
+    - Homo sapiens to Drosophila melanogaster gene mappings
+    - Mus musculus to Drosophila melanogaster gene mappings
+    - Genes
+    - Clusterings (inferred from e.g.: Seurat, ...)
+    - Regulons (inferred from SCENIC)
+    - Annotations
+    - Metrics
+    '''
+
     def __init__(self, loom, cross_species=''):
-        self.content = {}
+        dict.__init__(self)
         self.loom = loom
         self.cross_species = cross_species
         self.species, self.gene_mappings = loom.infer_species()
@@ -15,11 +25,11 @@ class SearchSpace():
     def add_element(self, element, element_type):
         if element_type == 'gene' and self.cross_species == '' and len(self.gene_mappings) > 0:
             if self.gene_mappings[element] != element:
-                self.content[('{0}'.format(str(element)).casefold(), element, element_type)] = self.gene_mappings[element]
+                self[('{0}'.format(str(element)).casefold(), element, element_type)] = self.gene_mappings[element]
             else:
-                self.content[(element.casefold(), element, element_type)] = element
+                self[(element.casefold(), element, element_type)] = element
         else:
-            self.content[(element.casefold(), element, element_type)] = element
+            self[(element.casefold(), element, element_type)] = element
 
     def add_elements(self, elements, element_type):
         for element in elements:
@@ -31,6 +41,7 @@ class SearchSpace():
         else:
             if self.loom.has_meta_data():
                 self.meta_data = self.loom.get_meta_data()
+            # Add genes to the search space
             self.add_genes()
             # Add clusterings to the search space if present in .loom
             if self.loom.has_md_clusterings():
@@ -41,7 +52,7 @@ class SearchSpace():
             # Add annotations to the search space if present in .loom
             if self.loom.has_md_annotations():
                 self.add_annotations()
-        return self.content
+        return self
 
     def add_cross_species_genes(self):
         if self.cross_species == 'hsap' and self.species == 'dmel':
