@@ -220,23 +220,23 @@ class Loom():
 
     def get_anno_cells(self, annotations, logic='OR'):
         loom = self.loom_connection
-        cellIndices = []
+        cell_indices = []
         for anno in annotations:
-            annoName = anno.name
-            for annotationValue in anno.values:
-                annoSet = set()
-                if annoName.startswith("Clustering_"):
-                    clusteringID = str(annoName.split('_')[1])
-                    [annoSet.add(x) for x in np.where(loom.ca.Clusterings[clusteringID] == annotationValue)[0]]
+            anno_name = anno.name
+            for annotation_value in anno.values:
+                anno_set = set()
+                if anno_name.startswith("Clustering_"):
+                    clustering_id = str(anno_name.split('_')[1])
+                    [anno_set.add(x) for x in np.where(loom.ca.Clusterings[clustering_id] == annotation_value)[0]]
                 else:
-                    [annoSet.add(x) for x in np.where(loom.ca[annoName] == annotationValue)[0]]
-                cellIndices.append(annoSet)
+                    [anno_set.add(x) for x in np.where(loom.ca[anno_name].astype(str) == str(annotation_value))[0]]
+                cell_indices.append(anno_set)
         if logic not in ['AND', 'OR']:
             logic = 'OR'
         if logic == 'AND':
-            return sorted(list(set.intersection(*cellIndices)))
+            return sorted(list(set.intersection(*cell_indices)))
         elif logic == 'OR':
-            return sorted(list(set.union(*cellIndices)))
+            return sorted(list(set.union(*cell_indices)))
 
     @lru_cache(maxsize=8)
     def get_gene_names(self):

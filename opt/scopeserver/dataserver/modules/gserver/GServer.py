@@ -239,34 +239,34 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getCellMetaData(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
-        cellIndices = request.cellIndices
-        if len(cellIndices) == 0:
-            cellIndices = list(range(loom.get_nb_cells()))
+        cell_indices = request.cellIndices
+        if len(cell_indices) == 0:
+            cell_indices = list(range(loom.get_nb_cells()))
 
-        cellClusters = []
+        cell_clusters = []
         for clustering_id in request.clusterings:
             if clustering_id != '':
-                cellClusters.append(loom.get_clustering_by_id(clustering_id=clustering_id)[cellIndices])
-        geneExp = []
+                cell_clusters.append(loom.get_clustering_by_id(clustering_id=clustering_id)[cell_indices])
+        gene_exp = []
         for gene in request.selectedGenes:
             if gene != '':
                 vals, _ = loom.get_gene_expression(gene_symbol=gene,
                                                    log_transform=request.hasLogTransform,
                                                    cpm_normalise=request.hasCpmTransform)
-                geneExp.append(vals[cellIndices])
-        aucVals = []
+                gene_exp.append(vals[cell_indices])
+        auc_vals = []
         for regulon in request.selectedRegulons:
             if regulon != '':
-                vals, _ = aucVals.append(loom.get_auc_values(regulon=regulon))
-                aucVals.append(vals[[cellIndices]])
+                vals, _ = gene_exp.append(loom.get_auc_values(regulon=regulon))
+                gene_exp.append(vals[[cell_indices]])
         annotations = []
         for anno in request.annotations:
             if anno != '':
-                annotations.append(loom.get_ca_attr_by_name(name=anno)[cellIndices])
+                annotations.append(loom.get_ca_attr_by_name(name=anno)[cell_indices].astype(str))
 
-        return s_pb2.CellMetaDataReply(clusterIDs=[s_pb2.CellClusters(clusters=x) for x in cellClusters],
-                                       geneExpression=[s_pb2.FeatureValues(features=x) for x in geneExp],
-                                       aucValues=[s_pb2.FeatureValues(features=x) for x in aucVals],
+        return s_pb2.CellMetaDataReply(clusterIDs=[s_pb2.CellClusters(clusters=x) for x in cell_clusters],
+                                       geneExpression=[s_pb2.FeatureValues(features=x) for x in gene_exp],
+                                       aucValues=[s_pb2.FeatureValues(features=x) for x in gene_exp],
                                        annotations=[s_pb2.CellAnnotations(annotations=x) for x in annotations])
 
     def getFeatures(self, request, context):
