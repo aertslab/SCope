@@ -56,7 +56,7 @@ class CellColorByFeatures():
     
     def get_compressed_hex_vec(self):
         comp_start_time = time.time()
-        hex_vec_compressed = CellColorByFeatures.compress_str_array(str_arr=self.hex_vec)
+        hex_vec_compressed = CellColorByFeatures.compress_str_array(str_arr=self.get_hex_vec())
         print("Debug: %s seconds elapsed (compression) ---" % (time.time() - comp_start_time))
         return hex_vec_compressed
 

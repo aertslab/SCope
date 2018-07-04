@@ -731,7 +731,8 @@ export default class Viewer extends Component {
 							if(err) console.log(err)
 							else {
 								this.endBenchmark("getFeatureColors")
-								this.updateColors(response, this.chunkString(uncompressedMessage.toString(), 6))
+								let colors = this.chunkString(uncompressedMessage.toString(), 6)
+								this.updateColors(response, colors)
 							}
 						});
 					} else {
