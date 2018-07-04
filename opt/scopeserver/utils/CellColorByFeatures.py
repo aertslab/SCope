@@ -1,6 +1,9 @@
 import numpy as np
 import re
 import itertools
+import time
+import zlib
+import sys
 
 from scopeserver.dataserver.modules.gserver import s_pb2
 from scopeserver.utils import Constant
@@ -27,6 +30,17 @@ class CellColorByFeatures():
         if vmax == 0:
             vmax = 0.01
         return vmax, maxVmax
+
+    @staticmethod
+    def compress_str_array(str_arr):
+        print("Compressing... ")
+        str_array_size = sys.getsizeof(str_arr)
+        str_array_joint = bytes(''.join(str_arr), 'utf-8')
+        str_array_joint_compressed = zlib.compress(str_array_joint, 1)
+        str_array_joint_compressed_size = sys.getsizeof(str_array_joint_compressed)
+        savings_percent = 1-str_array_joint_compressed_size/str_array_size
+        print("Saving "+"{:.2%} of space".format(savings_percent))
+        return str_array_joint_compressed
     
     def get_features(self):
         return self.features
@@ -39,6 +53,12 @@ class CellColorByFeatures():
                        else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
                        for r, g, b in zip(self.features[0], self.features[1], self.features[2])]
         return self.hex_vec
+    
+    def get_compressed_hex_vec(self):
+        comp_start_time = time.time()
+        hex_vec_compressed = CellColorByFeatures.compress_str_array(str_arr=self.hex_vec)
+        print("Debug: %s seconds elapsed (compression) ---" % (time.time() - comp_start_time))
+        return hex_vec_compressed
 
     def get_v_max(self):
         return self.v_max
@@ -102,6 +122,25 @@ class CellColorByFeatures():
                                                vmax=self.v_max,
                                                legend=s_pb2.ColorLegend(values=md_annotation_values, colors=Constant.BIG_COLOR_LIST[:len(md_annotation_values)]))
         self.setReply(reply=reply)
+    
+    def setMetricFeature(self, request, feature, n):
+        if feature != '':
+            vals, self.cell_indices = self.loom.get_metric(
+                metric_name=feature,
+                log_transform=request.hasLogTransform,
+                cpm_normalise=request.hasCpmTransform,
+                annotation=request.annotation,
+                logic=request.logic)
+            if request.vmax[n] != 0.0:
+                self.v_max[n] = request.vmax[n]
+            else:
+                self.v_max[n], self.max_v_max[n] = CellColorByFeatures.get_vmax(vals)
+            # vals = np.round((vals / vmax[n]) * 225)
+            vals = vals / self.v_max[n]
+            vals = (((Constant._UPPER_LIMIT_RGB - Constant._LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))) + Constant._LOWER_LIMIT_RGB
+            self.features.append([x if x <= Constant._UPPER_LIMIT_RGB else Constant._UPPER_LIMIT_RGB for x in vals])
+        else:
+            self.features.append(np.zeros(self.n_cells))
     
     def setClusteringFeature(self, request, feature, n):
         clusteringID = None

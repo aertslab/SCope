@@ -157,6 +157,15 @@ class Loom():
         return []
 
     @staticmethod
+    def has_md_metrics_(meta_data):
+        return "metrics" in meta_data
+
+    def has_md_metrics(self):
+        if self.has_meta_data():
+            return self.has_md_metrics_(meta_data=self.get_meta_data())
+        return False 
+
+    @staticmethod
     def has_md_annotations_(meta_data):
         return "annotations" in meta_data
 
@@ -273,11 +282,11 @@ class Loom():
             print("Debug: log-transforming gene expression...")
             gene_expr = np.log2(gene_expr + 1)
         if len(annotation) > 0:
-            cellIndices = self.get_anno_cells(annotations=annotation, logic=logic)
-            gene_expr = gene_expr[cellIndices]
+            cell_indices = self.get_anno_cells(annotations=annotation, logic=logic)
+            gene_expr = gene_expr[cell_indices]
         else:
-            cellIndices = list(range(self.get_nb_cells()))
-        return gene_expr, cellIndices
+            cell_indices = list(range(self.get_nb_cells()))
+        return gene_expr, cell_indices
 
     ############
     # Regulons #
@@ -369,6 +378,27 @@ class Loom():
             return self.loom_connection.ca[name]
         raise ValueError("The given annotation {0} does not exists in the .loom.".format(name))
 
+    ##########
+    # Metric #
+    ##########
+
+    def get_metric(self, metric_name, log_transform=True, cpm_normalise=False, annotation='', logic='OR'):
+        if not self.has_ca_attr(name=metric_name):
+            raise ValueError("The metric {0} does not exist in the current active loom".format(metric_name))
+        print("Debug: getting metric {0}...".format(metric_name))
+        metric_vals = self.get_ca_attr_by_name(name=metric_name)
+        if cpm_normalise:
+            print("Debug: CPM normalising gene expression...")
+            metric_vals = metric_vals / self.get_nUMI()
+        if log_transform:
+            print("Debug: log-transforming gene expression...")
+            metric_vals = np.log2(metric_vals + 1)
+        if len(annotation) > 0:
+            cell_indices = self.get_anno_cells(annotations=annotation, logic=logic)
+            metric_vals = metric_vals[cell_indices]
+        else:
+            cell_indices = list(range(self.get_nb_cells()))
+        return metric_vals, cell_indices
 
     ###############
     # Clusterings #
