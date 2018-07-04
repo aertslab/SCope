@@ -164,33 +164,39 @@ class SCope(s_pb2_grpc.MainServicer):
         return vmax, maxVmax
 
     def getVmax(self, request, context):
-        vmax = np.zeros(3)
-        maxVmax = np.zeros(3)
+        v_max = np.zeros(3)
+        max_v_max = np.zeros(3)
 
         for n, feature in enumerate(request.feature):
-            fVmax = 0
-            fMaxVmax = 0
+            f_v_max = 0
+            f_max_v_max = 0
             if feature != '':
                 for loomFilePath in request.loomFilePath:
-                    lVmax = 0
-                    lMaxVmax = 0
+                    l_v_max = 0
+                    l_max_v_max = 0
                     loom = self.lfh.get_loom(loom_file_path=loomFilePath)
                     if request.featureType[n] == 'gene':
-                            vals, cellIndices = loom.get_gene_expression(
-                                gene_symbol=feature,
-                                log_transform=request.hasLogTransform,
-                                cpm_normalise=request.hasCpmTransform)
-                            lVmax, lMaxVmax = SCope.get_vmax(vals)
+                        vals, cell_indices = loom.get_gene_expression(
+                            gene_symbol=feature,
+                            log_transform=request.hasLogTransform,
+                            cpm_normalise=request.hasCpmTransform)
+                        l_v_max, l_max_v_max = SCope.get_vmax(vals)
                     if request.featureType[n] == 'regulon':
-                            vals, cellIndices = loom.get_auc_values(regulon=feature)
-                            lVmax, lMaxVmax = SCope.get_vmax(vals)
-                    if lVmax > fVmax:
-                        fVmax = lVmax
-                if lMaxVmax > fMaxVmax:
-                    fMaxVmax = lMaxVmax
-            vmax[n] = fVmax
-            maxVmax[n] = fMaxVmax
-        return s_pb2.VmaxReply(vmax=vmax, maxVmax=maxVmax)
+                        vals, cell_indices = loom.get_auc_values(regulon=feature)
+                        l_v_max, l_max_v_max = SCope.get_vmax(vals)
+                    if request.featureType[n] == 'metric':
+                        vals, cell_indices = loom.get_metric(
+                            metric_name=feature,
+                            log_transform=request.hasLogTransform,
+                            cpm_normalise=request.hasCpmTransform)
+                        l_v_max, l_max_v_max = SCope.get_vmax(vals)
+                    if l_v_max > f_v_max:
+                        f_v_max = l_v_max
+                if l_max_v_max > f_max_v_max:
+                    f_max_v_max = l_max_v_max
+            v_max[n] = f_v_max
+            max_v_max[n] = f_max_v_max
+        return s_pb2.VmaxReply(vmax=v_max, maxVmax=max_v_max)
 
     def getCellColorByFeatures(self, request, context):
         start_time = time.time()
@@ -209,6 +215,8 @@ class SCope(s_pb2_grpc.MainServicer):
             elif request.featureType[n] == 'annotation':
                 cell_color_by_features.setAnnotationFeature(feature=feature)
                 return cell_color_by_features.getReply()
+            elif request.featureType[n] == 'metric':
+                cell_color_by_features.setMetricFeature(request=request, feature=feature, n=n)
             elif request.featureType[n].startswith('Clustering: '):
                 cell_color_by_features.setClusteringFeature(request=request, feature=feature, n=n)
                 if(cell_color_by_features.hasReply()):

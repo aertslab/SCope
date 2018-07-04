@@ -123,6 +123,25 @@ class CellColorByFeatures():
                                                legend=s_pb2.ColorLegend(values=md_annotation_values, colors=Constant.BIG_COLOR_LIST[:len(md_annotation_values)]))
         self.setReply(reply=reply)
     
+    def setMetricFeature(self, request, feature, n):
+        if feature != '':
+            vals, self.cell_indices = self.loom.get_metric(
+                metric_name=feature,
+                log_transform=request.hasLogTransform,
+                cpm_normalise=request.hasCpmTransform,
+                annotation=request.annotation,
+                logic=request.logic)
+            if request.vmax[n] != 0.0:
+                self.v_max[n] = request.vmax[n]
+            else:
+                self.v_max[n], self.max_v_max[n] = CellColorByFeatures.get_vmax(vals)
+            # vals = np.round((vals / vmax[n]) * 225)
+            vals = vals / self.v_max[n]
+            vals = (((Constant._UPPER_LIMIT_RGB - Constant._LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))) + Constant._LOWER_LIMIT_RGB
+            self.features.append([x if x <= Constant._UPPER_LIMIT_RGB else Constant._UPPER_LIMIT_RGB for x in vals])
+        else:
+            self.features.append(np.zeros(self.n_cells))
+    
     def setClusteringFeature(self, request, feature, n):
         clusteringID = None
         clusterID = None

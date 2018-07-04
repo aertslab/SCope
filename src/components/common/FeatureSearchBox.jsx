@@ -122,7 +122,7 @@ export default class FeatureSearch extends React.Component {
 			this.call = gbc.services.scope.Main.getFeatures(query, (err, response) => {
 				if (DEBUG) console.log("getFeatures", response);
 				if (response != null) {
-					let res = [], genes = [], regulons = [], clusters = {}, annotations = [];
+					let res = [], genes = [], regulons = [], clusters = {}, annotations = [], metrics = [];
 					let type = this.state.type;
 
 					for (var i = 0; i < response.feature.length; i++) {
@@ -138,6 +138,9 @@ export default class FeatureSearch extends React.Component {
 						// Annotations
 						} else if (ft == 'annotation') {
 							annotations.push({ "title": f, "type": ft, "description": d });
+						// Metric
+						} else if (ft == 'metric') {
+							metrics.push({ "title": f, "type": ft, "description": d });
 						// Clustering
 						} else if (ft.indexOf('Clustering:') == 0) {
 							if (!clusters[ft]) clusters[ft] = [];
@@ -158,6 +161,7 @@ export default class FeatureSearch extends React.Component {
 					genes = {"name": "gene", "results": genes.slice(0, 10)}
 					regulons = {"name": "regulon", "results": regulons.slice(0, 10)}
 					annotations = {"name": "annotation", "results": annotations.slice(0, 10)}
+					metrics = {"name": "metric", "results": metrics.slice(0, 10)}
 
 					// Only show results for the selected result type (gene | regulon | cluster | annotation)
 					if (genes['results'].length && (type == 'all' || type == 'gene')) {
@@ -168,6 +172,9 @@ export default class FeatureSearch extends React.Component {
 					}
 					if (annotations['results'].length && (type == 'all') || type == 'annotation') {
 						res.push(annotations)
+					}
+					if (metrics['results'].length && (type == 'all') || type == 'metric') {
+						res.push(metrics)
 					}
 					if (type == 'all' || type == 'cluster') {
 						Object.keys(clusters).map((ft) => {

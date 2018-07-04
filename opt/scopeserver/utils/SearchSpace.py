@@ -52,6 +52,9 @@ class SearchSpace(dict):
             # Add annotations to the search space if present in .loom
             if self.loom.has_md_annotations():
                 self.add_annotations()
+            # Add metrics to the search space if present in .loom
+            if self.loom.has_md_metrics():
+                self.add_metrics()
         return self
 
     def add_cross_species_genes(self):
@@ -79,11 +82,16 @@ class SearchSpace(dict):
     def add_regulons(self):
         self.add_elements(elements=self.loom.get_regulons_AUC().dtype.names, element_type='regulon')
 
-    
     def add_annotations(self):
         annotations = []
         for annotation in self.meta_data['annotations']:
             annotations.append(annotation['name'])
         self.add_elements(elements=annotations, element_type='annotation')
+    
+    def add_metrics(self):
+        metrics = []
+        for metric in self.meta_data['metrics']:
+            metrics.append(metric['name'])
+        self.add_elements(elements=metrics, element_type='metric')
 
     
