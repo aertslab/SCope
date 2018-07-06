@@ -459,11 +459,12 @@ export default class Viewer extends Component {
 
 	drawTrajectory() {
 		console.log("DRAW TRAJECTORY....")
+		let settings = BackendAPI.getSettings();
 		this.trajectoryLayer.removeChildren();
 
 		let k = this.zoomTransform.k;
 		
-		if(this.state.trajectory.nodes.length > 0) {
+		if(this.state.trajectory.nodes.length > 0 && !settings.hideTrajectory) {
 			let trajectory = new PIXI.Graphics();
 			this.trajectoryLayer.addChild(trajectory);
 

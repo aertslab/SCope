@@ -49,6 +49,7 @@ class API {
 		this.featureChangeListeners = {};
 
 		this.settings = {
+			hideTrajectory: false,
 			sortCells: true,
 			hasLogTransform: true,
 			hasCpmNormalization: false,
@@ -107,7 +108,7 @@ class API {
 			'activeLooms',
 			'activeCoordinates',
 			'features', 'gene', 'regulon', 'compare', 'feature', 'featureType', 'threshold', 'type', 'metadata', 'description',
-			'settings', 'hasCpmNormalization', 'hasLogTransform', 'sortCells', 'dissociateViewers',
+			'settings', 'hasCpmNormalization', 'hasLogTransform', 'sortCells', 'dissociateViewers', 'hideTrajectory', 
 			'viewerTool',
 			'viewerSelections',
 			'viewerTransform',
@@ -264,6 +265,10 @@ class API {
 
 	getActiveCoordinates() {
 		return this.activeCoordinates;
+	}
+
+	hasActiveCoordinatesTrajectory() {
+		return this.getActiveLoomMetaDataEmbedding().trajectory != null
 	}
 
 	getActiveCoordinatesTrajectory() {
