@@ -11,6 +11,12 @@ import Popup from 'react-popup'
 const DEFAULT_POINT_COLOR = 'A6A6A6';
 const VIEWER_MARGIN = 5;
 
+const EMPTY_TRAJECTORY = {
+	nodes: [],
+	edges: [],
+	coordinates: []
+}
+
 export default class Viewer extends Component {
 
 	constructor(props) {
@@ -21,6 +27,7 @@ export default class Viewer extends Component {
 				x: [],
 				y: []
 			},
+			trajectory : EMPTY_TRAJECTORY,
 			colors: props.colors || [],
 			lassoPoints: [],
 			lassoSelections: BackendAPI.getViewerSelections(),
@@ -138,9 +145,8 @@ export default class Viewer extends Component {
 		}
 		*/
 		this.onResize();
-
 		if (this.props.loomFile != nextProps.loomFile || this.props.activeCoordinates != nextProps.activeCoordinates || this.props.superposition != nextProps.superposition ||
-			(JSON.stringify(nextProps.activeAnnotations) != JSON.stringify(this.state.activeAnnotations)) ) {
+			(JSON.stringify(nextProps.activeAnnotations) != JSON.stringify(this.state.activeAnnotations)) ) {  
 				this.setState({loading: true});
 				if (DEBUG) console.log(nextProps.name, 'changing points');
 				this.getPoints(nextProps.loomFile, nextProps.activeCoordinates, nextProps.activeAnnotations, nextProps.superposition, () => {
@@ -204,7 +210,7 @@ export default class Viewer extends Component {
 		this.forceUpdate();
 		this.renderer.resize(this.w, this.h);
 		this.renderer.reset();
-		this.container.removeChildren();
+		this.mainLayer.removeChildren();
 		this.setScalingFactor();
 		this.initializeDataPoints();
 		this.updateDataPoints();
@@ -219,12 +225,9 @@ export default class Viewer extends Component {
 		this.stage.width = this.w;
 		this.stage.height = this.h;
 		this.renderer.render(this.stage);
-		this.container = new PIXI.particles.ParticleContainer(this.maxn, [false, true, false, false, true]);
-//		this.container.blendMode = PIXI.BLEND_MODES.NORMAL;
-		this.container.interactive = true
-		this.bcr = document.getElementById("viewer"+this.props.name).getBoundingClientRect()
-		this.stage.addChild(this.container);
+		this.addMainLayer();
 		this.addLassoLayer();
+		this.addTrajectoryLayer();
 		this.zoomBehaviour = d3.zoom().scaleExtent([-1, 10]).on("zoom", this.zoom.bind(this));
 		this.zoomSelection.call(this.zoomBehaviour);
 		var ticker = PIXI.ticker.shared; 
@@ -232,14 +235,24 @@ export default class Viewer extends Component {
 		ticker.stop();
 	}
 
+	addMainLayer() {
+		this.mainLayer = new PIXI.particles.ParticleContainer(this.maxn, [false, true, false, false, true]);
+//		this.mainLayer.blendMode = PIXI.BLEND_MODES.NORMAL;
+		this.mainLayer.interactive = true
+		this.bcr = document.getElementById("viewer"+this.props.name).getBoundingClientRect()
+		this.stage.addChild(this.mainLayer);
+	}
+
 	destroyGraphics() {
 		if (DEBUG) console.log("Destroying Viewer ", this.props.name);
-		this.container.removeChildren();
-		this.container.destroy();
+		this.mainLayer.removeChildren();
+		this.mainLayer.destroy();
 		this.lassoLayer.removeChildren();
 		this.lassoLayer.destroy();
 		this.selectionsLayer.removeChildren();
 		this.selectionsLayer.destroy();
+		this.trajectoryLayer.removeChildren();
+		this.trajectoryLayer.destroy();
 		this.renderer.destroy();
 		this.stage.destroy();
 	}
@@ -264,11 +277,15 @@ export default class Viewer extends Component {
 		return s;
 	}
 
+	scalePoint(point, scale) {
+		return { x: point.x * scale + this.renderer.width / 2
+			   , y: point.y * scale + this.renderer.height / 2 }
+	}
+
 	getPointAtLocation(s, x, y) {
-		const cx = x * 15 + this.renderer.width / 2;
-		const cy = y * 15 + this.renderer.height / 2;
-		s.position.x = cx;
-		s.position.y = cy;
+		const scaledCoordinates = this.scalePoint({ x: x, y: y }, 15)
+		s.position.x = scaledCoordinates.x;
+		s.position.y = scaledCoordinates.y;
 		s.blendMode = PIXI.BLEND_MODES.SCREEN;
 		s._originalData = {x: x, y: y};
 		return s;
@@ -280,8 +297,8 @@ export default class Viewer extends Component {
 
 	updatePointColor(i, x, y, c) {
 		let point = this.getTexturedColorPoint(x, y, c)
-		this.container.removeChildAt(i);
-		this.container.addChildAt(point, i);
+		this.mainLayer.removeChildAt(i);
+		this.mainLayer.addChildAt(point, i);
 	}
 
 	isLassoActive() {
@@ -360,12 +377,12 @@ export default class Viewer extends Component {
 	}
 
 	getPointsInLasso() {
-		let pts = this.container.children,
+		let pts = this.mainLayer.children,
 			lassoPoints = [];
 		if (pts.length < 2) return;
 		for (let i = 0; i < pts.length; ++i) {
 			// Calculate the position of the point in the lasso reference
-			let pointPosRelToLassoRef = this.lassoLayer.toLocal(pts[i], this.container, null, true)
+			let pointPosRelToLassoRef = this.lassoLayer.toLocal(pts[i], this.mainLayer, null, true)
 			if(this.lasso.containsPoint(pointPosRelToLassoRef)) {
 				let idx = pts[i]._originalData.idx;
 				lassoPoints.push(idx);
@@ -414,7 +431,7 @@ export default class Viewer extends Component {
 
 	highlightPointsInLasso(lS) {
 		this.startBenchmark("highlightPointsInLasso")
-		let pts = this.container.children;
+		let pts = this.mainLayer.children;
 		pts.map(p => {
 			if (lS.points.indexOf(p._originalData.idx) == -1) return;
 			let point = this.getTexturedColorPoint(p._originalData.x, p._originalData.y, lS.color);
@@ -432,6 +449,40 @@ export default class Viewer extends Component {
 		return color;
 	}
 
+	addTrajectoryLayer() {
+		this.trajectoryLayer = new PIXI.Container();
+//		this.trajectoryLayer.blendMode = PIXI.BLEND_MODES.ADD;
+		this.trajectoryLayer.width = this.w;
+		this.trajectoryLayer.height = this.h;
+		this.stage.addChild(this.trajectoryLayer);
+	}
+
+	drawTrajectory() {
+		console.log("DRAW TRAJECTORY....")
+		this.trajectoryLayer.removeChildren();
+
+		let k = this.zoomTransform.k;
+		
+		if(this.state.trajectory.nodes.length > 0) {
+			let trajectory = new PIXI.Graphics();
+			this.trajectoryLayer.addChild(trajectory);
+
+			trajectory.lineStyle(5, 0x000000, 0.5);
+			for(let i=0; i<this.state.trajectory.edges.length; i++) {
+				let edge = this.state.trajectory.edges[i],
+					edgeSourceNodeIndex = this.state.trajectory.nodes.indexOf(edge.source),
+					edgeTargetNodeIndex = this.state.trajectory.nodes.indexOf(edge.target);
+				const edgeSourceNodeScaledCoordinates = this.scalePoint({ x: this.state.trajectory.coordinates[edgeSourceNodeIndex].x
+																		, y: -this.state.trajectory.coordinates[edgeSourceNodeIndex].y }, this.scalingFactor),
+					edgeTargetNodeScaledCoordinates = this.scalePoint({ x: this.state.trajectory.coordinates[edgeTargetNodeIndex].x
+																		, y: -this.state.trajectory.coordinates[edgeTargetNodeIndex].y }, this.scalingFactor);		
+				trajectory.moveTo(edgeSourceNodeScaledCoordinates.x * k, edgeSourceNodeScaledCoordinates.y * k);
+				trajectory.lineTo(edgeTargetNodeScaledCoordinates.x * k, edgeTargetNodeScaledCoordinates.y * k);
+			}
+		}
+		console.log(this.trajectoryLayer.children)
+	}
+
 	zoom() {
 		let settings = BackendAPI.getSettings();
 		let transform = () => {
@@ -440,10 +491,12 @@ export default class Viewer extends Component {
 				dx = (t1.x - t0.x) / (this.renderer.width / 2),
 				dy = (t1.y - t0.y) / (this.renderer.height / 2);
 
-			this.container.position.x = t1.x;
-			this.container.position.y = t1.y;
+			this.mainLayer.position.x = t1.x;
+			this.mainLayer.position.y = t1.y;
 			this.selectionsLayer.position.x = t1.x;
 			this.selectionsLayer.position.y = t1.y;
+			this.trajectoryLayer.position.x = t1.x;
+			this.trajectoryLayer.position.y = t1.y;
 			this.zoomTransform = {x: t1.x, y: t1.y, k: t1.k};
 
 			if (t0.k != t1.k) {
@@ -580,20 +633,36 @@ export default class Viewer extends Component {
 			annotation: queryAnnotations,
 			logic: superposition,
 		};
+
 		this.startBenchmark("getCoordinates")
 		if (DEBUG) console.log(this.props.name, 'getCoordinates', query);
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getCoordinates(query, (err, response) => {
 				// Update the coordinates and remove all previous data points
 				if (DEBUG) console.log(this.props.name, 'getCoordinates', response);
-				this.container.removeChildren();
+				this.mainLayer.removeChildren();
 				if (response) {
 					let coord = {
 						idx: response.cellIndices,
 						x: response.x,
 						y: response.y
 					}
-					this.setState({ coord });
+					// If current coordinates has a trajectory set it 
+					let trajectory =  BackendAPI.getActiveCoordinatesTrajectory()
+					if (trajectory != null) {
+						if (DEBUG) {
+							console.log("Trajectory detected for current embedding.")
+							console.log(trajectory)
+						}
+						let t = {
+							nodes: trajectory.nodes,
+							edges: trajectory.edges,
+							coordinates: trajectory.coordinates
+						}
+						this.setState({ coord: coord, trajectory: t })
+					} else {
+						this.setState({ coord: coord, trajectory: EMPTY_TRAJECTORY });
+					}
 					this.setScalingFactor();
 				} else {
 					console.log('Could not get the coordinates - empty response!')
@@ -601,6 +670,7 @@ export default class Viewer extends Component {
 				}
 				this.endBenchmark("getCoordinates");
 				this.initializeDataPoints(callback ? true : false);
+				this.drawTrajectory()
 				callback();
 			});
 		}, () => {
@@ -624,7 +694,7 @@ export default class Viewer extends Component {
 		for (let i = 0; i < n; ++i) {
 			let point = this.getTexturedColorPoint(c.x[i], c.y[i], "000000");
 			point._originalData.idx = c.idx[i];
-			this.container.addChild(point);
+			this.mainLayer.addChild(point);
 		}
 		this.endBenchmark("initializeDataPoints");
 		this.transformDataPoints(stillLoading);
@@ -632,8 +702,9 @@ export default class Viewer extends Component {
 
 	transformDataPoints(stillLoading) {
 		if (DEBUG) console.log(this.props.name, 'transformDataPoints', stillLoading);
-		this.transformPoints(this.container);
+		this.transformPoints(this.mainLayer);
 		this.transformPoints(this.selectionsLayer);
+		this.drawTrajectory()
 		requestAnimationFrame(() => {
 			this.renderer.render(this.stage);
 		});
@@ -760,8 +831,8 @@ export default class Viewer extends Component {
 	
 	updateDataPoints(colors) {
 		this.startBenchmark("updateDataPoints")
-		let n = this.container.children.length;
-		this.container.removeChildren(0, n).map((p) => {
+		let n = this.mainLayer.children.length;
+		this.mainLayer.removeChildren(0, n).map((p) => {
 			p.destroy();
 		})
 		let settings = BackendAPI.getSettings();
@@ -779,7 +850,7 @@ export default class Viewer extends Component {
 			pts.map((p, i) => {
 				let point = this.getTexturedColorPoint(p[1], p[2], p[3])
 				point._originalData.idx = p[0];
-				this.container.addChildAt(point, i);
+				this.mainLayer.addChildAt(point, i);
 			})
 			this.endBenchmark("map")
 		} else {
@@ -787,7 +858,7 @@ export default class Viewer extends Component {
 			this.state.coord.idx.map((ci, i) => {
 				let point = this.getTexturedColorPoint(this.state.coord.x[i], this.state.coord.y[i], this.state.colors[i])
 				point._originalData.idx = ci;
-				this.container.addChildAt(point, i);
+				this.mainLayer.addChildAt(point, i);
 			})
 			this.endBenchmark("map")
 		}
@@ -797,16 +868,16 @@ export default class Viewer extends Component {
 
 	resetDataPoints() {
 		this.startBenchmark("resetDataPoints")
-		let pts = this.container.children;
+		let pts = this.mainLayer.children;
 		let n = pts.length;
 		// Draw new data points
 		for (let i = 0; i < n; ++i) {
 			let point = this.getTexturedColorPoint(pts[i]._originalData.x, pts[i]._originalData.y, '000000')
 			point._originalData.idx = pts[i]._originalData.idx; 
-			this.container.addChildAt(point, n+i);
+			this.mainLayer.addChildAt(point, n+i);
 		}
 		// Remove the first old data points (firstly rendered)
-		this.container.removeChildren(0, n)
+		this.mainLayer.removeChildren(0, n)
 		this.endBenchmark("resetDataPoints");
 		// Call for rendering
 		this.transformDataPoints();
