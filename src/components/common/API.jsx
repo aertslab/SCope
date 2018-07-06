@@ -49,6 +49,7 @@ class API {
 		this.featureChangeListeners = {};
 
 		this.settings = {
+			hideTrajectory: false,
 			sortCells: true,
 			hasLogTransform: true,
 			hasCpmNormalization: false,
@@ -107,7 +108,7 @@ class API {
 			'activeLooms',
 			'activeCoordinates',
 			'features', 'gene', 'regulon', 'compare', 'feature', 'featureType', 'threshold', 'type', 'metadata', 'description',
-			'settings', 'hasCpmNormalization', 'hasLogTransform', 'sortCells', 'dissociateViewers',
+			'settings', 'hasCpmNormalization', 'hasLogTransform', 'sortCells', 'dissociateViewers', 'hideTrajectory', 
 			'viewerTool',
 			'viewerSelections',
 			'viewerTransform',
@@ -243,6 +244,14 @@ class API {
 		return this.loomFiles[this.activeLooms[0]];
 	}
 
+	getActiveLoomMetadataEmbeddings() {
+		return this.loomFiles[this.activeLooms[0]].cellMetaData.embeddings;
+	}
+
+	getActiveLoomMetaDataEmbedding() {
+		return this.getActiveLoomMetadataEmbeddings().filter(x => x.id == this.getActiveCoordinates())[0]
+	}
+
 	onActiveLoomChange(listener) {
 		this.activeLoomChangeListeners.push(listener);
 	}
@@ -256,6 +265,14 @@ class API {
 
 	getActiveCoordinates() {
 		return this.activeCoordinates;
+	}
+
+	hasActiveCoordinatesTrajectory() {
+		return this.getActiveLoomMetaDataEmbedding().trajectory != null
+	}
+
+	getActiveCoordinatesTrajectory() {
+		return this.getActiveLoomMetaDataEmbedding().trajectory
 	}
 
 	queryLoomFiles(uuid, callback) {

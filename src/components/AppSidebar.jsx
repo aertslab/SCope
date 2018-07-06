@@ -124,6 +124,14 @@ class AppSidebar extends Component {
 							<Menu.Item>
 								<Dropdown inline value={activeCoordinates} options={coordinates} onChange={this.setActiveCoordinates.bind(this)} />
 							</Menu.Item>
+							{ BackendAPI.hasActiveCoordinatesTrajectory() &&
+							<div>
+							<Menu.Item>Trajectory</Menu.Item>
+							<Menu.Item>
+								<Checkbox toggle label="Hide" checked={settings.hideTrajectory} onChange={this.toggleHideTrajectory.bind(this)} />
+							</Menu.Item>
+							</div>
+							}
 						</Menu.Menu>
 					}
 					{ showTransforms &&
@@ -396,6 +404,17 @@ class AppSidebar extends Component {
 			category: 'settings',
 			action: 'toggle dissociate viewers',
 			label: settings.dissociateViewers ? 'on' : 'off'
+		});
+	}
+
+
+	toggleHideTrajectory() {
+		let settings = BackendAPI.setSetting('hideTrajectory', !this.state.settings.hideTrajectory);
+		this.setState({settings: settings});
+		ReactGA.event({
+			category: 'settings',
+			action: 'toggle hide trajectory',
+			label: settings.hideTrajectory ? 'on' : 'off'
 		});
 	}
 
