@@ -268,10 +268,16 @@ class API {
 	}
 
 	hasActiveCoordinatesTrajectory() {
+		if(this.getActiveLoomMetaDataEmbedding() == undefined)
+			return false
+		if(!("trajectory" in this.getActiveLoomMetaDataEmbedding()))
+			return false
 		return this.getActiveLoomMetaDataEmbedding().trajectory != null
 	}
 
 	getActiveCoordinatesTrajectory() {
+		if(!this.hasActiveCoordinatesTrajectory())
+			return null
 		return this.getActiveLoomMetaDataEmbedding().trajectory
 	}
 
