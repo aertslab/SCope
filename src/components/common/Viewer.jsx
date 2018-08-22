@@ -458,7 +458,6 @@ export default class Viewer extends Component {
 	}
 
 	drawTrajectory() {
-		console.log("DRAW TRAJECTORY....")
 		let settings = BackendAPI.getSettings();
 		this.trajectoryLayer.removeChildren();
 
@@ -481,7 +480,6 @@ export default class Viewer extends Component {
 				trajectory.lineTo(edgeTargetNodeScaledCoordinates.x * k, edgeTargetNodeScaledCoordinates.y * k);
 			}
 		}
-		console.log(this.trajectoryLayer.children)
 	}
 
 	zoom() {

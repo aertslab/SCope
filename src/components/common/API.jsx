@@ -331,6 +331,7 @@ class API {
 				listener(selectedFeatures, featureId, customValues, maxValues);
 			})
 		})
+		console.log("Active feature: "+feature+" ("+featureType+")")
 	}
 
 	updateFeature(field, type, feature, featureType, featureDescription, page) {
@@ -390,7 +391,6 @@ class API {
 				this.setActiveFeature(field, type, featureType, feature, 0, {description: featureDescription}, page);
 			}
 		} else {
-			console.log("Active feature: "+feature+" ("+featureType+")")
 			this.setActiveFeature(field, type, featureType, feature, 0, {description: featureDescription}, page);
 		}
 	}

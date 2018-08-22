@@ -34,6 +34,7 @@ service Main {
   rpc loomUploaded (LoomUploadedRequest) returns (LoomUploadedReply) {}
   rpc getMyGeneSets (MyGeneSetsRequest) returns (MyGeneSetsReply) {}
   rpc deleteUserFile (DeleteUserFileRequest) returns (DeleteUserFileReply) {}
+  rpc downloadSubLoom (DownloadSubLoomRequest) returns (DownloadSubLoomReply) {}
 }
 
 message ErrorReply {
@@ -357,4 +358,22 @@ message DeleteUserFileRequest {
 
 message DeleteUserFileReply {
   bool deletedSuccessfully=1;
+}
+
+message DownloadSubLoomRequest {
+  string loomFilePath=1;
+  string featureType=2;
+  string featureName=3;
+  string featureValue=4;
+  // enum Operator {
+  //   EQ = "==";
+  // }
+  string operator=5;
+  // Operator operator = 4 [default = EQ];
+}
+
+message DownloadSubLoomReply {
+  string loomFilePath=1;
+  int64 loomFileSize=2;
+  ErrorReply error=3;
 }
