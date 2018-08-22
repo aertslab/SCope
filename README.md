@@ -8,7 +8,7 @@ Currently the data format supported by SCope is `.loom`. This file format for ve
 
 August 22, 2018
 * Version 1.3.0
-   * Add feature to download subset of looms. Currently it only possible to subset based on cluster information.
+   * Add feature to download subset of looms. Currently it is only possible to subset the active loom based on cluster information.
 
 August 10, 2018
 * Version 1.2.1
@@ -42,7 +42,7 @@ Eventually the functionality from pySCENIC will be expanded and put in its own p
 
 **Required for standalone apps, command line instances and development.**
 
-`:exclamation:` **SCope requires at least version 9 of Node.js to work**. Let's download and install Node.js v9:
+:exclamation: **SCope requires at least version 9 of Node.js to work**. Let's download and install Node.js v9:
 ```
 # Ubuntu
 curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
