@@ -10,7 +10,6 @@ class LoomFileHandler():
     def __init__(self):
         self.active_looms = {}
         self.loom_dir = dfh.DataFileHandler.get_data_dir_path_by_file_type(file_type="Loom")
-        print("Starting LoomFileHandler...")
     
     def add_loom(self, partial_md5_hash, file_path, abs_file_path, loom_connection):
         loom = Loom(partial_md5_hash=partial_md5_hash, file_path=file_path, abs_file_path=abs_file_path, loom_connection=loom_connection)

@@ -30,6 +30,7 @@ from scopeserver.utils import GeneSetEnrichment as _gse
 from scopeserver.utils import CellColorByFeatures as ccbf
 from scopeserver.utils import Constant
 from scopeserver.utils import SearchSpace as ss
+from scopeserver.utils.Loom import Loom
 
 from pyscenic.genesig import GeneSignature
 from pyscenic.aucell import create_rankings, enrichment, enrichment4cells
@@ -493,8 +494,8 @@ class SCope(s_pb2_grpc.MainServicer):
             sub_loom_file_attrs["title"] = sub_loom_file_name
             sub_loom_file_attrs['CreationDate'] = timestamp()
             sub_loom_file_attrs["LOOM_SPEC_VERSION"] = _version.__version__
-            sub_loom_file_attrs["note"] = "This loom is a subset of {0} loom file".format(loom_connection.attrs["title"])
-            sub_loom_file_attrs["MetaData"] = loom_connection.attrs["MetaData"]
+            sub_loom_file_attrs["note"] = "This loom is a subset of {0} loom file".format(Loom.clean_file_attr(file_attr=loom_connection.attrs["title"]))
+            sub_loom_file_attrs["MetaData"] = Loom.clean_file_attr(file_attr=loom_connection.attrs["MetaData"])
             # - Use scan to subset cells (much faster than naive subsetting): avoid to load everything into memory
             # - Loompy bug: loompy.create_append works but generate a file much bigger than its parent
             #      So prepare all the data and create the loom afterwards

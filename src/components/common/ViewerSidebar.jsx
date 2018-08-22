@@ -306,11 +306,11 @@ class ViewerSidebar extends Component {
 							)
 						if(this.state.processSubLoomPercentage > 0)
 							return (
-								<Progress percent={this.state.processSubLoomPercentage} indicating progress disabled size='large'>>Processing...</Progress>
+								<Progress percent={this.state.processSubLoomPercentage} indicating progress disabled size='large'>Processing...</Progress>
 							)	
 						if(this.state.downloadSubLoomPercentage > 0)
 							return (
-								<Progress percent={this.state.downloadSubLoomPercentage} indicating progress disabled size='large'>>Downloading...</Progress>
+								<Progress percent={this.state.downloadSubLoomPercentage} indicating progress disabled size='large'>Downloading...</Progress>
 							)
 					}
 				}

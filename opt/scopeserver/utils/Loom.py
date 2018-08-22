@@ -34,6 +34,17 @@ class Loom():
         return self.loom_connection.attrs[name]
 
     @staticmethod
+    def clean_file_attr(file_attr):
+        fa = file_attr
+        if type(file_attr) == np.ndarray:
+            fa = file_attr[0]
+        try:
+            fa = fa.decode("utf-8") 
+        except AttributeError:
+            pass
+        return fa
+
+    @staticmethod
     def dfToNamedMatrix(df):
         arr_ip = [tuple(i) for i in df.as_matrix()]
         dtyp = np.dtype(list(zip(df.dtypes.index, df.dtypes)))

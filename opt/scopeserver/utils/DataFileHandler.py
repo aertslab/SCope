@@ -45,7 +45,6 @@ class DataFileHandler():
         self.logs_dir = DataFileHandler.get_data_dir_path_by_file_type(file_type="Logs")
         self.create_global_dirs()
         self.create_uuid_log()
-        print("Starting DataFileHandler...")
     
     def get_gene_sets_dir(self):
         return self.gene_sets_dir
