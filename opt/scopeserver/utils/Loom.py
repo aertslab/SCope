@@ -411,6 +411,9 @@ class Loom():
     #     loom = self.lfh.get_loom_connection(loom_file_path)
     #     return loom.ca.Clusterings[str(clustering_id)]
 
+    def has_cluster_markers(self, clustering_id):
+        return "ClusterMarkers_{0}".format(clustering_id) in self.loom_connection.ra.keys()
+
     def get_cluster_marker_genes(self, clustering_id, cluster_id):
         return self.get_genes()[self.loom_connection.ra["ClusterMarkers_{0}".format(clustering_id)][str(cluster_id)] == 1]
 

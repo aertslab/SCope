@@ -309,6 +309,11 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getMarkerGenes(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        # Check if cluster markers for the given clustering are present in the loom
+        if not loom.has_cluster_markers(clustering_id=request.clusteringID):
+            print("No markers for clustering {0} present in active loom.".format(request.clusteringID))
+            return (s_pb2.MarkerGenesReply(genes=[], metrics=[]))
+
         genes = loom.get_cluster_marker_genes(clustering_id=request.clusteringID, cluster_id=request.clusterID)
         # Filter the MD clusterings by ID
         md_clustering = loom.get_meta_data_clustering_by_id(id=request.clusteringID)
@@ -325,7 +330,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
             cluster_marker_metrics = list(map(create_cluster_marker_metric, md_cmm))
 
-        return(s_pb2.MarkerGenesReply(genes=genes, metrics=cluster_marker_metrics))
+        return (s_pb2.MarkerGenesReply(genes=genes, metrics=cluster_marker_metrics))
 
     def getMyGeneSets(self, request, context):
         userDir = dfh.DataFileHandler.get_data_dir_path_by_file_type('GeneSet', UUID=request.UUID)
