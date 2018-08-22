@@ -1,10 +1,14 @@
-# SCope v1.2.1: Visualization of large-scale and high dimensional single cell data
+# SCope v1.3.0: Visualization of large-scale and high dimensional single cell data
 <img src="images/SCope_Logo.png" width="640">
 
 SCope is a fast visualization tool for large-scale and high dimensional scRNA-seq datasets.
 Currently the data format supported by SCope is `.loom`. This file format for very large omics datasets is maintained by the Linnarsson Lab through the `loompy` Python package (https://github.com/linnarsson-lab/loompy).
 
 ## Version History
+
+August 22, 2018
+* Version 1.3.0
+   * Add feature to download subset of looms. Currently it is only possible to subset the active loom based on cluster information.
 
 August 10, 2018
 * Version 1.2.1
@@ -14,7 +18,6 @@ July 6, 2018
 
 * Version 1.2.0
    * Add feature to display trajectory data in the viewer. Currently the only way we provide to add trajectory data to .loom files is through [SCopeLoomR](https://github.com/aertslab/SCopeLoomR/).
-
 
 July 4, 2018
 
@@ -39,6 +42,7 @@ Eventually the functionality from pySCENIC will be expanded and put in its own p
 
 **Required for standalone apps, command line instances and development.**
 
+:exclamation: **SCope requires at least version 9 of Node.js to work**. Let's download and install Node.js v9:
 ```
 # Ubuntu
 curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
