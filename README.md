@@ -1,4 +1,4 @@
-# SCope v1.3.0: Visualization of large-scale and high dimensional single cell data
+# SCope v1.3.1: Visualization of large-scale and high dimensional single cell data
 <img src="images/SCope_Logo.png" width="640">
 
 SCope is a fast visualization tool for large-scale and high dimensional scRNA-seq datasets.
@@ -7,6 +7,8 @@ Currently the data format supported by SCope is `.loom`. This file format for ve
 ## Version History
 
 August 22, 2018
+* Version 1.3.1
+   * Fix bug when cluster markers not present in .loom.
 * Version 1.3.0
    * Add feature to download subset of looms. Currently it is only possible to subset the active loom based on cluster information.
 
