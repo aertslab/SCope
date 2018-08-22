@@ -1,13 +1,15 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom';
-import { Grid, Input, Icon, Tab, Image, Button } from 'semantic-ui-react'
+import { Grid, Input, Icon, Tab, Image, Button, Progress } from 'semantic-ui-react'
 import { BackendAPI } from '../common/API'
 import Metadata from '../common/Metadata'
 import ReactGA from 'react-ga';
 
 import ReactTable from "react-table";
 import "react-table/react-table.css";
+import FileDownloader from '../../js/http'
+
 import { delimiter } from 'path';
 
 class ViewerSidebar extends Component {
@@ -19,7 +21,9 @@ class ViewerSidebar extends Component {
 			activeFeatures: BackendAPI.getActiveFeatures(),
 			lassoSelections: BackendAPI.getViewerSelections(),
 			modalID: null,
-			activeTab: 0
+			activeTab: 0,
+			processSubLoomPercentage: null,
+			downloadSubLoomPercentage: null
 		};
 		this.selectionsListener = (selections) => {
 			this.setState({lassoSelections: selections, activeTab: 0});
@@ -94,7 +98,7 @@ class ViewerSidebar extends Component {
 			if (activeFeatures[i] && activeFeatures[i].metadata) {
 				let md = activeFeatures[i].metadata
 				let image = md.motifName ? (<Image src={'http://motifcollections.aertslab.org/v8/logos/'+md.motifName} />) : '';
-				let markerTable = "", legendTable = "";
+				let markerTable = "", legendTable = "", downloadSubLoomButton = () => "";
 
 				let newMarkerTableColumn = (header, id, accessor, cell) => {
 					let column = {
@@ -250,6 +254,67 @@ class ViewerSidebar extends Component {
 					);
 				}
 
+				if(activeFeatures[i].featureType.startsWith("Clustering")) {
+					downloadSubLoomButton = () => {
+						if(this.state.downloadSubLoomPercentage == null && this.state.processSubLoomPercentage ==null)
+							return (
+								<Button color="green" onClick={() => {
+									let query = {
+										loomFilePath: BackendAPI.getActiveLoom(),
+										featureType: "clusterings",
+										featureName: activeFeatures[i].featureType.replace(/Clustering: /g, ""),
+										featureValue: activeFeatures[i].feature, 
+										operator: "=="
+									};											
+									BackendAPI.getConnection().then((gbc) => {
+										if (DEBUG) console.log("Download subset of active .loom")
+										var call = gbc.services.scope.Main.downloadSubLoom(query);
+										call.on('data', (dsl) => {
+											if (DEBUG) console.log('downloadSubLoom data');
+											if(dsl == null) {
+												this.setState({ loomDownloading: null, downloadSubLoomPercentage: null });
+												return
+											}
+											if (!dsl.isDone) {
+												this.setState({ processSubLoomPercentage: Math.round(dsl.progress.value*100) });
+											} else {
+												// Start downloading the subsetted loom file
+												let fd = new FileDownloader(dsl.loomFilePath, match.params.uuid, dsl.loomFileSize)
+												fd.on('started', (isStarted) => {
+													this.setState({ processSubLoomPercentage: null, loomDownloading: encodeURIComponent(dsl.loomFilePath) });
+												})
+												fd.on('progress', (progress) => {
+													this.setState({ downloadSubLoomPercentage: progress })
+												})
+												fd.on('finished', (finished) => {
+													this.setState({ loomDownloading: null, downloadSubLoomPercentage: null });
+												})
+												fd.start()
+											}
+										});
+										call.on('end', () => {
+											console.log()
+											if (DEBUG) console.log('downloadSubLoom end');
+										});
+									}, () => {
+										this.setState({ loomDownloading: null, downloadSubLoomPercentage: null, processSubLoomPercentage: null });
+										BackendAPI.showError();	
+									})
+								}} style={{marginTop: "10px", width: "100%"}}>
+								{"Download "+ activeFeatures[i].feature +" .loom file"}
+								</Button>
+							)
+						if(this.state.processSubLoomPercentage > 0)
+							return (
+								<Progress percent={this.state.processSubLoomPercentage} indicating progress disabled size='large'>>Processing...</Progress>
+							)	
+						if(this.state.downloadSubLoomPercentage > 0)
+							return (
+								<Progress percent={this.state.downloadSubLoomPercentage} indicating progress disabled size='large'>>Downloading...</Progress>
+							)
+					}
+				}
+
 				metadata = (
 					<Grid.Row columns="1" centered className='viewerRow'>
 						<Grid.Column stretched className='viewerCell'>
@@ -257,6 +322,8 @@ class ViewerSidebar extends Component {
 							{image}
 							{markerTable}
 							{legendTable}
+							{downloadSubLoomButton()}
+							<br />
 						</Grid.Column>
 					</Grid.Row>
 				);

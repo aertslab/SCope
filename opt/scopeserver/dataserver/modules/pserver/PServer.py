@@ -244,7 +244,6 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
         if 'loomFilePath' in form.keys():
             self.directory = dfh.DataFileHandler.get_data_dir_path_by_file_type(file_type=form.getvalue('file-type'))
             localpath = _encode_str_if_py2(os.path.join(self.directory, form.getvalue('loomFilePath')), "utf-8")
-            print(localpath)
             with open(localpath, 'rb') as f:
                 self.send_resp_headers(200,
                                         {'Content-length': os.fstat(f.fileno())[6],

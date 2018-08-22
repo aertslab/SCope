@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
-import { Segment,  Sidebar, Menu, Icon, Image, Divider,  Checkbox, Dropdown, Grid, Dimmer, Loader, Progress } from 'semantic-ui-react';
+import { Segment, Sidebar, Menu, Icon, Image, Divider, Checkbox, Dropdown, Grid, Dimmer, Loader, Progress } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
 import UploadModal from './common/UploadModal';
 import Slider, { Range } from 'rc-slider';
 import ReactGA from 'react-ga';
+import FileDownloader from '../js/http'
 
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
-const path = require('path')
 const TooltipSlider = createSliderWithTooltip(Slider);
 
 class AppSidebar extends Component {
@@ -30,7 +30,7 @@ class AppSidebar extends Component {
 		}
 	}
 
-	render () {
+	render() {
 		const { match } = this.props;
 		const { activeCoordinates, settings, loading, loomFiles, userLoomTree, generalLoomTree, uncategorizedLoomFiles, uploadModalOpened, spriteScale, spriteAlpha } = this.state;
 		let metadata = BackendAPI.getActiveLoomMetadata(), coordinates = [];
@@ -53,23 +53,23 @@ class AppSidebar extends Component {
 				let loomUri = encodeURIComponent(file.loomFilePath);
 				let active = (match.params.loom == loomUri) || (encodeURIComponent(match.params.loom) == loomUri);
 				return (
-					<Link key={l + '-node- ' + i} to={'/' + [match.params.uuid, loomUri, match.params.page == 'welcome' ? 'gene' : match.params.page ].join('/')} onClick={() => {
-						this.setState({activeCoordinates: -1});
+					<Link key={l + '-node- ' + i} to={'/' + [match.params.uuid, loomUri, match.params.page == 'welcome' ? 'gene' : match.params.page].join('/')} onClick={() => {
+						this.setState({ activeCoordinates: -1 });
 						this.props.onMetadataChange(file);
 					}}  >
-						<Menu.Item className={'level'+l} active={active} key={file.loomFilePath} >
+						<Menu.Item className={'level' + l} active={active} key={file.loomFilePath} >
 							{canRemove &&
-								<Icon name='trash' title='delete this loom file' style={{display: 'inline'}} onClick={(e,d) => this.deleteLoomFile(file.loomFilePath, file.loomDisplayName)} className="pointer"  />
+								<Icon name='trash' title='delete this loom file' style={{ display: 'inline' }} onClick={(e, d) => this.deleteLoomFile(file.loomFilePath, file.loomDisplayName)} className="pointer" />
 							}
-							{this.state.downloadPercentage >= 0 && this.state.loomDownloading == loomUri  &&
+							{this.state.downloadPercentage >= 0 && this.state.loomDownloading == loomUri &&
 								<Progress percent={this.state.downloadPercentage} indicating progress disabled></Progress>
 							}
-							{! this.state.downloadPercentage &&
+							{!this.state.downloadPercentage &&
 								<Icon
-										name={ this.state.downloading && this.state.loomDownloading == loomUri ? 'circle notched' : 'save' }
-								    loading={ this.state.downloading && this.state.loomDownloading == loomUri ? true : false }
-										title='download this loom file' style={{display: 'inline'}}
-										onClick={(e,d) => this.downloadLoomFile(file.loomFilePath, file.loomSize)} className="pointer"/>
+									name={this.state.downloading && this.state.loomDownloading == loomUri ? 'circle notched' : 'save'}
+									loading={this.state.downloading && this.state.loomDownloading == loomUri ? true : false}
+									title='download this loom file' style={{ display: 'inline' }}
+									onClick={(e, d) => this.downloadLoomFile(file.loomFilePath, file.loomSize)} className="pointer" />
 							}
 							{file.loomDisplayName}
 						</Menu.Item>
@@ -79,17 +79,17 @@ class AppSidebar extends Component {
 			let children = Object.keys(t.children).map((level) => {
 				return (
 					<div key={l + '-level-' + level}>
-						<Menu.Header className={'level'+l}><Icon className="pointer" name={t.children[level].collapsed ? "arrow circle right" : "arrow circle down"} onClick={() => {
+						<Menu.Header className={'level' + l}><Icon className="pointer" name={t.children[level].collapsed ? "arrow circle right" : "arrow circle down"} onClick={() => {
 							t.children[level].collapsed = !t.children[level].collapsed;
 							this.forceUpdate();
 						}} />{level}</Menu.Header>
-						{!t.children[level].collapsed ? renderLevel(t.children[level], l+1, null, canRemove) : ''}
+						{!t.children[level].collapsed ? renderLevel(t.children[level], l + 1, null, canRemove) : ''}
 					</div>
 				)
 			})
 			return (
 				<div key={name}>
-					{name ? <Menu.Header className={'level'+(l-1)}>{name}</Menu.Header> : '' }
+					{name ? <Menu.Header className={'level' + (l - 1)}>{name}</Menu.Header> : ''}
 					{nodes}
 					{children}
 				</div>
@@ -98,59 +98,59 @@ class AppSidebar extends Component {
 
 		return (
 			<Sidebar as={Menu} animation="push" visible={this.props.visible} vertical className="clearfix">
-					<Segment basic>
-						<Icon name='arrow up' /><em>Hide me to get bigger workspace</em>
-					</Segment>
-					<Menu.Header>DATASETS</Menu.Header>
-						<Menu.Menu>
-							<Menu.Item key="new" onClick={this.toggleUploadModal.bind(this)}>
-								<Icon name="add" />
-								<em>Upload new dataset</em>
-							</Menu.Item>
-							{renderLevel(userLoomTree, 1, 'User uploaded', 1)}
-							{renderLevel(generalLoomTree, 1, 'Publicly available')}
-							<Dimmer active={loading} inverted>
-								<Loader inverted>Loading</Loader>
-							</Dimmer>
-						</Menu.Menu>
-					<Divider />
-					{(showTransforms || showCoordinatesSelection) &&
-						<Menu.Header>SETTINGS</Menu.Header>
-					}
+				<Segment basic>
+					<Icon name='arrow up' /><em>Hide me to get bigger workspace</em>
+				</Segment>
+				<Menu.Header>DATASETS</Menu.Header>
+				<Menu.Menu>
+					<Menu.Item key="new" onClick={this.toggleUploadModal.bind(this)}>
+						<Icon name="add" />
+						<em>Upload new dataset</em>
+					</Menu.Item>
+					{renderLevel(userLoomTree, 1, 'User uploaded', 1)}
+					{renderLevel(generalLoomTree, 1, 'Publicly available')}
+					<Dimmer active={loading} inverted>
+						<Loader inverted>Loading</Loader>
+					</Dimmer>
+				</Menu.Menu>
+				<Divider />
+				{(showTransforms || showCoordinatesSelection) &&
+					<Menu.Header>SETTINGS</Menu.Header>
+				}
 
-					{showCoordinatesSelection &&
-						<Menu.Menu>
-							<Menu.Item>Coordinates</Menu.Item>
-							<Menu.Item>
-								<Dropdown inline value={activeCoordinates} options={coordinates} onChange={this.setActiveCoordinates.bind(this)} />
-							</Menu.Item>
-							{ BackendAPI.hasActiveCoordinatesTrajectory() &&
+				{showCoordinatesSelection &&
+					<Menu.Menu>
+						<Menu.Item>Coordinates</Menu.Item>
+						<Menu.Item>
+							<Dropdown inline value={activeCoordinates} options={coordinates} onChange={this.setActiveCoordinates.bind(this)} />
+						</Menu.Item>
+						{BackendAPI.hasActiveCoordinatesTrajectory() &&
 							<div>
-							<Menu.Item>Trajectory</Menu.Item>
-							<Menu.Item>
-								<Checkbox toggle label="Hide" checked={settings.hideTrajectory} onChange={this.toggleHideTrajectory.bind(this)} />
-							</Menu.Item>
+								<Menu.Item>Trajectory</Menu.Item>
+								<Menu.Item>
+									<Checkbox toggle label="Hide" checked={settings.hideTrajectory} onChange={this.toggleHideTrajectory.bind(this)} />
+								</Menu.Item>
 							</div>
-							}
-						</Menu.Menu>
-					}
-					{ showTransforms &&
-						<Menu.Menu>
-							<Menu.Item>Gene expression</Menu.Item>
-							<Menu.Item>
-								<Checkbox toggle label="Log transform" checked={settings.hasLogTransform} onChange={this.toggleLogTransform.bind(this)} />
-							</Menu.Item>
-							<Menu.Item>
-								<Checkbox toggle label="CPM normalize" checked={settings.hasCpmNormalization} onChange={this.toggleCpmNormization.bind(this)} />
-							</Menu.Item>
-							<Menu.Item>Plot enhancement</Menu.Item>
-							<Menu.Item>
-								<Checkbox toggle label="Expression-based plotting" checked={settings.sortCells} onChange={this.toggleSortCells.bind(this)} />
-							</Menu.Item>
-							<Menu.Item>Point size</Menu.Item>
-							<Menu.Item>
-								<TooltipSlider
-								style={{margin: '5px'}}
+						}
+					</Menu.Menu>
+				}
+				{showTransforms &&
+					<Menu.Menu>
+						<Menu.Item>Gene expression</Menu.Item>
+						<Menu.Item>
+							<Checkbox toggle label="Log transform" checked={settings.hasLogTransform} onChange={this.toggleLogTransform.bind(this)} />
+						</Menu.Item>
+						<Menu.Item>
+							<Checkbox toggle label="CPM normalize" checked={settings.hasCpmNormalization} onChange={this.toggleCpmNormization.bind(this)} />
+						</Menu.Item>
+						<Menu.Item>Plot enhancement</Menu.Item>
+						<Menu.Item>
+							<Checkbox toggle label="Expression-based plotting" checked={settings.sortCells} onChange={this.toggleSortCells.bind(this)} />
+						</Menu.Item>
+						<Menu.Item>Point size</Menu.Item>
+						<Menu.Item>
+							<TooltipSlider
+								style={{ margin: '5px' }}
 								max={20}
 								defaultValue={spriteScale}
 								onAfterChange={(v) => {
@@ -167,11 +167,11 @@ class AppSidebar extends Component {
 									return v.toFixed(1);
 								}}
 							/>
-							</Menu.Item>
-							<Menu.Item>Point alpha</Menu.Item>
-							<Menu.Item>
-								<TooltipSlider
-								style={{margin: '5px'}}
+						</Menu.Item>
+						<Menu.Item>Point alpha</Menu.Item>
+						<Menu.Item>
+							<TooltipSlider
+								style={{ margin: '5px' }}
 								max={1}
 								defaultValue={spriteAlpha}
 								onAfterChange={(v) => {
@@ -188,20 +188,20 @@ class AppSidebar extends Component {
 									return v.toFixed(1);
 								}}
 							/>
-							</Menu.Item>
-							<Menu.Item>Mouse events</Menu.Item>
-							<Menu.Item>
-								<Checkbox toggle label="Dissociate viewers" checked={settings.dissociateViewers} onChange={this.toggleDissociateViewers.bind(this)} />
-							</Menu.Item>
-						</Menu.Menu>
-					}
-					<Divider />
-					<Menu.Menu className="logos">
-						{/*<Image src='src/images/kuleuven.png' size="small" centered href="http://kuleuven.be" />
+						</Menu.Item>
+						<Menu.Item>Mouse events</Menu.Item>
+						<Menu.Item>
+							<Checkbox toggle label="Dissociate viewers" checked={settings.dissociateViewers} onChange={this.toggleDissociateViewers.bind(this)} />
+						</Menu.Item>
+					</Menu.Menu>
+				}
+				<Divider />
+				<Menu.Menu className="logos">
+					{/*<Image src='src/images/kuleuven.png' size="small" centered href="http://kuleuven.be" />
 						<br /><br />
 						<Image src='src/images/vib.png' size="small" centered href="http://vib.be" />
 						<Image src='src/images/flycellatlas.png' size="small" centered href="http://flycellatlas.org/" />*/}
-					</Menu.Menu>
+				</Menu.Menu>
 				<UploadModal title="Import a .loom file" type='Loom' uuid={match.params.uuid} opened={uploadModalOpened} onClose={this.toggleUploadModal.bind(this)} onUploaded={this.onLoomUploaded.bind(this)} />
 			</Sidebar>
 		);
@@ -244,9 +244,9 @@ class AppSidebar extends Component {
 			let userLoomTree = this.getEmptyNode();
 			let generalLoomTree = this.getEmptyNode();
 			let addChildren = (t, l, f) => {
-				if (f.loomHeierarchy['L'+l]) {
-					t.children[f.loomHeierarchy['L'+l]] = t.children[f.loomHeierarchy['L'+l]] || this.getEmptyNode();
-					addChildren(t.children[f.loomHeierarchy['L'+l]], l+1, f);
+				if (f.loomHeierarchy['L' + l]) {
+					t.children[f.loomHeierarchy['L' + l]] = t.children[f.loomHeierarchy['L' + l]] || this.getEmptyNode();
+					addChildren(t.children[f.loomHeierarchy['L' + l]], l + 1, f);
 				} else {
 					t.nodes.push(f);
 				}
@@ -257,7 +257,7 @@ class AppSidebar extends Component {
 			generalFiles.forEach((file, i) => {
 				addChildren(generalLoomTree, 1, file);
 			});
-			this.setState({ loomFiles: files, loading: false, userLoomTree: userLoomTree, generalLoomTree: generalLoomTree});
+			this.setState({ loomFiles: files, loading: false, userLoomTree: userLoomTree, generalLoomTree: generalLoomTree });
 			this.props.onMetadataChange(BackendAPI.getActiveLoomMetadata());
 		});
 	}
@@ -271,63 +271,18 @@ class AppSidebar extends Component {
 	}
 
 	downloadLoomFile(loomFilePath, loomSize) {
-	  const { match } = this.props;
-
-		if (confirm("This loom file is " + parseInt(loomSize / (1000 * 1000)) + " MB in size. Unlike usual downloads, the file will first be downloaded to memory and then saved to disk. Once download begins, you will be unable to stop it without navigating away from this page.\n\n Would you like to continue downloading? ")) {
-			this.setState({downloading: true, loomDownloading: encodeURIComponent(loomFilePath)});
-
-		  let form = new FormData();
-		  form.append('loomFilePath', loomFilePath);
-		  form.append('UUID', match.params.uuid);
-		  form.append('file-type', 'Loom');
-
-		  try {
-		    this.XHRport = document.head.querySelector("[name=scope-xhrport]").getAttribute('port')
-		    console.log('Using meta XHRport')
-		  } catch (ex) {
-		    console.log('Using config XHRport')
-		    this.XHRport = BACKEND.XHRport;
-		  }
-
-		  let xhr = new XMLHttpRequest();
-		  if(REVERSEPROXYON) {
-		      xhr.open("POST", FRONTEND.httpProtocol +"://" + FRONTEND.host + "/upload/")
-		  } else {
-		      xhr.open("POST", BACKEND.httpProtocol + "://" + BACKEND.host + ":" + this.XHRport);
-		  }
-		  xhr.responseType = 'blob';
-		  xhr.upload.addEventListener('load', (event) => {
-		  		if (DEBUG) console.log("file donwload")
-		  		console.log(xhr, xhr.status, xhr.readyState, xhr.response)
-		  })
-
-			xhr.onprogress = (evt) => {
-				var percent = parseInt((evt.loaded / loomSize) * 100)
-				this.setState({downloadPercentage: percent})
-			}
-
-		  xhr.onreadystatechange = () => {
-		  	if (DEBUG) console.log("DL State change")
-		  	console.log(xhr, xhr.status, xhr.readyState, xhr.response)
-		  	if ((xhr.readyState == 4) && (xhr.status == 200)) {
-		  		console.log('Will download blob')
-		  		var blob = new Blob([xhr.response], {type: 'application/x-hdf5'});
-		  		let a = document.createElement("a");
-		  		a.style = "display: none";
-		  		document.body.appendChild(a);
-		  		let url = window.URL.createObjectURL(blob);
-		  		a.href = url;
-		  		a.download = path.basename(loomFilePath);
-		  		a.click();
-		  		window.URL.revokeObjectURL(url);
-					this.setState({downloading: false, loomDownloading: null, downloadPercentage: null});
-
-		  	}
-
-		  }
-	  	xhr.send(form)
-		}
-
+		const { match } = this.props;
+		let fd = new FileDownloader(loomFilePath, match.params.uuid, loomSize)
+		fd.on('started', (isStarted) => {
+			this.setState({ downloading: true, loomDownloading: encodeURIComponent(loomFilePath) });
+		})
+		fd.on('progress', (progress) => {
+			this.setState({ downloadPercentage: progress })
+		})
+		fd.on('finished', (finished) => {
+			this.setState({ downloading: false, loomDownloading: null, downloadPercentage: null });
+		})
+		fd.start()
 	}
 
 
@@ -369,7 +324,7 @@ class AppSidebar extends Component {
 
 	toggleSortCells() {
 		let settings = BackendAPI.setSetting('sortCells', !this.state.settings.sortCells);
-		this.setState({settings: settings});
+		this.setState({ settings: settings });
 		ReactGA.event({
 			category: 'settings',
 			action: 'toggle cell sorting',
@@ -379,7 +334,7 @@ class AppSidebar extends Component {
 
 	toggleCpmNormization() {
 		let settings = BackendAPI.setSetting('hasCpmNormalization', !this.state.settings.hasCpmNormalization);
-		this.setState({settings: settings});
+		this.setState({ settings: settings });
 		ReactGA.event({
 			category: 'settings',
 			action: 'toggle cpm normalization',
@@ -389,7 +344,7 @@ class AppSidebar extends Component {
 
 	toggleLogTransform() {
 		let settings = BackendAPI.setSetting('hasLogTransform', !this.state.settings.hasLogTransform);
-		this.setState({settings: settings});
+		this.setState({ settings: settings });
 		ReactGA.event({
 			category: 'settings',
 			action: 'toggle log transform',
@@ -399,7 +354,7 @@ class AppSidebar extends Component {
 
 	toggleDissociateViewers() {
 		let settings = BackendAPI.setSetting('dissociateViewers', !this.state.settings.dissociateViewers);
-		this.setState({settings: settings});
+		this.setState({ settings: settings });
 		ReactGA.event({
 			category: 'settings',
 			action: 'toggle dissociate viewers',
@@ -410,7 +365,7 @@ class AppSidebar extends Component {
 
 	toggleHideTrajectory() {
 		let settings = BackendAPI.setSetting('hideTrajectory', !this.state.settings.hideTrajectory);
-		this.setState({settings: settings});
+		this.setState({ settings: settings });
 		ReactGA.event({
 			category: 'settings',
 			action: 'toggle hide trajectory',
@@ -439,7 +394,7 @@ class AppSidebar extends Component {
 	}
 
 	handleUpdateSprite(scale, alpha) {
-		this.setState({spriteScale: scale, spriteAlpha: alpha})
+		this.setState({ spriteScale: scale, spriteAlpha: alpha })
 		BackendAPI.setSpriteSettings(scale, alpha);
 	}
 }

@@ -99,6 +99,11 @@ class MainStub(object):
         request_serializer=s__pb2.DeleteUserFileRequest.SerializeToString,
         response_deserializer=s__pb2.DeleteUserFileReply.FromString,
         )
+    self.downloadSubLoom = channel.unary_stream(
+        '/scope.Main/downloadSubLoom',
+        request_serializer=s__pb2.DownloadSubLoomRequest.SerializeToString,
+        response_deserializer=s__pb2.DownloadSubLoomReply.FromString,
+        )
 
 
 class MainServicer(object):
@@ -224,6 +229,13 @@ class MainServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def downloadSubLoom(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_MainServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -311,6 +323,11 @@ def add_MainServicer_to_server(servicer, server):
           servicer.deleteUserFile,
           request_deserializer=s__pb2.DeleteUserFileRequest.FromString,
           response_serializer=s__pb2.DeleteUserFileReply.SerializeToString,
+      ),
+      'downloadSubLoom': grpc.unary_stream_rpc_method_handler(
+          servicer.downloadSubLoom,
+          request_deserializer=s__pb2.DownloadSubLoomRequest.FromString,
+          response_serializer=s__pb2.DownloadSubLoomReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

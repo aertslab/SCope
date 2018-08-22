@@ -3,6 +3,8 @@ import sys
 import time
 import grpc
 import loompy as lp
+from loompy import timestamp
+from loompy import _version
 import os
 import re
 import numpy as np
@@ -466,6 +468,64 @@ class SCope(s_pb2_grpc.MainServicer):
             success = False
 
         return s_pb2.DeleteUserFileReply(deletedSuccessfully=success)
+    
+    def downloadSubLoom(self, request, context):
+        start_time = time.time()
+
+        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        loom_connection = loom.get_connection()
+        meta_data = loom.get_meta_data()
+        l = request.loomFilePath.split("/")
+        file_name = l[1].split(".")[0]
+
+        if(request.featureType == "clusterings"):
+            a = list(filter(lambda x : x['name'] == request.featureName, meta_data["clusterings"]))
+            b = list(filter(lambda x : x['description'] == request.featureValue, a[0]['clusters']))[0]
+            cells = loom_connection.ca["Clusterings"][str(a[0]['id'])] == b['id']
+            print("Number of cells in {0}: {1}".format(request.featureValue, np.sum(cells)))
+            sub_loom_file_name = file_name +"_Sub_"+ request.featureValue.replace(" ", "_").replace("/","_")
+            sub_loom_file_path = os.path.join(self.dfh.get_data_dirs()['Loom']['path'], "tmp" , sub_loom_file_name +".loom")
+            # Check if the file already exists
+            if os.path.exists(path=sub_loom_file_path):
+                os.remove(path=sub_loom_file_path)
+            # Create new file attributes
+            sub_loom_file_attrs = dict()
+            sub_loom_file_attrs["title"] = sub_loom_file_name
+            sub_loom_file_attrs['CreationDate'] = timestamp()
+            sub_loom_file_attrs["LOOM_SPEC_VERSION"] = _version.__version__
+            sub_loom_file_attrs["note"] = "This loom is a subset of {0} loom file".format(loom_connection.attrs["title"])
+            sub_loom_file_attrs["MetaData"] = loom_connection.attrs["MetaData"]
+            # - Use scan to subset cells (much faster than naive subsetting): avoid to load everything into memory
+            # - Loompy bug: loompy.create_append works but generate a file much bigger than its parent
+            #      So prepare all the data and create the loom afterwards
+            print("Subsetting {0} cluster from the active .loom...".format(request.featureValue))
+            sub_matrix = None
+            sub_selection = None
+            for (_, selection, _) in loom_connection.scan(items=cells, axis=1):
+                if sub_matrix is None:
+                    sub_matrix = loom_connection[:, selection]
+                    sub_selection = selection
+                else:
+                    sub_matrix = np.concatenate((sub_matrix, loom_connection[:, selection]), axis=1)
+                    sub_selection = np.concatenate((sub_selection, selection), axis=0)
+                # Send the progress
+                processed = len(sub_selection)/sum(cells)
+                yield s_pb2.DownloadSubLoomReply(loomFilePath=""
+                                               , loomFileSize=0
+                                               , progress=s_pb2.Progress(value=processed, status="Sub Loom Created!")
+                                               , isDone=False)
+            print("Creating {0} sub .loom...".format(request.featureValue))
+            lp.create(sub_loom_file_path, sub_matrix, row_attrs=loom_connection.ra, col_attrs=loom_connection.ca[sub_selection], file_attrs=sub_loom_file_attrs)
+            with open(sub_loom_file_path, 'r') as fh:
+                loom_file_size = os.fstat(fh.fileno())[6]
+            print("Done!")
+            print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
+        else:
+            print("This feature is currently not implemented.")
+        yield s_pb2.DownloadSubLoomReply(loomFilePath=sub_loom_file_path
+                                       , loomFileSize=loom_file_size
+                                       , progress=s_pb2.Progress(value=1.0, status="Sub Loom Created!")
+                                       , isDone=True)
 
     # Gene set enrichment
     #
