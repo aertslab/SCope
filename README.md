@@ -42,7 +42,7 @@ Eventually the functionality from pySCENIC will be expanded and put in its own p
 
 **Required for standalone apps, command line instances and development.**
 
-`:exclamation:` **SCope requires at least version 9 of Node.js to work**. Let's download and install Node.js v9:
+:exclamation: **SCope requires at least version 9 of Node.js to work**. Let's download and install Node.js v9:
 ```
 # Ubuntu
 curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
