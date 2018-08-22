@@ -43,7 +43,6 @@ class SCope(s_pb2_grpc.MainServicer):
 
     app_name = 'SCope'
     app_author = 'Aertslab'
-    app_version = '1.0'
 
     def __init__(self):
         self.dfh = dfh.DataFileHandler(dev_env=SCope.dev_env)
@@ -476,8 +475,12 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
         loom_connection = loom.get_connection()
         meta_data = loom.get_meta_data()
-        l = request.loomFilePath.split("/")
-        file_name = l[1].split(".")[0]
+
+        file_name = request.loomFilePath
+        # Check if not a public loom file
+        if '/' in request.loomFilePath:
+            l = request.loomFilePath.split("/")
+            file_name = l[1].split(".")[0]
 
         if(request.featureType == "clusterings"):
             a = list(filter(lambda x : x['name'] == request.featureName, meta_data["clusterings"]))

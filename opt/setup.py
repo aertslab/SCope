@@ -5,7 +5,7 @@ setup(name='scope-server',
                         'scope-server = scopeserver.dataserver:dev'
                         ]
                     },
-      version='1.3.1',
+      version='1.3.2',
       description='SCope Data Server: a server to load and serve the data to the SCope Client',
       url='',
       author='Maxime De Waegeneer',
@@ -15,7 +15,7 @@ setup(name='scope-server',
       install_requires=[
           'grpcio>=1.7.0',
           'grpcio-tools>=1.7.0',
-          'loompy==2.0.2',
+          'loompy>=2.0.2',
           'pandas',
           'numpy',
           'pyscenic',

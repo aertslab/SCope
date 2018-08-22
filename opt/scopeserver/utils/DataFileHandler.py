@@ -9,7 +9,6 @@ from scopeserver.dataserver.modules.gserver import GServer as gs
 
 app_name = 'SCope'
 app_author = 'Aertslab'
-app_version = '1.0'
 
 platform_dirs = AppDirs(appname=app_name, appauthor=app_author)
 
