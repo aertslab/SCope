@@ -7,6 +7,9 @@ Currently the data format supported by SCope is `.loom`. This file format for ve
 ## Version History
 
 August 22, 2018
+* Version 1.3.2
+   * Fix bug downloading sub loom when parent loom is a public one.
+   * Fix bug downloading sub loom when parent loom has been created with SCopeLoomR version < 0.0.5.6558.
 * Version 1.3.1
    * Fix bug when cluster markers not present in .loom.
 * Version 1.3.0

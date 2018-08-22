@@ -9,7 +9,6 @@ from scopeserver.dataserver.modules.gserver import GServer as gs
 
 app_name = 'SCope'
 app_author = 'Aertslab'
-app_version = '1.0'
 
 platform_dirs = AppDirs(appname=app_name, appauthor=app_author)
 
@@ -45,7 +44,6 @@ class DataFileHandler():
         self.logs_dir = DataFileHandler.get_data_dir_path_by_file_type(file_type="Logs")
         self.create_global_dirs()
         self.create_uuid_log()
-        print("Starting DataFileHandler...")
     
     def get_gene_sets_dir(self):
         return self.gene_sets_dir

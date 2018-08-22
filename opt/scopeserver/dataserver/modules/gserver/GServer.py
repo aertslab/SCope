@@ -30,6 +30,7 @@ from scopeserver.utils import GeneSetEnrichment as _gse
 from scopeserver.utils import CellColorByFeatures as ccbf
 from scopeserver.utils import Constant
 from scopeserver.utils import SearchSpace as ss
+from scopeserver.utils.Loom import Loom
 
 from pyscenic.genesig import GeneSignature
 from pyscenic.aucell import create_rankings, enrichment, enrichment4cells
@@ -42,7 +43,6 @@ class SCope(s_pb2_grpc.MainServicer):
 
     app_name = 'SCope'
     app_author = 'Aertslab'
-    app_version = '1.0'
 
     def __init__(self):
         self.dfh = dfh.DataFileHandler(dev_env=SCope.dev_env)
@@ -475,8 +475,12 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
         loom_connection = loom.get_connection()
         meta_data = loom.get_meta_data()
-        l = request.loomFilePath.split("/")
-        file_name = l[1].split(".")[0]
+
+        file_name = request.loomFilePath
+        # Check if not a public loom file
+        if '/' in request.loomFilePath:
+            l = request.loomFilePath.split("/")
+            file_name = l[1].split(".")[0]
 
         if(request.featureType == "clusterings"):
             a = list(filter(lambda x : x['name'] == request.featureName, meta_data["clusterings"]))
@@ -493,8 +497,8 @@ class SCope(s_pb2_grpc.MainServicer):
             sub_loom_file_attrs["title"] = sub_loom_file_name
             sub_loom_file_attrs['CreationDate'] = timestamp()
             sub_loom_file_attrs["LOOM_SPEC_VERSION"] = _version.__version__
-            sub_loom_file_attrs["note"] = "This loom is a subset of {0} loom file".format(loom_connection.attrs["title"])
-            sub_loom_file_attrs["MetaData"] = loom_connection.attrs["MetaData"]
+            sub_loom_file_attrs["note"] = "This loom is a subset of {0} loom file".format(Loom.clean_file_attr(file_attr=loom_connection.attrs["title"]))
+            sub_loom_file_attrs["MetaData"] = Loom.clean_file_attr(file_attr=loom_connection.attrs["MetaData"])
             # - Use scan to subset cells (much faster than naive subsetting): avoid to load everything into memory
             # - Loompy bug: loompy.create_append works but generate a file much bigger than its parent
             #      So prepare all the data and create the loom afterwards
