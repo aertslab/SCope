@@ -34,7 +34,7 @@ service Main {
   rpc loomUploaded (LoomUploadedRequest) returns (LoomUploadedReply) {}
   rpc getMyGeneSets (MyGeneSetsRequest) returns (MyGeneSetsReply) {}
   rpc deleteUserFile (DeleteUserFileRequest) returns (DeleteUserFileReply) {}
-  rpc downloadSubLoom (DownloadSubLoomRequest) returns (DownloadSubLoomReply) {}
+  rpc downloadSubLoom (DownloadSubLoomRequest) returns (stream DownloadSubLoomReply) {}
 }
 
 message ErrorReply {
@@ -375,5 +375,7 @@ message DownloadSubLoomRequest {
 message DownloadSubLoomReply {
   string loomFilePath=1;
   int64 loomFileSize=2;
-  ErrorReply error=3;
+  Progress progress=3;
+  bool isDone=4;
+  ErrorReply error=5;
 }

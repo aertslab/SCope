@@ -503,6 +503,12 @@ class SCope(s_pb2_grpc.MainServicer):
                 else:
                     sub_matrix = np.concatenate((sub_matrix, loom_connection[:, selection]), axis=1)
                     sub_selection = np.concatenate((sub_selection, selection), axis=0)
+                # Send the progress
+                processed = len(sub_selection)/sum(cells)
+                yield s_pb2.DownloadSubLoomReply(loomFilePath=""
+                                               , loomFileSize=0
+                                               , progress=s_pb2.Progress(value=processed, status="Sub Loom Created!")
+                                               , isDone=False)
             print("Creating {0} sub .loom...".format(request.featureValue))
             lp.create(sub_loom_file_path, sub_matrix, row_attrs=loom_connection.ra, col_attrs=loom_connection.ca[sub_selection], file_attrs=sub_loom_file_attrs)
             with open(sub_loom_file_path, 'r') as fh:
@@ -511,7 +517,10 @@ class SCope(s_pb2_grpc.MainServicer):
             print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
         else:
             print("This feature is currently not implemented.")
-        return s_pb2.DownloadSubLoomReply(loomFilePath=sub_loom_file_path, loomFileSize=loom_file_size)
+        yield s_pb2.DownloadSubLoomReply(loomFilePath=sub_loom_file_path
+                                       , loomFileSize=loom_file_size
+                                       , progress=s_pb2.Progress(value=1.0, status="Sub Loom Created!")
+                                       , isDone=True)
 
     # Gene set enrichment
     #

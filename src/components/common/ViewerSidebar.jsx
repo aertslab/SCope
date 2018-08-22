@@ -22,8 +22,8 @@ class ViewerSidebar extends Component {
 			lassoSelections: BackendAPI.getViewerSelections(),
 			modalID: null,
 			activeTab: 0,
-			downloading: false,
-			downloadPercentage: null
+			processSubLoomPercentage: null,
+			downloadSubLoomPercentage: null
 		};
 		this.selectionsListener = (selections) => {
 			this.setState({lassoSelections: selections, activeTab: 0});
@@ -256,10 +256,9 @@ class ViewerSidebar extends Component {
 
 				if(activeFeatures[i].featureType.startsWith("Clustering")) {
 					downloadSubLoomButton = () => {
-						if(this.state.downloadPercentage == null)
+						if(this.state.downloadSubLoomPercentage == null && this.state.processSubLoomPercentage ==null)
 							return (
 								<Button color="green" onClick={() => {
-									this.setState({ downloadPercentage: -1 });
 									let query = {
 										loomFilePath: BackendAPI.getActiveLoom(),
 										featureType: "clusterings",
@@ -268,42 +267,50 @@ class ViewerSidebar extends Component {
 										operator: "=="
 									};											
 									BackendAPI.getConnection().then((gbc) => {
-										gbc.services.scope.Main.downloadSubLoom(query, (err, response) => {
-											if (DEBUG) console.log("Download subset of active .loom")
-											if(response == null) {
-												this.setState({ loomDownloading: null, downloadPercentage: null });
+										if (DEBUG) console.log("Download subset of active .loom")
+										var call = gbc.services.scope.Main.downloadSubLoom(query);
+										call.on('data', (dsl) => {
+											if (DEBUG) console.log('downloadSubLoom data');
+											if(dsl == null) {
+												this.setState({ loomDownloading: null, downloadSubLoomPercentage: null });
 												return
 											}
-											// Start downloading the subsetted loom file
-											let fd = new FileDownloader(response.loomFilePath, match.params.uuid, response.loomFileSize)
-											fd.on('started', (isStarted) => {
-												this.setState({ loomDownloading: encodeURIComponent(response.loomFilePath) });
-											})
-											fd.on('progress', (progress) => {
-												this.setState({ downloadPercentage: progress })
-											})
-											fd.on('finished', (finished) => {
-												this.setState({ loomDownloading: null, downloadPercentage: null });
-											})
-											fd.start()
+											if (!dsl.isDone) {
+												this.setState({ processSubLoomPercentage: Math.round(dsl.progress.value*100) });
+											} else {
+												// Start downloading the subsetted loom file
+												let fd = new FileDownloader(dsl.loomFilePath, match.params.uuid, dsl.loomFileSize)
+												fd.on('started', (isStarted) => {
+													this.setState({ processSubLoomPercentage: null, loomDownloading: encodeURIComponent(dsl.loomFilePath) });
+												})
+												fd.on('progress', (progress) => {
+													this.setState({ downloadSubLoomPercentage: progress })
+												})
+												fd.on('finished', (finished) => {
+													this.setState({ loomDownloading: null, downloadSubLoomPercentage: null });
+												})
+												fd.start()
+											}
+										});
+										call.on('end', () => {
+											console.log()
+											if (DEBUG) console.log('downloadSubLoom end');
 										});
 									}, () => {
-										this.setState({ loomDownloading: null, downloadPercentage: null });
+										this.setState({ loomDownloading: null, downloadSubLoomPercentage: null, processSubLoomPercentage: null });
 										BackendAPI.showError();	
 									})
 								}} style={{marginTop: "10px", width: "100%"}}>
 								{"Download "+ activeFeatures[i].feature +" .loom file"}
 								</Button>
 							)
-						if(this.state.downloadPercentage < 0)
+						if(this.state.processSubLoomPercentage > 0)
 							return (
-								<Button disabled>
-									<Icon name='circle notched' loading /> Processing...
-								</Button>
-							)
-						if(this.state.downloadPercentage >= 0)
+								<Progress percent={this.state.processSubLoomPercentage} indicating progress disabled size='large'>>Processing...</Progress>
+							)	
+						if(this.state.downloadSubLoomPercentage > 0)
 							return (
-								<Progress percent={this.state.downloadPercentage} indicating progress disabled></Progress>
+								<Progress percent={this.state.downloadSubLoomPercentage} indicating progress disabled size='large'>>Downloading...</Progress>
 							)
 					}
 				}

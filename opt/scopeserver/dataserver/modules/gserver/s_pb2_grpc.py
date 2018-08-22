@@ -99,7 +99,7 @@ class MainStub(object):
         request_serializer=s__pb2.DeleteUserFileRequest.SerializeToString,
         response_deserializer=s__pb2.DeleteUserFileReply.FromString,
         )
-    self.downloadSubLoom = channel.unary_unary(
+    self.downloadSubLoom = channel.unary_stream(
         '/scope.Main/downloadSubLoom',
         request_serializer=s__pb2.DownloadSubLoomRequest.SerializeToString,
         response_deserializer=s__pb2.DownloadSubLoomReply.FromString,
@@ -324,7 +324,7 @@ def add_MainServicer_to_server(servicer, server):
           request_deserializer=s__pb2.DeleteUserFileRequest.FromString,
           response_serializer=s__pb2.DeleteUserFileReply.SerializeToString,
       ),
-      'downloadSubLoom': grpc.unary_unary_rpc_method_handler(
+      'downloadSubLoom': grpc.unary_stream_rpc_method_handler(
           servicer.downloadSubLoom,
           request_deserializer=s__pb2.DownloadSubLoomRequest.FromString,
           response_serializer=s__pb2.DownloadSubLoomReply.SerializeToString,
