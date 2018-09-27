@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "preinstall": "npm i shelljs && node bin/install.js",
+    "postinstall": "node bin/configure.js",
     "dev": "cross-env NODE_ENV=development NODE_TYPE=local webpack-dev-server --hot",
     "dev-aws": "cross-env NODE_ENV=development NODE_TYPE=aws webpack-dev-server --hot",
     "build": "cross-env NODE_ENV=production NODE_TYPE=local webpack",
@@ -48,6 +49,7 @@
     "json-schema": "^0.2.3",
     "json2csv": "^4.0.1",
     "launch-browser": "^1.0.0",
+    "make-dir": "^1.3.0",
     "moment": "^2.21.0",
     "pako": "^1.0.6",
     "pixi.js": "^4.6.2",
