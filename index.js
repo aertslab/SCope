@@ -15,7 +15,9 @@ if (process.platform == 'darwin') {
 
 const app = electron.app
 const Menu = electron.Menu
-const dataDir = appdirs.userDataDir(appname='SCope', appauthor='Aertslab')
+const app_name = 'SCope'
+const app_author = 'Aertslab'
+const dataDir = appdirs.userDataDir(appname=app_name, appauthor=app_author)
 
 const home = process.env['HOME'];
 
@@ -166,7 +168,24 @@ class DataServer {
       this.proc = cp.spawn(script, ["-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort, '--app_mode'], {});
     } else {
       console.log("SCope Server Not packaged or electronTest.")
-      this.proc = cp.spawn('python3', [script, "-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort, '--app_mode', '--dev_env'], {});
+      try {
+        var output = cp.execSync('python3.6 -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
+        var python = 'python3.6'
+      } catch(e) {
+        try {
+          var output = cp.execSync('python3 -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
+          var python = 'python3'
+        } catch(e) {
+            var output = cp.execSync('python -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
+            var python = 'python'
+        }
+      } finally {
+          console.log(output);
+          if (!(/^3.[0-6].[0-9].*/.test(output))) {
+              throw("Compatible python version not found!")
+         }
+      }
+      this.proc = cp.spawn(python, [script, "-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort, '--app_mode', '--dev_env'], {});
     }
     this.proc.stdout.on('data', (data) => {
       let buff = new Buffer(data).toString('utf8');
@@ -234,6 +253,7 @@ class BindServer {
   start() {
     const exec = cp.exec;
     this.proc = cp.spawn('node', [path.join(BINDSERVER_FOLDER, BINDSERVER_MODULE), this.port])
+
     if (this.proc == null) {
       throw "Null pointer exception for Bind Server."
     }
@@ -264,7 +284,11 @@ class SCope {
   install() {
     return new Promise((resolve) => {
       console.log("Installing SCope...")
-      cp.execSync("cd resources/app; npm rebuild");
+      if (process.argv[2] == 'electronTest') {
+        cp.execSync("npm rebuild");
+      } else {
+        cp.execSync("cd resources/app && npm rebuild");
+      }
       fs.writeFile("INSTALLED", "", function(err) {
         console.log("Successfully installed!");
       });
@@ -298,14 +322,14 @@ class SCope {
     // Set the size of the window to the size of the available screen
     const {width, height} = electron.screen.getPrimaryDisplay().workAreaSize
     this.view = new electron.BrowserWindow({width: width, height: height, icon:'images/SCope_Icon.png', webPreferences: {
-      devTools: false
+      devTools: true
     }})
     this.view.loadURL(require('url').format({
       pathname: path.join(__dirname, 'index.html'),
       protocol: 'file:',
       slashes: true
     }) + "?WSport=" + this.model.xPort + "&XHRport=" + this.model.pPort + "&RPCport=" + this.model.gPort)
-    this.view.webContents.openDevTools()
+    // this.view.webContents.openDevTools()
     this.view.webContents.on('new-window', (e, url) => {
       e.preventDefault();
       electron.shell.openExternal(url);
@@ -325,15 +349,30 @@ class SCope {
 const scope = new SCope();
 
 function setMainMenu() {
+  var globDir = ''
   const template = [
       {
         label: 'File',
         submenu: [
           {
             label: 'Open Loom Folder',
-            click () {glob(path.join(dataDir, 'my-looms', 'SCopeApp_*'), (er, files) => {
-              electron.shell.openItem(files[0])
-            })}
+            click () {
+              if (process.platform == 'win32') {
+                globDir = path.posix.join(dataDir.replace(/\\/g, '/').replace('/SCope', '/Aertslab/SCope'), 'my-looms', 'SCopeApp_*/')
+              } else {
+                globDir = path.join(dataDir, 'my-looms', 'SCopeApp_*/')
+              }
+              result = glob.sync(globDir)
+              electron.shell.openItem(result[0])
+              // glob(globDir), (er, files) => {
+              //   if (err) {
+              //     console.log(err)
+              //   }
+              //   console.log('Globbing')
+              //   console.log(files[0])
+              //   electron.shell.openItem(files[0])
+              // }
+            }
           }
         ]
       },
