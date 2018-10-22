@@ -355,7 +355,7 @@ function setMainMenu() {
               if (process.platform == 'win32') {
                 globDir = path.posix.join(dataDir.replace(/\\/g, '/').replace('/SCope', '/Aertslab/SCope'), 'my-looms', 'SCopeApp_*/')
               } else {
-                globdir = path.join(dataDir, 'my-looms', 'SCopeApp_*/')
+                globDir = path.join(dataDir, 'my-looms', 'SCopeApp_*/')
               }
               result = glob.sync(globDir)
               electron.shell.openItem(result[0])
