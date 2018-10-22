@@ -59,7 +59,8 @@ sudo yum -y install nodejs
 ```
 For more details and other versions please visit [https://github.com/nodesource/distributions](https://github.com/nodesource/distributions)
 
-- Python 3 (Developed and tested with 3.6.5):
+- Python 3.6.X (Developed and tested with 3.6.5):
+** Not compatible with Python 3.7 due to dependencies. ** 
 
 **Required for commands line instances and development.**
 
