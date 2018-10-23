@@ -5,14 +5,14 @@ shell.exec('npm install opt/scopeserver/bindserver');
 
 var execSync = require('child_process').execSync;
 try {
-  var output = cp.execSync('python3.6 -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
+  var output = execSync('python3.6 -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
   var python = 'python3.6'
 } catch(e) {
   try {
-    var output = cp.execSync('python3 -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
+    var output = execSync('python3 -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
     var python = 'python3'
   } catch(e) {
-      var output = cp.execSync('python -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
+      var output = execSync('python -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
       var python = 'python'
   }
 } finally {
