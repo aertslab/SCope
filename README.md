@@ -41,40 +41,6 @@ Currently there are two packages to generate extended loom files compatible with
 
 Eventually the functionality from pySCENIC will be expanded and put in its own python package.
 
-## Requirements
-
-- Node.js:
-
-**Required for standalone apps, command line instances and development.**
-
-:exclamation: **SCope requires at least version 9 of Node.js to work**. Let's download and install Node.js v9:
-```
-# Ubuntu
-curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
-sudo apt-get install -y nodejs
-
-# Enterprise Linux and Fedora
-curl -sL https://rpm.nodesource.com/setup_9.x | sudo bash -
-sudo yum -y install nodejs
-```
-For more details and other versions please visit [https://github.com/nodesource/distributions](https://github.com/nodesource/distributions)
-
-- Python 3.6.X (Developed and tested with 3.6.5):
-** Not compatible with Python 3.7 due to dependencies. ** 
-
-**Required for commands line instances and development.**
-
-We recommend using miniconda to install SCope and its dependencies in a clean environment.
-
-Download miniconda3 from https://conda.io/miniconda.html or use the command line:
-```
-wget --content-disposition http://bit.ly/miniconda3
-```
-
-Install Minconda (Python 3):
-```
-bash Miniconda3-latest-[...].sh
-```
 
 ## Run SCope
 
@@ -87,53 +53,107 @@ A **Windows** app is under development, but currently has no ETA.
 ### Development
 Requirements should be fulfilled (see `Requirements` section).
 
-#### Install
+#### Clone repository
 
-Create miniconda (python) virtual environment:
-```
-conda create -n scope python=3.6.2
-source activate scope # or conda activate scope if higher version of conda
+```bash
+# Define where you want to clone the SCope repository.
+LOCAL_SCOPE_REPO="${HOME}/repos/SCope"
+
+# Clone SCope git repository.
+git clone https://github.com/aertslab/SCope "${LOCAL_SCOPE_REPO}"
 ```
 
-Install SCope:
+### Install miniconda and create SCope environment.
+
+We recommend using miniconda to install SCope and its dependencies in a clean environment.
+
+Download miniconda3 from https://conda.io/miniconda.html or use the command line:
+
+```bash
+wget --content-disposition http://bit.ly/miniconda3
 ```
+
+Install Minconda:
+
+```bash
+bash Miniconda3-latest-[...].sh
+```
+
+Create miniconda virtual environment with python (3.6 or higher) and nodejs (9 or higher) for SCope:
+
+```bash
+# Install python and nodejs with conda.
+conda create -n scope 'python>=3.6' 'nodejs>=9'
+```
+
+#### Install SCope
+
+Activate miniconda virtual environment with python (3.6 or higher) and nodejs (9 or higher) and install SCope:
+
+```bash
+# Activate SCope environment.
+conda activate scope
+
+# Go to your local cloned SCope repository.
+cd "${LOCAL_SCOPE_REPO}"
+
+# Install SCope.
 npm install
 ```
 
 #### Run
 
 - One Command Run:
-```
+
+```bash
+# Go to your local cloned SCope repository.
+cd "${LOCAL_SCOPE_REPO}"
+
 npm run scope
 ```
 
-- Debug Run:
-```
-# Start SCope Server
+- Debug Run in 2 terminals:
+
+```bash
+# Go to your local cloned SCope repository.
+cd "${LOCAL_SCOPE_REPO}"
+
+# Start SCope Server (terminal 1).
 scope-server
 
-# Start SCope Client
+# Start SCope Client (terminal 2).
 npm run dev
 ```
 
 #### 1. Packaging SCope Data Server
 
-Requirements should be fullfilled and a `scope` python virtual should be loaded (see `Development Mode` section).
+Activate SCope environment (see `Install miniconda and create SCope environment.` section if you do not have one yet):
+
+```bash
+# Activate SCope environment.
+conda activate scope
+
+# Go to your local cloned SCope repository.
+cd "${LOCAL_SCOPE_REPO}"
+```
 
 Install the SCope Server as Python package:
-```
+
+```bash
 cd opt
 python setup.py develop
 ```
 
 Install PyInstaller:
-```
+
+```bash
 cd scopeserver/dataserver
 pip install pyinstaller
 ```
 
 Package the SCope Data Server:
-```
+
+```bash
 cd ./opt/scopeserver/dataserver
 LD_LIBRARY_PATH=${CONDA_PATH}/lib pyinstaller \
 	--onedir \
@@ -145,30 +165,35 @@ LD_LIBRARY_PATH=${CONDA_PATH}/lib pyinstaller \
 	--hidden-import=pandas._libs.tslibs.nattype \
 	--hidden-import=pandas._libs.skiplist
 ```
+
 `${CONDA_PATH}` is the path where Miniconda has been installed.
 
 #### 2. Packaging SCope
 
 First install electron-packager node module:
-```
+
+```bash
 sudo npm install electron-packager -g
 ```
 
 Finally, bundle the SCope app:
 - Linux (x64)
-```
+
+```bash
 npm run package-linux-x64
 tar -zcvf scope-linux-x64.tar.gz scope-linux-x64
 ```
 
 - macOS (x64)
-```
+
+```bash
 npm run package-macOS-x64
 ```
 
 Run the binary:
 - Linux
-```
+
+```bash
 ./release/scope-linux-x64/scope
 ```
 
@@ -180,12 +205,14 @@ Run the .app file generated
 
 ##### Debian package
 For more details, follow https://www.christianengvall.se/electron-installer-debian-package/
-```
+
+```bash
 npm run create-debian-installer
 ```
 
 ##### dmg for macOS
-```
+
+```bash
 git clone https://github.com/andreyvit/yoursway-create-dmg.git
 ./yoursway-create-dmg/create-dmg \
 	--volname "SCope Installer" \
