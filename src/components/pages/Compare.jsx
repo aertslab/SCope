@@ -19,6 +19,14 @@ import ReactGA from 'react-ga';
 class Compare extends Component {
 	constructor(props) {
 		super(props);
+
+		let isConfigurationLocked = this.props.metadata && this.props.metadata.cellMetaData  && this.props.metadata.cellMetaData.annotations.length ? false : true
+		let isSuperpositionLocked = isConfigurationLocked
+		let configurationDefaultValue = isConfigurationLocked ? 'multi' : 'simple'
+		let superpositionDefaultValue = isConfigurationLocked ? 'NA': 'OR'
+		let nDisplays = isConfigurationLocked ? 2: 4
+		let nRows = isConfigurationLocked ? 1: 2 
+
 		this.state = {
 			activePage: BackendAPI.getActivePage(),
 			multiLoom: BackendAPI.getActiveLooms(),
@@ -28,17 +36,20 @@ class Compare extends Component {
 			colors: BackendAPI.getColors(),
 			activeAnnotation: -1,
 			columns: 2,
-			rows: 2,
-			displays: 4,
+			rows: nRows,
+			displays: nDisplays,
 			crossAnnotations: {
 				horizontal: [],
 				vertical: [],
 				both: [],
 				one: []
 			},
-			configuration: 'simple',
-			superposition: 'OR',
+			configuration: configurationDefaultValue,
+			superposition: superpositionDefaultValue,
+			isConfigurationLocked: isConfigurationLocked, 
+			isSuperpositionLocked: isSuperpositionLocked, 
 		}
+
 		this.loomConf = [];
 		this.rebuildLoomOptions();
 		this.activeLoomListener = (loom, metadata, coordinates) => {
@@ -83,6 +94,7 @@ class Compare extends Component {
 	}
 
 	render() {
+
 		const {
 			activeThresholds,
 			activeFeatures,
@@ -93,6 +105,8 @@ class Compare extends Component {
 			displays,
 			configuration,
 			superposition,
+			isSuperpositionLocked,
+			isConfigurationLocked,
 			multiLoom,
 			multiCoordinates,
 			multiMetadata
@@ -277,10 +291,6 @@ class Compare extends Component {
 			</div>
 		);
 
-		let isConfigurationLocked = this.props.metadata && this.props.metadata.cellMetaData  && this.props.metadata.cellMetaData.annotations.length ? false : true
-		let isSuperpositionLocked = isConfigurationLocked
-		let configurationDefaultValue = isConfigurationLocked ? 'multi' : 'simple'
-
 		return (
 			<Grid>
 				<Grid.Row columns="5">
@@ -292,7 +302,7 @@ class Compare extends Component {
 						<Dropdown inline disabled={configuration=='one'} disabled={isSuperpositionLocked} options={this.superpositionConf} value={superposition} onChange={this.superpositionChanged.bind(this)}/>
 						<br />
 						Configuration: &nbsp;
-						<Dropdown inline options={this.configurationConf} disabled={isConfigurationLocked} defaultValue={configurationDefaultValue} onChange={this.configurationChanged.bind(this)}/>
+						<Dropdown inline options={this.configurationConf} disabled={isConfigurationLocked} defaultValue={configuration} onChange={this.configurationChanged.bind(this)}/>
 					</Grid.Column>
 					{featureSearch}
 					<Grid.Column>&nbsp;</Grid.Column>
