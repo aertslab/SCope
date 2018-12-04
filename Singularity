@@ -49,5 +49,5 @@ From: ubuntu
   exec scope-server
 
 %apprun frontend
-  exec cd /app && python2 -m SimpleHTTPServer
+  exec /bin/sh -c 'cd /app && python2 -m SimpleHTTPServer 55850'
 
