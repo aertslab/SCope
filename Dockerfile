@@ -44,6 +44,9 @@ RUN cd /app && \
 RUN cd /app/opt && \
     python setup.py develop
 
+RUN cd /app && \
+    npm run build
+
 # Frontend
 EXPOSE 55850
 # Data upload
@@ -54,6 +57,6 @@ EXPOSE 55852
 WORKDIR /app
 
 # The frontend fails if this directory does not exist
-RUN mkdir /app/assets/
+# RUN mkdir /app/assets/
 
 ENTRYPOINT ["npm", "run", "scope"]
