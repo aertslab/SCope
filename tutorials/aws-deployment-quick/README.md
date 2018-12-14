@@ -44,11 +44,22 @@ You can more detailed explanation at https://docs.aws.amazon.com/AWSEC2/latest/U
 cd SCope/
 ```
 
-2. Edit apache/config.json file by updating the value of *domainName*
+2. Edit apache/config.json file by updating the value of *publicHostAddress*
 ```
 {
     [...],
-    "domainName": "[public-dns-ipv4]",
+    "publicHostAddress": "[public-dns-ipv4]",
+    [...]
+}
+```
+With a secure protocol (e.g.: https):
+```
+{
+   [...],
+    "publicHostAddress": "[public-dns-ipv4]",
+    "httpProtocol": "https",
+    "httpPort": 443,
+    "wsProtocol": "wss"
     [...]
 }
 ```
@@ -60,4 +71,4 @@ npm run scope-aws
 sudo systemctl restart httpd
 ```
 
-A SCope instance should be running at http://```[public-dns-ipv4]```
+A SCope instance should be running at http://```[public-dns-ipv4]``` or https://```[public-dns-ipv4]``` if secure protocol was used.

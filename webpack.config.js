@@ -66,7 +66,7 @@ let config = {
             BACKEND: JSON.stringify({
                 httpProtocol: _config.httpProtocol,
                 wsProtocol: _config.wsProtocol,
-                host: "127.0.0.1",
+                host: _config.localHostAddress,
                 WSport: _config.xPort,
                 XHRport: _config.pPort,
                 RPCport: _config.gPort
@@ -74,7 +74,7 @@ let config = {
             FRONTEND: JSON.stringify({
                 httpProtocol: _config.httpProtocol,
                 wsProtocol: _config.wsProtocol,
-                host: _config.domainName
+                host: _config.publicHostAddress
             })
         }),
         new WebpackGitHash({

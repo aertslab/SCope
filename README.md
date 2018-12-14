@@ -1,10 +1,14 @@
-# SCope v1.3.4: Visualization of large-scale and high dimensional single cell data
+# SCope v1.3.5: Visualization of large-scale and high dimensional single cell data
 <img src="images/SCope_Logo.png" width="640">
 
 SCope is a fast visualization tool for large-scale and high dimensional scRNA-seq datasets.
 Currently the data format supported by SCope is `.loom`. This file format for very large omics datasets is maintained by the Linnarsson Lab through the `loompy` Python package (https://github.com/linnarsson-lab/loompy).
 
 ## Version History
+
+December 14, 2018
+* Version 1.3.5
+   * Update Apache config to deploy SCope on secure protocol (e.g.: HTTPS). Update related tutorials for AWS deployment.
 
 November 16, 2018
 * Version 1.3.4
