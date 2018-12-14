@@ -54,13 +54,15 @@ class ApacheConf {
                     console.log(err);
                     resolve(false)
                 }
-                let tmp = data.replace(/SCOPE_SERVER_DOMAIN_NAME/g, this._config.domainName);
-                tmp = tmp.replace(/SCOPE_SERVERS_HOSTNAME/g, "127.0.0.1")
+                let tmp = data.replace(/SCOPE_PUBLIC_HOST_ADDRESS/g, this._config.publicHostAddress);
+                tmp = tmp.replace(/SCOPE_SERVERS_LOCAL_HOST_ADDRESS/g, this._config.localHostAddress);
                 tmp = tmp.replace(/SCOPE_P_SERVER_PORT/g, this._config.pPort)
                 tmp = tmp.replace(/SCOPE_X_SERVER_PORT/g, this._config.xPort)
+                tmp = tmp.replace(/SCOPE_G_SERVER_PORT/g, this._config.gPort)
                 tmp = tmp.replace(/APACHE_LOG_DIR/g, this._config.apacheLogDir)
                 tmp = tmp.replace(/APACHE_HTML_DIR/g, this._config.apacheHtmlDir)
                 tmp = tmp.replace(/HTTP_PROTOCOL/g, this._config.httpProtocol)
+                tmp = tmp.replace(/HTTP_PORT/g, this._config.httpPort)
                 tmp = tmp.replace(/WS_PROTOCOL/g, this._config.wsProtocol)
                 fs.writeFile(this.apacheSCopeConfigFilePath, tmp, 'utf8', (err) => {
                     if (err) {
