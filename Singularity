@@ -26,9 +26,9 @@ From: ubuntu
     apt-get install -y build-essential 
 
     # conda
-    wget --quiet --content-disposition http://bit.ly/miniconda3 -O ~/miniconda.sh && \
-      /bin/bash ~/miniconda.sh -b -p /opt/conda && \
-      rm ~/miniconda.sh && \
+    wget --quiet --content-disposition http://bit.ly/miniconda3 -O /root/miniconda.sh && \
+      /bin/bash /root/miniconda.sh -b -p /opt/conda && \
+      rm /root/miniconda.sh && \
       ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
       echo ". /opt/conda/etc/profile.d/conda.sh" >> /etc/bash.bashrc && \
       echo "conda activate base" >> /etc/bash.bashrc
