@@ -92,7 +92,7 @@ Create miniconda virtual environment with python (3.6 or higher) and nodejs (9 o
 
 ```bash
 # Install python and nodejs with conda.
-conda create -n scope 'python>=3.6' 'nodejs>=9'
+conda create -n scope 'python==3.6.2' 'nodejs>=9'
 ```
 
 #### Install SCope
