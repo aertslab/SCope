@@ -57,6 +57,8 @@ Eventually the functionality from pySCENIC will be expanded and put in its own p
 
 Standalone apps for **macOS** and **Linux** can be downloaded from [the releases page.](https://github.com/aertslab/SCope/releases).
 
+:exclamation: SCope standalone app requires Node.js (> v9). To install it, go to https://nodejs.org/en/download/.
+
 A **Windows** app is under development, but currently has no ETA.
 
 ### Development
