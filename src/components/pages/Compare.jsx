@@ -222,7 +222,7 @@ class Compare extends Component {
 									datasetSelector = (
 										<span className="noStretch">
 										<b>Select a dataset: </b>
-										<Dropdown inline options={this.loomConf} disabled={j==0} value={multiLoom[j]} placeholder=" none selected " onChange={(proxy, select) => {
+										<Dropdown inline options={this.loomConf} disabled={j==0} value={multiLoom[j]} scrolling placeholder=" none selected " onChange={(proxy, select) => {
 											let ml = multiLoom;
 											let mc = multiCoordinates;
 											let mm = multiMetadata;
