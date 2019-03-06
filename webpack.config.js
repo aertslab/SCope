@@ -32,7 +32,7 @@ let config = {
         extensions: ['.js', '.jsx', '.css']
     },
     module: {
-        loaders: [
+        rules: [
         {
             test: /\.(js|jsx)$/,
             loader: ['react-hot-loader/webpack', 'babel-loader'],
