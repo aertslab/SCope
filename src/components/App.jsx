@@ -264,7 +264,7 @@ class App extends Component {
 					this.setState({loading: false, sessionsLimitReached: true});
 				} else {
 					this.timeout = response ? parseInt(response.timeRemaining * 1000) : 0;
-					cookies.set(cookieName, uuid, { path: '/', maxAge: this.timeout });
+					// cookies.set(cookieName, uuid, { path: '/', maxAge: this.timeout });
 					if (!ping) {
 						this.setState({loading: false, uuid: uuid});
 					}
