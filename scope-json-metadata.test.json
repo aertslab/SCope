@@ -1,0 +1,45 @@
+{
+    "embeddings": [{
+        "id": -1,
+        "name": "SCENIC 25PC, 60 perplexity"
+    }, {
+        "id": 0,
+        "name": "Seurat 82PC, 30 perplexity"
+    }],
+    "clusterings": [{
+        "id": 0,
+        "group": "Seurat",
+        "name": "Seurat resolution 2.0",
+        "clusters": [{
+            "id": 0,
+            "description": "Mushroom Body (1)"
+        }],
+        "clusterMarkerMetrics": [{
+           "accessor": "avg_logFC", 
+           "name": "Avg. logFC",
+           "description": "Average log fold change from Wilcox test (Seurat)"  
+        }]
+    }],
+    "regulonThresholds": [{
+        "regulon": "Abd-B_(17g)",
+        "defaultThresholdValue": 0.00909688,
+        "defaultThresholdName": "tenPercentOfMax",
+        "allThresholds": {
+              "tenPercentOfMax": 0.00909688
+        },
+        "motifData": "idmmpmm__Abd-B.png",
+        "motifVersion": "V8"
+    }],
+    "annotations": [{
+        "name": "Genotype",
+        "values": [
+            "W1118",
+            "DGRP-551"
+        ]
+    }],
+    "metrics": [{
+        "name": "nUMI"
+    }, {
+        "name": "nGene"
+    }]
+}

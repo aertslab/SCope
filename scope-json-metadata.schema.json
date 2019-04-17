@@ -1,0 +1,168 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://github.com/aertslab/SCope/scope-json-metadata.schema",
+    "title": "SCope metadata",
+    "description": "The metadata stored in a SCope compatible loom file",
+    "type": "object",
+    "properties": {
+        "embeddings": {
+            "description": "List of all embeddings stored in the loom file, must contain one entry for -1",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "minProperties": 1,
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "description": "Index of embeddings matrix in Embeddings_X and Embeddings_Y. -1 is special case and is stored in Embedding",
+                        "minimum": -1
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name shown in SCope"
+                    }
+                },
+                "required": ["id", "name"]
+            }
+        },
+        "clusterings": {
+            "description": "List of all clusterings stored in the loom file. Each element in the array is a different clustering (i.e. Louvain at different resolutions).",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "description": "Index of clustering used throughout this loom file",
+                        "minimum": 0
+                    },
+                    "group": {
+                        "type": "string",
+                        "description": "TODO"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name of clustering displayed in SCope"
+                    },
+                    "clusters": {
+                        "type": "array",
+                        "description": "Array of id -> name links for clusters",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer",
+                                    "description": "Index of cluster within this clustering",
+                                    "minimum": 0
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "description": "Name of the cluster displayed in SCope"
+                                }
+                            },
+                            "required": ["id", "description"]
+                        }
+                    },
+                    "clusterMarkerMetrics": {
+                        "type": "array",
+                        "description": "List of different metrics available from the clustering. Shown in the table in the right sidebar of SCope",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "accessor": {
+                                    "type": "string",
+                                    "description": "Variable name stored in row attributes"
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "description": "Name of metric"
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "description": "Description of metric"
+                                }
+                            },
+                            "required": ["accessor", "name", "description"]
+                        }
+                    }
+                },
+                "required": ["id", "name"]
+            }
+        },
+        "regulonThresholds": {
+            "type": "array",
+            "description": "List of thresholds generated form SCENIC per regulon",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "regulon": {
+                        "type": "string",
+                        "description": "Name of regulon"
+                    },
+                    "defaultThresholdValue": {
+                        "type": "number",
+                        "minimum": 0,
+                        "description": "Value of the default threshold"
+                    },
+                    "defaultThresholdName": {
+                        "type": "string",
+                        "description": "Name of the default threshold"
+                    },
+                    "allThresholds": {
+                        "type": "object",
+                        "uniqueItems": true,
+                        "additionalProperties": {
+                            "type": "number"
+                        }
+                    },
+                    "motifData": {
+                        "type": "string",
+                        "description": "Filename for the motif logo"
+                    },
+                    "motifVersion": {
+                        "type": "string",
+                        "description": "Version for the motif logo",
+                        "enum": ["V8", "V9"]
+                    }                                
+                },
+                "required": ["regulon", "defaultThresholdName", "defaultThresholdValue"]
+            }
+        },
+        "annotations": {
+            "type": "array",
+            "description": "List of annotations visible in scope",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the annotation"
+                    },
+                    "values": {
+                        "type": "array",
+                        "description": "A unique set of the values of the annotation",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": ["name", "values"]
+            }
+        },
+        "metrics": {
+            "type": "array",
+            "description": "A list of the metrics viewable (column attributes)",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the column attribute to enable colouring of"
+                    }
+                },
+                "required": ["name"]
+            }
+        }
+    },
+    "required": ["embeddings"]
+}
