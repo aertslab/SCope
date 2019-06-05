@@ -24,7 +24,7 @@
     "grpc-bus": "https://github.com/gabrielgrant/grpc-bus/releases/download/v1.0.1-dev5/grpc-bus-1.0.1-dev5.tgz",
     "protobufjs": "^5.0.2",
     "rsvp": "^3.3.3",
-    "ws": "^1.1.1"
+    "ws": "^7.0.0"
   },
   "devDependencies": {}
 }
