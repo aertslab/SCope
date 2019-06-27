@@ -18,7 +18,7 @@ let config = {
     entry: './src/main.jsx',
     devServer: {
       host: '0.0.0.0',
-      port: 55850,
+      port: _config.mPort,
       disableHostCheck: true
     },
     output: {
@@ -90,16 +90,14 @@ let config = {
 }
 
 if (process.env.NODE_ENV === 'production') {
-    if(process.env.NODE_TYPE !== 'aws') { // Take huge time on free tier aws
-        config.plugins.push(
-            new UglifyJsPlugin({
-                parallel: true,
-                uglifyOptions: {
-                    warnings: false,
-                }
-            })
-        )
-    }
+    config.plugins.push(
+        new UglifyJsPlugin({
+            parallel: true,
+            uglifyOptions: {
+                warnings: false,
+            }
+        })
+    )
     config.plugins.push(
         new webpack.optimize.OccurrenceOrderPlugin()
     )

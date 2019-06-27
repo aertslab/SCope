@@ -15,7 +15,7 @@ const figlet = require('figlet');
 const isWin = process.platform === "win32";
 const isAWS = process.argv.includes("--aws") || false
 const isDaemon = process.argv.includes("--daemon") || isAWS
-const isProd = process.argv.includes("--prod") || isAWS
+const isDev = process.argv.includes("--dev") || !process.argv.includes("--prod")
 
 class Launcher {
 
@@ -43,7 +43,12 @@ class Launcher {
         console.log("Running on "+ process.platform.charAt(0).toUpperCase() + process.platform.slice(1))
         console.log("Running in AWS: "+ isAWS)
         console.log("Running as daemon: "+ isDaemon)
-        console.log("Running in production mode: "+ isProd)
+        if(!isDev) {
+            console.log("Running in production mode: "+ !isDev)
+        } else {
+            console.log("Running in development mode: "+ isDev)
+            console.log("   *** please run in production mode except if it's for testing purposes.")
+        }
         console.log("----------------------------------")
         console.log("")
     }
@@ -52,7 +57,7 @@ class Launcher {
 
     checkApacheConf() {
         if(isAWS)
-            return new apache.ApacheConf().init()
+            return new apache.ApacheConf().setDevelopmentMode(isDev).init()
         return new Promise((resolve) => {
             resolve(true)
         })
@@ -179,6 +184,11 @@ class Launcher {
         return utils.runSimpleCommandAsPromise("npm run build")
     }
 
+    runDevAWS() {
+        console.log("Compiling SCope Client...")
+        return utils.runSimpleCommandAsPromise("npm run dev-aws")
+    }
+
     runBuildAWS() {
         console.log("Compiling SCope Client...")
         return utils.runSimpleCommandAsPromise("npm run build-aws")
@@ -202,7 +212,11 @@ class Launcher {
 
     startSCopeClient() {
         if(isAWS) {
-            return this.runBuildAWS().then(() => this.copySCopeToApacheHTMLDir())
+            if(isProd) {
+                return this.runBuildAWS().then(() => this.copySCopeToApacheHTMLDir())
+            } else {
+                return this.runDevAWS().then(() => this.copySCopeToApacheHTMLDir())
+            }
         } else {
             if(isProd) {
                 return this.runBuild()

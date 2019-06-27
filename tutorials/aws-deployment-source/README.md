@@ -4,7 +4,7 @@
 
 1. Create an Amazon AWS account
 2. Connect to you Amazon AWS account, go to Instances (left column) and click **Launch instance**
-3. Select Amazon Linux 2 instance
+3. Select an **Amazon Linux 2** instance
 <br>
 
 ![Step 1](/tutorials/aws-deployment-source/images/scope_aws_deploy_step1.png)
@@ -156,6 +156,9 @@ wget --content-disposition http://bit.ly/miniconda3
 bash Miniconda3-latest-[...].sh
 ```
 
+Don't forget to tell the installer to initialize Miniconda3 by running conda init. 
+Then reload Bashrc using `bash` command.
+
 6. Create conda environment and activate it
 ```
 conda create -n scope python=3.6.2
@@ -168,6 +171,13 @@ git clone https://github.com/aertslab/SCope.git
 cd SCope
 npm install
 ```
+
+If the following error is raised `error: dask 1.0.0 is installed but dask>=2 is required by {'distributed'}`, please proceed by running the following lines:
+```
+pip uninstall distributed
+pip install distributed==1.21.6
+```
+
 
 8. Edit apache/config.json file by updating the value of *publicHostAddress*
 ```
@@ -191,9 +201,17 @@ With a secure protocol (e.g.: https):
 
 
 9. Deploy SCope
+
+If you are deploying SCope on a **t2.micro** (1 GB memory) AWS instance, please consider to run (in a tmux session):
+```
+npm run scope-dev-aws
+# Restart Apache Web Server
+sudo systemctl restart httpd
+```
+
+Otherwise, please run:
 ```
 npm run scope-aws
-# Restart Apache Web Server
 sudo systemctl restart httpd
 ```
 

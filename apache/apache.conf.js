@@ -6,6 +6,7 @@ class ApacheConf {
 
     constructor() {
         this._config = null
+        this.isDev = null
     }
 
     setApachePaths() {
@@ -56,6 +57,11 @@ class ApacheConf {
                 }
                 let tmp = data.replace(/SCOPE_PUBLIC_HOST_ADDRESS/g, this._config.publicHostAddress);
                 tmp = tmp.replace(/SCOPE_SERVERS_LOCAL_HOST_ADDRESS/g, this._config.localHostAddress);
+                if(this.isDev) {
+                    tmp = tmp.replace(/SCOPE_M_PORT/g, this._config.mPort)
+                } else {
+                    tmp = tmp.replace(/SCOPE_M_PORT/g, 80)
+                }
                 tmp = tmp.replace(/SCOPE_P_SERVER_PORT/g, this._config.pPort)
                 tmp = tmp.replace(/SCOPE_X_SERVER_PORT/g, this._config.xPort)
                 tmp = tmp.replace(/SCOPE_G_SERVER_PORT/g, this._config.gPort)
@@ -74,6 +80,11 @@ class ApacheConf {
                 });
             });
         })
+    }
+
+    setDevelopmentMode(isDev) {
+        this.isDev = isDev
+        return this;
     }
 
     init() {
