@@ -172,10 +172,17 @@ cd SCope
 npm install
 ```
 
-If the following error is raised `error: dask 1.0.0 is installed but dask>=2 is required by {'distributed'}`, please proceed by running the following lines:
+If the following error is raised when running `scope-server`:
+```
+pkg_resources.ContextualVersionConflict: (dask 1.0.0 (/home/ec2-user/.software/miniconda3/envs/scope/lib/python3.6/site-packages/dask-1.0.0-py3.6.egg), Requirement.parse('dask>=2'), {'distributed'})
+```
+please proceed by running the following lines:
+
 ```
 pip uninstall distributed
+pip uninstall pyscenic
 pip install distributed==1.21.6
+pip install pyscenic==0.9.5
 ```
 
 
@@ -202,7 +209,7 @@ With a secure protocol (e.g.: https):
 
 9. Deploy SCope
 
-If you are deploying SCope on a **t2.micro** (1 GB memory) AWS instance, please consider to run (in a tmux session):
+If you are deploying SCope on a **t2.micro** (1 GB memory) AWS instance, please consider to run:
 ```
 npm run scope-dev-aws
 # Restart Apache Web Server

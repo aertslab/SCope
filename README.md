@@ -6,6 +6,10 @@ Currently the data format supported by SCope is `.loom`. This file format for ve
 
 ## Version History
 
+June 26, 2019
+* Version 1.3.6
+   * Allow for running in dev mode on AWS through `npm run scope-dev-aws` (useful for t2.micro AWS instance). See https://bit.ly/2XsunFh to start your own SCope instance running on AWS. Update related tutorials for AWS deployment. 
+
 December 14, 2018
 * Version 1.3.5
    * Update Apache config to deploy SCope on secure protocol (e.g.: HTTPS). Update related tutorials for AWS deployment.

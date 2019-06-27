@@ -55,7 +55,18 @@ class Launcher {
 
     // begin sanity checks
 
+    checkPublicHostAddress() {
+        console.log("- Checking public host address...")
+        return new Promise((resolve) => {
+            if(this._config.publicHostAddress == '') {
+                throw new Error("No public host address set in apache/config.json. Please set one.");
+            }
+            resolve(true)
+        })
+    }
+
     checkApacheConf() {
+        console.log("- Checking Apache configuration...")
         if(isAWS)
             return new apache.ApacheConf().setDevelopmentMode(isDev).init()
         return new Promise((resolve) => {
@@ -64,6 +75,7 @@ class Launcher {
     }
 
     checkDirs() {
+        console.log("- Checking directories (assets)...")
         return new Promise((resolve) => {
             const assetsDir = './assets';
             if (!fs.existsSync(assetsDir)) {
@@ -74,6 +86,7 @@ class Launcher {
     }
 
     checkTmuxExists() {
+        console.log("- Checking tmux...")
         return new Promise((resolve) => {
             if(isDaemon) {
                 if(!utils._commandExists("tmux")) {
@@ -86,17 +99,16 @@ class Launcher {
     }
 
     checkSCopeCondaEnvExists() {
+        console.log("- Checking SCope conda environment...")
         return new Promise((resolve, reject) => {
             exec("conda info --envs", {stdio:[0,1,2]}, (error, stdout, stderr) => {
                 if (error) return resolve(false);
                 if (stderr) return resolve(false);
                 if(!this.scopeServerActivated) {
                     if(stdout.includes("scope")) {
-                        console.log("SCope Server is installed but not activated.")
-                        resolve(true)
+                        throw new Error("SCope Server is installed but not activated. Please activate your 'scope' conda environment using either 'conda activate scope' or 'source activate scope' command.")
                     } else {
-                        console.log("Please install SCope Server.")
-                        resolve(false)
+                        throw new Error("SCope Server is not installed. Please install SCope Server.")
                     }
                 } else {
                     console.log("SCope Server is installed and activated!")
@@ -107,9 +119,11 @@ class Launcher {
     }
 
     checkSCopeServerCommandExists() {
+        console.log("- Checking SCope Server...")
         return new Promise((resolve) => {
             if(!utils._commandExists("scope-server")) {
-                resolve(true)
+                throw new Error("scope-server not found. Please activate your 'scope' conda environment using either 'conda activate scope' or 'source activate scope' command.");
+                resolve(false)
             } else {
                 this.scopeServerActivated = true
                 resolve(true)
@@ -140,6 +154,7 @@ class Launcher {
             .then(() => this.checkTmuxExists())
             .then(() => this.checkDirs())
             .then(() => this.checkApacheConf())
+            .then(() => this.checkPublicHostAddress())
             .then(() => this.endSanityChecks())
 
     }
@@ -154,8 +169,17 @@ class Launcher {
 
     // end sanity checks
 
+    showSCopeInstanceInformation() {
+        return new Promise((resolve) => {
+            console.log("A SCope instance is running at http://"+ this._config.publicHostAddress)
+            console.log("----------------------------------")
+            console.log("")
+            resolve(true)
+        })
+    }
+
     openSCopeClient() {
-        if(!isProd) {
+        if(isDev & !isAWS) {
             console.log("Open SCope in browser...")
             launcherBrowser('http://localhost:8080', { browser: ['chrome', 'firefox', 'safari'] }, (e, browser) => {
                 if(e) return console.log(e);
@@ -185,8 +209,18 @@ class Launcher {
     }
 
     runDevAWS() {
-        console.log("Compiling SCope Client...")
-        return utils.runSimpleCommandAsPromise("npm run dev-aws")
+        console.log("Running SCope Client...")
+        let scopeClientStartCmd = 'npm run dev-aws'
+        scopeClientStartCmd = 'tmux new-session -d -s scope-client "'+ scopeClientStartCmd +'"'
+        console.log("SCope Client started as daemon!")
+        console.log("It can be accessed using 'tmux a -t scope-client' command.")
+        return new Promise((resolve, reject) => {
+            exec(scopeClientStartCmd, {stdio:[0,1,2]}, (error, stdout, stderr) => {
+                if (error) return resolve(false);
+                if (stderr) return resolve(false);
+            });
+            resolve(true)
+        })
     }
 
     runBuildAWS() {
@@ -212,13 +246,13 @@ class Launcher {
 
     startSCopeClient() {
         if(isAWS) {
-            if(isProd) {
+            if(!isDev) {
                 return this.runBuildAWS().then(() => this.copySCopeToApacheHTMLDir())
             } else {
-                return this.runDevAWS().then(() => this.copySCopeToApacheHTMLDir())
+                return this.runDevAWS()
             }
         } else {
-            if(isProd) {
+            if(!isDev) {
                 return this.runBuild()
             } else {
                 return this.runDev()
@@ -236,9 +270,9 @@ class Launcher {
             console.log("Starting SCope Server...")
         }
         if(isDaemon && !isWin) {
-            scopeStartCmd = 'tmux new-session -d -s scope "'+ scopeStartCmd +'"'
+            scopeStartCmd = 'tmux new-session -d -s scope-server "'+ scopeStartCmd +'"'
             console.log("SCope Server started as daemon!")
-            console.log("It can be accessed using 'tmux a -t scope' command.")
+            console.log("It can be accessed using 'tmux a -t scope-server' command.")
         }
         return new Promise((resolve, reject) => {
             exec(scopeStartCmd, {stdio:[0,1,2]}, (error, stdout, stderr) => {
@@ -250,9 +284,11 @@ class Launcher {
     }
 
     init() {
+        console.log("--------- running scope ----------")
         console.log("Starting SCope...")
         return this.startSCopeServer()
             .then(() => this.startSCopeClient())
+            .then(() => this.showSCopeInstanceInformation())
     }
 
     start() {
