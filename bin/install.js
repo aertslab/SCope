@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 var shell = require("shelljs");
 console.log("Installing SCope Bind Server")
-shell.exec('npm install opt/scopeserver/bindserver');
-
+shell.cd('opt/scopeserver/bindserver')
+shell.exec('npm install');
+shell.cd('../../../')
 var execSync = require('child_process').execSync;
 
 try {

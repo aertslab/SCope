@@ -5,6 +5,7 @@ import uuid
 import pickle
 from pathlib import Path
 
+import scopeserver
 from scopeserver.dataserver.modules.gserver import GServer as gs
 
 app_name = 'SCope'
@@ -131,7 +132,7 @@ class DataFileHandler():
         self.active_sessions[UUID] = time.time()
 
     def load_gene_mappings(self):
-        gene_mappings_dir_path = os.path.join(Path(__file__).parents[2], 'dataserver', 'data', 'gene_mappings')
+        gene_mappings_dir_path = os.path.join(scopeserver.__path__[0], 'dataserver', 'data', 'gene_mappings')
         DataFileHandler.dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'terminal_mappings.pickle'), 'rb'))
         DataFileHandler.hsap_to_dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'hsap_to_dmel_mappings.pickle'), 'rb'))
         DataFileHandler.mmus_to_dmel_mappings = pickle.load(open(os.path.join(gene_mappings_dir_path, 'mmus_to_dmel_mappings.pickle'), 'rb'))

@@ -1,4 +1,14 @@
-from setuptools import setup
+from setuptools import setup, find_namespace_packages
+import os
+
+def get_bindserver_files():
+    paths = []
+    for (path, directories, filenames) in os.walk('scopeserver/bindserver'):
+        for filename in filenames:
+            if not filename.endswith('.py'):
+                paths.append((path, [os.path.join(path, filename)]))
+        paths.append(('scopeserver/bindserver', ['scopeserver/bindserver/server.js']))
+    return paths
 
 setup(name='scope-server',
       entry_points={'console_scripts': [
@@ -6,17 +16,17 @@ setup(name='scope-server',
                         ]
                     },
       data_files=[
-          ('gene_mappings', ['data/gene_mappings/terminal_mappings.pickle', 
-                             'data/gene_mappings/hsap_to_dmel_mappings.pickle',
-                             'data/gene_mappings/mmus_to_dmel_mappings.pickle']),
-      ],
+          ('scopeserver/dataserver/data/gene_mappings', ['scopeserver/dataserver/data/gene_mappings/terminal_mappings.pickle', 
+                                                         'scopeserver/dataserver/data/gene_mappings/hsap_to_dmel_mappings.pickle',
+                                                         'scopeserver/dataserver/data/gene_mappings/mmus_to_dmel_mappings.pickle'])
+      ] + get_bindserver_files() ,
       version='1.3.6',
       description='SCope Data Server: a server to load and serve the data to the SCope Client',
       url='',
       author='Maxime De Waegeneer',
       author_email='mdewaegeneer@gmail.com',
       license='GPL-3.0',
-      packages=['scopeserver'],
+      packages=find_namespace_packages(exclude=['node_modules']),
       install_requires=[
           'grpcio>=1.7.0',
           'grpcio-tools>=1.7.0',
