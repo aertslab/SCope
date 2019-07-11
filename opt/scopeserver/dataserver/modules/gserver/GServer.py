@@ -45,7 +45,7 @@ class SCope(s_pb2_grpc.MainServicer):
     app_author = 'Aertslab'
 
     def __init__(self):
-        self.dfh = dfh.DataFileHandler(dev_env=SCope.dev_env)
+        self.dfh = dfh.DataFileHandler()
         self.lfh = lfh.LoomFileHandler()
 
         self.dfh.load_gene_mappings()
@@ -593,8 +593,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.LoomUploadedReply()
 
 
-def serve(run_event, dev_env=False, port=50052, app_mode=False):
-    SCope.dev_env = dev_env
+def serve(run_event, port=50052, app_mode=False):
     SCope.app_mode = app_mode
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     scope = SCope()

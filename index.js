@@ -88,12 +88,12 @@ class SCopeServer extends EventEmitter {
 
 try {
   if (process.argv[2] == 'electronTest') {
-    var DATASERVER_FOLDER = path.join("opt", "scopeserver", "dataserver");
+    var DATASERVER_FOLDER = path.join("opt", "scopeserver");
   } else {
     throw 'Not testing'
   }
 } catch (e) {
-  var DATASERVER_FOLDER = path.join(app.getAppPath(), "opt", "scopeserver", "dataserver", "dist", "__init__");
+  var DATASERVER_FOLDER = path.join(app.getAppPath(), "opt", "scopeserver", "dist", "__init__");
 }
 // const DATASERVER_FOLDER = '__init__';
 const DATASERVER_MODULE = '__init__'; // without .py suffix
@@ -185,7 +185,7 @@ class DataServer {
               throw("Compatible python version not found!")
          }
       }
-      this.proc = cp.spawn(python, [script, "-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort, '--app_mode', '--dev_env'], {});
+      this.proc = cp.spawn(python, [script, "-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort, '--app_mode'], {});
     }
     this.proc.stdout.on('data', (data) => {
       let buff = new Buffer(data).toString('utf8');

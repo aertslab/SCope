@@ -2,9 +2,14 @@ from setuptools import setup
 
 setup(name='scope-server',
       entry_points={'console_scripts': [
-                        'scope-server = scopeserver:dev'
+                        'scope-server = scopeserver:run'
                         ]
                     },
+      data_files=[
+          ('gene_mappings', ['data/gene_mappings/terminal_mappings.pickle', 
+                             'data/gene_mappings/hsap_to_dmel_mappings.pickle',
+                             'data/gene_mappings/mmus_to_dmel_mappings.pickle']),
+      ],
       version='1.3.6',
       description='SCope Data Server: a server to load and serve the data to the SCope Client',
       url='',

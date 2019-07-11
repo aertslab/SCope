@@ -16,7 +16,6 @@ parser.add_argument('-g_port', metavar='gPort', type=int, help='gPort', default=
 parser.add_argument('-p_port', metavar='pPort', type=int, help='pPort', default=55851)
 parser.add_argument('-x_port', metavar='xPort', type=int, help='xPort', default=55852)
 parser.add_argument('--app_mode', action='store_true', help='Run in app mode (Fixed UUID)', default=False)
-parser.add_argument('--dev_env', action='store_true', help='Run in dev mode', default=False)
 
 args = parser.parse_args()
 
@@ -30,21 +29,20 @@ class SCopeServer():
         self.p_port = args.p_port
         self.x_port = args.x_port
         self.app_mode = args.app_mode
-        self.dev_env = args.dev_env
 
     def start_bind_server(self):
         self.xs_thread = threading.Thread(target=xs.run, args=(self.run_event,), kwargs={'port': self.x_port})
         self.xs_thread.start()
 
     def start_data_server(self):
-        self.gs_thread = threading.Thread(target=gs.serve, args=(self.run_event, self.dev_env,), kwargs={'port': self.g_port, 'app_mode': self.app_mode})
+        self.gs_thread = threading.Thread(target=gs.serve, args=(self.run_event,), kwargs={'port': self.g_port, 'app_mode': self.app_mode})
         self.ps_thread = threading.Thread(target=ps.run, args=(self.run_event,), kwargs={'port': self.p_port})
         self.gs_thread.start()
         self.ps_thread.start()
 
     def start_scope_server(self):
         self.start_data_server()
-        if self.dev_env and not self.app_mode:
+        if not self.app_mode:
             self.start_bind_server()
 
     def wait(self):
@@ -61,7 +59,7 @@ class SCopeServer():
                 pass
             self.ps_thread.join()
 
-            if self.dev_env:
+            if not self.app_mode:
                 self.xs_thread.join()
             print('Servers successfully terminated. Exiting.')
 
@@ -79,9 +77,6 @@ class SCopeServer():
                               | $$                                                                                  
                               |__/
         ''')
-        if self.dev_env:
-            print("Running SCope Server in development mode...")
-        else:
             print("Running SCope Server in production mode...")
         self.start_scope_server()
         self.wait()
@@ -92,13 +87,6 @@ def run():
     sys.stdout = su.Unbuffered(sys.stdout)
     # Start an instance of SCope Server
     scope_server = SCopeServer()
-    scope_server.run()
-
-
-def dev():
-    sys.stdout = su.Unbuffered(sys.stdout)
-    scope_server = SCopeServer()
-    scope_server.dev_env = True
     scope_server.run()
 
 
