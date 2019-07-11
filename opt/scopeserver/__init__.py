@@ -77,7 +77,7 @@ class SCopeServer():
                               | $$                                                                                  
                               |__/
         ''')
-            print("Running SCope Server in production mode...")
+        print("Running SCope Server in production mode...")
         self.start_scope_server()
         self.wait()
 
