@@ -23,14 +23,14 @@ from pathlib import Path
 
 from scopeserver.dataserver.modules.gserver import s_pb2
 from scopeserver.dataserver.modules.gserver import s_pb2_grpc
-from scopeserver.utils import SysUtils as su
-from scopeserver.utils import LoomFileHandler as lfh
-from scopeserver.utils import DataFileHandler as dfh
-from scopeserver.utils import GeneSetEnrichment as _gse
-from scopeserver.utils import CellColorByFeatures as ccbf
-from scopeserver.utils import Constant
-from scopeserver.utils import SearchSpace as ss
-from scopeserver.utils.Loom import Loom
+from scopeserver.dataserver.utils import SysUtils as su
+from scopeserver.dataserver.utils import LoomFileHandler as lfh
+from scopeserver.dataserver.utils import DataFileHandler as dfh
+from scopeserver.dataserver.utils import GeneSetEnrichment as _gse
+from scopeserver.dataserver.utils import CellColorByFeatures as ccbf
+from scopeserver.dataserver.utils import Constant
+from scopeserver.dataserver.utils import SearchSpace as ss
+from scopeserver.dataserver.utils.Loom import Loom
 
 from pyscenic.genesig import GeneSignature
 from pyscenic.aucell import create_rankings, enrichment, enrichment4cells

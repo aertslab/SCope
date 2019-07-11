@@ -1,7 +1,7 @@
 from scopeserver.dataserver.modules.gserver import GServer as gs
 from scopeserver.dataserver.modules.pserver import PServer as ps
 from scopeserver.bindserver import XServer as xs
-from scopeserver.utils import SysUtils as su
+from scopeserver.dataserver.utils import SysUtils as su
 
 import threading
 import os

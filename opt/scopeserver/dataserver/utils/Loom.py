@@ -6,7 +6,7 @@ from functools import lru_cache
 import pandas as pd
 import time
 
-from scopeserver.utils import DataFileHandler as dfh
+from scopeserver.dataserver.utils import DataFileHandler as dfh
 
 class Loom():
 

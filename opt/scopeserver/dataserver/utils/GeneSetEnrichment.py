@@ -1,9 +1,9 @@
 import os
 import numpy as np
 
-from scopeserver.utils import DataFileHandler as dfh
+from scopeserver.dataserver.utils import DataFileHandler as dfh
 
-from scopeserver.utils import Constant
+from scopeserver.dataserver.utils import Constant
 from scopeserver.dataserver.modules.gserver import GServer as gs
 from scopeserver.dataserver.modules.gserver import s_pb2
 

@@ -1,7 +1,7 @@
 import functools
 from functools import lru_cache
 
-from scopeserver.utils import DataFileHandler as dfh
+from scopeserver.dataserver.utils import DataFileHandler as dfh
 
 class SearchSpace(dict):
 

@@ -18,9 +18,9 @@ import loompy as lp
 from pathlib import Path
 import threading
 
-from scopeserver.utils import DataFileHandler as dfh
+from scopeserver.dataserver.utils import DataFileHandler as dfh
 from scopeserver.dataserver.modules.gserver import GServer
-from scopeserver.utils import SysUtils as su
+from scopeserver.dataserver.utils import SysUtils as su
 
 unicode = str
 

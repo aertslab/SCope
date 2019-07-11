@@ -2,8 +2,8 @@ import os
 import hashlib
 import loompy as lp
 
-from scopeserver.utils import DataFileHandler as dfh
-from scopeserver.utils.Loom import Loom
+from scopeserver.dataserver.utils import DataFileHandler as dfh
+from scopeserver.dataserver.utils.Loom import Loom
 
 class LoomFileHandler():
 

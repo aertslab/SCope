@@ -6,7 +6,7 @@ import zlib
 import sys
 
 from scopeserver.dataserver.modules.gserver import s_pb2
-from scopeserver.utils import Constant
+from scopeserver.dataserver.utils import Constant
 
 class CellColorByFeatures():
 
