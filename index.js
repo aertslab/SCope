@@ -169,19 +169,14 @@ class DataServer {
     } else {
       console.log("SCope Server Not packaged or electronTest.")
       try {
-        var output = cp.execSync('python3.6 -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
-        var python = 'python3.6'
-      } catch(e) {
-        try {
           var output = cp.execSync('python3 -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
           var python = 'python3'
         } catch(e) {
             var output = cp.execSync('python -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
             var python = 'python'
-        }
       } finally {
           console.log(output);
-          if (!(/^3.[0-6].[0-9].*/.test(output))) {
+          if (!(/^3.[0-7].[0-9].*/.test(output))) {
               throw("Compatible python version not found!")
          }
       }
