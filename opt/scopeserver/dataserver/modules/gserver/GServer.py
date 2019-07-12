@@ -23,14 +23,14 @@ from pathlib import Path
 
 from scopeserver.dataserver.modules.gserver import s_pb2
 from scopeserver.dataserver.modules.gserver import s_pb2_grpc
-from scopeserver.dataserver.utils import SysUtils as su
-from scopeserver.dataserver.utils import LoomFileHandler as lfh
-from scopeserver.dataserver.utils import DataFileHandler as dfh
-from scopeserver.dataserver.utils import GeneSetEnrichment as _gse
-from scopeserver.dataserver.utils import CellColorByFeatures as ccbf
-from scopeserver.dataserver.utils import Constant
-from scopeserver.dataserver.utils import SearchSpace as ss
-from scopeserver.dataserver.utils.Loom import Loom
+from scopeserver.dataserver.utils import sys_utils as su
+from scopeserver.dataserver.utils import loom_file_handler as lfh
+from scopeserver.dataserver.utils import data_file_handler as dfh
+from scopeserver.dataserver.utils import gene_set_enrichment as _gse
+from scopeserver.dataserver.utils import cell_color_by_features as ccbf
+from scopeserver.dataserver.utils import constant
+from scopeserver.dataserver.utils import search_space as ss
+from scopeserver.dataserver.utils.loom import Loom
 
 from pyscenic.genesig import GeneSignature
 from pyscenic.aucell import create_rankings, enrichment, enrichment4cells
@@ -38,6 +38,7 @@ from pyscenic.aucell import create_rankings, enrichment, enrichment4cells
 hexarr = np.vectorize('{:02x}'.format)
 
 uploadedLooms = defaultdict(lambda: set())
+
 
 class SCope(s_pb2_grpc.MainServicer):
 
@@ -72,7 +73,7 @@ class SCope(s_pb2_grpc.MainServicer):
         else:
             search_space = ss.SearchSpace(loom=loom).build()
             cross_species = ''
-        print("Debug: %s seconds elapsed making search space ---" % (time.time() - start_time))    
+        print("Debug: %s seconds elapsed making search space ---" % (time.time() - start_time))
         print(query)
 
         # Filter the genes by the query
@@ -323,8 +324,11 @@ class SCope(s_pb2_grpc.MainServicer):
 
         if "clusterMarkerMetrics" in md_clustering.keys():
             md_cmm = md_clustering["clusterMarkerMetrics"]
+
             def create_cluster_marker_metric(metric):
-                cluster_marker_metrics = loom.get_cluster_marker_metrics(clustering_id=request.clusteringID, cluster_id=request.clusterID, metric_accessor=metric["accessor"])
+                cluster_marker_metrics = loom.get_cluster_marker_metrics(clustering_id=request.clusteringID,
+                                                                         cluster_id=request.clusterID,
+                                                                         metric_accessor=metric["accessor"])
                 return s_pb2.MarkerGenesMetric(accessor=metric["accessor"],
                                                name=metric["name"],
                                                description=metric["description"],
@@ -431,12 +435,12 @@ class SCope(s_pb2_grpc.MainServicer):
             timeRemaining = int(dfh._UUID_TIMEOUT)
 
         self.dfh.active_session_check()
-        if request.mouseEvents >= Constant._MOUSE_EVENTS_THRESHOLD:
+        if request.mouseEvents >= constant._MOUSE_EVENTS_THRESHOLD:
             self.dfh.reset_active_session_timeout(uid)
 
         sessionsLimitReached = False
 
-        if len(self.dfh.get_active_sessions().keys()) >= Constant._ACTIVE_SESSIONS_LIMIT and uid not in self.dfh.get_permanent_UUIDs() and uid not in self.dfh.get_active_sessions().keys():
+        if len(self.dfh.get_active_sessions().keys()) >= constant._ACTIVE_SESSIONS_LIMIT and uid not in self.dfh.get_permanent_UUIDs() and uid not in self.dfh.get_active_sessions().keys():
             sessionsLimitReached = True
 
         if uid not in self.dfh.get_active_sessions().keys() and not sessionsLimitReached:
@@ -468,7 +472,7 @@ class SCope(s_pb2_grpc.MainServicer):
             success = False
 
         return s_pb2.DeleteUserFileReply(deletedSuccessfully=success)
-    
+
     def downloadSubLoom(self, request, context):
         start_time = time.time()
 
@@ -483,12 +487,12 @@ class SCope(s_pb2_grpc.MainServicer):
             file_name = l[1].split(".")[0]
 
         if(request.featureType == "clusterings"):
-            a = list(filter(lambda x : x['name'] == request.featureName, meta_data["clusterings"]))
-            b = list(filter(lambda x : x['description'] == request.featureValue, a[0]['clusters']))[0]
+            a = list(filter(lambda x: x['name'] == request.featureName, meta_data["clusterings"]))
+            b = list(filter(lambda x: x['description'] == request.featureValue, a[0]['clusters']))[0]
             cells = loom_connection.ca["Clusterings"][str(a[0]['id'])] == b['id']
             print("Number of cells in {0}: {1}".format(request.featureValue, np.sum(cells)))
-            sub_loom_file_name = file_name +"_Sub_"+ request.featureValue.replace(" ", "_").replace("/","_")
-            sub_loom_file_path = os.path.join(self.dfh.get_data_dirs()['Loom']['path'], "tmp" , sub_loom_file_name +".loom")
+            sub_loom_file_name = file_name + "_Sub_" + request.featureValue.replace(" ", "_").replace("/", "_")
+            sub_loom_file_path = os.path.join(self.dfh.get_data_dirs()['Loom']['path'], "tmp", sub_loom_file_name + ".loom")
             # Check if the file already exists
             if os.path.exists(path=sub_loom_file_path):
                 os.remove(path=sub_loom_file_path)
@@ -513,11 +517,11 @@ class SCope(s_pb2_grpc.MainServicer):
                     sub_matrix = np.concatenate((sub_matrix, loom_connection[:, selection]), axis=1)
                     sub_selection = np.concatenate((sub_selection, selection), axis=0)
                 # Send the progress
-                processed = len(sub_selection)/sum(cells)
-                yield s_pb2.DownloadSubLoomReply(loomFilePath=""
-                                               , loomFileSize=0
-                                               , progress=s_pb2.Progress(value=processed, status="Sub Loom Created!")
-                                               , isDone=False)
+                processed = len(sub_selection) / sum(cells)
+                yield s_pb2.DownloadSubLoomReply(loomFilePath="",
+                                                 loomFileSize=0,
+                                                 progress=s_pb2.Progress(value=processed, status="Sub Loom Created!"),
+                                                 isDone=False)
             print("Creating {0} sub .loom...".format(request.featureValue))
             lp.create(sub_loom_file_path, sub_matrix, row_attrs=loom_connection.ra, col_attrs=loom_connection.ca[sub_selection], file_attrs=sub_loom_file_attrs)
             with open(sub_loom_file_path, 'r') as fh:
@@ -526,10 +530,10 @@ class SCope(s_pb2_grpc.MainServicer):
             print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
         else:
             print("This feature is currently not implemented.")
-        yield s_pb2.DownloadSubLoomReply(loomFilePath=sub_loom_file_path
-                                       , loomFileSize=loom_file_size
-                                       , progress=s_pb2.Progress(value=1.0, status="Sub Loom Created!")
-                                       , isDone=True)
+        yield s_pb2.DownloadSubLoomReply(loomFilePath=sub_loom_file_path,
+                                         loomFileSize=loom_file_size,
+                                         progress=s_pb2.Progress(value=1.0, status="Sub Loom Created!"),
+                                         isDone=True)
 
     # Gene set enrichment
     #
@@ -539,10 +543,10 @@ class SCope(s_pb2_grpc.MainServicer):
         gene_set_file_path = os.path.join(self.dfh.get_gene_sets_dir(), request.geneSetFilePath)
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
         gse = _gse.GeneSetEnrichment(scope=self,
-                                method="AUCell",
-                                loom=loom,
-                                gene_set_file_path=gene_set_file_path,
-                                annotation='')
+                                     method="AUCell",
+                                     loom=loom,
+                                     gene_set_file_path=gene_set_file_path,
+                                     annotation='')
 
         # Running AUCell...
         yield gse.update_state(step=-1, status_code=200, status_message="Running AUCell...", values=None)

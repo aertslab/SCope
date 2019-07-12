@@ -17,14 +17,17 @@
 node_modules
 
 # Server
-opt/scopeserver/dataserver/__pycache__
+opt/build/
+opt/dist/
+
+opt/scopeserver/__pycache__
 opt/scopeserver/scope_server.egg-info
 opt/scopeserver/data/my-looms
 opt/scopeserver/dataserver/test
 opt/scopeserver/dataserver/data
-opt/scopeserver/dataserver/dist/
+opt/scopeserver/dist/
 opt/scopeserver/dataserver/pyvenv
-opt/scopeserver/dataserver/build
+opt/scopeserver/build
 opt/scopeserver/dataserver/logs
 opt/scope_server.egg-info
 

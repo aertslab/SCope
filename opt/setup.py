@@ -1,6 +1,7 @@
 from setuptools import setup, find_namespace_packages
 import os
 
+
 def get_bindserver_files():
     paths = []
     for (path, directories, filenames) in os.walk('scopeserver/bindserver'):
@@ -11,15 +12,12 @@ def get_bindserver_files():
     return paths
 
 setup(name='scope-server',
-      entry_points={'console_scripts': [
-                        'scope-server = scopeserver:run'
-                        ]
-                    },
+      entry_points={'console_scripts': ['scope-server = scopeserver:run']},
       data_files=[
-          ('scopeserver/dataserver/data/gene_mappings', ['scopeserver/dataserver/data/gene_mappings/terminal_mappings.pickle', 
+          ('scopeserver/dataserver/data/gene_mappings', ['scopeserver/dataserver/data/gene_mappings/terminal_mappings.pickle',
                                                          'scopeserver/dataserver/data/gene_mappings/hsap_to_dmel_mappings.pickle',
                                                          'scopeserver/dataserver/data/gene_mappings/mmus_to_dmel_mappings.pickle'])
-      ] + get_bindserver_files() ,
+      ] + get_bindserver_files(),
       version='1.3.6',
       description='SCope Data Server: a server to load and serve the data to the SCope Client',
       url='',

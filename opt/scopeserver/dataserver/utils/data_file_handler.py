@@ -28,6 +28,7 @@ data_dirs = {"Loom": {"path": os.path.join(platform_dirs.user_data_dir, "my-loom
              "Logs": {"path": os.path.join(platform_dirs.user_log_dir),
                       "message": "No Logs folder detected. Making Logs folder: {0}.".format(str(os.path.join(platform_dirs.user_log_dir)))}}
 
+
 class DataFileHandler():
 
     data_dirs = data_dirs
@@ -37,14 +38,14 @@ class DataFileHandler():
         self.permanent_UUIDs = set()
         self.active_sessions = {}
         self.uuid_log = None
-        self.data_dirs =  data_dirs
+        self.data_dirs = data_dirs
         self.gene_sets_dir = DataFileHandler.get_data_dir_path_by_file_type(file_type="GeneSet")
         self.rankings_dir = DataFileHandler.get_data_dir_path_by_file_type(file_type="LoomAUCellRankings")
         self.config_dir = DataFileHandler.get_data_dir_path_by_file_type(file_type="Config")
         self.logs_dir = DataFileHandler.get_data_dir_path_by_file_type(file_type="Logs")
         self.create_global_dirs()
         self.create_uuid_log()
-    
+
     def get_gene_sets_dir(self):
         return self.gene_sets_dir
 
@@ -56,7 +57,7 @@ class DataFileHandler():
 
     def get_global_rankings(self):
         return self.global_rankings
-    
+
     def set_global_data(self):
         self.global_sets = [x for x in os.listdir(self.gene_sets_dir) if not os.path.isdir(os.path.join(self.gene_sets_dir, x))]
         self.global_rankings = [x for x in os.listdir(self.rankings_dir) if not os.path.isdir(os.path.join(self.rankings_dir, x))]
@@ -72,13 +73,13 @@ class DataFileHandler():
     @staticmethod
     def get_data_dirs():
         return data_dirs
-    
+
     def create_global_dirs(self):
         for data_type in self.data_dirs.keys():
             if not os.path.isdir(data_dirs[data_type]["path"]):
                 print(self.data_dirs[data_type]["message"])
                 os.makedirs(self.data_dirs[data_type]["path"])
-    
+
     def get_current_UUIDs(self):
         return self.current_UUIDs
 
@@ -112,13 +113,13 @@ class DataFileHandler():
                 for line in fh.readlines():
                     self.permanent_UUIDs.add(line.rstrip('\n'))
                     self.current_UUIDs[line.rstrip('\n')] = time.time() + (_ONE_DAY_IN_SECONDS * 365)
-    
+
     def get_uuid_log(self):
         return self.uuid_log
 
     def create_uuid_log(self):
         self.uuid_log = open(os.path.join(self.logs_dir, 'UUID_Log_{0}'.format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()))), 'w')
-    
+
     def get_active_sessions(self):
         return self.active_sessions
 
@@ -127,7 +128,7 @@ class DataFileHandler():
         for UUID in list(self.active_sessions.keys()):
             if curTime - self.active_sessions[UUID] > _SESSION_TIMEOUT or UUID not in self.get_current_UUIDs():
                 del(self.active_sessions[UUID])
-    
+
     def reset_active_session_timeout(self, UUID):
         self.active_sessions[UUID] = time.time()
 

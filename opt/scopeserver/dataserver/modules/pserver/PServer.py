@@ -18,9 +18,9 @@ import loompy as lp
 from pathlib import Path
 import threading
 
-from scopeserver.dataserver.utils import DataFileHandler as dfh
+from scopeserver.dataserver.utils import data_file_handler as dfh
 from scopeserver.dataserver.modules.gserver import GServer
-from scopeserver.dataserver.utils import SysUtils as su
+from scopeserver.dataserver.utils import sys_utils as su
 
 unicode = str
 
@@ -60,7 +60,7 @@ def check_auth(method):
         if self.auth:
             # TODO: Between minor versions this handles str/bytes differently
             received = self.get_case_insensitive_header('Authorization', None)
-            expected = 'Basic ' + base64.b64encode(self.auth)
+            expected = 'Basic ' + base64.b64encode(self.auth).decode()
             # TODO: Timing attack?
             if received != expected:
                 self.send_response(401)
@@ -208,11 +208,11 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
         localpath = _encode_str_if_py2(os.path.join(self.directory, name), "utf-8")
         with open(localpath, 'rb') as f:
             self.send_resp_headers(200,
-                                    {'Content-length': os.fstat(f.fileno())[6],
+                                   {'Content-length': os.fstat(f.fileno())[6],
                                     'Access-Control-Allow-Origin': '*',
                                     'Content-type': 'application/x-hdf5',
                                     'Content-Disposition': 'attachment; filename="' + os.path.basename(name) + '""'},
-                                    end=True)
+                                   end=True)
             shutil.copyfileobj(f, self.wfile)
 
     @check_auth
@@ -237,19 +237,19 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
         # try:
         self.log_message("Started file transfer")
         form = DroopyFieldStorage(fp=self.rfile,
-                                    directory='',
-                                    headers=self.headers,
-                                    environ={'REQUEST_METHOD': self.command})
+                                  directory='',
+                                  headers=self.headers,
+                                  environ={'REQUEST_METHOD': self.command})
 
         if 'loomFilePath' in form.keys():
             self.directory = dfh.DataFileHandler.get_data_dir_path_by_file_type(file_type=form.getvalue('file-type'))
             localpath = _encode_str_if_py2(os.path.join(self.directory, form.getvalue('loomFilePath')), "utf-8")
             with open(localpath, 'rb') as f:
                 self.send_resp_headers(200,
-                                        {'Content-length': os.fstat(f.fileno())[6],
+                                       {'Content-length': os.fstat(f.fileno())[6],
                                         'Access-Control-Allow-Origin': '*',
                                         'Content-type': 'application/x-hdf5'},
-                                        end=True)
+                                       end=True)
                 shutil.copyfileobj(f, self.wfile)
         else:
             if form.getvalue('file-type') in dfh.DataFileHandler.get_data_dirs().keys():
@@ -317,14 +317,11 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                 return None
             # Send correct HTTP headers and Allow CROS Origin
             fs = os.fstat(f.fileno())
-            headers = {
-                        # 'Location': '/',
-                        # 'File-Path': localpath,
-                        'Access-Control-Allow-Origin': '*',
-                        'Content-Type': 'application/json',
-                        'Content-Length': 0,
-                        'Last-modified': self.date_time_string(fs.st_mtime)
-                        }
+            headers = {'Access-Control-Allow-Origin': '*',
+                       'Content-Type': 'application/json',
+                       'Content-Length': 0,
+                       'Last-modified': self.date_time_string(fs.st_mtime)
+                       }
             self.send_resp_headers(200, headers, end=True)
 
         # except Exception as e:
@@ -390,7 +387,7 @@ def run(run_event,
         templates=None,
         localisations=None,
         directory='',
-        timeout=3*60,
+        timeout=3 * 60,
         file_mode=None,
         publish_files=False,
         auth='',

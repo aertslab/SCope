@@ -1,7 +1,8 @@
 import functools
 from functools import lru_cache
 
-from scopeserver.dataserver.utils import DataFileHandler as dfh
+from scopeserver.dataserver.utils import data_file_handler as dfh
+
 
 class SearchSpace(dict):
 
@@ -34,7 +35,7 @@ class SearchSpace(dict):
     def add_elements(self, elements, element_type):
         for element in elements:
             self.add_element(element=element, element_type=element_type)
-    
+
     def build(self):
         if self.cross_species != '':
             self.add_cross_species_genes()
@@ -71,14 +72,14 @@ class SearchSpace(dict):
             self.add_elements(elements=shrink_mappings, element_type='gene')
         else:
             self.add_elements(elements=self.loom.get_genes(), element_type='gene')
-    
+
     def add_clusterings(self):
         for clustering in self.meta_data['clusterings']:
             all_clusters = ['All Clusters']
             for cluster in clustering['clusters']:
                 all_clusters.append(cluster['description'])
             self.add_elements(elements=all_clusters, element_type='Clustering: {0}'.format(clustering['name']))
-    
+
     def add_regulons(self):
         self.add_elements(elements=self.loom.get_regulons_AUC().dtype.names, element_type='regulon')
 
@@ -87,11 +88,9 @@ class SearchSpace(dict):
         for annotation in self.meta_data['annotations']:
             annotations.append(annotation['name'])
         self.add_elements(elements=annotations, element_type='annotation')
-    
+
     def add_metrics(self):
         metrics = []
         for metric in self.meta_data['metrics']:
             metrics.append(metric['name'])
         self.add_elements(elements=metrics, element_type='metric')
-
-    

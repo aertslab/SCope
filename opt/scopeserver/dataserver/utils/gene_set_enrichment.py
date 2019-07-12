@@ -1,11 +1,12 @@
 import os
 import numpy as np
 
-from scopeserver.dataserver.utils import DataFileHandler as dfh
+from scopeserver.dataserver.utils import data_file_handler as dfh
 
-from scopeserver.dataserver.utils import Constant
+from scopeserver.dataserver.utils import constant
 from scopeserver.dataserver.modules.gserver import GServer as gs
 from scopeserver.dataserver.modules.gserver import s_pb2
+
 
 class GeneSetEnrichment:
 
@@ -57,12 +58,12 @@ class GeneSetEnrichment:
             vmax[0] = _vmax[0]
             max_vmax[0] = _vmax[1]
             vals = aucs / vmax[0]
-            vals = (((Constant._UPPER_LIMIT_RGB - Constant._LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))) + Constant._LOWER_LIMIT_RGB
+            vals = (((constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))) + constant._LOWER_LIMIT_RGB
             hex_vec = ["null" if r == g == b == 0
                        else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
                        for r, g, b in zip(vals, np.zeros(len(aucs)), np.zeros(len(aucs)))]
             if len(self.annotation) > 0:
-                cell_indices = self.loom.get_anno_cells(annotations=annotation, logic=logic)  # This is broken and/or not neccessary
+                cell_indices = self.loom.get_anno_cells(annotations=annotation)  # This is broken and/or not neccessary
             else:
                 cell_indices = list(range(self.loom.get_nb_cells()))
             return s_pb2.GeneSetEnrichmentReply(progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message()),
