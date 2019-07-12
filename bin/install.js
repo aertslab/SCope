@@ -1,26 +1,23 @@
 #!/usr/bin/env node
 var shell = require("shelljs");
 console.log("Installing SCope Bind Server")
-shell.exec('npm install opt/scopeserver/bindserver');
-
+shell.cd('opt/scopeserver/bindserver')
+shell.exec('npm install');
+shell.cd('../../../')
 var execSync = require('child_process').execSync;
+
 try {
-  var output = execSync('python3.6 -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
-  var python = 'python3.6'
+  var output = execSync('python3 -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
+  var python = 'python3'
 } catch(e) {
-  try {
-    var output = execSync('python3 -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
-    var python = 'python3'
-  } catch(e) {
-      var output = execSync('python -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
-      var python = 'python'
-  }
+    var output = execSync('python -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
+    var python = 'python'
 } finally {
     console.log(output);
-    if (!(/^3.[0-6].[0-9].*/.test(output))) {
+    if (!(/^3.[0-7].[0-9].*/.test(output))) {
         throw("Compatible python version not found!")
    }
 }
 
 console.log("Installing SCope Data Server...")
-shell.exec('cd opt && ' + python + ' setup.py develop')
+shell.exec('cd opt && ' + python + ' setup.py install')

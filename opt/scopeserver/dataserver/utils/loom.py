@@ -6,7 +6,8 @@ from functools import lru_cache
 import pandas as pd
 import time
 
-from scopeserver.utils import DataFileHandler as dfh
+from scopeserver.dataserver.utils import data_file_handler as dfh
+
 
 class Loom():
 
@@ -39,7 +40,7 @@ class Loom():
         if type(file_attr) == np.ndarray:
             fa = file_attr[0]
         try:
-            fa = fa.decode("utf-8") 
+            fa = fa.decode("utf-8")
         except AttributeError:
             pass
         return fa
@@ -104,12 +105,11 @@ class Loom():
             clusterDF["0"] = [int(x) for x in loom.ca['Clusters']]
             loom.ca['Clusterings'] = Loom.dfToNamedMatrix(clusterDF)
             print(loom.ca["Clusterings"])
-            metaJson["clusterings"].append({
-                        "id": 0,
-                        "group": "Interpreted",
-                        "name": "Clusters + ClusterName",
-                        "clusters": clusters
-                    })
+            metaJson["clusterings"].append({"id": 0,
+                                            "group": "Interpreted",
+                                            "name": "Clusters + ClusterName",
+                                            "clusters": clusters
+                                            })
         loom.attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
         # self.change_loom_mode(loom_file_path, rw=False)
 
@@ -121,7 +121,7 @@ class Loom():
 
         """
         loom = self.loom_connection
-        attr_margins = [2,2,2,2,0]
+        attr_margins = [2, 2, 2, 2, 0]
         attr_names = ["RegulonsAUC", "Clusterings", "Embeddings_X", "GeneSets", "MetaData"]
         attr_keys = ["RegulonsAUC", "Clusterings", "ExtraEmbeddings", "GeneSets", "GlobalMeta"]
 
@@ -140,7 +140,7 @@ class Loom():
             return tmp
 
         md = map(loom_attr_exists, attr_names)
-        meta = { k: v for d in md for k, v in d.items() }
+        meta = {k: v for d in md for k, v in d.items()}
         return meta
 
     def get_meta_data_annotation_by_name(self, name):
@@ -174,7 +174,7 @@ class Loom():
     def has_md_metrics(self):
         if self.has_meta_data():
             return self.has_md_metrics_(meta_data=self.get_meta_data())
-        return False 
+        return False
 
     @staticmethod
     def has_md_annotations_(meta_data):
@@ -274,7 +274,7 @@ class Loom():
             return self.loom_connection.ca.nUMI
         # Compute nUMI on the fly
         calc_nUMI_start_time = time.time()
-        self.nUMI = self.loom_connection[:,:].sum(axis=0)
+        self.nUMI = self.loom_connection[:, :].sum(axis=0)
         print("Debug: %s seconds elapsed (calculating nUMI) ---" % (time.time() - calc_nUMI_start_time))
         return self.nUMI
 

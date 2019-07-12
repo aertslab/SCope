@@ -2,6 +2,7 @@ import subprocess
 import os.path
 import sys
 
+
 def subprocess_cmd(command, cwd):
     process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True, cwd=cwd)
     proc_stdout = process.communicate()[0].strip()

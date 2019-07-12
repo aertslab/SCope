@@ -88,12 +88,12 @@ class SCopeServer extends EventEmitter {
 
 try {
   if (process.argv[2] == 'electronTest') {
-    var DATASERVER_FOLDER = path.join("opt", "scopeserver", "dataserver");
+    var DATASERVER_FOLDER = path.join("opt", "scopeserver");
   } else {
     throw 'Not testing'
   }
 } catch (e) {
-  var DATASERVER_FOLDER = path.join(app.getAppPath(), "opt", "scopeserver", "dataserver", "dist", "__init__");
+  var DATASERVER_FOLDER = path.join(app.getAppPath(), "opt", "scopeserver", "dist", "__init__");
 }
 // const DATASERVER_FOLDER = '__init__';
 const DATASERVER_MODULE = '__init__'; // without .py suffix
@@ -169,23 +169,18 @@ class DataServer {
     } else {
       console.log("SCope Server Not packaged or electronTest.")
       try {
-        var output = cp.execSync('python3.6 -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
-        var python = 'python3.6'
-      } catch(e) {
-        try {
           var output = cp.execSync('python3 -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
           var python = 'python3'
         } catch(e) {
             var output = cp.execSync('python -c "import sys; print(sys.version)"', { encoding: 'utf-8' });
             var python = 'python'
-        }
       } finally {
           console.log(output);
-          if (!(/^3.[0-6].[0-9].*/.test(output))) {
+          if (!(/^3.[0-7].[0-9].*/.test(output))) {
               throw("Compatible python version not found!")
          }
       }
-      this.proc = cp.spawn(python, [script, "-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort, '--app_mode', '--dev_env'], {});
+      this.proc = cp.spawn(python, [script, "-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort, '--app_mode'], {});
     }
     this.proc.stdout.on('data', (data) => {
       let buff = new Buffer(data).toString('utf8');

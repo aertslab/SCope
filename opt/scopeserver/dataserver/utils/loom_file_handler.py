@@ -2,15 +2,16 @@ import os
 import hashlib
 import loompy as lp
 
-from scopeserver.utils import DataFileHandler as dfh
-from scopeserver.utils.Loom import Loom
+from scopeserver.dataserver.utils import data_file_handler as dfh
+from scopeserver.dataserver.utils.loom import Loom
+
 
 class LoomFileHandler():
 
     def __init__(self):
         self.active_looms = {}
         self.loom_dir = dfh.DataFileHandler.get_data_dir_path_by_file_type(file_type="Loom")
-    
+
     def add_loom(self, partial_md5_hash, file_path, abs_file_path, loom_connection):
         loom = Loom(partial_md5_hash=partial_md5_hash, file_path=file_path, abs_file_path=abs_file_path, loom_connection=loom_connection)
         self.active_looms[partial_md5_hash] = loom
@@ -38,7 +39,7 @@ class LoomFileHandler():
             else:
                 f.seek(- last_n_kb * 1024, 2)
             return hashlib.md5(f.read()).hexdigest()
-    
+
     def change_loom_mode(self, loom_file_path, mode):
         print(loom_file_path)
         if not os.path.exists(loom_file_path):
@@ -51,15 +52,15 @@ class LoomFileHandler():
         if partial_md5_hash in self.active_looms:
             self.active_looms[partial_md5_hash].close()
         if mode == 'rw':
-            self.active_looms[partial_md5_hash] = self.get_loom_connection(loom_file_path=loom_file_path) #, rw=True)
+            self.active_looms[partial_md5_hash] = self.get_loom_connection(loom_file_path=loom_file_path)  # , rw=True)
             print('{0} now rw'.format(loom_file_path))
         else:
-            self.active_looms[partial_md5_hash] = self.get_loom_connection(loom_file_path=loom_file_path) #, rw=False)
+            self.active_looms[partial_md5_hash] = self.get_loom_connection(loom_file_path=loom_file_path)  # , rw=False)
             print('{0} now ro'.format(loom_file_path))
-        
+
     def get_loom_absolute_file_path(self, loom_file_path):
         return os.path.join(self.loom_dir, loom_file_path)
-    
+
     def get_global_looms(self):
         return self.global_looms
 
