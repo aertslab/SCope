@@ -10,6 +10,19 @@ from urllib.request import urlopen
 import http
 import argparse
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+
+logger.addHandler(ch)
+
+logger.setLevel(logging.DEBUG)
 
 parser = argparse.ArgumentParser(description='Launch the scope server')
 parser.add_argument('-g_port', metavar='gPort', type=int, help='gPort', default=55853)
@@ -31,11 +44,14 @@ class SCopeServer():
         self.app_mode = args.app_mode
 
     def start_bind_server(self):
+        logger.debug('Starting bind server on port {0}'.format(self.x_port))
         self.xs_thread = threading.Thread(target=xs.run, args=(self.run_event,), kwargs={'port': self.x_port})
         self.xs_thread.start()
 
     def start_data_server(self):
+        logger.debug('Starting data server on port {0}. app_mode: {1}'.format(self.g_port, self.app_mode))
         self.gs_thread = threading.Thread(target=gs.serve, args=(self.run_event,), kwargs={'port': self.g_port, 'app_mode': self.app_mode})
+        logger.debug('Starting upload server on port {0}'.format(self.p_port))
         self.ps_thread = threading.Thread(target=ps.run, args=(self.run_event,), kwargs={'port': self.p_port})
         self.gs_thread.start()
         self.ps_thread.start()
@@ -50,7 +66,7 @@ class SCopeServer():
             while True:
                 time.sleep(0.1)
         except KeyboardInterrupt:
-            print('Terminating servers...')
+            logger.info('Terminating servers...')
             self.run_event.clear()
             self.gs_thread.join()
             try:
@@ -61,10 +77,11 @@ class SCopeServer():
 
             if not self.app_mode:
                 self.xs_thread.join()
-            print('Servers successfully terminated. Exiting.')
+            logger.info('Servers successfully terminated. Exiting.')
 
     def run(self):
-        print('''\
+        logger.info('''\n
+
   /$$$$$$   /$$$$$$                                       /$$$$$$
  /$$__  $$ /$$__  $$                                     /$$__  $$
 | $$  \__/| $$  \__/  /$$$$$$   /$$$$$$   /$$$$$$       | $$  \__/  /$$$$$$   /$$$$$$  /$$    /$$ /$$$$$$   /$$$$$$
@@ -77,12 +94,13 @@ class SCopeServer():
                               | $$
                               |__/
         ''')
-        print("Running SCope Server in production mode...")
+        logger.info("Running SCope Server in production mode...")
         self.start_scope_server()
         self.wait()
 
 
 def run():
+
     # Unbuffer the standard output: important for process communication
     sys.stdout = su.Unbuffered(sys.stdout)
     # Start an instance of SCope Server

@@ -34,6 +34,9 @@ from scopeserver.dataserver.utils.loom import Loom
 
 from pyscenic.genesig import GeneSignature
 from pyscenic.aucell import create_rankings, enrichment, enrichment4cells
+import logging
+
+logger = logging.getLogger(__name__)
 
 hexarr = np.vectorize('{:02x}'.format)
 
@@ -60,7 +63,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     @lru_cache(maxsize=256)
     def get_features(self, loom, query):
-        print(query)
+        logger.debug('Searching for {0}'.format(query))
         start_time = time.time()
         if query.startswith('hsap\\'):
             search_space = ss.SearchSpace(loom=loom, cross_species='hsap').build()
@@ -73,8 +76,8 @@ class SCope(s_pb2_grpc.MainServicer):
         else:
             search_space = ss.SearchSpace(loom=loom).build()
             cross_species = ''
-        print("Debug: %s seconds elapsed making search space ---" % (time.time() - start_time))
-        print(query)
+        logger.debug("{0:.5f} seconds elapsed making search space ---".format(time.time() - start_time))
+        logger.debug("Found {0}".format(query))
 
         # Filter the genes by the query
 
@@ -144,8 +147,8 @@ class SCope(s_pb2_grpc.MainServicer):
                 descriptions.append('Orthologue of {0}, {1:.2f}% identity (Mouse -> Drosophila)'.format(collapsedResults[r][0], collapsedResults[r][1]))
         # if mapping[result] != result: change title and description to indicate synonym
 
-        print("Debug: " + str(len(res)) + " genes matching '" + query + "'")
-        print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
+        logger.debug("{0} genes matching '{1}'".format(len(res), query))
+        logger.debug("{0:.5f} seconds elapsed ---".format(time.time() - start_time))
         res = {'feature': [r[0] for r in collapsedResults.keys()],
                'featureType': [r[1] for r in collapsedResults.keys()],
                'featureDescription': descriptions}
@@ -227,7 +230,7 @@ class SCope(s_pb2_grpc.MainServicer):
             else:
                 cell_color_by_features.addEmptyFeature()
 
-        print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
+        logger.debug("{0:.5f} seconds elapsed getting colours ---".format(time.time() - start_time))
         return s_pb2.CellColorByFeaturesReply(color=None,
                                               compressedColor=cell_color_by_features.get_compressed_hex_vec(),
                                               hasAddCompressionLayer=True,
@@ -290,7 +293,7 @@ class SCope(s_pb2_grpc.MainServicer):
         regulon_genes = loom.get_regulon_genes(regulon=request.regulon)
 
         if len(regulon_genes) == 0:
-            print("Something is wrong in the loom file: no regulon found!")
+            logger.error("Something is wrong in the loom file: no regulon found!")
 
         meta_data = loom.get_meta_data()
         for regulon in meta_data['regulonThresholds']:
@@ -314,7 +317,7 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
         # Check if cluster markers for the given clustering are present in the loom
         if not loom.has_cluster_markers(clustering_id=request.clusteringID):
-            print("No markers for clustering {0} present in active loom.".format(request.clusteringID))
+            logger.info("No markers for clustering {0} present in active loom.".format(request.clusteringID))
             return (s_pb2.MarkerGenesReply(genes=[], metrics=[]))
 
         genes = loom.get_cluster_marker_genes(clustering_id=request.clusteringID, cluster_id=request.clusterID)
@@ -371,7 +374,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     try:
                         loom.generate_meta_data()
                     except Exception as e:
-                        print(e)
+                        logger.error(e)
 
                 try:
                     L1 = loom.get_global_attribute_by_name(name="SCopeTreeL1")
@@ -413,7 +416,7 @@ class SCope(s_pb2_grpc.MainServicer):
         for uid in curUUIDSet:
             timeRemaining = int(dfh._UUID_TIMEOUT - (time.time() - self.dfh.get_current_UUIDs()[uid]))
             if timeRemaining < 0:
-                print('Removing UUID: {0}'.format(uid))
+                logger.info('Removing expired UUID: {0}'.format(uid))
                 del(self.dfh.get_current_UUIDs()[uid])
                 for i in ['Loom', 'GeneSet', 'LoomAUCellRankings']:
                     if os.path.exists(os.path.join(self.dfh.get_data_dirs()[i]['path'], uid)):
@@ -490,7 +493,7 @@ class SCope(s_pb2_grpc.MainServicer):
             a = list(filter(lambda x: x['name'] == request.featureName, meta_data["clusterings"]))
             b = list(filter(lambda x: x['description'] == request.featureValue, a[0]['clusters']))[0]
             cells = loom_connection.ca["Clusterings"][str(a[0]['id'])] == b['id']
-            print("Number of cells in {0}: {1}".format(request.featureValue, np.sum(cells)))
+            logger.debug("Number of cells in {0}: {1}".format(request.featureValue, np.sum(cells)))
             sub_loom_file_name = file_name + "_Sub_" + request.featureValue.replace(" ", "_").replace("/", "_")
             sub_loom_file_path = os.path.join(self.dfh.get_data_dirs()['Loom']['path'], "tmp", sub_loom_file_name + ".loom")
             # Check if the file already exists
@@ -506,7 +509,7 @@ class SCope(s_pb2_grpc.MainServicer):
             # - Use scan to subset cells (much faster than naive subsetting): avoid to load everything into memory
             # - Loompy bug: loompy.create_append works but generate a file much bigger than its parent
             #      So prepare all the data and create the loom afterwards
-            print("Subsetting {0} cluster from the active .loom...".format(request.featureValue))
+            logger.debug("Subsetting {0} cluster from the active .loom...".format(request.featureValue))
             sub_matrix = None
             sub_selection = None
             for (_, selection, _) in loom_connection.scan(items=cells, axis=1):
@@ -522,14 +525,14 @@ class SCope(s_pb2_grpc.MainServicer):
                                                  loomFileSize=0,
                                                  progress=s_pb2.Progress(value=processed, status="Sub Loom Created!"),
                                                  isDone=False)
-            print("Creating {0} sub .loom...".format(request.featureValue))
+            logger.debug("Creating {0} sub .loom...".format(request.featureValue))
             lp.create(sub_loom_file_path, sub_matrix, row_attrs=loom_connection.ra, col_attrs=loom_connection.ca[sub_selection], file_attrs=sub_loom_file_attrs)
             with open(sub_loom_file_path, 'r') as fh:
                 loom_file_size = os.fstat(fh.fileno())[6]
-            print("Done!")
-            print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
+            logger.debug("Done making loom!")
+            logger.debug("{0:.5f} seconds elapsed making loom ---".format(time.time() - start_time))
         else:
-            print("This feature is currently not implemented.")
+            logger.error("This feature is currently not implemented.")
         yield s_pb2.DownloadSubLoomReply(loomFilePath=sub_loom_file_path,
                                          loomFileSize=loom_file_size,
                                          progress=s_pb2.Progress(value=1.0, status="Sub Loom Created!"),
@@ -575,7 +578,7 @@ class SCope(s_pb2_grpc.MainServicer):
             # Saving the rankings...
             yield gse.update_state(step=2.2, status_code=200, status_message="Saving the rankings...", values=None)
             lp.create(gse.get_AUCell_ranking_filepath(), rnk_mtx.as_matrix(), {"CellID": loom.get_cell_ids()}, {"Gene": loom.get_genes()})
-            print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
+            logger.debug("{0:.5f} seconds elapsed generating rankings ---".format(time.time() - start_time))
         else:
             # Load the rankings...
             yield gse.update_state(step=2, status_code=200, status_message="Rankings exists: loading...", values=None)
@@ -589,7 +592,7 @@ class SCope(s_pb2_grpc.MainServicer):
         yield gse.update_state(step=3, status_code=200, status_message="Calculating AUCell enrichment...", values=None)
         aucs = enrichment(rnk_mtx, gs).loc[:, "AUC"].values
 
-        print("Debug: %s seconds elapsed ---" % (time.time() - start_time))
+        logger.debug("{0:.5f} seconds elapsed calculating AUC ---".format(time.time() - start_time))
         yield gse.update_state(step=4, status_code=200, status_message=gse.get_method() + " enrichment done!", values=aucs)
 
     def loomUploaded(self, request, content):
@@ -603,8 +606,8 @@ def serve(run_event, port=50052, app_mode=False):
     scope = SCope()
     s_pb2_grpc.add_MainServicer_to_server(scope, server)
     server.add_insecure_port('[::]:{0}'.format(port))
-    # print('Starting GServer on port {0}...'.format(port))
     server.start()
+
     # Let the main process know that GServer has started.
     su.send_msg("GServer", "SIGSTART")
 

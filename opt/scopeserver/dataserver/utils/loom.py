@@ -7,6 +7,9 @@ import pandas as pd
 import time
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Loom():
@@ -16,7 +19,7 @@ class Loom():
         self.file_path = file_path
         self.abs_file_path = abs_file_path
         self.loom_connection = loom_connection
-        print("New .loom created.")
+        logger.info("New .loom created.")
         # Metrics
         self.nUMI = None
 
@@ -70,7 +73,7 @@ class Loom():
     def generate_meta_data(self):
         loom = self.loom_connection
         # Designed to generate metadata from linnarson loom files
-        print('Making metadata for {0}'.format(self.get_abs_file_path()))
+        logger.info('Making metadata for {0}'.format(self.get_abs_file_path()))
         metaJson = {}
 
         # self.change_loom_mode(loom_file_path, rw=True)
@@ -88,10 +91,10 @@ class Loom():
         metaJson["annotations"] = []
         for anno in ['Age', 'ClusterName', 'Sex', 'Species', 'Strain', 'Tissue']:
             if anno in loom.ca.keys():
-                print("Anno: {0} in loom".format(anno))
+                logger.info("Anno: {0} in loom".format(anno))
                 if len(set(loom.ca[anno])) != loom.shape[1] and len(set(loom.ca[anno])) > 0:
                     metaJson["annotations"].append({"name": anno, "values": sorted(list(set(loom.ca[anno])))})
-                    print(metaJson["annotations"])
+                    logger.debug(metaJson["annotations"])
 
         # Clusterings - Anything with cluster in name?
         metaJson["clusterings"] = []
@@ -104,7 +107,7 @@ class Loom():
             clusterDF = pd.DataFrame(columns=["0"], index=[x for x in range(loom.shape[1])])
             clusterDF["0"] = [int(x) for x in loom.ca['Clusters']]
             loom.ca['Clusterings'] = Loom.dfToNamedMatrix(clusterDF)
-            print(loom.ca["Clusterings"])
+            logger.debug(loom.ca["Clusterings"])
             metaJson["clusterings"].append({"id": 0,
                                             "group": "Interpreted",
                                             "name": "Clusters + ClusterName",
@@ -260,7 +263,7 @@ class Loom():
                 if geneMappings[gene] != gene:
                     conversion[geneMappings[gene]] = gene
             except KeyError:
-                print("ERROR: Gene: {0} is not in the mapping table!".format(gene))
+                logger.error("Gene: {0} is not in the mapping table!".format(gene))
         return conversion
 
     ##############
@@ -275,7 +278,7 @@ class Loom():
         # Compute nUMI on the fly
         calc_nUMI_start_time = time.time()
         self.nUMI = self.loom_connection[:, :].sum(axis=0)
-        print("Debug: %s seconds elapsed (calculating nUMI) ---" % (time.time() - calc_nUMI_start_time))
+        logger.debug("{0:.5f} seconds elapsed (calculating nUMI) ---".format(time.time() - calc_nUMI_start_time))
         return self.nUMI
 
     def get_gene_expression_by_gene_symbol(self, gene_symbol):
@@ -284,13 +287,13 @@ class Loom():
     def get_gene_expression(self, gene_symbol, log_transform=True, cpm_normalise=False, annotation='', logic='OR'):
         if gene_symbol not in set(self.get_genes()):
             gene_symbol = self.get_gene_names()[gene_symbol]
-        print("Debug: getting expression of " + gene_symbol + "...")
+        logger.debug("Debug: getting expression of {0} ...".format(gene_symbol))
         gene_expr = self.get_gene_expression_by_gene_symbol(gene_symbol=gene_symbol)
         if cpm_normalise:
-            print("Debug: CPM normalising gene expression...")
+            logger.debug("Debug: CPM normalising gene expression...")
             gene_expr = gene_expr / self.get_nUMI()
         if log_transform:
-            print("Debug: log-transforming gene expression...")
+            logger.debug("Debug: log-transforming gene expression...")
             gene_expr = np.log2(gene_expr + 1)
         if len(annotation) > 0:
             cell_indices = self.get_anno_cells(annotations=annotation, logic=logic)
@@ -316,7 +319,7 @@ class Loom():
         return loom.ca.RegulonsAUC
 
     def get_auc_values(self, regulon, annotation='', logic='OR'):
-        print("Debug: getting AUC values for {0} ...".format(regulon))
+        logger.debug("Getting AUC values for {0} ...".format(regulon))
         cellIndices = list(range(self.get_nb_cells()))
         if regulon in self.get_regulons_AUC().dtype.names:
             vals = self.get_regulons_AUC()[regulon]
@@ -396,13 +399,13 @@ class Loom():
     def get_metric(self, metric_name, log_transform=True, cpm_normalise=False, annotation='', logic='OR'):
         if not self.has_ca_attr(name=metric_name):
             raise ValueError("The metric {0} does not exist in the current active loom".format(metric_name))
-        print("Debug: getting metric {0}...".format(metric_name))
+        logger.debug("getting metric {0}...".format(metric_name))
         metric_vals = self.get_ca_attr_by_name(name=metric_name)
         if cpm_normalise:
-            print("Debug: CPM normalising gene expression...")
+            logger.debug("CPM normalising gene expression...")
             metric_vals = metric_vals / self.get_nUMI()
         if log_transform:
-            print("Debug: log-transforming gene expression...")
+            logger.debug("log-transforming gene expression...")
             metric_vals = np.log2(metric_vals + 1)
         if len(annotation) > 0:
             cell_indices = self.get_anno_cells(annotations=annotation, logic=logic)

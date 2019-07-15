@@ -21,6 +21,9 @@ import threading
 from scopeserver.dataserver.utils import data_file_handler as dfh
 from scopeserver.dataserver.modules.gserver import GServer
 from scopeserver.dataserver.utils import sys_utils as su
+import logging
+
+logger = logging.getLogger(__name__)
 
 unicode = str
 
@@ -126,6 +129,10 @@ class DroopyFieldStorage(cgi.FieldStorage):
 
 
 class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
+
+    # Overwrite log_message from BaseHTTPRequestHandler to keep style of SCope
+    def log_message(self, format, *args):
+        logger.debug(' '.join([*args]))
     "The guts of Droopy-a custom handler that accepts files & serves templates"
 
     @property
@@ -197,7 +204,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
         self.directory = dfh.DataFileHandler.get_data_dir_path_by_file_type(file_type='Loom')
 
         name = self.path.lstrip('/')
-        print(name)
+        logger.debug(name)
 
         name = urllibparse.unquote(name)
         name = _decode_str_if_py2(name, 'utf-8')
@@ -223,6 +230,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
 
     @check_auth
     def do_OPTIONS(self):
+        logger.info('In do OPTIONS')
         self.send_response(200, "ok")
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS, POST')
@@ -230,12 +238,13 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.send_header("Access-Control-Allow-Headers", "Content-Disposition")
         self.end_headers()
+        logger.info('End do OPTIONS')
 
     @check_auth
     def do_POST(self):
         "Standard method to override in this Server object."
         # try:
-        self.log_message("Started file transfer")
+        logger.info("Started file transfer")
         form = DroopyFieldStorage(fp=self.rfile,
                                   directory='',
                                   headers=self.headers,
@@ -258,7 +267,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                 self.send_error(415, "Unsupported file tyype")
             # Update the directory of DroopyFieldStorage
             form.directory = self.directory
-            self.log_message("Saving uploaded file in " + self.directory)
+            logger.info("Saving uploaded file in {0}".format(self.directory))
             file_items = form[self.form_field]
 
             # Handle multiple file upload
@@ -286,7 +295,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                         shutil.copyfileobj(item.file, fout)
                 if self.file_mode is not None:
                     os.chmod(localpath, self.file_mode)
-                self.log_message("Received: %s", os.path.basename(localpath))
+                logger.info("Received: {0}".format(os.path.basename(localpath)))
 
             # -- Reply
             # The file list gives a feedback for the upload success
@@ -298,7 +307,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                 if form.getvalue('file-type') == 'Loom':
                     try:
                         with lp.connect(localpath) as f:
-                            self.log_message('Loom dimensions: {0}'.format(f.shape))
+                            logger.debug('Loom dimensions: {0}'.format(f.shape))
                             if not (f.shape[0] > 0 and f.shape[1] > 0):
                                 raise KeyError
                             else:
@@ -310,7 +319,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                         self.end_headers()
                         return None
                 else:
-                    self.log_message('Not a loom: {0}'.format(form.getvalue('file-type')))
+                    logger.error('Not a loom: {0}'.format(form.getvalue('file-type')))
                     f = open(localpath, 'rb')
             except IOError:
                 self.send_error(404, "File not found")
@@ -367,7 +376,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
         try:
             httpserver.BaseHTTPRequestHandler.handle(self)
         except socket.error as e:
-            self.log_message(str(e))
+            logger.error(str(e))
             raise Abort(str(e))
 
 
@@ -422,7 +431,7 @@ def run(run_event,
         try:
             import ssl
         except Exception:
-            print("Error: Could not import module 'ssl', exiting.")
+            logger.error("Error: Could not import module 'ssl', exiting.")
             sys.exit(2)
 
         httpd.socket = ssl.wrap_socket(httpd.socket,
@@ -445,7 +454,7 @@ def main():
     try:
         run(threading.Event())
     except KeyboardInterrupt:
-        print('^C received, awaiting termination of remaining server threads..')
+        logger.info('^C received, awaiting termination of remaining server threads..')
 
 
 if __name__ == '__main__':

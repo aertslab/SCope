@@ -7,6 +7,9 @@ from pathlib import Path
 
 import scopeserver
 from scopeserver.dataserver.modules.gserver import GServer as gs
+import logging
+
+logger = logging.getLogger(__name__)
 
 app_name = 'SCope'
 app_author = 'Aertslab'
@@ -77,7 +80,7 @@ class DataFileHandler():
     def create_global_dirs(self):
         for data_type in self.data_dirs.keys():
             if not os.path.isdir(data_dirs[data_type]["path"]):
-                print(self.data_dirs[data_type]["message"])
+                logger.error(self.data_dirs[data_type]["message"])
                 os.makedirs(self.data_dirs[data_type]["path"])
 
     def get_current_UUIDs(self):

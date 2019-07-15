@@ -6,7 +6,9 @@ from scopeserver.dataserver.utils import data_file_handler as dfh
 from scopeserver.dataserver.utils import constant
 from scopeserver.dataserver.modules.gserver import GServer as gs
 from scopeserver.dataserver.modules.gserver import s_pb2
+import logging
 
+logger = logging.getLogger(__name__)
 
 class GeneSetEnrichment:
 
@@ -45,7 +47,7 @@ class GeneSetEnrichment:
 
     def update_state(self, step, status_code, status_message, values):
         state = GeneSetEnrichment.State(step=step, status_code=status_code, status_message=status_message, values=values)
-        print("Status: " + state.get_status_message())
+        logger.debug("Status: {0}".format(state.get_status_message()))
         if state.get_values() is None:
             return s_pb2.GeneSetEnrichmentReply(progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message()),
                                                 isDone=False,

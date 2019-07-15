@@ -7,7 +7,9 @@ import sys
 
 from scopeserver.dataserver.modules.gserver import s_pb2
 from scopeserver.dataserver.utils import constant
+import logging
 
+logger = logging.getLogger(__name__)
 
 class CellColorByFeatures():
 
@@ -34,13 +36,13 @@ class CellColorByFeatures():
 
     @staticmethod
     def compress_str_array(str_arr):
-        print("Compressing... ")
+        logger.debug("Compressing colour data... ")
         str_array_size = sys.getsizeof(str_arr)
         str_array_joint = bytes(''.join(str_arr), 'utf-8')
         str_array_joint_compressed = zlib.compress(str_array_joint, 1)
         str_array_joint_compressed_size = sys.getsizeof(str_array_joint_compressed)
         savings_percent = 1 - str_array_joint_compressed_size / str_array_size
-        print("Saving " + "{:.2%} of space".format(savings_percent))
+        logger.debug("Saving " + "{:.2%} of space".format(savings_percent))
         return str_array_joint_compressed
  
     def get_features(self):
@@ -58,7 +60,7 @@ class CellColorByFeatures():
     def get_compressed_hex_vec(self):
         comp_start_time = time.time()
         hex_vec_compressed = CellColorByFeatures.compress_str_array(str_arr=self.get_hex_vec())
-        print("Debug: %s seconds elapsed (compression) ---" % (time.time() - comp_start_time))
+        logger.debug("{0:.5f} seconds elapsed (compression) ---".format(time.time() - comp_start_time))
         return hex_vec_compressed
 
     def get_v_max(self):
@@ -146,7 +148,7 @@ class CellColorByFeatures():
     def setClusteringFeature(self, request, feature, n):
         clusteringID = None
         clusterID = None
-        print("Getting clustering: {0}".format(request.feature[n]))
+        logger.debug("Getting clustering: {0}".format(request.feature[n]))
         for clustering in self.meta_data['clusterings']:
             if clustering['name'] == re.sub('^Clustering: ', '', request.featureType[n]):
                 clusteringID = str(clustering['id'])
