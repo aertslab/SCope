@@ -33,7 +33,7 @@ setup(name='scope-server',
           'numpy',
           'pyscenic==0.9.5',
           'appdirs',
-          'dask<=2.0.0',
+          'dask==1.0.0',
           'distributed==1.21.6'
       ],
       zip_safe=False)
