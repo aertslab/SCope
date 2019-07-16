@@ -129,6 +129,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
         descriptions = []
         if cross_species == '':
+            logger.debug(f'Performing cross species search: {query}')
             for r in collapsedResults.keys():
                 synonyms = sorted([x for x in collapsedResults[r]])
                 try:
@@ -476,6 +477,7 @@ class SCope(s_pb2_grpc.MainServicer):
         basename = os.path.basename(request.filePath)
         finalPath = os.path.join(self.dfh.get_data_dirs()[request.fileType]['path'], request.UUID, basename)
         if os.path.isfile(finalPath) and (basename.endswith('.loom') or basename.endswith('.txt')):
+            logger.info(f'File {request.filePath} deleted at request of user with UUID {request.UUID}.')
             os.remove(finalPath)
             success = True
         else:

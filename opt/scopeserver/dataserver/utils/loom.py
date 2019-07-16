@@ -19,7 +19,7 @@ class Loom():
         self.file_path = file_path
         self.abs_file_path = abs_file_path
         self.loom_connection = loom_connection
-        logger.info("New .loom created.")
+        logger.info(f"New Loom object created for {file_path}")
         # Metrics
         self.nUMI = None
 
@@ -91,14 +91,17 @@ class Loom():
         metaJson["annotations"] = []
         for anno in ['Age', 'ClusterName', 'Sex', 'Species', 'Strain', 'Tissue']:
             if anno in loom.ca.keys():
-                logger.info("Anno: {0} in loom".format(anno))
+                logger.info("\tAnnotation: {0} in loom".format(anno))
                 if len(set(loom.ca[anno])) != loom.shape[1] and len(set(loom.ca[anno])) > 0:
                     metaJson["annotations"].append({"name": anno, "values": sorted(list(set(loom.ca[anno])))})
-                    logger.debug(metaJson["annotations"])
+                    logger.debug(f'\t\tValues: {sorted(list(set(loom.ca[anno])))}')
+
+        logger.debug(f'\tFinal Annotations for {self.file_path} - {metaJson["annotations"]}')
 
         # Clusterings - Anything with cluster in name?
         metaJson["clusterings"] = []
         if 'Clusters' in loom.ca.keys() and 'ClusterName' in loom.ca.keys():
+            logger.debug(f'\tDetected clusterings in loom file. Adding metadata.')
             clusters = set(zip(loom.ca['Clusters'], loom.ca['ClusterName']))
             clusters = [{"id": int(x[0]), "description": x[1]} for x in clusters]
 
@@ -107,12 +110,13 @@ class Loom():
             clusterDF = pd.DataFrame(columns=["0"], index=[x for x in range(loom.shape[1])])
             clusterDF["0"] = [int(x) for x in loom.ca['Clusters']]
             loom.ca['Clusterings'] = Loom.dfToNamedMatrix(clusterDF)
-            logger.debug(loom.ca["Clusterings"])
             metaJson["clusterings"].append({"id": 0,
                                             "group": "Interpreted",
                                             "name": "Clusters + ClusterName",
                                             "clusters": clusters
                                             })
+        logger.debug(f'\tFinal Clusterings for {self.file_path} - {metaJson["clusterings"]}')
+
         loom.attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
         # self.change_loom_mode(loom_file_path, rw=False)
 

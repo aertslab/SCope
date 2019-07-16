@@ -92,12 +92,12 @@ class DataFileHandler():
     def read_UUID_db(self):
         logger.debug('Building UUID "database"')
         if os.path.isfile(os.path.join(self.config_dir, 'UUID_Timeouts.tsv')):
-            logger.debug('Existing User UUIDs:"')
+            logger.debug('Existing User UUIDs:')
             with open(os.path.join(self.config_dir, 'UUID_Timeouts.tsv'), 'r') as fh:
                 for line in fh.readlines():
                     ls = line.rstrip('\n').split('\t')
                     self.current_UUIDs[ls[0]] = float(ls[1])
-                    logger.debug(f'\tUUID {ls[0]}. Valid until {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(float(ls[1])))}')
+                    logger.debug(f'\tUUID {ls[0]}. Generated on {time.strftime("%Y-%m-%d at %H:%M:%S", time.localtime(float(ls[1])))}')
         if os.path.isfile(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt')):
             logger.debug('Existing Permanent Sessions:"')
             with open(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt'), 'r') as fh:
@@ -105,7 +105,7 @@ class DataFileHandler():
                     uuid = line.rstrip('\n')
                     self.permanent_UUIDs.add(uuid)
                     self.current_UUIDs[uuid] = time.time() + (_ONE_DAY_IN_SECONDS * 365)
-                    logger.debug(f'\tUUID {uuid}. Valid until {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime((_ONE_DAY_IN_SECONDS * 365)))}')
+                    logger.debug(f'\tUUID {uuid}. Valid until {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + (_ONE_DAY_IN_SECONDS * 365)))}')
         else:
             logger.debug('No Existing Permanent Sessions, generating App UUID:"')
             with open(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt'), 'w') as fh:
