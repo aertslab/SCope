@@ -10,6 +10,5 @@ def subprocess_cmd(command, cwd):
 
 def run(run_event, port=8081):
     while run_event.is_set():
-        print('Starting XServer on port {0}...'.format(port))
         cwd = os.path.dirname(__file__)
         subprocess_cmd('node server.js {0}'.format(port), cwd)

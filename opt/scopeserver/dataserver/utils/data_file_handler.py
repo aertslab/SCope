@@ -7,6 +7,9 @@ from pathlib import Path
 
 import scopeserver
 from scopeserver.dataserver.modules.gserver import GServer as gs
+import logging
+
+logger = logging.getLogger(__name__)
 
 app_name = 'SCope'
 app_author = 'Aertslab'
@@ -77,7 +80,7 @@ class DataFileHandler():
     def create_global_dirs(self):
         for data_type in self.data_dirs.keys():
             if not os.path.isdir(data_dirs[data_type]["path"]):
-                print(self.data_dirs[data_type]["message"])
+                logger.error(self.data_dirs[data_type]["message"])
                 os.makedirs(self.data_dirs[data_type]["path"])
 
     def get_current_UUIDs(self):
@@ -87,21 +90,29 @@ class DataFileHandler():
         return self.permanent_UUIDs
 
     def read_UUID_db(self):
+        logger.debug('Building UUID "database"')
         if os.path.isfile(os.path.join(self.config_dir, 'UUID_Timeouts.tsv')):
+            logger.debug('Existing User UUIDs:')
             with open(os.path.join(self.config_dir, 'UUID_Timeouts.tsv'), 'r') as fh:
                 for line in fh.readlines():
                     ls = line.rstrip('\n').split('\t')
                     self.current_UUIDs[ls[0]] = float(ls[1])
+                    logger.debug(f'\tUUID {ls[0]}. Generated on {time.strftime("%Y-%m-%d at %H:%M:%S", time.localtime(float(ls[1])))}')
         if os.path.isfile(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt')):
+            logger.debug('Existing Permanent Sessions:"')
             with open(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt'), 'r') as fh:
                 for line in fh.readlines():
-                    self.permanent_UUIDs.add(line.rstrip('\n'))
-                    self.current_UUIDs[line.rstrip('\n')] = time.time() + (_ONE_DAY_IN_SECONDS * 365)
+                    uuid = line.rstrip('\n')
+                    self.permanent_UUIDs.add(uuid)
+                    self.current_UUIDs[uuid] = time.time() + (_ONE_DAY_IN_SECONDS * 365)
+                    logger.debug(f'\tUUID {uuid}. Valid until {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + (_ONE_DAY_IN_SECONDS * 365)))}')
         else:
+            logger.debug('No Existing Permanent Sessions, generating App UUID:"')
             with open(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt'), 'w') as fh:
                 newUUID = 'SCopeApp__{0}'.format(str(uuid.uuid4()))
                 fh.write('{0}\n'.format(newUUID))
                 self.current_UUIDs[newUUID] = time.time() + (_ONE_DAY_IN_SECONDS * 365)
+                logger.debug(f'\tUUID {newUUID}. Valid until {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + (_ONE_DAY_IN_SECONDS * 365)))}')
 
     def update_UUID_db(self):
         with open(os.path.join(self.config_dir, 'UUID_Timeouts.tsv'), 'w') as fh:

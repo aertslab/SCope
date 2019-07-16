@@ -4,6 +4,9 @@ import loompy as lp
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
 from scopeserver.dataserver.utils.loom import Loom
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class LoomFileHandler():
@@ -25,8 +28,9 @@ class LoomFileHandler():
         try:
             loom_connection = lp.connect(abs_file_path, mode='r+')
         except KeyError as e:
-            print(e)
+            logger.error(e)
             os.remove(file_path)
+            logger.warning(f'Deleting malformed loom {file_path}')
             return None
         return self.add_loom(partial_md5_hash=partial_md5_hash, file_path=file_path, abs_file_path=abs_file_path, loom_connection=loom_connection)
 
@@ -41,22 +45,21 @@ class LoomFileHandler():
             return hashlib.md5(f.read()).hexdigest()
 
     def change_loom_mode(self, loom_file_path, mode):
-        print(loom_file_path)
         if not os.path.exists(loom_file_path):
             raise ValueError('The file located at ' +
                              loom_file_path + ' does not exist.')
-        print('{0} getting md5'.format(loom_file_path))
+        logger.info('{0} getting md5'.format(loom_file_path))
         partial_md5_hash = LoomFileHandler.get_partial_md5_hash(loom_file_path, 10000)
-        print('{0} md5 is {1}'.format(loom_file_path, partial_md5_hash))
+        logger.info('{0} md5 is {1}'.format(loom_file_path, partial_md5_hash))
 
         if partial_md5_hash in self.active_looms:
             self.active_looms[partial_md5_hash].close()
         if mode == 'rw':
             self.active_looms[partial_md5_hash] = self.get_loom_connection(loom_file_path=loom_file_path)  # , rw=True)
-            print('{0} now rw'.format(loom_file_path))
+            logger.info('{0} now rw'.format(loom_file_path))
         else:
             self.active_looms[partial_md5_hash] = self.get_loom_connection(loom_file_path=loom_file_path)  # , rw=False)
-            print('{0} now ro'.format(loom_file_path))
+            logger.info('{0} now ro'.format(loom_file_path))
 
     def get_loom_absolute_file_path(self, loom_file_path):
         return os.path.join(self.loom_dir, loom_file_path)
@@ -75,9 +78,14 @@ class LoomFileHandler():
         if not os.path.exists(abs_loom_file_path):
             raise ValueError('The file located at ' +
                              abs_loom_file_path + ' does not exist.')
+            logger.error(f"The file {loom_file_path} does not exists.")
         # To check if the given file path is given specified url!
         partial_md5_hash = LoomFileHandler.get_partial_md5_hash(abs_loom_file_path, 10000)
         if partial_md5_hash in self.active_looms:
-            return self.active_looms[partial_md5_hash]
-        print("Debug: loading the loom file from " + abs_loom_file_path + "...")
-        return self.load_loom_file(partial_md5_hash=partial_md5_hash, file_path=loom_file_path, abs_file_path=abs_loom_file_path)
+            loom = self.active_looms[partial_md5_hash]
+            logger.debug(f"Returning pre-loaded loom file {loom_file_path}. Hash {partial_md5_hash}, object {id(loom)}")
+            return loom
+
+        loom = self.load_loom_file(partial_md5_hash=partial_md5_hash, file_path=loom_file_path, abs_file_path=abs_loom_file_path)
+        logger.debug(f"Returning newly loaded loom file {loom_file_path}. Hash {partial_md5_hash}, object {id(loom)}")
+        return loom
