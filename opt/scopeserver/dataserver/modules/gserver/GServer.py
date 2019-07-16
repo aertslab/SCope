@@ -403,9 +403,11 @@ class SCope(s_pb2_grpc.MainServicer):
         if SCope.app_mode:
             with open(os.path.join(self.dfh.get_config_dir(), 'Permanent_Session_IDs.txt'), 'r') as fh:
                 newUUID = fh.readline().rstrip('\n')
+                logger.info(f'IP {request.ip} connected to SCope. Running in App mode. Passing UUID {newUUID}.')
         else:
             newUUID = str(uuid.uuid4())
         if newUUID not in self.dfh.get_current_UUIDs().keys():
+            logger.info(f'IP {request.ip} connected to SCope. Passing new UUID {newUUID}.')
             self.dfh.get_uuid_log().write("{0} :: {1} :: New UUID ({2}) assigned.\n".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, newUUID))
             self.dfh.get_uuid_log().flush()
             self.dfh.get_current_UUIDs()[newUUID] = time.time()
@@ -416,22 +418,26 @@ class SCope(s_pb2_grpc.MainServicer):
         for uid in curUUIDSet:
             timeRemaining = int(dfh._UUID_TIMEOUT - (time.time() - self.dfh.get_current_UUIDs()[uid]))
             if timeRemaining < 0:
-                logger.info('Removing expired UUID: {0}'.format(uid))
+                logger.info('Removing folders of expired UUID: {0}'.format(uid))
                 del(self.dfh.get_current_UUIDs()[uid])
                 for i in ['Loom', 'GeneSet', 'LoomAUCellRankings']:
                     if os.path.exists(os.path.join(self.dfh.get_data_dirs()[i]['path'], uid)):
                         shutil.rmtree(os.path.join(self.dfh.get_data_dirs()[i]['path'], uid))
         uid = request.UUID
         if uid in self.dfh.get_current_UUIDs():
+            logger.info(f'IP {request.ip} connected to SCope. Using UUID {uid} from frontend.')
             startTime = self.dfh.get_current_UUIDs()[uid]
             timeRemaining = int(dfh._UUID_TIMEOUT - (time.time() - startTime))
             self.dfh.get_uuid_log().write("{0} :: {1} :: Old UUID ({2}) connected :: Time Remaining - {3}.\n".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid, timeRemaining))
             self.dfh.get_uuid_log().flush()
         else:
+            logger.info(f'IP {request.ip} connected to SCope. Using UUID {uid} from frontend.')
             try:
                 uuid.UUID(uid)
             except (KeyError, AttributeError):
+                old_uid = uid
                 uid = str(uuid.uuid4())
+                logger.error(f'UUID {old_uid} is malformed. Passing new UUID {uid}')
             self.dfh.get_uuid_log().write("{0} :: {1} :: New UUID ({2}) assigned.\n".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid))
             self.dfh.get_uuid_log().flush()
             self.dfh.get_current_UUIDs()[uid] = time.time()
@@ -445,6 +451,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
         if len(self.dfh.get_active_sessions().keys()) >= constant._ACTIVE_SESSIONS_LIMIT and uid not in self.dfh.get_permanent_UUIDs() and uid not in self.dfh.get_active_sessions().keys():
             sessionsLimitReached = True
+            logger.warning(f'Maximum number of concurrent active sessions ({constant._ACTIVE_SESSIONS_LIMIT}) reached. IP {request.ip} will not be able to access SCope.')
 
         if uid not in self.dfh.get_active_sessions().keys() and not sessionsLimitReached:
             self.dfh.reset_active_session_timeout(uid)
