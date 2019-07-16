@@ -8,6 +8,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class LoomFileHandler():
 
     def __init__(self):
@@ -29,6 +30,7 @@ class LoomFileHandler():
         except KeyError as e:
             logger.error(e)
             os.remove(file_path)
+            logger.warning(f'Deleting malformed loom {file_path}')
             return None
         return self.add_loom(partial_md5_hash=partial_md5_hash, file_path=file_path, abs_file_path=abs_file_path, loom_connection=loom_connection)
 
@@ -43,7 +45,6 @@ class LoomFileHandler():
             return hashlib.md5(f.read()).hexdigest()
 
     def change_loom_mode(self, loom_file_path, mode):
-        loggerinfo(loom_file_path)
         if not os.path.exists(loom_file_path):
             raise ValueError('The file located at ' +
                              loom_file_path + ' does not exist.')
@@ -77,9 +78,14 @@ class LoomFileHandler():
         if not os.path.exists(abs_loom_file_path):
             raise ValueError('The file located at ' +
                              abs_loom_file_path + ' does not exist.')
+            logger.error(f"The file {loom_file_path} does not exists.")
         # To check if the given file path is given specified url!
         partial_md5_hash = LoomFileHandler.get_partial_md5_hash(abs_loom_file_path, 10000)
         if partial_md5_hash in self.active_looms:
-            return self.active_looms[partial_md5_hash]
-        logger.debug("loading the loom file from {0} ...".format(abs_loom_file_path))
-        return self.load_loom_file(partial_md5_hash=partial_md5_hash, file_path=loom_file_path, abs_file_path=abs_loom_file_path)
+            loom = self.active_looms[partial_md5_hash]
+            logger.debug(f"Returning pre-loaded loom file {loom_file_path}. Hash {partial_md5_hash}, object {id(loom)}")
+            return loom
+
+        loom = self.load_loom_file(partial_md5_hash=partial_md5_hash, file_path=loom_file_path, abs_file_path=abs_loom_file_path)
+        logger.debug(f"Returning newly loaded loom file {loom_file_path}. Hash {partial_md5_hash}, object {id(loom)}")
+        return loom
