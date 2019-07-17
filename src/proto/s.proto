@@ -328,6 +328,7 @@ message RemainingUUIDTimeReply {
   string UUID=1;
   int64 timeRemaining=2;
   bool sessionsLimitReached=3;
+  string sessionMode=4;
 }
 
 message LoomUploadedRequest {

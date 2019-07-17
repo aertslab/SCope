@@ -20,13 +20,9 @@ class LoomFileHandler():
         self.active_looms[partial_md5_hash] = loom
         return loom
 
-    def load_loom_file(self, partial_md5_hash, file_path, abs_file_path, rw=False):
-        # if rw:
-        #     loom = lp.connect(file_path, mode='r+')
-        # else:
-        #     loom = lp.connect(file_path, mode='r')\
+    def load_loom_file(self, partial_md5_hash, file_path, abs_file_path, mode='r'):
         try:
-            loom_connection = lp.connect(abs_file_path, mode='r+')
+            loom_connection = lp.connect(abs_file_path, mode=mode, validate=False)
         except KeyError as e:
             logger.error(e)
             os.remove(file_path)
@@ -44,7 +40,7 @@ class LoomFileHandler():
                 f.seek(- last_n_kb * 1024, 2)
             return hashlib.md5(f.read()).hexdigest()
 
-    def change_loom_mode(self, loom_file_path, mode):
+    def change_loom_mode(self, loom_file_path, mode='r'):
         if not os.path.exists(loom_file_path):
             raise ValueError('The file located at ' +
                              loom_file_path + ' does not exist.')
@@ -70,11 +66,11 @@ class LoomFileHandler():
     def set_global_data(self):
         self.global_looms = [x for x in os.listdir(self.loom_dir) if not os.path.isdir(os.path.join(self.loom_dir, x))]
 
-    def get_loom_connection(self, loom_file_path):
-        return self.get_loom(loom_file_path=loom_file_path).get_connection()
+    def get_loom_connection(self, loom_file_path, mode='r'):
+        return self.get_loom(loom_file_path=loom_file_path, mode=mode).get_connection()
 
-    def get_loom(self, loom_file_path):
-        abs_loom_file_path = self.get_loom_absolute_file_path(loom_file_path=loom_file_path)
+    def get_loom(self, loom_file_path, mode='r'):
+        abs_loom_file_path = self.get_loom_absolute_file_path(loom_file_path)
         if not os.path.exists(abs_loom_file_path):
             raise ValueError('The file located at ' +
                              abs_loom_file_path + ' does not exist.')
@@ -86,6 +82,6 @@ class LoomFileHandler():
             logger.debug(f"Returning pre-loaded loom file {loom_file_path}. Hash {partial_md5_hash}, object {id(loom)}")
             return loom
 
-        loom = self.load_loom_file(partial_md5_hash=partial_md5_hash, file_path=loom_file_path, abs_file_path=abs_loom_file_path)
+        loom = self.load_loom_file(partial_md5_hash=partial_md5_hash, mode=mode, file_path=loom_file_path, abs_file_path=abs_loom_file_path)
         logger.debug(f"Returning newly loaded loom file {loom_file_path}. Hash {partial_md5_hash}, object {id(loom)}")
         return loom

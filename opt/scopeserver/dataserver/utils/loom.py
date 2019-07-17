@@ -5,6 +5,7 @@ import base64
 from functools import lru_cache
 import pandas as pd
 import time
+import loompy as lp
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
 import logging
@@ -58,6 +59,11 @@ class Loom():
     def get_cell_ids(self):
         return self.loom_connection.ca["CellID"]
 
+    def change_loom_mode(self, mode='r'):
+        self.loom_connection.close()
+        self.loom_connection = lp.connect(self.abs_file_path, mode=mode, validate=False)
+        logger.info(f'{self.abs_file_path} now {self.loom_connection.mode}')
+
     #############
     # Meta Data #
     #############
@@ -71,12 +77,12 @@ class Loom():
             return json.loads(zlib.decompress(base64.b64decode(meta.encode('ascii'))).decode('ascii'))
 
     def generate_meta_data(self):
-        loom = self.loom_connection
         # Designed to generate metadata from linnarson loom files
         logger.info('Making metadata for {0}'.format(self.get_abs_file_path()))
         metaJson = {}
 
-        # self.change_loom_mode(loom_file_path, rw=True)
+        self.change_loom_mode(mode='r+')
+        loom = self.loom_connection
 
         # Embeddings
         # Find PCA / tSNE - Catch all 0's ERROR
@@ -118,7 +124,7 @@ class Loom():
         logger.debug(f'\tFinal Clusterings for {self.file_path} - {metaJson["clusterings"]}')
 
         loom.attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
-        # self.change_loom_mode(loom_file_path, rw=False)
+        self.change_loom_mode(mode='r')
 
     def get_file_metadata(self):
         """Summarize in a dict what feature data the loom file contains.
