@@ -42,6 +42,7 @@ class App extends Component {
 			error: false,
 			isSidebarVisible: true,
 			sessionsLimitReached: false,
+			sessionMode: 'rw',
 		}
 		this.timeout = null;
 		this.mouseClicks = 0;
@@ -116,7 +117,7 @@ class App extends Component {
 								cookies={this.props.cookies}
 							/>
 							<Sidebar.Pushable>
-								<AppSidebar visible={isSidebarVisible} onMetadataChange={this.onMetadataChange.bind(this)} />
+								<AppSidebar visible={isSidebarVisible} onMetadataChange={this.onMetadataChange.bind(this)} sessionMode={this.state.sessionMode} />
 								<Sidebar.Pusher style={{width: pusherWidth}}>
 									<Route path="/:uuid/:loom?/welcome"  component={Welcome}  />
 									<Route path="/:uuid/:loom?/dataset"  component={Dataset}  />
@@ -260,6 +261,7 @@ class App extends Component {
 			gbc.services.scope.Main.getRemainingUUIDTime(query, (err, response) => {
 				this.mouseClicks = 0;
 				if (DEBUG) console.log('getRemainingUUIDTime', response);
+				this.setState({sessionMode: response.sessionMode})
 				if (response.sessionsLimitReached) {
 					this.setState({loading: false, sessionsLimitReached: true});
 				} else {

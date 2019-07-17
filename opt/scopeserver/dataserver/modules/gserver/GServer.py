@@ -411,13 +411,13 @@ class SCope(s_pb2_grpc.MainServicer):
             logger.info(f'IP {request.ip} connected to SCope. Passing new UUID {newUUID}.')
             self.dfh.get_uuid_log().write("{0} :: {1} :: New UUID ({2}) assigned.\n".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, newUUID))
             self.dfh.get_uuid_log().flush()
-            self.dfh.get_current_UUIDs()[newUUID] = time.time()
+            self.dfh.get_current_UUIDs()[newUUID] = [time.time(), 'rw']  # New sessions are rw
         return s_pb2.UUIDReply(UUID=newUUID)
 
     def getRemainingUUIDTime(self, request, context):  # TODO: his function will be called a lot more often, we should reduce what it does.
         curUUIDSet = set(list(self.dfh.get_current_UUIDs().keys()))
         for uid in curUUIDSet:
-            timeRemaining = int(dfh._UUID_TIMEOUT - (time.time() - self.dfh.get_current_UUIDs()[uid]))
+            timeRemaining = int(dfh._UUID_TIMEOUT - (time.time() - self.dfh.get_current_UUIDs()[uid][0]))
             if timeRemaining < 0:
                 logger.info('Removing folders of expired UUID: {0}'.format(uid))
                 del(self.dfh.get_current_UUIDs()[uid])
@@ -425,9 +425,9 @@ class SCope(s_pb2_grpc.MainServicer):
                     if os.path.exists(os.path.join(self.dfh.get_data_dirs()[i]['path'], uid)):
                         shutil.rmtree(os.path.join(self.dfh.get_data_dirs()[i]['path'], uid))
         uid = request.UUID
-        if uid in self.dfh.get_current_UUIDs():
+        if uid in self.dfh.get_current_UUIDs().keys():
             logger.info(f'IP {request.ip} connected to SCope. Using UUID {uid} from frontend.')
-            startTime = self.dfh.get_current_UUIDs()[uid]
+            startTime = self.dfh.get_current_UUIDs()[uid][0]
             timeRemaining = int(dfh._UUID_TIMEOUT - (time.time() - startTime))
             self.dfh.get_uuid_log().write("{0} :: {1} :: Old UUID ({2}) connected :: Time Remaining - {3}.\n".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid, timeRemaining))
             self.dfh.get_uuid_log().flush()
@@ -441,7 +441,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 logger.error(f'UUID {old_uid} is malformed. Passing new UUID {uid}')
             self.dfh.get_uuid_log().write("{0} :: {1} :: New UUID ({2}) assigned.\n".format(time.strftime('%Y-%m-%d__%H-%M-%S', time.localtime()), request.ip, uid))
             self.dfh.get_uuid_log().flush()
-            self.dfh.get_current_UUIDs()[uid] = time.time()
+            self.dfh.get_current_UUIDs()[uid] = [time.time(), 'rw']
             timeRemaining = int(dfh._UUID_TIMEOUT)
 
         self.dfh.active_session_check()
@@ -456,7 +456,9 @@ class SCope(s_pb2_grpc.MainServicer):
 
         if uid not in self.dfh.get_active_sessions().keys() and not sessionsLimitReached:
             self.dfh.reset_active_session_timeout(uid)
-        return s_pb2.RemainingUUIDTimeReply(UUID=uid, timeRemaining=timeRemaining, sessionsLimitReached=sessionsLimitReached)
+
+        sessionMode = self.dfh.get_current_UUIDs()[uid][1]
+        return s_pb2.RemainingUUIDTimeReply(UUID=uid, timeRemaining=timeRemaining, sessionsLimitReached=sessionsLimitReached, sessionMode=sessionMode)
 
     def translateLassoSelection(self, request, context):
         src_loom = self.lfh.get_loom(loom_file_path=request.srcLoomFilePath)

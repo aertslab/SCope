@@ -103,11 +103,13 @@ class AppSidebar extends Component {
 				</Segment>
 				<Menu.Header>DATASETS</Menu.Header>
 				<Menu.Menu>
+					{this.props.sessionMode == 'rw' &&
 					<Menu.Item key="new" onClick={this.toggleUploadModal.bind(this)}>
 						<Icon name="add" />
 						<em>Upload new dataset</em>
 					</Menu.Item>
-					{renderLevel(userLoomTree, 1, 'User uploaded', 1)}
+					}
+					{renderLevel(userLoomTree, 1, this.props.sessionMode == 'rw' ? 'User uploaded' : 'Session Looms', this.props.sessionMode == 'rw' ? true : false)}
 					{renderLevel(generalLoomTree, 1, 'Publicly available')}
 					<Dimmer active={loading} inverted>
 						<Loader inverted>Loading</Loader>
