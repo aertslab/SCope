@@ -261,14 +261,13 @@ class App extends Component {
 			gbc.services.scope.Main.getRemainingUUIDTime(query, (err, response) => {
 				this.mouseClicks = 0;
 				if (DEBUG) console.log('getRemainingUUIDTime', response);
-				this.setState({sessionMode: response.sessionMode})
 				if (response.sessionsLimitReached) {
 					this.setState({loading: false, sessionsLimitReached: true});
 				} else {
 					this.timeout = response ? parseInt(response.timeRemaining * 1000) : 0;
 					// cookies.set(cookieName, uuid, { path: '/', maxAge: this.timeout });
 					if (!ping) {
-						this.setState({loading: false, uuid: uuid});
+						this.setState({loading: false, uuid: uuid, sessionMode: response.sessionMode});
 					}
 					if (!this.timer) {
 						this.timer = setInterval(() => {
