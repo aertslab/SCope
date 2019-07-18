@@ -271,10 +271,13 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                 self.send_error(415, "Unsupported file type")
                 return None
             data_file_handler.update_UUID_db()
-            if data_file_handler.current_UUIDs[form.getvalue('UUID')][1] == 'ro':
-                self.send_error(403, 'Session is read-only')
-                return None
-
+            try:
+                if data_file_handler.current_UUIDs[form.getvalue('UUID')][1] == 'ro':
+                    self.send_error(403, 'Session is read-only')
+                    return None
+            except KeyError:
+                pass
+                
             # Update the directory of DroopyFieldStorage
             form.directory = self.directory
             logger.info("Saving uploaded file in {0}".format(self.directory))
