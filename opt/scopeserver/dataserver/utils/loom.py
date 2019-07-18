@@ -222,6 +222,7 @@ class Loom():
     def get_nb_cells(self):
         return self.loom_connection.shape[1]
 
+    @lru_cache(maxsize=1)
     def get_genes(self):
         return self.loom_connection.ra.Gene.astype(str)
 

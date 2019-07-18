@@ -159,9 +159,9 @@ export default class FeatureSearch extends React.Component {
 
 					// Limit to maximum 10 results
 					genes = {"name": "gene", "results": genes.slice(0, 10)}
-					regulons = {"name": "regulon", "results": regulons.slice(0, 10)}
-					annotations = {"name": "annotation", "results": annotations.slice(0, 10)}
-					metrics = {"name": "metric", "results": metrics.slice(0, 10)}
+					regulons = {"name": "regulon", "results": regulons}
+					annotations = {"name": "annotation", "results": annotations}
+					metrics = {"name": "metric", "results": metrics}
 
 					// Only show results for the selected result type (gene | regulon | cluster | annotation)
 					if (genes['results'].length && (type == 'all' || type == 'gene')) {

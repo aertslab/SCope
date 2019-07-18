@@ -2,6 +2,9 @@ import functools
 from functools import lru_cache
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SearchSpace(dict):
@@ -82,6 +85,19 @@ class SearchSpace(dict):
 
     def add_regulons(self):
         self.add_elements(elements=self.loom.get_regulons_AUC().dtype.names, element_type='regulon')
+        self.add_markers(element_type='regulon_target')
+
+    def add_markers(self, element_type='regulon_target'):
+        loom = self.loom.loom_connection
+        if element_type == 'regulon_target':
+            regulons = list(loom.ca.RegulonsAUC.dtype.names)
+            for regulon in regulons:
+                genes = self.loom.get_regulon_genes(regulon=regulon)
+                for gene in genes:
+                    if (gene.casefold(), gene, element_type) in self.keys():
+                        self[(gene.casefold(), gene, element_type)].append(regulon)
+                    else:
+                        self[(gene.casefold(), gene, element_type)] = [regulon]
 
     def add_annotations(self):
         annotations = []

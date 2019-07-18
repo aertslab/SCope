@@ -1,4 +1,6 @@
 .ui.category.search>.results {
+	overflow-y: auto;
+	max-height: 550px;
 	width: auto;
 	float: none;
 }

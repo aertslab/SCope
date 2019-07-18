@@ -65,6 +65,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def get_features(self, loom, query):
         logger.debug('Searching for {0}'.format(query))
         start_time = time.time()
+
         if query.startswith('hsap\\'):
             search_space = ss.SearchSpace(loom=loom, cross_species='hsap').build()
             cross_species = 'hsap'
@@ -109,9 +110,14 @@ class SCope(s_pb2_grpc.MainServicer):
         # r = (elementCF, element, elementName)
         # dg = (drosElement, %match)
         # searchSpace[r] = translastedElement
+
+        # collapsedResults[element, element_name] = finalElement
+
         collapsedResults = OrderedDict()
         if cross_species == '':
             for r in res:
+                if type(search_space[r]) == list:
+                    search_space[r] = tuple(search_space[r])
                 if (search_space[r], r[2]) not in collapsedResults.keys():
                     collapsedResults[(search_space[r], r[2])] = [r[1]]
                 else:
@@ -127,32 +133,48 @@ class SCope(s_pb2_grpc.MainServicer):
                     if (dg[0], r[2]) not in collapsedResults.keys():
                         collapsedResults[(dg[0], r[2])] = (r[1], dg[1])
 
-        descriptions = []
-        if cross_species == '':
-            logger.debug(f'Performing cross species search: {query}')
-            for r in collapsedResults.keys():
+        descriptions = {x: '' for x in collapsedResults.keys() if x[1] not in ['regulon_target', 'marker_gene']}
+
+        for r in list(collapsedResults.keys()):
+            if cross_species == '':
+                description = ''
                 synonyms = sorted([x for x in collapsedResults[r]])
                 try:
                     synonyms.remove(r[0])
                 except ValueError:
                     pass
-                if len(synonyms) > 0:
-                    descriptions.append('Synonym of: {0}'.format(', '.join(synonyms)))
-                else:
-                    descriptions.append('')
-        elif cross_species == 'hsap':
-            for r in collapsedResults.keys():
-                descriptions.append('Orthologue of {0}, {1:.2f}% identity (Human -> Drosophila)'.format(collapsedResults[r][0], collapsedResults[r][1]))
-        elif cross_species == 'mmus':
-            for r in collapsedResults.keys():
-                descriptions.append('Orthologue of {0}, {1:.2f}% identity (Mouse -> Drosophila)'.format(collapsedResults[r][0], collapsedResults[r][1]))
-        # if mapping[result] != result: change title and description to indicate synonym
+                if r[1] == 'regulon_target':
+                    for regulon in r[0]:
+                        description = f'{collapsedResults[r][0]} is a target of {regulon}'
+                        if (regulon, 'regulon') not in collapsedResults.keys():
+                            collapsedResults[(regulon, 'regulon')] = collapsedResults[r][0]
+                            descriptions[(regulon, 'regulon')] = ''
+                        if descriptions[(regulon, 'regulon')] != '':
+                            descriptions[(regulon, 'regulon')] += ', '
+                        descriptions[(regulon, 'regulon')] += description
+                    del(collapsedResults[r])
+                elif len(synonyms) > 0:
+                    if description != '':
+                        description += ', '
+                    description += 'Synonym of: {0}'.format(', '.join(synonyms))
+                    descriptions[r] = description
+
+            elif cross_species == 'hsap':
+                logger.debug(f'Performing hsap cross species search: {query}')
+                description = 'Orthologue of {0}, {1:.2f}% identity (Human -> Drosophila)'.format(collapsedResults[r][0], collapsedResults[r][1])
+                descriptions[r] = description
+            elif cross_species == 'mmus':
+                logger.debug(f'Performing mmus cross species search: {query}')
+                description = 'Orthologue of {0}, {1:.2f}% identity (Mouse -> Drosophila)'.format(collapsedResults[r][0], collapsedResults[r][1])
+                descriptions[r] = description
+
+            # if mapping[result] != result: change title and description to indicate synonym
 
         logger.debug("{0} genes matching '{1}'".format(len(res), query))
         logger.debug("{0:.5f} seconds elapsed ---".format(time.time() - start_time))
         res = {'feature': [r[0] for r in collapsedResults.keys()],
                'featureType': [r[1] for r in collapsedResults.keys()],
-               'featureDescription': descriptions}
+               'featureDescription': [descriptions[r] for r in collapsedResults.keys()]}
         return res
 
     def compressHexColor(self, a):
