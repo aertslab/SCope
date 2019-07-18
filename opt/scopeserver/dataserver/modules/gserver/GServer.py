@@ -476,15 +476,19 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.CellIDsReply(cellIds=slctd_cell_ids)
 
     def deleteUserFile(self, request, context):
+        success = False
         basename = os.path.basename(request.filePath)
         finalPath = os.path.join(self.dfh.get_data_dirs()[request.fileType]['path'], request.UUID, basename)
-        if os.path.isfile(finalPath) and (basename.endswith('.loom') or basename.endswith('.txt')):
-            logger.info(f'File {request.filePath} deleted at request of user with UUID {request.UUID}.')
-            os.remove(finalPath)
-            success = True
+        if self.dfh.current_UUIDs[request.UUID][1] == 'rw':
+            if os.path.isfile(finalPath) and (basename.endswith('.loom') or basename.endswith('.txt')):
+                logger.info(f'File {request.filePath} deleted at request of user with UUID {request.UUID}.')
+                try:
+                    os.remove(finalPath)
+                    success = True
+                except:
+                    logger.error(f'OS Error, couldn\'t remove file: {finalPath}')
         else:
-            success = False
-
+            logger.error(f'UUID: {request.UUID} is read-only, but requested to delete file {finalPath}')
         return s_pb2.DeleteUserFileReply(deletedSuccessfully=success)
 
     def downloadSubLoom(self, request, context):
