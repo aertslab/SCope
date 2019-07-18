@@ -16,7 +16,7 @@ import base64
 import threading
 import pickle
 import uuid
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict, defaultdict, deque
 from functools import lru_cache
 from itertools import compress
 from pathlib import Path
@@ -89,22 +89,36 @@ class SCope(s_pb2_grpc.MainServicer):
         queryCF = query.casefold()
         res = [x for x in search_space.keys() if queryCF in x[0]]
 
+        order = deque()
+
         for n, r in enumerate(res):
             if query in r[0]:
-                r = res.pop(n)
-                res = [r] + res
+                order.appendleft(n)
         for n, r in enumerate(res):
-            if r[0].startswith(queryCF):
-                r = res.pop(n)
-                res = [r] + res
+            if r[0].startswith(queryCF) or r[0].endswith(queryCF):
+                order.appendleft(n)
         for n, r in enumerate(res):
             if r[0] == queryCF:
-                r = res.pop(n)
-                res = [r] + res
+                order.appendleft(n)
+        for n, r in enumerate(res):
+            if r[1].startswith(query):
+                order.appendleft(n)
+        for n, r in enumerate(res):
+            if r[1].startswith(query) or r[1].endswith(query):
+                order.appendleft(n)
         for n, r in enumerate(res):
             if r[1] == query:
-                r = res.pop(n)
-                res = [r] + res
+                order.appendleft(n)
+        for n in range(len(res)):
+            if n not in order:
+                order.appendleft(n)
+
+        order_dict = OrderedDict()
+
+        for x in order:
+            order_dict[x] = None
+
+        res = [res[x] for x in order_dict.keys()]
 
         # These structures are a bit messy, but still fast
         # r = (elementCF, element, elementName)
