@@ -132,7 +132,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
 
     # Overwrite log_message from BaseHTTPRequestHandler to keep style of SCope
     def log_message(self, format, *args):
-        logger.debug(' '.join([*args]))
+        logger.debug(' '.join([str(x) for x in [*args]]))
     "The guts of Droopy-a custom handler that accepts files & serves templates"
 
     @property
@@ -201,7 +201,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
     @check_auth
     def do_GET(self):
         "Standard method to override in this Server object."
-        self.directory = dfh.DataFileHandler.get_data_dir_path_by_file_type(file_type='Loom')
+        dfh.get_data_dir_path_by_file_type(file_type='Loom')
 
         name = self.path.lstrip('/')
         logger.debug(name)
@@ -250,8 +250,10 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                                   headers=self.headers,
                                   environ={'REQUEST_METHOD': self.command})
 
+        data_file_handler = dfh.DataFileHandler()
+
         if 'loomFilePath' in form.keys():
-            self.directory = dfh.DataFileHandler.get_data_dir_path_by_file_type(file_type=form.getvalue('file-type'))
+            self.directory = data_file_handler.get_data_dir_path_by_file_type(file_type=form.getvalue('file-type'))
             localpath = _encode_str_if_py2(os.path.join(self.directory, form.getvalue('loomFilePath')), "utf-8")
             with open(localpath, 'rb') as f:
                 self.send_resp_headers(200,
@@ -261,10 +263,16 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                                        end=True)
                 shutil.copyfileobj(f, self.wfile)
         else:
-            if form.getvalue('file-type') in dfh.DataFileHandler.get_data_dirs().keys():
-                self.directory = dfh.DataFileHandler.get_data_dir_path_by_file_type(file_type=form.getvalue('file-type'), UUID=form.getvalue('UUID'))
+            if form.getvalue('file-type') in data_file_handler.get_data_dirs().keys():
+                self.directory = data_file_handler.get_data_dir_path_by_file_type(file_type=form.getvalue('file-type'), UUID=form.getvalue('UUID'))
             else:
-                self.send_error(415, "Unsupported file tyype")
+                self.send_error(415, "Unsupported file type")
+                return None
+            data_file_handler.update_UUID_db()
+            if data_file_handler.current_UUIDs[form.getvalue('UUID')][1] == 'ro':
+                self.send_error(403, 'Session is read-only')
+                return None
+
             # Update the directory of DroopyFieldStorage
             form.directory = self.directory
             logger.info("Saving uploaded file in {0}".format(self.directory))
