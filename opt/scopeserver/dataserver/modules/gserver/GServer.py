@@ -476,6 +476,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.CellIDsReply(cellIds=slctd_cell_ids)
 
     def deleteUserFile(self, request, context):
+        self.dfh.update_UUID_db()
         success = False
         basename = os.path.basename(request.filePath)
         finalPath = os.path.join(self.dfh.get_data_dirs()[request.fileType]['path'], request.UUID, basename)
