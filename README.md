@@ -6,7 +6,7 @@ Currently the data format supported by SCope is `.loom`. This file format for ve
 
 ## Version History
 
-June 26, 2019
+July 18, 2019
 * Version 1.3.7
 	* Enabled read only sessions on the backend for permanent sessions
 		* Use by adding a tab-seperated value of either `ro` or `rw` to a session in Permanent_Sessions.txt in SCope config dir.
@@ -14,6 +14,8 @@ June 26, 2019
 	* Converted logs from print statements to logging package.
 	* Various small fixes and dependancy issues.
 	* General code cleanup and PEP8 compliance changes
+
+June 26, 2019
 * Version 1.3.6
    * Allow for running in dev mode on AWS through `npm run scope-dev-aws` (useful for t2.micro AWS instance). See https://bit.ly/2XsunFh to start your own SCope instance running on AWS. Update related tutorials for AWS deployment. 
 
