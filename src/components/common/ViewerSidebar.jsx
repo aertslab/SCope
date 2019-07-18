@@ -97,7 +97,8 @@ class ViewerSidebar extends Component {
 
 			if (activeFeatures[i] && activeFeatures[i].metadata) {
 				let md = activeFeatures[i].metadata
-				let image = md.motifName ? (<Image src={'http://motifcollections.aertslab.org/v8/logos/'+md.motifName} />) : '';
+				let image = md.motifName ? (<img src={'http://motifcollections.aertslab.org/v8/logos/'+md.motifName} ref={img => this.img = img} onError={
+					() => this.img.src = 'http://motifcollections.aertslab.org/v9/logos/'+md.motifName } />) : '';
 				let markerTable = "", legendTable = "", downloadSubLoomButton = () => "";
 
 				let newMarkerTableColumn = (header, id, accessor, cell) => {
