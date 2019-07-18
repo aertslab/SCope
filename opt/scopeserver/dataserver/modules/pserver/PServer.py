@@ -201,9 +201,11 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
     @check_auth
     def do_GET(self):
         "Standard method to override in this Server object."
-        dfh.get_data_dir_path_by_file_type(file_type='Loom')
+        dfh.DataFileHandler().get_data_dir_path_by_file_type(file_type='Loom')
 
         name = self.path.lstrip('/')
+        if name == '':
+            return None
         logger.debug(name)
 
         name = urllibparse.unquote(name)
