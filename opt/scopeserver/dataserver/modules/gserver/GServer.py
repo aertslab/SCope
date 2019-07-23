@@ -91,41 +91,26 @@ class SCope(s_pb2_grpc.MainServicer):
 
         order = deque()
 
+        perfect_match = []
+        good_match = []
+        bad_match = []
+        no_match = []
+
         for n, r in enumerate(res):
+            if r[1] == query or r[0] == queryCF:
+                perfect_match.append(r)
+                continue
+            if r[1].startswith(query) or r[1].endswith(query) or r[0].startswith(queryCF) or r[0].endswith(queryCF):
+                good_match.append(r)
+                continue
             if query in r[0]:
-                order.appendleft(n)
-        for n, r in enumerate(res):
-            if r[0].startswith(queryCF) or r[0].endswith(queryCF):
-                order.appendleft(n)
-        for n, r in enumerate(res):
-            if r[0] == queryCF:
-                order.appendleft(n)
-        for n, r in enumerate(res):
-            if r[1].startswith(query):
-                order.appendleft(n)
-        for n, r in enumerate(res):
-            if r[1].startswith(query) or r[1].endswith(query):
-                order.appendleft(n)
-        for n, r in enumerate(res):
-            if r[1] == query:
-                order.appendleft(n)
-        for n in range(len(res)):
+                bad_match.append(r)
+                continue
             if n not in order:
-                order.appendleft(n)
+                no_match.append(r)
+                continue
 
-        order_dict = OrderedDict()
-
-        for x in order:
-            order_dict[x] = None
-
-        res = [res[x] for x in order_dict.keys()]
-
-        # These structures are a bit messy, but still fast
-        # r = (elementCF, element, elementName)
-        # dg = (drosElement, %match)
-        # searchSpace[r] = translastedElement
-
-        # collapsedResults[element, element_name] = finalElement
+        res = sorted(perfect_match) + sorted(good_match) + sorted(bad_match) + sorted(no_match)
 
         collapsedResults = OrderedDict()
         if cross_species == '':
