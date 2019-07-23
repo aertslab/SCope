@@ -1,5 +1,6 @@
 import functools
 from functools import lru_cache
+import re
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
 import logging
@@ -82,6 +83,7 @@ class SearchSpace(dict):
             for cluster in clustering['clusters']:
                 all_clusters.append(cluster['description'])
             self.add_elements(elements=all_clusters, element_type='Clustering: {0}'.format(clustering['name']))
+        self.add_markers(element_type='marker_gene')
 
     def add_regulons(self):
         self.add_elements(elements=self.loom.get_regulons_AUC().dtype.names, element_type='regulon')
@@ -98,6 +100,17 @@ class SearchSpace(dict):
                         self[(gene.casefold(), gene, element_type)].append(regulon)
                     else:
                         self[(gene.casefold(), gene, element_type)] = [regulon]
+        if element_type == 'marker_gene':
+            searchable_clustering_ids = [x.split('_')[-1] for x in loom.ra.keys() if bool(re.search("ClusterMarkers_[0-9]+$", x))]
+            for clustering in searchable_clustering_ids:
+                clustering = int(clustering)
+                for cluster in range(len(self.meta_data['clusterings'][clustering]['clusters'])):
+                    genes = self.loom.get_cluster_marker_genes(clustering, cluster)
+                    for gene in genes:
+                        if (gene.casefold(), gene, element_type) in self.keys():
+                            self[(gene.casefold(), gene, element_type)].append(f'{clustering}_{cluster}')
+                        else:
+                            self[(gene.casefold(), gene, element_type)] = [f'{clustering}_{cluster}']
 
     def add_annotations(self):
         annotations = []

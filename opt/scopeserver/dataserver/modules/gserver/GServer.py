@@ -133,7 +133,7 @@ class SCope(s_pb2_grpc.MainServicer):
                         collapsedResults[(dg[0], r[2])] = (r[1], dg[1])
 
         descriptions = {x: '' for x in collapsedResults.keys() if x[1] not in ['regulon_target', 'marker_gene']}
-
+        
         for r in list(collapsedResults.keys()):
             if cross_species == '':
                 description = ''
@@ -151,6 +151,21 @@ class SCope(s_pb2_grpc.MainServicer):
                         if descriptions[(regulon, 'regulon')] != '':
                             descriptions[(regulon, 'regulon')] += ', '
                         descriptions[(regulon, 'regulon')] += description
+                    del(collapsedResults[r])
+
+                elif r[1] == 'marker_gene':
+                    for cluster in r[0]:
+                        clustering = int(cluster.split('_')[0])
+                        cluster = int(cluster.split('_')[1])
+                        clustering_name = loom.get_meta_data_clustering_by_id(clustering)["name"]
+                        cluster_name = loom.get_meta_data_clustering_by_id(clustering)['clusters'][cluster]["description"]
+                        description = f'{collapsedResults[r][0]} is a target of {cluster_name}'
+                        if (cluster_name, f'Clustering: {clustering_name}') not in collapsedResults.keys():
+                            collapsedResults[(cluster_name, f'Clustering: {clustering_name}')] = collapsedResults[r][0]
+                            descriptions[(cluster_name, f'Clustering: {clustering_name}')] = ''
+                        if descriptions[(cluster_name, f'Clustering: {clustering_name}')] != '':
+                            descriptions[(cluster_name, f'Clustering: {clustering_name}')] += ', '
+                        descriptions[(cluster_name, f'Clustering: {clustering_name}')] += description
                     del(collapsedResults[r])
                 elif len(synonyms) > 0:
                     if description != '':
