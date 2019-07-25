@@ -318,7 +318,10 @@ class Loom():
     ############
 
     def get_regulon_genes(self, regulon):
-        return self.get_genes()[self.loom_connection.ra.Regulons[regulon] == 1]
+        try:
+            return self.get_genes()[self.loom_connection.ra.Regulons[regulon] == 1]
+        except:
+            return []
 
     def has_regulons_AUC(self):
         return "RegulonsAUC" in self.loom_connection.ca.keys()
