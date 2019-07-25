@@ -27,8 +27,13 @@ class Loom():
         self.nUMI = None
 
         logger.debug(f'Building Search Spaces for {file_path}')
+        logger.debug(f'Building hsap Search Spaces for {file_path}')
         self.hsap_ss = ss.SearchSpace(loom=self, cross_species='hsap').build()
+        logger.debug(f'Building mmus Search Spaces for {file_path}')
+
         self.mmus_ss = ss.SearchSpace(loom=self, cross_species='mmus').build()
+        logger.debug(f'Building self Search Spaces for {file_path}')
+
         self.ss = ss.SearchSpace(loom=self).build()
 
     def get_connection(self):
@@ -451,7 +456,7 @@ class Loom():
 
     def get_cluster_marker_genes(self, clustering_id, cluster_id):
         try:
-        return self.get_genes()[self.loom_connection.ra["ClusterMarkers_{0}".format(clustering_id)][str(cluster_id)] == 1]
+            return self.get_genes()[self.loom_connection.ra["ClusterMarkers_{0}".format(clustering_id)][str(cluster_id)] == 1]
         except:
             return []
 
