@@ -26,6 +26,8 @@ class SearchSpace(dict):
         self.loom = loom
         self.cross_species = cross_species
         self.species, self.gene_mappings = loom.infer_species()
+        if self.species != 'dmel':
+            self.cross_species = ''
 
     def add_element(self, element, element_type):
         if element_type == 'gene' and self.cross_species == '' and len(self.gene_mappings) > 0:

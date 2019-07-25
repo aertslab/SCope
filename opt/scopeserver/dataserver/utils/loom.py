@@ -8,6 +8,8 @@ import time
 import loompy as lp
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
+from scopeserver.dataserver.utils import search_space as ss
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -23,6 +25,11 @@ class Loom():
         logger.info(f"New Loom object created for {file_path}")
         # Metrics
         self.nUMI = None
+
+        logger.debug(f'Building Search Spaces for {file_path}')
+        self.hsap_ss = ss.SearchSpace(loom=self, cross_species='hsap').build()
+        self.mmus_ss = ss.SearchSpace(loom=self, cross_species='mmus').build()
+        self.ss = ss.SearchSpace(loom=self).build()
 
     def get_connection(self):
         return self.loom_connection

@@ -67,18 +67,16 @@ class SCope(s_pb2_grpc.MainServicer):
         start_time = time.time()
 
         if query.startswith('hsap\\'):
-            search_space = ss.SearchSpace(loom=loom, cross_species='hsap').build()
+            search_space = loom.hsap_ss
             cross_species = 'hsap'
             query = query[5:]
         elif query.startswith('mmus\\'):
-            search_space = ss.SearchSpace(loom=loom, cross_species='mmus').build()
+            search_space = loom.mmus_ss
             cross_species = 'mmus'
             query = query[5:]
         else:
-            search_space = ss.SearchSpace(loom=loom).build()
+            search_space = loom.ss
             cross_species = ''
-        logger.debug("{0:.5f} seconds elapsed making search space ---".format(time.time() - start_time))
-        logger.debug("Found {0}".format(query))
 
         # Filter the genes by the query
 
@@ -133,7 +131,7 @@ class SCope(s_pb2_grpc.MainServicer):
                         collapsedResults[(dg[0], r[2])] = (r[1], dg[1])
 
         descriptions = {x: '' for x in collapsedResults.keys() if x[1] not in ['regulon_target', 'marker_gene']}
-        
+
         for r in list(collapsedResults.keys()):
             if cross_species == '':
                 description = ''
