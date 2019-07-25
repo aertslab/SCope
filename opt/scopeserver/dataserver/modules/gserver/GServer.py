@@ -130,7 +130,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     if (dg[0], r[2]) not in collapsedResults.keys():
                         collapsedResults[(dg[0], r[2])] = (r[1], dg[1])
 
-        descriptions = {x: '' for x in collapsedResults.keys() if x[1] not in ['regulon_target', 'marker_gene']}
+        descriptions = {x: '' for x in collapsedResults.keys() if x[1] not in ['region_gene_link', 'regulon_target', 'marker_gene']}
 
         for r in list(collapsedResults.keys()):
             if cross_species == '':
@@ -165,6 +165,16 @@ class SCope(s_pb2_grpc.MainServicer):
                             descriptions[(cluster_name, f'Clustering: {clustering_name}')] += ', '
                         descriptions[(cluster_name, f'Clustering: {clustering_name}')] += description
                     del(collapsedResults[r])
+                elif r[1] == 'region_gene_link':
+                    for region in r[0]:
+                        description = f'{region} is linked to of {collapsedResults[r][0]}'
+                        if (region, 'gene') not in collapsedResults.keys():
+                            collapsedResults[(region, 'gene')] = collapsedResults[r][0]
+                            descriptions[(region, 'gene')] = ''
+                        if descriptions[(region, 'gene')] != '':
+                            descriptions[(region, 'gene')] += ', '
+                        descriptions[(region, 'gene')] += description
+                    del(collapsedResults[r])                    
                 elif len(synonyms) > 0:
                     if description != '':
                         description += ', '

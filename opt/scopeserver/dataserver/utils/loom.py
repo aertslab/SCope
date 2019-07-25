@@ -25,8 +25,10 @@ class Loom():
         logger.info(f"New Loom object created for {file_path}")
         # Metrics
         self.nUMI = None
+        self.species, self.gene_mappings = self.infer_species()
 
         logger.debug(f'Building Search Spaces for {file_path}')
+        if self.species == 'dmel':
         logger.debug(f'Building hsap Search Spaces for {file_path}')
         self.hsap_ss = ss.SearchSpace(loom=self, cross_species='hsap').build()
         logger.debug(f'Building mmus Search Spaces for {file_path}')
@@ -417,6 +419,9 @@ class Loom():
         if self.has_ca_attr(name=name):
             return self.loom_connection.ca[name]
         raise ValueError("The given annotation {0} does not exists in the .loom.".format(name))
+
+    def has_region_gene_links(self):
+        return 'linkedGene' in self.loom_connection.ra.keys()
 
     ##########
     # Metric #

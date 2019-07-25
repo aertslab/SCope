@@ -62,6 +62,8 @@ class SearchSpace(dict):
             # Add metrics to the search space if present in .loom
             if self.loom.has_md_metrics():
                 self.add_metrics()
+            if self.loom.has_region_gene_links():
+                self.add_markers(element_type='region_gene_link')
         return self
 
     def add_cross_species_genes(self):
@@ -113,6 +115,14 @@ class SearchSpace(dict):
                             self[(gene.casefold(), gene, element_type)].append(f'{clustering}_{cluster}')
                         else:
                             self[(gene.casefold(), gene, element_type)] = [f'{clustering}_{cluster}']
+        if element_type == 'region_gene_link':
+            for n, region in enumerate(self.loom.get_genes()):
+                gene = self.loom.loom_connection.ra.linkedGene[n]
+                if gene != '':
+                    if (gene.casefold(), gene, element_type) in self.keys():
+                        self[(gene.casefold(), gene, element_type)].append(region)
+                    else:
+                        self[(gene.casefold(), gene, element_type)] = [region]
 
     def add_annotations(self):
         annotations = []
