@@ -450,7 +450,10 @@ class Loom():
         return "ClusterMarkers_{0}".format(clustering_id) in self.loom_connection.ra.keys()
 
     def get_cluster_marker_genes(self, clustering_id, cluster_id):
+        try:
         return self.get_genes()[self.loom_connection.ra["ClusterMarkers_{0}".format(clustering_id)][str(cluster_id)] == 1]
+        except:
+            return []
 
     def get_cluster_marker_metrics(self, clustering_id, cluster_id, metric_accessor):
         cluster_marker_metric = self.loom_connection.row_attrs["ClusterMarkers_{0}_{1}".format(clustering_id, metric_accessor)][str(cluster_id)]
