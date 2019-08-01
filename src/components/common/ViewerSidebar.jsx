@@ -23,7 +23,8 @@ class ViewerSidebar extends Component {
 			modalID: null,
 			activeTab: 0,
 			processSubLoomPercentage: null,
-			downloadSubLoomPercentage: null
+			downloadSubLoomPercentage: null,
+			imageErrored: false
 		};
 		this.selectionsListener = (selections) => {
 			this.setState({lassoSelections: selections, activeTab: 0});
@@ -97,12 +98,15 @@ class ViewerSidebar extends Component {
 
 			if (activeFeatures[i] && activeFeatures[i].metadata) {
 				let md = activeFeatures[i].metadata
-				if (md.motifName != 'NA.png') {
-					var image = md.motifName ? (<img src={'http://motifcollections.aertslab.org/v8/logos/'+md.motifName} ref={img => this.img = img} onError={
-						() => this.img.src = 'http://motifcollections.aertslab.org/v9/logos/'+md.motifName}
-						/>) : '';
+				if (md.motifName != 'NA.png' && !this.state.imageErrored) {
+					if (this.state.imageErrored) {
+						var image = md.motifName ? (<img src={'http://motifcollections.aertslab.org/v8/logos/'+md.motifName}/>) : '';
+						this.setState({imageErrored: true});
+					} else { 
+						var image = md.motifName ? (<img src={'http://motifcollections.aertslab.org/v9/logos/'+md.motifName}/>) : '';
+					}
 				} else {
-					var image = ''; 
+					var image = '';
 				}
 				let markerTable = "", legendTable = "", downloadSubLoomButton = () => "";
 
