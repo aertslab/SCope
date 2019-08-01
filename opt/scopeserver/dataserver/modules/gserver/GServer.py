@@ -157,7 +157,7 @@ class SCope(s_pb2_grpc.MainServicer):
                         cluster = int(cluster.split('_')[1])
                         clustering_name = loom.get_meta_data_clustering_by_id(clustering)["name"]
                         cluster_name = loom.get_meta_data_clustering_by_id(clustering)['clusters'][cluster]["description"]
-                        description = f'{collapsedResults[r][0]} is a target of {cluster_name}'
+                        description = f'{collapsedResults[r][0]} is a marker of {cluster_name}'
                         if (cluster_name, f'Clustering: {clustering_name}') not in collapsedResults.keys():
                             collapsedResults[(cluster_name, f'Clustering: {clustering_name}')] = collapsedResults[r][0]
                             descriptions[(cluster_name, f'Clustering: {clustering_name}')] = ''
@@ -167,14 +167,14 @@ class SCope(s_pb2_grpc.MainServicer):
                     del(collapsedResults[r])
                 elif r[1] == 'region_gene_link':
                     for region in r[0]:
-                        description = f'{region} is linked to of {collapsedResults[r][0]}'
+                        description = f'{region} is linked to {collapsedResults[r][0]}'
                         if (region, 'gene') not in collapsedResults.keys():
                             collapsedResults[(region, 'gene')] = collapsedResults[r][0]
                             descriptions[(region, 'gene')] = ''
                         if descriptions[(region, 'gene')] != '':
                             descriptions[(region, 'gene')] += ', '
                         descriptions[(region, 'gene')] += description
-                    del(collapsedResults[r])                    
+                    del(collapsedResults[r])
                 elif len(synonyms) > 0:
                     if description != '':
                         description += ', '
