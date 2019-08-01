@@ -324,7 +324,7 @@ class ViewerSidebar extends Component {
 				metadata = (
 					<Grid.Row columns="1" centered className='viewerRow'>
 						<Grid.Column stretched className='viewerCell'>
-							{md.description}<br />
+							{md.featureType} {md.feature}<br />
 							{image}
 							{markerTable}
 							{legendTable}

@@ -8,6 +8,8 @@ import time
 import loompy as lp
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
+from scopeserver.dataserver.utils import search_space as ss
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -23,6 +25,18 @@ class Loom():
         logger.info(f"New Loom object created for {file_path}")
         # Metrics
         self.nUMI = None
+        self.species, self.gene_mappings = self.infer_species()
+
+        logger.debug(f'Building Search Spaces for {file_path}')
+        if self.species == 'dmel':
+        logger.debug(f'Building hsap Search Spaces for {file_path}')
+        self.hsap_ss = ss.SearchSpace(loom=self, cross_species='hsap').build()
+        logger.debug(f'Building mmus Search Spaces for {file_path}')
+
+        self.mmus_ss = ss.SearchSpace(loom=self, cross_species='mmus').build()
+        logger.debug(f'Building self Search Spaces for {file_path}')
+
+        self.ss = ss.SearchSpace(loom=self).build()
 
     def get_connection(self):
         return self.loom_connection
@@ -222,6 +236,7 @@ class Loom():
     def get_nb_cells(self):
         return self.loom_connection.shape[1]
 
+    @lru_cache(maxsize=1)
     def get_genes(self):
         return self.loom_connection.ra.Gene.astype(str)
 
@@ -317,7 +332,10 @@ class Loom():
     ############
 
     def get_regulon_genes(self, regulon):
-        return self.get_genes()[self.loom_connection.ra.Regulons[regulon] == 1]
+        try:
+            return self.get_genes()[self.loom_connection.ra.Regulons[regulon] == 1]
+        except:
+            return []
 
     def has_regulons_AUC(self):
         return "RegulonsAUC" in self.loom_connection.ca.keys()
@@ -402,6 +420,9 @@ class Loom():
             return self.loom_connection.ca[name]
         raise ValueError("The given annotation {0} does not exists in the .loom.".format(name))
 
+    def has_region_gene_links(self):
+        return 'linkedGene' in self.loom_connection.ra.keys()
+
     ##########
     # Metric #
     ##########
@@ -439,7 +460,10 @@ class Loom():
         return "ClusterMarkers_{0}".format(clustering_id) in self.loom_connection.ra.keys()
 
     def get_cluster_marker_genes(self, clustering_id, cluster_id):
-        return self.get_genes()[self.loom_connection.ra["ClusterMarkers_{0}".format(clustering_id)][str(cluster_id)] == 1]
+        try:
+            return self.get_genes()[self.loom_connection.ra["ClusterMarkers_{0}".format(clustering_id)][str(cluster_id)] == 1]
+        except:
+            return []
 
     def get_cluster_marker_metrics(self, clustering_id, cluster_id, metric_accessor):
         cluster_marker_metric = self.loom_connection.row_attrs["ClusterMarkers_{0}_{1}".format(clustering_id, metric_accessor)][str(cluster_id)]

@@ -6,6 +6,21 @@ Currently the data format supported by SCope is `.loom`. This file format for ve
 
 ## Version History
 
+August 1, 2019
+* Version 1.4.0
+	* Enabled searching of regulons via their targetted genes
+	* Enabled searching of clusters by their marker genes
+		* Loom files containing many clusters will now search slower as a result
+	* General search space and search improvements
+		* Only build search space once per file on load
+			* Initial load times of a session may increase as a result, however time for searcing is halved as a result
+		* Reordering of search results
+		* Increased number of results returned when searching and enabled scroll bar
+	* EXPERIMENTAL: Enabled searching genes linked to regions for scATAC-seq data
+		* To enable this, a row attribute must be added called `linkedGene` containing a string of the gene linked to the region
+	* Allow display of Aertslab v9 motifs
+
+
 July 18, 2019
 * Version 1.3.7
 	* Enabled read only sessions on the backend for permanent sessions
@@ -14,6 +29,7 @@ July 18, 2019
 	* Converted logs from print statements to logging package.
 	* Various small fixes and dependancy issues.
 	* General code cleanup and PEP8 compliance changes
+	
 
 June 26, 2019
 * Version 1.3.6

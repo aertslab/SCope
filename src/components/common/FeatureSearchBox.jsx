@@ -144,7 +144,7 @@ export default class FeatureSearch extends React.Component {
 						// Clustering
 						} else if (ft.indexOf('Clustering:') == 0) {
 							if (!clusters[ft]) clusters[ft] = [];
-							clusters[ft].push({ "title": f, "type": ft, "description": d });
+						clusters[ft].push({ "title": f, "type": ft, "description": d });
 						} else if (ft.indexOf('cluster#') == 0) {
 							let cid = ft.split('#')[1], name = '';
 							activeMetadata.cellMetaData.clusterings.map((c, i) => {
@@ -158,10 +158,10 @@ export default class FeatureSearch extends React.Component {
 					};
 
 					// Limit to maximum 10 results
-					genes = {"name": "gene", "results": genes.slice(0, 10)}
-					regulons = {"name": "regulon", "results": regulons.slice(0, 10)}
-					annotations = {"name": "annotation", "results": annotations.slice(0, 10)}
-					metrics = {"name": "metric", "results": metrics.slice(0, 10)}
+					genes = {"name": "gene", "results": genes}
+					regulons = {"name": "regulon", "results": regulons}
+					annotations = {"name": "annotation", "results": annotations}
+					metrics = {"name": "metric", "results": metrics}
 
 					// Only show results for the selected result type (gene | regulon | cluster | annotation)
 					if (genes['results'].length && (type == 'all' || type == 'gene')) {

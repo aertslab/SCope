@@ -1,7 +1,11 @@
 import functools
 from functools import lru_cache
+import re
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SearchSpace(dict):
@@ -22,6 +26,8 @@ class SearchSpace(dict):
         self.loom = loom
         self.cross_species = cross_species
         self.species, self.gene_mappings = loom.infer_species()
+        if self.species != 'dmel':
+            self.cross_species = ''
 
     def add_element(self, element, element_type):
         if element_type == 'gene' and self.cross_species == '' and len(self.gene_mappings) > 0:
@@ -56,6 +62,8 @@ class SearchSpace(dict):
             # Add metrics to the search space if present in .loom
             if self.loom.has_md_metrics():
                 self.add_metrics()
+            if self.loom.has_region_gene_links():
+                self.add_markers(element_type='region_gene_link')
         return self
 
     def add_cross_species_genes(self):
@@ -79,9 +87,42 @@ class SearchSpace(dict):
             for cluster in clustering['clusters']:
                 all_clusters.append(cluster['description'])
             self.add_elements(elements=all_clusters, element_type='Clustering: {0}'.format(clustering['name']))
+        self.add_markers(element_type='marker_gene')
 
     def add_regulons(self):
         self.add_elements(elements=self.loom.get_regulons_AUC().dtype.names, element_type='regulon')
+        self.add_markers(element_type='regulon_target')
+
+    def add_markers(self, element_type='regulon_target'):
+        loom = self.loom.loom_connection
+        if element_type == 'regulon_target':
+            regulons = list(loom.ca.RegulonsAUC.dtype.names)
+            for regulon in regulons:
+                genes = self.loom.get_regulon_genes(regulon=regulon)
+                for gene in genes:
+                    if (gene.casefold(), gene, element_type) in self.keys():
+                        self[(gene.casefold(), gene, element_type)].append(regulon)
+                    else:
+                        self[(gene.casefold(), gene, element_type)] = [regulon]
+        if element_type == 'marker_gene':
+            searchable_clustering_ids = [x.split('_')[-1] for x in loom.ra.keys() if bool(re.search("ClusterMarkers_[0-9]+$", x))]
+            for clustering in searchable_clustering_ids:
+                clustering = int(clustering)
+                for cluster in range(len(self.meta_data['clusterings'][clustering]['clusters'])):
+                    genes = self.loom.get_cluster_marker_genes(clustering, cluster)
+                    for gene in genes:
+                        if (gene.casefold(), gene, element_type) in self.keys():
+                            self[(gene.casefold(), gene, element_type)].append(f'{clustering}_{cluster}')
+                        else:
+                            self[(gene.casefold(), gene, element_type)] = [f'{clustering}_{cluster}']
+        if element_type == 'region_gene_link':
+            for n, region in enumerate(self.loom.get_genes()):
+                gene = self.loom.loom_connection.ra.linkedGene[n]
+                if gene != '':
+                    if (gene.casefold(), gene, element_type) in self.keys():
+                        self[(gene.casefold(), gene, element_type)].append(region)
+                    else:
+                        self[(gene.casefold(), gene, element_type)] = [region]
 
     def add_annotations(self):
         annotations = []

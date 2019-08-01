@@ -16,7 +16,7 @@ import base64
 import threading
 import pickle
 import uuid
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict, defaultdict, deque
 from functools import lru_cache
 from itertools import compress
 from pathlib import Path
@@ -65,19 +65,18 @@ class SCope(s_pb2_grpc.MainServicer):
     def get_features(self, loom, query):
         logger.debug('Searching for {0}'.format(query))
         start_time = time.time()
+
         if query.startswith('hsap\\'):
-            search_space = ss.SearchSpace(loom=loom, cross_species='hsap').build()
+            search_space = loom.hsap_ss
             cross_species = 'hsap'
             query = query[5:]
         elif query.startswith('mmus\\'):
-            search_space = ss.SearchSpace(loom=loom, cross_species='mmus').build()
+            search_space = loom.mmus_ss
             cross_species = 'mmus'
             query = query[5:]
         else:
-            search_space = ss.SearchSpace(loom=loom).build()
+            search_space = loom.ss
             cross_species = ''
-        logger.debug("{0:.5f} seconds elapsed making search space ---".format(time.time() - start_time))
-        logger.debug("Found {0}".format(query))
 
         # Filter the genes by the query
 
@@ -88,30 +87,34 @@ class SCope(s_pb2_grpc.MainServicer):
         queryCF = query.casefold()
         res = [x for x in search_space.keys() if queryCF in x[0]]
 
-        for n, r in enumerate(res):
-            if query in r[0]:
-                r = res.pop(n)
-                res = [r] + res
-        for n, r in enumerate(res):
-            if r[0].startswith(queryCF):
-                r = res.pop(n)
-                res = [r] + res
-        for n, r in enumerate(res):
-            if r[0] == queryCF:
-                r = res.pop(n)
-                res = [r] + res
-        for n, r in enumerate(res):
-            if r[1] == query:
-                r = res.pop(n)
-                res = [r] + res
+        order = deque()
 
-        # These structures are a bit messy, but still fast
-        # r = (elementCF, element, elementName)
-        # dg = (drosElement, %match)
-        # searchSpace[r] = translastedElement
+        perfect_match = []
+        good_match = []
+        bad_match = []
+        no_match = []
+
+        for n, r in enumerate(res):
+            if r[1] == query or r[0] == queryCF:
+                perfect_match.append(r)
+                continue
+            if r[1].startswith(query) or r[1].endswith(query) or r[0].startswith(queryCF) or r[0].endswith(queryCF):
+                good_match.append(r)
+                continue
+            if query in r[0]:
+                bad_match.append(r)
+                continue
+            if n not in order:
+                no_match.append(r)
+                continue
+
+        res = sorted(perfect_match) + sorted(good_match) + sorted(bad_match) + sorted(no_match)
+
         collapsedResults = OrderedDict()
         if cross_species == '':
             for r in res:
+                if type(search_space[r]) == list:
+                    search_space[r] = tuple(search_space[r])
                 if (search_space[r], r[2]) not in collapsedResults.keys():
                     collapsedResults[(search_space[r], r[2])] = [r[1]]
                 else:
@@ -127,32 +130,73 @@ class SCope(s_pb2_grpc.MainServicer):
                     if (dg[0], r[2]) not in collapsedResults.keys():
                         collapsedResults[(dg[0], r[2])] = (r[1], dg[1])
 
-        descriptions = []
-        if cross_species == '':
-            logger.debug(f'Performing cross species search: {query}')
-            for r in collapsedResults.keys():
+        descriptions = {x: '' for x in collapsedResults.keys() if x[1] not in ['region_gene_link', 'regulon_target', 'marker_gene']}
+
+        for r in list(collapsedResults.keys()):
+            if cross_species == '':
+                description = ''
                 synonyms = sorted([x for x in collapsedResults[r]])
                 try:
                     synonyms.remove(r[0])
                 except ValueError:
                     pass
-                if len(synonyms) > 0:
-                    descriptions.append('Synonym of: {0}'.format(', '.join(synonyms)))
-                else:
-                    descriptions.append('')
-        elif cross_species == 'hsap':
-            for r in collapsedResults.keys():
-                descriptions.append('Orthologue of {0}, {1:.2f}% identity (Human -> Drosophila)'.format(collapsedResults[r][0], collapsedResults[r][1]))
-        elif cross_species == 'mmus':
-            for r in collapsedResults.keys():
-                descriptions.append('Orthologue of {0}, {1:.2f}% identity (Mouse -> Drosophila)'.format(collapsedResults[r][0], collapsedResults[r][1]))
-        # if mapping[result] != result: change title and description to indicate synonym
+                if r[1] == 'regulon_target':
+                    for regulon in r[0]:
+                        description = f'{collapsedResults[r][0]} is a target of {regulon}'
+                        if (regulon, 'regulon') not in collapsedResults.keys():
+                            collapsedResults[(regulon, 'regulon')] = collapsedResults[r][0]
+                            descriptions[(regulon, 'regulon')] = ''
+                        if descriptions[(regulon, 'regulon')] != '':
+                            descriptions[(regulon, 'regulon')] += ', '
+                        descriptions[(regulon, 'regulon')] += description
+                    del(collapsedResults[r])
+
+                elif r[1] == 'marker_gene':
+                    for cluster in r[0]:
+                        clustering = int(cluster.split('_')[0])
+                        cluster = int(cluster.split('_')[1])
+                        clustering_name = loom.get_meta_data_clustering_by_id(clustering)["name"]
+                        cluster_name = loom.get_meta_data_clustering_by_id(clustering)['clusters'][cluster]["description"]
+                        description = f'{collapsedResults[r][0]} is a marker of {cluster_name}'
+                        if (cluster_name, f'Clustering: {clustering_name}') not in collapsedResults.keys():
+                            collapsedResults[(cluster_name, f'Clustering: {clustering_name}')] = collapsedResults[r][0]
+                            descriptions[(cluster_name, f'Clustering: {clustering_name}')] = ''
+                        if descriptions[(cluster_name, f'Clustering: {clustering_name}')] != '':
+                            descriptions[(cluster_name, f'Clustering: {clustering_name}')] += ', '
+                        descriptions[(cluster_name, f'Clustering: {clustering_name}')] += description
+                    del(collapsedResults[r])
+                elif r[1] == 'region_gene_link':
+                    for region in r[0]:
+                        description = f'{region} is linked to {collapsedResults[r][0]}'
+                        if (region, 'gene') not in collapsedResults.keys():
+                            collapsedResults[(region, 'gene')] = collapsedResults[r][0]
+                            descriptions[(region, 'gene')] = ''
+                        if descriptions[(region, 'gene')] != '':
+                            descriptions[(region, 'gene')] += ', '
+                        descriptions[(region, 'gene')] += description
+                    del(collapsedResults[r])
+                elif len(synonyms) > 0:
+                    if description != '':
+                        description += ', '
+                    description += 'Synonym of: {0}'.format(', '.join(synonyms))
+                    descriptions[r] = description
+
+            elif cross_species == 'hsap':
+                logger.debug(f'Performing hsap cross species search: {query}')
+                description = 'Orthologue of {0}, {1:.2f}% identity (Human -> Drosophila)'.format(collapsedResults[r][0], collapsedResults[r][1])
+                descriptions[r] = description
+            elif cross_species == 'mmus':
+                logger.debug(f'Performing mmus cross species search: {query}')
+                description = 'Orthologue of {0}, {1:.2f}% identity (Mouse -> Drosophila)'.format(collapsedResults[r][0], collapsedResults[r][1])
+                descriptions[r] = description
+
+            # if mapping[result] != result: change title and description to indicate synonym
 
         logger.debug("{0} genes matching '{1}'".format(len(res), query))
         logger.debug("{0:.5f} seconds elapsed ---".format(time.time() - start_time))
         res = {'feature': [r[0] for r in collapsedResults.keys()],
                'featureType': [r[1] for r in collapsedResults.keys()],
-               'featureDescription': descriptions}
+               'featureDescription': [descriptions[r] for r in collapsedResults.keys()]}
         return res
 
     def compressHexColor(self, a):
