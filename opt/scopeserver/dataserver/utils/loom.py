@@ -29,11 +29,11 @@ class Loom():
 
         logger.debug(f'Building Search Spaces for {file_path}')
         if self.species == 'dmel':
-        logger.debug(f'Building hsap Search Spaces for {file_path}')
-        self.hsap_ss = ss.SearchSpace(loom=self, cross_species='hsap').build()
-        logger.debug(f'Building mmus Search Spaces for {file_path}')
+            logger.debug(f'Building hsap Search Spaces for {file_path}')
+            self.hsap_ss = ss.SearchSpace(loom=self, cross_species='hsap').build()
+            logger.debug(f'Building mmus Search Spaces for {file_path}')
 
-        self.mmus_ss = ss.SearchSpace(loom=self, cross_species='mmus').build()
+            self.mmus_ss = ss.SearchSpace(loom=self, cross_species='mmus').build()
         logger.debug(f'Building self Search Spaces for {file_path}')
 
         self.ss = ss.SearchSpace(loom=self).build()
