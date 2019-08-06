@@ -1,7 +1,7 @@
 import os
 from appdirs import AppDirs
 import time
-import uuid
+from uuid import uuid4
 import pickle
 from pathlib import Path
 
@@ -114,7 +114,7 @@ class DataFileHandler():
         else:
             logger.debug('No Existing Permanent Sessions, generating rw App UUID:"')
             with open(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt'), 'w') as fh:
-                newUUID = 'SCopeApp__{0}'.format(str(uuid.uuid4()))
+                newUUID = 'SCopeApp__{0}'.format(str(uuid4()))
                 fh.write('{0}\trw\n'.format(newUUID))  # App sessions are always rw
                 self.current_UUIDs[newUUID] = [time.time() + (_ONE_DAY_IN_SECONDS * 365), 'rw']
                 logger.debug(f'\tUUID {newUUID}, mode rw. Valid until {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + (_ONE_DAY_IN_SECONDS * 365)))}')
