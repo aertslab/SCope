@@ -1,6 +1,6 @@
 {
   "name": "SCope",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Visualization tool for large-scale and high dimensional single-cell data",
   "main": "index.js",
   "scripts": {

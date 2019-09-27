@@ -177,6 +177,15 @@ class Loom():
             raise ValueError('Multiple annotations matches the given name: {0}'.format(name))
         return md_annotation[0]
 
+    def get_meta_data_cluster_by_clustering_id_and_cluster_id(self, clustering_id, cluster_id):
+        md_clustering = self.get_meta_data_clustering_by_id(clustering_id)
+        md_cluster = list(filter(lambda x: x["id"] == cluster_id, md_clustering["clusters"]))
+        if(len(md_cluster) == 0):
+            raise ValueError('The cluster with the given id {0} does not exist.'.format(cluster_id))
+        if(len(md_cluster) > 1):
+            raise ValueError('Multiple clusters matches the given id: {0}'.format(cluster_id))
+        return md_cluster[0]
+
     def get_meta_data_clustering_by_id(self, id):
         md_clusterings = self.get_meta_data_by_key(key="clusterings")
         md_clustering = list(filter(lambda x: x["id"] == id, md_clusterings))

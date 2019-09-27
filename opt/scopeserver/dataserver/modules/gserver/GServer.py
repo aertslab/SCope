@@ -156,7 +156,8 @@ class SCope(s_pb2_grpc.MainServicer):
                         clustering = int(cluster.split('_')[0])
                         cluster = int(cluster.split('_')[1])
                         clustering_name = loom.get_meta_data_clustering_by_id(clustering)["name"]
-                        cluster_name = loom.get_meta_data_clustering_by_id(clustering)['clusters'][cluster]["description"]
+                        cluster = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(clustering, cluster)
+                        cluster_name = cluster["description"]
                         description = f'{collapsedResults[r][0]} is a marker of {cluster_name}'
                         if (cluster_name, f'Clustering: {clustering_name}') not in collapsedResults.keys():
                             collapsedResults[(cluster_name, f'Clustering: {clustering_name}')] = collapsedResults[r][0]
