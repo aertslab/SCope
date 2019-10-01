@@ -37,6 +37,7 @@ class Loom():
         logger.debug(f'Building self Search Spaces for {file_path}')
 
         self.ss = ss.SearchSpace(loom=self).build()
+        logger.debug(f'Built all Search Spaces for {file_path}')
 
     def get_connection(self):
         return self.loom_connection
@@ -95,17 +96,58 @@ class Loom():
         logger.info('Making metadata for {0}'.format(self.get_abs_file_path()))
         metaJson = {}
 
+        def dfToNamedMatrix(df):
+            arr_ip = [tuple(i) for i in df.as_matrix()]
+            dtyp = np.dtype(list(zip(df.dtypes.index, df.dtypes)))
+            arr = np.array(arr_ip, dtype=dtyp)
+            return arr
+
         self.change_loom_mode(mode='r+')
         loom = self.loom_connection
+        col_attrs = loom.ca.keys()
 
         # Embeddings
         # Find PCA / tSNE - Catch all 0's ERROR
-        metaJson['embeddings'] = [
-            {
-                "id": -1,
-                "name": "Default (_tSNE1/_tSNE2 or _X/_Y)"
-            }
-        ]
+
+        embeddings_id = 1
+        embeddings_default = False
+        if ('_tSNE1' in col_attrs and '_tSNE2' in col_attrs) or ('_X' in col_attrs and '_Y' in col_attrs):
+            metaJson['embeddings'] = [
+                {
+                    "id": -1,
+                    "name": "Default (_tSNE1/_tSNE2 or _X/_Y)"
+                }
+            ]
+            embeddings_default = True
+        else:
+            metaJson['embeddings'] = []
+
+        Embeddings_X = pd.DataFrame()
+        Embeddings_Y = pd.DataFrame()
+
+
+        for col in col_attrs:
+            cf_col = col.casefold()
+            if ('tsne'.casefold() in cf_col or 'umap'.casefold() in cf_col or 'pca'.casefold() in cf_col) and loom.ca[col].shape[1] >= 2:
+                if not embeddings_default:
+                    metaJson['embeddings'].append({
+                        "id": -1,
+                        "name": col
+                    })
+                    loom.ca['Embedding'] = dfToNamedMatrix(pd.DataFrame(loom.ca[col][:, :2], columns = ['_X', '_Y']))
+                    embeddings_default = True
+                else:
+                    metaJson['embeddings'].append({
+                        "id": embeddings_id,
+                        "name": col
+                    })
+                    Embeddings_X[str(embeddings_id)] = loom.ca[col][:, 0]
+                    Embeddings_Y[str(embeddings_id)] = loom.ca[col][:, 1]
+                    embeddings_id += 1
+        if Embeddings_X.shape != (0, 0):
+            loom.ca['Embeddings_X'] = dfToNamedMatrix(Embeddings_X)
+            loom.ca['Embeddings_Y'] = dfToNamedMatrix(Embeddings_Y)
+
 
         # Annotations - What goes here?
         metaJson["annotations"] = []

@@ -6,6 +6,10 @@ Currently the data format supported by SCope is `.loom`. This file format for ve
 
 ## Version History
 
+October 1, 2019
+* Version 1.4.2
+	* Autodetect dimensionality reductions from column attributes with 'pca', 'tsne' or 'umap' in the name. NOTE: Extracts first 2 dimensions from attributes with >=2 dimensions. Therefore 3D dimensions may appear in the list but will show as 2D.
+
 September 28, 2019
 * Version 1.4.1
 	* Fix bug in the query results (clusters) when searching a cluster which the queried gene is a marker for.
