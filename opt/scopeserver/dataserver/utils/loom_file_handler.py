@@ -38,7 +38,7 @@ class LoomFileHandler():
                 f.seek(- file_size, 2)
             else:
                 f.seek(- last_n_kb * 1024, 2)
-            return hashlib.md5(f.read()).hexdigest()
+            return hashlib.md5(f.read() + file_path.encode('ASCII')).hexdigest()
 
     def change_loom_mode(self, loom_file_path, mode='r', partial_md5_hash=None):
         if partial_md5_hash == None:
@@ -95,9 +95,9 @@ class LoomFileHandler():
                 logger.debug(f'Current mode: {self.active_looms[partial_md5_hash].get_connection().mode}, wanted mode {mode}')
 
                 if self.active_looms[partial_md5_hash].get_connection().mode == mode:
-            loom = self.active_looms[partial_md5_hash]
-            logger.debug(f"Returning pre-loaded loom file {loom_file_path}. Hash {partial_md5_hash}, object {id(loom)}")
-            return loom
+                    loom = self.active_looms[partial_md5_hash]
+                    logger.debug(f"Returning pre-loaded loom file {loom_file_path}. Hash {partial_md5_hash}, object {id(loom)}")
+                    return loom
             except AttributeError:
                 logger.error('Loom was previously closed')
 
