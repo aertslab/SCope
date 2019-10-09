@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 
 class Loom():
 
-    def __init__(self, partial_md5_hash, file_path, abs_file_path, loom_connection):
+    def __init__(self, partial_md5_hash, file_path, abs_file_path, loom_connection, loom_file_handler):
+        self.lfh = loom_file_handler
         self.partial_md5_hash = partial_md5_hash
         self.file_path = file_path
         self.abs_file_path = abs_file_path
@@ -74,11 +75,6 @@ class Loom():
     def get_cell_ids(self):
         return self.loom_connection.ca["CellID"]
 
-    def change_loom_mode(self, mode='r'):
-        self.loom_connection.close()
-        self.loom_connection = lp.connect(self.abs_file_path, mode=mode, validate=False)
-        logger.info(f'{self.abs_file_path} now {self.loom_connection.mode}')
-
     #############
     # Meta Data #
     #############
@@ -102,7 +98,7 @@ class Loom():
             arr = np.array(arr_ip, dtype=dtyp)
             return arr
 
-        self.change_loom_mode(mode='r+')
+        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r+')
         loom = self.loom_connection
         col_attrs = loom.ca.keys()
 
@@ -125,7 +121,6 @@ class Loom():
         Embeddings_X = pd.DataFrame()
         Embeddings_Y = pd.DataFrame()
 
-
         for col in col_attrs:
             cf_col = col.casefold()
             if ('tsne'.casefold() in cf_col or 'umap'.casefold() in cf_col or 'pca'.casefold() in cf_col) and loom.ca[col].shape[1] >= 2:
@@ -134,7 +129,7 @@ class Loom():
                         "id": -1,
                         "name": col
                     })
-                    loom.ca['Embedding'] = dfToNamedMatrix(pd.DataFrame(loom.ca[col][:, :2], columns = ['_X', '_Y']))
+                    loom.ca['Embedding'] = dfToNamedMatrix(pd.DataFrame(loom.ca[col][:, :2], columns=['_X', '_Y']))
                     embeddings_default = True
                 else:
                     metaJson['embeddings'].append({
@@ -147,7 +142,6 @@ class Loom():
         if Embeddings_X.shape != (0, 0):
             loom.ca['Embeddings_X'] = dfToNamedMatrix(Embeddings_X)
             loom.ca['Embeddings_Y'] = dfToNamedMatrix(Embeddings_Y)
-
 
         # Annotations - What goes here?
         metaJson["annotations"] = []
@@ -179,8 +173,8 @@ class Loom():
                                             })
         logger.debug(f'\tFinal Clusterings for {self.file_path} - {metaJson["clusterings"]}')
 
-        loom.attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
-        self.change_loom_mode(mode='r')
+        loom.attrs['MetaData'] = json.dumps(metaJson)  # base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
+        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r')
 
     def get_file_metadata(self):
         """Summarize in a dict what feature data the loom file contains.

@@ -319,7 +319,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                 # transmitted *less* than the content-length!
                 if form.getvalue('file-type') == 'Loom':
                     try:
-                        with lp.connect(localpath, mode='r+', validate=False) as f:
+                        with lp.connect(localpath, mode='r', validate=False) as f:
                             logger.debug('Loom dimensions: {0}'.format(f.shape))
                             if not (f.shape[0] > 0 and f.shape[1] > 0):
                                 raise KeyError
