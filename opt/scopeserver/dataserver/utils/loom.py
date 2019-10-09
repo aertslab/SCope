@@ -87,6 +87,36 @@ class Loom():
         except AttributeError:
             return json.loads(zlib.decompress(base64.b64decode(meta.encode('ascii'))).decode('ascii'))
 
+    def rename_annotation(self, clustering_id, cluster_id, new_annotation_name):
+        logger.info('Changing annotation name for {0}'.format(self.get_abs_file_path()))
+
+        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r+', partial_md5_hash=self.partial_md5_hash)
+        loom = self.loom_connection
+        metaJson = self.get_meta_data()        
+
+        for n, clustering in enumerate(metaJson['clusterings']):
+            if clustering['id'] == clustering_id:
+                clustering_n = n
+
+        for n, cluster in enumerate(metaJson['clusterings'][clustering_n]['clusters']):
+            if cluster['id'] == cluster_id:
+                cluster_n = n
+
+        metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['description'] = new_annotation_name
+
+        loom.attrs['MetaData'] = json.dumps(metaJson)  # base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
+
+        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r', partial_md5_hash=self.partial_md5_hash)
+
+        loom = self.loom_connection
+
+        if self.get_meta_data()['clusterings'][clustering_n]['clusters'][cluster_n]['description'] == new_annotation_name:
+            logger.debug('Success')
+            return True
+        else:
+            logger.debug('Failure')
+            return False
+
     def generate_meta_data(self):
         # Designed to generate metadata from linnarson loom files
         logger.info('Making metadata for {0}'.format(self.get_abs_file_path()))

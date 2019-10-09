@@ -334,6 +334,11 @@ class SCope(s_pb2_grpc.MainServicer):
                                  logic=request.logic)
         return s_pb2.CoordinatesReply(x=c["x"], y=c["y"], cellIndices=c["cellIndices"])
 
+    def setAnnotationName(self, request, context):
+        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        success = loom.rename_annotation(request.clusteringID, request.clusterID, request.newAnnoName)
+        return s_pb2.SetAnnotationNameReply(success=success)
+
     def getRegulonMetaData(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
         regulon_genes = loom.get_regulon_genes(regulon=request.regulon)

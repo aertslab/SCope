@@ -104,6 +104,11 @@ class MainStub(object):
         request_serializer=s__pb2.DownloadSubLoomRequest.SerializeToString,
         response_deserializer=s__pb2.DownloadSubLoomReply.FromString,
         )
+    self.setAnnotationName = channel.unary_unary(
+        '/scope.Main/setAnnotationName',
+        request_serializer=s__pb2.SetAnnotationNameRequest.SerializeToString,
+        response_deserializer=s__pb2.SetAnnotationNameReply.FromString,
+        )
 
 
 class MainServicer(object):
@@ -236,6 +241,13 @@ class MainServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def setAnnotationName(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_MainServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -328,6 +340,11 @@ def add_MainServicer_to_server(servicer, server):
           servicer.downloadSubLoom,
           request_deserializer=s__pb2.DownloadSubLoomRequest.FromString,
           response_serializer=s__pb2.DownloadSubLoomReply.SerializeToString,
+      ),
+      'setAnnotationName': grpc.unary_unary_rpc_method_handler(
+          servicer.setAnnotationName,
+          request_deserializer=s__pb2.SetAnnotationNameRequest.FromString,
+          response_serializer=s__pb2.SetAnnotationNameReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

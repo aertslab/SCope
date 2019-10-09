@@ -35,6 +35,7 @@ service Main {
   rpc getMyGeneSets (MyGeneSetsRequest) returns (MyGeneSetsReply) {}
   rpc deleteUserFile (DeleteUserFileRequest) returns (DeleteUserFileReply) {}
   rpc downloadSubLoom (DownloadSubLoomRequest) returns (stream DownloadSubLoomReply) {}
+  rpc setAnnotationName (SetAnnotationNameRequest) returns (SetAnnotationNameReply) {}
 }
 
 message ErrorReply {
@@ -379,4 +380,15 @@ message DownloadSubLoomReply {
   Progress progress=3;
   bool isDone=4;
   ErrorReply error=5;
+}
+
+message SetAnnotationNameRequest {
+  string loomFilePath=1;
+  int64 clusteringID=2;
+  int64 clusterID=3;
+  string newAnnoName=4;
+} 
+
+message SetAnnotationNameReply {
+  bool success=1;
 }
