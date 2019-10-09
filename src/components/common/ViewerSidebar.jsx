@@ -1,10 +1,11 @@
 import _ from 'lodash'
-import React, { Component } from 'react'
+import React, { Component, createRef } from 'react'
 import { withRouter } from 'react-router-dom';
 import { Grid, Input, Icon, Tab, Image, Button, Progress } from 'semantic-ui-react'
 import { BackendAPI } from '../common/API'
 import Metadata from '../common/Metadata'
 import ReactGA from 'react-ga';
+import Popup from 'react-popup'
 
 import ReactTable from "react-table";
 import "react-table/react-table.css";
@@ -18,9 +19,12 @@ class ViewerSidebar extends Component {
 		super();
 		this.state = {
 			activePage: BackendAPI.getActivePage(),
+			activeLoom: BackendAPI.getActiveLoom(),
 			activeFeatures: BackendAPI.getActiveFeatures(),
 			lassoSelections: BackendAPI.getViewerSelections(),
 			modalID: null,
+			newAnnoName: "",
+			newAnnoRef: createRef(),
 			activeTab: 0,
 			processSubLoomPercentage: null,
 			downloadSubLoomPercentage: null,
@@ -108,6 +112,69 @@ class ViewerSidebar extends Component {
 				} else {
 					var image = '';
 				}
+
+				this.handleAnnoUpdate = (feature, i) => {
+					if (this.state.newAnnoName != '') {
+						Popup.create({
+							title: "BETA: Annotation Change!",
+							content: <p>{["You are about to ", 
+										  <b>permanently</b>, 
+										  " update the annotation of the existing cluster: ", 
+										  <br />, 
+										  <b>{feature.feature}</b>, 
+										  <br />, 
+										  "to the following: ", 
+										  <br />, 
+										  <b>{this.state.newAnnoName}</ b>,
+										  <br />,
+										  <br />,
+										  <b> BETA: Some SCope functionality may be imparied until the loom is reloaded</b>,
+									      ]}</p>,
+							buttons: {
+								left: [{
+									text: 'Cancel',
+									className: 'danger',
+									action: function () {
+										Popup.close()
+									}
+								}],
+								right: [{
+									text: 'Save new annotation',
+									className: 'success',
+									action: () => {
+										BackendAPI.setAnnotationName(feature, this.state.newAnnoName, i, this.props.match.params.uuid)
+										Popup.close()
+									},
+									}]
+
+							}
+						});
+					}
+					if (this.state.newAnnoName === '') {
+						Popup.alert('You must enter a new annotation')
+					}
+				}
+
+
+				let annotationBox = () => {
+					if(activeFeatures[i].featureType.startsWith("Cluster") && activeFeatures[i].feature != 'All Clusters' && BackendAPI.getLoomRWStatus() == "rw" && this.state.activePage == "gene") {					
+					return (
+						<Input
+							ref={this.state.newAnnoRef}
+							style={{"margin-bottom": "15px", width: "100%"}}
+							placeholder={activeFeatures[i].feature}
+							onChange={e => this.setState({newAnnoName: e.target.value})}
+							actionPosition="left"
+							action={{
+								onClick: () => {this.handleAnnoUpdate(activeFeatures[i], i);} ,
+								"data-tooltip": "PERMANENT CHANGE and forces refresh!",
+								"data-variation":"basic",
+								"data-position":"left center",
+								content: "Update Annotation"
+							}}
+							/>
+					)}}
+
 				let markerTable = "", legendTable = "", downloadSubLoomButton = () => "";
 
 				let newMarkerTableColumn = (header, id, accessor, cell) => {
@@ -330,6 +397,7 @@ class ViewerSidebar extends Component {
 						<Grid.Column stretched className='viewerCell'>
 							{md.featureType} {md.feature}<br />
 							{image}
+							{annotationBox()}
 							{markerTable}
 							{legendTable}
 							{downloadSubLoomButton()}
@@ -426,6 +494,14 @@ class ViewerSidebar extends Component {
 			action: 'selection removed',
 			value: id
 		});
+	}
+
+	shouldComponentUpdate(nextProps, nextState) {
+		if (this.state.newAnnoName != nextState.newAnnoName && this.state.newAnnoName != "") {
+			return false
+		} else {
+			return true
+		}
 	}
 }
 export default withRouter(ViewerSidebar);

@@ -77,6 +77,7 @@ class API {
 		this.customValuesChangeListeners = [];
 
 		this.uuid = null;
+		this.sessionMode = null;
 		this.updateListeners = [];
 	}
 
@@ -334,6 +335,37 @@ class API {
 		console.log("Active feature: "+feature+" ("+featureType+")")
 	}
 
+	setAnnotationName(feature, newAnnoName, featureIndex, uuid) {
+		let clusteringID = feature.metadata['clusteringID']
+		let clusterID = feature.metadata['clusterID']
+		if (newAnnoName != '') {
+			let setAnnotationNameQuery = {
+				loomFilePath: this.getActiveLoom(),
+				clusteringID: clusteringID,
+				clusterID: clusterID,
+				newAnnoName: newAnnoName
+			}
+			this.getConnection().then((gbc) => {
+				if (DEBUG) console.log('setAnnotationName', setAnnotationNameQuery);
+				gbc.services.scope.Main.setAnnotationName(setAnnotationNameQuery, (setAnnotationNameErr, setAnnotationNameResponse) => {
+					if (setAnnotationNameResponse.success) {
+						BackendAPI.queryLoomFiles(uuid, () => {
+							BackendAPI.getActiveFeatures().forEach( (f, n) => {
+								if (f.metadata['clusteringID'] == clusteringID && f.metadata['clusterID'] == clusterID ) {
+									BackendAPI.updateFeature(n, f.type, newAnnoName, f.featureType, f.metadata ? f.metadata.description : null, "")
+								}
+
+							})
+						} )
+					}
+
+			});
+			}, () => {
+				this.showError();	
+			})
+		}
+	}
+
 	updateFeature(field, type, feature, featureType, featureDescription, page) {
 		if (featureType == 'regulon') {
 			let regulonQuery = {
@@ -382,7 +414,7 @@ class API {
 						if (DEBUG) console.log('getMarkerGenes', markerResponse);
 						if (!markerResponse) markerResponse = {};
 						markerResponse.description = featureDescription
-						this.setActiveFeature(field, type, featureType, feature, 0, markerResponse, page);
+						this.setActiveFeature(field, type, featureType, feature, 0, {...markerResponse, clusterID: clusterID, clusteringID: clusteringID}, page);
 					});
 				}, () => {
 					this.showError();
@@ -687,6 +719,23 @@ class API {
 
 	getUUID() {
 		return this.uuid;
+	}
+
+	
+	setSessionMode(sessionMode) {
+		this.sessionMode = sessionMode;
+	}
+
+	getSessionMode() {
+		return this.sessionMode;
+	}
+
+	getLoomRWStatus() {
+		if (/.*\/.*loom$/.test(this.getActiveLoom()) && this.getSessionMode() == 'rw') {
+			return 'rw'
+		} else {
+			return 'ro'
+		}
 	}
 
 

@@ -209,5 +209,8 @@ export default class FeatureSearch extends React.Component {
 
 	componentWillReceiveProps(nextProps) {
 		this.setState({ value: nextProps.value, type: nextProps.type })
+		if (this.props.value != nextProps.value) {
+			this.handleSearchChange(null, nextProps.value)
+		}
 	}
 }

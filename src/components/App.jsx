@@ -268,6 +268,7 @@ class App extends Component {
 					// cookies.set(cookieName, uuid, { path: '/', maxAge: this.timeout });
 					if (!ping) {
 						this.setState({loading: false, uuid: uuid, sessionMode: response.sessionMode});
+						BackendAPI.setSessionMode(response.sessionMode)
 					}
 					if (!this.timer) {
 						this.timer = setInterval(() => {
