@@ -109,6 +109,11 @@ class MainStub(object):
         request_serializer=s__pb2.SetAnnotationNameRequest.SerializeToString,
         response_deserializer=s__pb2.SetAnnotationNameReply.FromString,
         )
+    self.setLoomHierarchy = channel.unary_unary(
+        '/scope.Main/setLoomHierarchy',
+        request_serializer=s__pb2.SetLoomHierarchyRequest.SerializeToString,
+        response_deserializer=s__pb2.SetLoomHierarchyReply.FromString,
+        )
 
 
 class MainServicer(object):
@@ -248,6 +253,13 @@ class MainServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def setLoomHierarchy(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_MainServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -345,6 +357,11 @@ def add_MainServicer_to_server(servicer, server):
           servicer.setAnnotationName,
           request_deserializer=s__pb2.SetAnnotationNameRequest.FromString,
           response_serializer=s__pb2.SetAnnotationNameReply.SerializeToString,
+      ),
+      'setLoomHierarchy': grpc.unary_unary_rpc_method_handler(
+          servicer.setLoomHierarchy,
+          request_deserializer=s__pb2.SetLoomHierarchyRequest.FromString,
+          response_serializer=s__pb2.SetLoomHierarchyReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
