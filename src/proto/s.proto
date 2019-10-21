@@ -36,6 +36,7 @@ service Main {
   rpc deleteUserFile (DeleteUserFileRequest) returns (DeleteUserFileReply) {}
   rpc downloadSubLoom (DownloadSubLoomRequest) returns (stream DownloadSubLoomReply) {}
   rpc setAnnotationName (SetAnnotationNameRequest) returns (SetAnnotationNameReply) {}
+  rpc setLoomHierarchy (SetLoomHierarchyRequest) returns (SetLoomHierarchyReply) {}
 }
 
 message ErrorReply {
@@ -390,5 +391,16 @@ message SetAnnotationNameRequest {
 } 
 
 message SetAnnotationNameReply {
+  bool success=1;
+}
+
+message SetLoomHierarchyRequest {
+  string loomFilePath=1;
+  string newHierarchy_L1=2;
+  string newHierarchy_L2=3;
+  string newHierarchy_L3=4;
+} 
+
+message SetLoomHierarchyReply {
   bool success=1;
 }

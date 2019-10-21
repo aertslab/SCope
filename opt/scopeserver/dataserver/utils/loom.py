@@ -117,6 +117,32 @@ class Loom():
             logger.debug('Failure')
             return False
 
+    def set_hierarchy(self, L1, L2, L3):
+        logger.info('Changing hierarchy name for {0}'.format(self.get_abs_file_path()))
+
+        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r+', partial_md5_hash=self.partial_md5_hash)
+        loom = self.loom_connection
+        attrs = self.loom_connection.attrs
+
+        attrs['SCopeTreeL1'] = L1
+        attrs['SCopeTreeL2'] = L2
+        attrs['SCopeTreeL3'] = L3
+
+        loom.attrs = attrs # base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
+
+        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r', partial_md5_hash=self.partial_md5_hash)
+
+        loom = self.loom_connection
+
+        newAttrs = self.loom_connection.attrs
+
+        if newAttrs['SCopeTreeL1'] == L1 and newAttrs['SCopeTreeL2'] == L2 and newAttrs['SCopeTreeL3'] == L3:
+            logger.debug('Success')
+            return True
+        else:
+            logger.debug('Failure')
+            return False
+
     def generate_meta_data(self):
         # Designed to generate metadata from linnarson loom files
         logger.info('Making metadata for {0}'.format(self.get_abs_file_path()))

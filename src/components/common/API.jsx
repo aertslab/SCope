@@ -366,6 +366,23 @@ class API {
 		}
 	}
 
+	setLoomHierarchy(L1, L2, L3, callback) {
+		let setLoomHierarchyQuery = {
+			loomFilePath: this.getActiveLoom(),
+			newHierarchy_L1: L1,
+			newHierarchy_L2: L2,
+			newHierarchy_L3: L3,
+		}
+		this.getConnection().then((gbc) => {
+			if (DEBUG) console.log('setLoomHierarchy', setLoomHierarchyQuery);
+			gbc.services.scope.Main.setLoomHierarchy(setLoomHierarchyQuery, (setLoomHierarchyErr, setLoomHierarchyResponse) => {
+				callback(setLoomHierarchyResponse)
+		});
+		}, () => {
+			this.showError();	
+		})
+	}
+
 	updateFeature(field, type, feature, featureType, featureDescription, page) {
 		if (featureType == 'regulon') {
 			let regulonQuery = {

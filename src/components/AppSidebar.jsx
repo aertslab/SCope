@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
-import { Segment, Sidebar, Menu, Icon, Image, Divider, Checkbox, Dropdown, Grid, Dimmer, Loader, Progress } from 'semantic-ui-react';
+import { Segment, Sidebar, Menu, Icon, Input, Image, Divider, Checkbox, Dropdown, Grid, Dimmer, Loader, Progress } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
 import UploadModal from './common/UploadModal';
 import Slider, { Range } from 'rc-slider';
 import ReactGA from 'react-ga';
 import FileDownloader from '../js/http'
+import Popup from 'react-popup'
 
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
 const TooltipSlider = createSliderWithTooltip(Slider);
@@ -26,7 +27,11 @@ class AppSidebar extends Component {
 			uploadModalOpened: false,
 			loading: true,
 			downloading: false,
-			downloadPercentage: null
+			downloadPercentage: null,
+			newHierarchy_L1: "",
+			newHierarchy_L2: "",
+			newHierarchy_L3: "",
+
 		}
 	}
 
@@ -45,6 +50,65 @@ class AppSidebar extends Component {
 				});
 			}
 		})
+
+		
+		this.setLoomHierarchy = (loomFilePath, loomDisplayName, loomHeierarchy) => {
+			// Popup.alert('Test')
+			console.log("Making popup")
+			console.log(loomFilePath)
+			console.log(loomDisplayName)
+			this.setState({
+					newHierarchy_L1: loomHeierarchy['L1'],
+					newHierarchy_L2: loomHeierarchy['L2'],
+					newHierarchy_L3: loomHeierarchy['L3'],
+			})
+			Popup.create({
+				title: "BETA: Hierarchy Change!",
+				content: <p>{["This will ", 
+							<b>permanently</b>, 
+							" update the hierarchy in the file tree for ", 
+							<b>{loomDisplayName}</b>,
+							".", 
+							<br />,
+							<br />,
+							"Please enter the new level names for this file:",
+							<br />,
+							<br />,
+							"Level 1: ", <Input fluid defaultValue={loomHeierarchy['L1']} onChange={e => this.setState({newHierarchy_L1: e.target.value})} />,
+							<br />,
+							"Level 2: ", <Input fluid defaultValue={loomHeierarchy['L2']} onChange={e => this.setState({newHierarchy_L2: e.target.value})} />,
+							<br />,
+							"Level 3: ", <Input fluid defaultValue={loomHeierarchy['L3']} onChange={e => this.setState({newHierarchy_L3: e.target.value})} />,
+							<br />,
+							<b> BETA: Some SCope functionality may be imparied until the loom is reloaded</b>,
+							]}
+						</p>,
+				buttons: {
+					left: [{
+						text: 'Cancel',
+						className: 'danger',
+						action: function () {
+							Popup.close()
+						}
+					}],
+					right: [{
+						text: 'Save new hierarchy',
+						className: 'success',
+						action: () => {
+							BackendAPI.setLoomHierarchy(this.state.newHierarchy_L1, this.state.newHierarchy_L2, this.state.newHierarchy_L3, (setLoomHierarchyResponse) => {
+								if (setLoomHierarchyResponse.success) {
+									this.getLoomFiles()
+								} 
+							})
+
+							Popup.close()
+						},
+						}]
+
+				}
+			});
+		}
+			
 		let showTransforms = metadata && (['welcome', 'dataset', 'tutorial', 'about'].indexOf(match.params.page) == -1) ? true : false;
 		let showCoordinatesSelection = showTransforms && metadata.fileMetaData && metadata.fileMetaData.hasExtraEmbeddings ? true : false;
 		let renderLevel = (t, l, name, canRemove) => {
@@ -58,6 +122,8 @@ class AppSidebar extends Component {
 						this.props.onMetadataChange(file);
 					}}  >
 						<Menu.Item className={'level' + l} active={active} key={file.loomFilePath} >
+							{canRemove &&
+								<Icon name='sitemap' title='Change loom file hierarchy' style={{ display: 'inline' }} onClick={(e, d) => this.setLoomHierarchy(file.loomFilePath, file.loomDisplayName, file.loomHeierarchy)} className="pointer" />}
 							{canRemove &&
 								<Icon name='trash' title='delete this loom file' style={{ display: 'inline' }} onClick={(e, d) => this.deleteLoomFile(file.loomFilePath, file.loomDisplayName)} className="pointer" />
 							}
@@ -399,6 +465,9 @@ class AppSidebar extends Component {
 		this.setState({ spriteScale: scale, spriteAlpha: alpha })
 		BackendAPI.setSpriteSettings(scale, alpha);
 	}
+
 }
+
+
 
 export default withRouter(AppSidebar);
