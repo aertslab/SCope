@@ -177,11 +177,19 @@ message AUCThreshold {
   float threshold=2;
 }
 
+message RegulonGenesMetric {
+  string accessor=1;
+  string name=2;
+  string description=3;
+  repeated float values=4;
+}
+
 message Regulon {
   repeated string genes=1;
   repeated AUCThreshold autoThresholds=2;
   string defaultThreshold=3;
   string motifName=4;
+  repeated RegulonGenesMetric metrics=5;
 }
 
 message FileMetaData {

@@ -361,11 +361,29 @@ class SCope(s_pb2_grpc.MainServicer):
                 motifName = os.path.basename(regulon['motifData'])
                 break
 
-        regulon = {"genes": regulon_genes,
-                   "autoThresholds": autoThresholds,
-                   "defaultThreshold": defaultThreshold,
-                   "motifName": motifName
-                   }
+        if "regulonSettings" in meta_data:
+            def create_regulon_marker_metric(regulon_metric):
+                regulon_marker_metrics = loom.get_regulon_target_gene_metric(
+                    regulon=request.regulon,
+                    metric_accessor=regulon_metric['accessor'],
+                    gene_occurrence_threshold=meta_data["regulonSettings"]["min_regulon_gene_occurrence"]
+                )
+                return s_pb2.RegulonGenesMetric(
+                    accessor=regulon_metric['accessor'],
+                    name=regulon_metric['name'],
+                    description=regulon_metric['description'],
+                    values=regulon_marker_metrics)
+            regulon_marker_metrics = list(map(create_regulon_marker_metric, [{'accessor': 'GeneOccurrences', 'name': 'Occurrence', 'description': 'Regulon Target Gene Occurrence'}]))
+        else:
+            regulon_marker_metrics = None
+
+        regulon = {
+            "genes": regulon_genes,
+            "autoThresholds": autoThresholds,
+            "defaultThreshold": defaultThreshold,
+            "motifName": motifName,
+            "metrics": regulon_marker_metrics
+        }
 
         return s_pb2.RegulonMetaDataReply(regulonMeta=regulon)
 

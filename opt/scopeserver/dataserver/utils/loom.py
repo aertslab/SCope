@@ -435,7 +435,7 @@ class Loom():
     def get_regulon_genes(self, regulon):
         try:
             return self.get_genes()[self.loom_connection.ra.Regulons[regulon] == 1]
-        except:
+        except Exception:
             return []
 
     def has_regulons_AUC(self):
@@ -457,6 +457,11 @@ class Loom():
                 vals = vals[cellIndices]
             return vals, cellIndices
         return [], cellIndices
+
+    def get_regulon_target_gene_metric(self, regulon, metric_accessor, gene_occurrence_threshold=0):
+        regulon_target_gene_metric = self.loom_connection.row_attrs[f"Regulon{metric_accessor}"][str(regulon).replace('_', '')]
+        # Return non-zero values
+        return regulon_target_gene_metric  # [regulon_target_gene_metric >= gene_occurrence_threshold]
 
     ##############
     # Embeddings #
