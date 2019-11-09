@@ -461,7 +461,7 @@ class Loom():
     def get_regulon_target_gene_metric(self, regulon, metric_accessor, gene_occurrence_threshold=0):
         regulon_target_gene_metric = self.loom_connection.row_attrs[f"Regulon{metric_accessor}"][str(regulon).replace('_', '')]
         # Return non-zero values
-        return regulon_target_gene_metric  # [regulon_target_gene_metric >= gene_occurrence_threshold]
+        return regulon_target_gene_metric[regulon_target_gene_metric >= gene_occurrence_threshold]
 
     ##############
     # Embeddings #
