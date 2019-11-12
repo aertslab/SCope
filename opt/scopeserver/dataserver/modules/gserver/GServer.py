@@ -361,11 +361,44 @@ class SCope(s_pb2_grpc.MainServicer):
                 motifName = os.path.basename(regulon['motifData'])
                 break
 
-        regulon = {"genes": regulon_genes,
-                   "autoThresholds": autoThresholds,
-                   "defaultThreshold": defaultThreshold,
-                   "motifName": motifName
-                   }
+        # min_gene_occurrence_mask = regulon_marker_metrics >= meta_data["regulonSettings"]["min_regulon_gene_occurrence"]
+        # # Filter the regulon genes by threshold
+        # regulon_genes = regulon_genes[min_gene_occurrence_mask]
+
+        if "regulonSettings" in meta_data:
+            metrics = [{'accessor': 'GeneOccurrences', 'name': 'Occurrence', 'description': 'Regulon Target Gene Occurrence'}]
+
+            def get_regulon_marker_metric(regulon_metric):
+                return {
+                    regulon_metric['accessor']: loom.get_regulon_target_gene_metric(
+                        regulon=request.regulon,
+                        metric_accessor=regulon_metric['accessor'])
+                }
+            regulon_marker_metrics_dict = {k: v for e in list(map(get_regulon_marker_metric, metrics)) for k, v in e.items()}
+            # Create the mask based on threshold
+            mask = regulon_marker_metrics_dict["GeneOccurrences"] >= meta_data["regulonSettings"]["min_regulon_gene_occurrence"]
+            # Filter the regulon genes by threshold
+            regulon_genes = regulon_genes[mask]
+            regulon_marker_metrics = list(
+                map(
+                    lambda metric: s_pb2.RegulonGenesMetric(
+                        accessor=metric['accessor'],
+                        name=metric['name'],
+                        description=metric['description'],
+                        values=regulon_marker_metrics_dict[metric['accessor']][mask]
+                    ), metrics
+                )
+            )
+        else:
+            regulon_marker_metrics = None
+
+        regulon = {
+            "genes": regulon_genes,
+            "autoThresholds": autoThresholds,
+            "defaultThreshold": defaultThreshold,
+            "motifName": motifName,
+            "metrics": regulon_marker_metrics
+        }
 
         return s_pb2.RegulonMetaDataReply(regulonMeta=regulon)
 

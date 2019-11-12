@@ -229,6 +229,10 @@ class ViewerSidebar extends Component {
 						newMarkerTableColumn("Gene Symbol", "gene", "gene", newMarkerTableGeneCell)
 					]
 
+					// DISPLAY METRICS
+					console.log("DISPLAY METRICS")
+					console.log(md)
+
 					if ('metrics' in md) {
 						// Add extra columns (metrics like logFC, p-value, ...)
 						for(let metric of md.metrics) {
