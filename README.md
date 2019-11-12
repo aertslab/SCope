@@ -1,4 +1,4 @@
-# SCope v1.7.0: Visualization of large-scale and high dimensional single cell data
+# SCope v1.7.1: Visualization of large-scale and high dimensional single cell data
 <img src="images/SCope_Logo.png" width="640">
 
 SCope is a fast visualization tool for large-scale and high dimensional scRNA-seq datasets.
