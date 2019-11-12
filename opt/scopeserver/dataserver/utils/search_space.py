@@ -90,13 +90,20 @@ class SearchSpace(dict):
         self.add_markers(element_type='marker_gene')
 
     def add_regulons(self):
-        self.add_elements(elements=self.loom.get_regulons_AUC().dtype.names, element_type='regulon')
+        if self.loom.has_motif_and_track_regulons():
+            self.add_elements(elements=self.loom.get_regulons_AUC(regulon_type='motif').dtype.names + self.loom.get_regulons_AUC(regulon_type='track').dtype.names, element_type='regulon')
+        else:
+            self.add_elements(elements=self.loom.get_regulons_AUC().dtype.names, element_type='regulon')
         self.add_markers(element_type='regulon_target')
 
     def add_markers(self, element_type='regulon_target'):
         loom = self.loom.loom_connection
         if element_type == 'regulon_target':
-            regulons = list(loom.ca.RegulonsAUC.dtype.names)
+            if self.loom.has_motif_and_track_regulons():
+                regulons = list(self.loom.get_regulons_AUC(regulon_type='motif').dtype.names + self.loom.get_regulons_AUC(regulon_type='track').dtype.names)
+            else:
+                regulons = list(loom.ca.RegulonsAUC.dtype.names)
+
             for regulon in regulons:
                 genes = self.loom.get_regulon_genes(regulon=regulon)
                 for gene in genes:

@@ -6,6 +6,10 @@ Currently the data format supported by SCope is `.loom`. This file format for ve
 
 ## Version History
 
+November 12, 2019
+* Version 1.7.1
+	* Fix display of regulon target gene occurrences with loom containing motif-based and track-based regulons.
+
 November 9, 2019
 * Version 1.7.0
 	* Display the regulon target gene occurrences when running SCENIC in multi-runs mode.

@@ -240,9 +240,10 @@ class Loom():
 
         """
         loom = self.loom_connection
-        attr_margins = [2, 2, 2, 2, 0]
-        attr_names = ["RegulonsAUC", "Clusterings", "Embeddings_X", "GeneSets", "MetaData"]
-        attr_keys = ["RegulonsAUC", "Clusterings", "ExtraEmbeddings", "GeneSets", "GlobalMeta"]
+        attr_margins = [2, 2, 2, 2, 2, 2, 0]
+        # Order matters
+        attr_names = ["RegulonsAUC", "MotifRegulonsAUC", "TrackRegulonsAUC", "Clusterings", "Embeddings_X", "GeneSets", "MetaData"]
+        attr_keys = ["RegulonsAUC", "RegulonsAUC", "RegulonsAUC", "Clusterings", "ExtraEmbeddings", "GeneSets", "GlobalMeta"]
 
         def loom_attr_exists(x):
             tmp = {}
@@ -432,17 +433,35 @@ class Loom():
     # Regulons #
     ############
 
+    def has_motif_and_track_regulons(self):
+        return "MotifRegulons" in self.loom_connection.ra.keys() and "MotifRegulons" in self.loom_connection.ra.keys()
+
     def get_regulon_genes(self, regulon):
         try:
-            return self.get_genes()[self.loom_connection.ra.Regulons[regulon] == 1]
+            if "motif" in regulon.lower():
+                return self.get_genes()[self.loom_connection.ra.MotifRegulons[regulon] == 1]
+            elif "track" in regulon.lower():
+                return self.get_genes()[self.loom_connection.ra.TrackRegulons[regulon] == 1]
+            else:
+                return self.get_genes()[self.loom_connection.ra.Regulons[regulon] == 1]
         except Exception:
             return []
 
     def has_regulons_AUC(self):
+        if self.has_motif_and_track_regulons():
+            return True
         return "RegulonsAUC" in self.loom_connection.ca.keys()
 
-    def get_regulons_AUC(self):
+    def get_regulons_AUC(self, regulon_type=None):
         loom = self.loom_connection
+        if regulon_type == 'motif':
+            L = loom.ca.MotifRegulonsAUC.dtype.names
+            loom.ca.MotifRegulonsAUC.dtype.names = list(map(lambda s: s.replace(' ', '_'), L))
+            return loom.ca.MotifRegulonsAUC
+        if regulon_type == 'track':
+            L = loom.ca.TrackRegulonsAUC.dtype.names
+            loom.ca.TrackRegulonsAUC.dtype.names = list(map(lambda s: s.replace(' ', '_'), L))
+            return loom.ca.TrackRegulonsAUC
         L = loom.ca.RegulonsAUC.dtype.names
         loom.ca.RegulonsAUC.dtype.names = list(map(lambda s: s.replace(' ', '_'), L))
         return loom.ca.RegulonsAUC
@@ -450,18 +469,33 @@ class Loom():
     def get_auc_values(self, regulon, annotation='', logic='OR'):
         logger.debug("Getting AUC values for {0} ...".format(regulon))
         cellIndices = list(range(self.get_nb_cells()))
-        if regulon in self.get_regulons_AUC().dtype.names:
-            vals = self.get_regulons_AUC()[regulon]
+        # Get the regulon type
+        regulon_type = None
+        if "motif" in regulon.lower():
+            regulon_type = "motif"
+        elif "track" in regulon.lower():
+            regulon_type = "track"
+        else:
+            regulon_type = None
+
+        if regulon in self.get_regulons_AUC(regulon_type=regulon_type).dtype.names:
+            vals = self.get_regulons_AUC(regulon_type=regulon_type)[regulon]
             if len(annotation) > 0:
                 cellIndices = self.get_anno_cells(annotations=annotation, logic=logic)
                 vals = vals[cellIndices]
             return vals, cellIndices
         return [], cellIndices
 
-    def get_regulon_target_gene_metric(self, regulon, metric_accessor, gene_occurrence_threshold=0):
-        regulon_target_gene_metric = self.loom_connection.row_attrs[f"Regulon{metric_accessor}"][str(regulon).replace('_', '')]
-        # Return non-zero values
-        return regulon_target_gene_metric[regulon_target_gene_metric >= gene_occurrence_threshold]
+    def get_regulon_target_gene_metric(self, regulon, metric_accessor):
+        regulon_type = ''
+        if "motif" in regulon.lower():
+            regulon_type = "motif"
+        elif "track" in regulon.lower():
+            regulon_type = "track"
+
+        regulon_target_gene_metric = self.loom_connection.row_attrs[f"{regulon_type.capitalize()}Regulon{metric_accessor}"][str(regulon).replace('_', '')]
+        # Return only the target genes for the given regulon
+        return regulon_target_gene_metric[self.loom_connection.row_attrs[f"{regulon_type.capitalize()}Regulons"][str(regulon)] == 1]
 
     ##############
     # Embeddings #
@@ -568,7 +602,7 @@ class Loom():
     def get_cluster_marker_genes(self, clustering_id, cluster_id):
         try:
             return self.get_genes()[self.loom_connection.ra["ClusterMarkers_{0}".format(clustering_id)][str(cluster_id)] == 1]
-        except:
+        except Exception:
             return []
 
     def get_cluster_marker_metrics(self, clustering_id, cluster_id, metric_accessor):
