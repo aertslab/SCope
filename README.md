@@ -1,4 +1,4 @@
-# SCope v1.7.1: Visualization of large-scale and high dimensional single cell data
+# SCope v1.7.2: Visualization of large-scale and high dimensional single cell data
 <img src="images/SCope_Logo.png" width="640">
 
 SCope is a fast visualization tool for large-scale and high dimensional scRNA-seq datasets.
@@ -7,6 +7,8 @@ Currently the data format supported by SCope is `.loom`. This file format for ve
 ## Version History
 
 November 12, 2019
+* Version 1.7.2
+	* Fix bug Regulon tab not showing for loom files not containing otif-based and track-based regulons.
 * Version 1.7.1
 	* Fix display of regulon target gene occurrences with loom containing motif-based and track-based regulons.
 

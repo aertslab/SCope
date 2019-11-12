@@ -240,23 +240,26 @@ class Loom():
 
         """
         loom = self.loom_connection
-        attr_margins = [2, 2, 2, 2, 2, 2, 0]
+        # Global attribute: 0
+        # Row attribute: 1 
+        # Column attributeL 2
+        attr_margins = [2, 2, 2, 2, 0]
         # Order matters
-        attr_names = ["RegulonsAUC", "MotifRegulonsAUC", "TrackRegulonsAUC", "Clusterings", "Embeddings_X", "GeneSets", "MetaData"]
-        attr_keys = ["RegulonsAUC", "RegulonsAUC", "RegulonsAUC", "Clusterings", "ExtraEmbeddings", "GeneSets", "GlobalMeta"]
+        attr_names = [("RegulonsAUC", "MotifRegulonsAUC", "TrackRegulonsAUC",), ("Clusterings",), ("Embeddings_X",), ("GeneSets",), ("MetaData",)]
+        attr_keys = [("RegulonsAUC",), ("Clusterings",), ("ExtraEmbeddings",), ("GeneSets",), ("GlobalMeta",)]
 
         def loom_attr_exists(x):
             tmp = {}
             idx = attr_names.index(x)
             margin = attr_margins[idx]
             ha = False
-            if margin == 0 and x in loom.attrs.keys():
+            if margin == 0 and any(i in loom.attrs.keys() for i in x):
                 ha = True
-            elif margin == 1 and x in loom.ra.keys():
+            elif margin == 1 and any(i in loom.ra.keys() for i in x):
                 ha = True
-            elif margin == 2 and x in loom.ca.keys():
+            elif margin == 2 and any(i in loom.ca.keys() for i in x):
                 ha = True
-            tmp["has{0}".format(attr_keys[idx])] = ha
+            tmp["has{0}".format(attr_keys[idx][0])] = ha
             return tmp
 
         md = map(loom_attr_exists, attr_names)
