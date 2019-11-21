@@ -42,7 +42,7 @@ class LoomFileHandler():
 
     def change_loom_mode(self, loom_file_path, mode='r', partial_md5_hash=None):
         if partial_md5_hash == None:
-            partial_md5_hash = LoomFileHandler.get_partial_md5_hash(LoomFileHandler.get_loom_absolute_file_path(loom_file_path), 10000)
+            partial_md5_hash = LoomFileHandler.get_partial_md5_hash(self.get_loom_absolute_file_path(loom_file_path), 10000)
         if not os.path.exists(self.get_loom_absolute_file_path(loom_file_path)):
             raise ValueError('The file located at ' +
                              self.get_loom_absolute_file_path(loom_file_path) + ' does not exist.')
