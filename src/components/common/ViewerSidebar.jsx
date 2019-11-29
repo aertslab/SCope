@@ -39,12 +39,22 @@ class ViewerSidebar extends Component {
 			this.props.onActiveFeaturesChange(features, id);
 			this.setState({activeFeatures: features, activeTab: parseInt(id) + 1});
 		};
+		this.setNewAnnotationName.bind(this)
+		this.onNewAnnotationChange.bind(this)
+	}
+
+	onNewAnnotationChange = (e) => {
+		this.setNewAnnotationName(e.target.value)
+	}
+
+	setNewAnnotationName = (newAnnoName) => {
+		this.setState({newAnnoName: newAnnoName})
 	}
 
 	render() {
 		const { history, match, hideFeatures } = this.props;
 		const { lassoSelections, activeFeatures, activeTab, activePage } = this.state;
-
+		
 		let lassoTab = () => {
 			if (lassoSelections.length == 0) {
 				return (
@@ -165,7 +175,7 @@ class ViewerSidebar extends Component {
 							ref={this.state.newAnnoRef}
 							style={{"margin-bottom": "15px", width: "100%"}}
 							placeholder={activeFeatures[i].feature}
-							onChange={e => this.setState({newAnnoName: e.target.value})}
+							onChange={this.onNewAnnotationChange}
 							actionPosition="left"
 							action={{
 								onClick: () => {this.handleAnnoUpdate(activeFeatures[i], i);} ,
@@ -174,13 +184,14 @@ class ViewerSidebar extends Component {
 								"data-position":"left center",
 								content: "Update Annotation"
 							}}
+							value={this.state.newAnnoName}
 							/>
 					)}}
 				
 				let olsWidget = () => {
 					if(activeFeatures[i].featureType.startsWith("Cluster") && activeFeatures[i].feature != 'All Clusters' && BackendAPI.getLoomRWStatus() == "rw" && this.state.activePage == "gene") {					
 						return (
-							<OLSAutocomplete></OLSAutocomplete>
+							<OLSAutocomplete setNewAnnotationName={this.setNewAnnotationName}></OLSAutocomplete>
 						)
 					}
 				}
@@ -483,6 +494,7 @@ class ViewerSidebar extends Component {
 	}
 
 	componentWillMount() {
+		this.timer = null;
 		BackendAPI.onViewerSelectionsChange(this.selectionsListener);
 		BackendAPI.onActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
 	}
@@ -510,13 +522,6 @@ class ViewerSidebar extends Component {
 			value: id
 		});
 	}
-
-	shouldComponentUpdate(nextProps, nextState) {
-		if (this.state.newAnnoName != nextState.newAnnoName && this.state.newAnnoName != "") {
-			return false
-		} else {
-			return true
-		}
-	}
+	
 }
 export default withRouter(ViewerSidebar);

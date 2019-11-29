@@ -39,10 +39,14 @@ resultRenderer.propTypes = {
 const initialState = { isLoading: false, results: [], value: "" };
 
 export default class OLSAutocomplete extends Component {
+
     state = initialState;
 
-    handleResultSelect = (e, { result }) =>
+    handleResultSelect = (e, { result }) => {
         this.setState({ value: result.label });
+        const { setNewAnnotationName } = this.props;
+        setNewAnnotationName(result.label)
+    }
 
     queryOLS = query => {
         let metadata = BackendAPI.getActiveLoomMetadata()
@@ -60,8 +64,8 @@ export default class OLSAutocomplete extends Component {
 
     handleSearchChange = (e, { value }) => {
         this.setState({ isLoading: true, value });
-        this.queryOLS(value);
         setTimeout(() => {
+            this.queryOLS(value);
             if (this.state.value.length < 1) return this.setState(initialState);
 
             const re = new RegExp(_.escapeRegExp(this.state.value), "i");
@@ -78,7 +82,7 @@ export default class OLSAutocomplete extends Component {
         const { isLoading, value, results } = this.state;
 
         return (
-            <div>
+            <div key="ols-autocomplete">
                 <Header as='h2'>Search Annotation using EBI OLS</Header>
                 <Search
                     loading={isLoading}
