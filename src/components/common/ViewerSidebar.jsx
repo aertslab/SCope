@@ -11,6 +11,8 @@ import ReactTable from "react-table";
 import "react-table/react-table.css";
 import FileDownloader from '../../js/http'
 
+import OLSAutocomplete from  './OLSAutocomplete'
+
 import { delimiter } from 'path';
 
 class ViewerSidebar extends Component {
@@ -174,6 +176,14 @@ class ViewerSidebar extends Component {
 							}}
 							/>
 					)}}
+				
+				let olsWidget = () => {
+					if(activeFeatures[i].featureType.startsWith("Cluster") && activeFeatures[i].feature != 'All Clusters' && BackendAPI.getLoomRWStatus() == "rw" && this.state.activePage == "gene") {					
+						return (
+							<OLSAutocomplete></OLSAutocomplete>
+						)
+					}
+				}
 
 				let markerTable = "", legendTable = "", downloadSubLoomButton = () => "";
 
@@ -402,6 +412,7 @@ class ViewerSidebar extends Component {
 							{md.featureType} {md.feature}<br />
 							{image}
 							{annotationBox()}
+							{olsWidget()}
 							{markerTable}
 							{legendTable}
 							{downloadSubLoomButton()}

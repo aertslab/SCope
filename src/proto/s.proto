@@ -198,6 +198,7 @@ message FileMetaData {
   bool hasClusterings=3;
   bool hasExtraEmbeddings=4;
   bool hasGlobalMeta=5;
+  string species=6;
 }
 
 message FeatureValues {

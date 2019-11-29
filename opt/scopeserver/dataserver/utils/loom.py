@@ -264,6 +264,7 @@ class Loom():
 
         md = map(loom_attr_exists, attr_names)
         meta = {k: v for d in md for k, v in d.items()}
+        meta['species'], _ = self.infer_species()
         return meta
 
     def get_meta_data_annotation_by_name(self, name):
