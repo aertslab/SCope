@@ -496,10 +496,14 @@ class Loom():
             regulon_type = "motif"
         elif "track" in regulon.lower():
             regulon_type = "track"
-
-        regulon_target_gene_metric = self.loom_connection.row_attrs[f"{regulon_type.capitalize()}Regulon{metric_accessor}"][str(regulon).replace('_', '')]
+        loom_attribute = self.loom_connection.row_attrs[f"{regulon_type.capitalize()}Regulon{metric_accessor}"]
+        if str(regulon) in loom_attribute.dtype.names:
+            regulon = str(regulon)
+        else:
+            regulon = str(regulon).replace('_', '')
+        regulon_target_gene_metric = loom_attribute[regulon]
         # Return only the target genes for the given regulon
-        return regulon_target_gene_metric[self.loom_connection.row_attrs[f"{regulon_type.capitalize()}Regulons"][str(regulon)] == 1]
+        return regulon_target_gene_metric[self.loom_connection.row_attrs[f"{regulon_type.capitalize()}Regulons"][regulon] == 1]
 
     ##############
     # Embeddings #

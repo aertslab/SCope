@@ -210,11 +210,12 @@ class App extends Component {
 			} else if (match.params.uuid.startsWith('permalink')) {
 				this.restoreSession(ip, match.params.uuid.substring(11), match.params.loom);
 			} else {
-				if (DEBUG) console.log('Params UUID detected');
+				if (DEBUG) console.log('Params UUID detected:', match.params.uuid);
 				this.checkUUID(ip, match.params.uuid);
+				cookies.set(cookieName, match.params.uuid, { path: '/'});
 			}
 		} else if (cookies.get(cookieName)) {
-			if (DEBUG) console.log('Cookie UUID detected');
+			if (DEBUG) console.log('Cookie UUID detected:', cookies.get(cookieName) );
 			this.checkUUID(ip, cookies.get(cookieName));
 		} else {
 			if (DEBUG) console.log('No UUID detected');
