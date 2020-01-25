@@ -114,6 +114,16 @@ class MainStub(object):
         request_serializer=s__pb2.SetLoomHierarchyRequest.SerializeToString,
         response_deserializer=s__pb2.SetLoomHierarchyReply.FromString,
         )
+    self.getORCIDiD = channel.unary_unary(
+        '/scope.Main/getORCIDiD',
+        request_serializer=s__pb2.getORCIDiDRequest.SerializeToString,
+        response_deserializer=s__pb2.getORCIDiDReply.FromString,
+        )
+    self.getORCIDStatus = channel.unary_unary(
+        '/scope.Main/getORCIDStatus',
+        request_serializer=s__pb2.getORCIDStatusRequest.SerializeToString,
+        response_deserializer=s__pb2.getORCIDStatusReply.FromString,
+        )
 
 
 class MainServicer(object):
@@ -260,6 +270,20 @@ class MainServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def getORCIDiD(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def getORCIDStatus(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_MainServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -362,6 +386,16 @@ def add_MainServicer_to_server(servicer, server):
           servicer.setLoomHierarchy,
           request_deserializer=s__pb2.SetLoomHierarchyRequest.FromString,
           response_serializer=s__pb2.SetLoomHierarchyReply.SerializeToString,
+      ),
+      'getORCIDiD': grpc.unary_unary_rpc_method_handler(
+          servicer.getORCIDiD,
+          request_deserializer=s__pb2.getORCIDiDRequest.FromString,
+          response_serializer=s__pb2.getORCIDiDReply.SerializeToString,
+      ),
+      'getORCIDStatus': grpc.unary_unary_rpc_method_handler(
+          servicer.getORCIDStatus,
+          request_deserializer=s__pb2.getORCIDStatusRequest.FromString,
+          response_serializer=s__pb2.getORCIDStatusReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

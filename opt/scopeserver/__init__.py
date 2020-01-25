@@ -28,9 +28,14 @@ parser = argparse.ArgumentParser(description='Launch the scope server')
 parser.add_argument('-g_port', metavar='gPort', type=int, help='gPort', default=55853)
 parser.add_argument('-p_port', metavar='pPort', type=int, help='pPort', default=55851)
 parser.add_argument('-x_port', metavar='xPort', type=int, help='xPort', default=55852)
+parser.add_argument('--config', type=str, help='Path to config file', default=None)
 parser.add_argument('--app_mode', action='store_true', help='Run in app mode (Fixed UUID)', default=False)
 
 args = parser.parse_args()
+
+if args.config is not None:
+    if not os.path.isfile(args.config):
+        raise FileNotFoundError(f'The config file {args.config} does not exist!')
 
 
 class SCopeServer():
@@ -42,6 +47,7 @@ class SCopeServer():
         self.p_port = args.p_port
         self.x_port = args.x_port
         self.app_mode = args.app_mode
+        self.config = args.config
 
     def start_bind_server(self):
         logger.debug('Starting bind server on port {0}'.format(self.x_port))
@@ -50,7 +56,7 @@ class SCopeServer():
 
     def start_data_server(self):
         logger.debug('Starting data server on port {0}. app_mode: {1}'.format(self.g_port, self.app_mode))
-        self.gs_thread = threading.Thread(target=gs.serve, args=(self.run_event,), kwargs={'port': self.g_port, 'app_mode': self.app_mode})
+        self.gs_thread = threading.Thread(target=gs.serve, args=(self.run_event,), kwargs={'port': self.g_port, 'app_mode': self.app_mode, 'config': self.config})
         logger.debug('Starting upload server on port {0}'.format(self.p_port))
         self.ps_thread = threading.Thread(target=ps.run, args=(self.run_event,), kwargs={'port': self.p_port})
         self.gs_thread.start()

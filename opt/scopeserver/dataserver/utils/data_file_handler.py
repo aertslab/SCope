@@ -39,6 +39,7 @@ class DataFileHandler():
     def __init__(self):
         self.current_UUIDs = {}
         self.permanent_UUIDs = set()
+        self.orcid_ids = {}
         self.active_sessions = {}
         self.uuid_log = None
         self.data_dirs = data_dirs
@@ -82,6 +83,31 @@ class DataFileHandler():
             if not os.path.isdir(data_dirs[data_type]["path"]):
                 logger.error(self.data_dirs[data_type]["message"])
                 os.makedirs(self.data_dirs[data_type]["path"])
+
+    # ORCID_ID  UUID1,UUID2,UUID3   NAME
+
+    def read_ORCID_db(self):
+        logger.debug('Building UUID "database"')
+        if os.path.isfile(os.path.join(self.config_dir, 'ORCID_IDs.txt')):
+            logger.debug('Existing Permanent Sessions:"')
+            with open(os.path.join(self.config_dir, 'ORCID_IDs.txt'), 'r') as fh:
+                for line in fh.readlines():
+                    orcid_id, orcid_scope_uuids, name = line.rstrip('\n').split('\t')
+                    self.orcid_ids[orcid_id] = (set([x for x in orcid_scope_uuids.split(',')]), name)
+
+    def add_ORCIDiD(self, orcid_scope_uuid, name, orcid_id):
+        if orcid_id in self.orcid_ids:
+            self.orcid_ids[orcid_id][0].add(orcid_scope_uuid)
+        else:
+            self.orcid_ids[orcid_id] = (set([orcid_scope_uuid]), name)
+
+        self.update_ORCIDiD_db()
+
+    def update_ORCIDiD_db(self):
+        with open(os.path.join(self.config_dir, 'ORCID_IDs.txt'), 'w') as fh:
+            for orcid_id in self.orcid_ids:
+                orcid_scope_uuids, name = self.orcid_ids[orcid_id]
+                fh.write(f"{orcid_id}\t{','.join(orcid_scope_uuids)}\t{name}\n")
 
     def get_current_UUIDs(self):
         return self.current_UUIDs

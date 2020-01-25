@@ -8,5 +8,8 @@
     "pPort": "55851",
     "xPort": "55852",
     "gPort": "55853",
-    "reverseProxyOn": false
+    "reverseProxyOn": false,
+    "orcidAPIClientID": "",
+    "orcidAPIClientSecret": "",
+    "orcidAPIRedirectURI": ""
 }

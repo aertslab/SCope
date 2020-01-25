@@ -34,6 +34,7 @@ setup(name='scope-server',
           'pyscenic==0.9.14',
           'appdirs',
           'dask==1.0.0',
-          'distributed==1.21.6'
+          'distributed==1.21.6',
+          'requests>=2.22.0'
       ],
       zip_safe=False)

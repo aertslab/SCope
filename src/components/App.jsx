@@ -43,10 +43,28 @@ class App extends Component {
 			isSidebarVisible: true,
 			sessionsLimitReached: false,
 			sessionMode: 'rw',
+			orcid_active: true
 		}
+
+		BackendAPI.getORCIDStatus((active) => { 
+            this.setState({orcid_active: active})
+		})
+		
 		this.timeout = null;
 		this.mouseClicks = 0;
 		ReactGA.initialize('UA-61194136-10');
+
+		if (document.head.querySelector("[name=scope-orcid_auth]") != null && this.state.orcid_active) {
+			let code = document.head.querySelector("[name=scope-orcid_auth]").getAttribute('code')
+			BackendAPI.getORCIDiD(code, (orcid_scope_uuid, name, orcid_id) => {
+				this.props.cookies.set('scope_orcid_uuid', orcid_scope_uuid)
+				this.props.cookies.set('scope_orcid_name', name)
+				this.props.cookies.set('scope_orcid_id', orcid_id)
+				// Possibly a but hacky, but it works to remove the code from the URL
+				location.href = location.origin + location.pathname + location.hash
+			});
+
+		}
 	}
 
 	render() {

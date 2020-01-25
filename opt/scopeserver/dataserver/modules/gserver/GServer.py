@@ -15,6 +15,7 @@ import zlib
 import base64
 import threading
 import pickle
+import requests
 import uuid
 from collections import OrderedDict, defaultdict, deque
 from functools import lru_cache
@@ -48,7 +49,9 @@ class SCope(s_pb2_grpc.MainServicer):
     app_name = 'SCope'
     app_author = 'Aertslab'
 
-    def __init__(self):
+    orcid_active = False
+
+    def __init__(self, config=None):
         self.dfh = dfh.DataFileHandler()
         self.lfh = lfh.LoomFileHandler()
 
@@ -56,10 +59,86 @@ class SCope(s_pb2_grpc.MainServicer):
         self.dfh.set_global_data()
         self.lfh.set_global_data()
         self.dfh.read_UUID_db()
+        self.dfh.read_ORCID_db()
+        self.config = {}
+        if config is not None:
+            with open(config, 'r') as fh:
+                try:
+                    self.config = json.loads(fh.read())
+                except json.JSONDecodeError:
+                    logger.error('Config file is not proper json and will not be used')
+            self.test_ORCID_connection()
+        else:
+            self.config = {}
 
     def update_global_data(self):
         self.dfh.set_global_data()
         self.lfh.set_global_data()
+
+    def test_ORCID_connection(self):
+        for i in ['orcidAPIClientID', 'orcidAPIClientSecret', 'orcidAPIRedirectURI']:
+            if i not in self.config.keys():
+                self.orcid_active = False
+                return
+
+        r = requests.post('https://orcid.org/oauth/token',
+                          data={'client_id': self.config['orcidAPIClientID'],
+                                'client_secret': self.config['orcidAPIClientSecret'],
+                                'grant_type': 'client_credentials',
+                                'scope': '/read-public'
+                                }
+                          )
+        if r.status_code != 200:
+            logger.error(f'ORCID connection failed! Please check your credentials. See DEBUG output for more details.')
+            logger.debug(f'HTTP Code: {r.status_code}')
+            logger.debug(f'ERROR: {r.text}')
+            self.orcid_active = False
+        else:
+            logger.info('ORCID connection successful. Users will be able to authenticate.')
+            logger.debug(f"SUCCESS: {r.text}")
+            self.orcid_active = True
+
+    def getORCIDStatus(self, request, context):
+        return s_pb2.getORCIDStatusReply(active=self.orcid_active)
+
+    def getORCIDiD(self, request, context):
+        request_code = request.code
+        logger.debug(f'Recieved code "{request_code}" from frontend.')
+
+        if self.orcid_active:
+            r = requests.post('https://orcid.org/oauth/token',
+                              data={'client_id': self.config['orcidAPIClientID'],
+                                    'client_secret': self.config['orcidAPIClientSecret'],
+                                    'grant_type': 'authorization_code',
+                                    'code': request_code,
+                                    'redirect_uri': self.config['orcidAPIRedirectURI']
+                                    }
+                              )
+
+        if r.status_code != 200 or not self.orcid_active:
+            logger.debug(f'ERROR: {r.status_code}')
+            logger.debug(f'ERROR: {r.text}')
+            return s_pb2.getORCIDiDReply(
+                orcid_scope_uuid="null",
+                name='null',
+                orcid_id="null",
+                success=False
+            )
+        else:
+            logger.debug(f"SUCCESS: {r.text}")
+            orcid_data = json.loads(r.text)
+            success = True
+
+        orcid_scope_uuid = str(uuid.uuid4())
+
+        self.dfh.add_ORCIDiD(orcid_scope_uuid, orcid_data['name'], orcid_data['orcid'])
+
+        return s_pb2.getORCIDiDReply(
+            orcid_scope_uuid=orcid_scope_uuid,
+            name=orcid_data['name'],
+            orcid_id=orcid_data['orcid'],
+            success=success
+        )
 
     @lru_cache(maxsize=256)
     def get_features(self, loom, query):
@@ -704,10 +783,10 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.LoomUploadedReply()
 
 
-def serve(run_event, port=50052, app_mode=False):
+def serve(run_event, port=50052, app_mode=False, config=None):
     SCope.app_mode = app_mode
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    scope = SCope()
+    scope = SCope(config=config)
     s_pb2_grpc.add_MainServicer_to_server(scope, server)
     server.add_insecure_port('[::]:{0}'.format(port))
     server.start()

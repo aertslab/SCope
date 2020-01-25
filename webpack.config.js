@@ -75,6 +75,10 @@ let config = {
                 httpProtocol: _config.httpProtocol,
                 wsProtocol: _config.wsProtocol,
                 host: _config.publicHostAddress
+            }),
+            ORCID: JSON.stringify({
+                orcidAPIClientID: _config.orcidAPIClientID,
+                orcidAPIRedirectURI: _config.orcidAPIRedirectURI,
             })
         }),
         new WebpackGitHash({

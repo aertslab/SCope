@@ -454,6 +454,39 @@ class API {
 		})
 	}
 
+	getORCIDStatus(callback) {
+		BackendAPI.getConnection().then((gbc) => {
+			gbc.services.scope.Main.getORCIDStatus({}, (err, response) => {
+				if (DEBUG) console.log('getORCIDStatus', response);
+				callback(response.active)
+			});
+		}, () => {
+			BackendAPI.showError();
+		});
+	}
+
+	getORCIDiD(code, callback) {
+
+		if (DEBUG) console.log('getORCIDiD', code);
+		let query = {
+			code: code,
+		}
+
+		if (DEBUG) console.log('getORCIDiD', query);
+		BackendAPI.getConnection().then((gbc) => {
+			gbc.services.scope.Main.getORCIDiD(query, (err, response) => {
+				if (DEBUG) console.log('getORCIDiD', response);	
+				if (response.success) {
+					callback(response.orcid_scope_uuid, response.name, response.orcid_id)
+				} else {
+					console.log('ORCID AUTH FAILED')
+				}
+			})
+		}, () => {
+			BackendAPI.showError();
+		});
+	}
+
 	getMaxScale(id, callback) {
 		let settings = this.getSettings();
 		let page = this.activePage;

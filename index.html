@@ -15,6 +15,13 @@
          }
          return(false);
        }
+       
+       if (getQueryVariable("code")) {
+         var meta = document.createElement('meta');
+         meta.name = "scope-orcid_auth";
+         meta.setAttribute("code", getQueryVariable("code"))
+         document.getElementsByTagName('head')[0].appendChild(meta);
+      }
        if (getQueryVariable("WSport")) {
          var meta = document.createElement('meta');
          meta.name = "scope-wsport";
