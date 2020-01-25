@@ -62,8 +62,7 @@ class AppHeader extends Component {
 							<Button onClick={() => orcid_logout()}>Log out</Button>
 							<p/><b>By logging out you will no longer be able to annotate data. <br/>Your previous annotations and votes will remain.</b>
 							</div>}
-						trigger={<Image src="src/images/ORCIDiD_iconvector.svg" width="24" height="24" alt="ORCID iD icon" avatar/>} flowing hoverable/>
-					Welcome {orcid_name}!
+						trigger={<div><Image src="src/images/ORCIDiD_iconvector.svg" width="24" height="24" alt="ORCID iD icon" avatar/>Welcome {orcid_name}! &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Logout?</div>} flowing hoverable/>
 				</div>
 				)
 			} else {
