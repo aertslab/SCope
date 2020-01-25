@@ -67,7 +67,17 @@ class AppHeader extends Component {
 				</div>
 				)
 			} else {
-				return(this.state.orcid_active && <Button id="connect-orcid-button" onClick={() => this.openORCID() }><img id="orcid-id-icon" src="https://orcid.org/sites/default/files/images/orcid_24x24.png" width="24" height="24" alt="ORCID iD icon"/>Authenticate with ORCID</Button>)
+				return(
+					this.state.orcid_active && 
+					<Popup
+						content={<div>By logging in with ORCID, you will be able to update and vote on annotations in SCope.
+							<p/><p/>
+							ORCID provides a persistent identifier – an ORCID iD – 
+							that distinguishes you from other researchers and a mechanism for linking your 
+							research outputs and activities to your iD. <br/>Learn more at <a href="https://orcid.org/" target='_blank'>orcid.org</a>
+							</div>}
+						trigger={<Button id="connect-orcid-button" onClick={() => this.openORCID() }><img id="orcid-id-icon" src="https://orcid.org/sites/default/files/images/orcid_24x24.png" width="24" height="24" alt="ORCID iD icon"/>Authenticate with ORCID</Button>}
+					hoverable/>)
 			}
 		}
 
