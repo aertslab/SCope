@@ -36,16 +36,17 @@ resultRenderer.propTypes = {
     type: PropTypes.string
 };
 
-const initialState = { isLoading: false, results: [], value: "" };
+const initialState = { isLoading: false, results: [], value: "", term_name: "", term_id: "" };
 
 export default class OLSAutocomplete extends Component {
 
     state = initialState;
 
     handleResultSelect = (e, { result }) => {
-        this.setState({ value: result.label });
-        const { setNewAnnotationName } = this.props;
-        setNewAnnotationName(result.label)
+        this.setState({ 
+            value: result.obo_id + " (" + result.label + ")",
+            term_id: result.id
+        });
     }
 
     queryOLS = query => {
@@ -91,7 +92,7 @@ export default class OLSAutocomplete extends Component {
                         leading: true
                     })}
                     results={results}
-                    value={value}
+                    value={this.state.value}
                     resultRenderer={resultRenderer}
                     input={{ fluid: true }}
                     className={{ fluid: true }}

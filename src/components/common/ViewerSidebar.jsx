@@ -11,7 +11,7 @@ import ReactTable from "react-table";
 import "react-table/react-table.css";
 import FileDownloader from '../../js/http'
 
-import OLSAutocomplete from  './OLSAutocomplete'
+import CollaborativeAnnotation from  './CollaborativeAnnotation'
 
 import { delimiter } from 'path';
 
@@ -423,7 +423,7 @@ class ViewerSidebar extends Component {
 							{md.featureType} {md.feature}<br />
 							{image}
 							{annotationBox()}
-							{olsWidget()}
+							{<CollaborativeAnnotation />}
 							{markerTable}
 							{legendTable}
 							{downloadSubLoomButton()}
