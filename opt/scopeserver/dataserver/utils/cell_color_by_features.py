@@ -111,7 +111,7 @@ class CellColorByFeatures():
         else:
             self.features.append(np.zeros(self.n_cells))
     
-    def setAnnotationFeature(self, feature):
+    def setAnnotationFeature(self, request, feature):
         md_annotation_values = self.loom.get_meta_data_annotation_by_name(name=feature)["values"]
         ca_annotation = self.loom.get_ca_attr_by_name(name=feature)
         ca_annotation_as_int = list(map(lambda x: md_annotation_values.index(str(x)), ca_annotation))
@@ -121,6 +121,10 @@ class CellColorByFeatures():
         else:
             raise ValueError("The annotation {0} has too many unique values.".format(feature))
         # Set the reply
+
+        if len(request.annotation) > 0:
+            cellIndices = self.loom.get_anno_cells(annotations=request.annotation, logic=request.logic)
+            self.hex_vec = np.array(self.hex_vec)[cellIndices]
         reply = s_pb2.CellColorByFeaturesReply(color=self.hex_vec,
                                                vmax=self.v_max,
                                                legend=s_pb2.ColorLegend(values=md_annotation_values, colors=constant.BIG_COLOR_LIST[:len(md_annotation_values)]))
@@ -162,7 +166,7 @@ class CellColorByFeatures():
                         hex_vec = [hex(I)[2:].zfill(6) for I in range(0, numClusters, interval)]
                     if len(request.annotation) > 0:
                         cellIndices = self.loom.get_anno_cells(annotations=request.annotation, logic=request.logic)
-                        hex_vec = np.array(hex_vec)[cellIndices]
+                        self.hex_vec = np.array(self.hex_vec)[cellIndices]
                     # Set the reply and break the for loop
                     reply = s_pb2.CellColorByFeaturesReply(color=self.hex_vec, vmax=self.v_max)
                     self.setReply(reply=reply)

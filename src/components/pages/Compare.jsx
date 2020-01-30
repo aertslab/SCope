@@ -48,6 +48,7 @@ class Compare extends Component {
 			superposition: superpositionDefaultValue,
 			isConfigurationLocked: isConfigurationLocked, 
 			isSuperpositionLocked: isSuperpositionLocked, 
+            activeLegend: null, 
 		}
 
 		this.loomConf = [];
@@ -98,6 +99,7 @@ class Compare extends Component {
 		const {
 			activeThresholds,
 			activeFeatures,
+			activeLegend,
 			crossAnnotations,
 			activeAnnotation,
 			annotationIDs,
@@ -269,6 +271,9 @@ class Compare extends Component {
 											settings={true}
 											translate={true}
 											scale={true}
+											onActiveLegendChange={(legend) => {
+												this.setState({activeLegend: legend})
+											}}
 										/>
 									</Grid.Column>
 								);
@@ -325,6 +330,7 @@ class Compare extends Component {
 							onActiveFeaturesChange={(features, id) => {
 								this.setState({activeFeatures: features});
 							}} 
+							activeLegend={activeLegend}
 						/>
 					</Grid.Column>
 				</Grid.Row>
