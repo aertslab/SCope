@@ -265,7 +265,7 @@ class SCope(s_pb2_grpc.MainServicer):
             elif request.featureType[n] == 'regulon':
                 cell_color_by_features.setRegulonFeature(request=request, feature=feature, n=n)
             elif request.featureType[n] == 'annotation':
-                cell_color_by_features.setAnnotationFeature(feature=feature)
+                cell_color_by_features.setAnnotationFeature(request=request, feature=feature)
                 return cell_color_by_features.getReply()
             elif request.featureType[n] == 'metric':
                 cell_color_by_features.setMetricFeature(request=request, feature=feature, n=n)
