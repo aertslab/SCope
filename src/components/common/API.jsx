@@ -487,6 +487,14 @@ class API {
 		});
 	}
 
+	setColabAnnotationData(feature, annotationData, orcidInfo) {
+		let clusteringID = feature.metadata['clusteringID']
+		let clusterID = feature.metadata['clusterID']
+		console.log(feature)
+		console.log(annotationData)
+		console.log(orcidInfo)
+		
+	}
 	getMaxScale(id, callback) {
 		let settings = this.getSettings();
 		let page = this.activePage;

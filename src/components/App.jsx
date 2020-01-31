@@ -43,7 +43,8 @@ class App extends Component {
 			isSidebarVisible: true,
 			sessionsLimitReached: false,
 			sessionMode: 'rw',
-			orcid_active: true
+			orcid_active: true,
+			orcid_data: null
 		}
 
 		BackendAPI.getORCIDStatus((active) => { 
@@ -65,6 +66,7 @@ class App extends Component {
 			});
 
 		}
+
 	}
 
 	render() {

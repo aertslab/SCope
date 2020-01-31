@@ -24,8 +24,6 @@ export default class CollabAnnoGeneSearch extends React.Component {
 
 		const { isLoading, results, selected, options, type } = this.state;
 
-		console.log("selected", selected)
-
 		return (
 				<Dropdown
 					// category

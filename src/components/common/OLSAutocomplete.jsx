@@ -43,6 +43,11 @@ export default class OLSAutocomplete extends Component {
     state = initialState;
 
     handleResultSelect = (e, { result }) => {
+
+        if (this.props.handleResultSelect) {
+            this.props.handleResultSelect(e, result)
+        }
+
         this.setState({ 
             value: result.obo_id + " (" + result.label + ")",
             term_id: result.id
@@ -84,7 +89,6 @@ export default class OLSAutocomplete extends Component {
 
         return (
             <div key="ols-autocomplete">
-                <Header as='h2'>Search Annotation using EBI OLS</Header>
                 <Search
                     loading={isLoading}
                     onResultSelect={this.handleResultSelect}

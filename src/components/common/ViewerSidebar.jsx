@@ -423,7 +423,7 @@ class ViewerSidebar extends Component {
 							{md.featureType} {md.feature}<br />
 							{image}
 							{annotationBox()}
-							{<CollaborativeAnnotation />}
+							{<CollaborativeAnnotation feature={activeFeatures[i]}/>}
 							{markerTable}
 							{legendTable}
 							{downloadSubLoomButton()}

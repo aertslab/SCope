@@ -43,6 +43,10 @@
 	color: black !important;
 }
 
+.anno-button {
+	width: 100%
+}
+
 .sidebarTabs {
 	display: flex;
 	width: 100%;
