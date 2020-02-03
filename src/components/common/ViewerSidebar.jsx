@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import React, { Component, createRef } from 'react'
 import { withRouter } from 'react-router-dom';
-import { Grid, Input, Icon, Tab, Image, Button, Progress } from 'semantic-ui-react'
+import { Container, Grid, Input, Icon, Tab, Image, Button, Progress } from 'semantic-ui-react'
 import { BackendAPI } from '../common/API'
 import Metadata from '../common/Metadata'
 import ReactGA from 'react-ga';
@@ -111,7 +111,7 @@ class ViewerSidebar extends Component {
 
 			let colors = ["red", "green", "blue"]
 			let metadata = activeFeatures[i] && activeFeatures[i].feature ? "" : <div>No additional information shown for the feature queried in the <b style={{color: colors[i]}}>{colors[i]}</b> query box because it is empty. Additional information (e.g.: cluster markers, regulon motif, regulon target genes, ...) can be displayed here when querying clusters or regulons.<br/><br/></div>;
-
+			console.log(activeFeatures[i])
 			if (activeFeatures[i] && activeFeatures[i].metadata) {
 				let md = activeFeatures[i].metadata
 				if (md.motifName != 'NA.png' && !this.state.imageErrored) {
@@ -188,15 +188,15 @@ class ViewerSidebar extends Component {
 							/>
 					)}}
 				
-				let olsWidget = () => {
+				let collabAnnoButton = () => {
 					if(activeFeatures[i].featureType.startsWith("Cluster") && activeFeatures[i].feature != 'All Clusters' && BackendAPI.getLoomRWStatus() == "rw" && this.state.activePage == "gene") {					
 						return (
-							<OLSAutocomplete setNewAnnotationName={this.setNewAnnotationName}></OLSAutocomplete>
+							<CollaborativeAnnotation feature={activeFeatures[i]}/>
 						)
 					}
 				}
 
-				let markerTable = "", legendTable = "", downloadSubLoomButton = () => "";
+				let markerTable = "", legendTable = "", cellTypeAnnoTable = "", downloadSubLoomButton = () => "";
 
 				let newMarkerTableColumn = (header, id, accessor, cell) => {
 					let column = {
@@ -210,6 +210,76 @@ class ViewerSidebar extends Component {
 						column["Cell"] = props => cell(props)
 					}
 					return column
+				}
+
+				let newCellTypeAnnoColumn = (header, id, accessor, cell) => {
+					let column = {
+						Header: header,
+						id: id
+					}
+					if(accessor != null) {
+						column["accessor"] = d => d[accessor]
+					}
+					if(cell != null) {
+						column["Cell"] = props => cell(props)
+					}
+					return column
+				}
+
+				if (md.cellTypeAnno) {
+					if (md.cellTypeAnno.length > 0){ 
+						let newCellTypeAnnoTableOboCell = (props) => {
+							return (
+								<a href={"https://www.ebi.ac.uk/ols/search?q=" + props.value} target="_blank">{props.value}</a>
+							)
+						}
+
+						let newCellTypeAnnoTableCuratorCell = (props) => {
+							return (
+								<a href={"https://orcid.org/" + props.value.curator_id} target="_blank">{props.value.curator_name}</a>							
+							)
+						}
+
+						let cellTypeAnnoColumns = [
+							newCellTypeAnnoColumn("Ontology Term", "obo_id", "obo_id", newCellTypeAnnoTableOboCell),
+							newCellTypeAnnoColumn("Curator", "orcid_info", "orcid_info", newCellTypeAnnoTableCuratorCell),
+							newCellTypeAnnoColumn("Endorsements", "votes", "votes", null)
+						]
+
+						let cellTypeAnnoTableData = md.cellTypeAnno.map( (a, n) => {
+							let cellTypeAnnoTableRowData = {
+								obo_id: a.data.obo_id,
+								orcid_info: {curator_name: a.data.curator_name, curator_id: a.data.curator_id},
+								votes: a.endorsements.total
+							}
+							return (cellTypeAnnoTableRowData)
+						})
+
+						let cellTypeAnnoTableHeight = screen.availHeight / 5
+
+						let cellTypeAnnoTableHeaderName = "Community Annotations"
+
+						cellTypeAnnoTable = (
+							<div style={{marginBottom: "15px", align: "center"}}>
+								<ReactTable
+									data={cellTypeAnnoTableData}
+									columns={[
+										{
+										Header: cellTypeAnnoTableHeaderName,
+										columns: cellTypeAnnoColumns
+										}
+									]}
+									pageSizeOptions={[5]}
+									defaultPageSize={5}
+									style={{
+										height: cellTypeAnnoTableHeight +"px" // This will force the table body to overflow and scroll, since there is not enough room
+									}}
+									className="-striped -highlight"
+								/>
+							</div>
+						);
+					}
+
 				}
 
 				if (md.genes) {
@@ -249,10 +319,6 @@ class ViewerSidebar extends Component {
 					let markerTableColumns = [
 						newMarkerTableColumn("Gene Symbol", "gene", "gene", newMarkerTableGeneCell)
 					]
-
-					// DISPLAY METRICS
-					console.log("DISPLAY METRICS")
-					console.log(md)
 
 					if ('metrics' in md) {
 						// Add extra columns (metrics like logFC, p-value, ...)
@@ -423,7 +489,8 @@ class ViewerSidebar extends Component {
 							{md.featureType} {md.feature}<br />
 							{image}
 							{annotationBox()}
-							{<CollaborativeAnnotation feature={activeFeatures[i]}/>}
+							{cellTypeAnnoTable}
+							{collabAnnoButton()}
 							{markerTable}
 							{legendTable}
 							{downloadSubLoomButton()}

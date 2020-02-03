@@ -423,6 +423,11 @@ class SCope(s_pb2_grpc.MainServicer):
         success = loom.set_hierarchy(request.newHierarchy_L1, request.newHierarchy_L2, request.newHierarchy_L3)
         return s_pb2.SetLoomHierarchyReply(success=success)
 
+    def setColabAnnotationData(self, request, context):
+        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        success, message = loom.add_collab_annotation(request)
+        return s_pb2.setColabAnnotationDataReply(success=success, message=message)
+
     def getRegulonMetaData(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
         regulon_genes = loom.get_regulon_genes(regulon=request.regulon)

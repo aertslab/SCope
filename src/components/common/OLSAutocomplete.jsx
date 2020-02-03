@@ -43,14 +43,10 @@ export default class OLSAutocomplete extends Component {
     state = initialState;
 
     handleResultSelect = (e, { result }) => {
-
-        if (this.props.handleResultSelect) {
-            this.props.handleResultSelect(e, result)
-        }
-
         this.setState({ 
             value: result.obo_id + " (" + result.label + ")",
-            term_id: result.id
+            term_id: result.id,
+            result: result
         });
     }
 

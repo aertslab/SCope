@@ -39,6 +39,7 @@ service Main {
   rpc setLoomHierarchy (SetLoomHierarchyRequest) returns (SetLoomHierarchyReply) {}
   rpc getORCIDiD (getORCIDiDRequest) returns (getORCIDiDReply) {}
   rpc getORCIDStatus (getORCIDStatusRequest) returns (getORCIDStatusReply) {}
+  rpc setColabAnnotationData (setColabAnnotationDataRequest) returns (setColabAnnotationDataReply) {}
 }
 
 message ErrorReply {
@@ -155,9 +156,37 @@ message ClusterMarkerMetric {
   string description=3;
 }
 
+message CollabAnnoData {
+  string curator_name=1;
+  string curator_id=2;
+  int64 timestamp=3;
+  string obo_id=4;
+  repeated string markers=5;
+  string publication=6;
+  string comment=7;
+}
+
+message CollabAnnoEndorser {
+  string endorser_name=1;
+  string endorser_id=2;
+  string endorser_hash=3;
+}
+
+message CollabAnnoEndorsements {
+  int32 total=1;
+  repeated CollabAnnoEndorser endorsers=2;
+}
+
+message CellTypeAnnotation {
+  CollabAnnoData data=1;
+  string validate_hash=2;
+  CollabAnnoEndorsements endorsements=3;
+}
+
 message ClusterAnnotation {
   int32 id=1;
   string description=2;
+  repeated CellTypeAnnotation cell_type_annotation=3;
 }
 
 message Clustering {
@@ -433,4 +462,29 @@ message getORCIDStatusRequest {
 
 message getORCIDStatusReply {
   bool active=1;
+}
+
+// cell_type_annotation': {'data': 
+  //{'curator_name': 'Kristofer Davie', 
+  //'curator_id': '0000-0003-2182-1249', 
+  //'timestamp': 1580743614751, 
+  //'obo_id': 'FBbt:00100247', 
+  //'markers': ['ey', 'prt'], 
+  //'publication': 'https://doi.org/10.7554/eLife.04577', 
+  //'comment': 'These are some kenyon cells.'}, 
+//'validate_hash': '3123cf0c23097fd5a4b81fac941b8c2cb3275adce89d85e213cf8189c1f75d40', 
+//'endorsements': {'total': 1, 'ids': {'endorser_name': 'Kristofer Davie', 'endorser_id': '0000-0003-2182-1249', 'endorser_hash': '3123cf0c23097fd5a4b81fac941b8c2cb3275adce89d85e213cf8189c1f75d40'}}}}
+
+message setColabAnnotationDataRequest {
+  string loomFilePath=1;
+  int32 clusteringID=2;
+  int32 clusterID=3;
+  string orcid_scope_uuid=4;
+  CollabAnnoData annoData=5;
+
+}
+
+message setColabAnnotationDataReply {
+  bool success=1;
+  string message=2;
 }

@@ -14,41 +14,41 @@ export default class CollabAnnoGeneSearch extends React.Component {
 			selection: null,
 			type: "gene",
 			searchQuery: "",
-			selected: [],
-			options: []
+			options: [],
+			value: []
 		};
 		this.call = null;
 	}
 
 	render() {
 
-		const { isLoading, results, selected, options, type } = this.state;
+		const { isLoading, results, options, type } = this.state;
 
 		return (
 				<Dropdown
+					className="collab-anno-drop"
 					// category
 					multiple
 					search
 					selection
 					loading={isLoading}
-					deburr={false}
+					deburr={true}
+					closeOnChange={true}
 					onSearchChange={(evt, input) => {
 						evt.persist();
-						// this.setState({searchQuery: evt.target.value});
+						this.setState({searchQuery: evt.target.value});
 						this.stopRequest();
 						this.handleSearchChangeDebounced.cancel();
 						this.handleSearchChangeDebounced(evt, input);
 					}}
-					// handleTypeChange={this.handleTypeChange.bind(this)}
-					onSelectionChange={this.handleSelectionChange.bind(this)}
-					onBlur={this.handleBlur.bind(this)}
-					// onMouseDown={this.handleMouseDown.bind(this)}
 					onChange={this.updateValues.bind(this)}
 					stopRequest={() => {
 						if (this.call != null) this.call.end();
 					}}
 					options={options}
 					results={results}
+					value={this.state.value}
+					searchQuery={this.state.searchQuery}
 					type={type}
 				/>
 		);
@@ -57,15 +57,10 @@ export default class CollabAnnoGeneSearch extends React.Component {
 
 	updateValues(e, { value }) {
 		this.setState({
-			'selected': new Set([...this.state.selected].concat(value)),
-			// 'options': new Set([...this.state.selected].concat(value)),
+			'value': value,
+			'results': value.map((v) => {return {'key': v, 'text': v, 'value':v}}),
+			'options': value.map((v) => {return {'key': v, 'text': v, 'value':v}}),
 			'searchQuery': ""
-		})
-	}
-
-	handleBlur(e, select) {
-		this.setState({
-			'results': this.state.selected
 		})
 	}
 
@@ -73,18 +68,14 @@ export default class CollabAnnoGeneSearch extends React.Component {
 		if (this.call != null) this.call.end();
 	}
 
-	handleSelectionChange(e, { result }) {
-		if (DEBUG) console.log('handleSelectionChange', e, result);
-		// e.preventDefault();
-		// this.setState({selection: result})
-	}
-
 	handleSearchChange(e, { value }) {
+		this.setState({ isLoading: true, searchQuery: e.target.value})
+
 		if (this.call != null) this.call.end();
+
 		console.log(e.target.value)
 		if (e.target.value.length < 1) return;
 
-		this.setState({ isLoading: true, value })
 		let query = {
 			loomFilePath: BackendAPI.getActiveLoom(),
 			query: e.target.value

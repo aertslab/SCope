@@ -6,9 +6,11 @@ from functools import lru_cache
 import pandas as pd
 import time
 import loompy as lp
+import hashlib
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
 from scopeserver.dataserver.utils import search_space as ss
+from scopeserver.dataserver.modules.gserver import s_pb2
 
 import logging
 
@@ -92,7 +94,7 @@ class Loom():
 
         self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r+', partial_md5_hash=self.partial_md5_hash)
         loom = self.loom_connection
-        metaJson = self.get_meta_data()        
+        metaJson = self.get_meta_data()
 
         for n, clustering in enumerate(metaJson['clusterings']):
             if clustering['id'] == clustering_id:
@@ -117,6 +119,68 @@ class Loom():
             logger.debug('Failure')
             return False
 
+    def add_collab_annotation(self, request):
+        # TODO: Check if there is already an annotation with the same FBbt
+        # TODO: Fix hash to be real secret
+        # TODO: Confirm user with UUID
+        # TODO: Refactor, lots of duplicated code from above
+
+        logger.info('Adding collaborative annotation for {0}'.format(self.get_abs_file_path()))
+        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r+', partial_md5_hash=self.partial_md5_hash)
+        loom = self.loom_connection
+        metaJson = self.get_meta_data()
+
+        cell_type_annotation = {
+            'data': {
+                'curator_name': request.annoData.curator_name,
+                'curator_id': request.annoData.curator_id,
+                'timestamp': request.annoData.timestamp,
+                'obo_id': request.annoData.obo_id,
+                'markers': [request.annoData.markers] if type(request.annoData.markers) == str else list(request.annoData.markers),
+                'publication': request.annoData.publication,
+                'comment': request.annoData.comment,
+            }
+        }
+        hash_data = json.dumps(cell_type_annotation['data']) + "SCOPE_ORCID_SECRET_HERE"
+        user_hash = hashlib.sha256(hash_data.encode()).hexdigest()
+        cell_type_annotation['validate_hash'] = user_hash
+
+        cell_type_annotation['endorsements'] = {
+            'total': 1,
+            'endorsers': [{
+                'endorser_name': request.annoData.curator_name,
+                'endorser_id': request.annoData.curator_id,
+                'endorser_hash': user_hash,
+            }]
+        }
+
+        for n, clustering in enumerate(metaJson['clusterings']):
+            if clustering['id'] == request.clusteringID:
+                clustering_n = n
+
+        for n, cluster in enumerate(metaJson['clusterings'][clustering_n]['clusters']):
+            if cluster['id'] == request.clusterID:
+                cluster_n = n
+
+        if 'cell_type_annotation' in metaJson['clusterings'][clustering_n]['clusters'][cluster_n].keys():
+            print('CELL_TYPE_ANNO IS IN METADTAA')
+            print(metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation'])
+
+            metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation'].append(cell_type_annotation)
+        else:
+            print('CELL_TYPE_ANNO NOT IN METADTAA')
+            print(metaJson['clusterings'][clustering_n]['clusters'][cluster_n])
+            metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation'] = [cell_type_annotation]
+        loom.attrs['MetaData'] = json.dumps(metaJson)
+        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r', partial_md5_hash=self.partial_md5_hash)
+        loom = self.loom_connection
+        if cell_type_annotation in self.get_meta_data()['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation']:
+            logger.debug('Success')
+            return (True, "")
+        else:
+            logger.debug('Failure')
+            return (False, "Metadata was not correct after re-reading file")
+
     def set_hierarchy(self, L1, L2, L3):
         logger.info('Changing hierarchy name for {0}'.format(self.get_abs_file_path()))
 
@@ -128,7 +192,7 @@ class Loom():
         attrs['SCopeTreeL2'] = L2
         attrs['SCopeTreeL3'] = L3
 
-        loom.attrs = attrs # base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
+        loom.attrs = attrs  # base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
 
         self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r', partial_md5_hash=self.partial_md5_hash)
 
@@ -231,7 +295,7 @@ class Loom():
                                             })
         logger.debug(f'\tFinal Clusterings for {self.file_path} - {metaJson["clusterings"]}')
 
-        loom.attrs['MetaData'] = json.dumps(metaJson)  # base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
+        loom.attrs['MetaData'] = json.dumps(metaJson)
         self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r')
 
     def get_file_metadata(self):
@@ -292,6 +356,19 @@ class Loom():
             raise ValueError('Multiple clusterings matches the given id: {0}'.format(id))
         return md_clustering[0]
 
+    @staticmethod
+    def protoize_cell_type_annotation(md):
+        ctas = md['cell_type_annotation']
+        md['cell_type_annotation'] = []
+        for cta in ctas:
+            cta_proto = s_pb2.CellTypeAnnotation(data=s_pb2.CollabAnnoData(**cta['data']),
+                                                 validate_hash=cta['validate_hash'],
+                                                 endorsements=s_pb2.CollabAnnoEndorsements(
+                                                     total=cta['endorsements']['total'],
+                                                     endorsers=cta['endorsements']['endorsers']))
+            md['cell_type_annotation'].append(cta_proto)
+        return md
+
     def get_meta_data_by_key(self, key):
         meta_data = self.get_meta_data()
         if key in meta_data.keys():
@@ -299,6 +376,11 @@ class Loom():
             if key == "embeddings":
                 for e in md:  # Fix for malformed embeddings json (R problem)
                     e['id'] = int(e['id'])
+            if key == 'clusterings':
+                for n, clustering in enumerate(md.copy()):
+                    for m, cluster in enumerate(clustering['clusters']):
+                        if 'cell_type_annotation' in cluster.keys():
+                            md[n]['clusters'][m] = self.protoize_cell_type_annotation(cluster)
             return md
         return []
 

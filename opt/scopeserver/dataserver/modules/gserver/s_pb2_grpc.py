@@ -124,6 +124,11 @@ class MainStub(object):
         request_serializer=s__pb2.getORCIDStatusRequest.SerializeToString,
         response_deserializer=s__pb2.getORCIDStatusReply.FromString,
         )
+    self.setColabAnnotationData = channel.unary_unary(
+        '/scope.Main/setColabAnnotationData',
+        request_serializer=s__pb2.setColabAnnotationDataRequest.SerializeToString,
+        response_deserializer=s__pb2.setColabAnnotationDataReply.FromString,
+        )
 
 
 class MainServicer(object):
@@ -284,6 +289,13 @@ class MainServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def setColabAnnotationData(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_MainServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -396,6 +408,11 @@ def add_MainServicer_to_server(servicer, server):
           servicer.getORCIDStatus,
           request_deserializer=s__pb2.getORCIDStatusRequest.FromString,
           response_serializer=s__pb2.getORCIDStatusReply.SerializeToString,
+      ),
+      'setColabAnnotationData': grpc.unary_unary_rpc_method_handler(
+          servicer.setColabAnnotationData,
+          request_deserializer=s__pb2.setColabAnnotationDataRequest.FromString,
+          response_serializer=s__pb2.setColabAnnotationDataReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

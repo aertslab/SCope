@@ -408,13 +408,14 @@ class API {
 			});
 		} else if (featureType.indexOf('Clustering:') == 0) {
 			let loomMetadata = this.getActiveLoomMetadata();
-			let clusteringID, clusterID;
+			let clusteringID, clusterID, cellTypeAnno;
 			loomMetadata.cellMetaData.clusterings.map(clustering => {
 				if (featureType.indexOf(clustering.name) != -1) {
 					clusteringID = clustering.id
 					clustering.clusters.map(c => {
 						if (c.description == feature) {
 							clusterID = c.id;
+							cellTypeAnno = c.cell_type_annotation
 						}
 					})
 				}
@@ -431,7 +432,7 @@ class API {
 						if (DEBUG) console.log('getMarkerGenes', markerResponse);
 						if (!markerResponse) markerResponse = {};
 						markerResponse.description = featureDescription
-						this.setActiveFeature(field, type, featureType, feature, 0, {...markerResponse, clusterID: clusterID, clusteringID: clusteringID}, page);
+						this.setActiveFeature(field, type, featureType, feature, 0, {...markerResponse, clusterID: clusterID, clusteringID: clusteringID, cellTypeAnno: cellTypeAnno}, page);
 					});
 				}, () => {
 					this.showError();
@@ -487,14 +488,34 @@ class API {
 		});
 	}
 
-	setColabAnnotationData(feature, annotationData, orcidInfo) {
-		let clusteringID = feature.metadata['clusteringID']
-		let clusterID = feature.metadata['clusterID']
-		console.log(feature)
-		console.log(annotationData)
-		console.log(orcidInfo)
-		
+	setColabAnnotationData(feature, annotationData, orcidInfo, callback) {
+		if (DEBUG) console.log('setColabAnnotationData', feature, annotationData, orcidInfo);
+		let query = {
+			loomFilePath: this.getActiveLoom(),
+			clusteringID: feature.metadata['clusteringID'],
+			clusterID: feature.metadata['clusterID'],
+			orcid_scope_uuid: orcidInfo['orcid_uuid'],
+			annoData: {
+				curator_name: orcidInfo['orcid_name'], 
+				curator_id: orcidInfo['orcid_id'],
+				timestamp: new Date().getTime(),
+				obo_id: annotationData['olsResult']['obo_id'],
+				markers: annotationData['selectedMarkers'],
+				publication: annotationData['publication'],
+				comment: annotationData['comment'],
+			}
+		}
+		if (DEBUG) console.log('setColabAnnotationData', query);
+			BackendAPI.getConnection().then((gbc) => {
+				gbc.services.scope.Main.setColabAnnotationData(query, (err, response) => {
+					if (DEBUG) console.log('setColabAnnotationData', response);
+					callback(response)
+				})
+			}, () => {
+				BackendAPI.showError();
+			});
 	}
+
 	getMaxScale(id, callback) {
 		let settings = this.getSettings();
 		let page = this.activePage;

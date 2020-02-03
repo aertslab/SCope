@@ -42,3 +42,7 @@ a.active.item.annotation {
 	left: 30%;
 	/* transform: translate(-50%, -50%); */
   }
+
+  .collab-anno-drop>.search {
+	  width: 100% !important;
+  }

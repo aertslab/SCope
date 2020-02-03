@@ -27,9 +27,12 @@ class CollaborativeAnnotation extends Component {
     
     constructor() {
         super();
+        this.OLSAutocomplete = React.createRef();
+        this.AnnoGeneSearch = React.createRef();
         this.state = {
             value: [],
-            annoData: {}
+            annoData: {},
+            selected: []
         }
     }
 
@@ -38,16 +41,19 @@ class CollaborativeAnnotation extends Component {
         annoData[name] = value
         this.setState({ "annoData": annoData })
     }
-
-    handleOLSResultSelect = (e, result) => {
-        let annoData = this.state.annoData
-        annoData['ols_data'] = result
-        this.setState({ "annoData": annoData })
-
-    }
     
     sendData = () => {
-        BackendAPI.setColabAnnotationData(this.props.feature, this.state.selected, this.state.annoData, {'orcid_name': this.state.orcid_name, 'orcid_id': this.state.orcid_id, 'orcid_uuid': this.state.orcid_uuid})
+        let annoData = this.state.annoData
+        annoData["olsResult"] = this.OLSAutocomplete.current.state.result
+        annoData["selectedMarkers"] = this.AnnoGeneSearch.current.state.value
+
+        this.setState({ "annoData": annoData }, () => {
+            BackendAPI.setColabAnnotationData(
+                this.props.feature, 
+                this.state.annoData, 
+                {'orcid_name': this.state.orcid_name, 'orcid_id': this.state.orcid_id, 'orcid_uuid': this.state.orcid_uuid},
+                (response) => console.log(response))
+            })
     }
 
     render() {
@@ -62,7 +68,7 @@ class CollaborativeAnnotation extends Component {
 
         let olsWidget = () => {
             return (
-                <OLSAutocomplete handleResultSelect={this.handleOLSResultSelect}/>
+                <OLSAutocomplete ref={this.OLSAutocomplete}/>
             )
         }
 
@@ -114,7 +120,7 @@ class CollaborativeAnnotation extends Component {
                             resolving (But we need FlyBase !
                             https://registry.identifiers.org/prefixregistrationrequest).
                             {/* <input placeholder="Search for genes..." /> */}
-                            <CollabAnnoGeneSearch selected={selected}></CollabAnnoGeneSearch>
+                            <CollabAnnoGeneSearch ref={this.AnnoGeneSearch}></CollabAnnoGeneSearch>
                         </Form.Field>
 
                         <Form.Field>
