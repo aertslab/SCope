@@ -179,6 +179,8 @@ class Loom():
 
         for col in col_attrs:
             cf_col = col.casefold()
+            if len(loom.ca[col].shape) < 2:
+                continue
             if ('tsne'.casefold() in cf_col or 'umap'.casefold() in cf_col or 'pca'.casefold() in cf_col) and loom.ca[col].shape[1] >= 2:
                 if not embeddings_default:
                     metaJson['embeddings'].append({

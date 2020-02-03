@@ -541,7 +541,9 @@ class SCope(s_pb2_grpc.MainServicer):
                 if not file_meta['hasGlobalMeta']:
                     try:
                         loom.generate_meta_data()
+                        file_meta = loom.get_file_metadata()
                     except Exception as e:
+                        logger.error('Failed to make metadata!')
                         logger.error(e)
 
                 try:
