@@ -1,0 +1,65 @@
+[tool.poetry]
+name = "scopeserver"
+version = "1.7.3"
+description = "Visualization tool for large-scale and high dimensional single-cell data"
+
+license = "GPL-3.0"
+
+authors = [
+        "Maxime De Waegeneer <mdewaegeneer@gmail.com>",
+        "Kris Davie <kristopher.davie@kuleuven.vib.be>",
+        "James Colliers <james.collier@vib.be>",
+        "Lukasz Kreft <lukasz.kreft@vib.be>"]
+
+readme = 'README.md'
+
+repository = "https://github.com/aertslab/SCope"
+homepage = "scope.aertslab.org/"
+
+keywords = ["single-cell",
+            "gene",
+            "regulatory",
+            "networks",
+            "grn",
+            "large-scale data",
+            "visualization"]
+
+classifiers = ["Development Status :: 5 - Production/Stable",
+               "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+               "Natural Language :: English",
+               "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+               "Topic :: Scientific/Engineering :: Bio-Informatics"]
+
+[tool.poetry.dependencies]
+python = "^3.6.1"
+
+grpcio = "^1.26.0"
+grpcio-tools = "^1.26.0"
+
+appdirs = "^1.4.3"
+
+numpy = "^1.18.1"
+pandas = "1.0.0"
+
+loompy = "^3.0.1"
+pyscenic = "^0.9.14"
+multiprocessing_on_dill = { version = "*", allow-prereleases = true }
+
+[tool.poetry.dev-dependencies]
+pytest = "*"
+pytest-cov = "*"
+pylint = "*"
+flake8 = "*"
+tox = "*"
+black = { version = "*", allow-prereleases = true }
+mypy = "*"
+
+[tool.poetry.scripts]
+dev-script = 'scopeserver:run'
+
+[tool.pylint.'MESSAGES CONTROL']
+max-line-length = 120
+
+[tool.black]
+line-length = 120
+target-version = ['py37']
