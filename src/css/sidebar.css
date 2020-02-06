@@ -44,7 +44,14 @@
 }
 
 .anno-button {
+	margin-bottom: 15px !important;
 	width: 100%
+}
+
+.vote-tooltip {
+	z-index: 99999;
+	font-size: 12;
+	position: fixed !important;
 }
 
 .sidebarTabs {
