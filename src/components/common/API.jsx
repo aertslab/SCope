@@ -500,6 +500,8 @@ class API {
 				curator_id: orcidInfo['orcid_id'],
 				timestamp: new Date().getTime(),
 				obo_id: annotationData['olsResult']['obo_id'],
+				ols_iri: annotationData['olsResult']['iri'],
+				ontology_label: annotationData['olsResult']['label'],
 				markers: annotationData['selectedMarkers'],
 				publication: annotationData['publication'],
 				comment: annotationData['comment'],

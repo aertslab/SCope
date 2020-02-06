@@ -136,22 +136,33 @@ class Loom():
                 'curator_id': request.annoData.curator_id,
                 'timestamp': request.annoData.timestamp,
                 'obo_id': request.annoData.obo_id,
+                'ols_iri': request.annoData.ols_iri,
+                'ontology_label': request.annoData.ontology_label,
                 'markers': [request.annoData.markers] if type(request.annoData.markers) == str else list(request.annoData.markers),
                 'publication': request.annoData.publication,
                 'comment': request.annoData.comment,
             }
         }
         hash_data = json.dumps(cell_type_annotation['data']) + "SCOPE_ORCID_SECRET_HERE"
-        user_hash = hashlib.sha256(hash_data.encode()).hexdigest()
-        cell_type_annotation['validate_hash'] = user_hash
+        data_hash = hashlib.sha256(hash_data.encode()).hexdigest()
+        cell_type_annotation['validate_hash'] = data_hash
 
-        cell_type_annotation['endorsements'] = {
-            'total': 1,
-            'endorsers': [{
-                'endorser_name': request.annoData.curator_name,
-                'endorser_id': request.annoData.curator_id,
-                'endorser_hash': user_hash,
-            }]
+        hash_data = json.dumps(cell_type_annotation['data']) + request.annoData.curator_id + "SCOPE_ORCID_SECRET_HERE"
+        user_hash = hashlib.sha256(hash_data.encode()).hexdigest() 
+
+        cell_type_annotation['votes'] = {
+            'votes_for': {
+                'total': 1,
+                'voters': [{
+                    'voter_name': request.annoData.curator_name,
+                    'voter_id': request.annoData.curator_id,
+                    'voter_hash': user_hash,
+                }]
+            },
+            'votes_against': {
+                'total': 0,
+                'voters': []
+            }
         }
 
         for n, clustering in enumerate(metaJson['clusterings']):
@@ -361,11 +372,31 @@ class Loom():
         ctas = md['cell_type_annotation']
         md['cell_type_annotation'] = []
         for cta in ctas:
+            hash_data = json.dumps(cta['data']) + "SCOPE_ORCID_SECRET_HERE"
+            data_hash = hashlib.sha256(hash_data.encode()).hexdigest()
+
+            votes = {
+                'votes_for': {
+                    'total': 0,
+                    'voters': []},
+                'votes_against': {
+                    'total': 0,
+                    'voters': []}
+            }
+
+            for i in votes.keys():
+                for v in cta['votes'][i]['voters']:
+                    hash_data = json.dumps(cta['data']) + v['voter_id'] + "SCOPE_ORCID_SECRET_HERE"
+                    user_hash = hashlib.sha256(hash_data.encode()).hexdigest()
+                    v['voter_hash'] = True if user_hash == v['voter_hash'] else False
+                    votes[i]['voters'].append(s_pb2.CollabAnnoVoter(**v))
+                    votes[i]['total'] += 1
+                votes[i] = s_pb2.CollabAnnoVotes(**votes[i])
+
             cta_proto = s_pb2.CellTypeAnnotation(data=s_pb2.CollabAnnoData(**cta['data']),
-                                                 validate_hash=cta['validate_hash'],
-                                                 endorsements=s_pb2.CollabAnnoEndorsements(
-                                                     total=cta['endorsements']['total'],
-                                                     endorsers=cta['endorsements']['endorsers']))
+                                                 validate_hash=True if data_hash == cta['validate_hash'] else False,
+                                                 votes_for=votes['votes_for'],
+                                                 votes_against=votes['votes_against'])
             md['cell_type_annotation'].append(cta_proto)
         return md
 

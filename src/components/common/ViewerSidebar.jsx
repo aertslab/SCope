@@ -215,7 +215,8 @@ class ViewerSidebar extends Component {
 				let newCellTypeAnnoColumn = (header, id, accessor, cell) => {
 					let column = {
 						Header: header,
-						id: id
+						id: id,
+						style:  { 'white-space': 'normal' }
 					}
 					if(accessor != null) {
 						column["accessor"] = d => d[accessor]
@@ -229,33 +230,61 @@ class ViewerSidebar extends Component {
 				if (md.cellTypeAnno) {
 					if (md.cellTypeAnno.length > 0){ 
 						let newCellTypeAnnoTableOboCell = (props) => {
-							return (
-								<a href={"https://www.ebi.ac.uk/ols/search?q=" + props.value} target="_blank">{props.value}</a>
-							)
+							return (<a href={props.value.ols_iri} target="_blank">{props.value.obo_id}<br/>({props.value.ontology_label})</a>)
 						}
 
 						let newCellTypeAnnoTableCuratorCell = (props) => {
+							console.log(props.value.validated)
 							return (
-								<a href={"https://orcid.org/" + props.value.curator_id} target="_blank">{props.value.curator_name}</a>							
+								<div>
+									<a href={"https://orcid.org/" + props.value.curator_id} target="_blank">{props.value.curator_name}&nbsp;</a>
+									<Icon
+										name={props.value.validated ? "check circle outline" : "check circle outline"}
+										color={props.value.validated ? "green" : "red"}
+									/>			
+								</div>
+							)
+						}
+
+						let newCellTypeAnnoTableVotesCell = (props) => {
+							return (
+								<React.Fragment>
+										<Button 
+										className="vote-tooltip"
+										data-tooltip={props.value.votes_for.voters.map(v => v.voter_name).join(', ')}
+										data-variation="basic"
+										data-position="left center">
+										<Icon name="thumbs up outline"/>
+										{props.value.votes_for.total}</Button>
+										<br/>
+										<br/>
+										<Button 
+										className="vote-tooltip"
+										data-tooltip={props.value.votes_against.length > 0 ? props.value.votes_against.voters.map(v => v.voter_name).join(', ') : "None"}
+										data-variation="basic"
+										data-position="left center">
+										<Icon name="thumbs down outline"/>
+										{props.value.votes_against.total}</Button>
+								</React.Fragment>	
 							)
 						}
 
 						let cellTypeAnnoColumns = [
 							newCellTypeAnnoColumn("Ontology Term", "obo_id", "obo_id", newCellTypeAnnoTableOboCell),
 							newCellTypeAnnoColumn("Curator", "orcid_info", "orcid_info", newCellTypeAnnoTableCuratorCell),
-							newCellTypeAnnoColumn("Endorsements", "votes", "votes", null)
+							newCellTypeAnnoColumn("Endorsements", "votes", "votes", newCellTypeAnnoTableVotesCell)
 						]
 
 						let cellTypeAnnoTableData = md.cellTypeAnno.map( (a, n) => {
 							let cellTypeAnnoTableRowData = {
-								obo_id: a.data.obo_id,
-								orcid_info: {curator_name: a.data.curator_name, curator_id: a.data.curator_id},
-								votes: a.endorsements.total
+								obo_id: a.data,
+								orcid_info: {curator_name: a.data.curator_name, curator_id: a.data.curator_id, validated: a.validate_hash},
+								votes: {votes_for: a.votes_for, votes_against: a.votes_against}
 							}
 							return (cellTypeAnnoTableRowData)
 						})
 
-						let cellTypeAnnoTableHeight = screen.availHeight / 5
+						let cellTypeAnnoTableHeight = screen.availHeight / 4
 
 						let cellTypeAnnoTableHeaderName = "Community Annotations"
 
