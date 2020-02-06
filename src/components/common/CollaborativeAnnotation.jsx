@@ -79,7 +79,7 @@ class CollaborativeAnnotation extends Component {
                 className="collab-anno" 
                 closeOnEscape={false} 
                 closeIcon 
-                trigger={<Button>Add Annotation</Button>}
+                trigger={<Button className="anno-button">Add Annotation</Button>}
                 onSubmit={this.sendData}>
                 <Modal.Header>Add Annotation</Modal.Header>
                 <Modal.Content>
