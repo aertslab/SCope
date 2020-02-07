@@ -49,8 +49,6 @@ multiprocessing_on_dill = { version = "*", allow-prereleases = true }
 pytest = "*"
 pytest-cov = "*"
 pylint = "*"
-flake8 = "*"
-tox = "*"
 black = { version = "*", allow-prereleases = true }
 mypy = "*"
 

@@ -7,13 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install
-        uses: abatilo/actions-poetry@v1.5.0
-        with:
-          python_version: 3.7.6
-          poetry_version: 1.0.3
-          working_directory: ./opt
-          args: install
       - name: Run pylint
         uses: abatilo/actions-poetry@v1.5.0
         with:
@@ -27,13 +20,6 @@ jobs:
   #   runs-on: ubuntu-latest
   #   steps:
   #     - uses: actions/checkout@v2
-  #     - name: Install
-  #       uses: abatilo/actions-poetry@v1.5.0
-  #       with:
-  #         python_version: 3.7.6
-  #         poetry_version: 1.0.3
-  #         working_directory: ./opt
-  #         args: install
   #     - name: Run black
   #       uses: abatilo/actions-poetry@v1.5.0
   #       with:
@@ -47,13 +33,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install
-        uses: abatilo/actions-poetry@v1.5.0
-        with:
-          python_version: 3.7.6
-          poetry_version: 1.0.3
-          working_directory: ./opt
-          args: install
       - name: Run mypy
         uses: abatilo/actions-poetry@v1.5.0
         with:
@@ -62,3 +41,23 @@ jobs:
           working_directory: ./opt
           args: run mypy --config-file pyproject.toml --ignore-missing-imports scopeserver
 
+  pytest:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install
+        uses: abatilo/actions-poetry@v1.5.0
+        with:
+          python_version: 3.7.6
+          poetry_version: 1.0.3
+          working_directory: ./opt
+          args: install
+      - name: Run pytest
+        uses: abatilo/actions-poetry@v1.5.0
+        with:
+          python_version: 3.7.6
+          poetry_version: 1.0.3
+          working_directory: ./opt
+          args: run pytest --cov=src --cov-branch test/
+          # args: run pytest --cov=src --cov-branch --cov-fail-under=100 test/
