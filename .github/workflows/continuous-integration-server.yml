@@ -12,13 +12,13 @@ jobs:
         with:
           python_version: 3.7.6
           poetry_version: 1.0.3
-          working_directory: $GITHUB_WORKSPACE/opt/
+          working_directory: ./opt
           args: install
       - name: Run pylint
         uses: abatilo/actions-poetry@v1.1.0
         with:
           python_version: 3.7.6
           poetry_version: 1.0.3
-          working_directory: $GITHUB_WORKSPACE/opt/
+          working_directory: ./opt
           args: run pylint --rcfile pyproject.toml scopeserver
 
