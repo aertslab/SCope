@@ -7,6 +7,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Install
+        uses: abatilo/actions-poetry@v1.5.0
+        with:
+          python_version: 3.7.6
+          poetry_version: 1.0.3
+          working_directory: ./opt
+          args: install
       - name: Run pylint
         uses: abatilo/actions-poetry@v1.5.0
         with:
@@ -20,6 +27,14 @@ jobs:
   #   runs-on: ubuntu-latest
   #   steps:
   #     - uses: actions/checkout@v2
+        # - name: Install
+        # uses: abatilo/actions-poetry@v1.5.0
+        # with:
+        #   python_version: 3.7.6
+        #   poetry_version: 1.0.3
+        #   working_directory: ./opt
+        #   args: install
+
   #     - name: Run black
   #       uses: abatilo/actions-poetry@v1.5.0
   #       with:
@@ -33,6 +48,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Install
+        uses: abatilo/actions-poetry@v1.5.0
+        with:
+          python_version: 3.7.6
+          poetry_version: 1.0.3
+          working_directory: ./opt
+          args: install
       - name: Run mypy
         uses: abatilo/actions-poetry@v1.5.0
         with:
