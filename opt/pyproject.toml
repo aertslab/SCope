@@ -58,8 +58,13 @@ mypy = "*"
 dev-script = 'scopeserver:run'
 
 [tool.pylint.'MESSAGES CONTROL']
+disable = "W1401"
 max-line-length = 120
 
 [tool.black]
 line-length = 120
 target-version = ['py37']
+
+[mypy]
+python_version = 3.7
+

@@ -20,5 +20,45 @@ jobs:
           python_version: 3.7.6
           poetry_version: 1.0.3
           working_directory: ./opt
-          args: run pylint --rcfile pyproject.toml scopeserver
+          args: run pylint --rcfile pyproject.toml --exit-zero scopeserver
+
+  # black:
+  #   name: black
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Install
+  #       uses: abatilo/actions-poetry@v1.5.0
+  #       with:
+  #         python_version: 3.7.6
+  #         poetry_version: 1.0.3
+  #         working_directory: ./opt
+  #         args: install
+  #     - name: Run black
+  #       uses: abatilo/actions-poetry@v1.5.0
+  #       with:
+  #         python_version: 3.7.6
+  #         poetry_version: 1.0.3
+  #         working_directory: ./opt
+  #         args: run black --check .
+
+  mypy:
+    name: mypy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install
+        uses: abatilo/actions-poetry@v1.5.0
+        with:
+          python_version: 3.7.6
+          poetry_version: 1.0.3
+          working_directory: ./opt
+          args: install
+      - name: Run mypy
+        uses: abatilo/actions-poetry@v1.5.0
+        with:
+          python_version: 3.7.6
+          poetry_version: 1.0.3
+          working_directory: ./opt
+          args: run mypy --config-file pyproject.toml --ignore-missing-imports scopeserver
 
