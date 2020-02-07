@@ -1,5 +1,5 @@
 name: Server CI
-on: [push]
+on: [pull_request]
 
 jobs:
   pylint:
@@ -81,5 +81,4 @@ jobs:
           python_version: 3.7.6
           poetry_version: 1.0.3
           working_directory: ./opt
-          args: run pytest --cov=src --cov-branch test/
-          # args: run pytest --cov=src --cov-branch --cov-fail-under=100 test/
+          args: run pytest --cov=scopeserver --cov-branch --cov-fail-under=23 test/
