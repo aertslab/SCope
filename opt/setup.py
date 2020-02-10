@@ -36,6 +36,7 @@ setup(name='scope-server',
           'pandas>=1.0.0',
           'numpy>=1.18.1',
           'pyscenic>=0.9.14',
-          'appdirs>=1.4.3'
+          'appdirs>=1.4.3',
+          'pyarrow>=0.16.0'
       ],
       zip_safe=False)

@@ -3,7 +3,7 @@ name = "scopeserver"
 version = "1.7.3"
 description = "Visualization tool for large-scale and high dimensional single-cell data"
 
-license = "GPL-3.0"
+license = "GPL-3.0-only"
 
 authors = [
         "Maxime De Waegeneer <mdewaegeneer@gmail.com>",
@@ -37,6 +37,7 @@ grpcio = "^1.26.0"
 grpcio-tools = "^1.26.0"
 
 appdirs = "^1.4.3"
+pyarrow = "^0.16.0"
 
 numpy = "^1.18.1"
 pandas = "1.0.0"
@@ -61,8 +62,8 @@ max-line-length = 120
 
 [tool.black]
 line-length = 120
-target-version = ['py37']
+target-version = ['py38']
 
 [mypy]
-python_version = 3.7
+python_version = 3.8
 

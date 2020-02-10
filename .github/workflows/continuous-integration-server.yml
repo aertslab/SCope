@@ -2,83 +2,51 @@ name: Server CI
 on: [pull_request]
 
 jobs:
-  pylint:
-    name: pylint
+  quality-checks:
+
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+
     steps:
       - uses: actions/checkout@v2
-      - name: Install
+      - name: Install dependencies
         uses: abatilo/actions-poetry@v1.5.0
         with:
-          python_version: 3.7.6
+          python_version: ${{ matrix.python-version }}
           poetry_version: 1.0.3
           working_directory: ./opt
           args: install
+
       - name: Run pylint
         uses: abatilo/actions-poetry@v1.5.0
         with:
-          python_version: 3.7.6
+          python_version: ${{ matrix.python-version }}
           poetry_version: 1.0.3
           working_directory: ./opt
           args: run pylint --rcfile pyproject.toml --exit-zero scopeserver
 
-  # black:
-  #   name: black
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-        # - name: Install
-        # uses: abatilo/actions-poetry@v1.5.0
-        # with:
-        #   python_version: 3.7.6
-        #   poetry_version: 1.0.3
-        #   working_directory: ./opt
-        #   args: install
+#     - name: Run black
+#       uses: abatilo/actions-poetry@v1.5.0
+#       with:
+#         python_version: ${{ matrix.python-version }}
+#         poetry_version: 1.0.3
+#         working_directory: ./opt
+#         args: run black --check .
 
-  #     - name: Run black
-  #       uses: abatilo/actions-poetry@v1.5.0
-  #       with:
-  #         python_version: 3.7.6
-  #         poetry_version: 1.0.3
-  #         working_directory: ./opt
-  #         args: run black --check .
-
-  mypy:
-    name: mypy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install
-        uses: abatilo/actions-poetry@v1.5.0
-        with:
-          python_version: 3.7.6
-          poetry_version: 1.0.3
-          working_directory: ./opt
-          args: install
       - name: Run mypy
         uses: abatilo/actions-poetry@v1.5.0
         with:
-          python_version: 3.7.6
+          python_version: ${{ matrix.python-version }}
           poetry_version: 1.0.3
           working_directory: ./opt
           args: run mypy --config-file pyproject.toml --ignore-missing-imports scopeserver
 
-  pytest:
-    name: Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install
-        uses: abatilo/actions-poetry@v1.5.0
-        with:
-          python_version: 3.7.6
-          poetry_version: 1.0.3
-          working_directory: ./opt
-          args: install
       - name: Run pytest
         uses: abatilo/actions-poetry@v1.5.0
         with:
-          python_version: 3.7.6
+          python_version: ${{ matrix.python-version }}
           poetry_version: 1.0.3
           working_directory: ./opt
           args: run pytest --cov=scopeserver --cov-branch --cov-fail-under=23 test/
