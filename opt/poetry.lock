@@ -553,6 +553,17 @@ mccabe = ">=0.6,<0.7"
 
 [[package]]
 category = "dev"
+description = "Pylint wrapper that verifies code reaches a minimum quality score."
+name = "pylint-fail-under"
+optional = false
+python-versions = "*"
+version = "0.3.0"
+
+[package.dependencies]
+pylint = "*"
+
+[[package]]
+category = "dev"
 description = "Python parsing module"
 name = "pyparsing"
 optional = false
@@ -824,7 +835,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools"]
 
 [metadata]
-content-hash = "a7a5563e3ad17f19668798a33ed46c3b270f0d55c106cacfde734ab3ed3d56d3"
+content-hash = "e0c2c70dc05939dfabf88ee9dbb59938f5005fdf506e3e81cf88f3b16284261a"
 python-versions = "^3.6.1"
 
 [metadata.files]
@@ -1307,6 +1318,10 @@ pyarrow = [
 pylint = [
     {file = "pylint-2.4.4-py3-none-any.whl", hash = "sha256:886e6afc935ea2590b462664b161ca9a5e40168ea99e5300935f6591ad467df4"},
     {file = "pylint-2.4.4.tar.gz", hash = "sha256:3db5468ad013380e987410a8d6956226963aed94ecb5f9d3a28acca6d9ac36cd"},
+]
+pylint-fail-under = [
+    {file = "pylint-fail-under-0.3.0.tar.gz", hash = "sha256:4584c0eb6bf2c3dcf9402c74734a49d3a7a86fbe3590276b517fbcbdcba1333a"},
+    {file = "pylint_fail_under-0.3.0-py3-none-any.whl", hash = "sha256:d372e3a698634b48550c4e4af10dc145a6d2c2d9ee26a40690ae635661c85de2"},
 ]
 pyparsing = [
     {file = "pyparsing-2.4.6-py2.py3-none-any.whl", hash = "sha256:c342dccb5250c08d45fd6f8b4a559613ca603b57498511740e65cd11a2e7dcec"},

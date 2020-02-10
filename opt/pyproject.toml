@@ -50,6 +50,7 @@ multiprocessing_on_dill = { version = "*", allow-prereleases = true }
 pytest = "*"
 pytest-cov = "*"
 pylint = "*"
+pylint-fail-under = "*"
 black = { version = "*", allow-prereleases = true }
 mypy = "*"
 
@@ -57,7 +58,6 @@ mypy = "*"
 dev-script = 'scopeserver:run'
 
 [tool.pylint.'MESSAGES CONTROL']
-disable = "W1401"
 max-line-length = 120
 
 [tool.black]
