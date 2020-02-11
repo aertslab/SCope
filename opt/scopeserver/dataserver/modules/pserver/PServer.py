@@ -3,9 +3,6 @@ import socket
 import os
 import shutil
 import mimetypes
-import posixpath
-import macpath
-import ntpath
 import base64
 import functools
 import cgi
@@ -15,7 +12,7 @@ from http import server as httpserver
 import socketserver
 from urllib import parse as urllibparse
 import loompy as lp
-from pathlib import Path
+from pathlib import Path, PurePath
 import threading
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
@@ -49,11 +46,9 @@ def fullpath(path):
     return os.path.abspath(os.path.expanduser(path))
 
 
-def basename(path):
-    "Extract the file base name (some browsers send the full file path)."
-    for mod in posixpath, macpath, ntpath:
-        path = mod.basename(path)
-    return path
+def basename(path: str) -> str:
+    """Extract the file base name (some browsers send the full file path)."""
+    return PurePath(path).name
 
 
 def check_auth(method):
