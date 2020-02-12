@@ -8,7 +8,7 @@ export default class Welcome extends Component {
             <Grid>
                 <Grid.Row>
                     <Grid.Column>
-                        <img class="scopeLogo" src="images/SCope_Logo.png" width="320" /><br/><br/>
+                        <img className="scopeLogo" src="images/SCope_Logo.png" width="320" /><br/><br/>
 
                         SCope is a fast, user-friendly visualization tool for large-scale scRNA-seq datasets, published in Cell.<br/>
                         Datasets can be uploaded using the left sidebar. Files should be in the <a href='http://loompy.org/' target='_blank'>loom file format</a> and will appear under the "User Uploaded" category.<br/>

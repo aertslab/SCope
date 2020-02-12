@@ -95,6 +95,16 @@ class DataFileHandler():
                     orcid_id, orcid_scope_uuids, name = line.rstrip('\n').split('\t')
                     self.orcid_ids[orcid_id] = (set([x for x in orcid_scope_uuids.split(',')]), name)
 
+    def confirm_orcid_uuid(self, user_id, user_uuid):
+        logger.debug(f"Confirming User: {user_id}, uuid: {user_id}")
+        logger.debug("Current DB")
+        logger.debug(self.orcid_ids)
+
+        if user_id in self.orcid_ids.keys():
+            if user_uuid in self.orcid_ids[user_id][0]:
+                return True
+        return False
+
     def add_ORCIDiD(self, orcid_scope_uuid, name, orcid_id):
         if orcid_id in self.orcid_ids:
             self.orcid_ids[orcid_id][0].add(orcid_scope_uuid)

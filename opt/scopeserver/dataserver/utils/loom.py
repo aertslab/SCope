@@ -88,29 +88,31 @@ class Loom():
             return json.loads(zlib.decompress(base64.b64decode(meta)))
         except AttributeError:
             return json.loads(zlib.decompress(base64.b64decode(meta.encode('ascii'))).decode('ascii'))
+    
+    def update_metadata(self, meta):
+        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r+', partial_md5_hash=self.partial_md5_hash)
+        loom = self.loom_connection
+        orig_metaJson = self.get_meta_data()
+        loom.attrs['MetaData'] = json.dumps(meta)
+        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r', partial_md5_hash=self.partial_md5_hash)
+        loom = self.loom_connection
+        new_metaJson = self.get_meta_data()
+        return True if orig_metaJson != new_metaJson else False
 
     def rename_annotation(self, clustering_id, cluster_id, new_annotation_name):
         logger.info('Changing annotation name for {0}'.format(self.get_abs_file_path()))
 
-        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r+', partial_md5_hash=self.partial_md5_hash)
-        loom = self.loom_connection
         metaJson = self.get_meta_data()
 
         for n, clustering in enumerate(metaJson['clusterings']):
             if clustering['id'] == clustering_id:
                 clustering_n = n
-
         for n, cluster in enumerate(metaJson['clusterings'][clustering_n]['clusters']):
             if cluster['id'] == cluster_id:
                 cluster_n = n
 
         metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['description'] = new_annotation_name
-
-        loom.attrs['MetaData'] = json.dumps(metaJson)  # base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
-
-        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r', partial_md5_hash=self.partial_md5_hash)
-
-        loom = self.loom_connection
+        self.update_metadata(metaJson)
 
         if self.get_meta_data()['clusterings'][clustering_n]['clusters'][cluster_n]['description'] == new_annotation_name:
             logger.debug('Success')
@@ -119,15 +121,20 @@ class Loom():
             logger.debug('Failure')
             return False
 
-    def add_collab_annotation(self, request):
-        # TODO: Check if there is already an annotation with the same FBbt
-        # TODO: Fix hash to be real secret
-        # TODO: Confirm user with UUID
-        # TODO: Refactor, lots of duplicated code from above
+    def confirm_orcid_uuid(self, orcid_id, orcid_scope_uuid):
+        self.dfh = dfh.DataFileHandler()
+        self.dfh.read_ORCID_db()
+        return self.dfh.confirm_orcid_uuid(orcid_id, orcid_scope_uuid)
+
+    def add_collab_annotation(self, request, secret):
 
         logger.info('Adding collaborative annotation for {0}'.format(self.get_abs_file_path()))
-        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r+', partial_md5_hash=self.partial_md5_hash)
-        loom = self.loom_connection
+
+        if not self.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
+            logger.error(f"AUTHENTICATION FAILURE: {self.file_path}, user: {request.orcidInfo.orcidID}, uuid: {request.orcidInfo.orcidUUID}")
+            logger.error(request)
+            return(False, "Could not confirm user")
+
         metaJson = self.get_meta_data()
 
         cell_type_annotation = {
@@ -137,25 +144,26 @@ class Loom():
                 'timestamp': request.annoData.timestamp,
                 'obo_id': request.annoData.obo_id,
                 'ols_iri': request.annoData.ols_iri,
-                'ontology_label': request.annoData.ontology_label,
+                'annotation_label': request.annoData.annotation_label,
                 'markers': [request.annoData.markers] if type(request.annoData.markers) == str else list(request.annoData.markers),
                 'publication': request.annoData.publication,
                 'comment': request.annoData.comment,
             }
         }
-        hash_data = json.dumps(cell_type_annotation['data']) + "SCOPE_ORCID_SECRET_HERE"
+
+        hash_data = json.dumps(cell_type_annotation['data']) + secret
         data_hash = hashlib.sha256(hash_data.encode()).hexdigest()
         cell_type_annotation['validate_hash'] = data_hash
 
-        hash_data = json.dumps(cell_type_annotation['data']) + request.annoData.curator_id + "SCOPE_ORCID_SECRET_HERE"
-        user_hash = hashlib.sha256(hash_data.encode()).hexdigest() 
+        hash_data = json.dumps(cell_type_annotation['data']) + request.orcidInfo.orcidID + secret
+        user_hash = hashlib.sha256(hash_data.encode()).hexdigest()
 
         cell_type_annotation['votes'] = {
             'votes_for': {
                 'total': 1,
                 'voters': [{
-                    'voter_name': request.annoData.curator_name,
-                    'voter_id': request.annoData.curator_id,
+                    'voter_name': request.orcidInfo.orcidName,
+                    'voter_id': request.orcidInfo.orcidID,
                     'voter_hash': user_hash,
                 }]
             },
@@ -168,24 +176,87 @@ class Loom():
         for n, clustering in enumerate(metaJson['clusterings']):
             if clustering['id'] == request.clusteringID:
                 clustering_n = n
-
         for n, cluster in enumerate(metaJson['clusterings'][clustering_n]['clusters']):
             if cluster['id'] == request.clusterID:
                 cluster_n = n
 
         if 'cell_type_annotation' in metaJson['clusterings'][clustering_n]['clusters'][cluster_n].keys():
-            print('CELL_TYPE_ANNO IS IN METADTAA')
-            print(metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation'])
-
+            if (request.annoData.obo_id in [x['data']['obo_id'] for x in metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation']] 
+                or request.annoData.annotation_label in [x['data']['annotation_label'] for x in metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation']]):
+                return(False, "Annotation already exists with obo_id or label")
             metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation'].append(cell_type_annotation)
         else:
-            print('CELL_TYPE_ANNO NOT IN METADTAA')
-            print(metaJson['clusterings'][clustering_n]['clusters'][cluster_n])
             metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation'] = [cell_type_annotation]
-        loom.attrs['MetaData'] = json.dumps(metaJson)
-        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r', partial_md5_hash=self.partial_md5_hash)
-        loom = self.loom_connection
+
+        self.update_metadata(metaJson)
+
         if cell_type_annotation in self.get_meta_data()['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation']:
+            logger.debug('Success')
+            return (True, "")
+        else:
+            logger.debug('Failure')
+            return (False, "Metadata was not correct after re-reading file")
+
+    def annotation_vote(self, request, secret):
+        logger.info('Adding vote annotation for {0}'.format(self.get_abs_file_path()))
+
+        if not self.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
+            logger.error(f"AUTHENTICATION FAILURE: {self.file_path}, user: {request.annoData.curator_id}, uuid: {request.orcid_scope_uuid}")
+            logger.error(request)
+            return(False, "Could not confirm user")
+
+        metaJson = self.get_meta_data()
+
+        for n, clustering in enumerate(metaJson['clusterings']):
+            if clustering['id'] == request.clusteringID:
+                clustering_n = n
+        for n, cluster in enumerate(metaJson['clusterings'][clustering_n]['clusters']):
+            if cluster['id'] == request.clusterID:
+                cluster_n = n
+
+        request_data = {
+            'curator_name': request.annoData.curator_name,
+            'curator_id': request.annoData.curator_id,
+            'timestamp': request.annoData.timestamp,
+            'obo_id': request.annoData.obo_id,
+            'ols_iri': request.annoData.ols_iri,
+            'annotation_label': request.annoData.annotation_label,
+            'markers': [request.annoData.markers] if type(request.annoData.markers) == str else list(request.annoData.markers),
+            'publication': request.annoData.publication,
+            'comment': request.annoData.comment}
+
+        for n, cell_type_annotation in enumerate(metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation']):
+            if cell_type_annotation['data'] == request_data:
+                logger.debug('Changing votes')
+                hash_data = json.dumps(cell_type_annotation['data']) + request.orcidInfo.orcidID + secret
+                user_hash = hashlib.sha256(hash_data.encode()).hexdigest()
+                vote_data = {
+                    'voter_name': request.orcidInfo.orcidName,
+                    'voter_id': request.orcidInfo.orcidID,
+                    'voter_hash': user_hash,
+                }
+
+                present = False
+                vote_direction = f'votes_{request.direction}'
+                for i in ['votes_for', 'votes_against']:
+                    if vote_data in metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation'][n]['votes'][i]['voters']:
+                        present = i
+
+                if present:
+                    metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation'][n]['votes'][present]['voters'].remove(vote_data)
+                    metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation'][n]['votes'][present]['total'] -= 1
+                if vote_direction != present:
+                    metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation'][n]['votes'][vote_direction]['voters'].append(vote_data)
+                    metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation'][n]['votes'][vote_direction]['total'] += 1
+                check_data = metaJson
+                break
+        else:
+            logger.error('Could not find cell type annotation to change vote')
+            return (False, "Could not find cell type annotation to change vote")
+
+        self.update_metadata(metaJson)
+
+        if check_data == self.get_meta_data():
             logger.debug('Success')
             return (True, "")
         else:
@@ -204,11 +275,8 @@ class Loom():
         attrs['SCopeTreeL3'] = L3
 
         loom.attrs = attrs  # base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
-
         self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r', partial_md5_hash=self.partial_md5_hash)
-
         loom = self.loom_connection
-
         newAttrs = self.loom_connection.attrs
 
         if newAttrs['SCopeTreeL1'] == L1 and newAttrs['SCopeTreeL2'] == L2 and newAttrs['SCopeTreeL3'] == L3:
@@ -351,8 +419,8 @@ class Loom():
             raise ValueError('Multiple annotations matches the given name: {0}'.format(name))
         return md_annotation[0]
 
-    def get_meta_data_cluster_by_clustering_id_and_cluster_id(self, clustering_id, cluster_id):
-        md_clustering = self.get_meta_data_clustering_by_id(clustering_id)
+    def get_meta_data_cluster_by_clustering_id_and_cluster_id(self, clustering_id, cluster_id, secret=None):
+        md_clustering = self.get_meta_data_clustering_by_id(clustering_id, secret=secret)
         md_cluster = list(filter(lambda x: x["id"] == cluster_id, md_clustering["clusters"]))
         if(len(md_cluster) == 0):
             raise ValueError('The cluster with the given id {0} does not exist.'.format(cluster_id))
@@ -360,19 +428,19 @@ class Loom():
             raise ValueError('Multiple clusters matches the given id: {0}'.format(cluster_id))
         return md_cluster[0]
 
-    def get_meta_data_clustering_by_id(self, id):
-        md_clusterings = self.get_meta_data_by_key(key="clusterings")
+    def get_meta_data_clustering_by_id(self, id, secret=None):
+        md_clusterings = self.get_meta_data_by_key(key="clusterings", secret=secret)
         md_clustering = list(filter(lambda x: x["id"] == id, md_clusterings))
         if(len(md_clustering) > 1):
             raise ValueError('Multiple clusterings matches the given id: {0}'.format(id))
         return md_clustering[0]
 
     @staticmethod
-    def protoize_cell_type_annotation(md):
+    def protoize_cell_type_annotation(md, secret):
         ctas = md['cell_type_annotation']
         md['cell_type_annotation'] = []
         for cta in ctas:
-            hash_data = json.dumps(cta['data']) + "SCOPE_ORCID_SECRET_HERE"
+            hash_data = json.dumps(cta['data']) + secret
             data_hash = hashlib.sha256(hash_data.encode()).hexdigest()
 
             votes = {
@@ -386,7 +454,7 @@ class Loom():
 
             for i in votes.keys():
                 for v in cta['votes'][i]['voters']:
-                    hash_data = json.dumps(cta['data']) + v['voter_id'] + "SCOPE_ORCID_SECRET_HERE"
+                    hash_data = json.dumps(cta['data']) + v['voter_id'] + secret
                     user_hash = hashlib.sha256(hash_data.encode()).hexdigest()
                     v['voter_hash'] = True if user_hash == v['voter_hash'] else False
                     votes[i]['voters'].append(s_pb2.CollabAnnoVoter(**v))
@@ -400,7 +468,7 @@ class Loom():
             md['cell_type_annotation'].append(cta_proto)
         return md
 
-    def get_meta_data_by_key(self, key):
+    def get_meta_data_by_key(self, key, secret=None):
         meta_data = self.get_meta_data()
         if key in meta_data.keys():
             md = meta_data[key]
@@ -411,7 +479,7 @@ class Loom():
                 for n, clustering in enumerate(md.copy()):
                     for m, cluster in enumerate(clustering['clusters']):
                         if 'cell_type_annotation' in cluster.keys():
-                            md[n]['clusters'][m] = self.protoize_cell_type_annotation(cluster)
+                            md[n]['clusters'][m] = self.protoize_cell_type_annotation(cluster, secret=secret)
             return md
         return []
 
@@ -647,17 +715,6 @@ class Loom():
                     except AttributeError:
                         x = [n for n in range(len(loom.shape[1]))]
                         y = [n for n in range(len(loom.shape[1]))]
-                # for ca in loom.ca.keys():
-                    # if 'tSNE'.casefold() in ca.casefold():
-                    #     print(ca)
-                    #     if dims == 0:
-                    #         x = loom.ca[ca]
-                    #         dims += 1
-                    #         continue
-                    #     if dims == 1:
-                    #         y = loom.ca[ca]
-                    #         dims += 1
-                    #         continue
         else:
             x = loom.ca.Embeddings_X[str(coordinatesID)]
             y = loom.ca.Embeddings_Y[str(coordinatesID)]

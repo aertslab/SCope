@@ -40,6 +40,8 @@ service Main {
   rpc getORCIDiD (getORCIDiDRequest) returns (getORCIDiDReply) {}
   rpc getORCIDStatus (getORCIDStatusRequest) returns (getORCIDStatusReply) {}
   rpc setColabAnnotationData (setColabAnnotationDataRequest) returns (setColabAnnotationDataReply) {}
+  rpc voteAnnotation (voteAnnotationRequest) returns (voteAnnotationReply) {}
+  rpc getNextCluster (getNextClusterRequest) returns (FeatureReply) {} 
 }
 
 message ErrorReply {
@@ -162,7 +164,7 @@ message CollabAnnoData {
   int64 timestamp=3;
   string obo_id=4;
   string ols_iri=5;
-  string ontology_label=6;
+  string annotation_label=6;
   repeated string markers=7;
   string publication=8;
   string comment=9;
@@ -471,11 +473,37 @@ message setColabAnnotationDataRequest {
   string loomFilePath=1;
   int32 clusteringID=2;
   int32 clusterID=3;
-  string orcid_scope_uuid=4;
+  orcidInfo orcidInfo=4;
   CollabAnnoData annoData=5;
 }
 
 message setColabAnnotationDataReply {
   bool success=1;
   string message=2;
+}
+
+message orcidInfo {
+  string orcidName=1;
+  string orcidID=2;
+  string orcidUUID=3;
+}
+
+message voteAnnotationRequest {
+  string loomFilePath=1;
+  int32 clusteringID=2;
+  int32 clusterID=3;
+  orcidInfo orcidInfo=4;
+  CollabAnnoData annoData=5;
+  string direction=6;
+}
+
+message voteAnnotationReply {
+  bool success=1;
+  string message=2;
+}
+
+message getNextClusterRequest {
+  string loomFilePath=1;
+  int32 clusteringID=2;
+  int32 clusterID=3;
 }

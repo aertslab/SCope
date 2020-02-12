@@ -383,6 +383,21 @@ class API {
 		})
 	}
 
+	getNextCluster(clusteringID, clusterID, callback) {
+		let query = {
+			loomFilePath: this.getActiveLoom(),
+			clusteringID: clusteringID,
+			clusterID: clusterID
+		}
+		this.getConnection().then((gbc) => {
+			if (DEBUG) console.log('getNextCluster', query);
+			gbc.services.scope.Main.getNextCluster(query, (err, response) => {
+				callback(response)
+			})
+		})
+	}
+
+
 	updateFeature(field, type, feature, featureType, featureDescription, page) {
 		if (featureType == 'regulon') {
 			let regulonQuery = {
@@ -488,20 +503,20 @@ class API {
 		});
 	}
 
-	setColabAnnotationData(feature, annotationData, orcidInfo, callback) {
+	setColabAnnotationData(feature, annotationData, orcidInfo, uuid, callback) {
 		if (DEBUG) console.log('setColabAnnotationData', feature, annotationData, orcidInfo);
 		let query = {
 			loomFilePath: this.getActiveLoom(),
 			clusteringID: feature.metadata['clusteringID'],
 			clusterID: feature.metadata['clusterID'],
-			orcid_scope_uuid: orcidInfo['orcid_uuid'],
+			orcidInfo: orcidInfo,
 			annoData: {
-				curator_name: orcidInfo['orcid_name'], 
-				curator_id: orcidInfo['orcid_id'],
+				curator_name: orcidInfo['orcidName'], 
+				curator_id: orcidInfo['orcidID'],
 				timestamp: new Date().getTime(),
 				obo_id: annotationData['olsResult']['obo_id'],
 				ols_iri: annotationData['olsResult']['iri'],
-				ontology_label: annotationData['olsResult']['label'],
+				annotation_label: annotationData['olsResult']['label'],
 				markers: annotationData['selectedMarkers'],
 				publication: annotationData['publication'],
 				comment: annotationData['comment'],
@@ -511,6 +526,49 @@ class API {
 			BackendAPI.getConnection().then((gbc) => {
 				gbc.services.scope.Main.setColabAnnotationData(query, (err, response) => {
 					if (DEBUG) console.log('setColabAnnotationData', response);
+					if (response.success) {
+						BackendAPI.queryLoomFiles(uuid, () => {
+							BackendAPI.getActiveFeatures().forEach( (f, n) => {
+								console.log(f == feature)
+								if (f == feature) {
+									BackendAPI.updateFeature(n, f.type, f.feature, f.featureType, f.metadata ? f.metadata.description : null, "")
+								}
+
+							})
+						} )
+					}
+					callback(response)
+				})
+			}, () => {
+				BackendAPI.showError();
+			});
+	}
+
+	voteAnnotation(direction, data, feature, orcidInfo, uuid, callback) {
+		if (DEBUG) console.log('voteUpAnnotation');
+		let query = {
+			loomFilePath: this.getActiveLoom(),
+			clusteringID: feature.metadata['clusteringID'],
+			clusterID: feature.metadata['clusterID'],
+			orcidInfo: orcidInfo,
+			annoData: data,
+			direction: direction
+		}
+		if (DEBUG) console.log('voteAnnotation', query);
+			BackendAPI.getConnection().then((gbc) => {
+				gbc.services.scope.Main.voteAnnotation(query, (err, response) => {
+					if (DEBUG) console.log('voteAnnotation', response);
+					if (response.success) {
+						BackendAPI.queryLoomFiles(uuid, () => {
+							BackendAPI.getActiveFeatures().forEach( (f, n) => {
+								// if (f.metadata['clusteringID'] == feature.metadata['clusteringID'] && f.metadata['clusterID'] == feature.metadata['clusterID']) {
+								if (f == feature) {
+									BackendAPI.updateFeature(n, f.type, f.feature, f.featureType, f.metadata ? f.metadata.description : null, "")
+								}
+
+							})
+						} )
+					}
 					callback(response)
 				})
 			}, () => {

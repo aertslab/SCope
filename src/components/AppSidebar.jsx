@@ -53,10 +53,6 @@ class AppSidebar extends Component {
 
 		
 		this.setLoomHierarchy = (loomFilePath, loomDisplayName, loomHeierarchy) => {
-			// Popup.alert('Test')
-			console.log("Making popup")
-			console.log(loomFilePath)
-			console.log(loomDisplayName)
 			this.setState({
 					newHierarchy_L1: loomHeierarchy['L1'],
 					newHierarchy_L2: loomHeierarchy['L2'],

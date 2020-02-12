@@ -1,5 +1,7 @@
 import _ from "lodash";
 import { BackendAPI } from '../common/API'
+import { withRouter } from 'react-router-dom';
+
 import React, {Component} from "react";
 import {
   Button,
@@ -28,11 +30,12 @@ class CollaborativeAnnotation extends Component {
     constructor() {
         super();
         this.OLSAutocomplete = React.createRef();
-        this.AnnoGeneSearch = React.createRef();
+        this.AnnoGeneSearch = React.createRef();        
         this.state = {
             value: [],
             annoData: {},
-            selected: []
+            selected: [],
+            showModal: false
         }
     }
 
@@ -41,24 +44,39 @@ class CollaborativeAnnotation extends Component {
         annoData[name] = value
         this.setState({ "annoData": annoData })
     }
+
+    closeModal = () => {
+        this.setState({showModal: false})
+    }
     
-    sendData = () => {
+    sendData = (e) => {
         let annoData = this.state.annoData
         annoData["olsResult"] = this.OLSAutocomplete.current.state.result
         annoData["selectedMarkers"] = this.AnnoGeneSearch.current.state.value
-
-        this.setState({ "annoData": annoData }, () => {
+        this.setState({ annoData: annoData, submitAction: e.target.value }, () => {
             BackendAPI.setColabAnnotationData(
                 this.props.feature, 
                 this.state.annoData, 
-                {'orcid_name': this.state.orcid_name, 'orcid_id': this.state.orcid_id, 'orcid_uuid': this.state.orcid_uuid},
-                (response) => console.log(response))
+                {'orcidName': this.state.orcid_name, 'orcidID': this.state.orcid_id, 'orcidUUID': this.state.orcid_uuid},
+                this.props.match.params.uuid,
+                (response) => {
+                    if (response.success) {
+                       this.closeModal()
+                    }
+                    if (this.state.submitAction == 'submitNext') {
+                        BackendAPI.getNextCluster(this.props.feature.metadata['clusteringID'], this.props.feature.metadata['clusterID'], (response) => {
+                            BackendAPI.updateFeature(this.props.id, response.featureType[0], response.feature[0], response.featureType[0], response.featureDescription[0], this.props.match.params.page, (e) => {
+                            })
+
+                        })
+                    }
+                })
             })
     }
 
     render() {
 
-        const {annoData, selected, orcid_name, orcid_id, orcid_uuid} = this.state;
+        const {annoData, selected, showModal, orcid_name, orcid_id, orcid_uuid} = this.state;
 
         var cardStyle = {
             display: "block",
@@ -76,11 +94,13 @@ class CollaborativeAnnotation extends Component {
             return (
             <Modal 
                 as={Form} 
-                className="collab-anno" 
-                closeOnEscape={false} 
+                className="collab-anno"
+                onClose={() => this.closeModal()} 
                 closeIcon 
-                trigger={<Button className="anno-button">Add Annotation</Button>}
-                onSubmit={this.sendData}>
+                open={showModal}
+                trigger={<Button onClick={() => {this.setState({showModal: true})}} className="anno-button">Add Annotation</Button>}
+                // onSubmit={e => {this.sendData(e)}}
+                id="annoForm">
                 <Modal.Header>Add Annotation</Modal.Header>
                 <Modal.Content>
                 <Modal.Description>
@@ -142,8 +162,12 @@ class CollaborativeAnnotation extends Component {
                 </Modal.Description>
                 </Modal.Content>
                 <Modal.Actions>
-                <Button type="submit" primary>
+                <Button form="annoForm" type="submit" value="submitNext" onClick={(e) => this.sendData(e)} secondary>
+                    Submit and view next cluster<Icon name="right chevron" />
+                </Button>
+                <Button form="annoForm" type="submit" value="submit" onClick={(e) => this.sendData(e)} primary>
                     Submit Annotation <Icon name="right chevron" />
+
                 </Button>
                 </Modal.Actions>
             </Modal>
@@ -179,4 +203,4 @@ class CollaborativeAnnotation extends Component {
 
 };
 
-export default withCookies(CollaborativeAnnotation);
+export default withCookies(withRouter(CollaborativeAnnotation));

@@ -129,6 +129,16 @@ class MainStub(object):
         request_serializer=s__pb2.setColabAnnotationDataRequest.SerializeToString,
         response_deserializer=s__pb2.setColabAnnotationDataReply.FromString,
         )
+    self.voteAnnotation = channel.unary_unary(
+        '/scope.Main/voteAnnotation',
+        request_serializer=s__pb2.voteAnnotationRequest.SerializeToString,
+        response_deserializer=s__pb2.voteAnnotationReply.FromString,
+        )
+    self.getNextCluster = channel.unary_unary(
+        '/scope.Main/getNextCluster',
+        request_serializer=s__pb2.getNextClusterRequest.SerializeToString,
+        response_deserializer=s__pb2.FeatureReply.FromString,
+        )
 
 
 class MainServicer(object):
@@ -296,6 +306,20 @@ class MainServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def voteAnnotation(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def getNextCluster(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_MainServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -413,6 +437,16 @@ def add_MainServicer_to_server(servicer, server):
           servicer.setColabAnnotationData,
           request_deserializer=s__pb2.setColabAnnotationDataRequest.FromString,
           response_serializer=s__pb2.setColabAnnotationDataReply.SerializeToString,
+      ),
+      'voteAnnotation': grpc.unary_unary_rpc_method_handler(
+          servicer.voteAnnotation,
+          request_deserializer=s__pb2.voteAnnotationRequest.FromString,
+          response_serializer=s__pb2.voteAnnotationReply.SerializeToString,
+      ),
+      'getNextCluster': grpc.unary_unary_rpc_method_handler(
+          servicer.getNextCluster,
+          request_deserializer=s__pb2.getNextClusterRequest.FromString,
+          response_serializer=s__pb2.FeatureReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

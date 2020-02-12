@@ -18,31 +18,31 @@ a.active.item.annotation {
 	padding: 0px !important;
 }
 
-  .highlight-enter {
-	background: white;
-  }
+.highlight-enter {
+background: white;
+}
 
-  .highlight-enter.highlight-enter-active {
-	background: yellow;
-  }
+.highlight-enter.highlight-enter-active {
+background: yellow;
+}
 
-  .highlight-leave {
-	background: yellow;
-	opacity: 1;
-  }
+.highlight-leave {
+background: yellow;
+opacity: 1;
+}
 
-  .highlight-leave.highlight-leave-active {
-	background: white;
-	opacity: 0;
-	transition: opacity 10ms ease-in;
-  }
+.highlight-leave.highlight-leave-active {
+background: white;
+opacity: 0;
+transition: opacity 10ms ease-in;
+}
 
-  .collab-anno {
-	position: absolute;
-	left: 30%;
-	/* transform: translate(-50%, -50%); */
-  }
+.collab-anno {
+position: absolute;
+left: 30%;
+/* transform: translate(-50%, -50%); */
+}
 
-  .collab-anno-drop>.search {
-	  width: 100% !important;
-  }
+.collab-anno-drop>.search {
+	width: 100% !important;
+}

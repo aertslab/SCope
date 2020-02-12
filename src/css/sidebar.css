@@ -45,7 +45,13 @@
 
 .anno-button {
 	margin-bottom: 15px !important;
-	width: 100%
+	width: 65%
+}
+
+.next-cluster-button {
+	margin-bottom: 15px !important;
+	width: 32%;
+	white-space: pre;
 }
 
 .vote-tooltip {

@@ -6,6 +6,7 @@ import loompy as lp
 from loompy import timestamp
 from loompy import _version
 import os
+import secrets
 import re
 import numpy as np
 import pandas as pd
@@ -66,10 +67,16 @@ class SCope(s_pb2_grpc.MainServicer):
                 try:
                     self.config = json.loads(fh.read())
                 except json.JSONDecodeError:
+                    self.config = {}
                     logger.error('Config file is not proper json and will not be used')
             self.test_ORCID_connection()
         else:
             self.config = {}
+        dhs = self.config.get('dataHashSecret')
+        if not dhs or not dhs.strip():
+            new_secret = secrets.token_hex(32)
+            self.config['dataHashSecret'] = new_secret
+            logger.warning(f'The following secret key will be used to hash annotation data: {new_secret}\nLosing this key will mean all annotations will display as unvalidated.')
 
     def update_global_data(self):
         self.dfh.set_global_data()
@@ -368,6 +375,16 @@ class SCope(s_pb2_grpc.MainServicer):
         vals, cellIndices = loom.get_auc_values(regulon=request.feature[0])
         return s_pb2.CellAUCValuesByFeaturesReply(value=vals)
 
+    def getNextCluster(self, request, context):
+        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        try:
+            cluster_metadata = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(request.clusteringID, request.clusterID + 1, secret=self.config['dataHashSecret'])
+        except ValueError:
+            cluster_metadata = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(request.clusteringID, request.clusterID, secret=self.config['dataHashSecret'])
+
+        f = self.get_features(loom=loom, query=cluster_metadata['description'])
+        return s_pb2.FeatureReply(feature=[f['feature'][0]], featureType=[f['featureType'][0]], featureDescription=[f['featureDescription'][0]])
+
     def getCellMetaData(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
         cell_indices = request.cellIndices
@@ -425,8 +442,13 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def setColabAnnotationData(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
-        success, message = loom.add_collab_annotation(request)
+        success, message = loom.add_collab_annotation(request, self.config['dataHashSecret'])
         return s_pb2.setColabAnnotationDataReply(success=success, message=message)
+
+    def voteAnnotation(self, request, context):
+        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        success, message = loom.annotation_vote(request, self.config['dataHashSecret'])
+        return s_pb2.voteAnnotationReply(success=success, message=message)
 
     def getRegulonMetaData(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
@@ -495,7 +517,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
         genes = loom.get_cluster_marker_genes(clustering_id=request.clusteringID, cluster_id=request.clusterID)
         # Filter the MD clusterings by ID
-        md_clustering = loom.get_meta_data_clustering_by_id(id=request.clusteringID)
+        md_clustering = loom.get_meta_data_clustering_by_id(id=request.clusteringID, secret=self.config['dataHashSecret'])
         cluster_marker_metrics = None
 
         if "clusterMarkerMetrics" in md_clustering.keys():
