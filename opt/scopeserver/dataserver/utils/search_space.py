@@ -88,6 +88,23 @@ class SearchSpace(dict):
                 all_clusters.append(cluster['description'])
             self.add_elements(elements=all_clusters, element_type='Clustering: {0}'.format(clustering['name']))
         self.add_markers(element_type='marker_gene')
+        self.add_cluster_annotations()
+
+    def add_cluster_annotations(self):
+        for clustering in self.meta_data['clusterings']:
+            clusteringID = int(clustering['id'])
+            element_type = 'cluster_annotation'
+            for cluster in clustering['clusters']:
+                clusterID = cluster['id']
+                annotations = cluster.get('cell_type_annotation')
+                if not annotations:
+                    continue
+                annotations = [f'{an["data"]["annotation_label"]} ({an["data"]["obo_id"]})' for an in annotations]
+                for annotation in annotations:
+                    if (annotation.casefold(), annotation, element_type) in self.keys():
+                        self[(annotation.casefold(), annotation, element_type)].append(f'{clusteringID}_{clusterID}')
+                    else:
+                        self[(annotation.casefold(), annotation, element_type)] = [f'{clusteringID}_{clusterID}']
 
     def add_regulons(self):
         if self.loom.has_motif_and_track_regulons():

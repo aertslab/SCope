@@ -216,7 +216,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     if (dg[0], r[2]) not in collapsedResults.keys():
                         collapsedResults[(dg[0], r[2])] = (r[1], dg[1])
 
-        descriptions = {x: '' for x in collapsedResults.keys() if x[1] not in ['region_gene_link', 'regulon_target', 'marker_gene']}
+        descriptions = {x: '' for x in collapsedResults.keys() if x[1] not in ['region_gene_link', 'regulon_target', 'marker_gene', 'cluster_annotation']}
 
         for r in list(collapsedResults.keys()):
             if cross_species == '':
@@ -237,12 +237,28 @@ class SCope(s_pb2_grpc.MainServicer):
                         descriptions[(regulon, 'regulon')] += description
                     del(collapsedResults[r])
 
+                elif r[1] == 'cluster_annotation':
+                    for cluster in r[0]:
+                        clustering = int(cluster.split('_')[0])
+                        cluster = int(cluster.split('_')[1])
+                        clustering_name = loom.get_meta_data_clustering_by_id(clustering, secret=self.config['dataHashSecret'])["name"]
+                        cluster = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(clustering, cluster, secret=self.config['dataHashSecret'])
+                        cluster_name = cluster["description"]
+                        description = f'{collapsedResults[r][0]} is a suggested annotation of {cluster_name}'
+                        if (cluster_name, f'Clustering: {clustering_name}') not in collapsedResults.keys():
+                            collapsedResults[(cluster_name, f'Clustering: {clustering_name}')] = collapsedResults[r][0]
+                            descriptions[(cluster_name, f'Clustering: {clustering_name}')] = ''
+                        if descriptions[(cluster_name, f'Clustering: {clustering_name}')] != '':
+                            descriptions[(cluster_name, f'Clustering: {clustering_name}')] += ', '
+                        descriptions[(cluster_name, f'Clustering: {clustering_name}')] += description
+                    del(collapsedResults[r])
+
                 elif r[1] == 'marker_gene':
                     for cluster in r[0]:
                         clustering = int(cluster.split('_')[0])
                         cluster = int(cluster.split('_')[1])
-                        clustering_name = loom.get_meta_data_clustering_by_id(clustering)["name"]
-                        cluster = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(clustering, cluster)
+                        clustering_name = loom.get_meta_data_clustering_by_id(clustering, secret=self.config['dataHashSecret'])["name"]
+                        cluster = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(clustering, cluster, secret=self.config['dataHashSecret'])
                         cluster_name = cluster["description"]
                         description = f'{collapsedResults[r][0]} is a marker of {cluster_name}'
                         if (cluster_name, f'Clustering: {clustering_name}') not in collapsedResults.keys():
