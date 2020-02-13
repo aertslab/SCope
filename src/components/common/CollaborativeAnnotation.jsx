@@ -263,7 +263,7 @@ class CollaborativeAnnotation extends Component {
                 <Popup 
                 position='bottom left'
                 content={<b>You must be logged in with an ORCID ID to annotate datasets! (See header)</b>}
-                trigger={<span><Button className="anno-button" disabled >Add Annotation</Button> </span>} hoverable fluid/>
+                trigger={<Button color="red" inverted className="anno-button" >Add Annotation</Button>} hoverable fluid/>
             )
         }
 
