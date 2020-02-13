@@ -36,7 +36,9 @@ class CollaborativeAnnotation extends Component {
             value: [],
             annoData: {},
             selected: [],
-            showModal: false
+            showModal: false,
+            freeInput: "",
+            submitError: false
         }
     }
 
@@ -50,6 +52,14 @@ class CollaborativeAnnotation extends Component {
         this.setState({showModal: false})
     }
 
+    closeErrorModal = (e) => {
+        if (e.target.value == 'submit') {
+            return 
+        } else {
+            this.setState({submitError: false})
+        }
+    }
+
     onFreeInputChange = (e) => {
         this.setState({freeInput: e.target.value})
     }
@@ -60,14 +70,18 @@ class CollaborativeAnnotation extends Component {
     
     sendData = (e) => {
         let annoData = this.state.annoData
-        if (this.OLSAutocomplete.current) {
+
+        if (this.OLSAutocomplete.current && this.OLSAutocomplete.current.state.result) {
             annoData['obo_id'] = this.OLSAutocomplete.current.state.result['obo_id'],
             annoData['iri'] = this.OLSAutocomplete.current.state.result['iri'],
             annoData['label'] = this.OLSAutocomplete.current.state.result['label']
-        } else {
+        } else if (this.state.freeInput.length > 0) {
             annoData['obo_id'] = "Manual Annotation"
             annoData['iri'] = ""
             annoData['label'] = this.state.freeInput
+        } else {
+            this.setState({submitError: true}, () => {console.log(this.state)})
+            return
         }
 
         annoData["selectedMarkers"] = this.AnnoGeneSearch.current.state.value
@@ -94,7 +108,7 @@ class CollaborativeAnnotation extends Component {
 
     render() {
 
-        const {annoData, selected, showModal, orcid_name, orcid_id, orcid_uuid} = this.state;
+        const {annoData, selected, showModal, submitError, orcid_name, orcid_id, orcid_uuid} = this.state;
 
         var cardStyle = {
             display: "block",
@@ -131,6 +145,7 @@ class CollaborativeAnnotation extends Component {
             ]
 
             return (
+            <React.Fragment>
             <Modal 
                 as={Form} 
                 className="collab-anno"
@@ -213,6 +228,29 @@ class CollaborativeAnnotation extends Component {
                 </Button>
                 </Modal.Actions>
             </Modal>
+            <Modal
+                className="collab-anno"
+                style={{top: "20%"}}
+                open={submitError}
+                onClose={(e) => this.closeErrorModal(e)}
+            >
+                <Modal.Header>
+                    Input Error!
+                </Modal.Header>
+                <Modal.Content>
+                    <p>You MUST either select a term from the OLS search OR submit a manual annotation!</p>
+                </Modal.Content>
+                <Modal.Actions>
+                    <Button
+                        type="accept"
+                        color="red"
+                        onClick={(e) => this.closeErrorModal(e)}
+                    >
+                        OK
+                    </Button>
+                </Modal.Actions>
+            </Modal>
+            </React.Fragment>
             );
         }
 
