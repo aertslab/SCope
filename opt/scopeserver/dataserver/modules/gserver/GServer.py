@@ -558,40 +558,43 @@ class SCope(s_pb2_grpc.MainServicer):
         loomsToProcess = sorted(self.lfh.get_global_looms()) + sorted([os.path.join(request.UUID, x) for x in os.listdir(userDir)])
 
         for f in loomsToProcess:
-            if f.endswith('.loom'):
-                with open(self.lfh.get_loom_absolute_file_path(f), 'r') as fh:
-                    loomSize = os.fstat(fh.fileno())[6]
-                loom = self.lfh.get_loom(loom_file_path=f)
-                if loom is None:
-                    continue
-                file_meta = loom.get_file_metadata()
-                if not file_meta['hasGlobalMeta']:
-                    try:
-                        loom.generate_meta_data()
-                        file_meta = loom.get_file_metadata()
-                    except Exception as e:
-                        logger.error('Failed to make metadata!')
-                        logger.error(e)
+            try:
+                if f.endswith('.loom'):
+                    with open(self.lfh.get_loom_absolute_file_path(f), 'r') as fh:
+                        loomSize = os.fstat(fh.fileno())[6]
+                    loom = self.lfh.get_loom(loom_file_path=f)
+                    if loom is None:
+                        continue
+                    file_meta = loom.get_file_metadata()
+                    if not file_meta['hasGlobalMeta']:
+                        try:
+                            loom.generate_meta_data()
+                            file_meta = loom.get_file_metadata()
+                        except Exception as e:
+                            logger.error('Failed to make metadata!')
+                            logger.error(e)
 
-                try:
-                    L1 = loom.get_global_attribute_by_name(name="SCopeTreeL1")
-                    L2 = loom.get_global_attribute_by_name(name="SCopeTreeL2")
-                    L3 = loom.get_global_attribute_by_name(name="SCopeTreeL3")
-                except AttributeError:
-                    L1 = 'Uncategorized'
-                    L2 = L3 = ''
-                my_looms.append(s_pb2.MyLoom(loomFilePath=f,
-                                             loomDisplayName=os.path.splitext(os.path.basename(f))[0],
-                                             loomSize=loomSize,
-                                             cellMetaData=s_pb2.CellMetaData(annotations=loom.get_meta_data_by_key(key="annotations"),
-                                                                             embeddings=loom.get_meta_data_by_key(key="embeddings"),
-                                                                             clusterings=loom.get_meta_data_by_key(key="clusterings")),
-                                             fileMetaData=file_meta,
-                                             loomHeierarchy=s_pb2.LoomHeierarchy(L1=L1,
-                                                                                 L2=L2,
-                                                                                 L3=L3)
-                                             )
-                                )
+                    try:
+                        L1 = loom.get_global_attribute_by_name(name="SCopeTreeL1")
+                        L2 = loom.get_global_attribute_by_name(name="SCopeTreeL2")
+                        L3 = loom.get_global_attribute_by_name(name="SCopeTreeL3")
+                    except AttributeError:
+                        L1 = 'Uncategorized'
+                        L2 = L3 = ''
+                    my_looms.append(s_pb2.MyLoom(loomFilePath=f,
+                                                 loomDisplayName=os.path.splitext(os.path.basename(f))[0],
+                                                 loomSize=loomSize,
+                                                 cellMetaData=s_pb2.CellMetaData(annotations=loom.get_meta_data_by_key(key="annotations"),
+                                                                                 embeddings=loom.get_meta_data_by_key(key="embeddings"),
+                                                                                 clusterings=loom.get_meta_data_by_key(key="clusterings", secret=self.config['dataHashSecret'])),
+                                                 fileMetaData=file_meta,
+                                                 loomHeierarchy=s_pb2.LoomHeierarchy(L1=L1,
+                                                                                     L2=L2,
+                                                                                     L3=L3)
+                                                 )
+                                    )
+            except ValueError:
+                pass
         self.dfh.update_UUID_db()
 
         return s_pb2.MyLoomsReply(myLooms=my_looms)
