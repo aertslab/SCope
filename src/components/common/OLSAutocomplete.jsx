@@ -96,6 +96,7 @@ export default class OLSAutocomplete extends Component {
                     resultRenderer={resultRenderer}
                     input={{ fluid: true }}
                     className={{ fluid: true }}
+                    placeholder="Search for an ontology term..."
                     {...this.props}
                 />
                 <br/>

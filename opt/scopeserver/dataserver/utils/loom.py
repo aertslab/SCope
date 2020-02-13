@@ -181,8 +181,8 @@ class Loom():
                 cluster_n = n
 
         if 'cell_type_annotation' in metaJson['clusterings'][clustering_n]['clusters'][cluster_n].keys():
-            if (request.annoData.obo_id in [x['data']['obo_id'] for x in metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation']] 
-                or request.annoData.annotation_label in [x['data']['annotation_label'] for x in metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation']]):
+            current_annos = [f"{x['data']['annotation_label']}__{x['data']['obo_id']}".casefold() for x in metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation']]
+            if f"{request.annoData.annotation_label}__{request.annoData.obo_id}".casefold() in current_annos:
                 return(False, "Annotation already exists with obo_id or label")
             metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation'].append(cell_type_annotation)
         else:
@@ -239,11 +239,14 @@ class Loom():
                 present = False
                 vote_direction = f'votes_{request.direction}'
                 for i in ['votes_for', 'votes_against']:
-                    if vote_data in metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation'][n]['votes'][i]['voters']:
-                        present = i
+                    for idx, vote in enumerate(metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation'][n]['votes'][i]['voters']):
+                        if request.orcidInfo.orcidID == vote['voter_id']:
+                            present = i
+                            vote_idx = idx
+                            break
 
                 if present:
-                    metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation'][n]['votes'][present]['voters'].remove(vote_data)
+                    del(metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation'][n]['votes'][present]['voters'][vote_idx])
                     metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation'][n]['votes'][present]['total'] -= 1
                 if vote_direction != present:
                     metaJson['clusterings'][clustering_n]['clusters'][cluster_n]['cell_type_annotation'][n]['votes'][vote_direction]['voters'].append(vote_data)

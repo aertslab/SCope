@@ -506,4 +506,5 @@ message getNextClusterRequest {
   string loomFilePath=1;
   int32 clusteringID=2;
   int32 clusterID=3;
+  string direction=4;
 }

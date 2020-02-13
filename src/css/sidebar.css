@@ -45,12 +45,12 @@
 
 .anno-button {
 	margin-bottom: 15px !important;
-	width: 65%
+	width: 50%
 }
 
-.next-cluster-button {
+.change-cluster-button {
 	margin-bottom: 15px !important;
-	width: 32%;
+	width: 23%;
 	white-space: pre;
 }
 

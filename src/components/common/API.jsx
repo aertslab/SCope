@@ -383,11 +383,12 @@ class API {
 		})
 	}
 
-	getNextCluster(clusteringID, clusterID, callback) {
+	getNextCluster(clusteringID, clusterID, direction, callback) {
 		let query = {
 			loomFilePath: this.getActiveLoom(),
 			clusteringID: clusteringID,
-			clusterID: clusterID
+			clusterID: clusterID,
+			direction: direction
 		}
 		this.getConnection().then((gbc) => {
 			if (DEBUG) console.log('getNextCluster', query);
@@ -514,9 +515,9 @@ class API {
 				curator_name: orcidInfo['orcidName'], 
 				curator_id: orcidInfo['orcidID'],
 				timestamp: new Date().getTime(),
-				obo_id: annotationData['olsResult']['obo_id'],
-				ols_iri: annotationData['olsResult']['iri'],
-				annotation_label: annotationData['olsResult']['label'],
+				obo_id: annotationData['obo_id'],
+				ols_iri: annotationData['iri'],
+				annotation_label: annotationData['label'],
 				markers: annotationData['selectedMarkers'],
 				publication: annotationData['publication'],
 				comment: annotationData['comment'],

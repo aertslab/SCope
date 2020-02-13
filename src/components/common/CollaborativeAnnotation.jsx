@@ -12,7 +12,8 @@ import {
   Modal,
   Divider,
   Form,
-  TextArea,
+  Tab,
+  Grid,
   Card,
   CardContent
 } from "semantic-ui-react";
@@ -48,10 +49,27 @@ class CollaborativeAnnotation extends Component {
     closeModal = () => {
         this.setState({showModal: false})
     }
+
+    onFreeInputChange = (e) => {
+        this.setState({freeInput: e.target.value})
+    }
+    
+    handleTabChange = () => {
+        this.setState({freeInput: ''})
+    }
     
     sendData = (e) => {
         let annoData = this.state.annoData
-        annoData["olsResult"] = this.OLSAutocomplete.current.state.result
+        if (this.OLSAutocomplete.current) {
+            annoData['obo_id'] = this.OLSAutocomplete.current.state.result['obo_id'],
+            annoData['iri'] = this.OLSAutocomplete.current.state.result['iri'],
+            annoData['label'] = this.OLSAutocomplete.current.state.result['label']
+        } else {
+            annoData['obo_id'] = "Manual Annotation"
+            annoData['iri'] = ""
+            annoData['label'] = this.state.freeInput
+        }
+
         annoData["selectedMarkers"] = this.AnnoGeneSearch.current.state.value
         this.setState({ annoData: annoData, submitAction: e.target.value }, () => {
             BackendAPI.setColabAnnotationData(
@@ -63,8 +81,8 @@ class CollaborativeAnnotation extends Component {
                     if (response.success) {
                        this.closeModal()
                     }
-                    if (this.state.submitAction == 'submitNext') {
-                        BackendAPI.getNextCluster(this.props.feature.metadata['clusteringID'], this.props.feature.metadata['clusterID'], (response) => {
+                    if (this.state.submitAction == 'submitNext' || this.state.submitAction == 'submitPrevious') {
+                        BackendAPI.getNextCluster(this.props.feature.metadata['clusteringID'], this.props.feature.metadata['clusterID'], this.state.submitAction == 'submitNext' ? 'next' : 'previous', (response) => {
                             BackendAPI.updateFeature(this.props.id, response.featureType[0], response.feature[0], response.featureType[0], response.featureDescription[0], this.props.match.params.page, (e) => {
                             })
 
@@ -91,6 +109,27 @@ class CollaborativeAnnotation extends Component {
         }
 
         let annotationModal = (orcid_id, orcid_name) => {
+            const panes = [
+                {menuItem: 'Controlled Vocabulary', render: () => 
+                    <Tab.Pane>
+                        <Grid.Row>
+                            {olsWidget()}
+                        </Grid.Row>
+                        <Grid.Row>
+                            OLS Powered by <a href="https://www.ebi.ac.uk/ols/index" target="_blank">EBI OLS</a>
+                        </Grid.Row>
+                    </Tab.Pane>
+                },
+                {menuItem: 'Free Text', render: () => 
+                <Tab.Pane>
+                    <Input 
+                        placeholder="Enter your annotation..."
+                        onChange={this.onFreeInputChange}
+                        value={this.state.freeInput}
+                        />
+                </Tab.Pane>}
+            ]
+
             return (
             <Modal 
                 as={Form} 
@@ -104,11 +143,13 @@ class CollaborativeAnnotation extends Component {
                 <Modal.Header>Add Annotation</Modal.Header>
                 <Modal.Content>
                 <Modal.Description>
+                    <Divider horizontal>
+                        <Header as="h4">Basic Information (Read-only)</Header>
+                    </Divider>
                     <Card style={cardStyle}>
                         <CardContent>
                         <Form.Field>
-                            <label>ID</label>
-                            Cluster ID (read-only)
+                            <label>Cluster ID (read-only)</label>
                             <input value={this.props.feature.feature} disabled />
                         </Form.Field>
                         <Form.Field>
@@ -122,9 +163,10 @@ class CollaborativeAnnotation extends Component {
                     </Divider>
                     <Card style={cardStyle}>
                         <CardContent>
-                        <Form.Field> 
-                            <label>Ontology Term (Powered by <a href="https://www.ebi.ac.uk/ols/index" target="_blank">EBI OLS</a>)</label>
-                            {olsWidget()} 
+                        <Form.Field required> 
+                            <label>Annotation Label</label>
+                            <Tab panes={panes} onTabChange={this.handleTabChange}/>
+                            {/* {olsWidget()}  */}
                         </Form.Field>
                         </CardContent>
                     </Card>

@@ -377,8 +377,13 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getNextCluster(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        if request.direction == 'next':
+            next_clusterID = request.clusterID + 1
+        elif request.direction == 'previous':
+            next_clusterID = request.clusterID - 1
+
         try:
-            cluster_metadata = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(request.clusteringID, request.clusterID + 1, secret=self.config['dataHashSecret'])
+            cluster_metadata = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(request.clusteringID, next_clusterID, secret=self.config['dataHashSecret'])
         except ValueError:
             cluster_metadata = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(request.clusteringID, request.clusterID, secret=self.config['dataHashSecret'])
 

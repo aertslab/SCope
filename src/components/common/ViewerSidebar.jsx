@@ -59,8 +59,8 @@ class ViewerSidebar extends Component {
 		this.setState({newAnnoName: newAnnoName})
 	}
 
-	gotoNextCluster = (i) => {
-		BackendAPI.getNextCluster(this.state.activeFeatures[i].metadata['clusteringID'], this.state.activeFeatures[i].metadata['clusterID'], (response) => {
+	gotoNextCluster = (i, direction) => {
+		BackendAPI.getNextCluster(this.state.activeFeatures[i].metadata['clusteringID'], this.state.activeFeatures[i].metadata['clusterID'], direction, (response) => {
 			BackendAPI.updateFeature(i, response.featureType[0], response.feature[0], response.featureType[0], response.featureDescription[0], this.props.match.params.page, (e) => {
 			})
 		})
@@ -188,7 +188,7 @@ class ViewerSidebar extends Component {
 					return (
 						<Input
 							ref={this.state.newAnnoRef}
-							style={{"margin-bottom": "15px", width: "100%"}}
+							style={{"margin-bottom": "5px", width: "100%"}}
 							placeholder={activeFeatures[i].feature}
 							onChange={this.onNewAnnotationChange}
 							actionPosition="left"
@@ -203,13 +203,18 @@ class ViewerSidebar extends Component {
 							/>
 					)}}
 				
-				let collabAnnoButton = () => {
+				let clusterControls = () => {
 					if(activeFeatures[i].featureType.startsWith("Cluster") && activeFeatures[i].feature != 'All Clusters' && BackendAPI.getLoomRWStatus() == "rw" && this.state.activePage == "gene") {					
 						return (
 							<Grid>
+								<Grid.Row centered>
+									<Header as="h3" textAlign="center">Cluster Controls</Header>
+								</Grid.Row>
+								<Grid.Row>{annotationBox()}</Grid.Row>
 								<Grid.Row>
+									<Button onClick={() => this.gotoNextCluster(i, 'previous')} className='change-cluster-button'>{<Icon name="long arrow alternate left"/>}Previous</Button>
 									<CollaborativeAnnotation feature={activeFeatures[i]} id={i}/>
-									<Button onClick={() => this.gotoNextCluster(i)} className='next-cluster-button'>Next Cluster{<Icon name="long arrow alternate right"/>}</Button>
+									<Button onClick={() => this.gotoNextCluster(i, 'next')} className='change-cluster-button'>Next{<Icon name="long arrow alternate right"/>}</Button>
 								</Grid.Row>	
 							</Grid>					
 							)
@@ -250,9 +255,16 @@ class ViewerSidebar extends Component {
 					if (md.cellTypeAnno.length > 0){ 
 						let newCellTypeAnnoTableOboCell = (props) => {
 
+							let iriLink = (
+								props.value.ols_iri == "" ?
+									<React.Fragment>{props.value.annotation_label}<br/>{props.value.obo_id ? "(" + props.value.obo_id +")" : ""}</React.Fragment> :
+									<a href={props.value.ols_iri} target="_blank">{props.value.annotation_label}<br/>{props.value.obo_id ? "(" + props.value.obo_id +")" : ""}</a>
+
+							)
+
 							let popupInfo = (
 								<div>
-									<Header as='h3'>Evidence provided for:&nbsp;<a href={props.value.ols_iri} target="_blank">{props.value.annotation_label}<br/>{props.value.obo_id ? "(" + props.value.obo_id +")" : ""}</a></Header>
+									<Header as='h3'>Evidence provided for:&nbsp;{iriLink}</Header>
 									<Header as='h4'>Markers</Header>
 									{props.value.markers.length > 0 ? props.value.markers.map(m => m).join(', ') : "None provided"}
 									<Header as='h4'>Publication</Header>
@@ -264,13 +276,13 @@ class ViewerSidebar extends Component {
 
 							return (
 							<div style={{textAlign: "center"}}>
-							<a href={props.value.ols_iri} target="_blank">{props.value.annotation_label}<br/>{props.value.obo_id ? "(" + props.value.obo_id +")" : ""}</a>
-							<br/>
-							<Popup 
-								trigger={<Label><Icon name="question circle" />More Info</Label> } 
-								content={popupInfo}
-								on="click"
-							/>
+								{iriLink}
+								<br/>
+								<Popup 
+									trigger={<Label><Icon name="question circle" />More Info</Label> } 
+									content={popupInfo}
+									on="click"
+								/>
 							</div>
 							)
 						}
@@ -378,8 +390,8 @@ class ViewerSidebar extends Component {
 										columns: cellTypeAnnoColumns
 										}
 									]}
-									pageSizeOptions={[Math.min(5, Math.max(3, md.cellTypeAnno.length))]}
-									defaultPageSize={Math.min(5, Math.max(3, md.cellTypeAnno.length))}
+									pageSizeOptions={[3]}
+									defaultPageSize={3}
 									// style={{
 									// 	height: cellTypeAnnoTableHeight +"px" // This will force the table body to overflow and scroll, since there is not enough room
 									// }}
@@ -390,7 +402,7 @@ class ViewerSidebar extends Component {
 					} else {
 						cellTypeAnnoTable = (
 							<div style={{marginBottom: "5px", align: "center"}}>
-								▼ No annotations currently exist. {BackendAPI.getLoomRWStatus() == "rw" ? "Be the first to contribute!" : ""}
+								No annotations currently exist. {BackendAPI.getLoomRWStatus() == "rw" ? "Be the first to contribute!" : ""}
 							</div>
 						)
 					}
@@ -603,9 +615,9 @@ class ViewerSidebar extends Component {
 						<Grid.Column stretched className='viewerCell'>
 							{md.featureType} {md.feature}<br />
 							{image}
-							{annotationBox()}
+							{clusterControls()}
+							{/* {annotationBox()} */}
 							{cellTypeAnnoTable}
-							{collabAnnoButton()}
 							{markerTable}
 							{legendTable}
 							{downloadSubLoomButton()}
