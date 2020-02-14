@@ -59,23 +59,6 @@ class App extends Component {
 		this.mouseClicks = 0;
 		ReactGA.initialize('UA-61194136-10');
 
-		if (document.head.querySelector("[name=scope-orcid_auth]") != null && this.state.orcid_active) {
-			let code = document.head.querySelector("[name=scope-orcid_auth]").getAttribute('code')
-			if (this.state.cookiesAllowed) {
-				BackendAPI.getORCIDiD(code, (orcid_scope_uuid, name, orcid_id) => {
-					this.props.cookies.set('scope_orcid_uuid', orcid_scope_uuid)
-					this.props.cookies.set('scope_orcid_name', name)
-					this.props.cookies.set('scope_orcid_id', orcid_id)
-					// Possibly a bit hacky, but it works to remove the code from the URL
-					location.href = location.origin + location.pathname + location.hash
-				});
-			} else {
-				alert('You must allow cookies before you are able to log in!')
-				location.href = location.origin + location.pathname + location.hash
-				return
-			}
-		}
-
 	}
 
 	removeAllCookies = () => {
@@ -213,7 +196,24 @@ class App extends Component {
 		if (isSidebarVisible == '1') this.setState({isSidebarVisible: true});
 		if (isSidebarVisible == '0') this.setState({isSidebarVisible: false});
 		if (this.props.cookies.get('CookieConsent') == "true") {
-			this.setState({cookiesAllowed: true});
+			this.setState({cookiesAllowed: true}, () => {
+				if (document.head.querySelector("[name=scope-orcid_auth]") != null && this.state.orcid_active) {
+					let code = document.head.querySelector("[name=scope-orcid_auth]").getAttribute('code')
+					if (this.state.cookiesAllowed) {
+						BackendAPI.getORCIDiD(code, (orcid_scope_uuid, name, orcid_id) => {
+							this.props.cookies.set('scope_orcid_uuid', orcid_scope_uuid)
+							this.props.cookies.set('scope_orcid_name', name)
+							this.props.cookies.set('scope_orcid_id', orcid_id)
+							// Possibly a bit hacky, but it works to remove the code from the URL
+							location.href = location.origin + location.pathname + location.hash
+						});
+					} else {
+						alert('You must allow cookies before you are able to log in!')
+						location.href = location.origin + location.pathname + location.hash
+						return
+					}
+				}
+			});
 		}
 	}
 
