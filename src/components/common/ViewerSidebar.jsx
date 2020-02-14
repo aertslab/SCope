@@ -66,6 +66,14 @@ class ViewerSidebar extends Component {
 		})
 	}
 
+	updateMetadata = () => 	{
+		BackendAPI.queryLoomFiles(this.props.match.params.uuid, () => {
+			BackendAPI.getActiveFeatures().forEach( (f, n) => {
+				BackendAPI.updateFeature(n, f.type, f.feature, f.featureType, f.metadata ? f.metadata.description : null, "")
+			})
+		} )
+	}
+
 	render() {
 		const { history, match, hideFeatures } = this.props;
 		const { lassoSelections, activeFeatures, activeTab, activePage } = this.state;
@@ -705,6 +713,12 @@ class ViewerSidebar extends Component {
 	componentWillUnmount() {
 		BackendAPI.removeViewerSelectionsChange(this.selectionsListener);
 		BackendAPI.removeActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		if (this.props.match.params.loom != prevProps.match.params.loom) {
+			this.updateMetadata()
+		}
 	}
 
 	toggleLassoSelection(id) {
