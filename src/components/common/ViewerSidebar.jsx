@@ -495,8 +495,8 @@ class ViewerSidebar extends Component {
 									columns: markerTableColumns
 									}
 								]}
-								pageSizeOptions={[5, 10, md.genes.length]}
-								defaultPageSize={md.genes.length}
+								pageSizeOptions={[5, 10, 25, 50, 100]}
+								defaultPageSize={25}
 								style={{
 									height: markerTableHeight +"px" // This will force the table body to overflow and scroll, since there is not enough room
 								}}
