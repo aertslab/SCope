@@ -372,7 +372,7 @@ class SCope(s_pb2_grpc.MainServicer):
             elif request.featureType[n] == 'metric':
                 cell_color_by_features.setMetricFeature(request=request, feature=feature, n=n)
             elif request.featureType[n].startswith('Clustering: '):
-                cell_color_by_features.setClusteringFeature(request=request, feature=feature, n=n)
+                cell_color_by_features.setClusteringFeature(request=request, feature=feature, n=n, secret=self.config['dataHashSecret'])
                 if(cell_color_by_features.hasReply()):
                     return cell_color_by_features.getReply()
             else:

@@ -11,6 +11,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class CellColorByFeatures():
 
     def __init__(self, loom):
@@ -152,7 +153,7 @@ class CellColorByFeatures():
         else:
             self.features.append(np.zeros(self.n_cells))
     
-    def setClusteringFeature(self, request, feature, n):
+    def setClusteringFeature(self, request, feature, n, secret=None):
         clusteringID = None
         clusterID = None
         logger.debug("Getting clustering: {0}".format(request.feature[n]))
@@ -162,8 +163,12 @@ class CellColorByFeatures():
                 if request.feature[n] == 'All Clusters':
                     numClusters = max(self.loom.get_clustering_by_id(clusteringID))
                     if numClusters <= 245:
+                        self.legend = set()
+                        clustering_meta = self.loom.get_meta_data_clustering_by_id(int(clusteringID), secret=secret)
                         for i in self.loom.get_clustering_by_id(clusteringID):
                             self.hex_vec.append(constant.BIG_COLOR_LIST[i])
+                            self.legend.add((clustering_meta['clusters'][i]['description'], constant.BIG_COLOR_LIST[i]))
+                        self.legend = s_pb2.ColorLegend(values=[x[0] for x in self.legend], colors=[x[1] for x in self.legend])
                     else:
                         interval = int(16581375 / numClusters)
                         hex_vec = [hex(I)[2:].zfill(6) for I in range(0, numClusters, interval)]
@@ -171,7 +176,7 @@ class CellColorByFeatures():
                         cellIndices = self.loom.get_anno_cells(annotations=request.annotation, logic=request.logic)
                         self.hex_vec = np.array(self.hex_vec)[cellIndices]
                     # Set the reply and break the for loop
-                    reply = s_pb2.CellColorByFeaturesReply(color=self.hex_vec, vmax=self.v_max)
+                    reply = s_pb2.CellColorByFeaturesReply(color=self.hex_vec, vmax=self.v_max, legend=self.legend)
                     self.setReply(reply=reply)
                     break
                 else:

@@ -523,7 +523,7 @@ class ViewerSidebar extends Component {
 					);
 				}
 
-				if(this.props.activeLegend != null & activeFeatures[i].featureType == "annotation") {
+				if(this.props.activeLegend != null & (activeFeatures[i].featureType == "annotation" || activeFeatures[i].feature == "All Clusters")) {
 					let aL = this.props.activeLegend
 					let legendTableData = aL.values.map( (v, j) => ({ value: v, color: aL.colors[j] }) )
 					let newLegendTableColorCell = (props) => {
