@@ -53,10 +53,11 @@ class CollaborativeAnnotation extends Component {
     }
 
     closeErrorModal = (e) => {
-        if (e.target.value == 'submit') {
+        if (e.target.value == 'submit' || e.target.value == 'submitNext') {
             return 
         } else {
-            this.setState({submitError: false})
+            this.setState({submitError: false}, () => {
+            })
         }
     }
 
@@ -80,7 +81,7 @@ class CollaborativeAnnotation extends Component {
             annoData['iri'] = ""
             annoData['label'] = this.state.freeInput
         } else {
-            this.setState({submitError: true}, () => {console.log(this.state)})
+            this.setState({submitError: true})
             return
         }
 
@@ -119,6 +120,15 @@ class CollaborativeAnnotation extends Component {
         let olsWidget = () => {
             return (
                 <OLSAutocomplete ref={this.OLSAutocomplete}/>
+            )
+        }
+
+        let warningPopup = (trigger) => {
+            return(
+                <Popup
+                    trigger={trigger}
+                    content="By submitting an annotation, your ORCID details will be permanently added to this loom file. Anyone with access to this file will be able to see your full name and ORCID ID"
+                />
             )
         }
 
@@ -219,13 +229,8 @@ class CollaborativeAnnotation extends Component {
                 </Modal.Description>
                 </Modal.Content>
                 <Modal.Actions>
-                <Button form="annoForm" type="submit" value="submitNext" onClick={(e) => this.sendData(e)} secondary>
-                    Submit and view next cluster<Icon name="right chevron" />
-                </Button>
-                <Button form="annoForm" type="submit" value="submit" onClick={(e) => this.sendData(e)} primary>
-                    Submit Annotation <Icon name="right chevron" />
-
-                </Button>
+                    {warningPopup(<Button form="annoForm" type="submit" value="submitNext" onClick={(e) => this.sendData(e)} secondary>Submit and view next cluster<Icon name="right chevron" /></Button>)}
+                    {warningPopup(<Button form="annoForm" type="submit" value="submit" onClick={(e) => this.sendData(e)} primary>Submit Annotation <Icon name="right chevron" /></Button>)}
                 </Modal.Actions>
             </Modal>
             <Modal
