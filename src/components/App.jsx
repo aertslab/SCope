@@ -2,6 +2,8 @@ import { instanceOf } from 'prop-types';
 import React, { Component } from 'react';
 import { withRouter, Route, Link } from 'react-router-dom';
 import { withCookies, Cookies } from 'react-cookie';
+import CookieConsent from "react-cookie-consent";
+
 import ReactResizeDetector from 'react-resize-detector';
 import ReactGA from 'react-ga';
 import Favicon from 'react-favicon';
@@ -44,7 +46,9 @@ class App extends Component {
 			sessionsLimitReached: false,
 			sessionMode: 'rw',
 			orcid_active: true,
-			orcid_data: null
+			orcid_data: null,
+			cookiesAllowed: false,
+			cookieBannerRef: React.createRef()
 		}
 
 		BackendAPI.getORCIDStatus((active) => { 
@@ -57,16 +61,34 @@ class App extends Component {
 
 		if (document.head.querySelector("[name=scope-orcid_auth]") != null && this.state.orcid_active) {
 			let code = document.head.querySelector("[name=scope-orcid_auth]").getAttribute('code')
-			BackendAPI.getORCIDiD(code, (orcid_scope_uuid, name, orcid_id) => {
-				this.props.cookies.set('scope_orcid_uuid', orcid_scope_uuid)
-				this.props.cookies.set('scope_orcid_name', name)
-				this.props.cookies.set('scope_orcid_id', orcid_id)
-				// Possibly a but hacky, but it works to remove the code from the URL
+			if (this.state.cookiesAllowed) {
+				BackendAPI.getORCIDiD(code, (orcid_scope_uuid, name, orcid_id) => {
+					this.props.cookies.set('scope_orcid_uuid', orcid_scope_uuid)
+					this.props.cookies.set('scope_orcid_name', name)
+					this.props.cookies.set('scope_orcid_id', orcid_id)
+					// Possibly a bit hacky, but it works to remove the code from the URL
+					location.href = location.origin + location.pathname + location.hash
+				});
+			} else {
+				alert('You must allow cookies before you are able to log in!')
 				location.href = location.origin + location.pathname + location.hash
-			});
-
+				return
+			}
 		}
 
+	}
+
+	removeAllCookies = () => {
+		this.props.cookies.remove("scope_orcid_name")
+		this.props.cookies.remove("scope_orcid_id")
+		this.props.cookies.remove("scope_orcid_uuid")
+		this.props.cookies.remove(cookieName)
+		this.props.cookies.remove(sidebarCookieName)
+	}
+
+	acceptCookies = () => {
+		this.props.cookies.set('CookieConsent', "true")
+		this.setState({cookiesAllowed: true})
 	}
 
 	render() {
@@ -135,6 +157,8 @@ class App extends Component {
 								loaded={loaded}
 								timeout={this.timeout}
 								cookies={this.props.cookies}
+								cookiesAllowed={this.state.cookiesAllowed}
+								cookieBannerRef={this.state.cookieBannerRef}
 							/>
 							<Sidebar.Pushable>
 								<AppSidebar visible={isSidebarVisible} onMetadataChange={this.onMetadataChange.bind(this)} sessionMode={this.state.sessionMode} />
@@ -167,10 +191,19 @@ class App extends Component {
 						</Segment>
 					} />
 				</Segment>
-				<Popup/>
+				<CookieConsent 
+					ref={this.state.cookieBannerRef}
+					enableDeclineButton
+					onDecline={() => {this.removeAllCookies()}}
+					onAccept={(scrolling) => this.acceptCookies(scrolling)}
+				>
+						This website uses cookies to enhance the user experience and to store user information for annotation and access purposes.
+				</CookieConsent>
 			</div>
 		);
 	}
+
+
 
 	componentWillMount() {
 		if (DEBUG) console.log('App componentWillMount', this.props);
@@ -179,6 +212,9 @@ class App extends Component {
 		let isSidebarVisible = this.props.cookies.get(sidebarCookieName);
 		if (isSidebarVisible == '1') this.setState({isSidebarVisible: true});
 		if (isSidebarVisible == '0') this.setState({isSidebarVisible: false});
+		if (this.props.cookies.get('CookieConsent') == "true") {
+			this.setState({cookiesAllowed: true});
+		}
 	}
 
 	componentDidMount() {
@@ -232,7 +268,9 @@ class App extends Component {
 			} else {
 				if (DEBUG) console.log('Params UUID detected:', match.params.uuid);
 				this.checkUUID(ip, match.params.uuid);
-				cookies.set(cookieName, match.params.uuid, { path: '/'});
+				if (this.state.cookiesAllowed) {
+					cookies.set(cookieName, match.params.uuid, { path: '/'});
+				}
 			}
 		} else if (cookies.get(cookieName)) {
 			if (DEBUG) console.log('Cookie UUID detected:', cookies.get(cookieName) );
@@ -328,7 +366,9 @@ class App extends Component {
 
 	toggleSidebar() {
 		let state = !this.state.isSidebarVisible;
-		this.props.cookies.set(sidebarCookieName, state ? 1 : 0, { path: '/' });
+		if (this.state.cookiesAllowed) {
+			this.props.cookies.set(sidebarCookieName, state ? 1 : 0, { path: '/' });
+		}
 		this.setState({isSidebarVisible: state});
 		ReactGA.event({
 			category: 'settings',
