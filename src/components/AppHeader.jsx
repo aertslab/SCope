@@ -43,7 +43,7 @@ class AppHeader extends Component {
     }
 
 	render() {
-		const { match, location } = this.props;
+		const { match, location, cookiesAllowed} = this.props;
 		const { timeout, shortUrl } = this.state;
 		let metadata = BackendAPI.getLoomMetadata(decodeURIComponent(match.params.loom));
 		let menu = this.menuList(metadata);
@@ -57,8 +57,7 @@ class AppHeader extends Component {
 		let orcid_info = () => {
 			let orcid_name = this.props.cookies.get("scope_orcid_name")
 			let orcid_id = this.props.cookies.get("scope_orcid_id")
-			let cookieConsent = this.props.cookies.get("CookieConsent")
-			if (cookieConsent === 'false') {
+			if (cookiesAllowed === false) {
 				return(
 				<Popup
 					content={<div>You have not accepted the use of cookies, which is required for ORCID login and annotation abilities.
