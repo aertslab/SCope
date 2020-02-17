@@ -574,6 +574,10 @@ class Loom():
         genes = self.get_genes()
         conversion = {}
         species, geneMappings = self.infer_species()
+
+        if len(geneMappings) == 0:
+            return conversion
+
         for gene in genes:
             gene = str(gene)
             try:
