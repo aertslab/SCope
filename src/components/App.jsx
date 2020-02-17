@@ -183,6 +183,7 @@ class App extends Component {
 				>
 						This website uses cookies to enhance the user experience and to store user information for annotation and access purposes.
 				</CookieConsent>
+				<Popup /> {/* Needed for react popup to function. Do not remove */}
 			</div>
 		);
 	}
