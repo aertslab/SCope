@@ -165,9 +165,10 @@ class CellColorByFeatures():
                     if numClusters <= 245:
                         self.legend = set()
                         clustering_meta = self.loom.get_meta_data_clustering_by_id(int(clusteringID), secret=secret)
+                        cluster_dict = {int(x['id']): x['description'] for x in clustering_meta['clusters']}
                         for i in self.loom.get_clustering_by_id(clusteringID):
                             self.hex_vec.append(constant.BIG_COLOR_LIST[i])
-                            self.legend.add((clustering_meta['clusters'][i]['description'], constant.BIG_COLOR_LIST[i]))
+                            self.legend.add((cluster_dict[i], constant.BIG_COLOR_LIST[i]))
                         self.legend = s_pb2.ColorLegend(values=[x[0] for x in self.legend], colors=[x[1] for x in self.legend])
                     else:
                         interval = int(16581375 / numClusters)
