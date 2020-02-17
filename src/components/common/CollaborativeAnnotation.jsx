@@ -168,7 +168,7 @@ class CollaborativeAnnotation extends Component {
                 // onSubmit={e => {this.sendData(e)}}
                 id="annoForm">
                 <Modal.Header>Add Annotation</Modal.Header>
-                <Modal.Content>
+                <Modal.Content scrolling>
                 <Modal.Description>
                     <Divider horizontal>
                         <Header as="h4">Basic Information (Read-only)</Header>

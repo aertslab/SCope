@@ -37,7 +37,8 @@ opacity: 0;
 transition: opacity 10ms ease-in;
 }
 
-.collab-anno {
+.ui.modal.transition.visible.active.collab-anno {
+margin-top: 2% !important;
 position: absolute;
 left: 30%;
 /* transform: translate(-50%, -50%); */
