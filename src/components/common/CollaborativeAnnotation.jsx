@@ -38,8 +38,10 @@ class CollaborativeAnnotation extends Component {
             selected: [],
             showModal: false,
             freeInput: "",
-            submitError: false
-        }
+            submitError: false,
+            cookiesAllowed: false,
+
+        }   
     }
 
     handleChange = (e, { name, value }) => {
@@ -109,7 +111,7 @@ class CollaborativeAnnotation extends Component {
 
     render() {
 
-        const {annoData, selected, showModal, submitError, orcid_name, orcid_id, orcid_uuid} = this.state;
+        const {annoData, selected, showModal, submitError, orcid_name, orcid_id, orcid_uuid, cookiesAllowed} = this.state;
 
         var cardStyle = {
             display: "block",
@@ -261,7 +263,7 @@ class CollaborativeAnnotation extends Component {
 
 
 
-        if (orcid_name && orcid_id && orcid_uuid && orcid_name != "" && orcid_id != "" && orcid_uuid != "") {
+        if (orcid_name && orcid_id && orcid_uuid && orcid_name != "" && orcid_id != "" && orcid_uuid != "" && cookiesAllowed) {
             return(annotationModal(orcid_id, orcid_name))
         } else {
             return(
@@ -278,11 +280,16 @@ class CollaborativeAnnotation extends Component {
         let orcid_name = this.props.cookies.get("scope_orcid_name")
         let orcid_id = this.props.cookies.get("scope_orcid_id")
         let orcid_uuid = this.props.cookies.get("scope_orcid_uuid")
+        let cookiesAllowed = false
+        if (this.props.cookies.get('CookieConsent') == 'true') {
+            cookiesAllowed = true
+        }
 
         this.setState({
             orcid_name: orcid_name,
             orcid_id: orcid_id,
             orcid_uuid: orcid_uuid,
+            cookiesAllowed: cookiesAllowed
         })
     }
 

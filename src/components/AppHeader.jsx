@@ -25,7 +25,8 @@ class AppHeader extends Component {
 			shortUrl: null,
 			cookies: props.cookies,
 			permalinkUUID: false,
-			orcid_active: true
+			orcid_active: true,
+			cookiesAllowed: this.props.cookiesAllowed
 		}
 
 		BackendAPI.getORCIDStatus((active) => { 
@@ -36,6 +37,7 @@ class AppHeader extends Component {
 	acceptCookies = () => {
 		this.props.cookieBannerRef.current.setState({visible: false})
 		this.props.cookies.set("CookieConsent", 'true')
+		this.setState({cookiesAllowed: true})
 	}
 	
 	openORCID = () => {
@@ -43,7 +45,7 @@ class AppHeader extends Component {
     }
 
 	render() {
-		const { match, location, cookiesAllowed} = this.props;
+		const { match, location} = this.props;
 		const { timeout, shortUrl } = this.state;
 		let metadata = BackendAPI.getLoomMetadata(decodeURIComponent(match.params.loom));
 		let menu = this.menuList(metadata);
@@ -57,7 +59,7 @@ class AppHeader extends Component {
 		let orcid_info = () => {
 			let orcid_name = this.props.cookies.get("scope_orcid_name")
 			let orcid_id = this.props.cookies.get("scope_orcid_id")
-			if (cookiesAllowed === false) {
+			if (this.state.cookiesAllowed === false) {
 				return(
 				<Popup
 					content={<div>You have not accepted the use of cookies, which is required for ORCID login and annotation abilities.
