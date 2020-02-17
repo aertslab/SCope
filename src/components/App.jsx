@@ -71,6 +71,7 @@ class App extends Component {
 
 	acceptCookies = () => {
 		this.props.cookies.set('CookieConsent', "true")
+		this.props.cookies.set(cookieName, this.props.match.params.uuid, { path: '/'})
 		this.setState({cookiesAllowed: true})
 	}
 
@@ -268,6 +269,8 @@ class App extends Component {
 			} else {
 				if (DEBUG) console.log('Params UUID detected:', match.params.uuid);
 				this.checkUUID(ip, match.params.uuid);
+				console.log(this.state.cookiesAllowed)
+				console.log(cookieName, match.params.uuid, { path: '/'})
 				if (this.state.cookiesAllowed) {
 					cookies.set(cookieName, match.params.uuid, { path: '/'});
 				}

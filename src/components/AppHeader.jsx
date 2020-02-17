@@ -37,6 +37,7 @@ class AppHeader extends Component {
 	acceptCookies = () => {
 		this.props.cookieBannerRef.current.setState({visible: false})
 		this.props.cookies.set("CookieConsent", 'true')
+		this.props.cookies.set(cookieName, this.props.match.params.uuid, { path: '/'})
 		this.setState({cookiesAllowed: true})
 	}
 	
