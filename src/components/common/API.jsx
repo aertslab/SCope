@@ -346,9 +346,11 @@ class API {
 	setAnnotationName(feature, newAnnoName, featureIndex, uuid) {
 		let clusteringID = feature.metadata['clusteringID']
 		let clusterID = feature.metadata['clusterID']
+		let loomFilePath = this.getActiveLoom()
+
 		if (newAnnoName != '') {
 			let setAnnotationNameQuery = {
-				loomFilePath: this.getActiveLoom(),
+				loomFilePath: loomFilePath,
 				clusteringID: clusteringID,
 				clusterID: clusterID,
 				newAnnoName: newAnnoName
@@ -364,7 +366,7 @@ class API {
 								}
 
 							})
-						} )
+						}, loomFilePath )
 					}
 
 			});
@@ -556,8 +558,10 @@ class API {
 
 	voteAnnotation(direction, data, feature, orcidInfo, uuid, callback) {
 		if (DEBUG) console.log('voteUpAnnotation');
+		let loomFilePath = this.getActiveLoom()
+
 		let query = {
-			loomFilePath: this.getActiveLoom(),
+			loomFilePath: loomFilePath,
 			clusteringID: feature.metadata['clusteringID'],
 			clusterID: feature.metadata['clusterID'],
 			orcidInfo: orcidInfo,
@@ -577,7 +581,7 @@ class API {
 								}
 
 							})
-						} )
+						}, loomFilePath )
 					}
 					callback(response)
 				})
