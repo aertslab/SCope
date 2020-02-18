@@ -473,23 +473,28 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getRegulonMetaData(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        regulon_genes = None
+        autoThresholds = None
+        defaultThreshold = None
+        motifName = None
         regulon_genes = loom.get_regulon_genes(regulon=request.regulon)
 
         if len(regulon_genes) == 0:
             logger.error("Something is wrong in the loom file: no regulon found!")
 
         meta_data = loom.get_meta_data()
-        for regulon in meta_data['regulonThresholds']:
-            if regulon['regulon'] == request.regulon:
-                autoThresholds = []
-                for threshold in regulon['allThresholds'].keys():
-                    autoThresholds.append({"name": threshold, "threshold": regulon['allThresholds'][threshold]})
-                defaultThreshold = regulon['defaultThresholdName']
-                try:
-                    motifName = os.path.basename(regulon['motifData'])
-                except:
-                    motifName = None
-                break
+        if 'regulonThresholds' in meta_data:
+            for regulon in meta_data['regulonThresholds']:
+                if regulon['regulon'] == request.regulon:
+                    autoThresholds = []
+                    for threshold in regulon['allThresholds'].keys():
+                        autoThresholds.append({"name": threshold, "threshold": regulon['allThresholds'][threshold]})
+                    defaultThreshold = regulon['defaultThresholdName']
+                    try:
+                        motifName = os.path.basename(regulon['motifData'])
+                    except:
+                        motifName = None
+                    break
 
         # min_gene_occurrence_mask = regulon_marker_metrics >= meta_data["regulonSettings"]["min_regulon_gene_occurrence"]
         # # Filter the regulon genes by threshold
