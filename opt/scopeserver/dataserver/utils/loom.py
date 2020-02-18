@@ -7,6 +7,8 @@ import pandas as pd
 import time
 import loompy as lp
 import hashlib
+import os
+import pickle
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
 from scopeserver.dataserver.utils import search_space as ss
@@ -29,18 +31,29 @@ class Loom():
         # Metrics
         self.nUMI = None
         self.species, self.gene_mappings = self.infer_species()
+        self.ss_pickle_name = os.path.join(os.path.dirname(self.abs_file_path), partial_md5_hash + '.ss_pkl')
 
-        logger.debug(f'Building Search Spaces for {file_path}')
-        if self.species == 'dmel':
-            logger.debug(f'Building hsap Search Spaces for {file_path}')
-            self.hsap_ss = ss.SearchSpace(loom=self, cross_species='hsap').build()
-            logger.debug(f'Building mmus Search Spaces for {file_path}')
+        try:
+            with open(self.ss_pickle_name, 'rb') as fh:
+                logger.debug(f'Loading prebuilt SS for {file_path} from {self.ss_pickle_name}')
+                self.ss = pickle.load(fh)
+                
+        except (EOFError, FileNotFoundError):
+            logger.debug(f'Building Search Spaces for {file_path}')
+            if self.species == 'dmel':
+                logger.debug(f'Building hsap Search Spaces for {file_path}')
+                self.hsap_ss = ss.SearchSpace(loom=self, cross_species='hsap').build()
+                logger.debug(f'Building mmus Search Spaces for {file_path}')
 
-            self.mmus_ss = ss.SearchSpace(loom=self, cross_species='mmus').build()
-        logger.debug(f'Building self Search Spaces for {file_path}')
+                self.mmus_ss = ss.SearchSpace(loom=self, cross_species='mmus').build()
+            logger.debug(f'Building self Search Spaces for {file_path}')
 
-        self.ss = ss.SearchSpace(loom=self).build()
-        logger.debug(f'Built all Search Spaces for {file_path}')
+            self.ss = ss.SearchSpace(loom=self).build()
+            self.ss.loom = None  # Remove loom connection to enable pickling
+            logger.debug(f'Built all Search Spaces for {file_path}')
+            with open(self.ss_pickle_name, 'wb') as fh:
+                logger.debug(f'Writing prebuilt SS for {file_path} to {self.ss_pickle_name}')
+                pickle.dump(self.ss, fh)
 
     def get_connection(self):
         return self.loom_connection

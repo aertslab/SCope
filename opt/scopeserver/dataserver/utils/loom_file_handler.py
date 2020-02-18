@@ -52,17 +52,26 @@ class LoomFileHandler():
             logger.debug(f'Found file with hash: {partial_md5_hash}. Closing.')
             self.active_looms[partial_md5_hash].get_connection()._file.close()
             self.active_looms[partial_md5_hash].get_connection().close()
+
         if mode == 'r+':
             logger.debug(f'Reopening file as {mode}')
             self.active_looms[partial_md5_hash] = self.get_loom(loom_file_path=loom_file_path, mode='r+')
             logger.info(f'{loom_file_path} now {self.active_looms[partial_md5_hash].get_connection().mode}')
+
         else:
             logger.debug(f'Reopening file as r')
             self.active_looms[partial_md5_hash] = self.get_loom(loom_file_path=loom_file_path)
             logger.info(f'{loom_file_path} now {self.active_looms[partial_md5_hash].get_connection().mode}')
+
         logger.debug(f"Checking MD5")
         new_partial_md5_hash = LoomFileHandler.get_partial_md5_hash(self.get_loom_absolute_file_path(loom_file_path), 10000)
         logger.debug(f"Old MD5 is: {partial_md5_hash} New MD5 is: {new_partial_md5_hash}")
+
+        try:
+            os.remove(os.path.join(os.path.dirname(self.active_looms[partial_md5_hash].abs_file_path), partial_md5_hash + '.ss_pkl'))
+        except:
+            pass
+
         if new_partial_md5_hash not in self.active_looms.keys():
             logger.info(f"{loom_file_path} has changed, correcting old loom entry")
             self.active_looms[new_partial_md5_hash] = self.get_loom(loom_file_path=loom_file_path)
