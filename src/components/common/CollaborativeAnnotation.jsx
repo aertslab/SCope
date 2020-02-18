@@ -96,7 +96,8 @@ class CollaborativeAnnotation extends Component {
                 this.props.match.params.uuid,
                 (response) => {
                     if (response.success) {
-                       this.closeModal()
+                        this.setState({annoData: {}})
+                        this.closeModal()
                     }
                     if (this.state.submitAction == 'submitNext' || this.state.submitAction == 'submitPrevious') {
                         BackendAPI.getNextCluster(this.props.feature.metadata['clusteringID'], this.props.feature.metadata['clusterID'], this.state.submitAction == 'submitNext' ? 'next' : 'previous', (response) => {
