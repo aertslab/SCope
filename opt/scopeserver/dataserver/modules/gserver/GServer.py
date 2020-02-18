@@ -742,6 +742,8 @@ class SCope(s_pb2_grpc.MainServicer):
             cells = loom_connection.ca["Clusterings"][str(a[0]['id'])] == b['id']
             logger.debug("Number of cells in {0}: {1}".format(request.featureValue, np.sum(cells)))
             sub_loom_file_name = file_name + "_Sub_" + request.featureValue.replace(" ", "_").replace("/", "_")
+            if not os.path.exists(os.path.join(self.dfh.get_data_dirs()['Loom']['path'], "tmp")):
+                os.mkdir(os.path.join(self.dfh.get_data_dirs()['Loom']['path'], "tmp"))
             sub_loom_file_path = os.path.join(self.dfh.get_data_dirs()['Loom']['path'], "tmp", sub_loom_file_name + ".loom")
             # Check if the file already exists
             if os.path.exists(path=sub_loom_file_path):
