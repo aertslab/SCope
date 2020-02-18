@@ -71,7 +71,7 @@ class ViewerSidebar extends Component {
 			BackendAPI.getActiveFeatures().forEach( (f, n) => {
 				BackendAPI.updateFeature(n, f.type, f.feature, f.featureType, f.metadata ? f.metadata.description : null, "")
 			})
-		} )
+		}, this.state.activeLoom )
 	}
 
 	render() {
