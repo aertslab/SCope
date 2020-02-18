@@ -124,6 +124,6 @@ def run():
     scope_server = SCopeServer(args.g_port, args.p_port, args.x_port, args.app_mode, args.config)
     scope_server.run()
 
-
+    
 if __name__ == '__main__':
     run()
