@@ -282,16 +282,22 @@ class API {
 		return this.getActiveLoomMetaDataEmbedding().trajectory
 	}
 
-	queryLoomFiles(uuid, callback) {
+	queryLoomFiles(uuid, callback, loomFile = null) {
 		let query = {
-			UUID: uuid
+			UUID: uuid,
 		};
+
+		console.log(loomFile)
+		if (loomFile) {
+			query['loomFile'] = loomFile
+		}
+
 		this.getConnection().then((gbc) => {
 			if (DEBUG) console.log("getMyLooms", query);
 			gbc.services.scope.Main.getMyLooms(query, (error, response) => {
 				if (response !== null) {
 					if (DEBUG) console.log("getMyLooms", response);
-					BackendAPI.setLoomFiles(response.myLooms);
+					BackendAPI.setLoomFiles(response.myLooms, response.update);
 					callback(response.myLooms);
 				} else {
 					console.log("No loom files detected");
@@ -307,8 +313,10 @@ class API {
 		return this.loomFiles;
 	}
 
-	setLoomFiles(files) {
-		this.loomFiles = {};
+	setLoomFiles(files, update) {
+		if (!update) {
+			this.loomFiles = {};
+		}
 		Object.keys(files).map((i) => {
 			let file = files[i];
 			this.loomFiles[file.loomFilePath] = file;
@@ -506,8 +514,9 @@ class API {
 
 	setColabAnnotationData(feature, annotationData, orcidInfo, uuid, callback) {
 		if (DEBUG) console.log('setColabAnnotationData', feature, annotationData, orcidInfo);
+		let loomFilePath = this.getActiveLoom()
 		let query = {
-			loomFilePath: this.getActiveLoom(),
+			loomFilePath: loomFilePath,
 			clusteringID: feature.metadata['clusteringID'],
 			clusterID: feature.metadata['clusterID'],
 			orcidInfo: orcidInfo,
@@ -536,7 +545,7 @@ class API {
 								}
 
 							})
-						} )
+						}, loomFilePath )
 					}
 					callback(response)
 				})

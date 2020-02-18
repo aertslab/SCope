@@ -569,6 +569,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getMyLooms(self, request, context):
         my_looms = []
+        update = False
         userDir = dfh.DataFileHandler.get_data_dir_path_by_file_type('Loom', UUID=request.UUID)
         if not os.path.isdir(userDir):
             for i in ['Loom', 'GeneSet', 'LoomAUCellRankings']:
@@ -577,6 +578,13 @@ class SCope(s_pb2_grpc.MainServicer):
         self.update_global_data()
 
         loomsToProcess = sorted(self.lfh.get_global_looms()) + sorted([os.path.join(request.UUID, x) for x in os.listdir(userDir)])
+
+        if request.loomFile:
+            if request.loomFile in loomsToProcess:
+                loomsToProcess = [request.loomFile]
+                update = True
+            else:
+                logger.error("Requested loom not in all looms")
 
         for f in loomsToProcess:
             try:
@@ -618,7 +626,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 pass
         self.dfh.update_UUID_db()
 
-        return s_pb2.MyLoomsReply(myLooms=my_looms)
+        return s_pb2.MyLoomsReply(myLooms=my_looms, update=update)
 
     def getUUID(self, request, context):
         if SCope.app_mode:

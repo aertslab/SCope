@@ -285,6 +285,7 @@ message MarkerGenesReply {
 
 message MyLoomsRequest {
   string UUID=1;
+  string loomFile=2;
 }
 
 message LoomHeierarchy {
@@ -306,6 +307,7 @@ message MyLoom {
 
 message MyLoomsReply {
   repeated MyLoom myLooms=1;
+  bool update=2;
 }
 
 message TranslateLassoSelectionRequest {
