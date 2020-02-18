@@ -88,7 +88,7 @@ class CellColorByFeatures():
             # vals = np.round((vals / vmax[n]) * 225)
             vals = vals / self.v_max[n]
             vals = np.array([x if x <= 1 else 1 for x in vals])
-            vals = (((constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))) + constant._LOWER_LIMIT_RGB
+            vals = ((constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB) * ((vals - min(vals))) / (1 - min(vals))) + constant._LOWER_LIMIT_RGB
             self.features.append([x if x <= constant._UPPER_LIMIT_RGB else constant._UPPER_LIMIT_RGB for x in vals])
         else:
             self.features.append(np.zeros(self.n_cells))
@@ -107,7 +107,7 @@ class CellColorByFeatures():
                 # vals = np.round((vals / vmax[n]) * 225)
                 vals = vals / self.v_max[n]
                 vals = np.array([x if x <= 1 else 1 for x in vals])
-                vals = (((constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))) + constant._LOWER_LIMIT_RGB
+                vals = ((constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB) * ((vals - min(vals))) / (1 - min(vals))) + constant._LOWER_LIMIT_RGB
                 self.features.append([x if x <= constant._UPPER_LIMIT_RGB else constant._UPPER_LIMIT_RGB for x in vals])
             else:
                 self.features.append([constant._UPPER_LIMIT_RGB if auc >= request.threshold[n] else 0 for auc in vals])
@@ -132,7 +132,7 @@ class CellColorByFeatures():
                                                vmax=self.v_max,
                                                legend=s_pb2.ColorLegend(values=md_annotation_values, colors=constant.BIG_COLOR_LIST[:len(md_annotation_values)]))
         self.setReply(reply=reply)
-    
+
     def setMetricFeature(self, request, feature, n):
         if feature != '':
             vals, self.cell_indices = self.loom.get_metric(
@@ -148,11 +148,11 @@ class CellColorByFeatures():
             # vals = np.round((vals / vmax[n]) * 225)
             vals = vals / self.v_max[n]
             vals = np.array([x if x <= 1 else 1 for x in vals])
-            vals = (((constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))) + constant._LOWER_LIMIT_RGB
+            vals = ((constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB) * ((vals - min(vals))) / (1 - min(vals))) + constant._LOWER_LIMIT_RGB
             self.features.append([x if x <= constant._UPPER_LIMIT_RGB else constant._UPPER_LIMIT_RGB for x in vals])
         else:
             self.features.append(np.zeros(self.n_cells))
-    
+
     def setClusteringFeature(self, request, feature, n, secret=None):
         clusteringID = None
         clusterID = None
