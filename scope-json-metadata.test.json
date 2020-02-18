@@ -12,7 +12,33 @@
         "name": "Seurat resolution 2.0",
         "clusters": [{
             "id": 0,
-            "description": "Mushroom Body (1)"
+            "description": "Mushroom Body (1)",
+            "cell_type_annotation": [{
+                "data": {
+                    "curator_name": "Kristofer Davie",
+                    "curator_id": "0000-0003-2182-1249",
+                    "timestamp": 1581609997591,
+                    "obo_id": "GO:0043005",
+                    "ols_iri": "http://purl.obolibrary.org/obo/GO_0043005",
+                    "annotation_label": "neuron projection",
+                    "markers": ["ey"],
+                    "publication": "https://doi.org/10.1016/j.cell.2018.05.057",
+                    "comment": "This cluster seems to be enriched in neuronal projection genes"},
+               "validate_hash": "3070ff3f9913cda19183bc74e310c61e675540b9f52a6d4d1724919e744d363a",
+               "votes": {
+                   "votes_for": {
+                       "total": 0, 
+                       "voters": []},
+                    "votes_against": {
+                        "total": 1,
+                    "voters": [{
+                        "voter_name": "Kristofer Davie",
+                        "voter_id": "0000-0003-2182-1249",
+                        "voter_hash": "de4787fba14bb1f412bd33055f6ca155172bba34b4b88ef0662ad58b823a06de"}
+                        ]
+                    }
+                }
+            }]
         }],
         "clusterMarkerMetrics": [{
            "accessor": "avg_logFC", 

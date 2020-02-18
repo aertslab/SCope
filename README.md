@@ -1,10 +1,30 @@
-# SCope v1.7.3: Visualization of large-scale and high dimensional single cell data
+# SCope v1.8.0: Visualization of large-scale and high dimensional single cell data
 <img src="images/SCope_Logo.png" width="640">
 
 SCope is a fast visualization tool for large-scale and high dimensional scRNA-seq datasets.
 Currently the data format supported by SCope is `.loom`. This file format for very large omics datasets is maintained by the Linnarsson Lab through the `loompy` Python package (https://github.com/linnarsson-lab/loompy).
 
 ## Version History
+
+February 18, 2020
+* Version 1.8.0
+	* Add GDPR compliant cookie warning
+	* Implement login with ORCID ID
+		* Logging in with an ORCID ID provides access to collaborative annotation functions
+	* Implement collaborative annotation for RW sessions
+		* Clusters can now be annotated with controlloed vocabularies (via EBI OLS) or free text.
+		* Other users can vote on annotations
+		* Once added, annotations can be searched by other users	
+	* Expand config options
+	* Decrease page size on marker tables for performance
+	* Fix a bug in colors overflowing into other channels
+	* Add legend on compare tab
+	* Fix color indexing on compare tab
+	* Enable legend for 'All Clusters'
+	* Improve loading of looms when only one is required
+	* Fix issue displaying targets of regulons without all metadata
+	* Limit search results for single letter queries
+	* Various other fixes and performance increases (See commit history)
 
 January 24, 2020
 * Version 1.7.3
@@ -306,6 +326,15 @@ All uploaded data from SCope will be put in the following folders by default:
 
 - macOS
 `~/Library/Application\ Support/scope/`
+
+## Enabling ORCID Functionality
+
+To enable colaborative annotations and login via ORCID ID, API credentials (`orcidAPIClientID`, `orcidAPIClientSecret` and `orcidAPIRedirectURI`) must be added to the config file provided. 
+These can be generate at the [orcid developer tools page](https://orcid.org/developer-tools).
+
+The `dataHashSecret` entry in the config file should be filled in with a randomly generated string for example from the python secrets package. 
+This string will be used to salt all annotation data, allowing validation of data generated on the instance of SCope. Any changes in this string will invalidate all pre-existing annotations.
+
 
 ## Deploy a Cloud-based Instance
 
