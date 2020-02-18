@@ -8,7 +8,6 @@ import os
 import time
 from urllib.request import urlopen
 import http
-import argparse
 import sys
 import logging
 
@@ -25,34 +24,16 @@ logger.addHandler(ch)
 logger.setLevel(logging.WARNING)
 
 
-parser = argparse.ArgumentParser(description='Launch the scope server')
-parser.add_argument('-g_port', metavar='gPort', type=int, help='gPort', default=55853)
-parser.add_argument('-p_port', metavar='pPort', type=int, help='pPort', default=55851)
-parser.add_argument('-x_port', metavar='xPort', type=int, help='xPort', default=55852)
-parser.add_argument('--config', type=str, help='Path to config file', default=None)
-parser.add_argument('--app_mode', action='store_true', help='Run in app mode (Fixed UUID)', default=False)
-parser.add_argument('--debug', action='store_true', help='Show debug logging', default=False)
-
-args = parser.parse_args()
-
-if args.config is not None:
-    if not os.path.isfile(args.config):
-        raise FileNotFoundError(f'The config file {args.config} does not exist!')
-
-if args.debug:
-    logger.setLevel(logging.DEBUG)
-
-
 class SCopeServer():
 
-    def __init__(self):
+    def __init__(self, g_port, p_port, x_port, app_mode, config):
         self.run_event = threading.Event()
         self.run_event.set()
-        self.g_port = args.g_port
-        self.p_port = args.p_port
-        self.x_port = args.x_port
-        self.app_mode = args.app_mode
-        self.config = args.config
+        self.g_port = g_port
+        self.p_port = p_port
+        self.x_port = x_port
+        self.app_mode = app_mode
+        self.config = config
 
     def start_bind_server(self):
         logger.debug('Starting bind server on port {0}'.format(self.x_port))
@@ -91,6 +72,8 @@ class SCopeServer():
             logger.info('Servers successfully terminated. Exiting.')
 
     def run(self):
+        # Unbuffer the standard output: important for process communication
+        sys.stdout = su.Unbuffered(sys.stdout)
         logger.info('''\n
 
   /$$$$$$   /$$$$$$                                       /$$$$$$
@@ -111,11 +94,34 @@ class SCopeServer():
 
 
 def run():
-
     # Unbuffer the standard output: important for process communication
     sys.stdout = su.Unbuffered(sys.stdout)
+
+    import argparse
+    parser = argparse.ArgumentParser(description='Launch the scope server')
+    parser.add_argument('-g_port', metavar='gPort',
+                        type=int, help='gPort', default=55853)
+    parser.add_argument('-p_port', metavar='pPort',
+                        type=int, help='pPort', default=55851)
+    parser.add_argument('-x_port', metavar='xPort',
+                        type=int, help='xPort', default=55852)
+    parser.add_argument('--app_mode', action='store_true',
+                        help='Run in app mode (Fixed UUID)', default=False)
+    parser.add_argument('--config', type=str,
+                        help='Path to config file', default=None)
+    parser.add_argument('--debug', action='store_true',
+                        help='Show debug logging', default=False)
+    args = parser.parse_args()
+
+    if args.config is not None:
+        if not os.path.isfile(args.config):
+            raise FileNotFoundError(f'The config file {args.config} does not exist!')
+
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+
     # Start an instance of SCope Server
-    scope_server = SCopeServer()
+    scope_server = SCopeServer(args.g_port, args.p_port, args.x_port, args.app_mode, args.config)
     scope_server.run()
 
 

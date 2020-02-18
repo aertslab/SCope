@@ -18,6 +18,7 @@ import threading
 import pickle
 import requests
 import uuid
+from typing import DefaultDict, Set
 from collections import OrderedDict, defaultdict, deque
 from functools import lru_cache
 from itertools import compress
@@ -42,7 +43,7 @@ logger = logging.getLogger(__name__)
 
 hexarr = np.vectorize('{:02x}'.format)
 
-uploadedLooms = defaultdict(lambda: set())
+uploadedLooms: DefaultDict[str, Set[str]] = defaultdict(lambda: set())
 
 
 class SCope(s_pb2_grpc.MainServicer):
