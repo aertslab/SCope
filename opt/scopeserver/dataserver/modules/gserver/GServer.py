@@ -194,7 +194,10 @@ class SCope(s_pb2_grpc.MainServicer):
                 no_match.append(r)
                 continue
 
-        res = sorted(perfect_match) + sorted(good_match) + sorted(bad_match) + sorted(no_match)
+        if len(query) == 1:
+            res = sorted(perfect_match)
+        else:
+            res = sorted(perfect_match) + sorted(good_match) + sorted(bad_match) + sorted(no_match)
 
         collapsedResults = OrderedDict()
         if cross_species == '':
