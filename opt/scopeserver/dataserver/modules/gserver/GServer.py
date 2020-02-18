@@ -485,7 +485,10 @@ class SCope(s_pb2_grpc.MainServicer):
                 for threshold in regulon['allThresholds'].keys():
                     autoThresholds.append({"name": threshold, "threshold": regulon['allThresholds'][threshold]})
                 defaultThreshold = regulon['defaultThresholdName']
-                motifName = os.path.basename(regulon['motifData'])
+                try:
+                    motifName = os.path.basename(regulon['motifData'])
+                except:
+                    motifName = None
                 break
 
         # min_gene_occurrence_mask = regulon_marker_metrics >= meta_data["regulonSettings"]["min_regulon_gene_occurrence"]
