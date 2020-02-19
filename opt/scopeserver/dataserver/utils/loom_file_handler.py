@@ -93,9 +93,9 @@ class LoomFileHandler():
     def get_loom(self, loom_file_path, mode='r'):
         abs_loom_file_path = self.get_loom_absolute_file_path(loom_file_path)
         if not os.path.exists(abs_loom_file_path):
+            logger.error(f"The file {loom_file_path} does not exists.")
             raise ValueError('The file located at ' +
                              abs_loom_file_path + ' does not exist.')
-            logger.error(f"The file {loom_file_path} does not exists.")
         # To check if the given file path is given specified url!
         partial_md5_hash = LoomFileHandler.get_partial_md5_hash(abs_loom_file_path, 10000)
         if abs_loom_file_path in self.active_looms:

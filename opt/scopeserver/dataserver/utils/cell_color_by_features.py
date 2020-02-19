@@ -205,7 +205,7 @@ class CellColorByFeatures():
                         self.legend = s_pb2.ColorLegend(values=[x[0] for x in self.legend], colors=[x[1] for x in self.legend])
                     else:
                         interval = int(16581375 / numClusters)
-                        hex_vec = [hex(I)[2:].zfill(6) for I in range(0, numClusters, interval)]
+                        self.hex_vec = [hex(I)[2:].zfill(6) for I in range(0, numClusters, interval)]
                     if len(request.annotation) > 0:
                         cellIndices = self.loom.get_anno_cells(annotations=request.annotation, logic=request.logic)
                         self.hex_vec = np.array(self.hex_vec)[cellIndices]

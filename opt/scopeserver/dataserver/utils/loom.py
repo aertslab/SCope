@@ -584,7 +584,7 @@ class Loom():
     def get_gene_names(self):
         genes = self.get_genes()
         conversion = {}
-        species, geneMappings = self.infer_species()
+        _, geneMappings = self.infer_species()
 
         if len(geneMappings) == 0:
             return conversion
@@ -715,7 +715,6 @@ class Loom():
 
     def get_coordinates(self, coordinatesID=-1, annotation='', logic='OR'):
         loom = self.loom_connection
-        dims = 0
         if coordinatesID == -1:
             try:
                 embedding = loom.ca['Embedding']

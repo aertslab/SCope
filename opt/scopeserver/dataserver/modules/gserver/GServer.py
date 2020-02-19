@@ -334,16 +334,16 @@ class SCope(s_pb2_grpc.MainServicer):
                     l_max_v_max = 0
                     loom = self.lfh.get_loom(loom_file_path=loomFilePath)
                     if request.featureType[n] == 'gene':
-                        vals, cell_indices = loom.get_gene_expression(
+                        vals, _ = loom.get_gene_expression(
                             gene_symbol=feature,
                             log_transform=request.hasLogTransform,
                             cpm_normalise=request.hasCpmTransform)
                         l_v_max, l_max_v_max = SCope.get_vmax(vals)
                     if request.featureType[n] == 'regulon':
-                        vals, cell_indices = loom.get_auc_values(regulon=feature)
+                        vals, _ = loom.get_auc_values(regulon=feature)
                         l_v_max, l_max_v_max = SCope.get_vmax(vals)
                     if request.featureType[n] == 'metric':
-                        vals, cell_indices = loom.get_metric(
+                        vals, _ = loom.get_metric(
                             metric_name=feature,
                             log_transform=request.hasLogTransform,
                             cpm_normalise=request.hasCpmTransform)
@@ -392,7 +392,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getCellAUCValuesByFeatures(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
-        vals, cellIndices = loom.get_auc_values(regulon=request.feature[0])
+        vals, _ = loom.get_auc_values(regulon=request.feature[0])
         return s_pb2.CellAUCValuesByFeaturesReply(value=vals)
 
     def getNextCluster(self, request, context):
@@ -430,15 +430,15 @@ class SCope(s_pb2_grpc.MainServicer):
         auc_vals = []
         for regulon in request.selectedRegulons:
             if regulon != '':
-                vals, _ = gene_exp.append(loom.get_auc_values(regulon=regulon))
-                gene_exp.append(vals[[cell_indices]])
+                vals, _ = auc_vals.append(loom.get_auc_values(regulon=regulon))
+                auc_vals.append(vals[[cell_indices]])
         annotations = []
         for anno in request.annotations:
             if anno != '':
                 annotations.append(loom.get_ca_attr_by_name(name=anno)[cell_indices].astype(str))
 
         return s_pb2.CellMetaDataReply(clusterIDs=[s_pb2.CellClusters(clusters=x) for x in cell_clusters],
-                                       geneExpression=[s_pb2.FeatureValues(features=x) for x in gene_exp],
+                                       geneExpression=[s_pb2.FeatureValues(features=x) for x in auc_vals],
                                        aucValues=[s_pb2.FeatureValues(features=x) for x in gene_exp],
                                        annotations=[s_pb2.CellAnnotations(annotations=x) for x in annotations])
 
@@ -773,6 +773,7 @@ class SCope(s_pb2_grpc.MainServicer):
             logger.debug("Subsetting {0} cluster from the active .loom...".format(request.featureValue))
             sub_matrix = None
             sub_selection = None
+            processed = 0
             for (_, selection, _) in loom_connection.scan(items=cells, axis=1):
                 if sub_matrix is None:
                     sub_matrix = loom_connection[:, selection]
