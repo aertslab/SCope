@@ -45,8 +45,8 @@ pandas = "1.0.0"
 loompy = "^3.0.1"
 pyscenic = "^0.9.14"
 
-requests = "^2.22.0"
 multiprocessing_on_dill = { version = "*", allow-prereleases = true }
+requests = "^2.22.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
