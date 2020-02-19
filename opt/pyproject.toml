@@ -7,8 +7,8 @@ license = "GPL-3.0-only"
 
 authors = [
         "Maxime De Waegeneer <mdewaegeneer@gmail.com>",
-        "Kris Davie <kristopher.davie@kuleuven.vib.be>",
-        "James Colliers <james.collier@vib.be>",
+        "Kris Davie <kristofer.davie@kuleuven.vib.be>",
+        "James Collier <james.collier@vib.be>",
         "Lukasz Kreft <lukasz.kreft@vib.be>"]
 
 readme = 'README.md'
