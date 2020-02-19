@@ -21,7 +21,7 @@ setup(name='scope-server',
             'scopeserver/dataserver/data/gene_mappings/hsap_to_dmel_mappings.pickle',
             'scopeserver/dataserver/data/gene_mappings/mmus_to_dmel_mappings.pickle'])
       ] + get_bindserver_files(),
-      version='1.8.0',
+      version='1.8.1',
       description='SCope Data Server: a server for the SCope Client',
       url='',
       author='Maxime De Waegeneer',

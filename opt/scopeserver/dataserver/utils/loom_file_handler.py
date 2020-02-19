@@ -17,7 +17,7 @@ class LoomFileHandler():
 
     def add_loom(self, partial_md5_hash, file_path, abs_file_path, loom_connection):
         loom = Loom(partial_md5_hash=partial_md5_hash, file_path=file_path, abs_file_path=abs_file_path, loom_connection=loom_connection, loom_file_handler=self)
-        self.active_looms[partial_md5_hash] = loom
+        self.active_looms[abs_file_path] = loom
         return loom
 
     def load_loom_file(self, partial_md5_hash, file_path, abs_file_path, mode='r'):
@@ -41,41 +41,40 @@ class LoomFileHandler():
             return hashlib.md5(f.read() + file_path.encode('ASCII')).hexdigest()
 
     def change_loom_mode(self, loom_file_path, mode='r', partial_md5_hash=None):
+        abs_file_path = self.get_loom_absolute_file_path(loom_file_path)
         if partial_md5_hash == None:
-            partial_md5_hash = LoomFileHandler.get_partial_md5_hash(self.get_loom_absolute_file_path(loom_file_path), 10000)
-        if not os.path.exists(self.get_loom_absolute_file_path(loom_file_path)):
+            partial_md5_hash = LoomFileHandler.get_partial_md5_hash(abs_file_path, 10000)
+        if not os.path.exists(abs_file_path):
             raise ValueError('The file located at ' +
-                             self.get_loom_absolute_file_path(loom_file_path) + ' does not exist.')
-        logger.info('{0} md5 is {1}'.format(self.get_loom_absolute_file_path(loom_file_path), partial_md5_hash))
+                             abs_file_path + ' does not exist.')
+        logger.info('{0} md5 is {1}'.format(abs_file_path, partial_md5_hash))
 
-        if partial_md5_hash in self.active_looms:
-            logger.debug(f'Found file with hash: {partial_md5_hash}. Closing.')
-            self.active_looms[partial_md5_hash].get_connection()._file.close()
-            self.active_looms[partial_md5_hash].get_connection().close()
+        if abs_file_path in self.active_looms:
+            logger.debug(f'Found file with hash: {partial_md5_hash}. Current mode is {self.active_looms[abs_file_path].get_connection().mode}. Closing.')
+            self.active_looms[abs_file_path].get_connection().close()
 
         if mode == 'r+':
             logger.debug(f'Reopening file as {mode}')
-            self.active_looms[partial_md5_hash] = self.get_loom(loom_file_path=loom_file_path, mode='r+')
-            logger.info(f'{loom_file_path} now {self.active_looms[partial_md5_hash].get_connection().mode}')
+            self.active_looms[abs_file_path] = self.get_loom(loom_file_path=loom_file_path, mode='r+')
+            logger.info(f'{loom_file_path} now {self.active_looms[abs_file_path].get_connection().mode}')
 
         else:
             logger.debug(f'Reopening file as r')
-            self.active_looms[partial_md5_hash] = self.get_loom(loom_file_path=loom_file_path)
-            logger.info(f'{loom_file_path} now {self.active_looms[partial_md5_hash].get_connection().mode}')
+            self.active_looms[abs_file_path] = self.get_loom(loom_file_path=loom_file_path)
+            logger.info(f'{loom_file_path} now {self.active_looms[abs_file_path].get_connection().mode}')
 
         logger.debug(f"Checking MD5")
-        new_partial_md5_hash = LoomFileHandler.get_partial_md5_hash(self.get_loom_absolute_file_path(loom_file_path), 10000)
+        new_partial_md5_hash = LoomFileHandler.get_partial_md5_hash(abs_file_path, 10000)
         logger.debug(f"Old MD5 is: {partial_md5_hash} New MD5 is: {new_partial_md5_hash}")
 
         try:
-            os.remove(os.path.join(os.path.dirname(self.active_looms[partial_md5_hash].abs_file_path), partial_md5_hash + '.ss_pkl'))
-        except:
+            os.remove(os.path.join(os.path.dirname(abs_file_path), partial_md5_hash + '.ss_pkl'))
+        except Exception as e:
+            logger.debug("Couldn't remove pickle SS")
+            logger.debug(e)
             pass
 
-        if new_partial_md5_hash not in self.active_looms.keys():
-            logger.info(f"{loom_file_path} has changed, correcting old loom entry")
-            self.active_looms[new_partial_md5_hash] = self.get_loom(loom_file_path=loom_file_path)
-        return self.active_looms[partial_md5_hash].get_connection()
+        return self.active_looms[abs_file_path].get_connection()
 
     def get_loom_absolute_file_path(self, loom_file_path):
         return os.path.join(self.loom_dir, loom_file_path)
@@ -98,13 +97,13 @@ class LoomFileHandler():
             logger.error(f"The file {loom_file_path} does not exists.")
         # To check if the given file path is given specified url!
         partial_md5_hash = LoomFileHandler.get_partial_md5_hash(abs_loom_file_path, 10000)
-        if partial_md5_hash in self.active_looms:
+        if abs_loom_file_path in self.active_looms:
             logger.debug('Should be preloaded')
             try:
-                logger.debug(f'Current mode: {self.active_looms[partial_md5_hash].get_connection().mode}, wanted mode {mode}')
+                logger.debug(f'Current mode: {self.active_looms[abs_loom_file_path].get_connection().mode}, wanted mode {mode}')
 
-                if self.active_looms[partial_md5_hash].get_connection().mode == mode:
-                    loom = self.active_looms[partial_md5_hash]
+                if self.active_looms[abs_loom_file_path].get_connection().mode == mode:
+                    loom = self.active_looms[abs_loom_file_path]
                     logger.debug(f"Returning pre-loaded loom file {loom_file_path}. Hash {partial_md5_hash}, object {id(loom)}")
                     return loom
             except AttributeError:
