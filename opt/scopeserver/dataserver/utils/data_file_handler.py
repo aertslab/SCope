@@ -141,7 +141,9 @@ class DataFileHandler():
                 for line in fh.readlines():
                     try:
                         uuid, sessionMode = line.rstrip('\n').split('\t')
-                    except:
+                    except Exception as e:
+                        logger.error("Exception raised")
+                        logger.error(e)
                         uuid = line.rstrip('\n')
                         sessionMode = 'rw'
                     self.permanent_UUIDs.add(uuid)
@@ -165,7 +167,9 @@ class DataFileHandler():
                 for line in fh.readlines():
                     try:
                         uuid, sessionMode = line.rstrip('\n').split('\t')
-                    except:
+                    except Exception as e:
+                        logger.error("Exception raised")
+                        logger.error(e)
                         uuid = line.rstrip('\n')
                         sessionMode = 'rw'
                     self.permanent_UUIDs.add(uuid)

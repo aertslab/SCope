@@ -272,7 +272,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                     return None
             except KeyError:
                 pass
-                
+
             # Update the directory of DroopyFieldStorage
             form.directory = self.directory
             logger.info("Saving uploaded file in {0}".format(self.directory))

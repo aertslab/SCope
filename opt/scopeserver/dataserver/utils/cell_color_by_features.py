@@ -45,7 +45,7 @@ class CellColorByFeatures():
         savings_percent = 1 - str_array_joint_compressed_size / str_array_size
         logger.debug("Saving " + "{:.2%} of space".format(savings_percent))
         return str_array_joint_compressed
- 
+
     def get_features(self):
         return self.features
 
@@ -57,7 +57,7 @@ class CellColorByFeatures():
                             else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
                             for r, g, b in zip(self.features[0], self.features[1], self.features[2])]
         return self.hex_vec
- 
+
     def get_compressed_hex_vec(self):
         comp_start_time = time.time()
         hex_vec_compressed = CellColorByFeatures.compress_str_array(str_arr=self.get_hex_vec())
@@ -72,7 +72,7 @@ class CellColorByFeatures():
 
     def get_cell_indices(self):
         return self.cell_indices
-    
+
     def setGeneFeature(self, request, feature, n):
         if feature != '':
             vals, self.cellIndices = self.loom.get_gene_expression(
@@ -88,7 +88,18 @@ class CellColorByFeatures():
             # vals = np.round((vals / vmax[n]) * 225)
             vals = vals / self.v_max[n]
             vals = np.array([x if x <= 1 else 1 for x in vals])
-            vals = ((constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB) * ((vals - min(vals))) / (1 - min(vals))) + constant._LOWER_LIMIT_RGB
+            vals = \
+                (
+                    (
+                        constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB
+                    ) * (
+                        (
+                            vals - min(vals)
+                        )
+                    ) / (
+                        1 - min(vals)
+                    )
+                ) + constant._LOWER_LIMIT_RGB
             self.features.append([x if x <= constant._UPPER_LIMIT_RGB else constant._UPPER_LIMIT_RGB for x in vals])
         else:
             self.features.append(np.zeros(self.n_cells))
@@ -107,13 +118,24 @@ class CellColorByFeatures():
                 # vals = np.round((vals / vmax[n]) * 225)
                 vals = vals / self.v_max[n]
                 vals = np.array([x if x <= 1 else 1 for x in vals])
-                vals = ((constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB) * ((vals - min(vals))) / (1 - min(vals))) + constant._LOWER_LIMIT_RGB
+                vals = \
+                    (
+                        (
+                            constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB
+                        ) * (
+                            (
+                                vals - min(vals)
+                            )
+                        ) / (
+                            1 - min(vals)
+                        )
+                    ) + constant._LOWER_LIMIT_RGB
                 self.features.append([x if x <= constant._UPPER_LIMIT_RGB else constant._UPPER_LIMIT_RGB for x in vals])
             else:
                 self.features.append([constant._UPPER_LIMIT_RGB if auc >= request.threshold[n] else 0 for auc in vals])
         else:
             self.features.append(np.zeros(self.n_cells))
-    
+
     def setAnnotationFeature(self, request, feature):
         md_annotation_values = self.loom.get_meta_data_annotation_by_name(name=feature)["values"]
         ca_annotation = self.loom.get_ca_attr_by_name(name=feature)
@@ -148,7 +170,18 @@ class CellColorByFeatures():
             # vals = np.round((vals / vmax[n]) * 225)
             vals = vals / self.v_max[n]
             vals = np.array([x if x <= 1 else 1 for x in vals])
-            vals = ((constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB) * ((vals - min(vals))) / (1 - min(vals))) + constant._LOWER_LIMIT_RGB
+            vals = \
+                (
+                    (
+                        constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB
+                    ) * (
+                        (
+                            vals - min(vals)
+                        )
+                    ) / (
+                        1 - min(vals)
+                    )
+                ) + constant._LOWER_LIMIT_RGB
             self.features.append([x if x <= constant._UPPER_LIMIT_RGB else constant._UPPER_LIMIT_RGB for x in vals])
         else:
             self.features.append(np.zeros(self.n_cells))

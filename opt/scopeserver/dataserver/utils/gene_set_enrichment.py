@@ -10,6 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class GeneSetEnrichment:
 
     def __init__(self, scope, method, loom, gene_set_file_path, annotation):
@@ -76,7 +77,7 @@ class GeneSetEnrichment:
                                                                                           cellIndices=cell_indices))
 
     def get_method(self):
-            return self.method
+        return self.method
 
     def get_AUCell_ranking_filepath(self):
         AUCell_rankings_file_name = self.loom.get_file_path().split(".")[0] + "." + "AUCell.rankings.loom"

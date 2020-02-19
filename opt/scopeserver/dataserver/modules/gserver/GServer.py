@@ -496,7 +496,9 @@ class SCope(s_pb2_grpc.MainServicer):
                     defaultThreshold = regulon['defaultThresholdName']
                     try:
                         motifName = os.path.basename(regulon['motifData'])
-                    except:
+                    except Exception as e:
+                        logger.error("Exception raised")
+                        logger.error(e)
                         motifName = None
                     break
 
@@ -726,8 +728,9 @@ class SCope(s_pb2_grpc.MainServicer):
                 try:
                     os.remove(finalPath)
                     success = True
-                except:
+                except Exception as e:
                     logger.error(f'OS Error, couldn\'t remove file: {finalPath}')
+                    logger.error(e)
         else:
             logger.error(f'UUID: {request.UUID} is read-only, but requested to delete file {finalPath}')
         return s_pb2.DeleteUserFileReply(deletedSuccessfully=success)
@@ -742,8 +745,8 @@ class SCope(s_pb2_grpc.MainServicer):
         file_name = request.loomFilePath
         # Check if not a public loom file
         if '/' in request.loomFilePath:
-            l = request.loomFilePath.split("/")
-            file_name = l[1].split(".")[0]
+            loom = request.loomFilePath.split("/")
+            file_name = loom[1].split(".")[0]
 
         if(request.featureType == "clusterings"):
             a = list(filter(lambda x: x['name'] == request.featureName, meta_data["clusterings"]))

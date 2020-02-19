@@ -37,7 +37,7 @@ class Loom():
             with open(self.ss_pickle_name, 'rb') as fh:
                 logger.debug(f'Loading prebuilt SS for {file_path} from {self.ss_pickle_name}')
                 self.ss = pickle.load(fh)
-                
+
         except (EOFError, FileNotFoundError):
             logger.debug(f'Building Search Spaces for {file_path}')
             if self.species == 'dmel':
@@ -101,14 +101,12 @@ class Loom():
             return json.loads(zlib.decompress(base64.b64decode(meta)))
         except AttributeError:
             return json.loads(zlib.decompress(base64.b64decode(meta.encode('ascii'))).decode('ascii'))
-    
+
     def update_metadata(self, meta):
         self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r+', partial_md5_hash=self.partial_md5_hash)
-        loom = self.loom_connection
         orig_metaJson = self.get_meta_data()
-        loom.attrs['MetaData'] = json.dumps(meta)
+        self.loom_connection.attrs['MetaData'] = json.dumps(meta)
         self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r', partial_md5_hash=self.partial_md5_hash)
-        loom = self.loom_connection
         new_metaJson = self.get_meta_data()
         return True if orig_metaJson != new_metaJson else False
 
@@ -402,7 +400,7 @@ class Loom():
         """
         loom = self.loom_connection
         # Global attribute: 0
-        # Row attribute: 1 
+        # Row attribute: 1
         # Column attributeL 2
         attr_margins = [2, 2, 2, 2, 0]
         # Order matters

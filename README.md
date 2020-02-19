@@ -16,8 +16,8 @@ February 18, 2020
 	* Add GDPR compliant cookie warning
 	* Implement login with ORCID ID
 		* Logging in with an ORCID ID provides access to collaborative annotation functions
-	* Implement collaborative annotation for RW sessions
-		* Clusters can now be annotated with controlloed vocabularies (via EBI OLS) or free text.
+	* Implement collaborative annotation for read-write sessions
+		* Clusters can now be annotated with controlloed vocabularies (via [EBI OLS](https://www.ebi.ac.uk/ols/index)) or free text.
 		* Other users can vote on annotations
 		* Once added, annotations can be searched by other users	
 	* Expand config options
@@ -335,9 +335,9 @@ All uploaded data from SCope will be put in the following folders by default:
 ## Enabling ORCID Functionality
 
 To enable colaborative annotations and login via ORCID ID, API credentials (`orcidAPIClientID`, `orcidAPIClientSecret` and `orcidAPIRedirectURI`) must be added to the config file provided. 
-These can be generate at the [orcid developer tools page](https://orcid.org/developer-tools).
+These can be generated at the [orcid developer tools page](https://orcid.org/developer-tools).
 
-The `dataHashSecret` entry in the config file should be filled in with a randomly generated string for example from the python secrets package. 
+The `dataHashSecret` entry in the config file should be filled in with a randomly generated string for example from the python [secrets package](https://docs.python.org/3/library/secrets.html). 
 This string will be used to salt all annotation data, allowing validation of data generated on the instance of SCope. Any changes in this string will invalidate all pre-existing annotations.
 
 
