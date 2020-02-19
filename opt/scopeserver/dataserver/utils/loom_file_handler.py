@@ -67,12 +67,13 @@ class LoomFileHandler():
         new_partial_md5_hash = LoomFileHandler.get_partial_md5_hash(abs_file_path, 10000)
         logger.debug(f"Old MD5 is: {partial_md5_hash} New MD5 is: {new_partial_md5_hash}")
 
-        try:
-            os.remove(os.path.join(os.path.dirname(abs_file_path), partial_md5_hash + '.ss_pkl'))
-        except Exception as e:
-            logger.debug("Couldn't remove pickle SS")
-            logger.debug(e)
-            pass
+        if partial_md5_hash != new_partial_md5_hash:
+            try:
+                os.remove(os.path.join(os.path.dirname(abs_file_path), partial_md5_hash + '.ss_pkl'))
+            except Exception as e:
+                logger.debug("Couldn't remove pickle SS")
+                logger.debug(e)
+                pass
 
         return self.active_looms[abs_file_path].get_connection()
 
