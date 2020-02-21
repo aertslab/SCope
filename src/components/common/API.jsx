@@ -492,11 +492,11 @@ class API {
 		});
 	}
 
-	getORCIDiD(code, callback) {
+	getORCIDiD(auth_code, callback) {
 
-		if (DEBUG) console.log('getORCIDiD', code);
+		if (DEBUG) console.log('getORCIDiD', auth_code);
 		let query = {
-			code: code,
+			auth_code: auth_code,
 		}
 
 		if (DEBUG) console.log('getORCIDiD', query);

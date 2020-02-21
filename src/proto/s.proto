@@ -453,7 +453,7 @@ message SetLoomHierarchyReply {
 }
 
 message getORCIDiDRequest {
-  string code=1;
+  string auth_code=1;
 }
 
 message getORCIDiDReply {

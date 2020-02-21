@@ -16,12 +16,14 @@
          return(false);
        }
        
-       if (getQueryVariable("code")) {
-         var meta = document.createElement('meta');
-         meta.name = "scope-orcid_auth";
-         meta.setAttribute("code", getQueryVariable("code"))
+       var orcid_auth = getQueryVariable("code");
+       if (orcid_auth) {
+         var orcid = document.createElement('meta');
+         orcid.name = "scope-orcid";
+         orcid.setAttribute("auth", orcid_auth);
          document.getElementsByTagName('head')[0].appendChild(meta);
-      }
+       }
+
        if (getQueryVariable("WSport")) {
          var meta = document.createElement('meta');
          meta.name = "scope-wsport";

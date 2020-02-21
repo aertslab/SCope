@@ -199,10 +199,10 @@ class App extends Component {
 		if (isSidebarVisible == '0') this.setState({isSidebarVisible: false});
 		if (this.props.cookies.get('CookieConsent') == "true") {
 			this.setState({cookiesAllowed: true}, () => {
-				if (document.head.querySelector("[name=scope-orcid_auth]") != null && this.state.orcid_active) {
-					let code = document.head.querySelector("[name=scope-orcid_auth]").getAttribute('code')
+				if (document.head.querySelector("[name=scope-orcid]") != null && this.state.orcid_active) {
+					let auth_code = document.head.querySelector("[name=scope-orcid]").getAttribute('auth')
 					if (this.state.cookiesAllowed) {
-						BackendAPI.getORCIDiD(code, (orcid_scope_uuid, name, orcid_id) => {
+						BackendAPI.getORCIDiD(auth_code, (orcid_scope_uuid, name, orcid_id) => {
 							this.props.cookies.set('scope_orcid_uuid', orcid_scope_uuid)
 							this.props.cookies.set('scope_orcid_name', name)
 							this.props.cookies.set('scope_orcid_id', orcid_id)

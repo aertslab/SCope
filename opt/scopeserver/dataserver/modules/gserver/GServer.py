@@ -110,15 +110,15 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.getORCIDStatusReply(active=self.orcid_active)
 
     def getORCIDiD(self, request, context):
-        request_code = request.code
-        logger.debug(f'Recieved code "{request_code}" from frontend.')
+        auth_code = request.auth_code
+        logger.debug(f'Recieved code "{auth_code}" from frontend.')
 
         if self.orcid_active:
             r = requests.post('https://orcid.org/oauth/token',
                               data={'client_id': self.config['orcidAPIClientID'],
                                     'client_secret': self.config['orcidAPIClientSecret'],
                                     'grant_type': 'authorization_code',
-                                    'code': request_code,
+                                    'code': auth_code,
                                     'redirect_uri': self.config['orcidAPIRedirectURI']
                                     }
                               )
