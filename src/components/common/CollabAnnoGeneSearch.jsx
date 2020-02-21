@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import React from 'react'
 import { Search, Input, Dropdown, Select, Icon, Segment } from 'semantic-ui-react'
 import { BackendAPI } from './API'

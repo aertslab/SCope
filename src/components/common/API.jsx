@@ -493,15 +493,9 @@ class API {
 	}
 
 	getORCID(auth_code, callback) {
-
 		if (DEBUG) console.log('getORCID', auth_code);
-		let query = {
-			auth_code: auth_code,
-		}
-
-		if (DEBUG) console.log('getORCID', query);
 		BackendAPI.getConnection().then((gbc) => {
-			gbc.services.scope.Main.getORCID(query, (err, response) => {
+			gbc.services.scope.Main.getORCID({auth_code}, (err, response) => {
 				if (DEBUG) console.log('getORCID', response);	
 				if (response.success) {
 					callback(response.orcid_scope_uuid, response.name, response.orcid_id)
@@ -541,8 +535,7 @@ class API {
 					if (response.success) {
 						BackendAPI.queryLoomFiles(uuid, () => {
 							BackendAPI.getActiveFeatures().forEach( (f, n) => {
-								console.log(f == feature)
-								if (f == feature) {
+								if (f === feature) {
 									BackendAPI.updateFeature(n, f.type, f.feature, f.featureType, f.metadata ? f.metadata.description : null, "")
 								}
 

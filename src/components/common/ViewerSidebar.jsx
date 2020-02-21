@@ -77,7 +77,7 @@ class ViewerSidebar extends Component {
 	render() {
 		const { history, match, hideFeatures } = this.props;
 		const { lassoSelections, activeFeatures, activeTab, activePage } = this.state;
-		
+
 		let lassoTab = () => {
 			if (lassoSelections.length == 0) {
 				return (

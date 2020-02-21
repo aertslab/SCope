@@ -212,7 +212,6 @@ class App extends Component {
 					} else {
 						alert('You must allow cookies before you are able to log in!')
 						location.href = location.origin + location.pathname + location.hash
-						return
 					}
 				}
 			});
