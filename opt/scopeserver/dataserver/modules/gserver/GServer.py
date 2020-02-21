@@ -65,13 +65,13 @@ class SCope(s_pb2_grpc.MainServicer):
         self.dfh.read_UUID_db()
         self.dfh.read_ORCID_db()
 
-        self.test_ORCID_connection()
+        self.check_ORCID_connection()
 
     def update_global_data(self):
         self.dfh.set_global_data()
         self.lfh.set_global_data()
 
-    def test_ORCID_connection(self):
+    def check_ORCID_connection(self):
         for i in ['orcidAPIClientID', 'orcidAPIClientSecret', 'orcidAPIRedirectURI']:
             if i not in self.config.keys():
                 self.orcid_active = False
