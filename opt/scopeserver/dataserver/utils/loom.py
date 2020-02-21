@@ -26,6 +26,8 @@ class Loom():
         self.file_path = file_path
         self.abs_file_path = abs_file_path
         self.loom_connection = loom_connection
+        self.dfh = dfh.DataFileHandler()
+
         logger.info(f"New Loom object created for {file_path}")
         # Metrics
         self.nUMI = None
@@ -107,7 +109,7 @@ class Loom():
         self.loom_connection.attrs['MetaData'] = json.dumps(meta)
         self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r', partial_md5_hash=self.partial_md5_hash)
         new_metaJson = self.get_meta_data()
-        return True if orig_metaJson != new_metaJson else False
+        return orig_metaJson != new_metaJson
 
     def rename_annotation(self, clustering_id, cluster_id, new_annotation_name):
         logger.info('Changing annotation name for {0}'.format(self.get_abs_file_path()))
@@ -132,12 +134,10 @@ class Loom():
             return False
 
     def confirm_orcid_uuid(self, orcid_id, orcid_scope_uuid):
-        self.dfh = dfh.DataFileHandler()
         self.dfh.read_ORCID_db()
         return self.dfh.confirm_orcid_uuid(orcid_id, orcid_scope_uuid)
 
     def add_collab_annotation(self, request, secret):
-
         logger.info('Adding collaborative annotation for {0}'.format(self.get_abs_file_path()))
 
         if not self.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
@@ -287,7 +287,7 @@ class Loom():
         attrs['SCopeTreeL2'] = L2
         attrs['SCopeTreeL3'] = L3
 
-        loom.attrs = attrs  # base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
+        loom.attrs = attrs
         self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode='r', partial_md5_hash=self.partial_md5_hash)
         loom = self.loom_connection
         newAttrs = self.loom_connection.attrs
@@ -337,7 +337,7 @@ class Loom():
             cf_col = col.casefold()
             if len(loom.ca[col].shape) < 2:
                 continue
-            if ('tsne'.casefold() in cf_col or 'umap'.casefold() in cf_col or 'pca'.casefold() in cf_col) and loom.ca[col].shape[1] >= 2:
+            if cf_col in ['tsne', 'umap', 'pca'] and loom.ca[col].shape[1] >= 2:
                 if not embeddings_default:
                     metaJson['embeddings'].append({
                         "id": -1,
