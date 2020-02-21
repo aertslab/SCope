@@ -5,7 +5,6 @@ import base64
 from functools import lru_cache
 import pandas as pd
 import time
-import loompy as lp
 import hashlib
 import os
 import pickle
