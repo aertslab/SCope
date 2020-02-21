@@ -488,7 +488,7 @@ class API {
 				callback(response.active)
 			});
 		}, () => {
-			BackendAPI.showError();
+			this.showError();
 		});
 	}
 
@@ -504,7 +504,7 @@ class API {
 				}
 			})
 		}, () => {
-			BackendAPI.showError();
+			this.showError();
 		});
 	}
 
@@ -545,7 +545,7 @@ class API {
 					callback(response)
 				})
 			}, () => {
-				BackendAPI.showError();
+				this.showError();
 			});
 	}
 
@@ -579,7 +579,7 @@ class API {
 					callback(response)
 				})
 			}, () => {
-				BackendAPI.showError();
+				this.showError();
 			});
 	}
 
@@ -609,7 +609,7 @@ class API {
 				callback(this.customValues[page], this.maxValues[page]);
 			})
 		}, () => {
-			BackendAPI.showError();
+			this.showError();
 		});
 	}
 
