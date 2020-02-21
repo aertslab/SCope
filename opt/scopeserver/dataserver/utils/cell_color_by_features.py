@@ -11,6 +11,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+RGB_COLORS = 255 * 255 * 255
 
 class CellColorByFeatures():
 
@@ -173,7 +174,7 @@ class CellColorByFeatures():
                             self.legend.add((cluster_dict[i], constant.BIG_COLOR_LIST[i]))
                         self.legend = s_pb2.ColorLegend(values=[x[0] for x in self.legend], colors=[x[1] for x in self.legend])
                     else:
-                        interval = int(16581375 / numClusters)
+                        interval = int(RGB_COLORS / numClusters)
                         self.hex_vec = [hex(I)[2:].zfill(6) for I in range(0, numClusters, interval)]
                     if len(request.annotation) > 0:
                         cellIndices = self.loom.get_anno_cells(annotations=request.annotation, logic=request.logic)
