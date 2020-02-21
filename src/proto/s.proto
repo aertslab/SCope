@@ -37,7 +37,7 @@ service Main {
   rpc downloadSubLoom (DownloadSubLoomRequest) returns (stream DownloadSubLoomReply) {}
   rpc setAnnotationName (SetAnnotationNameRequest) returns (SetAnnotationNameReply) {}
   rpc setLoomHierarchy (SetLoomHierarchyRequest) returns (SetLoomHierarchyReply) {}
-  rpc getORCIDiD (getORCIDiDRequest) returns (getORCIDiDReply) {}
+  rpc getORCID (getORCIDRequest) returns (getORCIDReply) {}
   rpc getORCIDStatus (getORCIDStatusRequest) returns (getORCIDStatusReply) {}
   rpc setColabAnnotationData (setColabAnnotationDataRequest) returns (setColabAnnotationDataReply) {}
   rpc voteAnnotation (voteAnnotationRequest) returns (voteAnnotationReply) {}
@@ -452,11 +452,11 @@ message SetLoomHierarchyReply {
   bool success=1;
 }
 
-message getORCIDiDRequest {
+message getORCIDRequest {
   string auth_code=1;
 }
 
-message getORCIDiDReply {
+message getORCIDReply {
   string orcid_scope_uuid=1;
   string name=2;
   string orcid_id=3;

@@ -114,10 +114,10 @@ class MainStub(object):
         request_serializer=s__pb2.SetLoomHierarchyRequest.SerializeToString,
         response_deserializer=s__pb2.SetLoomHierarchyReply.FromString,
         )
-    self.getORCIDiD = channel.unary_unary(
-        '/scope.Main/getORCIDiD',
-        request_serializer=s__pb2.getORCIDiDRequest.SerializeToString,
-        response_deserializer=s__pb2.getORCIDiDReply.FromString,
+    self.getORCID = channel.unary_unary(
+        '/scope.Main/getORCID',
+        request_serializer=s__pb2.getORCIDRequest.SerializeToString,
+        response_deserializer=s__pb2.getORCIDReply.FromString,
         )
     self.getORCIDStatus = channel.unary_unary(
         '/scope.Main/getORCIDStatus',
@@ -285,7 +285,7 @@ class MainServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def getORCIDiD(self, request, context):
+  def getORCID(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -423,10 +423,10 @@ def add_MainServicer_to_server(servicer, server):
           request_deserializer=s__pb2.SetLoomHierarchyRequest.FromString,
           response_serializer=s__pb2.SetLoomHierarchyReply.SerializeToString,
       ),
-      'getORCIDiD': grpc.unary_unary_rpc_method_handler(
-          servicer.getORCIDiD,
-          request_deserializer=s__pb2.getORCIDiDRequest.FromString,
-          response_serializer=s__pb2.getORCIDiDReply.SerializeToString,
+      'getORCID': grpc.unary_unary_rpc_method_handler(
+          servicer.getORCID,
+          request_deserializer=s__pb2.getORCIDRequest.FromString,
+          response_serializer=s__pb2.getORCIDReply.SerializeToString,
       ),
       'getORCIDStatus': grpc.unary_unary_rpc_method_handler(
           servicer.getORCIDStatus,

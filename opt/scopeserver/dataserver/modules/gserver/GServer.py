@@ -97,7 +97,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def getORCIDStatus(self, request, context):
         return s_pb2.getORCIDStatusReply(active=self.orcid_active)
 
-    def getORCIDiD(self, request, context):
+    def getORCID(self, request, context):
         auth_code = request.auth_code
         logger.debug(f'Recieved code "{auth_code}" from frontend.')
 
@@ -114,7 +114,7 @@ class SCope(s_pb2_grpc.MainServicer):
         if r.status_code != 200 or not self.orcid_active:
             logger.debug(f'ERROR: {r.status_code}')
             logger.debug(f'ERROR: {r.text}')
-            return s_pb2.getORCIDiDReply(
+            return s_pb2.getORCIDReply(
                 orcid_scope_uuid="null",
                 name='null',
                 orcid_id="null",
@@ -129,7 +129,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
         self.dfh.add_ORCIDiD(orcid_scope_uuid, orcid_data['name'], orcid_data['orcid'])
 
-        return s_pb2.getORCIDiDReply(
+        return s_pb2.getORCIDReply(
             orcid_scope_uuid=orcid_scope_uuid,
             name=orcid_data['name'],
             orcid_id=orcid_data['orcid'],

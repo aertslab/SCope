@@ -202,7 +202,7 @@ class App extends Component {
 				if (document.head.querySelector("[name=scope-orcid]") != null && this.state.orcid_active) {
 					let auth_code = document.head.querySelector("[name=scope-orcid]").getAttribute('auth')
 					if (this.state.cookiesAllowed) {
-						BackendAPI.getORCIDiD(auth_code, (orcid_scope_uuid, name, orcid_id) => {
+						BackendAPI.getORCID(auth_code, (orcid_scope_uuid, name, orcid_id) => {
 							this.props.cookies.set('scope_orcid_uuid', orcid_scope_uuid)
 							this.props.cookies.set('scope_orcid_name', name)
 							this.props.cookies.set('scope_orcid_id', orcid_id)

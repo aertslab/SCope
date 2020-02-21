@@ -492,17 +492,17 @@ class API {
 		});
 	}
 
-	getORCIDiD(auth_code, callback) {
+	getORCID(auth_code, callback) {
 
-		if (DEBUG) console.log('getORCIDiD', auth_code);
+		if (DEBUG) console.log('getORCID', auth_code);
 		let query = {
 			auth_code: auth_code,
 		}
 
-		if (DEBUG) console.log('getORCIDiD', query);
+		if (DEBUG) console.log('getORCID', query);
 		BackendAPI.getConnection().then((gbc) => {
-			gbc.services.scope.Main.getORCIDiD(query, (err, response) => {
-				if (DEBUG) console.log('getORCIDiD', response);	
+			gbc.services.scope.Main.getORCID(query, (err, response) => {
+				if (DEBUG) console.log('getORCID', response);	
 				if (response.success) {
 					callback(response.orcid_scope_uuid, response.name, response.orcid_id)
 				} else {
