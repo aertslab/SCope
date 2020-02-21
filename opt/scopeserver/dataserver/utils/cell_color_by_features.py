@@ -73,6 +73,14 @@ class CellColorByFeatures():
     def get_cell_indices(self):
         return self.cell_indices
 
+    def normalise_vals(self, vals, v_max):
+        vals = vals / v_max
+        vals = np.array([x if x <= 1 else 1 for x in vals])
+        vals = ((constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB ) * \
+            ((vals - min(vals))) / (1 - min(vals))) + constant._LOWER_LIMIT_RGB
+        vals = [x if x <= constant._UPPER_LIMIT_RGB else constant._UPPER_LIMIT_RGB for x in vals]
+        return vals
+
     def setGeneFeature(self, request, feature, n):
         if feature != '':
             vals, self.cellIndices = self.loom.get_gene_expression(
@@ -85,22 +93,9 @@ class CellColorByFeatures():
                 self.v_max[n] = request.vmax[n]
             else:
                 self.v_max[n], self.max_v_max[n] = CellColorByFeatures.get_vmax(vals)
-            # vals = np.round((vals / vmax[n]) * 225)
-            vals = vals / self.v_max[n]
-            vals = np.array([x if x <= 1 else 1 for x in vals])
-            vals = \
-                (
-                    (
-                        constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB
-                    ) * (
-                        (
-                            vals - min(vals)
-                        )
-                    ) / (
-                        1 - min(vals)
-                    )
-                ) + constant._LOWER_LIMIT_RGB
-            self.features.append([x if x <= constant._UPPER_LIMIT_RGB else constant._UPPER_LIMIT_RGB for x in vals])
+
+            vals = self.normalise_vals(vals, self.v_max[n])
+            self.features.append(vals)
         else:
             self.features.append(np.zeros(self.n_cells))
 
@@ -115,22 +110,9 @@ class CellColorByFeatures():
                 self.v_max[n], self.max_v_max[n] = CellColorByFeatures.get_vmax(vals)
             if request.scaleThresholded:
                 vals = ([auc if auc >= request.threshold[n] else 0 for auc in vals])
-                # vals = np.round((vals / vmax[n]) * 225)
-                vals = vals / self.v_max[n]
-                vals = np.array([x if x <= 1 else 1 for x in vals])
-                vals = \
-                    (
-                        (
-                            constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB
-                        ) * (
-                            (
-                                vals - min(vals)
-                            )
-                        ) / (
-                            1 - min(vals)
-                        )
-                    ) + constant._LOWER_LIMIT_RGB
-                self.features.append([x if x <= constant._UPPER_LIMIT_RGB else constant._UPPER_LIMIT_RGB for x in vals])
+
+                vals = self.normalise_vals(vals, self.v_max[n])
+                self.features.append(vals)
             else:
                 self.features.append([constant._UPPER_LIMIT_RGB if auc >= request.threshold[n] else 0 for auc in vals])
         else:
@@ -167,22 +149,9 @@ class CellColorByFeatures():
                 self.v_max[n] = request.vmax[n]
             else:
                 self.v_max[n], self.max_v_max[n] = CellColorByFeatures.get_vmax(vals)
-            # vals = np.round((vals / vmax[n]) * 225)
-            vals = vals / self.v_max[n]
-            vals = np.array([x if x <= 1 else 1 for x in vals])
-            vals = \
-                (
-                    (
-                        constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB
-                    ) * (
-                        (
-                            vals - min(vals)
-                        )
-                    ) / (
-                        1 - min(vals)
-                    )
-                ) + constant._LOWER_LIMIT_RGB
-            self.features.append([x if x <= constant._UPPER_LIMIT_RGB else constant._UPPER_LIMIT_RGB for x in vals])
+
+            vals = self.normalise_vals(vals, self.v_max[n])
+            self.features.append(vals)
         else:
             self.features.append(np.zeros(self.n_cells))
 
