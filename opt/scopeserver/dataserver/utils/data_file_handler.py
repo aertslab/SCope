@@ -124,6 +124,23 @@ class DataFileHandler():
     def get_permanent_UUIDs(self):
         return self.permanent_UUIDs
 
+    def read_permanent_sessions(self):
+        if os.path.isfile(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt')):
+            with open(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt'), 'r') as fh:
+                    for line in fh.readlines():
+                        try:
+                            uuid, sessionMode = line.rstrip('\n').split('\t')
+                        except Exception as e:
+                            logger.error("Exception raised")
+                            logger.error(e)
+                            uuid = line.rstrip('\n')
+                            sessionMode = 'rw'
+                        self.permanent_UUIDs.add(uuid)
+                        self.current_UUIDs[uuid] = [time.time() + (_ONE_DAY_IN_SECONDS * 365), sessionMode]
+            return True
+        else:
+            return False
+
     def read_UUID_db(self):
         logger.debug('Building UUID "database"')
         if os.path.isfile(os.path.join(self.config_dir, 'UUID_Timeouts.tsv')):
@@ -135,19 +152,11 @@ class DataFileHandler():
                     logger.debug(f'\tUUID {ls[0]}, mode rw. Generated on {time.strftime("%Y-%m-%d at %H:%M:%S", time.localtime(float(ls[1])))}')
 
         if os.path.isfile(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt')):
-            logger.debug('Existing Permanent Sessions:"')
-            with open(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt'), 'r') as fh:
-                for line in fh.readlines():
-                    try:
-                        uuid, sessionMode = line.rstrip('\n').split('\t')
-                    except Exception as e:
-                        logger.error("Exception raised")
-                        logger.error(e)
-                        uuid = line.rstrip('\n')
-                        sessionMode = 'rw'
-                    self.permanent_UUIDs.add(uuid)
-                    self.current_UUIDs[uuid] = [time.time() + (_ONE_DAY_IN_SECONDS * 365), sessionMode]
-                    logger.debug(f'\tUUID {uuid}, mode {sessionMode}. Valid until {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + (_ONE_DAY_IN_SECONDS * 365)))}')
+            perm_sessions_exist = self.read_permanent_sessions()
+            if perm_sessions_exist:
+                for session in self.get_permanent_UUIDs():
+                    logger.debug('Existing Permanent Sessions:"')
+                    logger.debug(f'\tUUID {session}, mode {self.current_UUIDs[session][1]}. Valid until {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + (_ONE_DAY_IN_SECONDS * 365)))}')
         else:
             logger.debug('No Existing Permanent Sessions, generating rw App UUID:"')
             with open(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt'), 'w') as fh:
@@ -161,18 +170,8 @@ class DataFileHandler():
             for UUID in self.current_UUIDs.keys():
                 if UUID not in self.permanent_UUIDs:
                     fh.write('{0}\t{1}\n'.format(UUID, self.current_UUIDs[UUID][0]))
-        if os.path.isfile(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt')):
-            with open(os.path.join(self.config_dir, 'Permanent_Session_IDs.txt'), 'r') as fh:
-                for line in fh.readlines():
-                    try:
-                        uuid, sessionMode = line.rstrip('\n').split('\t')
-                    except Exception as e:
-                        logger.error("Exception raised")
-                        logger.error(e)
-                        uuid = line.rstrip('\n')
-                        sessionMode = 'rw'
-                    self.permanent_UUIDs.add(uuid)
-                    self.current_UUIDs[uuid] = [time.time() + (_ONE_DAY_IN_SECONDS * 365), sessionMode]
+            self.read_permanent_sessions()
+
 
     def get_uuid_log(self):
         return self.uuid_log
