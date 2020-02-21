@@ -89,7 +89,6 @@ class DataFileHandler():
     def read_ORCID_db(self):
         logger.debug('Building UUID "database"')
         if os.path.isfile(os.path.join(self.config_dir, 'ORCID_IDs.txt')):
-            logger.debug('Existing Permanent Sessions:"')
             with open(os.path.join(self.config_dir, 'ORCID_IDs.txt'), 'r') as fh:
                 for line in fh.readlines():
                     orcid_id, orcid_scope_uuids, name = line.rstrip('\n').split('\t')
