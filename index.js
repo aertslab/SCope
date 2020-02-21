@@ -165,7 +165,7 @@ class DataServer {
     console.log(script)
     if (this.isPackaged() & process.argv[2] != 'electronTest') {
       console.log("SCope Server Packaged.")
-      this.proc = cp.spawn(script, ["-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort, '--app_mode'], {});
+      this.proc = cp.spawn(script, ["--g_port", this.gPort, "--p_port", this.pPort, "--x_port", this.xPort, '--app_mode'], {});
     } else {
       console.log("SCope Server Not packaged or electronTest.")
       try {
@@ -180,7 +180,7 @@ class DataServer {
               throw("Compatible python version not found!")
          }
       }
-      this.proc = cp.spawn(python, [script, "-g_port", this.gPort, "-p_port", this.pPort, "-x_port", this.xPort, '--app_mode'], {});
+      this.proc = cp.spawn(python, [script, "--g_port", this.gPort, "--p_port", this.pPort, "--x_port", this.xPort, '--app_mode'], {});
     }
     this.proc.stdout.on('data', (data) => {
       let buff = new Buffer(data).toString('utf8');

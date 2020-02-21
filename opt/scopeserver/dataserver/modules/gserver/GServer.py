@@ -6,7 +6,6 @@ import loompy as lp
 from loompy import timestamp
 from loompy import _version
 import os
-import secrets
 import re
 import numpy as np
 import pandas as pd
@@ -53,7 +52,10 @@ class SCope(s_pb2_grpc.MainServicer):
 
     orcid_active = False
 
-    def __init__(self, config=None):
+    def __init__(self, config):
+
+        self.config = config
+
         self.dfh = dfh.DataFileHandler()
         self.lfh = lfh.LoomFileHandler()
 
@@ -62,22 +64,8 @@ class SCope(s_pb2_grpc.MainServicer):
         self.lfh.set_global_data()
         self.dfh.read_UUID_db()
         self.dfh.read_ORCID_db()
-        self.config = {}
-        if config is not None:
-            with open(config, 'r') as fh:
-                try:
-                    self.config = json.loads(fh.read())
-                except json.JSONDecodeError:
-                    self.config = {}
-                    logger.error('Config file is not proper json and will not be used')
-            self.test_ORCID_connection()
-        else:
-            self.config = {}
-        dhs = self.config.get('dataHashSecret')
-        if not dhs or not dhs.strip():
-            new_secret = secrets.token_hex(32)
-            self.config['dataHashSecret'] = new_secret
-            logger.warning(f'The following secret key will be used to hash annotation data: {new_secret}\nLosing this key will mean all annotations will display as unvalidated.')
+
+        self.test_ORCID_connection()
 
     def update_global_data(self):
         self.dfh.set_global_data()
@@ -862,12 +850,12 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.LoomUploadedReply()
 
 
-def serve(run_event, port=50052, app_mode=False, config=None):
-    SCope.app_mode = app_mode
+def serve(run_event, config):
+    SCope.app_mode = config['app_mode']
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     scope = SCope(config=config)
     s_pb2_grpc.add_MainServicer_to_server(scope, server)
-    server.add_insecure_port('[::]:{0}'.format(port))
+    server.add_insecure_port('[::]:{0}'.format(config['gPort']))
     server.start()
 
     # Let the main process know that GServer has started.
@@ -880,9 +868,3 @@ def serve(run_event, port=50052, app_mode=False, config=None):
     scope.dfh.get_uuid_log().close()
     scope.dfh.update_UUID_db()
     server.stop(0)
-
-
-if __name__ == '__main__':
-    run_event = threading.Event()
-    run_event.set()
-    serve(run_event=run_event)
