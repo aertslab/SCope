@@ -17,7 +17,7 @@ import threading
 import pickle
 import requests
 import uuid
-from typing import DefaultDict, Set
+from typing import DefaultDict, Set, List, Dict, Any, Tuple
 from collections import OrderedDict, defaultdict, deque
 from functools import lru_cache
 from itertools import compress
@@ -52,9 +52,10 @@ class SCope(s_pb2_grpc.MainServicer):
 
     orcid_active = False
 
-    def __init__(self, config):
+    def __init__(self, config: Dict[str, str]):
 
         self.config = config
+        self.app_mode = False
 
         self.dfh = dfh.DataFileHandler()
         self.lfh = lfh.LoomFileHandler()
@@ -67,11 +68,11 @@ class SCope(s_pb2_grpc.MainServicer):
 
         self.check_ORCID_connection()
 
-    def update_global_data(self):
+    def update_global_data(self) -> None:
         self.dfh.set_global_data()
         self.lfh.set_global_data()
 
-    def check_ORCID_connection(self):
+    def check_ORCID_connection(self) -> None:
         for i in ['orcidAPIClientID', 'orcidAPIClientSecret', 'orcidAPIRedirectURI']:
             if i not in self.config.keys():
                 self.orcid_active = False
@@ -137,7 +138,7 @@ class SCope(s_pb2_grpc.MainServicer):
         )
 
     @lru_cache(maxsize=256)
-    def get_features(self, loom, query):
+    def get_features(self, loom: Loom, query: str):
         logger.debug('Searching for {0}'.format(query))
         start_time = time.time()
 
@@ -162,12 +163,10 @@ class SCope(s_pb2_grpc.MainServicer):
         queryCF = query.casefold()
         res = [x for x in search_space.keys() if queryCF in x[0]]
 
-        order = deque()
-
-        perfect_match = []
-        good_match = []
-        bad_match = []
-        no_match = []
+        perfect_match: List[object] = []
+        good_match: List[object] = []
+        bad_match: List[object] = []
+        no_match: List[object] = []
 
         for n, r in enumerate(res):
             if r[1] == query or r[0] == queryCF:
@@ -179,16 +178,14 @@ class SCope(s_pb2_grpc.MainServicer):
             if query in r[0]:
                 bad_match.append(r)
                 continue
-            if n not in order:
-                no_match.append(r)
-                continue
+
 
         if len(query) == 1:
             res = sorted(perfect_match)
         else:
             res = sorted(perfect_match) + sorted(good_match) + sorted(bad_match) + sorted(no_match)
 
-        collapsedResults = OrderedDict()
+        collapsedResults: Dict[Any, Any] = OrderedDict()
         if cross_species == '':
             for r in res:
                 if type(search_space[r]) == list:
@@ -289,18 +286,13 @@ class SCope(s_pb2_grpc.MainServicer):
 
         logger.debug("{0} genes matching '{1}'".format(len(res), query))
         logger.debug("{0:.5f} seconds elapsed ---".format(time.time() - start_time))
-        res = {'feature': [r[0] for r in collapsedResults.keys()],
+        final_res = {'feature': [r[0] for r in collapsedResults.keys()],
                'featureType': [r[1] for r in collapsedResults.keys()],
                'featureDescription': [descriptions[r] for r in collapsedResults.keys()]}
-        return res
-
-    def compressHexColor(self, a):
-        a = int(a, 16)
-        a_hex3d = hex(a >> 20 << 8 | a >> 8 & 240 | a >> 4 & 15)
-        return a_hex3d.replace("0x", "")
+        return final_res
 
     @staticmethod
-    def get_vmax(vals):
+    def get_vmax(vals: np.ndarray) -> Tuple[np.float, np.float]:
         maxVmax = max(vals)
         vmax = np.percentile(vals, 99)
         if vmax == 0 and max(vals) != 0:
@@ -586,7 +578,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 loomsToProcess = [request.loomFile]
                 update = True
             else:
-                logger.error("Requested loom not in all looms")
+                logger.error("User requested a loom file wich is not available")
 
         for f in loomsToProcess:
             try:
@@ -850,7 +842,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.LoomUploadedReply()
 
 
-def serve(run_event, config):
+def serve(run_event, config: Dict[str, Any]) -> None:
     SCope.app_mode = config['app_mode']
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     scope = SCope(config=config)

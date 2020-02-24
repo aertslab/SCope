@@ -11,7 +11,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-RGB_COLORS = 255 * 255 * 255
+RGB_COLORS: int = 255 * 255 * 255
 
 class CellColorByFeatures():
 
@@ -74,12 +74,12 @@ class CellColorByFeatures():
     def get_cell_indices(self):
         return self.cell_indices
 
-    def normalise_vals(self, vals, v_max):
+    def normalise_vals(self, vals: np.ndarray, v_max: int) -> np.ndarray:
         vals = vals / v_max
-        vals = np.array([x if x <= 1 else 1 for x in vals])
+        vals = np.clip(vals / v_max, None, 1)
         vals = ((constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB ) * \
             ((vals - min(vals))) / (1 - min(vals))) + constant._LOWER_LIMIT_RGB
-        vals = [x if x <= constant._UPPER_LIMIT_RGB else constant._UPPER_LIMIT_RGB for x in vals]
+        vals = np.clip(vals, 0, constant._UPPER_LIMIT_RGB)
         return vals
 
     def setGeneFeature(self, request, feature, n):

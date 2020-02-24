@@ -1,6 +1,7 @@
 import functools
 from functools import lru_cache
 import re
+from typing import Any
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
 import logging
@@ -29,7 +30,7 @@ class SearchSpace(dict):
         if self.species != 'dmel':
             self.cross_species = ''
 
-    def add_element(self, element, element_type):
+    def add_element(self, element: str, element_type: str) -> None:
         if element_type == 'gene' and self.cross_species == '' and len(self.gene_mappings) > 0:
             if self.gene_mappings[element] != element:
                 self[('{0}'.format(str(element)).casefold(), element, element_type)] = self.gene_mappings[element]
@@ -38,7 +39,7 @@ class SearchSpace(dict):
         else:
             self[(element.casefold(), element, element_type)] = element
 
-    def add_elements(self, elements, element_type):
+    def add_elements(self, elements: Any, element_type: Any) -> None:
         for element in elements:
             self.add_element(element=element, element_type=element_type)
 
@@ -66,13 +67,13 @@ class SearchSpace(dict):
                 self.add_markers(element_type='region_gene_link')
         return self
 
-    def add_cross_species_genes(self):
+    def add_cross_species_genes(self) -> None:
         if self.cross_species == 'hsap' and self.species == 'dmel':
             self.add_elements(elements=dfh.DataFileHandler.hsap_to_dmel_mappings.keys(), element_type='gene')
         elif self.cross_species == 'mmus' and self.species == 'dmel':
             self.add_elements(elements=dfh.DataFileHandler.mmus_to_dmel_mappings.keys(), element_type='gene')
 
-    def add_genes(self):
+    def add_genes(self) -> None:
         # Add genes to search space
         if len(self.gene_mappings) > 0:
             genes = set(self.loom.get_genes())
@@ -81,7 +82,7 @@ class SearchSpace(dict):
         else:
             self.add_elements(elements=self.loom.get_genes(), element_type='gene')
 
-    def add_clusterings(self):
+    def add_clusterings(self) -> None:
         for clustering in self.meta_data['clusterings']:
             all_clusters = ['All Clusters']
             for cluster in clustering['clusters']:
@@ -90,7 +91,7 @@ class SearchSpace(dict):
         self.add_markers(element_type='marker_gene')
         self.add_cluster_annotations()
 
-    def add_cluster_annotations(self):
+    def add_cluster_annotations(self) -> None:
         for clustering in self.meta_data['clusterings']:
             clusteringID = int(clustering['id'])
             element_type = 'cluster_annotation'
@@ -106,14 +107,14 @@ class SearchSpace(dict):
                     else:
                         self[(annotation.casefold(), annotation, element_type)] = [f'{clusteringID}_{clusterID}']
 
-    def add_regulons(self):
+    def add_regulons(self) -> None:
         if self.loom.has_motif_and_track_regulons():
             self.add_elements(elements=self.loom.get_regulons_AUC(regulon_type='motif').dtype.names + self.loom.get_regulons_AUC(regulon_type='track').dtype.names, element_type='regulon')
         else:
             self.add_elements(elements=self.loom.get_regulons_AUC().dtype.names, element_type='regulon')
         self.add_markers(element_type='regulon_target')
 
-    def add_markers(self, element_type='regulon_target'):
+    def add_markers(self, element_type='regulon_target') -> None:
         loom = self.loom.loom_connection
         if element_type == 'regulon_target':
             if self.loom.has_motif_and_track_regulons():
@@ -148,13 +149,13 @@ class SearchSpace(dict):
                     else:
                         self[(gene.casefold(), gene, element_type)] = [region]
 
-    def add_annotations(self):
+    def add_annotations(self) -> None:
         annotations = []
         for annotation in self.meta_data['annotations']:
             annotations.append(annotation['name'])
         self.add_elements(elements=annotations, element_type='annotation')
 
-    def add_metrics(self):
+    def add_metrics(self) -> None:
         metrics = []
         for metric in self.meta_data['metrics']:
             metrics.append(metric['name'])

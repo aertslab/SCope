@@ -471,11 +471,17 @@ message getORCIDStatusReply {
   bool active=1;
 }
 
+message orcidInfoMessage {
+  string orcidName=1;
+  string orcidID=2;
+  string orcidUUID=3;
+}
+
 message setColabAnnotationDataRequest {
   string loomFilePath=1;
   int32 clusteringID=2;
   int32 clusterID=3;
-  orcidInfo orcidInfo=4;
+  orcidInfoMessage orcidInfo=4;
   CollabAnnoData annoData=5;
 }
 
@@ -484,17 +490,11 @@ message setColabAnnotationDataReply {
   string message=2;
 }
 
-message orcidInfo {
-  string orcidName=1;
-  string orcidID=2;
-  string orcidUUID=3;
-}
-
 message voteAnnotationRequest {
   string loomFilePath=1;
   int32 clusteringID=2;
   int32 clusterID=3;
-  orcidInfo orcidInfo=4;
+  orcidInfoMessage orcidInfo=4;
   CollabAnnoData annoData=5;
   string direction=6;
 }

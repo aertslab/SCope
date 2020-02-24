@@ -12,6 +12,7 @@ import sys
 import logging
 import json
 import secrets
+from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 
@@ -34,12 +35,12 @@ class SCopeServer():
         self.config = config
 
 
-    def start_bind_server(self):
+    def start_bind_server(self) -> None:
         logger.debug(f"Starting bind server on port {self.config['xPort']}")
         self.xs_thread = threading.Thread(target=xs.run, args=(self.run_event,), kwargs={'port': self.config['xPort']})
         self.xs_thread.start()
 
-    def start_data_server(self):
+    def start_data_server(self) -> None:
         logger.debug(f"Starting data server on port {self.config['gPort']}. app_mode: {self.config['app_mode']}")
         self.gs_thread = threading.Thread(target=gs.serve, args=(self.run_event, self.config,))
         logger.debug(f"Starting upload server on port {self.config['pPort']}")
@@ -47,12 +48,12 @@ class SCopeServer():
         self.gs_thread.start()
         self.ps_thread.start()
 
-    def start_scope_server(self):
+    def start_scope_server(self) -> None:
         self.start_data_server()
         if not self.config['app_mode']:
             self.start_bind_server()
 
-    def wait(self):
+    def wait(self) -> None:
         try:
             while True:
                 time.sleep(0.1)
@@ -70,13 +71,13 @@ class SCopeServer():
                 self.xs_thread.join()
             logger.info('Servers successfully terminated. Exiting.')
 
-    def run(self):
+    def run(self) -> None:
         # Unbuffer the standard output: important for process communication
-        sys.stdout = su.Unbuffered(sys.stdout)
+        sys.stdout = su.Unbuffered(sys.stdout) # type: ignore
         self.start_scope_server()
         self.wait()
 
-def log_ascii_header():
+def log_ascii_header() -> None:
     logger.info('''\n
 
   /$$$$$$   /$$$$$$                                       /$$$$$$
@@ -92,7 +93,7 @@ def log_ascii_header():
                               |__/
         ''')
 
-def generate_config(args):
+def generate_config(args) -> Dict[str, Any]:
     if args.config_file is not None:
         if not os.path.isfile(args.config_file):
             raise FileNotFoundError(f'The config file {args.config_file} does not exist!')
@@ -116,20 +117,16 @@ def generate_config(args):
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
-    for port_name, port_arg in {"gPort": args.g_port, "pPort": args.p_port, "xPort": args.x_port}.items():
-        if config.get(port_name) != port_arg :
-            config[port_name] = port_arg
+    config = {**config, **{"gPort": args.g_port, "pPort": args.p_port, "xPort": args.x_port, "app_mode": args.app_mode}}
     
-    config['app_mode'] = args.app_mode
-
     return config
 
-def run():
+def run() -> None:
     log_ascii_header()
     logger.info("Running SCope Server in production mode...")
 
     # Unbuffer the standard output: important for process communication
-    sys.stdout = su.Unbuffered(sys.stdout)
+    sys.stdout = su.Unbuffered(sys.stdout)  # type: ignore
 
     import argparse
     parser = argparse.ArgumentParser(description='Launch the scope server')
@@ -153,6 +150,5 @@ def run():
     # Start an instance of SCope Server
     scope_server = SCopeServer(config)
     scope_server.run()
-    
-if __name__ == '__main__':
-    run()
+    if __name__ == '__main__':
+        run()

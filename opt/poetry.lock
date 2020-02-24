@@ -414,6 +414,17 @@ python-versions = "*"
 version = "0.4.3"
 
 [[package]]
+category = "dev"
+description = "Generate mypy stub files from protobuf specs"
+name = "mypy-protobuf"
+optional = false
+python-versions = "*"
+version = "1.19"
+
+[package.dependencies]
+protobuf = ">=3.6.0"
+
+[[package]]
 category = "main"
 description = "Python package for creating and manipulating graphs and networks"
 name = "networkx"
@@ -890,7 +901,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "de4fe07ab5dce2deb3d8c2629b7fa43298c7ec4f881dd6577a6e11ba4262130c"
+content-hash = "9d715acb1a76a80af960d23d75cf6d2121111d6c4de6284b0e1ec055f882fefe"
 python-versions = "^3.6.1"
 
 [metadata.files]
@@ -1244,6 +1255,10 @@ mypy = [
 mypy-extensions = [
     {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
     {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
+]
+mypy-protobuf = [
+    {file = "mypy-protobuf-1.19.tar.gz", hash = "sha256:9a5c8e793778b4b13a43366ed9e717c5f9a5e1981a4424f655b0e62c5da7b5f1"},
+    {file = "mypy_protobuf-1.19-py3-none-any.whl", hash = "sha256:fc52c201e71bcb7955c4a6966d85eb38dcb282a459483a624e8bd4b19aa3840c"},
 ]
 networkx = [
     {file = "networkx-2.4-py3-none-any.whl", hash = "sha256:cdfbf698749a5014bf2ed9db4a07a5295df1d3a53bf80bf3cbd61edf9df05fa1"},
