@@ -2,6 +2,7 @@ import React from 'react'
 import { Search, Input, Dropdown, Select, Icon, Segment } from 'semantic-ui-react'
 import { BackendAPI } from './API'
 import ReactGA from 'react-ga';
+import _ from "lodash"
 
 export default class CollabAnnoGeneSearch extends React.Component {
 	
@@ -84,17 +85,9 @@ export default class CollabAnnoGeneSearch extends React.Component {
 			this.call = gbc.services.scope.Main.getFeatures(query, (err, response) => {
 				if (DEBUG) console.log("getFeatures", response);
 				if (response != null) {
-					let genes = [];
-
-					for (var i = 0; i < response.feature.length; i++) {
-						let f = response.feature[i];
-						let ft = response.featureType[i];
-						let d = response.featureDescription[i];
-						// Gene
-						if (ft == 'gene') {
-							genes.push({ "text": f, "description": d , "key": f, "value": f});
-						}
-					};
+					const genes = _.zip(response.feature, response.featureType, response.featureDescription)
+					.filter(([_, featureType, __]) => featureType === 'gene')
+					.map(([feature, _, featureDescription]) => {return {"text": feature, "description": featureDescription, "key": feature, "value": feature}})
 					console.log(this.state)
 					console.log(this.props)
 					this.setState({

@@ -235,29 +235,31 @@ class ViewerSidebar extends Component {
 					let column = {
 						Header: header,
 						id: id,
-					}
+					};
 					if(accessor != null) {
-						column["accessor"] = d => d[accessor]
+						column["accessor"] = d => d[accessor];
 					}
 					if(cell != null) {
-						column["Cell"] = props => cell(props)
+						column["Cell"] = props => cell(props);
 					}
-					return column
-				}
+					return column;
+				};
 
 				let newCellTypeAnnoColumn = (header, id, accessor, cell) => {
 					let column = {
 						Header: header,
 						id: id,
-					}
+					};
+
 					if(accessor != null) {
-						column["accessor"] = d => d[accessor]
+						column["accessor"] = d => d[accessor];
 					}
+
 					if(cell != null) {
-						column["Cell"] = props => cell(props)
+						column["Cell"] = props => cell(props);
 					}
-					return column
-				}
+					return column;
+				};
 
 				if (md.cellTypeAnno) {
 					if (md.cellTypeAnno.length > 0){ 
