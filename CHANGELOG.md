@@ -1,6 +1,6 @@
 # Changelog
 
-February 18, 2020
+February 24, 2020
 * Version 1.8.0
 	* Add GDPR compliant cookie warning
 	* Implement login with ORCID ID
@@ -9,7 +9,7 @@ February 18, 2020
 		* Clusters can now be annotated with controlloed vocabularies (via [EBI OLS](https://www.ebi.ac.uk/ols/index)) or free text.
 		* Other users can vote on annotations
 		* Once added, annotations can be searched by other users	
-	* Expand config options
+	* Expand config options and enable use of config.json file to be passed at runtime
 	* Decrease page size on marker tables for performance
 	* Fix a bug in colors overflowing into other channels
 	* Add legend on compare tab
@@ -18,9 +18,13 @@ February 18, 2020
 	* Improve loading of looms when only one is required
 	* Fix issue displaying targets of regulons without all metadata
 	* Limit search results for single letter queries
-	* Various other fixes and performance increases (See commit history)
+	* Save generated search spaces to disc to improve loading times after server has been restarted
 	* Switch to path based store for active connections
 		* This propagates changes to a file to all active connections (when triggered)
+	* Begin implementation of [Python type hints](https://docs.python.org/3/library/typing.html)
+	* General code cleanup
+	* Generate mypy typings on protobuf creation
+	* Various other fixes and performance increases (See commit history)
 
 January 24, 2020
 * Version 1.7.3
