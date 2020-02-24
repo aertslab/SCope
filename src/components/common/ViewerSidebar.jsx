@@ -5,7 +5,7 @@ import { Header, Grid, Input, Icon, Tab, Label, Button, Progress, Popup } from '
 import { BackendAPI } from '../common/API'
 import Metadata from '../common/Metadata'
 import ReactGA from 'react-ga';
-import {Popup as RPopup} from 'react-popup'
+import {Popup as Alert} from 'react-popup'
 
 import ReactTable from "react-table";
 import "react-table/react-table.css";
@@ -150,7 +150,7 @@ class ViewerSidebar extends Component {
 
 				this.handleAnnoUpdate = (feature, i) => {
 					if (this.state.newAnnoName != '') {
-						RPopup.create({
+						Alert.create({
 							title: "BETA: Annotation Change!",
 							content: <p>{["You are about to ", 
 										  <b>permanently</b>, 
@@ -170,7 +170,7 @@ class ViewerSidebar extends Component {
 									text: 'Cancel',
 									className: 'danger',
 									action: function () {
-										RPopup.close()
+										Alert.close()
 									}
 								}],
 								right: [{
@@ -178,7 +178,7 @@ class ViewerSidebar extends Component {
 									className: 'success',
 									action: () => {
 										BackendAPI.setAnnotationName(feature, this.state.newAnnoName, i, this.props.match.params.uuid)
-										RPopup.close()
+										Alert.close()
 									},
 									}]
 
@@ -186,7 +186,7 @@ class ViewerSidebar extends Component {
 						});
 					}
 					if (this.state.newAnnoName === '') {
-						RPopup.alert('You must enter a new annotation')
+						Alert.alert('You must enter a new annotation')
 					}
 				}
 
