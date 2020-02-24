@@ -3,7 +3,6 @@ import _ from "lodash";
 import React, { Component } from "react";
 import { Header, Search, Grid, Label } from "semantic-ui-react";
 import { BackendAPI } from '../common/API'
-import axios from "axios";
 
 const resultRenderer = entry => {
     return (
@@ -52,16 +51,20 @@ export default class OLSAutocomplete extends Component {
 
     queryOLS = query => {
         let metadata = BackendAPI.getActiveLoomMetadata()
-        let ontology = metadata.fileMetaData.species == "dmel" ? "fbbt": "cl" // cl for Human & Mouse
-        axios
-            .get("https://www.ebi.ac.uk/ols/api/select?q=" + query + "&ontology="+ ontology)
-            .then(response => {
-                this.setState({ results: response.data.response.docs });
+    
+        let ontology = metadata.fileMetaData.species == "dmel" ? "fbbt" : "cl" // cl for Human & Mouse
+        const request = new Request("https://www.ebi.ac.uk/ols/api/select?q=" + query + "&ontology=" + ontology)
+        fetch(request).then(response => {
+                response.json().then(data => {
+                    this.setState({
+                        results: data.response.docs
+                    });
+                })
             })
-            .catch(function (error) {
+            .catch(function(error) {
                 console.log(error);
             })
-            .finally(function () { });
+            .finally(function() {});
     };
 
     handleSearchChange = (e, { value }) => {

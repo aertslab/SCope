@@ -34,7 +34,6 @@
   "dependencies": {
     "@types/google-protobuf": "^3.2.7",
     "appdirs": "^1.1.0",
-    "axios": "^0.19.0",
     "bitlyapi": "^1.0.9",
     "command-exists": "^1.2.6",
     "d3": "^4.12.0",
