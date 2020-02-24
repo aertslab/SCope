@@ -27,13 +27,13 @@ jobs:
           working_directory: ./opt
           args: run pylint-fail-under --fail_under "-8.1" --rcfile pyproject.toml scopeserver
 
-#     - name: Run black
-#       uses: abatilo/actions-poetry@v1.5.0
-#       with:
-#         python_version: ${{ matrix.python-version }}
-#         poetry_version: 1.0.3
-#         working_directory: ./opt
-#         args: run black --check .
+      - name: Run black
+        uses: abatilo/actions-poetry@v1.5.0
+        with:
+          python_version: ${{ matrix.python-version }}
+          poetry_version: 1.0.3
+          working_directory: ./opt
+          args: run black --check .
 
       - name: Run mypy
         uses: abatilo/actions-poetry@v1.5.0
