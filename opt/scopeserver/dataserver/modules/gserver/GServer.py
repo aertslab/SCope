@@ -477,8 +477,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     try:
                         motifName = os.path.basename(regulon['motifData'])
                     except Exception as e:
-                        logger.error("Exception raised")
-                        logger.error(e)
+                        logger.error(f"Exception raised {e}")
                         motifName = None
                     break
 

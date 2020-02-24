@@ -134,8 +134,7 @@ class DataFileHandler():
                         try:
                             uuid, sessionMode = line.rstrip('\n').split('\t')
                         except Exception as e:
-                            logger.error("Exception raised")
-                            logger.error(e)
+                            logger.error(f"Exception raised {e}")
                             uuid = line.rstrip('\n')
                             sessionMode = 'rw'
                         self.permanent_UUIDs.add(uuid)
