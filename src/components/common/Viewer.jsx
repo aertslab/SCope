@@ -6,7 +6,7 @@ import { Dimmer, Loader } from 'semantic-ui-react'
 import ReactResizeDetector from 'react-resize-detector';
 import ReactGA from 'react-ga';
 import zlib from 'zlib';
-import {Popup as Alert} from 'react-popup'
+import Alert from 'react-popup';
 
 const DEFAULT_POINT_COLOR = 'A6A6A6';
 const VIEWER_MARGIN = 5;

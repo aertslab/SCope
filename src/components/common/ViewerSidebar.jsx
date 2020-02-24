@@ -5,7 +5,7 @@ import { Header, Grid, Input, Icon, Tab, Label, Button, Progress, Popup } from '
 import { BackendAPI } from '../common/API'
 import Metadata from '../common/Metadata'
 import ReactGA from 'react-ga';
-import {Popup as Alert} from 'react-popup'
+import Alert from 'react-popup';
 
 import ReactTable from "react-table";
 import "react-table/react-table.css";

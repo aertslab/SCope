@@ -21,7 +21,7 @@ import Regulon from './pages/Regulon';
 import Compare from './pages/Compare';
 import Tutorial from './pages/Tutorial';
 import About from './pages/About';
-import Popup from 'react-popup';
+import Alert from 'react-popup';
 import 'react-popup/style.css'
 
 const pako = require('pako');
@@ -183,7 +183,7 @@ class App extends Component {
 				>
 						This website uses cookies to enhance the user experience and to store user information for annotation and access purposes.
 				</CookieConsent>
-				<Popup /> {/* Needed for react popup to function. Do not remove */}
+				<Alert /> {/* Needed for react popup to function. Do not remove */}
 			</div>
 		);
 	}

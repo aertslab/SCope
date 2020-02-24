@@ -5,8 +5,8 @@ import { BackendAPI } from './common/API';
 import UploadModal from './common/UploadModal';
 import Slider, { Range } from 'rc-slider';
 import ReactGA from 'react-ga';
-import FileDownloader from '../js/http'
-import {Popup as Alert} from 'react-popup'
+import FileDownloader from '../js/http';
+import Alert from 'react-popup';
 
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
 const TooltipSlider = createSliderWithTooltip(Slider);
