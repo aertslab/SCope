@@ -117,5 +117,15 @@
   },
   "optionalDependencies": {
     "electron-installer-debian": "^0.8.1"
+  },
+  "prettier": {
+    "endOfLine": "lf",
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": true,
+    "jsxSingleQuote": true,
+    "jsxBracketSameLine": true,
+    "arrowParens": "always"
   }
 }
