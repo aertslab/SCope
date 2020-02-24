@@ -4,9 +4,13 @@
     "localHostAddress": "127.0.0.1",
     "httpProtocol": "http",
     "wsProtocol": "ws",
-    "mPort": "55850",
-    "pPort": "55851",
-    "xPort": "55852",
-    "gPort": "55853",
-    "reverseProxyOn": false
+    "mPort": 55850,
+    "pPort": 55851,
+    "xPort": 55852,
+    "gPort": 55853,
+    "reverseProxyOn": false,
+    "orcidAPIClientID": "",
+    "orcidAPIClientSecret": "",
+    "orcidAPIRedirectURI": "",
+    "dataHashSecret": ""
 }

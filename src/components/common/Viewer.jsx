@@ -6,7 +6,7 @@ import { Dimmer, Loader } from 'semantic-ui-react'
 import ReactResizeDetector from 'react-resize-detector';
 import ReactGA from 'react-ga';
 import zlib from 'zlib';
-import Popup from 'react-popup'
+import Alert from 'react-popup';
 
 const DEFAULT_POINT_COLOR = 'A6A6A6';
 const VIEWER_MARGIN = 5;
@@ -790,7 +790,7 @@ export default class Viewer extends Component {
 		BackendAPI.getConnection().then((gbc) => {
 			gbc.services.scope.Main.getCellColorByFeatures(query, (err, response) => {
 				if(response.error !== null) {
-					Popup.alert(response.error.message, response.error.type);
+					Alert.alert(response.error.message, response.error.type);
 				} else {
 					if (DEBUG) console.log(this.props.name, 'getFeatureColors', response);
 					// Convert object to ArrayBuffer

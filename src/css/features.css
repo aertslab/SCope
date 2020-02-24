@@ -18,21 +18,32 @@ a.active.item.annotation {
 	padding: 0px !important;
 }
 
-  .highlight-enter {
+.highlight-enter {
 	background: white;
-  }
+}
 
-  .highlight-enter.highlight-enter-active {
+.highlight-enter.highlight-enter-active {
 	background: yellow;
-  }
+}
 
-  .highlight-leave {
+.highlight-leave {
 	background: yellow;
 	opacity: 1;
-  }
+}
 
-  .highlight-leave.highlight-leave-active {
+.highlight-leave.highlight-leave-active {
 	background: white;
 	opacity: 0;
 	transition: opacity 10ms ease-in;
-  }
+}
+
+.ui.modal.transition.visible.active.collab-anno {
+	margin-top: 2% !important;
+	position: absolute;
+	left: 30%;
+	/* transform: translate(-50%, -50%); */
+}
+
+.collab-anno-drop>.search {
+	width: 100% !important;
+}

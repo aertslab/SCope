@@ -37,6 +37,11 @@ service Main {
   rpc downloadSubLoom (DownloadSubLoomRequest) returns (stream DownloadSubLoomReply) {}
   rpc setAnnotationName (SetAnnotationNameRequest) returns (SetAnnotationNameReply) {}
   rpc setLoomHierarchy (SetLoomHierarchyRequest) returns (SetLoomHierarchyReply) {}
+  rpc getORCID (getORCIDRequest) returns (getORCIDReply) {}
+  rpc getORCIDStatus (getORCIDStatusRequest) returns (getORCIDStatusReply) {}
+  rpc setColabAnnotationData (setColabAnnotationDataRequest) returns (setColabAnnotationDataReply) {}
+  rpc voteAnnotation (voteAnnotationRequest) returns (voteAnnotationReply) {}
+  rpc getNextCluster (getNextClusterRequest) returns (FeatureReply) {} 
 }
 
 message ErrorReply {
@@ -153,9 +158,40 @@ message ClusterMarkerMetric {
   string description=3;
 }
 
+message CollabAnnoData {
+  string curator_name=1;
+  string curator_id=2; 
+  int64 timestamp=3;
+  string obo_id=4;
+  string ols_iri=5;
+  string annotation_label=6;
+  repeated string markers=7;
+  string publication=8;
+  string comment=9;
+}
+
+message CollabAnnoVoter {
+  string voter_name=1;
+  string voter_id=2;
+  bool voter_hash=3;
+}
+
+message CollabAnnoVotes {
+  int32 total=1;
+  repeated CollabAnnoVoter voters=2;
+}
+
+message CellTypeAnnotation {
+  CollabAnnoData data=1;
+  bool validate_hash=2;
+  CollabAnnoVotes votes_for=3;
+  CollabAnnoVotes votes_against=4;
+}
+
 message ClusterAnnotation {
   int32 id=1;
   string description=2;
+  repeated CellTypeAnnotation cell_type_annotation=3;
 }
 
 message Clustering {
@@ -198,6 +234,7 @@ message FileMetaData {
   bool hasClusterings=3;
   bool hasExtraEmbeddings=4;
   bool hasGlobalMeta=5;
+  string species=6;
 }
 
 message FeatureValues {
@@ -248,6 +285,7 @@ message MarkerGenesReply {
 
 message MyLoomsRequest {
   string UUID=1;
+  string loomFile=2;
 }
 
 message LoomHeierarchy {
@@ -269,6 +307,7 @@ message MyLoom {
 
 message MyLoomsReply {
   repeated MyLoom myLooms=1;
+  bool update=2;
 }
 
 message TranslateLassoSelectionRequest {
@@ -411,4 +450,63 @@ message SetLoomHierarchyRequest {
 
 message SetLoomHierarchyReply {
   bool success=1;
+}
+
+message getORCIDRequest {
+  string auth_code=1;
+}
+
+message getORCIDReply {
+  string orcid_scope_uuid=1;
+  string name=2;
+  string orcid_id=3;
+  bool success=4;
+}
+
+message getORCIDStatusRequest {
+
+}
+
+message getORCIDStatusReply {
+  bool active=1;
+}
+
+message orcidInfoMessage {
+  string orcidName=1;
+  string orcidID=2;
+  string orcidUUID=3;
+}
+
+message setColabAnnotationDataRequest {
+  string loomFilePath=1;
+  int32 clusteringID=2;
+  int32 clusterID=3;
+  orcidInfoMessage orcidInfo=4;
+  CollabAnnoData annoData=5;
+}
+
+message setColabAnnotationDataReply {
+  bool success=1;
+  string message=2;
+}
+
+message voteAnnotationRequest {
+  string loomFilePath=1;
+  int32 clusteringID=2;
+  int32 clusterID=3;
+  orcidInfoMessage orcidInfo=4;
+  CollabAnnoData annoData=5;
+  string direction=6;
+}
+
+message voteAnnotationReply {
+  bool success=1;
+  string message=2;
+}
+
+message getNextClusterRequest {
+  string loomFilePath=1;
+  int32 clusteringID=2;
+  int32 clusterID=3;
+  string direction=4;
 }

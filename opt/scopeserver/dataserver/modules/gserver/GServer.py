@@ -15,8 +15,9 @@ import zlib
 import base64
 import threading
 import pickle
+import requests
 import uuid
-from typing import DefaultDict, Set
+from typing import DefaultDict, Set, List, Dict, Any, Tuple
 from collections import OrderedDict, defaultdict, deque
 from functools import lru_cache
 from itertools import compress
@@ -49,7 +50,13 @@ class SCope(s_pb2_grpc.MainServicer):
     app_name = 'SCope'
     app_author = 'Aertslab'
 
-    def __init__(self):
+    orcid_active = False
+
+    def __init__(self, config: Dict[str, str]):
+
+        self.config = config
+        self.app_mode = False
+
         self.dfh = dfh.DataFileHandler()
         self.lfh = lfh.LoomFileHandler()
 
@@ -57,13 +64,81 @@ class SCope(s_pb2_grpc.MainServicer):
         self.dfh.set_global_data()
         self.lfh.set_global_data()
         self.dfh.read_UUID_db()
+        self.dfh.read_ORCID_db()
 
-    def update_global_data(self):
+        self.check_ORCID_connection()
+
+    def update_global_data(self) -> None:
         self.dfh.set_global_data()
         self.lfh.set_global_data()
 
+    def check_ORCID_connection(self) -> None:
+        for i in ['orcidAPIClientID', 'orcidAPIClientSecret', 'orcidAPIRedirectURI']:
+            if i not in self.config.keys():
+                self.orcid_active = False
+                return
+
+        r = requests.post('https://orcid.org/oauth/token',
+                          data={'client_id': self.config['orcidAPIClientID'],
+                                'client_secret': self.config['orcidAPIClientSecret'],
+                                'grant_type': 'client_credentials',
+                                'scope': '/read-public'
+                                }
+                          )
+        if r.status_code != 200:
+            logger.error(f'ORCID connection failed! Please check your credentials. See DEBUG output for more details.')
+            logger.debug(f'HTTP Code: {r.status_code}')
+            logger.debug(f'ERROR: {r.text}')
+            self.orcid_active = False
+        else:
+            logger.info('ORCID connection successful. Users will be able to authenticate.')
+            logger.debug(f"SUCCESS: {r.text}")
+            self.orcid_active = True
+
+    def getORCIDStatus(self, request, context):
+        return s_pb2.getORCIDStatusReply(active=self.orcid_active)
+
+    def getORCID(self, request, context):
+        auth_code = request.auth_code
+        logger.debug(f'Recieved code "{auth_code}" from frontend.')
+
+        if self.orcid_active:
+            r = requests.post('https://orcid.org/oauth/token',
+                              data={'client_id': self.config['orcidAPIClientID'],
+                                    'client_secret': self.config['orcidAPIClientSecret'],
+                                    'grant_type': 'authorization_code',
+                                    'code': auth_code,
+                                    'redirect_uri': self.config['orcidAPIRedirectURI']
+                                    }
+                              )
+
+        if r.status_code != 200 or not self.orcid_active:
+            logger.debug(f'ERROR: {r.status_code}')
+            logger.debug(f'ERROR: {r.text}')
+            return s_pb2.getORCIDReply(
+                orcid_scope_uuid="null",
+                name='null',
+                orcid_id="null",
+                success=False
+            )
+        else:
+            logger.debug(f"SUCCESS: {r.text}")
+            orcid_data = json.loads(r.text)
+            success = True
+
+        orcid_scope_uuid = str(uuid.uuid4())
+
+        self.dfh.add_ORCIDiD(orcid_scope_uuid, orcid_data['name'], orcid_data['orcid'])
+
+        return s_pb2.getORCIDReply(
+            orcid_scope_uuid=orcid_scope_uuid,
+            name=orcid_data['name'],
+            orcid_id=orcid_data['orcid'],
+            success=success
+        )
+
     @lru_cache(maxsize=256)
-    def get_features(self, loom, query):
+    def get_features(self, loom: Loom, query: str):
         logger.debug('Searching for {0}'.format(query))
         start_time = time.time()
 
@@ -88,12 +163,10 @@ class SCope(s_pb2_grpc.MainServicer):
         queryCF = query.casefold()
         res = [x for x in search_space.keys() if queryCF in x[0]]
 
-        order = deque()
-
-        perfect_match = []
-        good_match = []
-        bad_match = []
-        no_match = []
+        perfect_match: List[object] = []
+        good_match: List[object] = []
+        bad_match: List[object] = []
+        no_match: List[object] = []
 
         for n, r in enumerate(res):
             if r[1] == query or r[0] == queryCF:
@@ -105,13 +178,14 @@ class SCope(s_pb2_grpc.MainServicer):
             if query in r[0]:
                 bad_match.append(r)
                 continue
-            if n not in order:
-                no_match.append(r)
-                continue
 
-        res = sorted(perfect_match) + sorted(good_match) + sorted(bad_match) + sorted(no_match)
 
-        collapsedResults = OrderedDict()
+        if len(query) == 1:
+            res = sorted(perfect_match)
+        else:
+            res = sorted(perfect_match) + sorted(good_match) + sorted(bad_match) + sorted(no_match)
+
+        collapsedResults: Dict[Any, Any] = OrderedDict()
         if cross_species == '':
             for r in res:
                 if type(search_space[r]) == list:
@@ -131,7 +205,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     if (dg[0], r[2]) not in collapsedResults.keys():
                         collapsedResults[(dg[0], r[2])] = (r[1], dg[1])
 
-        descriptions = {x: '' for x in collapsedResults.keys() if x[1] not in ['region_gene_link', 'regulon_target', 'marker_gene']}
+        descriptions = {x: '' for x in collapsedResults.keys() if x[1] not in ['region_gene_link', 'regulon_target', 'marker_gene', 'cluster_annotation']}
 
         for r in list(collapsedResults.keys()):
             if cross_species == '':
@@ -152,12 +226,28 @@ class SCope(s_pb2_grpc.MainServicer):
                         descriptions[(regulon, 'regulon')] += description
                     del(collapsedResults[r])
 
+                elif r[1] == 'cluster_annotation':
+                    for cluster in r[0]:
+                        clustering = int(cluster.split('_')[0])
+                        cluster = int(cluster.split('_')[1])
+                        clustering_name = loom.get_meta_data_clustering_by_id(clustering, secret=self.config['dataHashSecret'])["name"]
+                        cluster = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(clustering, cluster, secret=self.config['dataHashSecret'])
+                        cluster_name = cluster["description"]
+                        description = f'{collapsedResults[r][0]} is a suggested annotation of {cluster_name}'
+                        if (cluster_name, f'Clustering: {clustering_name}') not in collapsedResults.keys():
+                            collapsedResults[(cluster_name, f'Clustering: {clustering_name}')] = collapsedResults[r][0]
+                            descriptions[(cluster_name, f'Clustering: {clustering_name}')] = ''
+                        if descriptions[(cluster_name, f'Clustering: {clustering_name}')] != '':
+                            descriptions[(cluster_name, f'Clustering: {clustering_name}')] += ', '
+                        descriptions[(cluster_name, f'Clustering: {clustering_name}')] += description
+                    del(collapsedResults[r])
+
                 elif r[1] == 'marker_gene':
                     for cluster in r[0]:
                         clustering = int(cluster.split('_')[0])
                         cluster = int(cluster.split('_')[1])
-                        clustering_name = loom.get_meta_data_clustering_by_id(clustering)["name"]
-                        cluster = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(clustering, cluster)
+                        clustering_name = loom.get_meta_data_clustering_by_id(clustering, secret=self.config['dataHashSecret'])["name"]
+                        cluster = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(clustering, cluster, secret=self.config['dataHashSecret'])
                         cluster_name = cluster["description"]
                         description = f'{collapsedResults[r][0]} is a marker of {cluster_name}'
                         if (cluster_name, f'Clustering: {clustering_name}') not in collapsedResults.keys():
@@ -196,18 +286,13 @@ class SCope(s_pb2_grpc.MainServicer):
 
         logger.debug("{0} genes matching '{1}'".format(len(res), query))
         logger.debug("{0:.5f} seconds elapsed ---".format(time.time() - start_time))
-        res = {'feature': [r[0] for r in collapsedResults.keys()],
+        final_res = {'feature': [r[0] for r in collapsedResults.keys()],
                'featureType': [r[1] for r in collapsedResults.keys()],
                'featureDescription': [descriptions[r] for r in collapsedResults.keys()]}
-        return res
-
-    def compressHexColor(self, a):
-        a = int(a, 16)
-        a_hex3d = hex(a >> 20 << 8 | a >> 8 & 240 | a >> 4 & 15)
-        return a_hex3d.replace("0x", "")
+        return final_res
 
     @staticmethod
-    def get_vmax(vals):
+    def get_vmax(vals: np.ndarray) -> Tuple[np.float, np.float]:
         maxVmax = max(vals)
         vmax = np.percentile(vals, 99)
         if vmax == 0 and max(vals) != 0:
@@ -229,16 +314,16 @@ class SCope(s_pb2_grpc.MainServicer):
                     l_max_v_max = 0
                     loom = self.lfh.get_loom(loom_file_path=loomFilePath)
                     if request.featureType[n] == 'gene':
-                        vals, cell_indices = loom.get_gene_expression(
+                        vals, _ = loom.get_gene_expression(
                             gene_symbol=feature,
                             log_transform=request.hasLogTransform,
                             cpm_normalise=request.hasCpmTransform)
                         l_v_max, l_max_v_max = SCope.get_vmax(vals)
                     if request.featureType[n] == 'regulon':
-                        vals, cell_indices = loom.get_auc_values(regulon=feature)
+                        vals, _ = loom.get_auc_values(regulon=feature)
                         l_v_max, l_max_v_max = SCope.get_vmax(vals)
                     if request.featureType[n] == 'metric':
-                        vals, cell_indices = loom.get_metric(
+                        vals, _ = loom.get_metric(
                             metric_name=feature,
                             log_transform=request.hasLogTransform,
                             cpm_normalise=request.hasCpmTransform)
@@ -271,7 +356,7 @@ class SCope(s_pb2_grpc.MainServicer):
             elif request.featureType[n] == 'metric':
                 cell_color_by_features.setMetricFeature(request=request, feature=feature, n=n)
             elif request.featureType[n].startswith('Clustering: '):
-                cell_color_by_features.setClusteringFeature(request=request, feature=feature, n=n)
+                cell_color_by_features.setClusteringFeature(request=request, feature=feature, n=n, secret=self.config['dataHashSecret'])
                 if(cell_color_by_features.hasReply()):
                     return cell_color_by_features.getReply()
             else:
@@ -287,8 +372,23 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getCellAUCValuesByFeatures(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
-        vals, cellIndices = loom.get_auc_values(regulon=request.feature[0])
+        vals, _ = loom.get_auc_values(regulon=request.feature[0])
         return s_pb2.CellAUCValuesByFeaturesReply(value=vals)
+
+    def getNextCluster(self, request, context):
+        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        if request.direction == 'next':
+            next_clusterID = request.clusterID + 1
+        elif request.direction == 'previous':
+            next_clusterID = request.clusterID - 1
+
+        try:
+            cluster_metadata = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(request.clusteringID, next_clusterID, secret=self.config['dataHashSecret'])
+        except ValueError:
+            cluster_metadata = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(request.clusteringID, request.clusterID, secret=self.config['dataHashSecret'])
+
+        f = self.get_features(loom=loom, query=cluster_metadata['description'])
+        return s_pb2.FeatureReply(feature=[f['feature'][0]], featureType=[f['featureType'][0]], featureDescription=[f['featureDescription'][0]])
 
     def getCellMetaData(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
@@ -310,15 +410,15 @@ class SCope(s_pb2_grpc.MainServicer):
         auc_vals = []
         for regulon in request.selectedRegulons:
             if regulon != '':
-                vals, _ = gene_exp.append(loom.get_auc_values(regulon=regulon))
-                gene_exp.append(vals[[cell_indices]])
+                vals, _ = auc_vals.append(loom.get_auc_values(regulon=regulon))
+                auc_vals.append(vals[[cell_indices]])
         annotations = []
         for anno in request.annotations:
             if anno != '':
                 annotations.append(loom.get_ca_attr_by_name(name=anno)[cell_indices].astype(str))
 
         return s_pb2.CellMetaDataReply(clusterIDs=[s_pb2.CellClusters(clusters=x) for x in cell_clusters],
-                                       geneExpression=[s_pb2.FeatureValues(features=x) for x in gene_exp],
+                                       geneExpression=[s_pb2.FeatureValues(features=x) for x in auc_vals],
                                        aucValues=[s_pb2.FeatureValues(features=x) for x in gene_exp],
                                        annotations=[s_pb2.CellAnnotations(annotations=x) for x in annotations])
 
@@ -345,22 +445,41 @@ class SCope(s_pb2_grpc.MainServicer):
         success = loom.set_hierarchy(request.newHierarchy_L1, request.newHierarchy_L2, request.newHierarchy_L3)
         return s_pb2.SetLoomHierarchyReply(success=success)
 
+    def setColabAnnotationData(self, request, context):
+        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        success, message = loom.add_collab_annotation(request, self.config['dataHashSecret'])
+        return s_pb2.setColabAnnotationDataReply(success=success, message=message)
+
+    def voteAnnotation(self, request, context):
+        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        success, message = loom.annotation_vote(request, self.config['dataHashSecret'])
+        return s_pb2.voteAnnotationReply(success=success, message=message)
+
     def getRegulonMetaData(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        regulon_genes = None
+        autoThresholds = None
+        defaultThreshold = None
+        motifName = None
         regulon_genes = loom.get_regulon_genes(regulon=request.regulon)
 
         if len(regulon_genes) == 0:
             logger.error("Something is wrong in the loom file: no regulon found!")
 
         meta_data = loom.get_meta_data()
-        for regulon in meta_data['regulonThresholds']:
-            if regulon['regulon'] == request.regulon:
-                autoThresholds = []
-                for threshold in regulon['allThresholds'].keys():
-                    autoThresholds.append({"name": threshold, "threshold": regulon['allThresholds'][threshold]})
-                defaultThreshold = regulon['defaultThresholdName']
-                motifName = os.path.basename(regulon['motifData'])
-                break
+        if 'regulonThresholds' in meta_data:
+            for regulon in meta_data['regulonThresholds']:
+                if regulon['regulon'] == request.regulon:
+                    autoThresholds = []
+                    for threshold in regulon['allThresholds'].keys():
+                        autoThresholds.append({"name": threshold, "threshold": regulon['allThresholds'][threshold]})
+                    defaultThreshold = regulon['defaultThresholdName']
+                    try:
+                        motifName = os.path.basename(regulon['motifData'])
+                    except Exception as e:
+                        logger.error(f"Exception raised {e}")
+                        motifName = None
+                    break
 
         # min_gene_occurrence_mask = regulon_marker_metrics >= meta_data["regulonSettings"]["min_regulon_gene_occurrence"]
         # # Filter the regulon genes by threshold
@@ -412,7 +531,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
         genes = loom.get_cluster_marker_genes(clustering_id=request.clusteringID, cluster_id=request.clusterID)
         # Filter the MD clusterings by ID
-        md_clustering = loom.get_meta_data_clustering_by_id(id=request.clusteringID)
+        md_clustering = loom.get_meta_data_clustering_by_id(id=request.clusteringID, secret=self.config['dataHashSecret'])
         cluster_marker_metrics = None
 
         if "clusterMarkerMetrics" in md_clustering.keys():
@@ -443,6 +562,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getMyLooms(self, request, context):
         my_looms = []
+        update = False
         userDir = dfh.DataFileHandler.get_data_dir_path_by_file_type('Loom', UUID=request.UUID)
         if not os.path.isdir(userDir):
             for i in ['Loom', 'GeneSet', 'LoomAUCellRankings']:
@@ -452,42 +572,54 @@ class SCope(s_pb2_grpc.MainServicer):
 
         loomsToProcess = sorted(self.lfh.get_global_looms()) + sorted([os.path.join(request.UUID, x) for x in os.listdir(userDir)])
 
-        for f in loomsToProcess:
-            if f.endswith('.loom'):
-                with open(self.lfh.get_loom_absolute_file_path(f), 'r') as fh:
-                    loomSize = os.fstat(fh.fileno())[6]
-                loom = self.lfh.get_loom(loom_file_path=f)
-                if loom is None:
-                    continue
-                file_meta = loom.get_file_metadata()
-                if not file_meta['hasGlobalMeta']:
-                    try:
-                        loom.generate_meta_data()
-                    except Exception as e:
-                        logger.error(e)
+        if request.loomFile:
+            if request.loomFile in loomsToProcess:
+                loomsToProcess = [request.loomFile]
+                update = True
+            else:
+                logger.error("User requested a loom file wich is not available")
 
-                try:
-                    L1 = loom.get_global_attribute_by_name(name="SCopeTreeL1")
-                    L2 = loom.get_global_attribute_by_name(name="SCopeTreeL2")
-                    L3 = loom.get_global_attribute_by_name(name="SCopeTreeL3")
-                except AttributeError:
-                    L1 = 'Uncategorized'
-                    L2 = L3 = ''
-                my_looms.append(s_pb2.MyLoom(loomFilePath=f,
-                                             loomDisplayName=os.path.splitext(os.path.basename(f))[0],
-                                             loomSize=loomSize,
-                                             cellMetaData=s_pb2.CellMetaData(annotations=loom.get_meta_data_by_key(key="annotations"),
-                                                                             embeddings=loom.get_meta_data_by_key(key="embeddings"),
-                                                                             clusterings=loom.get_meta_data_by_key(key="clusterings")),
-                                             fileMetaData=file_meta,
-                                             loomHeierarchy=s_pb2.LoomHeierarchy(L1=L1,
-                                                                                 L2=L2,
-                                                                                 L3=L3)
-                                             )
-                                )
+        for f in loomsToProcess:
+            try:
+                if f.endswith('.loom'):
+                    with open(self.lfh.get_loom_absolute_file_path(f), 'r') as fh:
+                        loomSize = os.fstat(fh.fileno())[6]
+                    loom = self.lfh.get_loom(loom_file_path=f)
+                    if loom is None:
+                        continue
+                    file_meta = loom.get_file_metadata()
+                    if not file_meta['hasGlobalMeta']:
+                        try:
+                            loom.generate_meta_data()
+                            file_meta = loom.get_file_metadata()
+                        except Exception as e:
+                            logger.error('Failed to make metadata!')
+                            logger.error(e)
+
+                    try:
+                        L1 = loom.get_global_attribute_by_name(name="SCopeTreeL1")
+                        L2 = loom.get_global_attribute_by_name(name="SCopeTreeL2")
+                        L3 = loom.get_global_attribute_by_name(name="SCopeTreeL3")
+                    except AttributeError:
+                        L1 = 'Uncategorized'
+                        L2 = L3 = ''
+                    my_looms.append(s_pb2.MyLoom(loomFilePath=f,
+                                                 loomDisplayName=os.path.splitext(os.path.basename(f))[0],
+                                                 loomSize=loomSize,
+                                                 cellMetaData=s_pb2.CellMetaData(annotations=loom.get_meta_data_by_key(key="annotations"),
+                                                                                 embeddings=loom.get_meta_data_by_key(key="embeddings"),
+                                                                                 clusterings=loom.get_meta_data_by_key(key="clusterings", secret=self.config['dataHashSecret'])),
+                                                 fileMetaData=file_meta,
+                                                 loomHeierarchy=s_pb2.LoomHeierarchy(L1=L1,
+                                                                                     L2=L2,
+                                                                                     L3=L3)
+                                                 )
+                                    )
+            except ValueError:
+                pass
         self.dfh.update_UUID_db()
 
-        return s_pb2.MyLoomsReply(myLooms=my_looms)
+        return s_pb2.MyLoomsReply(myLooms=my_looms, update=update)
 
     def getUUID(self, request, context):
         if SCope.app_mode:
@@ -575,8 +707,9 @@ class SCope(s_pb2_grpc.MainServicer):
                 try:
                     os.remove(finalPath)
                     success = True
-                except:
+                except Exception as e:
                     logger.error(f'OS Error, couldn\'t remove file: {finalPath}')
+                    logger.error(e)
         else:
             logger.error(f'UUID: {request.UUID} is read-only, but requested to delete file {finalPath}')
         return s_pb2.DeleteUserFileReply(deletedSuccessfully=success)
@@ -591,8 +724,8 @@ class SCope(s_pb2_grpc.MainServicer):
         file_name = request.loomFilePath
         # Check if not a public loom file
         if '/' in request.loomFilePath:
-            l = request.loomFilePath.split("/")
-            file_name = l[1].split(".")[0]
+            loom = request.loomFilePath.split("/")
+            file_name = loom[1].split(".")[0]
 
         if(request.featureType == "clusterings"):
             a = list(filter(lambda x: x['name'] == request.featureName, meta_data["clusterings"]))
@@ -600,6 +733,8 @@ class SCope(s_pb2_grpc.MainServicer):
             cells = loom_connection.ca["Clusterings"][str(a[0]['id'])] == b['id']
             logger.debug("Number of cells in {0}: {1}".format(request.featureValue, np.sum(cells)))
             sub_loom_file_name = file_name + "_Sub_" + request.featureValue.replace(" ", "_").replace("/", "_")
+            if not os.path.exists(os.path.join(self.dfh.get_data_dirs()['Loom']['path'], "tmp")):
+                os.mkdir(os.path.join(self.dfh.get_data_dirs()['Loom']['path'], "tmp"))
             sub_loom_file_path = os.path.join(self.dfh.get_data_dirs()['Loom']['path'], "tmp", sub_loom_file_name + ".loom")
             # Check if the file already exists
             if os.path.exists(path=sub_loom_file_path):
@@ -617,6 +752,7 @@ class SCope(s_pb2_grpc.MainServicer):
             logger.debug("Subsetting {0} cluster from the active .loom...".format(request.featureValue))
             sub_matrix = None
             sub_selection = None
+            processed = 0
             for (_, selection, _) in loom_connection.scan(items=cells, axis=1):
                 if sub_matrix is None:
                     sub_matrix = loom_connection[:, selection]
@@ -705,12 +841,12 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.LoomUploadedReply()
 
 
-def serve(run_event, port=50052, app_mode=False):
-    SCope.app_mode = app_mode
+def serve(run_event, config: Dict[str, Any]) -> None:
+    SCope.app_mode = config['app_mode']
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    scope = SCope()
+    scope = SCope(config=config)
     s_pb2_grpc.add_MainServicer_to_server(scope, server)
-    server.add_insecure_port('[::]:{0}'.format(port))
+    server.add_insecure_port('[::]:{0}'.format(config['gPort']))
     server.start()
 
     # Let the main process know that GServer has started.
@@ -723,9 +859,3 @@ def serve(run_event, port=50052, app_mode=False):
     scope.dfh.get_uuid_log().close()
     scope.dfh.update_UUID_db()
     server.stop(0)
-
-
-if __name__ == '__main__':
-    run_event = threading.Event()
-    run_event.set()
-    serve(run_event=run_event)

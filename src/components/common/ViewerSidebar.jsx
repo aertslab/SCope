@@ -1,19 +1,29 @@
 import _ from 'lodash'
 import React, { Component, createRef } from 'react'
 import { withRouter } from 'react-router-dom';
-import { Grid, Input, Icon, Tab, Image, Button, Progress } from 'semantic-ui-react'
+import { Header, Grid, Input, Icon, Tab, Label, Button, Progress, Popup } from 'semantic-ui-react'
 import { BackendAPI } from '../common/API'
 import Metadata from '../common/Metadata'
 import ReactGA from 'react-ga';
-import Popup from 'react-popup'
+import Alert from 'react-popup';
 
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 import FileDownloader from '../../js/http'
+import { instanceOf } from 'prop-types';
+import { withCookies, Cookies } from 'react-cookie';
+
+
+import CollaborativeAnnotation from  './CollaborativeAnnotation'
 
 import { delimiter } from 'path';
+import { min } from 'moment';
 
 class ViewerSidebar extends Component {
+
+    static propTypes = {
+		cookies: instanceOf(Cookies).isRequired
+	}
 
 	constructor() {
 		super();
@@ -37,6 +47,31 @@ class ViewerSidebar extends Component {
 			this.props.onActiveFeaturesChange(features, id);
 			this.setState({activeFeatures: features, activeTab: parseInt(id) + 1});
 		};
+		this.setNewAnnotationName.bind(this)
+		this.onNewAnnotationChange.bind(this)
+	}
+
+	onNewAnnotationChange = (e) => {
+		this.setNewAnnotationName(e.target.value)
+	}
+
+	setNewAnnotationName = (newAnnoName) => {
+		this.setState({newAnnoName: newAnnoName})
+	}
+
+	gotoNextCluster = (i, direction) => {
+		BackendAPI.getNextCluster(this.state.activeFeatures[i].metadata['clusteringID'], this.state.activeFeatures[i].metadata['clusterID'], direction, (response) => {
+			BackendAPI.updateFeature(i, response.featureType[0], response.feature[0], response.featureType[0], response.featureDescription[0], this.props.match.params.page, (e) => {
+			})
+		})
+	}
+
+	updateMetadata = () => 	{
+		BackendAPI.queryLoomFiles(this.props.match.params.uuid, () => {
+			BackendAPI.getActiveFeatures().forEach( (f, n) => {
+				BackendAPI.updateFeature(n, f.type, f.feature, f.featureType, f.metadata ? f.metadata.description : null, "")
+			})
+		}, this.state.activeLoom )
 	}
 
 	render() {
@@ -99,7 +134,7 @@ class ViewerSidebar extends Component {
 
 			let colors = ["red", "green", "blue"]
 			let metadata = activeFeatures[i] && activeFeatures[i].feature ? "" : <div>No additional information shown for the feature queried in the <b style={{color: colors[i]}}>{colors[i]}</b> query box because it is empty. Additional information (e.g.: cluster markers, regulon motif, regulon target genes, ...) can be displayed here when querying clusters or regulons.<br/><br/></div>;
-
+			console.log(activeFeatures[i])
 			if (activeFeatures[i] && activeFeatures[i].metadata) {
 				let md = activeFeatures[i].metadata
 				if (md.motifName != 'NA.png' && !this.state.imageErrored) {
@@ -115,7 +150,7 @@ class ViewerSidebar extends Component {
 
 				this.handleAnnoUpdate = (feature, i) => {
 					if (this.state.newAnnoName != '') {
-						Popup.create({
+						Alert.create({
 							title: "BETA: Annotation Change!",
 							content: <p>{["You are about to ", 
 										  <b>permanently</b>, 
@@ -135,7 +170,7 @@ class ViewerSidebar extends Component {
 									text: 'Cancel',
 									className: 'danger',
 									action: function () {
-										Popup.close()
+										Alert.close()
 									}
 								}],
 								right: [{
@@ -143,7 +178,7 @@ class ViewerSidebar extends Component {
 									className: 'success',
 									action: () => {
 										BackendAPI.setAnnotationName(feature, this.state.newAnnoName, i, this.props.match.params.uuid)
-										Popup.close()
+										Alert.close()
 									},
 									}]
 
@@ -151,7 +186,7 @@ class ViewerSidebar extends Component {
 						});
 					}
 					if (this.state.newAnnoName === '') {
-						Popup.alert('You must enter a new annotation')
+						Alert.alert('You must enter a new annotation')
 					}
 				}
 
@@ -161,34 +196,227 @@ class ViewerSidebar extends Component {
 					return (
 						<Input
 							ref={this.state.newAnnoRef}
-							style={{"margin-bottom": "15px", width: "100%"}}
+							style={{"margin-bottom": "5px", width: "100%"}}
 							placeholder={activeFeatures[i].feature}
-							onChange={e => this.setState({newAnnoName: e.target.value})}
+							onChange={this.onNewAnnotationChange}
 							actionPosition="left"
 							action={{
 								onClick: () => {this.handleAnnoUpdate(activeFeatures[i], i);} ,
 								"data-tooltip": "PERMANENT CHANGE and forces refresh!",
 								"data-variation":"basic",
 								"data-position":"left center",
-								content: "Update Annotation"
+								content: "Update Description"
 							}}
+							value={this.state.newAnnoName}
 							/>
 					)}}
+				
+				let clusterControls = () => {
+					if(activeFeatures[i].featureType.startsWith("Cluster") && activeFeatures[i].feature != 'All Clusters' && BackendAPI.getLoomRWStatus() == "rw" && this.state.activePage == "gene") {					
+						return (
+							<Grid>
+								<Grid.Row centered>
+									<Header as="h3" textAlign="center">Cluster Controls</Header>
+								</Grid.Row>
+								<Grid.Row>{annotationBox()}</Grid.Row>
+								<Grid.Row>
+									<Button onClick={() => this.gotoNextCluster(i, 'previous')} className='change-cluster-button'>{<Icon name="long arrow alternate left"/>}Previous</Button>
+									<CollaborativeAnnotation feature={activeFeatures[i]} id={i}/>
+									<Button onClick={() => this.gotoNextCluster(i, 'next')} className='change-cluster-button'>Next{<Icon name="long arrow alternate right"/>}</Button>
+								</Grid.Row>	
+							</Grid>					
+							)
+					}
+				}
 
-				let markerTable = "", legendTable = "", downloadSubLoomButton = () => "";
+				let markerTable = "", legendTable = "", cellTypeAnnoTable = "", downloadSubLoomButton = () => "";
 
 				let newMarkerTableColumn = (header, id, accessor, cell) => {
 					let column = {
 						Header: header,
 						id: id,
-					}
+					};
 					if(accessor != null) {
-						column["accessor"] = d => d[accessor]
+						column["accessor"] = d => d[accessor];
 					}
 					if(cell != null) {
-						column["Cell"] = props => cell(props)
+						column["Cell"] = props => cell(props);
 					}
-					return column
+					return column;
+				};
+
+				let newCellTypeAnnoColumn = (header, id, accessor, cell) => {
+					let column = {
+						Header: header,
+						id: id,
+					};
+
+					if(accessor != null) {
+						column["accessor"] = d => d[accessor];
+					}
+
+					if(cell != null) {
+						column["Cell"] = props => cell(props);
+					}
+					return column;
+				};
+
+				if (md.cellTypeAnno) {
+					if (md.cellTypeAnno.length > 0){ 
+						let newCellTypeAnnoTableOboCell = (props) => {
+
+							let iriLink = (
+								props.value.ols_iri == "" ?
+									<React.Fragment>{props.value.annotation_label}<br/>{props.value.obo_id ? "(" + props.value.obo_id +")" : ""}</React.Fragment> :
+									<a href={props.value.ols_iri} target="_blank">{props.value.annotation_label}<br/>{props.value.obo_id ? "(" + props.value.obo_id +")" : ""}</a>
+
+							)
+
+							let popupInfo = (
+								<div>
+									<Header as='h3'>Evidence provided for:&nbsp;{iriLink}</Header>
+									<Header as='h4'>Markers</Header>
+									{props.value.markers.length > 0 ? props.value.markers.map(m => m).join(', ') : "None provided"}
+									<Header as='h4'>Publication</Header>
+									{props.value.publication ? <a href={props.value.publication}>{props.value.publication}</a> : "None provided"}
+									<Header as='h4'>Comment</Header>
+									{props.value.comment ? props.value.publication : "None provided"}
+								</div>
+							)
+
+							return (
+							<div style={{textAlign: "center"}}>
+								{iriLink}
+								<br/>
+								<Popup 
+									trigger={<Label><Icon name="question circle" />More Info</Label> } 
+									content={popupInfo}
+									on="click"
+								/>
+							</div>
+							)
+						}
+
+						let newCellTypeAnnoTableCuratorCell = (props) => {
+
+							// Match 4 sets of 4 digits, hyphen seperated with an X as a possible final check digit
+							let orcidIDRegex = /(?:\d{4}-){3}\d{3}[0-9,X]/; 
+
+							let iconName, iconColor, popupText = ''
+
+							if (props.value.validated & orcidIDRegex.test(props.value.curator_id)) {
+								iconName = 'check circle outline'
+								iconColor = 'green'
+								popupText = "This annotation was generated on this site."
+							} else if (orcidIDRegex.test(props.value.curator_id)) {
+								iconName = 'times circle outline'
+								iconColor = 'red'
+								popupText = "This annotation was NOT generated on this site."
+							} else {
+								iconName = 'laptop'
+								iconColor = 'orange'
+								popupText = "This annotation is not linked to an ORCID iD and is therefore likely a prediction from a tool."
+							}
+
+							return (
+								<div style={{textAlign: "center"}}>
+									{orcidIDRegex.test(props.value.curator_id) ?
+									<a href={"https://orcid.org/" + props.value.curator_id} target="_blank">{props.value.curator_name}&nbsp;</a>
+									: props.value.curator_name + (props.value.curator_id ? "(" + props.value.curator_id + ")" : "")
+									}
+
+									<Popup 
+									trigger={
+										<Icon
+											name={iconName}
+											color={iconColor}
+										/>}	
+									content={popupText}
+									/>		
+								</div>
+							)
+						}
+
+						let submitVote = (annoData, direction) => {
+							BackendAPI.voteAnnotation(
+								direction, 
+								annoData, 
+								activeFeatures[i],
+								{
+									orcidName: this.state.orcid_name,
+									orcidID: this.state.orcid_id,
+									orcidUUID: this.state.orcid_uuid
+								},
+								match.params.uuid,
+								(response) => console.log(response)
+							)
+						}
+
+						let newCellTypeAnnoTableVotesCell = (props) => {
+							return (
+								<React.Fragment>
+										<Popup className="vote-tooltip" 
+										trigger={<Button onClick={() => submitVote(props.value.data, 'for')} icon ="thumbs up outline" content={props.value.votes_for.total}/>}
+										content={props.value.votes_for.voters.length > 0 ? props.value.votes_for.voters.map((v, i) => <font color={v.voter_hash ? "green" : "red"}>{"" + v.voter_name}&nbsp;&nbsp;</font>) : "None"}
+										/>
+										<Popup className="vote-tooltip" 
+										trigger={<Button onClick={() => submitVote(props.value.data, 'against')} icon ="thumbs down outline" content={props.value.votes_against.total}/>}
+										content={props.value.votes_against.voters.length > 0 ? props.value.votes_against.voters.map(v => <font color={v.voter_hash ? "green" : "red"}>{v.voter_name}&nbsp;&nbsp;</font>) : "None"}
+										/>
+								</React.Fragment>	
+							)
+						}
+
+						let cellTypeAnnoColumns = [
+							newCellTypeAnnoColumn(<div><nobr>Annotation/Ontology</nobr><p>Term</p></div>, "annotation", "annotation", newCellTypeAnnoTableOboCell),
+							newCellTypeAnnoColumn("Curator", "orcid_info", "orcid_info", newCellTypeAnnoTableCuratorCell),
+							newCellTypeAnnoColumn("Endorsements", "votes", "votes", newCellTypeAnnoTableVotesCell)
+						]
+
+						let cellTypeAnnoTableData = md.cellTypeAnno.map( (a, n) => {
+							let cellTypeAnnoTableRowData = {
+								annotation: a.data,
+								orcid_info: {curator_name: a.data.curator_name, curator_id: a.data.curator_id, validated: a.validate_hash},
+								votes: {
+									votes_for: a.votes_for, 
+									votes_against: a.votes_against, 
+									data: a.data
+								}
+							}
+							return (cellTypeAnnoTableRowData)
+						})
+
+						let cellTypeAnnoTableHeight = screen.availHeight / 4
+
+						let cellTypeAnnoTableHeaderName = "Community Annotations"
+
+						cellTypeAnnoTable = (
+							<div style={{marginBottom: "15px", align: "center"}}>
+								<ReactTable
+									data={cellTypeAnnoTableData}
+									columns={[
+										{
+										Header: cellTypeAnnoTableHeaderName,
+										columns: cellTypeAnnoColumns
+										}
+									]}
+									pageSizeOptions={[3]}
+									defaultPageSize={3}
+									// style={{
+									// 	height: cellTypeAnnoTableHeight +"px" // This will force the table body to overflow and scroll, since there is not enough room
+									// }}
+									className="-striped -highlight"
+								/>
+							</div>
+						);
+					} else {
+						cellTypeAnnoTable = (
+							<div style={{marginBottom: "5px", align: "center"}}>
+								No annotations currently exist. {BackendAPI.getLoomRWStatus() == "rw" ? "Be the first to contribute!" : ""}
+							</div>
+						)
+					}
+
 				}
 
 				if (md.genes) {
@@ -228,10 +456,6 @@ class ViewerSidebar extends Component {
 					let markerTableColumns = [
 						newMarkerTableColumn("Gene Symbol", "gene", "gene", newMarkerTableGeneCell)
 					]
-
-					// DISPLAY METRICS
-					console.log("DISPLAY METRICS")
-					console.log(md)
 
 					if ('metrics' in md) {
 						// Add extra columns (metrics like logFC, p-value, ...)
@@ -281,8 +505,8 @@ class ViewerSidebar extends Component {
 									columns: markerTableColumns
 									}
 								]}
-								pageSizeOptions={[5, 10, md.genes.length]}
-								defaultPageSize={md.genes.length}
+								pageSizeOptions={[5, 10, 25, 50, 100]}
+								defaultPageSize={25}
 								style={{
 									height: markerTableHeight +"px" // This will force the table body to overflow and scroll, since there is not enough room
 								}}
@@ -301,7 +525,7 @@ class ViewerSidebar extends Component {
 					);
 				}
 
-				if(this.props.activeLegend != null & activeFeatures[i].featureType == "annotation") {
+				if(this.props.activeLegend != null & (activeFeatures[i].featureType == "annotation" || activeFeatures[i].feature == "All Clusters")) {
 					let aL = this.props.activeLegend
 					let legendTableData = aL.values.map( (v, j) => ({ value: v, color: aL.colors[j] }) )
 					let newLegendTableColorCell = (props) => {
@@ -401,7 +625,9 @@ class ViewerSidebar extends Component {
 						<Grid.Column stretched className='viewerCell'>
 							{md.featureType} {md.feature}<br />
 							{image}
-							{annotationBox()}
+							{clusterControls()}
+							{/* {annotationBox()} */}
+							{cellTypeAnnoTable}
 							{markerTable}
 							{legendTable}
 							{downloadSubLoomButton()}
@@ -472,6 +698,16 @@ class ViewerSidebar extends Component {
 	}
 
 	componentWillMount() {
+		let orcid_name = this.props.cookies.get("scope_orcid_name")
+        let orcid_id = this.props.cookies.get("scope_orcid_id")
+        let orcid_uuid = this.props.cookies.get("scope_orcid_uuid")
+
+        this.setState({
+            orcid_name: orcid_name,
+            orcid_id: orcid_id,
+            orcid_uuid: orcid_uuid,
+        })
+		this.timer = null;
 		BackendAPI.onViewerSelectionsChange(this.selectionsListener);
 		BackendAPI.onActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
 	}
@@ -479,6 +715,12 @@ class ViewerSidebar extends Component {
 	componentWillUnmount() {
 		BackendAPI.removeViewerSelectionsChange(this.selectionsListener);
 		BackendAPI.removeActiveFeaturesChange(this.state.activePage, this.activeFeaturesListener);
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		if (this.props.match.params.loom != prevProps.match.params.loom) {
+			this.updateMetadata()
+		}
 	}
 
 	toggleLassoSelection(id) {
@@ -499,13 +741,6 @@ class ViewerSidebar extends Component {
 			value: id
 		});
 	}
-
-	shouldComponentUpdate(nextProps, nextState) {
-		if (this.state.newAnnoName != nextState.newAnnoName && this.state.newAnnoName != "") {
-			return false
-		} else {
-			return true
-		}
-	}
+	
 }
-export default withRouter(ViewerSidebar);
+export default withCookies(withRouter(ViewerSidebar));

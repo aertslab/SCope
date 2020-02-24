@@ -272,7 +272,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                     return None
             except KeyError:
                 pass
-                
+
             # Update the directory of DroopyFieldStorage
             form.directory = self.directory
             logger.info("Saving uploaded file in {0}".format(self.directory))
@@ -307,7 +307,6 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
 
             # -- Reply
             # The file list gives a feedback for the upload success
-            ctype = mimetypes.guess_type(localpath)[0]
             try:
                 # Always read in binary mode. Opening files in text mode may cause
                 # newline translations, making the actual size of the content

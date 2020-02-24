@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
-import { Icon, Label, Button, Menu, Input, Popup, Checkbox} from 'semantic-ui-react';
+import { Icon, Label, Button, Menu, Image, Input, Popup, Checkbox} from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
 import { instanceOf } from 'prop-types';
 import { withCookies, Cookies } from 'react-cookie';
@@ -24,15 +24,81 @@ class AppHeader extends Component {
 			timeout: props.timeout,
 			shortUrl: null,
 			cookies: props.cookies,
-			permalinkUUID: false
+			permalinkUUID: false,
+			orcid_active: true,
+			cookiesAllowed: this.props.cookiesAllowed
 		}
+
+		BackendAPI.getORCIDStatus((active) => { 
+            this.setState({orcid_active: active})
+        })
+	}   
+	
+	acceptCookies = () => {
+		this.props.cookieBannerRef.current.setState({visible: false})
+		this.props.cookies.set("CookieConsent", 'true')
+		this.props.cookies.set(cookieName, this.props.match.params.uuid, { path: '/'})
+		this.setState({cookiesAllowed: true})
 	}
+	
+	openORCID = () => {
+        window.open("https://orcid.org/oauth/authorize?client_id=" + ORCID.orcidAPIClientID + "&response_type=code&scope=/authenticate&show_login=false&redirect_uri=" + ORCID.orcidAPIRedirectURI, "_self", "toolbar=no, scrollbars=yes, width=500, height=600, top=500, left=500");
+    }
 
 	render() {
-		const { match, location } = this.props;
+		const { match, location} = this.props;
 		const { timeout, shortUrl } = this.state;
 		let metadata = BackendAPI.getLoomMetadata(decodeURIComponent(match.params.loom));
 		let menu = this.menuList(metadata);
+
+		let orcid_logout = () => {
+			this.props.cookies.remove("scope_orcid_name")
+			this.props.cookies.remove("scope_orcid_id")
+			this.props.cookies.remove("scope_orcid_uuid")
+		}
+
+		let orcid_info = () => {
+			let orcid_name = this.props.cookies.get("scope_orcid_name")
+			let orcid_id = this.props.cookies.get("scope_orcid_id")
+			if (this.state.cookiesAllowed === false) {
+				return(
+				<Popup
+					content={<div>You have not accepted the use of cookies, which is required for ORCID login and annotation abilities.
+						<br/>
+						<br/>
+						<Button onClick={() => {this.acceptCookies()}}>Click here to accept cookies.</Button>
+						</div>}
+					trigger={<Button id="connect-orcid-button" onClick={() => {}}><img id="orcid-id-icon" src="https://orcid.org/sites/default/files/images/orcid_24x24.png" width="24" height="24" alt="ORCID iD icon"/>Authenticate with ORCID</Button>}
+				hoverable/>
+				)
+			}
+			else if (orcid_name && orcid_id) {
+				return(
+				<div>
+					<Popup 
+						position='bottom left'
+						content={
+							<div>You are authenticated with ORCID: {orcid_id}<p/>
+							<Button onClick={() => orcid_logout()}>Log out</Button>
+							<p/><b>By logging out you will no longer be able to annotate data. <br/>Your previous annotations and votes will remain.</b>
+							</div>}
+						trigger={<div><Image src="src/images/ORCIDiD_iconvector.svg" width="24" height="24" alt="ORCID iD icon" avatar/>Welcome {orcid_name}! &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Logout?</div>} flowing hoverable/>
+				</div>
+				)
+			} else {
+				return(
+					this.state.orcid_active && 
+					<Popup
+						content={<div>By logging in with ORCID, you will be able to update and vote on annotations in SCope.
+							<p/><p/>
+							ORCID provides a persistent identifier – an ORCID iD – 
+							that distinguishes you from other researchers and a mechanism for linking your 
+							research outputs and activities to your iD. <br/>Learn more at <a href="https://orcid.org/" target='_blank'>orcid.org</a>
+							</div>}
+						trigger={<Button id="connect-orcid-button" onClick={() => this.openORCID() }><img id="orcid-id-icon" src="https://orcid.org/sites/default/files/images/orcid_24x24.png" width="24" height="24" alt="ORCID iD icon"/>Authenticate with ORCID</Button>}
+					hoverable/>)
+			}
+		}
 
 		return (
 			<Menu secondary attached="top" className="vib" inverted>
@@ -68,6 +134,9 @@ class AppHeader extends Component {
 
 					}
 				</Menu.Item>
+				<Menu.Item className="orcidInfo">
+					{orcid_info()}
+				</Menu.Item>
 
 				<Menu.Item className="sessionInfo">
 					Your session will be deleted in {moment.duration(timeout).humanize()} &nbsp;
@@ -78,8 +147,6 @@ class AppHeader extends Component {
 						Get new session
 
 					</Button>
-
-
 				</Menu.Item>
 			</Menu>
 		);
@@ -90,7 +157,9 @@ class AppHeader extends Component {
 		const { history, cookies } = this.props;
 		BackendAPI.getUUIDFromIP((uuid, timeRemaining) => {
 			cookies.remove(cookieName);
-			cookies.set(cookieName, uuid, { path: '/'});
+			if (this.props.cookiesAllowed) {
+				cookies.set(cookieName, uuid, { path: '/'});
+			}
 			history.replace('/' + [uuid])
 			BackendAPI.forceUpdate();
 

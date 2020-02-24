@@ -10,6 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class GeneSetEnrichment:
 
     def __init__(self, scope, method, loom, gene_set_file_path, annotation):
@@ -64,10 +65,7 @@ class GeneSetEnrichment:
             hex_vec = ["null" if r == g == b == 0
                        else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
                        for r, g, b in zip(vals, np.zeros(len(aucs)), np.zeros(len(aucs)))]
-            if len(self.annotation) > 0:
-                cell_indices = self.loom.get_anno_cells(annotations=annotation)  # This is broken and/or not neccessary
-            else:
-                cell_indices = list(range(self.loom.get_nb_cells()))
+            cell_indices = list(range(self.loom.get_nb_cells()))
             return s_pb2.GeneSetEnrichmentReply(progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message()),
                                                 isDone=True,
                                                 cellValues=s_pb2.CellColorByFeaturesReply(color=hex_vec,
@@ -76,7 +74,7 @@ class GeneSetEnrichment:
                                                                                           cellIndices=cell_indices))
 
     def get_method(self):
-            return self.method
+        return self.method
 
     def get_AUCell_ranking_filepath(self):
         AUCell_rankings_file_name = self.loom.get_file_path().split(".")[0] + "." + "AUCell.rankings.loom"

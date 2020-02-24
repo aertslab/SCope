@@ -5,8 +5,8 @@ import { BackendAPI } from './common/API';
 import UploadModal from './common/UploadModal';
 import Slider, { Range } from 'rc-slider';
 import ReactGA from 'react-ga';
-import FileDownloader from '../js/http'
-import Popup from 'react-popup'
+import FileDownloader from '../js/http';
+import Alert from 'react-popup';
 
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
 const TooltipSlider = createSliderWithTooltip(Slider);
@@ -53,16 +53,12 @@ class AppSidebar extends Component {
 
 		
 		this.setLoomHierarchy = (loomFilePath, loomDisplayName, loomHeierarchy) => {
-			// Popup.alert('Test')
-			console.log("Making popup")
-			console.log(loomFilePath)
-			console.log(loomDisplayName)
 			this.setState({
 					newHierarchy_L1: loomHeierarchy['L1'],
 					newHierarchy_L2: loomHeierarchy['L2'],
 					newHierarchy_L3: loomHeierarchy['L3'],
 			})
-			Popup.create({
+			Alert.create({
 				title: "BETA: Hierarchy Change!",
 				content: <p>{["This will ", 
 							<b>permanently</b>, 
@@ -88,7 +84,7 @@ class AppSidebar extends Component {
 						text: 'Cancel',
 						className: 'danger',
 						action: function () {
-							Popup.close()
+							Alert.close()
 						}
 					}],
 					right: [{
@@ -101,7 +97,7 @@ class AppSidebar extends Component {
 								} 
 							})
 
-							Popup.close()
+							Alert.close()
 						},
 						}]
 

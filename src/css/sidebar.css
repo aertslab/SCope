@@ -43,6 +43,23 @@
 	color: black !important;
 }
 
+.anno-button {
+	margin-bottom: 15px !important;
+	width: 50%
+}
+
+.change-cluster-button {
+	margin-bottom: 15px !important;
+	width: 23%;
+	white-space: pre;
+}
+
+.vote-tooltip {
+	z-index: 99999;
+	font-size: 12;
+	position: fixed !important;
+}
+
 .sidebarTabs {
 	display: flex;
 	width: 100%;

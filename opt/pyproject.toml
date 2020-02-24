@@ -1,14 +1,14 @@
 [tool.poetry]
 name = "scopeserver"
-version = "1.7.3"
+version = "1.8.0"
 description = "Visualization tool for large-scale and high dimensional single-cell data"
 
 license = "GPL-3.0-only"
 
 authors = [
         "Maxime De Waegeneer <mdewaegeneer@gmail.com>",
-        "Kris Davie <kristopher.davie@kuleuven.vib.be>",
-        "James Colliers <james.collier@vib.be>",
+        "Kris Davie <kristofer.davie@kuleuven.vib.be>",
+        "James Collier <james.collier@vib.be>",
         "Lukasz Kreft <lukasz.kreft@vib.be>"]
 
 readme = 'README.md'
@@ -44,7 +44,9 @@ pandas = "1.0.0"
 
 loompy = "^3.0.1"
 pyscenic = "^0.9.14"
+
 multiprocessing_on_dill = { version = "*", allow-prereleases = true }
+requests = "^2.22.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
@@ -53,6 +55,7 @@ pylint = "*"
 pylint-fail-under = "*"
 black = { version = "*", allow-prereleases = true }
 mypy = "*"
+mypy-protobuf = "^1.19"
 
 [tool.poetry.scripts]
 dev-script = 'scopeserver:run'

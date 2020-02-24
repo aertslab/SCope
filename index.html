@@ -15,6 +15,15 @@
          }
          return(false);
        }
+       
+       var orcid_auth = getQueryVariable("code");
+       if (orcid_auth) {
+         var orcid = document.createElement('meta');
+         orcid.name = "scope-orcid";
+         orcid.setAttribute("auth", orcid_auth);
+         document.getElementsByTagName('head')[0].appendChild(orcid);
+       }
+
        if (getQueryVariable("WSport")) {
          var meta = document.createElement('meta');
          meta.name = "scope-wsport";
@@ -46,6 +55,6 @@
 </head>
 <body>
     <div id="scope"></div>
-    <script id='scope_js' src="./assets/SCope-1.3.5.1eb6216.js"></script>
+    <script id='scope_js' src="./assets/SCope-1.8.0.d3177d2.js"></script>
 </body>
 </html>

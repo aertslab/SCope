@@ -282,16 +282,22 @@ class API {
 		return this.getActiveLoomMetaDataEmbedding().trajectory
 	}
 
-	queryLoomFiles(uuid, callback) {
+	queryLoomFiles(uuid, callback, loomFile = null) {
 		let query = {
-			UUID: uuid
+			UUID: uuid,
 		};
+
+		console.log(loomFile)
+		if (loomFile) {
+			query['loomFile'] = loomFile
+		}
+
 		this.getConnection().then((gbc) => {
 			if (DEBUG) console.log("getMyLooms", query);
 			gbc.services.scope.Main.getMyLooms(query, (error, response) => {
 				if (response !== null) {
 					if (DEBUG) console.log("getMyLooms", response);
-					BackendAPI.setLoomFiles(response.myLooms);
+					BackendAPI.setLoomFiles(response.myLooms, response.update);
 					callback(response.myLooms);
 				} else {
 					console.log("No loom files detected");
@@ -307,8 +313,10 @@ class API {
 		return this.loomFiles;
 	}
 
-	setLoomFiles(files) {
-		this.loomFiles = {};
+	setLoomFiles(files, update) {
+		if (!update) {
+			this.loomFiles = {};
+		}
 		Object.keys(files).map((i) => {
 			let file = files[i];
 			this.loomFiles[file.loomFilePath] = file;
@@ -338,9 +346,11 @@ class API {
 	setAnnotationName(feature, newAnnoName, featureIndex, uuid) {
 		let clusteringID = feature.metadata['clusteringID']
 		let clusterID = feature.metadata['clusterID']
+		let loomFilePath = this.getActiveLoom()
+
 		if (newAnnoName != '') {
 			let setAnnotationNameQuery = {
-				loomFilePath: this.getActiveLoom(),
+				loomFilePath: loomFilePath,
 				clusteringID: clusteringID,
 				clusterID: clusterID,
 				newAnnoName: newAnnoName
@@ -356,7 +366,7 @@ class API {
 								}
 
 							})
-						} )
+						}, loomFilePath )
 					}
 
 			});
@@ -383,6 +393,22 @@ class API {
 		})
 	}
 
+	getNextCluster(clusteringID, clusterID, direction, callback) {
+		let query = {
+			loomFilePath: this.getActiveLoom(),
+			clusteringID: clusteringID,
+			clusterID: clusterID,
+			direction: direction
+		}
+		this.getConnection().then((gbc) => {
+			if (DEBUG) console.log('getNextCluster', query);
+			gbc.services.scope.Main.getNextCluster(query, (err, response) => {
+				callback(response)
+			})
+		})
+	}
+
+
 	updateFeature(field, type, feature, featureType, featureDescription, page) {
 		if (featureType == 'regulon') {
 			let regulonQuery = {
@@ -408,13 +434,14 @@ class API {
 			});
 		} else if (featureType.indexOf('Clustering:') == 0) {
 			let loomMetadata = this.getActiveLoomMetadata();
-			let clusteringID, clusterID;
+			let clusteringID, clusterID, cellTypeAnno;
 			loomMetadata.cellMetaData.clusterings.map(clustering => {
 				if (featureType.indexOf(clustering.name) != -1) {
 					clusteringID = clustering.id
 					clustering.clusters.map(c => {
 						if (c.description == feature) {
 							clusterID = c.id;
+							cellTypeAnno = c.cell_type_annotation
 						}
 					})
 				}
@@ -431,7 +458,7 @@ class API {
 						if (DEBUG) console.log('getMarkerGenes', markerResponse);
 						if (!markerResponse) markerResponse = {};
 						markerResponse.description = featureDescription
-						this.setActiveFeature(field, type, featureType, feature, 0, {...markerResponse, clusterID: clusterID, clusteringID: clusteringID}, page);
+						this.setActiveFeature(field, type, featureType, feature, 0, {...markerResponse, clusterID: clusterID, clusteringID: clusteringID, cellTypeAnno: cellTypeAnno}, page);
 					});
 				}, () => {
 					this.showError();
@@ -452,6 +479,108 @@ class API {
 		(this.featureChangeListeners[page] || []).forEach((listener) => {
 			listener(selectedFeatures, id, this.customValues[page], this.maxValues[page]);
 		})
+	}
+
+	getORCIDStatus(callback) {
+		BackendAPI.getConnection().then((gbc) => {
+			gbc.services.scope.Main.getORCIDStatus({}, (err, response) => {
+				if (DEBUG) console.log('getORCIDStatus', response);
+				callback(response.active)
+			});
+		}, () => {
+			this.showError();
+		});
+	}
+
+	getORCID(auth_code, callback) {
+		if (DEBUG) console.log('getORCID', auth_code);
+		BackendAPI.getConnection().then((gbc) => {
+			gbc.services.scope.Main.getORCID({auth_code}, (err, response) => {
+				if (DEBUG) console.log('getORCID', response);	
+				if (response.success) {
+					callback(response.orcid_scope_uuid, response.name, response.orcid_id)
+				} else {
+					console.log('ORCID AUTH FAILED')
+				}
+			})
+		}, () => {
+			this.showError();
+		});
+	}
+
+	setColabAnnotationData(feature, annotationData, orcidInfo, uuid, callback) {
+		if (DEBUG) console.log('setColabAnnotationData', feature, annotationData, orcidInfo);
+		let loomFilePath = this.getActiveLoom()
+		let query = {
+			loomFilePath: loomFilePath,
+			clusteringID: feature.metadata['clusteringID'],
+			clusterID: feature.metadata['clusterID'],
+			orcidInfo: orcidInfo,
+			annoData: {
+				curator_name: orcidInfo['orcidName'], 
+				curator_id: orcidInfo['orcidID'],
+				timestamp: new Date().getTime(),
+				obo_id: annotationData['obo_id'],
+				ols_iri: annotationData['iri'],
+				annotation_label: annotationData['label'],
+				markers: annotationData['selectedMarkers'],
+				publication: annotationData['publication'],
+				comment: annotationData['comment'],
+			}
+		}
+		if (DEBUG) console.log('setColabAnnotationData', query);
+			BackendAPI.getConnection().then((gbc) => {
+				gbc.services.scope.Main.setColabAnnotationData(query, (err, response) => {
+					if (DEBUG) console.log('setColabAnnotationData', response);
+					if (response.success) {
+						BackendAPI.queryLoomFiles(uuid, () => {
+							BackendAPI.getActiveFeatures().forEach( (f, n) => {
+								if (f === feature) {
+									BackendAPI.updateFeature(n, f.type, f.feature, f.featureType, f.metadata ? f.metadata.description : null, "")
+								}
+
+							})
+						}, loomFilePath )
+					}
+					callback(response)
+				})
+			}, () => {
+				this.showError();
+			});
+	}
+
+	voteAnnotation(direction, data, feature, orcidInfo, uuid, callback) {
+		if (DEBUG) console.log('voteUpAnnotation');
+		let loomFilePath = this.getActiveLoom()
+
+		let query = {
+			loomFilePath: loomFilePath,
+			clusteringID: feature.metadata['clusteringID'],
+			clusterID: feature.metadata['clusterID'],
+			orcidInfo: orcidInfo,
+			annoData: data,
+			direction: direction
+		}
+		if (DEBUG) console.log('voteAnnotation', query);
+			BackendAPI.getConnection().then((gbc) => {
+				gbc.services.scope.Main.voteAnnotation(query, (err, response) => {
+					if (DEBUG) console.log('voteAnnotation', response);
+					if (response.success) {
+						BackendAPI.queryLoomFiles(uuid, () => {
+							BackendAPI.getActiveFeatures().forEach( (f, n) => {
+								// if (f.metadata['clusteringID'] == feature.metadata['clusteringID'] && f.metadata['clusterID'] == feature.metadata['clusterID']) {
+								if (f == feature) {
+									BackendAPI.updateFeature(n, f.type, f.feature, f.featureType, f.metadata ? f.metadata.description : null, "")
+								}
+
+							})
+						}, loomFilePath )
+					}
+					callback(response)
+				})
+			}, () => {
+				this.showError();
+			});
 	}
 
 	getMaxScale(id, callback) {
@@ -480,7 +609,7 @@ class API {
 				callback(this.customValues[page], this.maxValues[page]);
 			})
 		}, () => {
-			BackendAPI.showError();
+			this.showError();
 		});
 	}
 

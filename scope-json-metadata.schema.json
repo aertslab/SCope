@@ -58,6 +58,151 @@
                                 "description": {
                                     "type": "string",
                                     "description": "Name of the cluster displayed in SCope"
+                                },
+                                "cell_type_annotation": {
+                                    "type": "array",
+                                    "description": "Possible annotations for the cluster",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "data": {
+                                                "type": "object",
+                                                "description": "Actual data for the annotation",
+                                                "properties": {
+                                                    "curator_name": {
+                                                        "type": "string",
+                                                        "description": "Real name of the curator or tool"
+                                                    },
+                                                    "curator_id": {
+                                                        "type": "string",
+                                                        "description": "ORCID ID of the curator or version number of the tool"
+                                                    },
+                                                    "timestamp": {
+                                                        "type": "integer",
+                                                        "description": "timestamp"
+                                                    },
+                                                    "obo_id": {
+                                                        "type": "string",
+                                                        "description": "Controlled vocabulary term"
+                                                    },
+                                                    "ols_iri": {
+                                                        "type": "string",
+                                                        "description": "Optional URL linking to vocabulary"
+                                                    },
+                                                    "annotation_label": {
+                                                        "type": "string",
+                                                        "description": "Vocabulary name or free text annotation"
+                                                    },
+                                                    "markers": {
+                                                        "type": "array",
+                                                        "description": "markers",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "publication": {
+                                                        "type": "string",
+                                                        "description": "Related publication DOI (Full URL)"
+                                                    },
+                                                    "comment": {
+                                                        "type": "string",
+                                                        "description": "Free text comment"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "curator_name",
+                                                    "curator_id",
+                                                    "timestamp",
+                                                    "obo_id",
+                                                    "ols_iri",
+                                                    "annotation_label",
+                                                    "markers",
+                                                    "publication",
+                                                    "comment"
+                                                ]
+                                            },
+                                            "validate_hash": {
+                                                "type": "string",
+                                                "description": "SHA256 hash of annotation data + salt"
+                                            },
+                                            "votes": {
+                                                "type": "object",
+                                                "description": "Vote information for this annotation",
+                                                "properties": {
+                                                    "votes_for": {
+                                                        "type": "object",
+                                                        "description": "Data for positive votes",
+                                                        "properties": {
+                                                            "total": {
+                                                                "type": "integer",
+                                                                "description": "Number of total votes"
+                                                            },
+                                                            "voters": {
+                                                                "type": "array",
+                                                                "description": "Array of voter information",
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "description": "Information about voters",
+                                                                    "properties": {
+                                                                        "voter_name": {
+                                                                            "type": "string",
+                                                                            "description": "Real name of voter"
+                                                                        },
+                                                                        "voter_id": {
+                                                                            "type": "string",
+                                                                            "description": "ORCID ID of voter"
+                                                                        },
+                                                                        "voter_hash": {
+                                                                            "type": "string",
+                                                                            "description": "SHA256 hash of data + ORCID ID + salt"
+                                                                        }
+                                                                    },
+                                                                    "required": ["voter_name", "voter_id", "voter_hash"]
+                                                                }
+                                                            }
+                                                        },
+                                                        "required": ["voters"]
+                                                    },
+                                                    "votes_against": {
+                                                        "type": "object",
+                                                        "description": "Data for negative votes",
+                                                        "properties": {
+                                                            "total": {
+                                                                "type": "integer",
+                                                                "description": "Number of total votes"
+                                                            },
+                                                            "voters": {
+                                                                "type": "array",
+                                                                "description": "Array of voter information",
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "description": "Information about voters",
+                                                                    "properties": {
+                                                                        "voter_name": {
+                                                                            "type": "string",
+                                                                            "description": "Real name of voter"
+                                                                        },
+                                                                        "voter_id": {
+                                                                            "type": "string",
+                                                                            "description": "ORCID ID of voter"
+                                                                        },
+                                                                        "voter_hash": {
+                                                                            "type": "string",
+                                                                            "description": "SHA256 hash of data + ORCID ID + salt"
+                                                                        }
+                                                                    },
+                                                                    "required": ["voter_name", "voter_id", "voter_hash"]
+                                                                }
+                                                            }
+                                                        },
+                                                        "required": ["voters"]
+                                                    }
+                                                },
+                                                "required": ["votes_for", "votes_against"]
+                                            }
+                                        },
+                                        "required": ["data", "validate_hash", "votes"]       
+                                    }
                                 }
                             },
                             "required": ["id", "description"]

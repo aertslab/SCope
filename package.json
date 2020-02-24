@@ -1,6 +1,6 @@
 {
   "name": "SCope",
-  "version": "1.7.3",
+  "version": "1.8.0",
   "description": "Visualization tool for large-scale and high dimensional single-cell data",
   "main": "index.js",
   "scripts": {
@@ -61,6 +61,7 @@
     "react": "^16.2.0",
     "react-addons-css-transition-group": "^15.6.2",
     "react-cookie": "^2.1.4",
+    "react-cookie-consent": "^3.0.0",
     "react-dnd": "^2.5.4",
     "react-dnd-html5-backend": "^2.5.4",
     "react-dom": "^16.2.0",
