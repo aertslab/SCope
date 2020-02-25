@@ -12,7 +12,7 @@
     "build-aws": "cross-env NODE_ENV=production NODE_TYPE=aws webpack",
     "build-dev": "cross-env NODE_ENV=development NODE_TYPE=local webpack",
     "check-style": "prettier --check 'src/**/*.js' 'src/**/*.jsx'",
-    "lint": "eslint src/",
+    "lint": "tsc --noEmit && eslint 'src/**/*.{js,ts,jsx,tsx}'",
     "test": "echo \"Error: no test specified\"",
     "scope": "node bin/launch.js",
     "scope-dev": "node bin/launch.js --dev",
@@ -114,6 +114,8 @@
     "electron-builder": "^20.8.1",
     "electron-packager": "^12.1.0",
     "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-react": "^7.18.3",
     "file-system": "^2.2.2",
     "fork-ts-checker-webpack-plugin": "^4.0.4",
@@ -147,5 +149,36 @@
     "jsxSingleQuote": true,
     "jsxBracketSameLine": true,
     "arrowParens": "always"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "es6": true
+    },
+    "extends": [
+      "eslint:recommended",
+      "plugin:react/recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:prettier/recommended"
+    ],
+    "globals": {
+      "Atomics": "readonly",
+      "SharedArrayBuffer": "readonly"
+    },
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "ecmaFeatures": {
+        "jsx": true
+      },
+      "ecmaVersion": 2018,
+      "sourceType": "module"
+    },
+    "plugins": [
+      "react",
+      "@typescript-eslint"
+    ],
+    "rules": {
+      "prettier/prettier": "error"
+    }
   }
 }
