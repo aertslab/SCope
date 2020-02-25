@@ -197,25 +197,8 @@ class Launcher {
     }
 
     openSCopeClient() {
-        if (isDev & !isAWS) {
-            console.log('Open SCope in browser...');
-            launcherBrowser(
-                'http://localhost:8080',
-                { browser: ['chrome', 'firefox', 'safari'] },
-                (e, browser) => {
-                    if (e) return console.log(e);
-                    browser.on('stop', (code) => {
-                        // console.log("Stopping SCope Server...")
-                        // scopeServer.kill('SIGINT')
-                        // scopeServer = null
-                        // console.log("Stopping SCope Client...")
-                        // scopeClient.kill('SIGINT')
-                        // scopeClient = null
-                        // console.log("SCope stopped running!")
-                        process.exit();
-                    });
-                }
-            );
+        if(isDev & !isAWS) {
+            console.log("Open SCope in browser @ http://localhost:8080...")
         }
     }
 
@@ -346,5 +329,5 @@ class Launcher {
     }
 }
 
-let launcher = new Launcher();
-launcher.start();
+let launcher = new Launcher()
+launcher.start()
