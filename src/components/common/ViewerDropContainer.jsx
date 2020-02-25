@@ -118,9 +118,9 @@ class ViewerDropContainer extends Component {
         );
     }
 
-    componentWillReceiveProps(nextProps) {
-        this.forceUpdate();
-    }
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    this.forceUpdate();
+  }
 
     handleRemove(name, value) {
         this.props.onRemove(this.props.name, name, value);

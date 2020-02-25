@@ -459,57 +459,208 @@ class Compare extends Component {
                             value={displays}
                             onChange={this.displayNumberChanged.bind(this)}
                         />
-                        <br />
-                        Superposition: &nbsp;
-                        <Dropdown
-                            inline
-                            disabled={configuration == 'one'}
-                            disabled={isSuperpositionLocked}
-                            options={this.superpositionConf}
-                            value={superposition}
-                            onChange={this.superpositionChanged.bind(this)}
-                        />
-                        <br />
-                        Configuration: &nbsp;
-                        <Dropdown
-                            inline
-                            options={this.configurationConf}
-                            disabled={isConfigurationLocked}
-                            defaultValue={configuration}
-                            onChange={this.configurationChanged.bind(this)}
-                        />
-                    </Grid.Column>
-                    {featureSearch}
-                    <Grid.Column>&nbsp;</Grid.Column>
-                </Grid.Row>
-                <Grid.Row columns={3} stretched className='viewerRow'>
-                    <Grid.Column width={2}>
-                        <Accordion styled>{annotationTabs()}</Accordion>
-                        <br />
-                        <ViewerToolbar />
-                    </Grid.Column>
-                    <Grid.Column width={11} className='viewerCell'>
-                        {viewers()}
-                    </Grid.Column>
-                    <Grid.Column width={3}>
-                        <div
-                            className='chart-wrapper noStretch'
-                            id='chart-distro1'
-                            style={{ width: '100%' }}
-                            height='200px'></div>
-                        <ViewerSidebar
-                            getSelectedAnnotations={this.getSelectedAnnotations.bind(
-                                this
-                            )}
-                            onActiveFeaturesChange={(features, id) => {
-                                this.setState({ activeFeatures: features });
-                            }}
-                            activeLegend={activeLegend}
-                        />
-                    </Grid.Column>
-                </Grid.Row>
-            </Grid>
-        );
+                      </span>
+                    );
+                  }
+                  datasetSelector = (
+                    <span className='noStretch'>
+                      <b>Select a dataset: </b>
+                      <Dropdown
+                        inline
+                        options={this.loomConf}
+                        disabled={j == 0}
+                        value={multiLoom[j]}
+                        scrolling
+                        placeholder=' none selected '
+                        onChange={(proxy, select) => {
+                          let ml = multiLoom;
+                          let mc = multiCoordinates;
+                          let mm = multiMetadata;
+                          ml[j] = select.value;
+                          mc[j] = -1;
+                          mm[j] = BackendAPI.getLoomMetadata(ml[j]);
+                          BackendAPI.setActiveLooms(ml);
+                          this.setState({
+                            multiLoom: ml,
+                            multiCoordinates: mc
+                          });
+                          ReactGA.event({
+                            category: 'compare',
+                            action: 'comparison dataset selected',
+                            label: select.value,
+                            value: j
+                          });
+                        }}
+                      />
+                      {coordinatesSelector}
+                    </span>
+                  );
+                }
+                let va;
+                if (configuration == 'simple')
+                  va = crossAnnotations['both'][columns * i + j];
+                else if (configuration == 'one')
+                  va = crossAnnotations['one'][columns * i + j];
+                else va = this.getCrossAnnotations(i, j);
+                return (
+                  <Grid.Column key={j} className='viewerCell'>
+                    {datasetSelector}
+                    {annotationDropContainerHorizontal}
+                    {annotationDropContainerVertical}
+                    <ViewerDropContainer
+                      active={configuration == 'simple' ? true : false}
+                      key={columns * i + j}
+                      onDrop={this.handleDrop.bind(this)}
+                      onRemove={this.handleRemove.bind(this)}
+                      name={name}
+                      loomFile={
+                        configuration == 'multi' ? multiLoom[j] : multiLoom[0]
+                      }
+                      activeFeatures={activeFeatures}
+                      superposition={superposition}
+                      activeCoordinates={
+                        configuration == 'multi'
+                          ? multiCoordinates[j]
+                            ? multiCoordinates[j]
+                            : -1
+                          : multiCoordinates[0]
+                      }
+                      activeAnnotations={va}
+                      orientation={configuration == 'one' ? 'one' : 'both'}
+                      position={columns * i + j}
+                      configuration={configuration}
+                      customScale={true}
+                      settings={true}
+                      translate={true}
+                      scale={true}
+                      onActiveLegendChange={(legend) => {
+                        this.setState({ activeLegend: legend });
+                      }}
+                    />
+                  </Grid.Column>
+                );
+              })}
+            </Grid.Row>
+          ))}
+        </Grid>
+      );
+    };
+
+    let featureSearch = _.times(3, (i) => (
+      <Grid.Column key={i}>
+        <FeatureSearchBox
+          field={i}
+          color={colors[i]}
+          type='all'
+          value={activeFeatures[i] ? activeFeatures[i].feature : ''}
+        />
+      </Grid.Column>
+    ));
+
+    if (!multiLoom[0]) return <div>Select the dataset to be analyzed</div>;
+
+    return (
+      <Grid>
+        <Grid.Row columns='5'>
+          <Grid.Column width={2}>
+            Number of displays: &nbsp;
+            <Dropdown
+              inline
+              options={this.displayConf}
+              disabled={configuration == 'one'}
+              value={displays}
+              onChange={this.displayNumberChanged.bind(this)}
+            />
+            <br />
+            Superposition: &nbsp;
+            <Dropdown
+              inline
+              disabled={configuration == 'one'}
+              disabled={isSuperpositionLocked}
+              options={this.superpositionConf}
+              value={superposition}
+              onChange={this.superpositionChanged.bind(this)}
+            />
+            <br />
+            Configuration: &nbsp;
+            <Dropdown
+              inline
+              options={this.configurationConf}
+              disabled={isConfigurationLocked}
+              defaultValue={configuration}
+              onChange={this.configurationChanged.bind(this)}
+            />
+          </Grid.Column>
+          {featureSearch}
+          <Grid.Column>&nbsp;</Grid.Column>
+        </Grid.Row>
+        <Grid.Row columns={3} stretched className='viewerRow'>
+          <Grid.Column width={2}>
+            <Accordion styled>{annotationTabs()}</Accordion>
+            <br />
+            <ViewerToolbar />
+          </Grid.Column>
+          <Grid.Column width={11} className='viewerCell'>
+            {viewers()}
+          </Grid.Column>
+          <Grid.Column width={3}>
+            <div
+              className='chart-wrapper noStretch'
+              id='chart-distro1'
+              style={{ width: '100%' }}
+              height='200px'></div>
+            <ViewerSidebar
+              getSelectedAnnotations={this.getSelectedAnnotations.bind(this)}
+              onActiveFeaturesChange={(features, id) => {
+                this.setState({ activeFeatures: features });
+              }}
+              activeLegend={activeLegend}
+            />
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
+    );
+  }
+
+  UNSAFE_componentWillMount() {
+    BackendAPI.onActiveLoomChange(this.activeLoomListener);
+    BackendAPI.onActiveFeaturesChange(
+      this.state.activePage,
+      this.activeFeaturesListener
+    );
+  }
+
+  componentWillUnmount() {
+    BackendAPI.removeActiveLoomChange(this.activeLoomListener);
+    BackendAPI.removeActiveFeaturesChange(
+      this.state.activePage,
+      this.activeFeaturesListener
+    );
+  }
+
+  isDropped(name, value) {
+    let selected = false;
+    let annotations = this.state.crossAnnotations;
+    Object.keys(annotations).map((orientation) => {
+      annotations[orientation].map((annotation) => {
+        let va = annotation[name];
+        if (va && va.indexOf(value) != -1) selected = true;
+      });
+    });
+    return selected;
+  }
+
+  handleDrop(item, viewer, orientation, position) {
+    if (DEBUG) console.log('handleDrop', item, viewer, orientation, position);
+    let annotations = this.state.crossAnnotations;
+    if (!annotations[orientation][position])
+      annotations[orientation][position] = {};
+    let selectedAnnotations = (
+      annotations[orientation][position][item.name] || []
+    ).slice(0);
+    if (selectedAnnotations.indexOf(item.value) != -1) {
+      alert('This annotation is already shown in that viewer');
+      return false;
     }
 
     componentWillMount() {

@@ -57,11 +57,11 @@ export default class FeatureSearchInput extends Search {
         );
     };
 
-    componentWillMount() {
-        this.handleSearchChangeDebounced = _.debounce((evt, input) => {
-            this.handleSearchChange(evt, input);
-        }, 750);
-    }
+  UNSAFE_componentWillMount() {
+    this.handleSearchChangeDebounced = _.debounce((evt, input) => {
+      this.handleSearchChange(evt, input);
+    }, 750);
+  }
 
     handleTypeChange(proxy, select) {
         this.props.handleTypeChange(select.value);

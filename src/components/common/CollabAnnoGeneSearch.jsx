@@ -136,11 +136,11 @@ export default class CollabAnnoGeneSearch extends React.Component {
         );
     }
 
-    componentWillMount() {
-        this.handleSearchChangeDebounced = _.debounce((evt, input) => {
-            this.handleSearchChange(evt, input);
-        }, 750);
-    }
+  UNSAFE_componentWillMount() {
+    this.handleSearchChangeDebounced = _.debounce((evt, input) => {
+      this.handleSearchChange(evt, input);
+    }, 750);
+  }
 
     // componentWillReceiveProps(nextProps) {
     // 	this.setState({ value: nextProps.value, type: nextProps.type })

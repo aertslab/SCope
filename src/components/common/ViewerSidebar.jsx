@@ -1231,10 +1231,64 @@ class ViewerSidebar extends Component {
         );
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        if (this.props.match.params.loom != prevProps.match.params.loom) {
-            this.updateMetadata();
-        }
+    return (
+      <div className='flexDisplay'>
+        <Tab
+          menu={{ secondary: true, pointing: true }}
+          panes={panes}
+          renderActiveOnly={true}
+          activeIndex={activeTab}
+          className='sidebarTabs'
+          onTabChange={(evt, data) => {
+            this.setState({ activeTab: data.activeIndex });
+          }}
+        />
+        <Metadata
+          selectionId={this.state.modalID}
+          onClose={() => {
+            ReactGA.event({
+              category: 'metadata',
+              action: 'modal closed',
+              value: this.state.modalID
+            });
+            this.setState({ modalID: null });
+            this.forceUpdate();
+          }}
+          annotations={Object.keys(annotations)}
+        />
+      </div>
+    );
+  }
+
+  UNSAFE_componentWillMount() {
+    let orcid_name = this.props.cookies.get('scope_orcid_name');
+    let orcid_id = this.props.cookies.get('scope_orcid_id');
+    let orcid_uuid = this.props.cookies.get('scope_orcid_uuid');
+
+    this.setState({
+      orcid_name: orcid_name,
+      orcid_id: orcid_id,
+      orcid_uuid: orcid_uuid
+    });
+    this.timer = null;
+    BackendAPI.onViewerSelectionsChange(this.selectionsListener);
+    BackendAPI.onActiveFeaturesChange(
+      this.state.activePage,
+      this.activeFeaturesListener
+    );
+  }
+
+  componentWillUnmount() {
+    BackendAPI.removeViewerSelectionsChange(this.selectionsListener);
+    BackendAPI.removeActiveFeaturesChange(
+      this.state.activePage,
+      this.activeFeaturesListener
+    );
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.match.params.loom != prevProps.match.params.loom) {
+      this.updateMetadata();
     }
 
     toggleLassoSelection(id) {

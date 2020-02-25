@@ -65,14 +65,12 @@ export default class Histogram extends Component {
         );
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (
-            JSON.stringify(this.props.feature) !=
-                JSON.stringify(nextProps.feature) ||
-            this.props.loomFile != nextProps.loomFile
-        ) {
-            this.getCellAUCValues(nextProps.feature, nextProps.loomFile);
-        }
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    if (
+      JSON.stringify(this.props.feature) != JSON.stringify(nextProps.feature) ||
+      this.props.loomFile != nextProps.loomFile
+    ) {
+      this.getCellAUCValues(nextProps.feature, nextProps.loomFile);
     }
 
     componentDidMount() {

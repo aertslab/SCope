@@ -498,10 +498,10 @@ class AppSidebar extends Component {
         );
     }
 
-    componentWillMount() {
-        this.getLoomFiles();
-        BackendAPI.onUpdate(this.onSettingsUpdate.bind(this));
-    }
+  UNSAFE_componentWillMount() {
+    this.getLoomFiles();
+    BackendAPI.onUpdate(this.onSettingsUpdate.bind(this));
+  }
 
     componentWillUnmount() {
         BackendAPI.removeOnUpdate(this.onSettingsUpdate.bind(this));

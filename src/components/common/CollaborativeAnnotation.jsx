@@ -295,115 +295,13 @@ class CollaborativeAnnotation extends Component {
                                                 }></CollabAnnoGeneSearch>
                                         </Form.Field>
 
-                                        <Form.Field>
-                                            <label>
-                                                Publication (Optional)
-                                            </label>
-                                            A publication with evidence that
-                                            marker maps to cell type.
-                                            <Form.Input
-                                                name='publication'
-                                                value={this.state.publication}
-                                                onChange={this.handleChange}
-                                                placeholder='DOI of publication'
-                                            />
-                                        </Form.Field>
-                                        <Form.Field>
-                                            <label>Comment (Optional)</label>
-                                            Used to document how the mapping was
-                                            made and to detail any uncertainty.
-                                            <Form.Input
-                                                name='comment'
-                                                value={this.state.comment}
-                                                onChange={this.handleChange}
-                                                placeholder='Free text...'
-                                            />
-                                        </Form.Field>
-                                    </CardContent>
-                                </Card>
-                                {/* <Button>Add Markers Entry</Button> */}
-                            </Modal.Description>
-                        </Modal.Content>
-                        <Modal.Actions>
-                            {warningPopup(
-                                <Button
-                                    form='annoForm'
-                                    type='submit'
-                                    value='submitNext'
-                                    onClick={(e) => this.sendData(e)}
-                                    secondary>
-                                    Submit and view next cluster
-                                    <Icon name='right chevron' />
-                                </Button>
-                            )}
-                            {warningPopup(
-                                <Button
-                                    form='annoForm'
-                                    type='submit'
-                                    value='submit'
-                                    onClick={(e) => this.sendData(e)}
-                                    primary>
-                                    Submit Annotation{' '}
-                                    <Icon name='right chevron' />
-                                </Button>
-                            )}
-                        </Modal.Actions>
-                    </Modal>
-                    <Modal
-                        className='collab-anno'
-                        style={{ top: '20%' }}
-                        open={submitError}
-                        onClose={(e) => this.closeErrorModal(e)}>
-                        <Modal.Header>Input Error!</Modal.Header>
-                        <Modal.Content>
-                            <p>
-                                You MUST either select a term from the OLS
-                                search OR submit a manual annotation!
-                            </p>
-                        </Modal.Content>
-                        <Modal.Actions>
-                            <Button
-                                type='accept'
-                                color='red'
-                                onClick={(e) => this.closeErrorModal(e)}>
-                                OK
-                            </Button>
-                        </Modal.Actions>
-                    </Modal>
-                </React.Fragment>
-            );
-        };
-
-        if (
-            orcid_name &&
-            orcid_id &&
-            orcid_uuid &&
-            orcid_name != '' &&
-            orcid_id != '' &&
-            orcid_uuid != '' &&
-            cookiesAllowed
-        ) {
-            return annotationModal(orcid_id, orcid_name);
-        } else {
-            return (
-                <Popup
-                    position='bottom left'
-                    content={
-                        <b>
-                            You must be logged in with an ORCID ID to annotate
-                            datasets! (See header)
-                        </b>
-                    }
-                    trigger={
-                        <Button color='red' inverted className='anno-button'>
-                            Add Annotation
-                        </Button>
-                    }
-                    hoverable
-                    fluid
-                />
-            );
-        }
+  UNSAFE_componentWillMount() {
+    let orcid_name = this.props.cookies.get('scope_orcid_name');
+    let orcid_id = this.props.cookies.get('scope_orcid_id');
+    let orcid_uuid = this.props.cookies.get('scope_orcid_uuid');
+    let cookiesAllowed = false;
+    if (this.props.cookies.get('CookieConsent') == 'true') {
+      cookiesAllowed = true;
     }
 
     componentWillMount() {

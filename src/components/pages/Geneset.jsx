@@ -247,23 +247,11 @@ class Geneset extends Component {
         );
     }
 
-    componentWillMount() {
-        BackendAPI.onActiveLoomChange(this.activeLoomListener);
-        BackendAPI.onActiveFeaturesChange(
-            'regulon',
-            this.activeFeaturesListener
-        );
-        BackendAPI.onSidebarVisibleChange(this.sidebarVisibleListener);
-    }
-
-    componentWillUnmount() {
-        BackendAPI.removeActiveLoomChange(this.activeLoomListener);
-        BackendAPI.removeActiveFeaturesChange(
-            'regulon',
-            this.activeFeaturesListener
-        );
-        BackendAPI.removeSidebarVisibleChange(this.sidebarVisibleListener);
-    }
+  UNSAFE_componentWillMount() {
+    BackendAPI.onActiveLoomChange(this.activeLoomListener);
+    BackendAPI.onActiveFeaturesChange('regulon', this.activeFeaturesListener);
+    BackendAPI.onSidebarVisibleChange(this.sidebarVisibleListener);
+  }
 
     componentDidMount() {
         this.getGeneSets();

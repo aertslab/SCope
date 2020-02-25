@@ -301,12 +301,69 @@ export default class Metadata extends Component {
         );
     }
 
-    componentWillReceiveProps() {
-        this.setState({
-            annotation: this.props.annotations,
-            clustering: this.props.clustering
-        });
-    }
+    return (
+      <Modal
+        open={selectionId != null ? true : false}
+        onMount={() => {
+          setTimeout(() => {
+            this.getMetadata();
+          });
+        }}
+        onClose={this.closeModal.bind(this)}
+        size={'fullscreen'}>
+        <Modal.Content image scrolling>
+          {tableMetadata}
+        </Modal.Content>
+        <Modal.Actions>
+          <Button
+            primary
+            onClick={() => {
+              let data = [];
+              selection.points.map((p, i) => {
+                let cellData = {};
+                cellData['cellID'] = cellIDs ? cellIDs[i] : p;
+                if (metadata) {
+                  selectedGenes.map((g, j) => {
+                    cellData[g] = metadata.geneExpression[j].features[i];
+                  });
+                  selectedRegulons.map((g, j) => {
+                    cellData[g] = metadata.aucValues[j].features[i];
+                  });
+                  if (metadata.annotations[0])
+                    cellData[this.state.annotation] =
+                      metadata.annotations[0].annotations[i];
+                  if (metadata.clusterIDs[0])
+                    cellData[selectedClusteringName] =
+                      selectedClustering[metadata.clusterIDs[0].clusters[i]];
+                }
+                data.push(cellData);
+              });
+              var fileDownload = require('react-file-download');
+              const json2csv = require('json2csv').parse;
+              const csv = json2csv(data);
+              fileDownload(csv, 'metadata.csv');
+              ReactGA.event({
+                category: 'metadata',
+                action: 'downloaded csv file',
+                value: selection.points.length
+              });
+            }}>
+            <Icon name='download' /> Download
+          </Button>
+          <Button onClick={this.closeModal.bind(this)}>
+            <Icon name='close' /> Close
+          </Button>
+        </Modal.Actions>
+      </Modal>
+    );
+  }
+
+  UNSAFE_componentWillReceiveProps() {
+    this.setState({
+      annotation: this.props.annotations,
+      clustering: this.props.clustering
+    });
+  }
 
     closeModal() {
         this.props.onClose();

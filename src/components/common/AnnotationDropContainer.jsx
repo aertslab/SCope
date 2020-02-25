@@ -77,9 +77,9 @@ class AnnotationDropContainer extends Component {
         );
     }
 
-    componentWillReceiveProps(nextProps) {
-        this.forceUpdate();
-    }
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    this.forceUpdate();
+  }
 
     handleRemove(viewerName, name, value) {
         this.props.onRemove(

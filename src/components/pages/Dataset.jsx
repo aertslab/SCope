@@ -41,9 +41,9 @@ export default class Dataset extends Component {
         );
     }
 
-    componentWillMount() {
-        BackendAPI.onActiveLoomChange(this.activeLoomListener);
-    }
+  UNSAFE_componentWillMount() {
+    BackendAPI.onActiveLoomChange(this.activeLoomListener);
+  }
 
     componentWillUnmount() {
         BackendAPI.removeActiveLoomChange(this.activeLoomListener);

@@ -124,282 +124,124 @@ class App extends Component {
                         onClick={() => {
                             window.location.reload();
                         }}>
-                        REFRESH
-                    </Button>
-                </Header>
-            </Dimmer>
-        );
+                        RESTART
+                      </Button>
+                    </Link>
+                  </Header>
+                </Dimmer>
+                {errorDimmer}
+                {limitReachedDimmer}
+              </Segment>
+            )}
+          />
+        </Segment>
+        <CookieConsent
+          ref={this.state.cookieBannerRef}
+          enableDeclineButton
+          onDecline={() => {
+            this.removeAllCookies();
+          }}
+          onAccept={(scrolling) => this.acceptCookies(scrolling)}>
+          This website uses cookies to enhance the user experience and to store
+          user information for annotation and access purposes.
+        </CookieConsent>
+        <Alert /> {/* Needed for react popup to function. Do not remove */}
+      </div>
+    );
+  }
 
-        let limitReachedDimmer = (
-            <Dimmer active={!loading && sessionsLimitReached}>
-                <br />
-                <br />
-                <Icon name='warning circle' color='orange' size='big' />
-                <br />
-                <br />
-                <Header as='h2' inverted>
-                    Currenlty Scope has reached it's capacity in number of
-                    concurrent users.
-                    <br />
-                    <br />
-                    Please try again later or try out our standalone SCope app.
-                    <br />
-                    <br />
-                    More details on our GitHub.
-                    <br />
-                    <br />
-                    <Button
-                        color='orange'
-                        href='https://github.com/aertslab/SCope'
-                        target='_blank'>
-                        AertsLab GitHub
-                    </Button>
-                </Header>
-            </Dimmer>
-        );
-
-        console.log('isSidebarVisible', isSidebarVisible);
-        let pusherWidth = isSidebarVisible
-            ? screen.width - 340
-            : screen.width - 75;
-
-        var sidebarContent = <b>Sidebar content</b>;
-
-        let sidebarStyle = {
-            root: {
-                position: 'relative'
-            },
-            content: {
-                position: 'relative'
-            },
-            sidebar: {
-                position: 'absolute',
-                zIndex: 2
-            }
-        };
-
-        return (
-            <div>
-                <Favicon url='src/images/SCope_favicon.ico' />
-                <Segment className='parentView'>
-                    <Route
-                        exact
-                        path='/'
-                        render={() => (
-                            <Segment textAlign='center' className='parentView'>
-                                <Segment vertical>
-                                    <Header as='h1'>SCope</Header>
-                                </Segment>
-                                {errorDimmer}
-                                {limitReachedDimmer}
-                            </Segment>
-                        )}
-                    />
-                    <Route
-                        path='/:uuid/:loom?/:page?'
-                        render={({ history }) => (
-                            <Segment className='parentView'>
-                                <ReactResizeDetector
-                                    handleHeight
-                                    skipOnMount
-                                    onResize={this.onResize.bind(this)}
-                                />
-                                <AppHeader
-                                    toggleSidebar={this.toggleSidebar.bind(
-                                        this
-                                    )}
-                                    metadata={metadata}
-                                    loaded={loaded}
-                                    timeout={this.timeout}
-                                    cookies={this.props.cookies}
-                                    cookiesAllowed={this.state.cookiesAllowed}
-                                    cookieBannerRef={this.state.cookieBannerRef}
-                                />
-                                <Sidebar.Pushable>
-                                    <AppSidebar
-                                        visible={isSidebarVisible}
-                                        onMetadataChange={this.onMetadataChange.bind(
-                                            this
-                                        )}
-                                        sessionMode={this.state.sessionMode}
-                                    />
-                                    <Sidebar.Pusher
-                                        style={{ width: pusherWidth }}>
-                                        <Route
-                                            path='/:uuid/:loom?/welcome'
-                                            component={Welcome}
-                                        />
-                                        <Route
-                                            path='/:uuid/:loom?/dataset'
-                                            component={Dataset}
-                                        />
-                                        <Route
-                                            path='/:uuid/:loom?/gene'
-                                            component={Gene}
-                                        />
-                                        <Route
-                                            path='/:uuid/:loom?/geneset'
-                                            component={Geneset}
-                                        />
-                                        <Route
-                                            path='/:uuid/:loom?/regulon'
-                                            component={Regulon}
-                                        />
-                                        <Route
-                                            path='/:uuid/:loom?/compare'
-                                            component={() => (
-                                                <Compare metadata={metadata} />
-                                            )}
-                                        />
-                                        <Route
-                                            path='/:uuid/:loom?/tutorial'
-                                            component={Tutorial}
-                                        />
-                                        <Route
-                                            path='/:uuid/:loom?/about'
-                                            component={About}
-                                        />
-                                    </Sidebar.Pusher>
-                                </Sidebar.Pushable>
-                                <Dimmer active={loading} inverted>
-                                    <Loader inverted>
-                                        Your SCope session is starting
-                                    </Loader>
-                                </Dimmer>
-                                <Dimmer
-                                    active={
-                                        !loading &&
-                                        this.timeout != null &&
-                                        this.timeout <= 0
-                                    }>
-                                    <br />
-                                    <br />
-                                    <Icon
-                                        name='warning circle'
-                                        color='orange'
-                                        size='big'
-                                    />
-                                    <br />
-                                    <br />
-                                    <Header as='h2' inverted>
-                                        Your SCope session has ended
-                                        <br />
-                                        <br />
-                                        <Link to='/'>
-                                            <Button
-                                                color='orange'
-                                                onClick={() => {
-                                                    history.replace('/');
-                                                }}>
-                                                RESTART
-                                            </Button>
-                                        </Link>
-                                    </Header>
-                                </Dimmer>
-                                {errorDimmer}
-                                {limitReachedDimmer}
-                            </Segment>
-                        )}
-                    />
-                </Segment>
-                <CookieConsent
-                    ref={this.state.cookieBannerRef}
-                    enableDeclineButton
-                    onDecline={() => {
-                        this.removeAllCookies();
-                    }}
-                    onAccept={(scrolling) => this.acceptCookies(scrolling)}>
-                    This website uses cookies to enhance the user experience and
-                    to store user information for annotation and access
-                    purposes.
-                </CookieConsent>
-                <Alert />{' '}
-                {/* Needed for react popup to function. Do not remove */}
-            </div>
-        );
-    }
-
-    componentWillMount() {
-        if (DEBUG) console.log('App componentWillMount', this.props);
-        this.parseURLParams(this.props);
-        this.getUUIDFromIP(this.props);
-        let isSidebarVisible = this.props.cookies.get(sidebarCookieName);
-        if (isSidebarVisible == '1') this.setState({ isSidebarVisible: true });
-        if (isSidebarVisible == '0') this.setState({ isSidebarVisible: false });
-        if (this.props.cookies.get('CookieConsent') == 'true') {
-            this.setState({ cookiesAllowed: true }, () => {
-                if (
-                    document.head.querySelector('[name=scope-orcid]') != null &&
-                    this.state.orcid_active
-                ) {
-                    let auth_code = document.head
-                        .querySelector('[name=scope-orcid]')
-                        .getAttribute('auth');
-                    if (this.state.cookiesAllowed) {
-                        BackendAPI.getORCID(
-                            auth_code,
-                            (orcid_scope_uuid, name, orcid_id) => {
-                                this.props.cookies.set(
-                                    'scope_orcid_uuid',
-                                    orcid_scope_uuid
-                                );
-                                this.props.cookies.set(
-                                    'scope_orcid_name',
-                                    name
-                                );
-                                this.props.cookies.set(
-                                    'scope_orcid_id',
-                                    orcid_id
-                                );
-                                // Possibly a bit hacky, but it works to remove the code from the URL
-                                location.href =
-                                    location.origin +
-                                    location.pathname +
-                                    location.hash;
-                            }
-                        );
-                    } else {
-                        alert(
-                            'You must allow cookies before you are able to log in!'
-                        );
-                        location.href =
-                            location.origin + location.pathname + location.hash;
-                    }
-                }
-            });
+  UNSAFE_componentWillMount() {
+    if (DEBUG) console.log('App componentWillMount', this.props);
+    this.parseURLParams(this.props);
+    this.getUUIDFromIP(this.props);
+    let isSidebarVisible = this.props.cookies.get(sidebarCookieName);
+    if (isSidebarVisible == '1') this.setState({ isSidebarVisible: true });
+    if (isSidebarVisible == '0') this.setState({ isSidebarVisible: false });
+    if (this.props.cookies.get('CookieConsent') == 'true') {
+      this.setState({ cookiesAllowed: true }, () => {
+        if (
+          document.head.querySelector('[name=scope-orcid]') != null &&
+          this.state.orcid_active
+        ) {
+          let auth_code = document.head
+            .querySelector('[name=scope-orcid]')
+            .getAttribute('auth');
+          if (this.state.cookiesAllowed) {
+            BackendAPI.getORCID(
+              auth_code,
+              (orcid_scope_uuid, name, orcid_id) => {
+                this.props.cookies.set('scope_orcid_uuid', orcid_scope_uuid);
+                this.props.cookies.set('scope_orcid_name', name);
+                this.props.cookies.set('scope_orcid_id', orcid_id);
+                // Possibly a bit hacky, but it works to remove the code from the URL
+                location.href =
+                  location.origin + location.pathname + location.hash;
+              }
+            );
+          } else {
+            alert('You must allow cookies before you are able to log in!');
+            location.href = location.origin + location.pathname + location.hash;
+          }
         }
     }
+  }
 
-    componentDidMount() {
-        document.addEventListener('click', this.clickHandler.bind(this));
-        document.addEventListener('keypress', this.clickHandler.bind(this));
-    }
+  componentDidMount() {
+    document.addEventListener('click', this.clickHandler.bind(this));
+    document.addEventListener('keypress', this.clickHandler.bind(this));
+  }
 
-    clickHandler() {
-        this.mouseClicks += 1;
-        if (DEBUG) console.log('User click', this.mouseClicks);
-    }
+  clickHandler() {
+    this.mouseClicks += 1;
+    if (DEBUG) console.log('User click', this.mouseClicks);
+  }
 
-    componentWillUnmount() {
-        if (this.timer) clearInterval(this.timer);
-        document.removeEventListener('click', this.clickHandler);
-        document.removeEventListener('keypress', this.clickHandler);
-    }
+  componentWillUnmount() {
+    if (this.timer) clearInterval(this.timer);
+    document.removeEventListener('click', this.clickHandler);
+    document.removeEventListener('keypress', this.clickHandler);
+  }
 
-    componentWillReceiveProps(nextProps) {
-        this.parseURLParams(nextProps);
-        if (this.state.uuid != nextProps.match.params.uuid)
-            this.getUUIDFromIP(nextProps);
-    }
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    this.parseURLParams(nextProps);
+    if (this.state.uuid != nextProps.match.params.uuid)
+      this.getUUIDFromIP(nextProps);
+  }
 
-    parseURLParams(props) {
-        let loom = decodeURIComponent(props.match.params.loom);
-        let page = decodeURIComponent(props.match.params.page);
-        if (DEBUG) console.log('Query params - loom: ', loom, ' page: ', page);
-        BackendAPI.setActivePage(page ? page : 'welcome');
-        BackendAPI.setActiveLoom(loom ? loom : '');
-        ReactGA.pageview(
-            '/' + encodeURIComponent(loom) + '/' + encodeURIComponent(page)
+  parseURLParams(props) {
+    let loom = decodeURIComponent(props.match.params.loom);
+    let page = decodeURIComponent(props.match.params.page);
+    if (DEBUG) console.log('Query params - loom: ', loom, ' page: ', page);
+    BackendAPI.setActivePage(page ? page : 'welcome');
+    BackendAPI.setActiveLoom(loom ? loom : '');
+    ReactGA.pageview(
+      '/' + encodeURIComponent(loom) + '/' + encodeURIComponent(page)
+    );
+  }
+
+  getUUIDFromIP(props) {
+    publicIp.v4().then(
+      (ip) => {
+        this.getUUID(props, ip);
+      },
+      () => {
+        this.getUUID(props);
+      }
+    );
+  }
+
+  getUUID(props, ip) {
+    const { cookies, match } = props;
+
+    if (match.params.uuid) {
+      if (match.params.uuid == 'permalink') {
+        if (DEBUG) console.log('Permalink detected');
+        this.restoreSession(ip, cookies.get(cookieName), match.params.loom);
+      } else if (match.params.uuid.startsWith('permalink')) {
+        this.restoreSession(
+          ip,
+          match.params.uuid.substring(11),
+          match.params.loom
         );
     }
 

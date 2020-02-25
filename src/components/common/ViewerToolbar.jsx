@@ -148,15 +148,15 @@ export default class ViewerToolbar extends Component {
         );
     }
 
-    componentWillMount() {
-        BackendAPI.onActiveFeaturesChange(
-            this.state.activePage,
-            this.activeFeaturesListener
-        );
-        BackendAPI.onSettingsChange(this.settingsListener);
-        BackendAPI.onFeatureScaleChange(this.featuresScaleListener);
-        //this.onActiveFeaturesChange(this.state.activeFeatures);
-    }
+  UNSAFE_componentWillMount() {
+    BackendAPI.onActiveFeaturesChange(
+      this.state.activePage,
+      this.activeFeaturesListener
+    );
+    BackendAPI.onSettingsChange(this.settingsListener);
+    BackendAPI.onFeatureScaleChange(this.featuresScaleListener);
+    //this.onActiveFeaturesChange(this.state.activeFeatures);
+  }
 
     componentWillUnmount() {
         BackendAPI.removeActiveFeaturesChange(

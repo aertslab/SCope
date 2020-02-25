@@ -106,79 +106,106 @@ export default class Viewer extends Component {
                 </Dimmer>
             </div>
         );
-    }
+      }
+    };
+    this.spriteSettingsListener = () => {
+      this.setState({ loading: true });
+      if (this.state.colors) this.updateDataPoints(this.state.colors);
+      else this.resetDataPoints();
+      this.repaintLassoSelections(this.state.lassoSelections);
+    };
+    this.viewerToolListener = (tool) => {
+      this.setState({ activeTool: tool });
+    };
+    this.viewerSelectionListener = (selections) => {
+      this.onViewerSelectionChange(selections);
+    };
+    this.viewerTransformListener = (t) => {
+      this.onViewerTransformChange(t);
+    };
+    this.customScaleListener = (scale) => {
+      if (this.props.customScale) {
+        this.onCustomScaleChange(scale);
+      }
+    };
+    this.activeFeaturesListener = (features, featureID, customScale) => {
+      this.onActiveFeaturesChange(features, featureID, customScale);
+    };
+  }
 
-    componentWillMount() {
-        BackendAPI.onSettingsChange(this.settingsListener);
-        BackendAPI.onSpriteSettingsChange(this.spriteSettingsListener);
-        BackendAPI.onViewerToolChange(this.viewerToolListener);
-        BackendAPI.onViewerSelectionsChange(this.viewerSelectionListener);
-        BackendAPI.onViewerTransformChange(this.viewerTransformListener);
-        BackendAPI.onCustomScaleChange(this.customScaleListener);
-        BackendAPI.onActiveFeaturesChange(
-            this.state.activePage,
-            this.activeFeaturesListener
-        );
-    }
+  render() {
+    return (
+      <div className='stretched'>
+        <canvas id={'viewer' + this.props.name}></canvas>
+        <ReactResizeDetector
+          skipOnMount
+          handleWidth
+          handleHeight
+          onResize={this.onResize.bind(this)}
+        />
+        <Dimmer active={this.state.loading} inverted style={{ zIndex: 0 }}>
+          <Loader inverted>Loading</Loader>
+        </Dimmer>
+      </div>
+    );
+  }
 
-    componentDidMount() {
-        let viewerId = 'viewer' + this.props.name;
-        if (DEBUG)
-            console.log(this.props.name, 'componentDidMount', this.props);
-        this.zoomSelection = d3.select('#' + viewerId);
-        let bbox = this.zoomSelection
-            .select(function() {
-                return this.parentNode;
-            })
-            .node()
-            .getBoundingClientRect();
-        this.w = bbox.width - VIEWER_MARGIN;
-        this.h = bbox.height - VIEWER_MARGIN;
+  UNSAFE_componentWillMount() {
+    BackendAPI.onSettingsChange(this.settingsListener);
+    BackendAPI.onSpriteSettingsChange(this.spriteSettingsListener);
+    BackendAPI.onViewerToolChange(this.viewerToolListener);
+    BackendAPI.onViewerSelectionsChange(this.viewerSelectionListener);
+    BackendAPI.onViewerTransformChange(this.viewerTransformListener);
+    BackendAPI.onCustomScaleChange(this.customScaleListener);
+    BackendAPI.onActiveFeaturesChange(
+      this.state.activePage,
+      this.activeFeaturesListener
+    );
+  }
 
-        this.initGraphics();
-        if (this.props.loomFile != null) {
-            this.getPoints(
-                this.props.loomFile,
-                this.props.activeCoordinates,
-                this.props.activeAnnotations,
-                this.props.superposition,
-                () => {
-                    if (this.props.colors)
-                        this.updateDataPoints(this.props.colors);
-                    else
-                        this.getFeatureColors(
-                            this.state.activeFeatures,
-                            this.props.loomFile,
-                            this.props.thresholds,
-                            this.props.activeAnnotations,
-                            this.state.customScale,
-                            this.props.superposition
-                        );
-                    this.onViewerSelectionChange(this.state.lassoSelections);
-                    let t = BackendAPI.getViewerTransform();
-                    if (t) {
-                        let initialTransform = d3.zoomTransform(
-                            d3.select('#viewer' + t.src).node()
-                        );
-                        initialTransform.src = 'init';
-                        initialTransform.receivedFromListener = true;
-                        this.zoomBehaviour.transform(
-                            this.zoomSelection,
-                            initialTransform
-                        );
-                    }
-                }
+  componentDidMount() {
+    let viewerId = 'viewer' + this.props.name;
+    if (DEBUG) console.log(this.props.name, 'componentDidMount', this.props);
+    this.zoomSelection = d3.select('#' + viewerId);
+    let bbox = this.zoomSelection
+      .select(function() {
+        return this.parentNode;
+      })
+      .node()
+      .getBoundingClientRect();
+    this.w = bbox.width - VIEWER_MARGIN;
+    this.h = bbox.height - VIEWER_MARGIN;
+
+    this.initGraphics();
+    if (this.props.loomFile != null) {
+      this.getPoints(
+        this.props.loomFile,
+        this.props.activeCoordinates,
+        this.props.activeAnnotations,
+        this.props.superposition,
+        () => {
+          if (this.props.colors) this.updateDataPoints(this.props.colors);
+          else
+            this.getFeatureColors(
+              this.state.activeFeatures,
+              this.props.loomFile,
+              this.props.thresholds,
+              this.props.activeAnnotations,
+              this.state.customScale,
+              this.props.superposition
+            );
+          this.onViewerSelectionChange(this.state.lassoSelections);
+          let t = BackendAPI.getViewerTransform();
+          if (t) {
+            let initialTransform = d3.zoomTransform(
+              d3.select('#viewer' + t.src).node()
             );
         }
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (DEBUG)
-            console.log(
-                this.props.name,
-                'componentWillReceiveProps',
-                nextProps
-            );
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    if (DEBUG)
+      console.log(this.props.name, 'componentWillReceiveProps', nextProps);
 
         // TODO: dirty hacks
         /*
