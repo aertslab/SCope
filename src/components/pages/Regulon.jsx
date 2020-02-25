@@ -21,7 +21,7 @@ export default class Regulon extends Component {
     this.activeLoomListener = (loom, metadata, coordinates) => {
       this.setState({ activeLoom: loom, activeCoordinates: coordinates });
     };
-    this.activeFeaturesListener = (features, _) => {
+    this.activeFeaturesListener = (features) => {
       this.setState({ activeFeatures: features });
     };
     this.sidebarVisibleListener = (state) => {
@@ -113,7 +113,7 @@ export default class Regulon extends Component {
           </Grid.Column>
           <Grid.Column width={3}>
             <ViewerSidebar
-              onActiveFeaturesChange={(features, _) => {
+              onActiveFeaturesChange={(features) => {
                 this.setState({ activeFeatures: features });
               }}
             />

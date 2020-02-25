@@ -52,7 +52,6 @@ let config = {
                 ],
                 plugins: [
                   ['@babel/plugin-proposal-class-properties', { loose: true }],
-                  'react-hot-loader/babel',
                 ],
               }
             }
@@ -133,7 +132,6 @@ if (process.env.NODE_ENV === 'production') {
     )
 } else {
     config.plugins.push(new webpack.NamedModulesPlugin())
-    config.entry = ['react-hot-loader/patch', config.entry]
 }
 
 // config.node = { fs: 'empty', child_process: 'empty' };

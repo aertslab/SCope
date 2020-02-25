@@ -16,7 +16,10 @@ export default class Tutorial extends Component {
             These tutorials will be updated as and when possible and needed.
             <br />
             This tutorial is based on the following .loom file:{' '}
-            <a href='https://placeholder.com/' target='_blank' rel='noopener noreferrer'>
+            <a
+              href='https://placeholder.com/'
+              target='_blank'
+              rel='noopener noreferrer'>
               Aerts_56k.loom
             </a>
             <br />

@@ -176,6 +176,10 @@
     ],
     "rules": {
       "prettier/prettier": "error"
+    },
+    "globals": {
+      "DEBUG": "readonly",
+      "REVERSEPROXYON": "readonly"
     }
   }
 }

@@ -81,43 +81,43 @@ export default class Gene extends Component {
 
         if (!activeLoom) return <div>Select the dataset to be analyzed</div>;
 
-        return (
-            <Grid>
-                <Grid.Row columns='4' centered>
-                    {featureSearch()}
-                    <Grid.Column>&nbsp;</Grid.Column>
-                </Grid.Row>
-                <Grid.Row columns='3' stretched className='viewerFlex'>
-                    <Grid.Column width={1} className='viewerToolbar'>
-                        <ViewerToolbar />
-                    </Grid.Column>
-                    <Grid.Column stretched>
-                        <b>Expression levels</b>
-                        <Viewer
-                            name='expr'
-                            loomFile={activeLoom}
-                            activeFeatures={activeFeatures}
-                            activeCoordinates={activeCoordinates}
-                            onActiveLegendChange={(legend) => {
-                                this.setState({ activeLegend: legend });
-                            }}
-                            customScale={true}
-                            settings={true}
-                            scale={true}
-                        />
-                    </Grid.Column>
-                    <Grid.Column width={3}>
-                        <ViewerSidebar
-                            onActiveFeaturesChange={(features, id) => {
-                                this.setState({ activeFeatures: features });
-                            }}
-                            activeLegend={activeLegend}
-                        />
-                    </Grid.Column>
-                </Grid.Row>
-            </Grid>
-        );
-    }
+    return (
+      <Grid>
+        <Grid.Row columns='4' centered>
+          {featureSearch()}
+          <Grid.Column>&nbsp;</Grid.Column>
+        </Grid.Row>
+        <Grid.Row columns='3' stretched className='viewerFlex'>
+          <Grid.Column width={1} className='viewerToolbar'>
+            <ViewerToolbar />
+          </Grid.Column>
+          <Grid.Column stretched>
+            <b>Expression levels</b>
+            <Viewer
+              name='expr'
+              loomFile={activeLoom}
+              activeFeatures={activeFeatures}
+              activeCoordinates={activeCoordinates}
+              onActiveLegendChange={(legend) => {
+                this.setState({ activeLegend: legend });
+              }}
+              customScale={true}
+              settings={true}
+              scale={true}
+            />
+          </Grid.Column>
+          <Grid.Column width={3}>
+            <ViewerSidebar
+              onActiveFeaturesChange={(features) => {
+                this.setState({ activeFeatures: features });
+              }}
+              activeLegend={activeLegend}
+            />
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
+    );
+  }
 
   UNSAFE_componentWillMount() {
     BackendAPI.onActiveLoomChange(this.activeLoomListener);
