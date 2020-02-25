@@ -103,6 +103,7 @@
     "google-protobuf": "^3.5.0",
     "grpc": "^1.7.2",
     "grpc-loader": "^2.0.1",
+    "prettier": "^1.19.1",
     "react-hot-loader": "^3.1.3",
     "script-loader": "^0.7.2",
     "semantic-ui-react": "^0.77.0",
@@ -116,5 +117,15 @@
   },
   "optionalDependencies": {
     "electron-installer-debian": "^0.8.1"
+  },
+  "prettier": {
+    "endOfLine": "lf",
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": true,
+    "jsxSingleQuote": true,
+    "jsxBracketSameLine": true,
+    "arrowParens": "always"
   }
 }
