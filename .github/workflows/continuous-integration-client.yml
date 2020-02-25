@@ -1,20 +1,22 @@
 name: Client CI
-on: [push, pull_request]
+on:
+  push:
+
+  pull_request:
+    paths-ignore:
+    - 'src/**'
 
 jobs:
   client-quality-checks:
 
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: ['10', '12', '13']
 
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
         uses: actions/setup-node@v1
         with:
-          node-version" ${{ matrix.node }}
+          node-version: '12.x'
       - run: npm install
       - run: npm run check-style
       - run: npm run lint
