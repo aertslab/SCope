@@ -30,6 +30,10 @@ classifiers = ["Development Status :: 5 - Production/Stable",
                "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
                "Topic :: Scientific/Engineering :: Bio-Informatics"]
 
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
 [tool.poetry.dependencies]
 python = "^3.6.1"
 
@@ -46,6 +50,7 @@ loompy = "^3.0.1"
 pyscenic = "^0.9.14"
 
 multiprocessing_on_dill = { version = "*", allow-prereleases = true }
+safety = "^1.8.5"
 requests = "^2.22.0"
 
 [tool.poetry.dev-dependencies]
