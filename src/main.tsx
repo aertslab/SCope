@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { render } from 'react-dom';
 import App from './components/App';
 import 'semantic-ui-css/semantic.min.css';
 import './css/header.css';
@@ -11,7 +11,7 @@ import { AppContainer } from 'react-hot-loader'
 import { CookiesProvider } from 'react-cookie';
 
 const renderApp = () => {
-    ReactDOM.render((
+    render((
         <AppContainer>
             <CookiesProvider>
                 <HashRouter>
@@ -26,5 +26,5 @@ if(module.hot) {
     module.hot.accept('./components/App', renderApp)
 }
 
-renderApp()
+renderApp();
 
