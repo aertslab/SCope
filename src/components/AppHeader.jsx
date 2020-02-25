@@ -13,7 +13,7 @@ import {
 import { BackendAPI } from './common/API';
 import { instanceOf } from 'prop-types';
 import { withCookies, Cookies } from 'react-cookie';
-import Bitly from 'bitlyapi';
+import Bitly from 'bitly4api';
 const moment = require('moment');
 const pako = require('pako');
 let bitly = new Bitly(BITLY.token);
