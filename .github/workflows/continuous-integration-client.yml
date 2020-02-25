@@ -1,0 +1,22 @@
+name: Client CI
+on: [push, pull_request]
+
+jobs:
+  client-quality-checks:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['10', '12', '13']
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        uses: actions/setup-node@v1
+        with:
+          node-version" ${{ matrix.node }}
+      - run: npm install
+      - run: npm run check-style
+      - run: npm run lint
+      - run: npm test
+      
