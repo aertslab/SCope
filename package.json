@@ -11,6 +11,8 @@
     "build": "cross-env NODE_ENV=production NODE_TYPE=local webpack",
     "build-aws": "cross-env NODE_ENV=production NODE_TYPE=aws webpack",
     "build-dev": "cross-env NODE_ENV=development NODE_TYPE=local webpack",
+    "check-style": "prettier --check 'src/**/*.js' 'src/**/*.jsx'",
+    "lint": "eslint src/",
     "test": "echo \"Error: no test specified\"",
     "scope": "node bin/launch.js",
     "scope-dev": "node bin/launch.js --dev",
