@@ -4,16 +4,16 @@ import ReactJson from 'react-json-view';
 import { Grid } from 'semantic-ui-react';
 
 export default class Dataset extends Component {
-    constructor() {
-        super();
-        this.state = {
-            activeLoom: BackendAPI.getActiveLoom(),
-            metadata: BackendAPI.getActiveLoomMetadata()
-        };
-        this.activeLoomListener = (loom, metadata, coordinates) => {
-            this.setState({ activeLoom: loom, metadata: metadata });
-        };
-    }
+  constructor() {
+    super();
+    this.state = {
+      activeLoom: BackendAPI.getActiveLoom(),
+      metadata: BackendAPI.getActiveLoomMetadata()
+    };
+    this.activeLoomListener = (loom, metadata) => {
+      this.setState({ activeLoom: loom, metadata: metadata });
+    };
+  }
 
     render() {
         const { activeLoom, metadata } = this.state;

@@ -59,6 +59,7 @@
     "moment": "^2.21.0",
     "pako": "^1.0.6",
     "pixi.js": "^4.6.2",
+    "prop-types": "^15.7.2",
     "protobufjs": "^6.8.6",
     "public-ip": "^2.4.0",
     "rc-slider": "^8.6.0",
@@ -159,8 +160,8 @@
       "plugin:prettier/recommended"
     ],
     "globals": {
-      "Atomics": "readonly",
-      "SharedArrayBuffer": "readonly"
+      "DEBUG": "readonly",
+      "REVERSEPROXYON": "readonly"
     },
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
@@ -176,10 +177,6 @@
     ],
     "rules": {
       "prettier/prettier": "error"
-    },
-    "globals": {
-      "DEBUG": "readonly",
-      "REVERSEPROXYON": "readonly"
     }
   }
 }

@@ -3,7 +3,7 @@ import 'rc-tooltip/assets/bootstrap.css';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { Menu, Grid } from 'semantic-ui-react';
-import Slider, { Range } from 'rc-slider';
+import Slider from 'rc-slider';
 import { BackendAPI } from '../common/API';
 import ReactGA from 'react-ga';
 

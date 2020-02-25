@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { Grid } from 'semantic-ui-react';
+import _ from 'lodash';
+
 import { BackendAPI } from '../common/API';
 import FeatureSearchBox from '../common/FeatureSearchBox';
 import Viewer from '../common/Viewer';
