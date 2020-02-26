@@ -11,20 +11,20 @@ import { AppContainer } from 'react-hot-loader';
 import { CookiesProvider } from 'react-cookie';
 
 const renderApp = () => {
-  ReactDOM.render(
-    <AppContainer>
-      <CookiesProvider>
-        <HashRouter>
-          <Route path='/:uuid?/:loom?/:page?' component={App} />
-        </HashRouter>
-      </CookiesProvider>
-    </AppContainer>,
-    document.getElementById('scope')
-  );
+    ReactDOM.render(
+        <AppContainer>
+            <CookiesProvider>
+                <HashRouter>
+                    <Route path='/:uuid?/:loom?/:page?' component={App} />
+                </HashRouter>
+            </CookiesProvider>
+        </AppContainer>,
+        document.getElementById('scope')
+    );
 };
 
 if (module.hot) {
-  module.hot.accept('./components/App', renderApp);
+    module.hot.accept('./components/App', renderApp);
 }
 
 renderApp();

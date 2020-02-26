@@ -4,46 +4,48 @@ import ReactJson from 'react-json-view';
 import { Grid } from 'semantic-ui-react';
 
 export default class Dataset extends Component {
-  constructor() {
-    super();
-    this.state = {
-      activeLoom: BackendAPI.getActiveLoom(),
-      metadata: BackendAPI.getActiveLoomMetadata()
-    };
-    this.activeLoomListener = (loom, metadata, coordinates) => {
-      this.setState({ activeLoom: loom, metadata: metadata });
-    };
-  }
+    constructor() {
+        super();
+        this.state = {
+            activeLoom: BackendAPI.getActiveLoom(),
+            metadata: BackendAPI.getActiveLoomMetadata()
+        };
+        this.activeLoomListener = (loom, metadata, coordinates) => {
+            this.setState({ activeLoom: loom, metadata: metadata });
+        };
+    }
 
-  render() {
-    const { activeLoom, metadata } = this.state;
+    render() {
+        const { activeLoom, metadata } = this.state;
 
-    return (
-      <Grid>
-        {!activeLoom && (
-          <Grid.Row>
-            <Grid.Column>Select the dataset to be analyzed</Grid.Column>
-          </Grid.Row>
-        )}
-        {activeLoom && (
-          <Grid.Row>
-            <Grid.Column>
-              Active loom file: <b>{activeLoom}</b>
-              <br />
-              <br />
-              <ReactJson src={metadata} collapsed={2} />
-            </Grid.Column>
-          </Grid.Row>
-        )}
-      </Grid>
-    );
-  }
+        return (
+            <Grid>
+                {!activeLoom && (
+                    <Grid.Row>
+                        <Grid.Column>
+                            Select the dataset to be analyzed
+                        </Grid.Column>
+                    </Grid.Row>
+                )}
+                {activeLoom && (
+                    <Grid.Row>
+                        <Grid.Column>
+                            Active loom file: <b>{activeLoom}</b>
+                            <br />
+                            <br />
+                            <ReactJson src={metadata} collapsed={2} />
+                        </Grid.Column>
+                    </Grid.Row>
+                )}
+            </Grid>
+        );
+    }
 
-  componentWillMount() {
-    BackendAPI.onActiveLoomChange(this.activeLoomListener);
-  }
+    componentWillMount() {
+        BackendAPI.onActiveLoomChange(this.activeLoomListener);
+    }
 
-  componentWillUnmount() {
-    BackendAPI.removeActiveLoomChange(this.activeLoomListener);
-  }
+    componentWillUnmount() {
+        BackendAPI.removeActiveLoomChange(this.activeLoomListener);
+    }
 }
