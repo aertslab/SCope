@@ -98,17 +98,17 @@ class Launcher {
         })
     }
 
-    checkSCopeCondaEnvExists() {
-        console.log("- Checking SCope conda environment...")
+    checkSCopePoetryEnvExists() {
+        console.log("- Checking SCope poetry environment...")
         return new Promise((resolve, reject) => {
-            exec("conda info --envs", {stdio:[0,1,2]}, (error, stdout, stderr) => {
+            exec("cd opt; poetry env list", {stdio:[0,1,2]}, (error, stdout, stderr) => {
                 if (error) return resolve(false);
                 if (stderr) return resolve(false);
                 if(!this.scopeServerActivated) {
-                    if(stdout.includes("scope")) {
-                        throw new Error("SCope Server is installed but not activated. Please activate your 'scope' conda environment using either 'conda activate scope' or 'source activate scope' command.")
+                    if(stdout.includes("scopeserver")) {
+                        throw new Error("SCope Server is installed but not activated. Please activate your 'scope' poetry environment using either 'cd opt; poetry shell; cd ..;' command.")
                     } else {
-                        throw new Error("SCope Server is not installed. Please install SCope Server.")
+                        throw new Error("SCope Server is not installed. Please install SCope Server using 'npm install'.")
                     }
                 } else {
                     console.log("SCope Server is installed and activated!")
@@ -122,7 +122,6 @@ class Launcher {
         console.log("- Checking SCope Server...")
         return new Promise((resolve) => {
             if(!utils._commandExists("scope-server")) {
-                throw new Error("scope-server not found. Please activate your 'scope' conda environment using either 'conda activate scope' or 'source activate scope' command.");
                 resolve(false)
             } else {
                 this.scopeServerActivated = true
@@ -133,14 +132,14 @@ class Launcher {
 
     checkSCopeServer() {
         return this.checkSCopeServerCommandExists()
-            .then(() => this.checkSCopeCondaEnvExists())
+            .then(() => this.checkSCopePoetryEnvExists())
     }
 
-    checkCondaExists() {
+    checkPoetryExists() {
         // conda
         return new Promise((resolve) => {
-            if(!utils._commandExists("conda")) {
-                console.log("Please install miniconda3.")
+            if(!utils._commandExists("poetry")) {
+                console.log("Please install poetry.")
                 process.exit()
             }
             resolve()
@@ -149,7 +148,7 @@ class Launcher {
 
     runSanityChecks() {
         console.log("--------- sanity checks ----------")
-        return this.checkCondaExists()
+        return this.checkPoetryExists()
             .then(() => this.checkSCopeServer())
             .then(() => this.checkTmuxExists())
             .then(() => this.checkDirs())
@@ -264,7 +263,7 @@ class Launcher {
         let scopeStartCmd = "scope-server"
         if(!this.scopeServerActivated) {
             console.log("SCope Server installed but not activated")
-            scopeStartCmd = "source activate scope &&"+ scopeStartCmd 
+            scopeStartCmd = "cd opt && poetry shell && cd .. &&"+ scopeStartCmd 
             console.log("Activating and starting SCope Server...")
         } else {
             console.log("Starting SCope Server...")
