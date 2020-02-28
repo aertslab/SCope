@@ -2,59 +2,58 @@ name: Server CI
 on: [pull_request]
 
 jobs:
-  quality-checks:
+    quality-checks:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                python-version: [3.6, 3.7, 3.8]
 
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.6, 3.7, 3.8]
+        steps:
+            - uses: actions/checkout@v2
+            - name: Install dependencies
+              uses: abatilo/actions-poetry@v1.5.0
+              with:
+                  python_version: ${{ matrix.python-version }}
+                  poetry_version: 1.0.3
+                  working_directory: ./opt
+                  args: install
 
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install dependencies
-        uses: abatilo/actions-poetry@v1.5.0
-        with:
-          python_version: ${{ matrix.python-version }}
-          poetry_version: 1.0.3
-          working_directory: ./opt
-          args: install
+            - name: Run pylint
+              uses: abatilo/actions-poetry@v1.5.0
+              with:
+                  python_version: ${{ matrix.python-version }}
+                  poetry_version: 1.0.3
+                  working_directory: ./opt
+                  args: run pylint-fail-under --fail_under "6.25" --rcfile pyproject.toml scopeserver
 
-      - name: Run pylint
-        uses: abatilo/actions-poetry@v1.5.0
-        with:
-          python_version: ${{ matrix.python-version }}
-          poetry_version: 1.0.3
-          working_directory: ./opt
-          args: run pylint-fail-under --fail_under "-8.1" --rcfile pyproject.toml scopeserver
+            - name: Run black
+              uses: abatilo/actions-poetry@v1.5.0
+              with:
+                  python_version: ${{ matrix.python-version }}
+                  poetry_version: 1.0.3
+                  working_directory: ./opt
+                  args: run black --check .
 
-      - name: Run black
-        uses: abatilo/actions-poetry@v1.5.0
-        with:
-          python_version: ${{ matrix.python-version }}
-          poetry_version: 1.0.3
-          working_directory: ./opt
-          args: run black --check .
+            - name: Run mypy
+              uses: abatilo/actions-poetry@v1.5.0
+              with:
+                  python_version: ${{ matrix.python-version }}
+                  poetry_version: 1.0.3
+                  working_directory: ./opt
+                  args: run mypy --config-file pyproject.toml --ignore-missing-imports scopeserver
 
-      - name: Run mypy
-        uses: abatilo/actions-poetry@v1.5.0
-        with:
-          python_version: ${{ matrix.python-version }}
-          poetry_version: 1.0.3
-          working_directory: ./opt
-          args: run mypy --config-file pyproject.toml --ignore-missing-imports scopeserver
+            - name: Run pytest
+              uses: abatilo/actions-poetry@v1.5.0
+              with:
+                  python_version: ${{ matrix.python-version }}
+                  poetry_version: 1.0.3
+                  working_directory: ./opt
+                  args: run pytest --cov=scopeserver --cov-branch --cov-fail-under=23 test/
 
-      - name: Run pytest
-        uses: abatilo/actions-poetry@v1.5.0
-        with:
-          python_version: ${{ matrix.python-version }}
-          poetry_version: 1.0.3
-          working_directory: ./opt
-          args: run pytest --cov=scopeserver --cov-branch --cov-fail-under=23 test/
-
-      - name: Run safety security checks
-        uses: abatilo/actions-poetry@v1.5.0
-        with:
-          python_version: ${{ matrix.python-version }}
-          poetry_version: 1.0.3
-          working_directory: ./opt
-          args: run pip freeze | poetry run safety check --stdin
+            - name: Run safety security checks
+              uses: abatilo/actions-poetry@v1.5.0
+              with:
+                  python_version: ${{ matrix.python-version }}
+                  poetry_version: 1.0.3
+                  working_directory: ./opt
+                  args: run pip freeze | poetry run safety check --stdin
