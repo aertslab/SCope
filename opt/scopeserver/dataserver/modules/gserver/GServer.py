@@ -581,9 +581,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
             def create_cluster_marker_metric(metric):
                 return loom.get_cluster_marker_metrics(
-                    clustering_id=request.clusteringID,
-                    cluster_id=request.clusterID,
-                    metric_accessor=metric["accessor"]
+                    clustering_id=request.clusteringID, cluster_id=request.clusterID, metric_accessor=metric["accessor"]
                 )
 
             def to_pb(metric):
@@ -591,46 +589,21 @@ class SCope(s_pb2_grpc.MainServicer):
                     accessor=metric["accessor"],
                     name=metric["name"],
                     description=metric["description"],
-                    values=cluster_marker_metrics[metric["accessor"]]
+                    values=cluster_marker_metrics[metric["accessor"]],
                 )
 
             cluster_marker_metrics = functools.reduce(
-                lambda left, right: pd.merge(
-                    left,
-                    right,
-                    left_index=True,
-                    right_index=True,
-                    how='outer'
-                ),
-                list(
-                    map(
-                        lambda x: create_cluster_marker_metric(x),
-                        md_cmm
-                    )
-                )
+                lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how="outer"),
+                [create_cluster_marker_metric(x) for x in md_cmm],
             )
             # Keep only non-zeros elements
             nonzero_mask = cluster_marker_metrics.apply(
-                lambda x: functools.reduce(
-                    np.logical_and,
-                    np.logical_and(
-                        ~np.isnan(x),
-                        x != 0
-                    )
-                ),
-                axis=1
+                lambda x: functools.reduce(np.logical_and, np.logical_and(~np.isnan(x), x != 0)), axis=1
             )
             cluster_marker_metrics_nonzero = cluster_marker_metrics[nonzero_mask]
 
-        return s_pb2.MarkerGenesReply(
-            genes=cluster_marker_metrics_nonzero.index,
-            metrics=list(
-                map(
-                    to_pb,
-                    md_cmm
-                )
-            )
-        )
+        metrics = [to_pb(x) for x in md_cmm]
+        return s_pb2.MarkerGenesReply(genes=cluster_marker_metrics_nonzero.index, metrics=metrics)
 
     def getMyGeneSets(self, request, context):
         userDir = dfh.DataFileHandler.get_data_dir_path_by_file_type("GeneSet", UUID=request.UUID)
