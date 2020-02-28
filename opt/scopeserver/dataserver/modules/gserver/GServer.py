@@ -584,7 +584,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     clustering_id=request.clusteringID, cluster_id=request.clusterID, metric_accessor=metric["accessor"]
                 )
 
-            def to_pb(metric):
+            def protoize_cluster_marker_metric(metric):
                 return s_pb2.MarkerGenesMetric(
                     accessor=metric["accessor"],
                     name=metric["name"],
@@ -602,7 +602,7 @@ class SCope(s_pb2_grpc.MainServicer):
             )
             cluster_marker_metrics_nonzero = cluster_marker_metrics[nonzero_mask]
 
-        metrics = [to_pb(x) for x in md_cmm]
+        metrics = [protoize_cluster_marker_metric(x) for x in md_cmm]
         return s_pb2.MarkerGenesReply(genes=cluster_marker_metrics_nonzero.index, metrics=metrics)
 
     def getMyGeneSets(self, request, context):
