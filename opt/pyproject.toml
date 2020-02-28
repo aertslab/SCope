@@ -71,7 +71,7 @@ target-version = ['py38']
 [build-system]
 requires = [
         "poetry>=0.12",
-        "setuptools==45.2.0"
+        "setuptools>=45.2.0"
         ]
 build-backend = "poetry.masonry.api"
 
