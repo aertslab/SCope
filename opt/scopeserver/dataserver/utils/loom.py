@@ -862,8 +862,6 @@ class Loom:
             "ClusterMarkers_{0}_{1}".format(clustering_id, metric_accessor)
         ][str(cluster_id)][marker_mask]
         cluster_marker_metric_df = pd.DataFrame(
-            cluster_marker_metric,
-            index=self.get_genes()[marker_mask],
-            columns=[metric_accessor]
+            cluster_marker_metric, index=self.get_genes()[marker_mask], columns=[metric_accessor]
         )
         return cluster_marker_metric_df
