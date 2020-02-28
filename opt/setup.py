@@ -1,10 +1,10 @@
-from setuptools import setup, find_namespace_packages
+from setuptools import setup, find_packages
 import os
 
 
 def get_bindserver_files():
     paths = []
-    for (path, directories, filenames) in os.walk("scopeserver/bindserver"):
+    for (path, _, filenames) in os.walk("scopeserver/bindserver"):
         for filename in filenames:
             if not filename.endswith(".py"):
                 paths.append((path, [os.path.join(path, filename)]))
@@ -32,7 +32,7 @@ setup(
     author="Maxime De Waegeneer",
     author_email="mdewaegeneer@gmail.com",
     license="GPL-3.0",
-    packages=find_namespace_packages(exclude=["node_modules"]),
+    packages=find_packages(exclude=["node_modules"]),
     install_requires=[
         "grpcio>=1.26.0",
         "grpcio-tools>=1.26.0",
