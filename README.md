@@ -1,4 +1,5 @@
 # SCope v1.8.0: Visualization of large-scale and high dimensional single cell data
+
 <img src="images/SCope_Logo.png" width="640">
 
 SCope is a fast visualization tool for large-scale and high dimensional scRNA-seq datasets.
@@ -13,6 +14,7 @@ Visit [http://scope.aertslab.org](http://scope.aertslab.org) to test out SCope o
 ## Loom File Generation
 
 Currently there are two packages to generate extended loom files compatible with SCope.
+
 - R: [SCopeLoomR](https://github.com/aertslab/SCopeLoomR) - Dedicated R package
 - Python: [pySCENIC](https://github.com/aertslab/pySCENIC) - Single function for generation from SCENIC results
 
@@ -20,7 +22,7 @@ Eventually the functionality from pySCENIC will be expanded and put in its own p
 
 ## Run SCope
 
-### Standalone apps
+### Standalone App
 
 Standalone apps for **macOS** and **Linux** can be downloaded from [the releases page.](https://github.com/aertslab/SCope/releases).
 
@@ -28,41 +30,67 @@ Standalone apps for **macOS** and **Linux** can be downloaded from [the releases
 
 A **Windows** app is under development, but currently has no ETA.
 
-### Development
-Requirements should be fulfilled (see `Requirements` section).
+### Command Line
 
-#### Clone repository
+1. Clone the GitHub repository and install,
 
 ```bash
 # Define where you want to clone the SCope repository.
 LOCAL_SCOPE_REPO="${HOME}/repos/SCope"
-
 # Clone SCope git repository.
 git clone https://github.com/aertslab/SCope "${LOCAL_SCOPE_REPO}"
-```
-
-#### Install SCope
-
-```bash
 # Go to your local cloned SCope repository.
 cd "${LOCAL_SCOPE_REPO}"
-
 # Install SCope.
 npm install
 ```
 
-#### Run
-
-- One Command Run:
+2. Run,
 
 ```bash
 # Go to your local cloned SCope repository.
 cd "${LOCAL_SCOPE_REPO}"
-
 npm run scope
 ```
 
-- Debug Run in 2 terminals:
+## Deploy a Cloud-based Instance
+
+### Amazon Web Services
+
+#### Public AMI
+
+No ETA.
+
+#### Source
+
+To create a SCope AWS instance from scratch please read the tutorial [aws-deployment-source](https://github.com/aertslab/SCope/tree/master/tutorials/aws-deployment-source).
+
+## Features
+
+### Enabling ORCID Functionality
+
+To enable colaborative annotations and login via ORCID ID, API credentials (`orcidAPIClientID`, `orcidAPIClientSecret` and `orcidAPIRedirectURI`) must be added to the config file provided.
+These can be generated at the [orcid developer tools page](https://orcid.org/developer-tools).
+
+The `dataHashSecret` entry in the config file should be filled in with a randomly generated string for example from the python [secrets package](https://docs.python.org/3/library/secrets.html).
+This string will be used to salt all annotation data, allowing validation of data generated on the instance of SCope. Any changes in this string will invalidate all pre-existing annotations.
+
+## Development
+
+1. Clone the GitHub repository and install,
+
+```bash
+# Define where you want to clone the SCope repository.
+LOCAL_SCOPE_REPO="${HOME}/repos/SCope"
+# Clone SCope git repository.
+git clone https://github.com/aertslab/SCope "${LOCAL_SCOPE_REPO}"
+# Go to your local cloned SCope repository.
+cd "${LOCAL_SCOPE_REPO}"
+# Install SCope.
+npm install
+```
+
+2. Run,
 
 ```bash
 # Go to your local cloned SCope repository.
@@ -71,30 +99,9 @@ cd "${LOCAL_SCOPE_REPO}"
 # Start SCope Server (terminal 1).
 cd opt
 poetry shell
+scope-server
 
 # Start SCope Client (terminal 2).
 cd ..
 npm run dev
 ```
-
-## Enabling ORCID Functionality
-
-To enable colaborative annotations and login via ORCID ID, API credentials (`orcidAPIClientID`, `orcidAPIClientSecret` and `orcidAPIRedirectURI`) must be added to the config file provided. 
-These can be generated at the [orcid developer tools page](https://orcid.org/developer-tools).
-
-The `dataHashSecret` entry in the config file should be filled in with a randomly generated string for example from the python [secrets package](https://docs.python.org/3/library/secrets.html). 
-This string will be used to salt all annotation data, allowing validation of data generated on the instance of SCope. Any changes in this string will invalidate all pre-existing annotations.
-
-
-## Deploy a Cloud-based Instance
-
-### Amazon Web Services
-
-#### Public AMI
-
-Coming soon.
-
-#### Source
-
-To create a SCope AWS instance from scratch please read the tutorial [aws-deployment-source](https://github.com/aertslab/SCope/tree/master/tutorials/aws-deployment-source).
-
