@@ -592,9 +592,13 @@ class SCope(s_pb2_grpc.MainServicer):
                     values=cluster_marker_metrics[metric["accessor"]],
                 )
 
-            cluster_marker_metrics = functools.reduce(
-                lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how="outer"),
-                [create_cluster_marker_metric(x) for x in md_cmm],
+            def merge_cluster_marker_metrics(metrics):
+                return functools.reduce(
+                    lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how="outer"), metrics,
+                )
+
+            cluster_marker_metrics = merge_cluster_marker_metrics(
+                metrics=[create_cluster_marker_metric(x) for x in md_cmm]
             )
             # Keep only non-zeros elements
             nonzero_mask = cluster_marker_metrics.apply(
