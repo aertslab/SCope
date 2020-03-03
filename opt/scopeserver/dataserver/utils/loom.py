@@ -857,8 +857,11 @@ class Loom:
             return []
 
     def get_cluster_marker_metrics(self, clustering_id: int, cluster_id: int, metric_accessor: str):
+        marker_mask = self.loom_connection.ra["ClusterMarkers_{0}".format(clustering_id)][str(cluster_id)] == 1
         cluster_marker_metric = self.loom_connection.row_attrs[
             "ClusterMarkers_{0}_{1}".format(clustering_id, metric_accessor)
-        ][str(cluster_id)]
-        # Return non-zero values
-        return cluster_marker_metric[cluster_marker_metric != 0]
+        ][str(cluster_id)][marker_mask]
+        cluster_marker_metric_df = pd.DataFrame(
+            cluster_marker_metric, index=self.get_genes()[marker_mask], columns=[metric_accessor]
+        )
+        return cluster_marker_metric_df

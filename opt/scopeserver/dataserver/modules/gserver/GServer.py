@@ -17,6 +17,7 @@ import threading
 import pickle
 import requests
 import uuid
+import functools
 from typing import DefaultDict, Set, List, Dict, Any, Tuple
 from collections import OrderedDict, defaultdict, deque
 from functools import lru_cache
@@ -569,7 +570,6 @@ class SCope(s_pb2_grpc.MainServicer):
             logger.info("No markers for clustering {0} present in active loom.".format(request.clusteringID))
             return s_pb2.MarkerGenesReply(genes=[], metrics=[])
 
-        genes = loom.get_cluster_marker_genes(clustering_id=request.clusteringID, cluster_id=request.clusterID)
         # Filter the MD clusterings by ID
         md_clustering = loom.get_meta_data_clustering_by_id(
             id=request.clusteringID, secret=self.config["dataHashSecret"]
@@ -580,19 +580,34 @@ class SCope(s_pb2_grpc.MainServicer):
             md_cmm = md_clustering["clusterMarkerMetrics"]
 
             def create_cluster_marker_metric(metric):
-                cluster_marker_metrics = loom.get_cluster_marker_metrics(
+                return loom.get_cluster_marker_metrics(
                     clustering_id=request.clusteringID, cluster_id=request.clusterID, metric_accessor=metric["accessor"]
                 )
+
+            def protoize_cluster_marker_metric(metric):
                 return s_pb2.MarkerGenesMetric(
                     accessor=metric["accessor"],
                     name=metric["name"],
                     description=metric["description"],
-                    values=cluster_marker_metrics,
+                    values=cluster_marker_metrics[metric["accessor"]],
                 )
 
-            cluster_marker_metrics = list(map(create_cluster_marker_metric, md_cmm))
+            def merge_cluster_marker_metrics(metrics):
+                return functools.reduce(
+                    lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how="outer"), metrics,
+                )
 
-        return s_pb2.MarkerGenesReply(genes=genes, metrics=cluster_marker_metrics)
+            cluster_marker_metrics = merge_cluster_marker_metrics(
+                metrics=[create_cluster_marker_metric(x) for x in md_cmm]
+            )
+            # Keep only non-zeros elements
+            nonzero_mask = cluster_marker_metrics.apply(
+                lambda x: functools.reduce(np.logical_and, np.logical_and(~np.isnan(x), x != 0)), axis=1
+            )
+            cluster_marker_metrics_nonzero = cluster_marker_metrics[nonzero_mask]
+
+        metrics = [protoize_cluster_marker_metric(x) for x in md_cmm]
+        return s_pb2.MarkerGenesReply(genes=cluster_marker_metrics_nonzero.index, metrics=metrics)
 
     def getMyGeneSets(self, request, context):
         userDir = dfh.DataFileHandler.get_data_dir_path_by_file_type("GeneSet", UUID=request.UUID)
