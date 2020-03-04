@@ -76,7 +76,6 @@ class CellColorByFeatures:
         return self.cell_indices
 
     def normalise_vals(self, vals: np.ndarray, v_max: int) -> np.ndarray:
-        vals = vals / v_max
         vals = np.clip(vals / v_max, None, 1)
         vals = (
             (constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB) * ((vals - min(vals))) / (1 - min(vals))
