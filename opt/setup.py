@@ -26,7 +26,7 @@ setup(
         )
     ]
     + get_bindserver_files(),
-    version="1.8.0",
+    version="1.8.1",
     description="SCope Data Server: a server for the SCope Client",
     url="",
     author="Maxime De Waegeneer",

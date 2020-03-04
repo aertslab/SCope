@@ -1,6 +1,6 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/aertslab/scope/badge)](https://www.codefactor.io/repository/github/aertslab/scope)
 
-# SCope v1.8.0: Visualization of large-scale and high dimensional single cell data
+# SCope v1.8.1: Visualization of large-scale and high dimensional single cell data
 
 <img src="images/SCope_Logo.png" width="640">
 
@@ -17,8 +17,8 @@ Visit [http://scope.aertslab.org](http://scope.aertslab.org) to test out SCope o
 
 Currently there are two packages to generate extended loom files compatible with SCope.
 
-- R: [SCopeLoomR](https://github.com/aertslab/SCopeLoomR) - Dedicated R package
-- Python: [pySCENIC](https://github.com/aertslab/pySCENIC) - Single function for generation from SCENIC results
+-   R: [SCopeLoomR](https://github.com/aertslab/SCopeLoomR) - Dedicated R package
+-   Python: [pySCENIC](https://github.com/aertslab/pySCENIC) - Single function for generation from SCENIC results
 
 Eventually the functionality from pySCENIC will be expanded and put in its own python package.
 
