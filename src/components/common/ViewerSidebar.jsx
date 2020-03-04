@@ -478,7 +478,7 @@ class ViewerSidebar extends Component {
                                     )}
                                     <Header as='h4'>Comment</Header>
                                     {props.value.comment
-                                        ? props.value.publication
+                                        ? props.value.comment
                                         : 'None provided'}
                                 </div>
                             );
@@ -547,7 +547,10 @@ class ViewerSidebar extends Component {
                                     ) : (
                                         props.value.curator_name +
                                         (props.value.curator_id
-                                            ? '(' + props.value.curator_id + ')'
+                                            ? <br /> +
+                                              '(' +
+                                              props.value.curator_id +
+                                              ')'
                                             : '')
                                     )}
 
