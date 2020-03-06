@@ -709,17 +709,14 @@ class Loom:
             L = loom.ca.MotifRegulonsAUC.dtype.names
             loom.ca.MotifRegulonsAUC.dtype.names = list(map(lambda s: s.replace(" ", "_"), L))
             return loom.ca.MotifRegulonsAUC
-        elif "TrackRegulonsAUC" in self.loom_connection.ca.keys() and regulon_type == "track":
+        if "TrackRegulonsAUC" in self.loom_connection.ca.keys() and regulon_type == "track":
             L = loom.ca.TrackRegulonsAUC.dtype.names
             loom.ca.TrackRegulonsAUC.dtype.names = list(map(lambda s: s.replace(" ", "_"), L))
             return loom.ca.TrackRegulonsAUC
-        elif "RegulonsAUC" in self.loom_connection.ca.keys():
+        if "RegulonsAUC" in self.loom_connection.ca.keys():
             L = loom.ca.RegulonsAUC.dtype.names
             loom.ca.RegulonsAUC.dtype.names = list(map(lambda s: s.replace(" ", "_"), L))
             return loom.ca.RegulonsAUC
-        else:
-            logger.error("Error when getting AUC values for the regulon.")
-
         L = loom.ca.RegulonsAUC.dtype.names
         loom.ca.RegulonsAUC.dtype.names = list(map(lambda s: s.replace(" ", "_"), L))
         return loom.ca.RegulonsAUC
