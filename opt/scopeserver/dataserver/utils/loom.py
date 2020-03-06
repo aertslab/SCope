@@ -696,6 +696,7 @@ class Loom:
                 return self.get_genes()[self.loom_connection.ra.Regulons[regulon] == 1]
         except Exception as err:
             logger.error(err)
+            return []
 
     def has_regulons_AUC(self) -> bool:
         if self.has_motif_and_track_regulons():
