@@ -688,14 +688,14 @@ class Loom:
 
     def get_regulon_genes(self, regulon: str) -> np.ndarray:
         try:
-            if "motif" in regulon.lower():
+            if "MotifRegulons" in self.loom_connection.ra.keys() and "motif" in regulon.lower():
                 return self.get_genes()[self.loom_connection.ra.MotifRegulons[regulon] == 1]
-            elif "track" in regulon.lower():
+            elif "TrackRegulons" in self.loom_connection.ra.keys() and "track" in regulon.lower():
                 return self.get_genes()[self.loom_connection.ra.TrackRegulons[regulon] == 1]
             else:
                 return self.get_genes()[self.loom_connection.ra.Regulons[regulon] == 1]
-        except Exception:
-            return []
+        except Exception as err:
+            logger.error(err)
 
     def has_regulons_AUC(self) -> bool:
         if self.has_motif_and_track_regulons():
@@ -704,14 +704,21 @@ class Loom:
 
     def get_regulons_AUC(self, regulon_type: str = None):
         loom = self.loom_connection
-        if regulon_type == "motif":
+        if "MotifRegulonsAUC" in self.loom_connection.ca.keys() and regulon_type == "motif":
             L = loom.ca.MotifRegulonsAUC.dtype.names
             loom.ca.MotifRegulonsAUC.dtype.names = list(map(lambda s: s.replace(" ", "_"), L))
             return loom.ca.MotifRegulonsAUC
-        if regulon_type == "track":
+        elif "TrackRegulonsAUC" in self.loom_connection.ca.keys() and regulon_type == "track":
             L = loom.ca.TrackRegulonsAUC.dtype.names
             loom.ca.TrackRegulonsAUC.dtype.names = list(map(lambda s: s.replace(" ", "_"), L))
             return loom.ca.TrackRegulonsAUC
+        elif "RegulonsAUC" in self.loom_connection.ca.keys():
+            L = loom.ca.RegulonsAUC.dtype.names
+            loom.ca.RegulonsAUC.dtype.names = list(map(lambda s: s.replace(" ", "_"), L))
+            return loom.ca.RegulonsAUC
+        else:
+            logger.error("Error when getting AUC values for the regulon.")
+
         L = loom.ca.RegulonsAUC.dtype.names
         loom.ca.RegulonsAUC.dtype.names = list(map(lambda s: s.replace(" ", "_"), L))
         return loom.ca.RegulonsAUC
@@ -853,7 +860,8 @@ class Loom:
             return self.get_genes()[
                 self.loom_connection.ra["ClusterMarkers_{0}".format(clustering_id)][str(cluster_id)] == 1
             ]
-        except Exception:
+        except Exception as err:
+            logger.error(err)
             return []
 
     def get_cluster_marker_metrics(self, clustering_id: int, cluster_id: int, metric_accessor: str):
