@@ -2,6 +2,10 @@
 
 March 3, 2020
 
+-   Version 1.8.2
+
+    -   Fix issue getting regulon data in edge case
+
 -   Version 1.8.1
     -   Fix issue with comments not being displayed on annotations
     -   Fix issue with expression values being double scaled
