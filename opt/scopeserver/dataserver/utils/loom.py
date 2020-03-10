@@ -706,19 +706,19 @@ class Loom:
     def get_regulons_AUC(self, regulon_type: str = None):
         loom = self.loom_connection
         if "MotifRegulonsAUC" in self.loom_connection.ca.keys() and regulon_type == "motif":
-            L = loom.ca.MotifRegulonsAUC.dtype.names
-            loom.ca.MotifRegulonsAUC.dtype.names = list(map(lambda s: s.replace(" ", "_"), L))
+            regulon_names = loom.ca.MotifRegulonsAUC.dtype.names
+            loom.ca.MotifRegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
             return loom.ca.MotifRegulonsAUC
         if "TrackRegulonsAUC" in self.loom_connection.ca.keys() and regulon_type == "track":
-            L = loom.ca.TrackRegulonsAUC.dtype.names
-            loom.ca.TrackRegulonsAUC.dtype.names = list(map(lambda s: s.replace(" ", "_"), L))
+            regulon_names = loom.ca.TrackRegulonsAUC.dtype.names
+            loom.ca.TrackRegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
             return loom.ca.TrackRegulonsAUC
         if "RegulonsAUC" in self.loom_connection.ca.keys():
-            L = loom.ca.RegulonsAUC.dtype.names
-            loom.ca.RegulonsAUC.dtype.names = list(map(lambda s: s.replace(" ", "_"), L))
+            regulon_names = loom.ca.RegulonsAUC.dtype.names
+            loom.ca.RegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
             return loom.ca.RegulonsAUC
-        L = loom.ca.RegulonsAUC.dtype.names
-        loom.ca.RegulonsAUC.dtype.names = list(map(lambda s: s.replace(" ", "_"), L))
+        regulon_names = loom.ca.RegulonsAUC.dtype.names
+        loom.ca.RegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
         return loom.ca.RegulonsAUC
 
     def get_auc_values(self, regulon: str, annotation="", logic: str = "OR") -> Tuple[np.ndarray, list]:
