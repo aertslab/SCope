@@ -70,191 +70,125 @@ class ViewerSidebar extends Component {
         this.setState({ newAnnoName: newAnnoName });
     };
 
-    gotoNextCluster = (i, direction) => {
-        BackendAPI.getNextCluster(
-            this.state.activeFeatures[i].metadata['clusteringID'],
-            this.state.activeFeatures[i].metadata['clusterID'],
-            direction,
-            (response) => {
-                BackendAPI.updateFeature(
-                    i,
-                    response.featureType[0],
-                    response.feature[0],
-                    response.featureType[0],
-                    response.featureDescription[0],
-                    this.props.match.params.page,
-                    (e) => {}
-                );
-            }
+    let lassoTab = () => {
+      if (lassoSelections.length == 0) {
+        return (
+          <Tab.Pane attached={false} style={{ textAlign: 'center' }}>
+            <br />
+            <br />
+            No user&apos;s lasso selections
+            <br />
+            <br />
+            <br />
+          </Tab.Pane>
         );
     };
 
-    updateMetadata = () => {
-        BackendAPI.queryLoomFiles(
-            this.props.match.params.uuid,
-            () => {
-                BackendAPI.getActiveFeatures().forEach((f, n) => {
-                    BackendAPI.updateFeature(
-                        n,
-                        f.type,
-                        f.feature,
-                        f.featureType,
-                        f.metadata ? f.metadata.description : null,
-                        ''
-                    );
-                });
-            },
-            this.state.activeLoom
+      return lassoSelections.map((lS, i) => {
+        return (
+          <Tab.Pane attached={false} style={{ textAlign: 'center' }} key={i}>
+            <Grid>
+              <Grid.Row columns={3} key={i} className='selectionRow'>
+                <Grid.Column>{'Selection ' + (lS.id + 1)}</Grid.Column>
+                <Grid.Column>
+                  <Input
+                    size='mini'
+                    style={{ width: 75, height: 15 }}
+                    label={{ style: { backgroundColor: '#' + lS.color } }}
+                    labelPosition='right'
+                    placeholder={'#' + lS.color}
+                    disabled
+                  />
+                </Grid.Column>
+                <Grid.Column>
+                  <Icon
+                    name='eye'
+                    title='toggle show/hide selection'
+                    onClick={(e, d) => this.toggleLassoSelection(lS.id)}
+                    style={{
+                      display: 'inline',
+                      opacity: lS.selected ? 1 : 0.5
+                    }}
+                    className='pointer'
+                  />
+                  &nbsp;
+                  <Icon
+                    name='trash'
+                    title='remove this selection'
+                    style={{ display: 'inline' }}
+                    onClick={(e, d) => this.removeLassoSelection(i)}
+                    className='pointer'
+                  />
+                  &nbsp;
+                  <Icon
+                    name='search'
+                    title='show metadata for this selection'
+                    style={{ display: 'inline' }}
+                    onClick={(e, d) => {
+                      this.setState({ modalID: i });
+                      this.forceUpdate();
+                      ReactGA.event({
+                        category: 'metadata',
+                        action: 'modal opened',
+                        value: i
+                      });
+                    }}
+                    className='pointer'
+                  />
+                </Grid.Column>
+              </Grid.Row>
+            </Grid>
+            <br />
+          </Tab.Pane>
         );
     };
 
-    render() {
-        const { history, match, hideFeatures } = this.props;
-        const {
-            lassoSelections,
-            activeFeatures,
-            activeTab,
-            activePage
-        } = this.state;
-
-        let lassoTab = () => {
-            if (lassoSelections.length == 0) {
-                return (
-                    <Tab.Pane attached={false} style={{ textAlign: 'center' }}>
-                        <br />
-                        <br />
-                        No user's lasso selections
-                        <br />
-                        <br />
-                        <br />
-                    </Tab.Pane>
-                );
-            }
-
-            return lassoSelections.map((lS, i) => {
-                return (
-                    <Tab.Pane
-                        attached={false}
-                        style={{ textAlign: 'center' }}
-                        key={i}>
-                        <Grid>
-                            <Grid.Row
-                                columns={3}
-                                key={i}
-                                className='selectionRow'>
-                                <Grid.Column>
-                                    {'Selection ' + (lS.id + 1)}
-                                </Grid.Column>
-                                <Grid.Column>
-                                    <Input
-                                        size='mini'
-                                        style={{ width: 75, height: 15 }}
-                                        label={{
-                                            style: {
-                                                backgroundColor: '#' + lS.color
-                                            }
-                                        }}
-                                        labelPosition='right'
-                                        placeholder={'#' + lS.color}
-                                        disabled
-                                    />
-                                </Grid.Column>
-                                <Grid.Column>
-                                    <Icon
-                                        name='eye'
-                                        title='toggle show/hide selection'
-                                        style={{ display: 'inline' }}
-                                        onClick={(e, d) =>
-                                            this.toggleLassoSelection(lS.id)
-                                        }
-                                        style={{
-                                            opacity: lS.selected ? 1 : 0.5
-                                        }}
-                                        className='pointer'
-                                    />
-                                    &nbsp;
-                                    <Icon
-                                        name='trash'
-                                        title='remove this selection'
-                                        style={{ display: 'inline' }}
-                                        onClick={(e, d) =>
-                                            this.removeLassoSelection(i)
-                                        }
-                                        className='pointer'
-                                    />
-                                    &nbsp;
-                                    <Icon
-                                        name='search'
-                                        title='show metadata for this selection'
-                                        style={{ display: 'inline' }}
-                                        onClick={(e, d) => {
-                                            this.setState({ modalID: i });
-                                            this.forceUpdate();
-                                            ReactGA.event({
-                                                category: 'metadata',
-                                                action: 'modal opened',
-                                                value: i
-                                            });
-                                        }}
-                                        className='pointer'
-                                    />
-                                </Grid.Column>
-                            </Grid.Row>
-                        </Grid>
-                        <br />
-                    </Tab.Pane>
-                );
-            });
-        };
-
-        let featureTab = (i) => {
-            let colors = ['red', 'green', 'blue'];
-            let metadata =
-                activeFeatures[i] && activeFeatures[i].feature ? (
-                    ''
-                ) : (
-                    <div>
-                        No additional information shown for the feature queried
-                        in the <b style={{ color: colors[i] }}>{colors[i]}</b>{' '}
-                        query box because it is empty. Additional information
-                        (e.g.: cluster markers, regulon motif, regulon target
-                        genes, ...) can be displayed here when querying clusters
-                        or regulons.
-                        <br />
-                        <br />
-                    </div>
-                );
-            console.log(activeFeatures[i]);
-            if (activeFeatures[i] && activeFeatures[i].metadata) {
-                let md = activeFeatures[i].metadata;
-                if (md.motifName != 'NA.png' && !this.state.imageErrored) {
-                    if (this.state.imageErrored) {
-                        var image = md.motifName ? (
-                            <img
-                                src={
-                                    'http://motifcollections.aertslab.org/v8/logos/' +
-                                    md.motifName
-                                }
-                            />
-                        ) : (
-                            ''
-                        );
-                        this.setState({ imageErrored: true });
-                    } else {
-                        var image = md.motifName ? (
-                            <img
-                                src={
-                                    'http://motifcollections.aertslab.org/v9/logos/' +
-                                    md.motifName
-                                }
-                            />
-                        ) : (
-                            ''
-                        );
-                    }
-                } else {
-                    var image = '';
+    let featureTab = (i) => {
+      let colors = ['red', 'green', 'blue'];
+      let metadata =
+        activeFeatures[i] && activeFeatures[i].feature ? (
+          ''
+        ) : (
+          <div>
+            No additional information shown for the feature queried in the{' '}
+            <b style={{ color: colors[i] }}>{colors[i]}</b> query box because it
+            is empty. Additional information (e.g.: cluster markers, regulon
+            motif, regulon target genes, ...) can be displayed here when
+            querying clusters or regulons.
+            <br />
+            <br />
+          </div>
+        );
+      console.log(activeFeatures[i]);
+      if (activeFeatures[i] && activeFeatures[i].metadata) {
+        let md = activeFeatures[i].metadata;
+        let image = '';
+        if (md.motifName != 'NA.png' && !this.state.imageErrored) {
+          if (this.state.imageErrored) {
+            image = md.motifName ? (
+              <img
+                src={
+                  'http://motifcollections.aertslab.org/v8/logos/' +
+                  md.motifName
                 }
+              />
+            ) : (
+              ''
+            );
+            this.setState({ imageErrored: true });
+          } else {
+            image = md.motifName ? (
+              <img
+                src={
+                  'http://motifcollections.aertslab.org/v9/logos/' +
+                  md.motifName
+                }
+              />
+            ) : (
+              ''
+            );
+          }
+        }
 
                 this.handleAnnoUpdate = (feature, i) => {
                     if (this.state.newAnnoName != '') {
@@ -433,29 +367,26 @@ class ViewerSidebar extends Component {
                     return column;
                 };
 
-                if (md.cellTypeAnno) {
-                    if (md.cellTypeAnno.length > 0) {
-                        let newCellTypeAnnoTableOboCell = (props) => {
-                            let iriLink =
-                                props.value.ols_iri == '' ? (
-                                    <React.Fragment>
-                                        {props.value.annotation_label}
-                                        <br />
-                                        {props.value.obo_id
-                                            ? '(' + props.value.obo_id + ')'
-                                            : ''}
-                                    </React.Fragment>
-                                ) : (
-                                    <a
-                                        href={props.value.ols_iri}
-                                        target='_blank'>
-                                        {props.value.annotation_label}
-                                        <br />
-                                        {props.value.obo_id
-                                            ? '(' + props.value.obo_id + ')'
-                                            : ''}
-                                    </a>
-                                );
+        if (md.cellTypeAnno) {
+          if (md.cellTypeAnno.length > 0) {
+            let newCellTypeAnnoTableOboCell = (props) => {
+              let iriLink =
+                props.value.ols_iri == '' ? (
+                  <React.Fragment>
+                    {props.value.annotation_label}
+                    <br />
+                    {props.value.obo_id ? '(' + props.value.obo_id + ')' : ''}
+                  </React.Fragment>
+                ) : (
+                  <a
+                    href={props.value.ols_iri}
+                    target='_blank'
+                    rel='noopener noreferrer'>
+                    {props.value.annotation_label}
+                    <br />
+                    {props.value.obo_id ? '(' + props.value.obo_id + ')' : ''}
+                  </a>
+                );
 
                             let popupInfo = (
                                 <div>
@@ -531,28 +462,21 @@ class ViewerSidebar extends Component {
                                     'This annotation is not linked to an ORCID iD and is therefore likely a prediction from a tool.';
                             }
 
-                            return (
-                                <div style={{ textAlign: 'center' }}>
-                                    {orcidIDRegex.test(
-                                        props.value.curator_id
-                                    ) ? (
-                                        <a
-                                            href={
-                                                'https://orcid.org/' +
-                                                props.value.curator_id
-                                            }
-                                            target='_blank'>
-                                            {props.value.curator_name}&nbsp;
-                                        </a>
-                                    ) : (
-                                        props.value.curator_name +
-                                        (props.value.curator_id
-                                            ? <br /> +
-                                              '(' +
-                                              props.value.curator_id +
-                                              ')'
-                                            : '')
-                                    )}
+              return (
+                <div style={{ textAlign: 'center' }}>
+                  {orcidIDRegex.test(props.value.curator_id) ? (
+                    <a
+                      href={'https://orcid.org/' + props.value.curator_id}
+                      target='_blank'
+                      rel='noopener noreferrer'>
+                      {props.value.curator_name}&nbsp;
+                    </a>
+                  ) : (
+                    props.value.curator_name +
+                    (props.value.curator_id
+                      ? '(' + props.value.curator_id + ')'
+                      : '')
+                  )}
 
                                     <Popup
                                         trigger={

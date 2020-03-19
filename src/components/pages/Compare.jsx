@@ -575,8 +575,7 @@ class Compare extends Component {
             Superposition: &nbsp;
             <Dropdown
               inline
-              disabled={configuration == 'one'}
-              disabled={isSuperpositionLocked}
+              disabled={configuration == 'one' && isSuperpositionLocked}
               options={this.superpositionConf}
               value={superposition}
               onChange={this.superpositionChanged.bind(this)}
@@ -979,40 +978,18 @@ class Compare extends Component {
         );
     }
 
-    renderExpressionGraph(data) {
-        const {
-            selectedGenes,
-            selectedRegulons,
-            selectedClusters
-        } = BackendAPI.getParsedFeatures();
-        if (selectedGenes.length + selectedRegulons.length == 0) return;
-        let selectedAnnotations = this.getSelectedAnnotations();
-        d3.select('#chart-distro1')
-            .select('svg')
-            .remove();
-        Object.keys(selectedAnnotations).map((annotation, ai) => {
-            let selections = 0;
-            let dataset = [];
-            selectedGenes.map((gene, gi) => {
-                data.annotations[ai].annotations.map((av, i) => {
-                    dataset.push({
-                        feature: selections,
-                        annotation: av,
-                        value: data.geneExpression[gi].features[i]
-                    });
-                });
-                selections++;
-            });
-            selectedRegulons.map((regulon, ri) => {
-                data.annotations[ai].annotations.map((av, i) => {
-                    dataset.push({
-                        feature: selections,
-                        annotation: av,
-                        value: data.aucValues[ri].features[i]
-                    });
-                });
-                selections++;
-            });
+  iqr(k) {
+    return function(d) {
+      var q1 = d.quartiles[0],
+        q3 = d.quartiles[2],
+        iqr = (q3 - q1) * k,
+        i = -1,
+        j = d.length;
+      while (d[++i] < q1 - iqr);
+      while (d[--j] > q3 + iqr);
+      return [i, j];
+    };
+  }
 
             let bbox = d3
                 .select('#chart-distro1')

@@ -519,51 +519,46 @@ class AppSidebar extends Component {
         this.getLoomFiles();
     }
 
-    getLoomFiles() {
-        const { match } = this.props;
-        if (DEBUG) console.log('getLoomFiles', match);
-        if (match.params.uuid == 'permalink') return;
-        BackendAPI.queryLoomFiles(match.params.uuid, (files) => {
-            let userFiles = [],
-                generalFiles = [];
-            files.forEach((file) => {
-                if (file.loomFilePath.match(/[\\\/]/)) {
-                    userFiles.push(file);
-                } else {
-                    generalFiles.push(file);
-                }
-            });
-            let userLoomTree = this.getEmptyNode();
-            let generalLoomTree = this.getEmptyNode();
-            let addChildren = (t, l, f) => {
-                if (f.loomHeierarchy['L' + l]) {
-                    t.children[f.loomHeierarchy['L' + l]] =
-                        t.children[f.loomHeierarchy['L' + l]] ||
-                        this.getEmptyNode();
-                    addChildren(
-                        t.children[f.loomHeierarchy['L' + l]],
-                        l + 1,
-                        f
-                    );
-                } else {
-                    t.nodes.push(f);
-                }
-            };
-            userFiles.forEach((file, i) => {
-                addChildren(userLoomTree, 1, file);
-            });
-            generalFiles.forEach((file, i) => {
-                addChildren(generalLoomTree, 1, file);
-            });
-            this.setState({
-                loomFiles: files,
-                loading: false,
-                userLoomTree: userLoomTree,
-                generalLoomTree: generalLoomTree
-            });
-            this.props.onMetadataChange(BackendAPI.getActiveLoomMetadata());
-        });
-    }
+  getLoomFiles() {
+    const { match } = this.props;
+    if (DEBUG) console.log('getLoomFiles', match);
+    if (match.params.uuid == 'permalink') return;
+    BackendAPI.queryLoomFiles(match.params.uuid, (files) => {
+      let userFiles = [],
+        generalFiles = [];
+      files.forEach((file) => {
+        if (file.loomFilePath.match(/[\\/]/)) {
+          userFiles.push(file);
+        } else {
+          generalFiles.push(file);
+        }
+      });
+      let userLoomTree = this.getEmptyNode();
+      let generalLoomTree = this.getEmptyNode();
+      let addChildren = (t, l, f) => {
+        if (f.loomHeierarchy['L' + l]) {
+          t.children[f.loomHeierarchy['L' + l]] =
+            t.children[f.loomHeierarchy['L' + l]] || this.getEmptyNode();
+          addChildren(t.children[f.loomHeierarchy['L' + l]], l + 1, f);
+        } else {
+          t.nodes.push(f);
+        }
+      };
+      userFiles.forEach((file, i) => {
+        addChildren(userLoomTree, 1, file);
+      });
+      generalFiles.forEach((file, i) => {
+        addChildren(generalLoomTree, 1, file);
+      });
+      this.setState({
+        loomFiles: files,
+        loading: false,
+        userLoomTree: userLoomTree,
+        generalLoomTree: generalLoomTree
+      });
+      this.props.onMetadataChange(BackendAPI.getActiveLoomMetadata());
+    });
+  }
 
     getEmptyNode() {
         return {

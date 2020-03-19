@@ -68,29 +68,36 @@ class CollaborativeAnnotation extends Component {
         this.setState({ freeInput: '' });
     };
 
-    sendData = (e) => {
-        let annoData = this.state.annoData;
-
-        if (
-            this.OLSAutocomplete.current &&
-            this.OLSAutocomplete.current.state.result
-        ) {
-            (annoData['obo_id'] = this.OLSAutocomplete.current.state.result[
-                'obo_id'
-            ]),
-                (annoData['iri'] = this.OLSAutocomplete.current.state.result[
-                    'iri'
-                ]),
-                (annoData['label'] = this.OLSAutocomplete.current.state.result[
-                    'label'
-                ]);
-        } else if (this.state.freeInput.length > 0) {
-            annoData['obo_id'] = 'Manual Annotation';
-            annoData['iri'] = '';
-            annoData['label'] = this.state.freeInput;
-        } else {
-            this.setState({ submitError: true });
-            return;
+    let annotationModal = (orcid_id, orcid_name) => {
+      const panes = [
+        {
+          menuItem: 'Controlled Vocabulary',
+          render: () => (
+            <Tab.Pane>
+              <Grid.Row>{olsWidget()}</Grid.Row>
+              <Grid.Row>
+                OLS Powered by{' '}
+                <a
+                  href='https://www.ebi.ac.uk/ols/index'
+                  target='_blank'
+                  rel='noopener noreferrer'>
+                  EBI OLS
+                </a>
+              </Grid.Row>
+            </Tab.Pane>
+          )
+        },
+        {
+          menuItem: 'Free Text',
+          render: () => (
+            <Tab.Pane>
+              <Input
+                placeholder='Enter your annotation...'
+                onChange={this.onFreeInputChange}
+                value={this.state.freeInput}
+              />
+            </Tab.Pane>
+          )
         }
 
         annoData['selectedMarkers'] = this.AnnoGeneSearch.current.state.value;

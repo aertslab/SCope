@@ -51,14 +51,116 @@ class AppHeader extends Component {
         this.setState({ cookiesAllowed: true });
     };
 
-    openORCID = () => {
-        window.open(
-            'https://orcid.org/oauth/authorize?client_id=' +
-                ORCID.orcidAPIClientID +
-                '&response_type=code&scope=/authenticate&show_login=false&redirect_uri=' +
-                ORCID.orcidAPIRedirectURI,
-            '_self',
-            'toolbar=no, scrollbars=yes, width=500, height=600, top=500, left=500'
+    let orcid_info = () => {
+      let orcid_name = this.props.cookies.get('scope_orcid_name');
+      let orcid_id = this.props.cookies.get('scope_orcid_id');
+      if (this.state.cookiesAllowed === false) {
+        return (
+          <Popup
+            content={
+              <div>
+                You have not accepted the use of cookies, which is required for
+                ORCID login and annotation abilities.
+                <br />
+                <br />
+                <Button
+                  onClick={() => {
+                    this.acceptCookies();
+                  }}>
+                  Click here to accept cookies.
+                </Button>
+              </div>
+            }
+            trigger={
+              <Button id='connect-orcid-button' onClick={() => {}}>
+                <img
+                  id='orcid-id-icon'
+                  src='https://orcid.org/sites/default/files/images/orcid_24x24.png'
+                  width='24'
+                  height='24'
+                  alt='ORCID iD icon'
+                />
+                Authenticate with ORCID
+              </Button>
+            }
+            hoverable
+          />
+        );
+      } else if (orcid_name && orcid_id) {
+        return (
+          <div>
+            <Popup
+              position='bottom left'
+              content={
+                <div>
+                  You are authenticated with ORCID: {orcid_id}
+                  <p />
+                  <Button onClick={() => orcid_logout()}>Log out</Button>
+                  <p />
+                  <b>
+                    By logging out you will no longer be able to annotate data.{' '}
+                    <br />
+                    Your previous annotations and votes will remain.
+                  </b>
+                </div>
+              }
+              trigger={
+                <div>
+                  <Image
+                    src='src/images/ORCIDiD_iconvector.svg'
+                    width='24'
+                    height='24'
+                    alt='ORCID iD icon'
+                    avatar
+                  />
+                  Welcome {orcid_name}! &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Logout?
+                </div>
+              }
+              flowing
+              hoverable
+            />
+          </div>
+        );
+      } else {
+        return (
+          this.state.orcid_active && (
+            <Popup
+              content={
+                <div>
+                  By logging in with ORCID, you will be able to update and vote
+                  on annotations in SCope.
+                  <p />
+                  <p />
+                  ORCID provides a persistent identifier – an ORCID iD – that
+                  distinguishes you from other researchers and a mechanism for
+                  linking your research outputs and activities to your iD.{' '}
+                  <br />
+                  Learn more at{' '}
+                  <a
+                    href='https://orcid.org/'
+                    target='_blank'
+                    rel='noopener noreferrer'>
+                    orcid.org
+                  </a>
+                </div>
+              }
+              trigger={
+                <Button
+                  id='connect-orcid-button'
+                  onClick={() => this.openORCID()}>
+                  <img
+                    id='orcid-id-icon'
+                    src='https://orcid.org/sites/default/files/images/orcid_24x24.png'
+                    width='24'
+                    height='24'
+                    alt='ORCID iD icon'
+                  />
+                  Authenticate with ORCID
+                </Button>
+              }
+              hoverable
+            />
+          )
         );
     };
 
@@ -354,53 +456,72 @@ class AppHeader extends Component {
 				icon: false
 			},
 			*/
-            {
-                display: metadata ? true : false,
-                path: 'gene',
-                title: 'Gene',
-                icon: false
-            },
-            {
-                display: metadata ? true : false,
-                path: 'geneset',
-                title: 'Geneset',
-                icon: false
-            },
-            {
-                display:
-                    metadata && metadata.fileMetaData.hasRegulonsAUC
-                        ? true
-                        : false,
-                path: 'regulon',
-                title: 'Regulon',
-                icon: false
-            },
-            {
-                display: metadata ? true : false,
-                path: 'compare',
-                title: 'Compare',
-                icon: false
-            },
-            {
-                display: true,
-                path: 'tutorial',
-                title: 'Tutorial',
-                icon: false
-            },
-            {
-                display: true,
-                path: 'about',
-                title: 'About',
-                icon: false
-            }
-        ];
-    }
+      {
+        display: metadata ? true : false,
+        path: 'gene',
+        title: 'Gene',
+        icon: false
+      },
+      {
+        display: metadata ? true : false,
+        path: 'geneset',
+        title: 'Geneset',
+        icon: false
+      },
+      {
+        display:
+          metadata && metadata.fileMetaData.hasRegulonsAUC ? true : false,
+        path: 'regulon',
+        title: 'Regulon',
+        icon: false
+      },
+      {
+        display: metadata ? true : false,
+        path: 'compare',
+        title: 'Compare',
+        icon: false
+      },
+      {
+        display: true,
+        path: 'tutorial',
+        title: 'Tutorial',
+        icon: false
+      },
+      {
+        display: true,
+        path: 'about',
+        title: 'About',
+        icon: false
+      }
+    ];
+  }
 
-    getPermalink(togglePermalinkUUID) {
-        const { match } = this.props;
-        if (togglePermalinkUUID) {
-            let state = !this.state.permalinkUUID;
-            this.state.permalinkUUID = state;
+  getPermalink(togglePermalinkUUID) {
+    const { match } = this.props;
+    if (togglePermalinkUUID) {
+      let state = !this.state.permalinkUUID;
+      this.setState({
+        permalinkUUID: state
+      });
+    }
+    let j = JSON.stringify(
+      BackendAPI.getExportObject(match.params),
+      BackendAPI.getExportKeys()
+    );
+    let d = pako.deflate(j, { to: 'string' });
+    let b = encodeURIComponent(window.btoa(d).replace(/\//g, '$'));
+    const pl_uuid =
+      'permalink' + (this.state.permalinkUUID ? '__' + match.params.uuid : '');
+
+    bitly
+      .shorten(BITLY.baseURL + '/#/' + pl_uuid + '/' + b)
+      .then((result) => {
+        this.setState({ shortUrl: result.data.url });
+        this.forceUpdate();
+      })
+      .then((error) => {
+        if (error) {
+          console.log(error);
         }
         let j = JSON.stringify(
             BackendAPI.getExportObject(match.params),

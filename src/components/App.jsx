@@ -44,25 +44,109 @@ class App extends Component {
         cookies: instanceOf(Cookies).isRequired
     };
 
-    constructor() {
-        super();
-        this.state = {
-            metadata: null,
-            loading: true,
-            loaded: false,
-            error: false,
-            isSidebarVisible: true,
-            sessionsLimitReached: false,
-            sessionMode: 'rw',
-            orcid_active: true,
-            orcid_data: null,
-            cookiesAllowed: false,
-            cookieBannerRef: React.createRef()
-        };
+    BackendAPI.getORCIDStatus((active) => {
+      this.setState({ orcid_active: active });
+    });
 
-        BackendAPI.getORCIDStatus((active) => {
-            this.setState({ orcid_active: active });
-        });
+    this.timeout = null;
+    this.mouseClicks = 0;
+    ReactGA.initialize('UA-61194136-10');
+  }
+
+  removeAllCookies = () => {
+    this.props.cookies.remove('scope_orcid_name');
+    this.props.cookies.remove('scope_orcid_id');
+    this.props.cookies.remove('scope_orcid_uuid');
+    this.props.cookies.remove(cookieName);
+    this.props.cookies.remove(sidebarCookieName);
+  };
+
+  acceptCookies = () => {
+    this.props.cookies.set('CookieConsent', 'true');
+    this.props.cookies.set(cookieName, this.props.match.params.uuid, {
+      path: '/'
+    });
+    this.setState({ cookiesAllowed: true });
+  };
+
+  render() {
+    const {
+      loading,
+      metadata,
+      error,
+      loaded,
+      isSidebarVisible,
+      sessionsLimitReached
+    } = this.state;
+
+    let errorDimmer = (
+      <Dimmer active={error}>
+        <br />
+        <br />
+        <Icon name='warning circle' color='orange' size='big' />
+        <br />
+        <br />
+        <Header as='h2' inverted>
+          An error occured when connecting to SCope back-end.
+          <br />
+          <br />
+          Please check your Internet connection.
+          <br />
+          <br />
+          If this error persists, please try a local install from our{' '}
+          <a
+            href='https://github.com/aertslab/SCope'
+            target='_blank'
+            rel='noopener noreferrer'>
+            Github page
+          </a>{' '}
+          or try our{' '}
+          <a
+            href='http://scope-mirror.aertslab.org/'
+            target='_blank'
+            rel='noopener noreferrer'>
+            SCope mirror
+          </a>
+          .<br />
+          <br />
+          <Button
+            color='orange'
+            onClick={() => {
+              window.location.reload();
+            }}>
+            REFRESH
+          </Button>
+        </Header>
+      </Dimmer>
+    );
+
+    let limitReachedDimmer = (
+      <Dimmer active={!loading && sessionsLimitReached}>
+        <br />
+        <br />
+        <Icon name='warning circle' color='orange' size='big' />
+        <br />
+        <br />
+        <Header as='h2' inverted>
+          Currenlty Scope has reached its capacity in number of concurrent
+          users.
+          <br />
+          <br />
+          Please try again later or try out our standalone SCope app.
+          <br />
+          <br />
+          More details on our GitHub.
+          <br />
+          <br />
+          <Button
+            color='orange'
+            href='https://github.com/aertslab/SCope'
+            target='_blank'>
+            AertsLab GitHub
+          </Button>
+        </Header>
+      </Dimmer>
+    );
 
         this.timeout = null;
         this.mouseClicks = 0;
