@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: '12.x'
       - run: npm install
-      - run: npm outdated
+      - run: npm outdated || exit 0
       - run: npm audit
       - run: npm run check-style
       - run: npm run lint
