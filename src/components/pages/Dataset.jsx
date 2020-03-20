@@ -41,7 +41,7 @@ export default class Dataset extends Component {
         );
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         BackendAPI.onActiveLoomChange(this.activeLoomListener);
     }
 

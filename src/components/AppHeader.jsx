@@ -297,7 +297,7 @@ class AppHeader extends Component {
         });
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.timer = setInterval(() => {
             let timeout = this.state.timeout;
             timeout -= timer;
@@ -309,7 +309,7 @@ class AppHeader extends Component {
         }, timer);
     }
 
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
         if (DEBUG) console.log('componentWillReceiveProps', nextProps);
         const { timeout, metadata, match, history, loaded } = nextProps;
         this.setState({ timeout: timeout });

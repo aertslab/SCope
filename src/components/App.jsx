@@ -325,7 +325,7 @@ class App extends Component {
         );
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         if (DEBUG) console.log('App componentWillMount', this.props);
         this.parseURLParams(this.props);
         this.getUUIDFromIP(this.props);
@@ -392,7 +392,7 @@ class App extends Component {
         document.removeEventListener('keypress', this.clickHandler);
     }
 
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
         this.parseURLParams(nextProps);
         if (this.state.uuid != nextProps.match.params.uuid)
             this.getUUIDFromIP(nextProps);

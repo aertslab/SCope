@@ -90,7 +90,7 @@ export default class Expression extends Component {
         );
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         BackendAPI.onActiveLoomChange(this.activeLoomListener);
         BackendAPI.onSidebarVisibleChange(this.sidebarVisibleListener);
     }

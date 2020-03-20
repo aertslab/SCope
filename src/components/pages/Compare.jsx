@@ -512,7 +512,7 @@ class Compare extends Component {
         );
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         BackendAPI.onActiveLoomChange(this.activeLoomListener);
         BackendAPI.onActiveFeaturesChange(
             this.state.activePage,

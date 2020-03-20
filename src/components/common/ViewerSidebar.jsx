@@ -1205,7 +1205,7 @@ class ViewerSidebar extends Component {
         );
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         let orcid_name = this.props.cookies.get('scope_orcid_name');
         let orcid_id = this.props.cookies.get('scope_orcid_id');
         let orcid_uuid = this.props.cookies.get('scope_orcid_uuid');

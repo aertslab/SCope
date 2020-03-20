@@ -65,7 +65,7 @@ export default class Histogram extends Component {
         );
     }
 
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
         if (
             JSON.stringify(this.props.feature) !=
                 JSON.stringify(nextProps.feature) ||
