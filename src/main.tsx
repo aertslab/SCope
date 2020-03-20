@@ -21,4 +21,3 @@ const renderApp = () => {
 };
 
 renderApp();
-
