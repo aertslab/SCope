@@ -1,0 +1,22 @@
+name: Client CI
+on:
+  pull_request:
+    paths-ignore:
+    - 'opt/**'
+
+jobs:
+  client-quality-checks:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - run: npm install
+      - run: npm outdated || exit 0
+      - run: npm audit --audit-level=moderate
+      - run: npm run lint
+      - run: npm test

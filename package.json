@@ -88,18 +88,18 @@
     },
     "devDependencies": {
         "@babel/cli": "^7.8.4",
-        "@babel/core": "^7.8.7",
+        "@babel/core": "^7.9.0",
         "@babel/plugin-proposal-class-properties": "^7.8.3",
-        "@babel/plugin-proposal-object-rest-spread": "^7.8.3",
-        "@babel/preset-env": "^7.8.7",
-        "@babel/preset-react": "^7.8.3",
-        "@babel/preset-typescript": "^7.8.3",
-        "@types/react": "^16.9.23",
+        "@babel/plugin-proposal-object-rest-spread": "^7.9.0",
+        "@babel/preset-env": "^7.9.0",
+        "@babel/preset-react": "^7.9.0",
+        "@babel/preset-typescript": "^7.9.0",
+        "@types/react": "^16.9.25",
         "@types/react-dom": "^16.9.5",
         "@types/react-router-dom": "^5.1.3",
         "@typescript-eslint/eslint-plugin": "^2.24.0",
         "@typescript-eslint/parser": "^2.24.0",
-        "babel-loader": "^8.0.6",
+        "babel-loader": "^8.1.0",
         "child_process": "^1.0.2",
         "cross-env": "^5.1.4",
         "css-loader": "^0.28.7",
@@ -169,10 +169,8 @@
         ],
         "rules": {
             "prettier/prettier": "error",
-
             "no-unused-vars": "off",
             "no-undef": "off",
-
             "react/prop-types": "off",
             "react/jsx-key": "off"
         },
