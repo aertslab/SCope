@@ -3,7 +3,7 @@ const webpack = require('webpack')
 const WebpackGitHash = require('webpack-git-hash');
 const fs = require('fs');
 const pkg = require('./package.json');
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 // Import config file
@@ -117,16 +117,12 @@ let config = {
 
 if (process.env.NODE_ENV === 'production') {
     config.plugins.push(
-        new UglifyJsPlugin({
-            parallel: true,
-            uglifyOptions: {
-                warnings: false,
-            }
-        })
-    )
-    config.plugins.push(
         new webpack.optimize.OccurrenceOrderPlugin()
     )
+    config.optimization = {
+        minimize: true,
+        minimizer: [ new TerserPlugin() ],
+    }
 } else {
     config.plugins.push(new webpack.NamedModulesPlugin())
 }
