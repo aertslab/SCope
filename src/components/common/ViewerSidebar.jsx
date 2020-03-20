@@ -123,7 +123,7 @@ class ViewerSidebar extends Component {
                     <Tab.Pane attached={false} style={{ textAlign: 'center' }}>
                         <br />
                         <br />
-                        No user's lasso selections
+                        No user&apos;s lasso selections
                         <br />
                         <br />
                         <br />

@@ -110,11 +110,17 @@ class App extends Component {
                     <br />
                     <br />
                     If this error persists, please try a local install from our{' '}
-                    <a href='https://github.com/aertslab/SCope' target='_blank'>
+                    <a
+                        href='https://github.com/aertslab/SCope'
+                        target='_blank'
+                        rel='noopener noreferrer'>
                         Github page
                     </a>{' '}
                     or try our{' '}
-                    <a href='http://scope-mirror.aertslab.org/' target='_blank'>
+                    <a
+                        href='http://scope-mirror.aertslab.org/'
+                        target='_blank'
+                        rel='noopener noreferrer'>
                         SCope mirror
                     </a>
                     .<br />
@@ -138,7 +144,7 @@ class App extends Component {
                 <br />
                 <br />
                 <Header as='h2' inverted>
-                    Currenlty Scope has reached it's capacity in number of
+                  Currenlty Scope has reached it&apos;s capacity in number of
                     concurrent users.
                     <br />
                     <br />
