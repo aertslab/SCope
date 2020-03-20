@@ -1,9 +1,11 @@
 const path = require('path')
 const webpack = require('webpack')
-var WebpackGitHash = require('webpack-git-hash');
-var fs = require('fs')
-var pkg = require('./package.json')
+const WebpackGitHash = require('webpack-git-hash');
+const fs = require('fs');
+const pkg = require('./package.json');
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+
 // Import config file
 let isAWS = process.env.NODE_TYPE == "aws"
 let _config = null
@@ -15,7 +17,9 @@ if(isAWS) {
 console.log(_config)
 
 let config = {
-    entry: './src/main.jsx',
+    mode: process.env.NODE_ENV,
+    devtool: 'inline-source-map',
+    entry: './src/main.tsx',
     devServer: {
       host: '0.0.0.0',
       port: _config.mPort,
@@ -29,14 +33,31 @@ let config = {
         chunkFilename: pkg.name +'-chunk.[githash].js'
     },
     resolve: {
-        extensions: ['.js', '.jsx', '.css']
+        extensions: ['.ts', '.tsx', '.js', '.jsx', '.css']
     },
     module: {
         rules: [
         {
-            test: /\.(js|jsx)$/,
-            loader: ['react-hot-loader/webpack', 'babel-loader'],
-            exclude: /node_modules/
+            test: /\.(t|j)s(x?)$/,
+            exclude: /node_modules/,
+            use: [
+                {
+                    loader: 'babel-loader',
+                    options: {
+                        cacheDirectory: true,
+                        babelrc: false,
+                        presets: [
+                            '@babel/preset-env',
+                            '@babel/preset-typescript',
+                            '@babel/preset-react',
+                        ],
+                        plugins: [
+                            ['@babel/plugin-proposal-class-properties', { loose: true }],
+                            ['@babel/plugin-proposal-object-rest-spread']
+                        ]
+                    }
+                }
+            ]
         },
         {
             test: /\.css$/,
@@ -88,7 +109,8 @@ let config = {
                 indexHtml = indexHtml.replace(/src="\.\/assets\/.*\.js"/, 'src="./assets/'+ pkg.name +'-'+ pkg.version +'.' + versionHash + '.js"');
                 fs.writeFileSync('./index.html', indexHtml);
             }
-        })
+        }),
+        new ForkTsCheckerWebpackPlugin()
 
     ]
 }
@@ -107,7 +129,6 @@ if (process.env.NODE_ENV === 'production') {
     )
 } else {
     config.plugins.push(new webpack.NamedModulesPlugin())
-    config.entry = ['react-hot-loader/patch', config.entry]
 }
 
 // config.node = { fs: 'empty', child_process: 'empty' };
