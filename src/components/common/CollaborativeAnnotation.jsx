@@ -182,7 +182,8 @@ class CollaborativeAnnotation extends Component {
                                 OLS Powered by{' '}
                                 <a
                                     href='https://www.ebi.ac.uk/ols/index'
-                                    target='_blank'>
+                                    target='_blank'
+                                    rel='noopener noreferrer'>
                                     EBI OLS
                                 </a>
                             </Grid.Row>

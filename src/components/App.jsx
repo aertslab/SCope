@@ -144,7 +144,7 @@ class App extends Component {
                 <br />
                 <br />
                 <Header as='h2' inverted>
-                  Currenlty Scope has reached it&apos;s capacity in number of
+                    Currenlty Scope has reached it&apos;s capacity in number of
                     concurrent users.
                     <br />
                     <br />
