@@ -197,7 +197,7 @@ class Launcher {
 
     openSCopeClient() {
         if (isDev & !isAWS) {
-            console.log("Open SCope in browser @ http://localhost:8080...");
+            console.log('Open SCope in browser @ http://localhost:8080...');
         }
     }
 
