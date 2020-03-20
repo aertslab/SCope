@@ -11,6 +11,8 @@
         "build": "cross-env NODE_ENV=production NODE_TYPE=local webpack",
         "build-aws": "cross-env NODE_ENV=production NODE_TYPE=aws webpack",
         "test": "echo \"Error: no test specified\"",
+        "lint-fix": "tsc --noEmit && eslint --fix 'src/**/*.{ts,jsx,tsx}'",
+        "lint": "tsc --noEmit && eslint 'src/**/*.{ts,jsx,tsx}'",
         "scope": "node bin/launch.js",
         "scope-aws": "node bin/launch.js --aws",
         "scope-dev-aws": "node bin/launch.js --dev --aws",
@@ -95,6 +97,8 @@
         "@types/react": "^16.9.23",
         "@types/react-dom": "^16.9.5",
         "@types/react-router-dom": "^5.1.3",
+        "@typescript-eslint/eslint-plugin": "^2.24.0",
+        "@typescript-eslint/parser": "^2.24.0",
         "babel-loader": "^8.0.6",
         "child_process": "^1.0.2",
         "cross-env": "^5.1.4",
@@ -102,6 +106,10 @@
         "electron": "^1.8.4",
         "electron-builder": "^20.8.1",
         "electron-packager": "^12.1.0",
+        "eslint": "^6.8.0",
+        "eslint-config-prettier": "^6.10.0",
+        "eslint-plugin-prettier": "^3.1.2",
+        "eslint-plugin-react": "^7.19.0",
         "file-system": "^2.2.2",
         "fork-ts-checker-webpack-plugin": "^4.1.0",
         "google-protobuf": "^3.11.4",
@@ -131,5 +139,47 @@
         "jsxSingleQuote": true,
         "jsxBracketSameLine": true,
         "arrowParens": "always"
+    },
+    "eslintConfig": {
+        "env": {
+            "browser": true,
+            "es6": true
+        },
+        "extends": [
+            "eslint:recommended",
+            "plugin:react/recommended",
+            "plugin:@typescript-eslint/eslint-recommended",
+            "plugin:prettier/recommended"
+        ],
+        "globals": {
+            "DEBUG": "readonly",
+            "REVERSEPROXYON": "readonly"
+        },
+        "parser": "@typescript-eslint/parser",
+        "parserOptions": {
+            "ecmaFeatures": {
+                "jsx": true
+            },
+            "ecmaVersion": 2018,
+            "sourceType": "module"
+        },
+        "plugins": [
+            "react",
+            "@typescript-eslint"
+        ],
+        "rules": {
+            "prettier/prettier": "error",
+
+            "no-unused-vars": "off",
+            "no-undef": "off",
+
+            "react/prop-types": "off",
+            "react/jsx-key": "off"
+        },
+        "settings": {
+            "react": {
+                "version": "detect"
+            }
+        }
     }
 }
