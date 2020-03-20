@@ -41,7 +41,7 @@
         "@improbable-eng/grpc-web": "^0.12.0",
         "@types/google-protobuf": "^3.7.2",
         "appdirs": "^1.1.0",
-        "bitlyapi": "^1.0.9",
+        "bitly4api": "^1.0.1",
         "command-exists": "^1.2.8",
         "d3": "^4.12.0",
         "figlet": "^1.2.0",
