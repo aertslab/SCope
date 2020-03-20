@@ -4,7 +4,7 @@
     "description": "Visualization tool for large-scale and high dimensional single-cell data",
     "main": "index.js",
     "scripts": {
-        "preinstall": "npm i shelljs && node bin/install.js",
+        "preinstall": "npm i shelljs command-exists && node bin/install.js",
         "postinstall": "node bin/configure.js",
         "dev": "cross-env NODE_ENV=development NODE_TYPE=local webpack-dev-server --hot",
         "dev-aws": "cross-env NODE_ENV=development NODE_TYPE=aws webpack-dev-server --hot",
@@ -33,12 +33,16 @@
     ],
     "author": "Maxime De Waegeneer <mdewaegeneer@gmail.com>",
     "license": "GPL-3.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aertslab/SCope.git"
+    },
     "dependencies": {
         "@improbable-eng/grpc-web": "^0.12.0",
         "@types/google-protobuf": "^3.7.2",
         "appdirs": "^1.1.0",
         "bitlyapi": "^1.0.9",
-        "command-exists": "^1.2.6",
+        "command-exists": "^1.2.8",
         "d3": "^4.12.0",
         "figlet": "^1.2.0",
         "file-loader": "^1.1.5",
