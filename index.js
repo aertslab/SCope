@@ -67,7 +67,7 @@ class SCopeServer extends EventEmitter {
     }
 
     handleMessage(msg) {
-        if (msg.hasOwnProperty('origin')) {
+        if (Object.prototype.hasOwnProperty.call(msg, 'origin')) {
             this.dataServer.setStarted(msg);
             // Start the bind server if
             // 1) Not already started
@@ -86,15 +86,15 @@ class SCopeServer extends EventEmitter {
 /*************************************************************
  * Data Server
  *************************************************************/
-
+let DATASERVER_FOLDER = '';
 try {
     if (process.argv[2] == 'electronTest') {
-        var DATASERVER_FOLDER = path.join('opt', 'scopeserver');
+        DATASERVER_FOLDER = path.join('opt', 'scopeserver');
     } else {
         throw 'Not testing';
     }
 } catch (e) {
-    var DATASERVER_FOLDER = path.join(
+    DATASERVER_FOLDER = path.join(
         app.getAppPath(),
         'opt',
         'scopeserver',
@@ -186,26 +186,30 @@ class DataServer {
             );
         } else {
             console.log('SCope Server Not packaged or electronTest.');
+            let output = '',
+                python = '';
             try {
-                var output = cp.execSync(
+                output = cp.execSync(
                     'python3 -c "import sys; print(sys.version)"',
                     { encoding: 'utf-8' }
                 );
-                var python = 'python3';
+                python = 'python3';
             } catch (e) {
-                var output = cp.execSync(
+                output = cp.execSync(
                     'python -c "import sys; print(sys.version)"',
                     {
                         encoding: 'utf-8'
                     }
                 );
-                var python = 'python';
+                python = 'python';
             } finally {
                 console.log(output);
-                if (!/^3.[0-7].[0-9].*/.test(output)) {
-                    throw 'Compatible python version not found!';
-                }
             }
+
+            if (!/^3.[0-9].[0-9].*/.test(output)) {
+                throw 'Compatible python version not found!';
+            }
+
             this.proc = cp.spawn(
                 python,
                 [
@@ -226,8 +230,8 @@ class DataServer {
             let buff_json;
             console.log(buff);
             try {
-                let buff_json = JSON.parse(buff);
-                if (buff_json.hasOwnProperty('msg')) {
+                const buff_json = JSON.parse(buff);
+                if (Object.prototype.hasOwnProperty.call(buff_json, 'msg')) {
                     this.scopeServer.handleMessage(buff_json['msg']);
                 }
             } catch (e) {
@@ -251,14 +255,15 @@ class DataServer {
  *************************************************************/
 
 // const BINDSERVER_FOLDER = 'opt/scopeserver/bindserver'
+let BINDSERVER_FOLDER = '';
 try {
     if (process.argv[2] == 'electronTest') {
-        var BINDSERVER_FOLDER = path.join('opt', 'scopeserver', 'bindserver');
+        BINDSERVER_FOLDER = path.join('opt', 'scopeserver', 'bindserver');
     } else {
         throw 'Not testing';
     }
 } catch (e) {
-    var BINDSERVER_FOLDER = path.join(
+    BINDSERVER_FOLDER = path.join(
         app.getAppPath(),
         'opt',
         'scopeserver',
