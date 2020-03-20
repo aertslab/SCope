@@ -163,11 +163,11 @@ class ViewerSidebar extends Component {
                                     <Icon
                                         name='eye'
                                         title='toggle show/hide selection'
-                                        style={{ display: 'inline' }}
                                         onClick={(e, d) =>
                                             this.toggleLassoSelection(lS.id)
                                         }
                                         style={{
+                                            display: 'inline',
                                             opacity: lS.selected ? 1 : 0.5
                                         }}
                                         className='pointer'
@@ -228,8 +228,9 @@ class ViewerSidebar extends Component {
             if (activeFeatures[i] && activeFeatures[i].metadata) {
                 let md = activeFeatures[i].metadata;
                 if (md.motifName != 'NA.png' && !this.state.imageErrored) {
+                    let image = '';
                     if (this.state.imageErrored) {
-                        var image = md.motifName ? (
+                        image = md.motifName ? (
                             <img
                                 src={
                                     'http://motifcollections.aertslab.org/v8/logos/' +
@@ -241,7 +242,7 @@ class ViewerSidebar extends Component {
                         );
                         this.setState({ imageErrored: true });
                     } else {
-                        var image = md.motifName ? (
+                        image = md.motifName ? (
                             <img
                                 src={
                                     'http://motifcollections.aertslab.org/v9/logos/' +
@@ -252,8 +253,6 @@ class ViewerSidebar extends Component {
                             ''
                         );
                     }
-                } else {
-                    var image = '';
                 }
 
                 this.handleAnnoUpdate = (feature, i) => {
@@ -448,7 +447,8 @@ class ViewerSidebar extends Component {
                                 ) : (
                                     <a
                                         href={props.value.ols_iri}
-                                        target='_blank'>
+                                        target='_blank'
+                                        rel='noopener noreferrer'>
                                         {props.value.annotation_label}
                                         <br />
                                         {props.value.obo_id
@@ -541,7 +541,8 @@ class ViewerSidebar extends Component {
                                                 'https://orcid.org/' +
                                                 props.value.curator_id
                                             }
-                                            target='_blank'>
+                                            target='_blank'
+                                            rel='noopener noreferrer'>
                                             {props.value.curator_name}&nbsp;
                                         </a>
                                     ) : (

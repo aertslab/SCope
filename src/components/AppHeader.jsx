@@ -171,7 +171,8 @@ class AppHeader extends Component {
                                     Learn more at{' '}
                                     <a
                                         href='https://orcid.org/'
-                                        target='_blank'>
+                                        target='_blank'
+                                        rel='noopener noreferrer'>
                                         orcid.org
                                     </a>
                                 </div>
@@ -400,7 +401,9 @@ class AppHeader extends Component {
         const { match } = this.props;
         if (togglePermalinkUUID) {
             let state = !this.state.permalinkUUID;
-            this.state.permalinkUUID = state;
+            this.state.setState({
+                permalinkUUID: state
+            });
         }
         let j = JSON.stringify(
             BackendAPI.getExportObject(match.params),
@@ -408,11 +411,9 @@ class AppHeader extends Component {
         );
         let d = pako.deflate(j, { to: 'string' });
         let b = encodeURIComponent(window.btoa(d).replace(/\//g, '$'));
-        if (this.state.permalinkUUID) {
-            var uuid = 'permalink__' + match.params.uuid;
-        } else {
-            var uuid = 'permalink';
-        }
+        const uuid =
+            'permalink' + (this.state.permalinkUUID ? match.params.uuid : '');
+
         bitly
             .shorten(BITLY.baseURL + '/#/' + uuid + '/' + b)
             .then((result) => {

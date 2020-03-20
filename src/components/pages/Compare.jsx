@@ -463,8 +463,9 @@ class Compare extends Component {
                         Superposition: &nbsp;
                         <Dropdown
                             inline
-                            disabled={configuration == 'one'}
-                            disabled={isSuperpositionLocked}
+                            disabled={
+                                configuration == 'one' && isSuperpositionLocked
+                            }
                             options={this.superpositionConf}
                             value={superposition}
                             onChange={this.superpositionChanged.bind(this)}
@@ -987,7 +988,7 @@ class Compare extends Component {
     }
 
     iqr(k) {
-        return function(d, i) {
+        return function(d) {
             var q1 = d.quartiles[0],
                 q3 = d.quartiles[2],
                 iqr = (q3 - q1) * k,

@@ -527,7 +527,7 @@ class AppSidebar extends Component {
             let userFiles = [],
                 generalFiles = [];
             files.forEach((file) => {
-                if (file.loomFilePath.match(/[\\\/]/)) {
+                if (file.loomFilePath.match(/[\\/]/)) {
                     userFiles.push(file);
                 } else {
                     generalFiles.push(file);
