@@ -2,7 +2,7 @@
     "compilerOptions": {
         "outDir": "./assests/",
         "sourceMap": true,
-        "noImplicitAny": true,
+        "noImplicitAny": false,
         "module": "commonjs",
         "target": "es6",
         "jsx": "react"
