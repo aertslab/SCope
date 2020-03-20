@@ -148,7 +148,7 @@ export default class ViewerToolbar extends Component {
         );
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         BackendAPI.onActiveFeaturesChange(
             this.state.activePage,
             this.activeFeaturesListener

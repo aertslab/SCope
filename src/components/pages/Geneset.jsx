@@ -247,7 +247,7 @@ class Geneset extends Component {
         );
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         BackendAPI.onActiveLoomChange(this.activeLoomListener);
         BackendAPI.onActiveFeaturesChange(
             'regulon',

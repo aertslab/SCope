@@ -108,7 +108,7 @@ export default class Viewer extends Component {
         );
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         BackendAPI.onSettingsChange(this.settingsListener);
         BackendAPI.onSpriteSettingsChange(this.spriteSettingsListener);
         BackendAPI.onViewerToolChange(this.viewerToolListener);
@@ -172,7 +172,7 @@ export default class Viewer extends Component {
         }
     }
 
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
         if (DEBUG)
             console.log(
                 this.props.name,

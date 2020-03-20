@@ -301,7 +301,7 @@ export default class Metadata extends Component {
         );
     }
 
-    componentWillReceiveProps() {
+    UNSAFE_componentWillReceiveProps() {
         this.setState({
             annotation: this.props.annotations,
             clustering: this.props.clustering
