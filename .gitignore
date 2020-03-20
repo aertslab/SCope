@@ -3,7 +3,10 @@
 # vscode settings
 /.vscode
 /.deprecated
-.gitignore
+
+# Emacs
+.dir-locals.el
+*~
 
 # pycache
 **/__pycache__
