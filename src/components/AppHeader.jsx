@@ -412,7 +412,8 @@ class AppHeader extends Component {
         let d = pako.deflate(j, { to: 'string' });
         let b = encodeURIComponent(window.btoa(d).replace(/\//g, '$'));
         const uuid =
-            'permalink' + (this.state.permalinkUUID ? "__" + match.params.uuid : '');
+            'permalink' +
+            (this.state.permalinkUUID ? '__' + match.params.uuid : '');
 
         bitly
             .shorten(BITLY.baseURL + '/#/' + uuid + '/' + b)
