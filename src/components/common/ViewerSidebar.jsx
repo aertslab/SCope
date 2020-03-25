@@ -226,9 +226,9 @@ class ViewerSidebar extends Component {
                 );
             console.log(activeFeatures[i]);
             if (activeFeatures[i] && activeFeatures[i].metadata) {
+                let image = '';
                 let md = activeFeatures[i].metadata;
                 if (md.motifName != 'NA.png' && !this.state.imageErrored) {
-                    let image = '';
                     if (this.state.imageErrored) {
                         image = md.motifName ? (
                             <img
