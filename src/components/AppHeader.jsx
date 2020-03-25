@@ -418,7 +418,7 @@ class AppHeader extends Component {
         bitly
             .shorten(BITLY.baseURL + '/#/' + uuid + '/' + b)
             .then((result) => {
-                this.setState({ shortUrl: result.data.url });
+                this.setState({ shortUrl: result.link });
                 this.forceUpdate();
             })
             .then((error) => {
