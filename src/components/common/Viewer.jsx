@@ -327,7 +327,7 @@ export default class Viewer extends Component {
             .scaleExtent([-1, 10])
             .on('zoom', this.zoom.bind(this));
         this.zoomSelection.call(this.zoomBehaviour);
-        var ticker = PIXI.ticker.shared;
+        let ticker = PIXI.ticker.shared;
         ticker.autoStart = false;
         ticker.stop();
     }
@@ -577,9 +577,9 @@ export default class Viewer extends Component {
     }
 
     getRandomColor() {
-        var letters = '0123456789ABCDEF';
-        var color = '';
-        for (var i = 0; i < 6; i++) {
+        let letters = '0123456789ABCDEF';
+        let color = '';
+        for (let i = 0; i < 6; i++) {
             color += letters[Math.floor(Math.random() * 16)];
         }
         return color;
@@ -1124,7 +1124,7 @@ export default class Viewer extends Component {
     }
 
     hexToRgb(hex) {
-        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result
             ? {
                   r: parseInt(result[1], 16),
@@ -1210,7 +1210,7 @@ export default class Viewer extends Component {
     }
 
     endBenchmark(msg) {
-        var t2 = performance.now();
+        let t2 = performance.now();
         let benchmark = this.state.benchmark[msg];
         let et = t2 - benchmark.t1 || 0;
         if (DEBUG)

@@ -155,7 +155,7 @@ export default class FeatureSearch extends React.Component {
                                 metrics = [];
                             let type = this.state.type;
 
-                            for (var i = 0; i < response.feature.length; i++) {
+                            for (let i = 0; i < response.feature.length; i++) {
                                 let f = response.feature[i];
                                 let ft = response.featureType[i];
                                 let d = response.featureDescription[i];

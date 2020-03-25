@@ -173,6 +173,7 @@
             "prettier/prettier": "error",
             "no-unused-vars": "off",
             "no-undef": "off",
+            "no-var": "warn",
             "react/prop-types": "off",
             "react/jsx-key": "off"
         },

@@ -169,7 +169,7 @@ class App extends Component {
             ? screen.width - 340
             : screen.width - 75;
 
-        var sidebarContent = <b>Sidebar content</b>;
+        let sidebarContent = <b>Sidebar content</b>;
 
         let sidebarStyle = {
             root: {

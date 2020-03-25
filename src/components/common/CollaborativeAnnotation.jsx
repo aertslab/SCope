@@ -152,7 +152,7 @@ class CollaborativeAnnotation extends Component {
             cookiesAllowed
         } = this.state;
 
-        var cardStyle = {
+        let cardStyle = {
             display: 'block',
             width: '100vw',
             transitionDuration: '0.3s'
