@@ -409,7 +409,7 @@ class SCope {
 const scope = new SCope();
 
 function setMainMenu() {
-    var globDir = '';
+    let globDir = '';
     const template = [
         {
             label: 'File',

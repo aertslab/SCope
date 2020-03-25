@@ -372,7 +372,7 @@ class Geneset extends Component {
             (gbc) => {
                 this.setState({ loading: true });
                 if (DEBUG) console.log('doGeneSetEnrichment', query);
-                var call = gbc.services.scope.Main.doGeneSetEnrichment(query);
+                let call = gbc.services.scope.Main.doGeneSetEnrichment(query);
                 call.on('data', (gse) => {
                     if (DEBUG) console.log('doGeneSetEnrichment data', gse);
                     if (gse.isDone) {

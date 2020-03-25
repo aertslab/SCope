@@ -868,18 +868,18 @@ class Compare extends Component {
                 .select('#chart-distro1')
                 .node()
                 .getBoundingClientRect();
-            var margin = { top: 30, right: 50, bottom: 70, left: 50 };
-            var width = bbox.width - margin.left - margin.right;
-            var height = 200 - margin.top - margin.bottom;
-            var min = Infinity,
+            let margin = { top: 30, right: 50, bottom: 70, left: 50 };
+            let width = bbox.width - margin.left - margin.right;
+            let height = 200 - margin.top - margin.bottom;
+            let min = Infinity,
                 max = -Infinity;
 
-            var x0 = d3.scaleBand().range([0, width], 0.5);
-            var x_1 = d3.scaleBand();
-            var y_0 = d3.scaleLinear().range([height + margin.top, 0]);
-            var xAxis1 = d3.axisBottom(x0);
-            var yAxis1 = d3.axisLeft(y_0);
-            var svg1 = d3
+            let x0 = d3.scaleBand().range([0, width], 0.5);
+            let x_1 = d3.scaleBand();
+            let y_0 = d3.scaleLinear().range([height + margin.top, 0]);
+            let xAxis1 = d3.axisBottom(x0);
+            let yAxis1 = d3.axisLeft(y_0);
+            let svg1 = d3
                 .select('#chart-distro1')
                 .append('svg')
                 .attr('class', 'box')
@@ -890,18 +890,18 @@ class Compare extends Component {
                     'transform',
                     'translate(' + margin.left + ',' + margin.top + ')'
                 );
-            var features = d3
+            let features = d3
                 .map(dataset, function(d) {
                     return d.feature;
                 })
                 .keys();
-            var annotations = d3
+            let annotations = d3
                 .map(dataset, function(d) {
                     return d.annotation;
                 })
                 .keys();
-            var graphData = [];
-            var tmp = [];
+            let graphData = [];
+            let tmp = [];
             annotations.forEach(function(a) {
                 let annotatedFeatures = [];
                 features.forEach(function(f) {
@@ -950,18 +950,18 @@ class Compare extends Component {
                 .style('text-anchor', 'end')
                 .text('Expression');
 
-            var bandwidth = x_1.bandwidth();
-            var translate = (bandwidth - 100) / 2;
+            let bandwidth = x_1.bandwidth();
+            let translate = (bandwidth - 100) / 2;
             translate = translate > 0 ? translate : 0;
 
-            var boxplot = box2()
+            let boxplot = box2()
                 .whiskers(this.iqr(1.5))
                 .width(bandwidth < 100 ? bandwidth : 100)
                 .height(height + margin.top)
                 .domain([min, max])
                 .showLabels(false);
 
-            var state = svg1
+            let state = svg1
                 .selectAll('.state2')
                 .data(graphData)
                 .enter()
@@ -989,7 +989,7 @@ class Compare extends Component {
 
     iqr(k) {
         return function(d) {
-            var q1 = d.quartiles[0],
+            let q1 = d.quartiles[0],
                 q3 = d.quartiles[2],
                 iqr = (q3 - q1) * k,
                 i = -1,

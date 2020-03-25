@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-var shell = require('shelljs');
+let shell = require('shelljs');
 console.log('Installing SCope Bind Server');
 shell.cd('opt/scopeserver/bindserver');
 shell.exec('npm install');
 shell.cd('../../../');
-var commandExists = require('command-exists');
+let commandExists = require('command-exists');
 
 commandExists('poetry')
     .then(() => {

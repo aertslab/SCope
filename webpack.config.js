@@ -109,7 +109,7 @@ let config = {
         new WebpackGitHash({
             cleanup: true,
             callback: function(versionHash) {
-                var indexHtml = fs.readFileSync('./index.html', 'utf8');
+                let indexHtml = fs.readFileSync('./index.html', 'utf8');
                 indexHtml = indexHtml.replace(
                     /src="\.\/assets\/.*\.js"/,
                     'src="./assets/' +

@@ -86,11 +86,11 @@ export default class Histogram extends Component {
     handleThresholdChange(value) {
         value = value || 0;
         if (DEBUG) console.log('handleThresholdChange', value);
-        var x = d3
+        let x = d3
             .scaleLinear()
             .domain([0, this.state.max])
             .rangeRound([0, this.state.width]);
-        var svg = d3.select('#thresholdSVG' + this.props.field);
+        let svg = d3.select('#thresholdSVG' + this.props.field);
         svg.select('.threshold').attr('transform', function() {
             let cx = x(value);
             let cy = 0;
@@ -140,11 +140,11 @@ export default class Histogram extends Component {
 
     renderAUCGraph(feature, points) {
         console.log('renderAUCGraph', feature, points);
-        var formatCount = d3.format(',.0f');
-        var svg = d3.select('#thresholdSVG' + this.props.field);
-        var bbox = svg.node().getBoundingClientRect();
+        let formatCount = d3.format(',.0f');
+        let svg = d3.select('#thresholdSVG' + this.props.field);
+        let bbox = svg.node().getBoundingClientRect();
         svg.selectAll('*').remove();
-        var margin = { top: 10, right: 10, bottom: 30, left: 40 },
+        let margin = { top: 10, right: 10, bottom: 30, left: 40 },
             width = bbox.width - margin.left - margin.right,
             height = bbox.height - margin.top - margin.bottom,
             max = d3.max(points),
@@ -183,17 +183,17 @@ export default class Histogram extends Component {
             return;
         }
 
-        var x = d3
+        let x = d3
             .scaleLinear()
             .domain([0, max])
             .rangeRound([0, width]);
 
-        var bins = d3
+        let bins = d3
             .histogram()
             .domain(x.domain())
             .thresholds(x.ticks(100))(points);
 
-        var y = d3
+        let y = d3
             .scaleLinear()
             .domain([
                 0,
@@ -203,7 +203,7 @@ export default class Histogram extends Component {
             ])
             .range([height, 0]);
 
-        var bar = g
+        let bar = g
             .selectAll('.bar')
             .data(bins)
             .enter()

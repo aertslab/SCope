@@ -281,7 +281,7 @@ export default class Metadata extends Component {
                                 }
                                 data.push(cellData);
                             });
-                            var fileDownload = require('react-file-download');
+                            let fileDownload = require('react-file-download');
                             const json2csv = require('json2csv').parse;
                             const csv = json2csv(data);
                             fileDownload(csv, 'metadata.csv');

@@ -911,7 +911,7 @@ class ViewerSidebar extends Component {
                                 primary
                                 onClick={() => {
                                     const opts = { delimiter: '\t', quote: '' };
-                                    var fileDownload = require('react-file-download');
+                                    let fileDownload = require('react-file-download');
                                     const json2csv = require('json2csv').parse;
                                     const tsv = json2csv(markerTableData, opts);
                                     fileDownload(tsv, genesFileName());
@@ -999,7 +999,7 @@ class ViewerSidebar extends Component {
                                                     console.log(
                                                         'Download subset of active .loom'
                                                     );
-                                                var call = gbc.services.scope.Main.downloadSubLoom(
+                                                let call = gbc.services.scope.Main.downloadSubLoom(
                                                     query
                                                 );
                                                 call.on('data', (dsl) => {
