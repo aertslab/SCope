@@ -115,10 +115,27 @@ class DroopyFieldStorage(cgi.FieldStorage):
         # life difficult, in a class that's *supposed to be subclassed*!
         if sys.version_info > (3,):
             cgi.FieldStorage.__init__(
-                self, fp, headers, outerboundary, environ, keep_blank_values, strict_parsing, limit, encoding, errors
+                self,
+                fp,
+                headers,
+                outerboundary,
+                environ,
+                keep_blank_values,
+                strict_parsing,
+                limit,
+                encoding,
+                errors,
             )
         else:
-            cgi.FieldStorage.__init__(self, fp, headers, outerboundary, environ, keep_blank_values, strict_parsing)
+            cgi.FieldStorage.__init__(
+                self,
+                fp,
+                headers,
+                outerboundary,
+                environ,
+                keep_blank_values,
+                strict_parsing,
+            )
 
     # Binary is passed in Py2 but not Py3.
     def make_file(self, binary=None):
@@ -227,7 +244,9 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                     "Content-length": os.fstat(f.fileno())[6],
                     "Access-Control-Allow-Origin": "*",
                     "Content-type": "application/x-hdf5",
-                    "Content-Disposition": 'attachment; filename="' + os.path.basename(name) + '""',
+                    "Content-Disposition": 'attachment; filename="'
+                    + os.path.basename(name)
+                    + '""',
                 },
                 end=True,
             )
@@ -257,14 +276,21 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
         # try:
         logger.info("Started file transfer")
         form = DroopyFieldStorage(
-            fp=self.rfile, directory="", headers=self.headers, environ={"REQUEST_METHOD": self.command}
+            fp=self.rfile,
+            directory="",
+            headers=self.headers,
+            environ={"REQUEST_METHOD": self.command},
         )
 
         data_file_handler = dfh.DataFileHandler()
 
         if "loomFilePath" in form.keys():
-            self.directory = data_file_handler.get_data_dir_path_by_file_type(file_type=form.getvalue("file-type"))
-            localpath = _encode_str_if_py2(os.path.join(self.directory, form.getvalue("loomFilePath")), "utf-8")
+            self.directory = data_file_handler.get_data_dir_path_by_file_type(
+                file_type=form.getvalue("file-type")
+            )
+            localpath = _encode_str_if_py2(
+                os.path.join(self.directory, form.getvalue("loomFilePath")), "utf-8"
+            )
             with open(localpath, "rb") as f:
                 self.send_resp_headers(
                     200,
@@ -304,7 +330,9 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
                 filename = _decode_str_if_py2(basename(item.filename), "utf-8")
                 if filename == "":
                     continue
-                localpath = _encode_str_if_py2(os.path.join(self.directory, filename), "utf-8")
+                localpath = _encode_str_if_py2(
+                    os.path.join(self.directory, filename), "utf-8"
+                )
                 root, ext = os.path.splitext(localpath)
                 i = 1
                 # TODO: race condition...
@@ -373,7 +401,9 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
 
     def send_html(self, htmlstr):
         "Simply returns htmlstr with the appropriate content-type/status."
-        self.send_resp_headers(200, {"Content-type": "text/html; charset=utf-8"}, end=True)
+        self.send_resp_headers(
+            200, {"Content-type": "text/html; charset=utf-8"}, end=True
+        )
         self.wfile.write(htmlstr.encode("utf-8"))
 
     def send_file(self, localpath):
@@ -381,7 +411,10 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
         with open(localpath, "rb") as f:
             self.send_resp_headers(
                 200,
-                {"Content-length": os.fstat(f.fileno())[6], "Content-type": mimetypes.guess_type(localpath)[0]},
+                {
+                    "Content-length": os.fstat(f.fileno())[6],
+                    "Content-type": mimetypes.guess_type(localpath)[0],
+                },
                 end=True,
             )
             shutil.copyfileobj(f, self.wfile)
@@ -431,7 +464,9 @@ def run(
     auth="",
     certfile=None,
     permitted_ciphers=(
-        "ECDH+AESGCM:ECDH+AES256:ECDH+AES128:ECDH+3DES" ":RSA+AESGCM:RSA+AES:RSA+3DES" ":!aNULL:!MD5:!DSS"
+        "ECDH+AESGCM:ECDH+AES256:ECDH+AES128:ECDH+3DES"
+        ":RSA+AESGCM:RSA+AES:RSA+3DES"
+        ":!aNULL:!MD5:!DSS"
     ),
 ):
     """
@@ -463,7 +498,9 @@ def run(
             logger.error("Error: Could not import module 'ssl', exiting.")
             sys.exit(2)
 
-        httpd.socket = ssl.wrap_socket(httpd.socket, certfile=certfile, ciphers=permitted_ciphers, server_side=True)
+        httpd.socket = ssl.wrap_socket(
+            httpd.socket, certfile=certfile, ciphers=permitted_ciphers, server_side=True
+        )
 
     # # # Wait a little bit
     # time.sleep(0.5)

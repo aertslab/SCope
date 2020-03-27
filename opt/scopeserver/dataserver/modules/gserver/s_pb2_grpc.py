@@ -450,5 +450,7 @@ def add_MainServicer_to_server(servicer, server):
             response_serializer=s__pb2.FeatureReply.SerializeToString,
         ),
     }
-    generic_handler = grpc.method_handlers_generic_handler("scope.Main", rpc_method_handlers)
+    generic_handler = grpc.method_handlers_generic_handler(
+        "scope.Main", rpc_method_handlers
+    )
     server.add_generic_rpc_handlers((generic_handler,))

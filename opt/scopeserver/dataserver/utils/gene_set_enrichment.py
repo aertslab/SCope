@@ -24,7 +24,9 @@ class GeneSetEnrichment:
         self.loom = loom
         self.gene_set_file_path = gene_set_file_path
         self.annotation = annotation
-        self.AUCell_rankings_dir = dfh.DataFileHandler.get_data_dir_path_by_file_type("LoomAUCellRankings")
+        self.AUCell_rankings_dir = dfh.DataFileHandler.get_data_dir_path_by_file_type(
+            "LoomAUCellRankings"
+        )
 
     class State:
         def __init__(self, step, status_code, status_message, values):
@@ -47,14 +49,21 @@ class GeneSetEnrichment:
 
     def update_state(self, step, status_code, status_message, values):
         state = GeneSetEnrichment.State(
-            step=step, status_code=status_code, status_message=status_message, values=values
+            step=step,
+            status_code=status_code,
+            status_message=status_message,
+            values=values,
         )
         logger.debug("Status: {0}".format(state.get_status_message()))
         if state.get_values() is None:
             return s_pb2.GeneSetEnrichmentReply(
-                progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message()),
+                progress=s_pb2.Progress(
+                    value=state.get_step(), status=state.get_status_message()
+                ),
                 isDone=False,
-                cellValues=s_pb2.CellColorByFeaturesReply(color=[], vmax=[], maxVmax=[], cellIndices=[]),
+                cellValues=s_pb2.CellColorByFeaturesReply(
+                    color=[], vmax=[], maxVmax=[], cellIndices=[]
+                ),
             )
         else:
             vmax = np.zeros(3)
@@ -65,15 +74,23 @@ class GeneSetEnrichment:
             max_vmax[0] = _vmax[1]
             vals = aucs / vmax[0]
             vals = (
-                ((constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))
+                (
+                    (constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB)
+                    * (vals - min(vals))
+                )
+                / (1 - min(vals))
             ) + constant._LOWER_LIMIT_RGB
             hex_vec = [
-                "null" if r == g == b == 0 else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
+                "null"
+                if r == g == b == 0
+                else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
                 for r, g, b in zip(vals, np.zeros(len(aucs)), np.zeros(len(aucs)))
             ]
             cell_indices = list(range(self.loom.get_nb_cells()))
             return s_pb2.GeneSetEnrichmentReply(
-                progress=s_pb2.Progress(value=state.get_step(), status=state.get_status_message()),
+                progress=s_pb2.Progress(
+                    value=state.get_step(), status=state.get_status_message()
+                ),
                 isDone=True,
                 cellValues=s_pb2.CellColorByFeaturesReply(
                     color=hex_vec, vmax=vmax, maxVmax=max_vmax, cellIndices=cell_indices
@@ -84,7 +101,9 @@ class GeneSetEnrichment:
         return self.method
 
     def get_AUCell_ranking_filepath(self):
-        AUCell_rankings_file_name = self.loom.get_file_path().split(".")[0] + "." + "AUCell.rankings.loom"
+        AUCell_rankings_file_name = (
+            self.loom.get_file_path().split(".")[0] + "." + "AUCell.rankings.loom"
+        )
         return os.path.join(self.AUCell_rankings_dir, AUCell_rankings_file_name)
 
     def has_AUCell_rankings(self):
@@ -99,5 +118,8 @@ class GeneSetEnrichment:
             self.run_AUCell()
         else:
             self.update_state(
-                step=0, status_code=404, status_message="This enrichment method is not implemented!", values=None
+                step=0,
+                status_code=404,
+                status_message="This enrichment method is not implemented!",
+                values=None,
             )

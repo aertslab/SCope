@@ -20,7 +20,14 @@ logger = logging.getLogger(__name__)
 
 
 class Loom:
-    def __init__(self, partial_md5_hash, file_path, abs_file_path, loom_connection, loom_file_handler):
+    def __init__(
+        self,
+        partial_md5_hash,
+        file_path,
+        abs_file_path,
+        loom_connection,
+        loom_file_handler,
+    ):
         self.lfh = loom_file_handler
         self.partial_md5_hash = partial_md5_hash
         self.file_path = file_path
@@ -32,11 +39,15 @@ class Loom:
         # Metrics
         self.nUMI = None
         self.species, self.gene_mappings = self.infer_species()
-        self.ss_pickle_name = os.path.join(os.path.dirname(self.abs_file_path), partial_md5_hash + ".ss_pkl")
+        self.ss_pickle_name = os.path.join(
+            os.path.dirname(self.abs_file_path), partial_md5_hash + ".ss_pkl"
+        )
 
         try:
             with open(self.ss_pickle_name, "rb") as fh:
-                logger.debug(f"Loading prebuilt SS for {file_path} from {self.ss_pickle_name}")
+                logger.debug(
+                    f"Loading prebuilt SS for {file_path} from {self.ss_pickle_name}"
+                )
                 self.ss = pickle.load(fh)
 
         except (EOFError, FileNotFoundError):
@@ -53,7 +64,9 @@ class Loom:
             self.ss.loom = None  # Remove loom connection to enable pickling
             logger.debug(f"Built all Search Spaces for {file_path}")
             with open(self.ss_pickle_name, "wb") as fh:
-                logger.debug(f"Writing prebuilt SS for {file_path} to {self.ss_pickle_name}")
+                logger.debug(
+                    f"Writing prebuilt SS for {file_path} to {self.ss_pickle_name}"
+                )
                 pickle.dump(self.ss, fh)
 
     def get_connection(self):
@@ -67,7 +80,11 @@ class Loom:
 
     def get_global_attribute_by_name(self, name):
         if name not in self.loom_connection.attrs.keys():
-            raise AttributeError("The global attribute {0} does not exist in the .loom file.".format(name))
+            raise AttributeError(
+                "The global attribute {0} does not exist in the .loom file.".format(
+                    name
+                )
+            )
         return self.loom_connection.attrs[name]
 
     @staticmethod
@@ -101,7 +118,9 @@ class Loom:
             meta = meta.decode("ascii")
             return json.loads(zlib.decompress(base64.b64decode(meta)))
         except AttributeError:
-            return json.loads(zlib.decompress(base64.b64decode(meta.encode("ascii"))).decode("ascii"))
+            return json.loads(
+                zlib.decompress(base64.b64decode(meta.encode("ascii"))).decode("ascii")
+            )
 
     def update_metadata(self, meta):
         self.loom_connection = self.lfh.change_loom_mode(
@@ -115,7 +134,9 @@ class Loom:
         new_metaJson = self.get_meta_data()
         return orig_metaJson != new_metaJson
 
-    def rename_annotation(self, clustering_id: int, cluster_id: int, new_annotation_name: str) -> bool:
+    def rename_annotation(
+        self, clustering_id: int, cluster_id: int, new_annotation_name: str
+    ) -> bool:
         logger.info("Changing annotation name for {0}".format(self.get_abs_file_path()))
 
         metaJson = self.get_meta_data()
@@ -127,11 +148,15 @@ class Loom:
             if cluster["id"] == cluster_id:
                 cluster_n = n
 
-        metaJson["clusterings"][clustering_n]["clusters"][cluster_n]["description"] = new_annotation_name
+        metaJson["clusterings"][clustering_n]["clusters"][cluster_n][
+            "description"
+        ] = new_annotation_name
         self.update_metadata(metaJson)
 
         if (
-            self.get_meta_data()["clusterings"][clustering_n]["clusters"][cluster_n]["description"]
+            self.get_meta_data()["clusterings"][clustering_n]["clusters"][cluster_n][
+                "description"
+            ]
             == new_annotation_name
         ):
             logger.debug("Success")
@@ -145,9 +170,13 @@ class Loom:
         return self.dfh.confirm_orcid_uuid(orcid_id, orcid_scope_uuid)
 
     def add_collab_annotation(self, request, secret: str) -> Tuple[bool, str]:
-        logger.info("Adding collaborative annotation for {0}".format(self.get_abs_file_path()))
+        logger.info(
+            "Adding collaborative annotation for {0}".format(self.get_abs_file_path())
+        )
 
-        if not self.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
+        if not self.confirm_orcid_uuid(
+            request.orcidInfo.orcidID, request.orcidInfo.orcidUUID
+        ):
             logger.error(
                 f"AUTHENTICATION FAILURE: {self.file_path}, user: {request.orcidInfo.orcidID}, uuid: {request.orcidInfo.orcidUUID}"
             )
@@ -176,7 +205,11 @@ class Loom:
         data_hash = hashlib.sha256(hash_data.encode()).hexdigest()
         cell_type_annotation["validate_hash"] = data_hash
 
-        hash_data = json.dumps(cell_type_annotation["data"]) + request.orcidInfo.orcidID + secret
+        hash_data = (
+            json.dumps(cell_type_annotation["data"])
+            + request.orcidInfo.orcidID
+            + secret
+        )
         user_hash = hashlib.sha256(hash_data.encode()).hexdigest()
 
         cell_type_annotation["votes"] = {
@@ -200,26 +233,36 @@ class Loom:
             if cluster["id"] == request.clusterID:
                 cluster_n = n
 
-        if "cell_type_annotation" in metaJson["clusterings"][clustering_n]["clusters"][cluster_n].keys():
+        if (
+            "cell_type_annotation"
+            in metaJson["clusterings"][clustering_n]["clusters"][cluster_n].keys()
+        ):
             current_annos = [
                 f"{x['data']['annotation_label']}__{x['data']['obo_id']}".casefold()
-                for x in metaJson["clusterings"][clustering_n]["clusters"][cluster_n]["cell_type_annotation"]
+                for x in metaJson["clusterings"][clustering_n]["clusters"][cluster_n][
+                    "cell_type_annotation"
+                ]
             ]
-            if f"{request.annoData.annotation_label}__{request.annoData.obo_id}".casefold() in current_annos:
+            if (
+                f"{request.annoData.annotation_label}__{request.annoData.obo_id}".casefold()
+                in current_annos
+            ):
                 return (False, "Annotation already exists with obo_id or label")
-            metaJson["clusterings"][clustering_n]["clusters"][cluster_n]["cell_type_annotation"].append(
-                cell_type_annotation
-            )
+            metaJson["clusterings"][clustering_n]["clusters"][cluster_n][
+                "cell_type_annotation"
+            ].append(cell_type_annotation)
         else:
-            metaJson["clusterings"][clustering_n]["clusters"][cluster_n]["cell_type_annotation"] = [
-                cell_type_annotation
-            ]
+            metaJson["clusterings"][clustering_n]["clusters"][cluster_n][
+                "cell_type_annotation"
+            ] = [cell_type_annotation]
 
         self.update_metadata(metaJson)
 
         if (
             cell_type_annotation
-            in self.get_meta_data()["clusterings"][clustering_n]["clusters"][cluster_n]["cell_type_annotation"]
+            in self.get_meta_data()["clusterings"][clustering_n]["clusters"][cluster_n][
+                "cell_type_annotation"
+            ]
         ):
             logger.debug("Success")
             return (True, "")
@@ -230,7 +273,9 @@ class Loom:
     def annotation_vote(self, request, secret: str) -> Tuple[bool, str]:
         logger.info("Adding vote annotation for {0}".format(self.get_abs_file_path()))
 
-        if not self.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
+        if not self.confirm_orcid_uuid(
+            request.orcidInfo.orcidID, request.orcidInfo.orcidUUID
+        ):
             logger.error(
                 f"AUTHENTICATION FAILURE: {self.file_path}, user: {request.annoData.curator_id}, uuid: {request.orcid_scope_uuid}"
             )
@@ -261,11 +306,17 @@ class Loom:
         }
 
         for n, cell_type_annotation in enumerate(
-            metaJson["clusterings"][clustering_n]["clusters"][cluster_n]["cell_type_annotation"]
+            metaJson["clusterings"][clustering_n]["clusters"][cluster_n][
+                "cell_type_annotation"
+            ]
         ):
             if cell_type_annotation["data"] == request_data:
                 logger.debug("Changing votes")
-                hash_data = json.dumps(cell_type_annotation["data"]) + request.orcidInfo.orcidID + secret
+                hash_data = (
+                    json.dumps(cell_type_annotation["data"])
+                    + request.orcidInfo.orcidID
+                    + secret
+                )
                 user_hash = hashlib.sha256(hash_data.encode()).hexdigest()
                 vote_data = {
                     "voter_name": request.orcidInfo.orcidName,
@@ -277,9 +328,9 @@ class Loom:
                 vote_direction = f"votes_{request.direction}"
                 for i in ["votes_for", "votes_against"]:
                     for idx, vote in enumerate(
-                        metaJson["clusterings"][clustering_n]["clusters"][cluster_n]["cell_type_annotation"][n][
-                            "votes"
-                        ][i]["voters"]
+                        metaJson["clusterings"][clustering_n]["clusters"][cluster_n][
+                            "cell_type_annotation"
+                        ][n]["votes"][i]["voters"]
                     ):
                         if request.orcidInfo.orcidID == vote["voter_id"]:
                             present = i
@@ -287,19 +338,19 @@ class Loom:
                             break
 
                 if present:
-                    del metaJson["clusterings"][clustering_n]["clusters"][cluster_n]["cell_type_annotation"][n][
-                        "votes"
-                    ][present]["voters"][vote_idx]
-                    metaJson["clusterings"][clustering_n]["clusters"][cluster_n]["cell_type_annotation"][n]["votes"][
-                        present
-                    ]["total"] -= 1
+                    del metaJson["clusterings"][clustering_n]["clusters"][cluster_n][
+                        "cell_type_annotation"
+                    ][n]["votes"][present]["voters"][vote_idx]
+                    metaJson["clusterings"][clustering_n]["clusters"][cluster_n][
+                        "cell_type_annotation"
+                    ][n]["votes"][present]["total"] -= 1
                 if vote_direction != present:
-                    metaJson["clusterings"][clustering_n]["clusters"][cluster_n]["cell_type_annotation"][n]["votes"][
-                        vote_direction
-                    ]["voters"].append(vote_data)
-                    metaJson["clusterings"][clustering_n]["clusters"][cluster_n]["cell_type_annotation"][n]["votes"][
-                        vote_direction
-                    ]["total"] += 1
+                    metaJson["clusterings"][clustering_n]["clusters"][cluster_n][
+                        "cell_type_annotation"
+                    ][n]["votes"][vote_direction]["voters"].append(vote_data)
+                    metaJson["clusterings"][clustering_n]["clusters"][cluster_n][
+                        "cell_type_annotation"
+                    ][n]["votes"][vote_direction]["total"] += 1
                 check_data = metaJson
                 break
         else:
@@ -335,7 +386,11 @@ class Loom:
         loom = self.loom_connection
         newAttrs = self.loom_connection.attrs
 
-        if newAttrs["SCopeTreeL1"] == L1 and newAttrs["SCopeTreeL2"] == L2 and newAttrs["SCopeTreeL3"] == L3:
+        if (
+            newAttrs["SCopeTreeL1"] == L1
+            and newAttrs["SCopeTreeL2"] == L2
+            and newAttrs["SCopeTreeL3"] == L3
+        ):
             logger.debug("Success")
             return True
         else:
@@ -362,8 +417,12 @@ class Loom:
 
         embeddings_id = 1
         embeddings_default = False
-        if ("_tSNE1" in col_attrs and "_tSNE2" in col_attrs) or ("_X" in col_attrs and "_Y" in col_attrs):
-            metaJson["embeddings"] = [{"id": -1, "name": "Default (_tSNE1/_tSNE2 or _X/_Y)"}]
+        if ("_tSNE1" in col_attrs and "_tSNE2" in col_attrs) or (
+            "_X" in col_attrs and "_Y" in col_attrs
+        ):
+            metaJson["embeddings"] = [
+                {"id": -1, "name": "Default (_tSNE1/_tSNE2 or _X/_Y)"}
+            ]
             embeddings_default = True
         else:
             metaJson["embeddings"] = []
@@ -378,7 +437,9 @@ class Loom:
             if cf_col in ["tsne", "umap", "pca"] and loom.ca[col].shape[1] >= 2:
                 if not embeddings_default:
                     metaJson["embeddings"].append({"id": -1, "name": col})
-                    loom.ca["Embedding"] = dfToNamedMatrix(pd.DataFrame(loom.ca[col][:, :2], columns=["_X", "_Y"]))
+                    loom.ca["Embedding"] = dfToNamedMatrix(
+                        pd.DataFrame(loom.ca[col][:, :2], columns=["_X", "_Y"])
+                    )
                     embeddings_default = True
                 else:
                     metaJson["embeddings"].append({"id": embeddings_id, "name": col})
@@ -394,11 +455,18 @@ class Loom:
         for anno in ["Age", "ClusterName", "Sex", "Species", "Strain", "Tissue"]:
             if anno in loom.ca.keys():
                 logger.info("\tAnnotation: {0} in loom".format(anno))
-                if len(set(loom.ca[anno])) != loom.shape[1] and len(set(loom.ca[anno])) > 0:
-                    metaJson["annotations"].append({"name": anno, "values": sorted(list(set(loom.ca[anno])))})
+                if (
+                    len(set(loom.ca[anno])) != loom.shape[1]
+                    and len(set(loom.ca[anno])) > 0
+                ):
+                    metaJson["annotations"].append(
+                        {"name": anno, "values": sorted(list(set(loom.ca[anno])))}
+                    )
                     logger.debug(f"\t\tValues: {sorted(list(set(loom.ca[anno])))}")
 
-        logger.debug(f'\tFinal Annotations for {self.file_path} - {metaJson["annotations"]}')
+        logger.debug(
+            f'\tFinal Annotations for {self.file_path} - {metaJson["annotations"]}'
+        )
 
         # Clusterings - Anything with cluster in name?
         metaJson["clusterings"] = []
@@ -409,13 +477,22 @@ class Loom:
 
             # loom.ca['Clusterings'] = SCope.dfToNamedMatrix(pd.DataFrame(columns=[0], index=[x for x in range(loom.shape[1])], data=[int(x) for x in loom.ca['Clusters']]))
 
-            clusterDF = pd.DataFrame(columns=["0"], index=[x for x in range(loom.shape[1])])
+            clusterDF = pd.DataFrame(
+                columns=["0"], index=[x for x in range(loom.shape[1])]
+            )
             clusterDF["0"] = [int(x) for x in loom.ca["Clusters"]]
             loom.ca["Clusterings"] = Loom.dfToNamedMatrix(clusterDF)
             metaJson["clusterings"].append(
-                {"id": 0, "group": "Interpreted", "name": "Clusters + ClusterName", "clusters": clusters}
+                {
+                    "id": 0,
+                    "group": "Interpreted",
+                    "name": "Clusters + ClusterName",
+                    "clusters": clusters,
+                }
             )
-        logger.debug(f'\tFinal Clusterings for {self.file_path} - {metaJson["clusterings"]}')
+        logger.debug(
+            f'\tFinal Clusterings for {self.file_path} - {metaJson["clusterings"]}'
+        )
 
         loom.attrs["MetaData"] = json.dumps(metaJson)
         self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode="r")
@@ -440,7 +517,13 @@ class Loom:
             ("GeneSets",),
             ("MetaData",),
         ]
-        attr_keys = [("RegulonsAUC",), ("Clusterings",), ("ExtraEmbeddings",), ("GeneSets",), ("GlobalMeta",)]
+        attr_keys = [
+            ("RegulonsAUC",),
+            ("Clusterings",),
+            ("ExtraEmbeddings",),
+            ("GeneSets",),
+            ("GlobalMeta",),
+        ]
 
         def loom_attr_exists(x):
             tmp = {}
@@ -465,25 +548,37 @@ class Loom:
         md_annotations = self.get_meta_data_by_key(key="annotations")
         md_annotation = list(filter(lambda x: x["name"] == name, md_annotations))
         if len(md_annotation) > 1:
-            raise ValueError("Multiple annotations matches the given name: {0}".format(name))
+            raise ValueError(
+                "Multiple annotations matches the given name: {0}".format(name)
+            )
         return md_annotation[0]
 
     def get_meta_data_cluster_by_clustering_id_and_cluster_id(
         self, clustering_id: int, cluster_id: int, secret: str = None
     ):
-        md_clustering = self.get_meta_data_clustering_by_id(clustering_id, secret=secret)
-        md_cluster = list(filter(lambda x: x["id"] == cluster_id, md_clustering["clusters"]))
+        md_clustering = self.get_meta_data_clustering_by_id(
+            clustering_id, secret=secret
+        )
+        md_cluster = list(
+            filter(lambda x: x["id"] == cluster_id, md_clustering["clusters"])
+        )
         if len(md_cluster) == 0:
-            raise ValueError("The cluster with the given id {0} does not exist.".format(cluster_id))
+            raise ValueError(
+                "The cluster with the given id {0} does not exist.".format(cluster_id)
+            )
         if len(md_cluster) > 1:
-            raise ValueError("Multiple clusters matches the given id: {0}".format(cluster_id))
+            raise ValueError(
+                "Multiple clusters matches the given id: {0}".format(cluster_id)
+            )
         return md_cluster[0]
 
     def get_meta_data_clustering_by_id(self, id: int, secret: str = None):
         md_clusterings = self.get_meta_data_by_key(key="clusterings", secret=secret)
         md_clustering = list(filter(lambda x: x["id"] == id, md_clusterings))
         if len(md_clustering) > 1:
-            raise ValueError("Multiple clusterings matches the given id: {0}".format(id))
+            raise ValueError(
+                "Multiple clusterings matches the given id: {0}".format(id)
+            )
         return md_clustering[0]
 
     @staticmethod
@@ -528,7 +623,9 @@ class Loom:
                 for n, clustering in enumerate(md.copy()):
                     for m, cluster in enumerate(clustering["clusters"]):
                         if "cell_type_annotation" in cluster.keys():
-                            md[n]["clusters"][m] = self.protoize_cell_type_annotation(cluster, secret=secret)
+                            md[n]["clusters"][m] = self.protoize_cell_type_annotation(
+                                cluster, secret=secret
+                            )
             return md
         return []
 
@@ -602,10 +699,14 @@ class Loom:
                 anno_set = set()
                 if anno_name.startswith("Clustering_"):
                     clustering_id = str(anno_name.split("_")[1])
-                    for x in np.where(loom.ca.Clusterings[clustering_id] == annotation_value)[0]:
+                    for x in np.where(
+                        loom.ca.Clusterings[clustering_id] == annotation_value
+                    )[0]:
                         anno_set.add(x)
                 else:
-                    for x in np.where(loom.ca[anno_name].astype(str) == str(annotation_value))[0]:
+                    for x in np.where(
+                        loom.ca[anno_name].astype(str) == str(annotation_value)
+                    )[0]:
                         anno_set.add(x)
                 cell_indices.append(anno_set)
         if logic not in ["AND", "OR"]:
@@ -648,7 +749,11 @@ class Loom:
 
         calc_nUMI_start_time = time.time()
         self.nUMI = self.loom_connection[:, :].sum(axis=0)
-        logger.debug("{0:.5f} seconds elapsed (calculating nUMI) ---".format(time.time() - calc_nUMI_start_time))
+        logger.debug(
+            "{0:.5f} seconds elapsed (calculating nUMI) ---".format(
+                time.time() - calc_nUMI_start_time
+            )
+        )
         return self.nUMI
 
     def get_gene_expression_by_gene_symbol(self, gene_symbol: str) -> np.ndarray:
@@ -684,14 +789,27 @@ class Loom:
     ############
 
     def has_motif_and_track_regulons(self) -> bool:
-        return "MotifRegulons" in self.loom_connection.ra.keys() and "MotifRegulons" in self.loom_connection.ra.keys()
+        return (
+            "MotifRegulons" in self.loom_connection.ra.keys()
+            and "MotifRegulons" in self.loom_connection.ra.keys()
+        )
 
     def get_regulon_genes(self, regulon: str) -> np.ndarray:
         try:
-            if "MotifRegulons" in self.loom_connection.ra.keys() and "motif" in regulon.lower():
-                return self.get_genes()[self.loom_connection.ra.MotifRegulons[regulon] == 1]
-            elif "TrackRegulons" in self.loom_connection.ra.keys() and "track" in regulon.lower():
-                return self.get_genes()[self.loom_connection.ra.TrackRegulons[regulon] == 1]
+            if (
+                "MotifRegulons" in self.loom_connection.ra.keys()
+                and "motif" in regulon.lower()
+            ):
+                return self.get_genes()[
+                    self.loom_connection.ra.MotifRegulons[regulon] == 1
+                ]
+            elif (
+                "TrackRegulons" in self.loom_connection.ra.keys()
+                and "track" in regulon.lower()
+            ):
+                return self.get_genes()[
+                    self.loom_connection.ra.TrackRegulons[regulon] == 1
+                ]
             else:
                 return self.get_genes()[self.loom_connection.ra.Regulons[regulon] == 1]
         except Exception as err:
@@ -705,23 +823,39 @@ class Loom:
 
     def get_regulons_AUC(self, regulon_type: str = None):
         loom = self.loom_connection
-        if "MotifRegulonsAUC" in self.loom_connection.ca.keys() and regulon_type == "motif":
+        if (
+            "MotifRegulonsAUC" in self.loom_connection.ca.keys()
+            and regulon_type == "motif"
+        ):
             regulon_names = loom.ca.MotifRegulonsAUC.dtype.names
-            loom.ca.MotifRegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
+            loom.ca.MotifRegulonsAUC.dtype.names = [
+                regulon_name.replace(" ", "_") for regulon_name in regulon_names
+            ]
             return loom.ca.MotifRegulonsAUC
-        if "TrackRegulonsAUC" in self.loom_connection.ca.keys() and regulon_type == "track":
+        if (
+            "TrackRegulonsAUC" in self.loom_connection.ca.keys()
+            and regulon_type == "track"
+        ):
             regulon_names = loom.ca.TrackRegulonsAUC.dtype.names
-            loom.ca.TrackRegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
+            loom.ca.TrackRegulonsAUC.dtype.names = [
+                regulon_name.replace(" ", "_") for regulon_name in regulon_names
+            ]
             return loom.ca.TrackRegulonsAUC
         if "RegulonsAUC" in self.loom_connection.ca.keys():
             regulon_names = loom.ca.RegulonsAUC.dtype.names
-            loom.ca.RegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
+            loom.ca.RegulonsAUC.dtype.names = [
+                regulon_name.replace(" ", "_") for regulon_name in regulon_names
+            ]
             return loom.ca.RegulonsAUC
         regulon_names = loom.ca.RegulonsAUC.dtype.names
-        loom.ca.RegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
+        loom.ca.RegulonsAUC.dtype.names = [
+            regulon_name.replace(" ", "_") for regulon_name in regulon_names
+        ]
         return loom.ca.RegulonsAUC
 
-    def get_auc_values(self, regulon: str, annotation="", logic: str = "OR") -> Tuple[np.ndarray, list]:
+    def get_auc_values(
+        self, regulon: str, annotation="", logic: str = "OR"
+    ) -> Tuple[np.ndarray, list]:
         logger.debug("Getting AUC values for {0} ...".format(regulon))
         cellIndices = list(range(self.get_nb_cells()))
         # Get the regulon type
@@ -747,7 +881,9 @@ class Loom:
             regulon_type = "motif"
         elif "track" in regulon.lower():
             regulon_type = "track"
-        loom_attribute = self.loom_connection.row_attrs[f"{regulon_type.capitalize()}Regulon{metric_accessor}"]
+        loom_attribute = self.loom_connection.row_attrs[
+            f"{regulon_type.capitalize()}Regulon{metric_accessor}"
+        ]
         if str(regulon) in loom_attribute.dtype.names:
             regulon = str(regulon)
         else:
@@ -755,14 +891,19 @@ class Loom:
         regulon_target_gene_metric = loom_attribute[regulon]
         # Return only the target genes for the given regulon
         return regulon_target_gene_metric[
-            self.loom_connection.row_attrs[f"{regulon_type.capitalize()}Regulons"][regulon] == 1
+            self.loom_connection.row_attrs[f"{regulon_type.capitalize()}Regulons"][
+                regulon
+            ]
+            == 1
         ]
 
     ##############
     # Embeddings #
     ##############
 
-    def get_coordinates(self, coordinatesID: int = -1, annotation="", logic: str = "OR"):
+    def get_coordinates(
+        self, coordinatesID: int = -1, annotation="", logic: str = "OR"
+    ):
         loom = self.loom_connection
         if coordinatesID == -1:
             try:
@@ -805,7 +946,9 @@ class Loom:
     def get_ca_attr_by_name(self, name: str):
         if self.has_ca_attr(name=name):
             return self.loom_connection.ca[name]
-        raise ValueError("The given annotation {0} does not exists in the .loom.".format(name))
+        raise ValueError(
+            "The given annotation {0} does not exists in the .loom.".format(name)
+        )
 
     def has_region_gene_links(self) -> bool:
         return "linkedGene" in self.loom_connection.ra.keys()
@@ -823,7 +966,11 @@ class Loom:
         logic: str = "OR",
     ):
         if not self.has_ca_attr(name=metric_name):
-            raise ValueError("The metric {0} does not exist in the current active loom".format(metric_name))
+            raise ValueError(
+                "The metric {0} does not exist in the current active loom".format(
+                    metric_name
+                )
+            )
         logger.debug("getting metric {0}...".format(metric_name))
         metric_vals = self.get_ca_attr_by_name(name=metric_name)
         if cpm_normalise:
@@ -851,23 +998,37 @@ class Loom:
     #     return loom.ca.Clusterings[str(clustering_id)]
 
     def has_cluster_markers(self, clustering_id: int):
-        return "ClusterMarkers_{0}".format(clustering_id) in self.loom_connection.ra.keys()
+        return (
+            "ClusterMarkers_{0}".format(clustering_id) in self.loom_connection.ra.keys()
+        )
 
     def get_cluster_marker_genes(self, clustering_id: int, cluster_id: int):
         try:
             return self.get_genes()[
-                self.loom_connection.ra["ClusterMarkers_{0}".format(clustering_id)][str(cluster_id)] == 1
+                self.loom_connection.ra["ClusterMarkers_{0}".format(clustering_id)][
+                    str(cluster_id)
+                ]
+                == 1
             ]
         except Exception as err:
             logger.error(err)
             return []
 
-    def get_cluster_marker_metrics(self, clustering_id: int, cluster_id: int, metric_accessor: str):
-        marker_mask = self.loom_connection.ra["ClusterMarkers_{0}".format(clustering_id)][str(cluster_id)] == 1
+    def get_cluster_marker_metrics(
+        self, clustering_id: int, cluster_id: int, metric_accessor: str
+    ):
+        marker_mask = (
+            self.loom_connection.ra["ClusterMarkers_{0}".format(clustering_id)][
+                str(cluster_id)
+            ]
+            == 1
+        )
         cluster_marker_metric = self.loom_connection.row_attrs[
             "ClusterMarkers_{0}_{1}".format(clustering_id, metric_accessor)
         ][str(cluster_id)][marker_mask]
         cluster_marker_metric_df = pd.DataFrame(
-            cluster_marker_metric, index=self.get_genes()[marker_mask], columns=[metric_accessor]
+            cluster_marker_metric,
+            index=self.get_genes()[marker_mask],
+            columns=[metric_accessor],
         )
         return cluster_marker_metric_df
