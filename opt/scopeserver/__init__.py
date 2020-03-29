@@ -142,5 +142,6 @@ def run() -> None:
     scope_server = SCopeServer(config)
     scope_server.run()
 
+
 if __name__ == "__main__":
     run()
