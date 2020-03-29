@@ -69,15 +69,9 @@ class DataFileHandler:
         self.active_sessions = {}
         self.uuid_log = None
         self.data_dirs = data_dirs
-        self.gene_sets_dir = DataFileHandler.get_data_dir_path_by_file_type(
-            file_type="GeneSet"
-        )
-        self.rankings_dir = DataFileHandler.get_data_dir_path_by_file_type(
-            file_type="LoomAUCellRankings"
-        )
-        self.config_dir = DataFileHandler.get_data_dir_path_by_file_type(
-            file_type="Config"
-        )
+        self.gene_sets_dir = DataFileHandler.get_data_dir_path_by_file_type(file_type="GeneSet")
+        self.rankings_dir = DataFileHandler.get_data_dir_path_by_file_type(file_type="LoomAUCellRankings")
+        self.config_dir = DataFileHandler.get_data_dir_path_by_file_type(file_type="Config")
         self.logs_dir = DataFileHandler.get_data_dir_path_by_file_type(file_type="Logs")
         self.create_global_dirs()
         self.create_uuid_log()
@@ -96,14 +90,10 @@ class DataFileHandler:
 
     def set_global_data(self) -> None:
         self.global_sets = [
-            x
-            for x in os.listdir(self.gene_sets_dir)
-            if not os.path.isdir(os.path.join(self.gene_sets_dir, x))
+            x for x in os.listdir(self.gene_sets_dir) if not os.path.isdir(os.path.join(self.gene_sets_dir, x))
         ]
         self.global_rankings = [
-            x
-            for x in os.listdir(self.rankings_dir)
-            if not os.path.isdir(os.path.join(self.rankings_dir, x))
+            x for x in os.listdir(self.rankings_dir) if not os.path.isdir(os.path.join(self.rankings_dir, x))
         ]
 
     @staticmethod
@@ -132,10 +122,7 @@ class DataFileHandler:
             with open(os.path.join(self.config_dir, "ORCID_IDs.txt"), "r") as fh:
                 for line in fh.readlines():
                     orcid_id, orcid_scope_uuids, name = line.rstrip("\n").split("\t")
-                    self.orcid_ids[orcid_id] = (
-                        set([x for x in orcid_scope_uuids.split(",")]),
-                        name,
-                    )
+                    self.orcid_ids[orcid_id] = (set([x for x in orcid_scope_uuids.split(",")]), name)
 
     def confirm_orcid_uuid(self, user_id, user_uuid) -> bool:
         logger.debug(f"Confirming User: {user_id}, uuid: {user_id}")
@@ -168,9 +155,7 @@ class DataFileHandler:
 
     def read_permanent_sessions(self) -> bool:
         if os.path.isfile(os.path.join(self.config_dir, "Permanent_Session_IDs.txt")):
-            with open(
-                os.path.join(self.config_dir, "Permanent_Session_IDs.txt"), "r"
-            ) as fh:
+            with open(os.path.join(self.config_dir, "Permanent_Session_IDs.txt"), "r") as fh:
                 for line in fh.readlines():
                     try:
                         uuid, sessionMode = line.rstrip("\n").split("\t")
@@ -179,10 +164,7 @@ class DataFileHandler:
                         uuid = line.rstrip("\n")
                         sessionMode = "rw"
                     self.permanent_UUIDs.add(uuid)
-                    self.current_UUIDs[uuid] = [
-                        time.time() + (_ONE_DAY_IN_SECONDS * 365),
-                        sessionMode,
-                    ]
+                    self.current_UUIDs[uuid] = [time.time() + (_ONE_DAY_IN_SECONDS * 365), sessionMode]
             return True
         else:
             return False
@@ -194,10 +176,7 @@ class DataFileHandler:
             with open(os.path.join(self.config_dir, "UUID_Timeouts.tsv"), "r") as fh:
                 for line in fh.readlines():
                     ls = line.rstrip("\n").split("\t")
-                    self.current_UUIDs[ls[0]] = [
-                        float(ls[1]),
-                        "rw",
-                    ]  # All user sessions are rw
+                    self.current_UUIDs[ls[0]] = [float(ls[1]), "rw"]  # All user sessions are rw
                     logger.debug(
                         f'\tUUID {ls[0]}, mode rw. Generated on {time.strftime("%Y-%m-%d at %H:%M:%S", time.localtime(float(ls[1])))}'
                     )
@@ -212,15 +191,10 @@ class DataFileHandler:
                     )
         else:
             logger.debug('No Existing Permanent Sessions, generating rw App UUID:"')
-            with open(
-                os.path.join(self.config_dir, "Permanent_Session_IDs.txt"), "w"
-            ) as fh:
+            with open(os.path.join(self.config_dir, "Permanent_Session_IDs.txt"), "w") as fh:
                 newUUID = "SCopeApp__{0}".format(str(uuid4()))
                 fh.write("{0}\trw\n".format(newUUID))  # App sessions are always rw
-                self.current_UUIDs[newUUID] = [
-                    time.time() + (_ONE_DAY_IN_SECONDS * 365),
-                    "rw",
-                ]
+                self.current_UUIDs[newUUID] = [time.time() + (_ONE_DAY_IN_SECONDS * 365), "rw"]
                 logger.debug(
                     f'\tUUID {newUUID}, mode rw. Valid until {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + (_ONE_DAY_IN_SECONDS * 365)))}'
                 )
@@ -237,12 +211,7 @@ class DataFileHandler:
 
     def create_uuid_log(self) -> None:
         self.uuid_log = open(
-            os.path.join(
-                self.logs_dir,
-                "UUID_Log_{0}".format(
-                    time.strftime("%Y-%m-%d__%H-%M-%S", time.localtime())
-                ),
-            ),
+            os.path.join(self.logs_dir, "UUID_Log_{0}".format(time.strftime("%Y-%m-%d__%H-%M-%S", time.localtime()))),
             "w",
         )
 
@@ -252,10 +221,7 @@ class DataFileHandler:
     def active_session_check(self) -> None:
         curTime = time.time()
         for UUID in list(self.active_sessions.keys()):
-            if (
-                curTime - self.active_sessions[UUID] > _SESSION_TIMEOUT
-                or UUID not in self.get_current_UUIDs().keys()
-            ):
+            if curTime - self.active_sessions[UUID] > _SESSION_TIMEOUT or UUID not in self.get_current_UUIDs().keys():
                 del self.active_sessions[UUID]
 
     def reset_active_session_timeout(self, UUID) -> None:
@@ -267,14 +233,8 @@ class DataFileHandler:
             open(os.path.join(gene_mappings_dir_path, "terminal_mappings.pickle"), "rb")
         )
         DataFileHandler.hsap_to_dmel_mappings = pickle.load(
-            open(
-                os.path.join(gene_mappings_dir_path, "hsap_to_dmel_mappings.pickle"),
-                "rb",
-            )
+            open(os.path.join(gene_mappings_dir_path, "hsap_to_dmel_mappings.pickle"), "rb")
         )
         DataFileHandler.mmus_to_dmel_mappings = pickle.load(
-            open(
-                os.path.join(gene_mappings_dir_path, "mmus_to_dmel_mappings.pickle"),
-                "rb",
-            )
+            open(os.path.join(gene_mappings_dir_path, "mmus_to_dmel_mappings.pickle"), "rb")
         )

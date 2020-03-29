@@ -5752,9 +5752,7 @@ _COLLABANNOVOTES.fields_by_name["voters"].message_type = _COLLABANNOVOTER
 _CELLTYPEANNOTATION.fields_by_name["data"].message_type = _COLLABANNODATA
 _CELLTYPEANNOTATION.fields_by_name["votes_for"].message_type = _COLLABANNOVOTES
 _CELLTYPEANNOTATION.fields_by_name["votes_against"].message_type = _COLLABANNOVOTES
-_CLUSTERANNOTATION.fields_by_name[
-    "cell_type_annotation"
-].message_type = _CELLTYPEANNOTATION
+_CLUSTERANNOTATION.fields_by_name["cell_type_annotation"].message_type = _CELLTYPEANNOTATION
 _CLUSTERING.fields_by_name["clusterMarkerMetrics"].message_type = _CLUSTERMARKERMETRIC
 _CLUSTERING.fields_by_name["clusters"].message_type = _CLUSTERANNOTATION
 _CELLMETADATA.fields_by_name["annotations"].message_type = _ANNOTATION
@@ -5773,30 +5771,20 @@ _MYLOOM.fields_by_name["fileMetaData"].message_type = _FILEMETADATA
 _MYLOOM.fields_by_name["loomHeierarchy"].message_type = _LOOMHEIERARCHY
 _MYLOOMSREPLY.fields_by_name["myLooms"].message_type = _MYLOOM
 _GENESETENRICHMENTREPLY.fields_by_name["progress"].message_type = _PROGRESS
-_GENESETENRICHMENTREPLY.fields_by_name[
-    "cellValues"
-].message_type = _CELLCOLORBYFEATURESREPLY
+_GENESETENRICHMENTREPLY.fields_by_name["cellValues"].message_type = _CELLCOLORBYFEATURESREPLY
 _MYGENESETSREPLY.fields_by_name["myGeneSets"].message_type = _MYGENESET
 _DOWNLOADSUBLOOMREPLY.fields_by_name["progress"].message_type = _PROGRESS
 _DOWNLOADSUBLOOMREPLY.fields_by_name["error"].message_type = _ERRORREPLY
-_SETCOLABANNOTATIONDATAREQUEST.fields_by_name[
-    "orcidInfo"
-].message_type = _ORCIDINFOMESSAGE
+_SETCOLABANNOTATIONDATAREQUEST.fields_by_name["orcidInfo"].message_type = _ORCIDINFOMESSAGE
 _SETCOLABANNOTATIONDATAREQUEST.fields_by_name["annoData"].message_type = _COLLABANNODATA
 _VOTEANNOTATIONREQUEST.fields_by_name["orcidInfo"].message_type = _ORCIDINFOMESSAGE
 _VOTEANNOTATIONREQUEST.fields_by_name["annoData"].message_type = _COLLABANNODATA
 DESCRIPTOR.message_types_by_name["ErrorReply"] = _ERRORREPLY
-DESCRIPTOR.message_types_by_name[
-    "CellColorByFeaturesRequest"
-] = _CELLCOLORBYFEATURESREQUEST
+DESCRIPTOR.message_types_by_name["CellColorByFeaturesRequest"] = _CELLCOLORBYFEATURESREQUEST
 DESCRIPTOR.message_types_by_name["ColorLegend"] = _COLORLEGEND
 DESCRIPTOR.message_types_by_name["CellColorByFeaturesReply"] = _CELLCOLORBYFEATURESREPLY
-DESCRIPTOR.message_types_by_name[
-    "CellAUCValuesByFeaturesRequest"
-] = _CELLAUCVALUESBYFEATURESREQUEST
-DESCRIPTOR.message_types_by_name[
-    "CellAUCValuesByFeaturesReply"
-] = _CELLAUCVALUESBYFEATURESREPLY
+DESCRIPTOR.message_types_by_name["CellAUCValuesByFeaturesRequest"] = _CELLAUCVALUESBYFEATURESREQUEST
+DESCRIPTOR.message_types_by_name["CellAUCValuesByFeaturesReply"] = _CELLAUCVALUESBYFEATURESREPLY
 DESCRIPTOR.message_types_by_name["FeatureRequest"] = _FEATUREREQUEST
 DESCRIPTOR.message_types_by_name["CellMetaDataRequest"] = _CELLMETADATAREQUEST
 DESCRIPTOR.message_types_by_name["FeatureReply"] = _FEATUREREPLY
@@ -5832,12 +5820,8 @@ DESCRIPTOR.message_types_by_name["MyLoomsRequest"] = _MYLOOMSREQUEST
 DESCRIPTOR.message_types_by_name["LoomHeierarchy"] = _LOOMHEIERARCHY
 DESCRIPTOR.message_types_by_name["MyLoom"] = _MYLOOM
 DESCRIPTOR.message_types_by_name["MyLoomsReply"] = _MYLOOMSREPLY
-DESCRIPTOR.message_types_by_name[
-    "TranslateLassoSelectionRequest"
-] = _TRANSLATELASSOSELECTIONREQUEST
-DESCRIPTOR.message_types_by_name[
-    "TranslateLassoSelectionReply"
-] = _TRANSLATELASSOSELECTIONREPLY
+DESCRIPTOR.message_types_by_name["TranslateLassoSelectionRequest"] = _TRANSLATELASSOSELECTIONREQUEST
+DESCRIPTOR.message_types_by_name["TranslateLassoSelectionReply"] = _TRANSLATELASSOSELECTIONREPLY
 DESCRIPTOR.message_types_by_name["CellIDsRequest"] = _CELLIDSREQUEST
 DESCRIPTOR.message_types_by_name["CellIDsReply"] = _CELLIDSREPLY
 DESCRIPTOR.message_types_by_name["GeneSetEnrichmentRequest"] = _GENESETENRICHMENTREQUEST
@@ -5867,12 +5851,8 @@ DESCRIPTOR.message_types_by_name["getORCIDReply"] = _GETORCIDREPLY
 DESCRIPTOR.message_types_by_name["getORCIDStatusRequest"] = _GETORCIDSTATUSREQUEST
 DESCRIPTOR.message_types_by_name["getORCIDStatusReply"] = _GETORCIDSTATUSREPLY
 DESCRIPTOR.message_types_by_name["orcidInfoMessage"] = _ORCIDINFOMESSAGE
-DESCRIPTOR.message_types_by_name[
-    "setColabAnnotationDataRequest"
-] = _SETCOLABANNOTATIONDATAREQUEST
-DESCRIPTOR.message_types_by_name[
-    "setColabAnnotationDataReply"
-] = _SETCOLABANNOTATIONDATAREPLY
+DESCRIPTOR.message_types_by_name["setColabAnnotationDataRequest"] = _SETCOLABANNOTATIONDATAREQUEST
+DESCRIPTOR.message_types_by_name["setColabAnnotationDataReply"] = _SETCOLABANNOTATIONDATAREPLY
 DESCRIPTOR.message_types_by_name["voteAnnotationRequest"] = _VOTEANNOTATIONREQUEST
 DESCRIPTOR.message_types_by_name["voteAnnotationReply"] = _VOTEANNOTATIONREPLY
 DESCRIPTOR.message_types_by_name["getNextClusterRequest"] = _GETNEXTCLUSTERREQUEST

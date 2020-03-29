@@ -27,22 +27,14 @@ class SCopeServer:
 
     def start_bind_server(self) -> None:
         logger.debug(f"Starting bind server on port {self.config['xPort']}")
-        self.xs_thread = threading.Thread(
-            target=xs.run, args=(self.run_event,), kwargs={"port": self.config["xPort"]}
-        )
+        self.xs_thread = threading.Thread(target=xs.run, args=(self.run_event,), kwargs={"port": self.config["xPort"]})
         self.xs_thread.start()
 
     def start_data_server(self) -> None:
-        logger.debug(
-            f"Starting data server on port {self.config['gPort']}. app_mode: {self.config['app_mode']}"
-        )
-        self.gs_thread = threading.Thread(
-            target=gs.serve, args=(self.run_event, self.config,)
-        )
+        logger.debug(f"Starting data server on port {self.config['gPort']}. app_mode: {self.config['app_mode']}")
+        self.gs_thread = threading.Thread(target=gs.serve, args=(self.run_event, self.config,))
         logger.debug(f"Starting upload server on port {self.config['pPort']}")
-        self.ps_thread = threading.Thread(
-            target=ps.run, args=(self.run_event,), kwargs={"port": self.config["pPort"]}
-        )
+        self.ps_thread = threading.Thread(target=ps.run, args=(self.run_event,), kwargs={"port": self.config["pPort"]})
         self.gs_thread.start()
         self.ps_thread.start()
 
@@ -98,9 +90,7 @@ def log_ascii_header() -> None:
 def generate_config(args) -> Dict[str, Any]:
     if args.config_file is not None:
         if not os.path.isfile(args.config_file):
-            raise FileNotFoundError(
-                f"The config file {args.config_file} does not exist!"
-            )
+            raise FileNotFoundError(f"The config file {args.config_file} does not exist!")
 
         with open(args.config_file, "r") as fh:
             try:
@@ -123,15 +113,7 @@ def generate_config(args) -> Dict[str, Any]:
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
-    config = {
-        **config,
-        **{
-            "gPort": args.g_port,
-            "pPort": args.p_port,
-            "xPort": args.x_port,
-            "app_mode": args.app_mode,
-        },
-    }
+    config = {**config, **{"gPort": args.g_port, "pPort": args.p_port, "xPort": args.x_port, "app_mode": args.app_mode}}
 
     return config
 
@@ -146,27 +128,12 @@ def run() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(description="Launch the scope server")
-    parser.add_argument(
-        "--g_port", metavar="gPort", type=int, help="gPort", default=55853
-    )
-    parser.add_argument(
-        "--p_port", metavar="pPort", type=int, help="pPort", default=55851
-    )
-    parser.add_argument(
-        "--x_port", metavar="xPort", type=int, help="xPort", default=55852
-    )
-    parser.add_argument(
-        "--app_mode",
-        action="store_true",
-        help="Run in app mode (Fixed UUID)",
-        default=False,
-    )
-    parser.add_argument(
-        "--config_file", type=str, help="Path to config file", default=None
-    )
-    parser.add_argument(
-        "--debug", action="store_true", help="Show debug logging", default=False
-    )
+    parser.add_argument("--g_port", metavar="gPort", type=int, help="gPort", default=55853)
+    parser.add_argument("--p_port", metavar="pPort", type=int, help="pPort", default=55851)
+    parser.add_argument("--x_port", metavar="xPort", type=int, help="xPort", default=55852)
+    parser.add_argument("--app_mode", action="store_true", help="Run in app mode (Fixed UUID)", default=False)
+    parser.add_argument("--config_file", type=str, help="Path to config file", default=None)
+    parser.add_argument("--debug", action="store_true", help="Show debug logging", default=False)
     args = parser.parse_args()
 
     config = generate_config(args)
@@ -174,7 +141,6 @@ def run() -> None:
     # Start an instance of SCope Server
     scope_server = SCopeServer(config)
     scope_server.run()
-
 
 if __name__ == "__main__":
     run()
