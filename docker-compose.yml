@@ -1,0 +1,25 @@
+version: "3.7"
+services:
+  scope-server:
+    build:
+      context: .
+      dockerfile: ./.docker/Dockerfile.server
+    init: true
+    image: scope-server:latest
+    volumes:
+      - ./opt:/home/scope/opt
+    ports:
+      - 55851:55851
+      - 55852:55852
+      - 55853:55853
+    networks:
+      - scope
+    restart: unless-stopped
+
+networks:
+  scope:
+    driver: bridge
+
+volumes:
+  node_modules:
+    driver: local

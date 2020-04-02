@@ -59,7 +59,7 @@ mypy = "*"
 mypy-protobuf = "^1.19"
 
 [tool.poetry.scripts]
-dev-script = 'scopeserver:run'
+scope-server = 'scopeserver:run'
 
 [tool.pylint.'MESSAGES CONTROL']
 max-line-length = 120

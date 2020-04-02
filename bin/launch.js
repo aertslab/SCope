@@ -284,7 +284,7 @@ class Launcher {
         if (!this.scopeServerActivated) {
             console.log('SCope Server installed but not activated');
             scopeStartCmd =
-                'cd opt && poetry shell && cd .. &&' + scopeStartCmd;
+                'cd opt && poetry run ' + scopeStartCmd;
             console.log('Activating and starting SCope Server...');
         } else {
             console.log('Starting SCope Server...');
