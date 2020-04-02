@@ -3,7 +3,7 @@ services:
   scope-server:
     build:
       context: .
-      dockerfile: ./.docker/Dockerfile.server
+      dockerfile: ./.docker/Dockerfile
     init: true
     image: scope-server:latest
     volumes:
