@@ -31,7 +31,6 @@ import Metadata from '../common/Metadata';
 import FileDownloader from '../../js/http';
 import CollaborativeAnnotation from './CollaborativeAnnotation';
 
-
 class ViewerSidebar extends Component {
     static propTypes = {
         cookies: instanceOf(Cookies).isRequired
@@ -914,7 +913,10 @@ class ViewerSidebar extends Component {
                             <Button
                                 primary
                                 onClick={() => {
-                                    const tsv = json2csv(markerTableData, { delimiter: '\t', quote: '' });
+                                    const tsv = json2csv(markerTableData, {
+                                        delimiter: '\t',
+                                        quote: ''
+                                    });
                                     fileDownload(tsv, genesFileName());
                                 }}
                                 style={{ marginTop: '10px', width: '100%' }}>
