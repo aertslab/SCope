@@ -9,11 +9,12 @@ if [ ! -f ${FIRST_RUN_FILE} ]; then
 
     pushd .
     cd scopeserver/bindserver
-    npm install
+    npm install || exit 1
     popd
 
     echo "Installing SCope server"
-    poetry install
+    poetry install || exit 1
+
     touch ${FIRST_RUN_FILE}
 fi
 
