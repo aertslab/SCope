@@ -1,4 +1,4 @@
-FROM python:3.8-slim
+FROM python:3.8-buster
 
 # Install python
 RUN apt-get update \
