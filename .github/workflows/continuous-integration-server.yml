@@ -7,56 +7,48 @@ on:
 jobs:
     quality-checks:
         runs-on: ubuntu-latest
+        env:
+          working-directory: ./opt
         strategy:
             matrix:
                 python-version: [3.6, 3.7, 3.8]
 
         steps:
             - uses: actions/checkout@v2
-            - name: Install dependencies
-              uses: abatilo/actions-poetry@v1.5.0
+
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v1
               with:
-                  python_version: ${{ matrix.python-version }}
-                  poetry_version: 1.0.3
-                  working_directory: ./opt
-                  args: install
+                python-version: ${{ matrix.python-version }}
+
+            - name: Install Poetry
+              uses: wei/curl@master
+              with:
+                args: -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+            - name: Install dependencies
+              run: |
+                ${HOME}/.poetry/bin/poetry install
+              working-directory: ${{ env.working-directory }}
 
             - name: Run pylint
-              uses: abatilo/actions-poetry@v1.5.0
-              with:
-                  python_version: ${{ matrix.python-version }}
-                  poetry_version: 1.0.3
-                  working_directory: ./opt
-                  args: run pylint-fail-under --fail_under "6.25" --rcfile pyproject.toml scopeserver
+              run: |
+                ${HOME}/.poetry/bin/poetry run pylint-fail-under --fail_under "6.25" --rcfile pyproject.toml scopeserver
+              working-directory: ${{ env.working-directory }}
 
             - name: Run black
-              uses: abatilo/actions-poetry@v1.5.0
-              with:
-                  python_version: ${{ matrix.python-version }}
-                  poetry_version: 1.0.3
-                  working_directory: ./opt
-                  args: run black --check .
+              run: |
+                ${HOME}/.poetry/bin/poetry run black --check .
+              working-directory: ${{ env.working-directory }}
 
             - name: Run mypy
-              uses: abatilo/actions-poetry@v1.5.0
-              with:
-                  python_version: ${{ matrix.python-version }}
-                  poetry_version: 1.0.3
-                  working_directory: ./opt
-                  args: run mypy --config-file pyproject.toml --ignore-missing-imports scopeserver
+              run: |
+                ${HOME}/.poetry/bin/poetry run mypy --config-file pyproject.toml --ignore-missing-imports scopeserver
+              working-directory: ${{ env.working-directory }}
 
             - name: Run pytest
-              uses: abatilo/actions-poetry@v1.5.0
-              with:
-                  python_version: ${{ matrix.python-version }}
-                  poetry_version: 1.0.3
-                  working_directory: ./opt
-                  args: run pytest --cov=scopeserver --cov-branch --cov-fail-under=23 test/
+              run: |
+                ${HOME}/.poetry/bin/poetry run pytest --cov=scopeserver --cov-branch --cov-fail-under=23 test/
 
             - name: Run safety security checks
-              uses: abatilo/actions-poetry@v1.5.0
-              with:
-                  python_version: ${{ matrix.python-version }}
-                  poetry_version: 1.0.3
-                  working_directory: ./opt
-                  args: run pip freeze | poetry run safety check --stdin
+              run: |
+                ${HOME}/.poetry/bin/poetry run pip freeze | ${HOME}/.poetry/bin/poetry run safety check --stdin
