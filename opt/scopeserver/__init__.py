@@ -1,18 +1,17 @@
-from scopeserver.dataserver.modules.gserver import GServer as gs
-from scopeserver.dataserver.modules.pserver import PServer as ps
-from scopeserver.bindserver import XServer as xs
-from scopeserver.dataserver.utils import sys_utils as su
-
 import threading
-import os
 import time
 from urllib.request import urlopen
 import http
 import sys
 import logging
-import json
 import secrets
+from pathlib import Path
 from typing import Dict, Any
+
+from scopeserver.dataserver.modules.gserver import GServer as gs
+from scopeserver.dataserver.modules.pserver import PServer as ps
+from scopeserver.bindserver import XServer as xs
+from scopeserver.dataserver.utils import sys_utils as su
 
 LOG_FMT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(format=LOG_FMT, level=logging.INFO)
@@ -69,23 +68,8 @@ class SCopeServer:
 
 
 def log_ascii_header() -> None:
-    logger.info(
-        """\n
-
-  /$$$$$$   /$$$$$$                                       /$$$$$$
- /$$__  $$ /$$__  $$                                     /$$__  $$
-| $$  \__/| $$  \__/  /$$$$$$   /$$$$$$   /$$$$$$       | $$  \__/  /$$$$$$   /$$$$$$  /$$    /$$ /$$$$$$   /$$$$$$
-|  $$$$$$ | $$       /$$__  $$ /$$__  $$ /$$__  $$      |  $$$$$$  /$$__  $$ /$$__  $$|  $$  /$$//$$__  $$ /$$__  $$
- \____  $$| $$      | $$  \ $$| $$  \ $$| $$$$$$$$       \____  $$| $$$$$$$$| $$  \__/ \  $$/$$/| $$$$$$$$| $$  \__/
- /$$  \ $$| $$    $$| $$  | $$| $$  | $$| $$_____/       /$$  \ $$| $$_____/| $$        \  $$$/ | $$_____/| $$
-|  $$$$$$/|  $$$$$$/|  $$$$$$/| $$$$$$$/|  $$$$$$$      |  $$$$$$/|  $$$$$$$| $$         \  $/  |  $$$$$$$| $$
- \______/  \______/  \______/ | $$____/  \_______/       \______/  \_______/|__/          \_/    \_______/|__/
-                              | $$
-                              | $$
-                              |__/
-        """
-    )
-
+    with open(Path("data") / Path("motd.txt")) as motd:
+        logger.info(motd.read())
 
 def generate_config(args) -> Dict[str, Any]:
     from scopeserver.scope.config import from_file
@@ -95,7 +79,7 @@ def generate_config(args) -> Dict[str, Any]:
     if config.get("dataHashSecret") is None:
         new_secret = secrets.token_hex(32)
         config["dataHashSecret"] = new_secret
-        logger.error(
+        logger.warn(
             f"The following secret key will be used to hash annotation data: {new_secret}\nLosing this key will mean all annotations will display as unvalidated."
         )
 
