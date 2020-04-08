@@ -204,8 +204,23 @@ class SCope(s_pb2_grpc.MainServicer):
         descriptions = {
             x: ""
             for x in collapsedResults.keys()
-            if x[1] not in ["region_gene_link", "regulon_target", "marker_gene", "cluster_annotation"]
+            if x[1]
+            not in ["region_gene_link", "regulon_target", "marker_gene", "cluster_annotation", "annotation_category"]
         }
+
+        def process_descriptions(
+            r: object, collapsedResults: dict, descriptions: dict, element: str, element_type: str, join_text: str
+        ):
+            toProcess = [collapsedResults[r]] if type(collapsedResults[r]) == str else collapsedResults[r]
+            for result in toProcess:
+                description = f"{result} {join_text} {element}"
+                if (element, element_type) not in collapsedResults.keys():
+                    collapsedResults[(element, element_type)] = result
+                    descriptions[(element, element_type)] = ""
+                if descriptions[(element, element_type)] != "":
+                    descriptions[(element, element_type)] += ", "
+                descriptions[(element, element_type)] += description
+            return collapsedResults, descriptions
 
         for r in list(collapsedResults.keys()):
             if cross_species == "":
@@ -215,15 +230,18 @@ class SCope(s_pb2_grpc.MainServicer):
                     synonyms.remove(r[0])
                 except ValueError:
                     pass
+                if r[1] == "annotation_category":
+                    for annotation in r[0]:
+                        collapsedResults, descriptions = process_descriptions(
+                            r, collapsedResults, descriptions, annotation, "annotation", "is a category of"
+                        )
+                    del collapsedResults[r]
+
                 if r[1] == "regulon_target":
                     for regulon in r[0]:
-                        description = f"{collapsedResults[r][0]} is a target of {regulon}"
-                        if (regulon, "regulon") not in collapsedResults.keys():
-                            collapsedResults[(regulon, "regulon")] = collapsedResults[r][0]
-                            descriptions[(regulon, "regulon")] = ""
-                        if descriptions[(regulon, "regulon")] != "":
-                            descriptions[(regulon, "regulon")] += ", "
-                        descriptions[(regulon, "regulon")] += description
+                        collapsedResults, descriptions = process_descriptions(
+                            r, collapsedResults, descriptions, regulon, "regulon", "is a target of"
+                        )
                     del collapsedResults[r]
 
                 elif r[1] == "cluster_annotation":
@@ -237,13 +255,15 @@ class SCope(s_pb2_grpc.MainServicer):
                             clustering, cluster, secret=self.config["dataHashSecret"]
                         )
                         cluster_name = cluster["description"]
-                        description = f"{collapsedResults[r][0]} is a suggested annotation of {cluster_name}"
-                        if (cluster_name, f"Clustering: {clustering_name}") not in collapsedResults.keys():
-                            collapsedResults[(cluster_name, f"Clustering: {clustering_name}")] = collapsedResults[r][0]
-                            descriptions[(cluster_name, f"Clustering: {clustering_name}")] = ""
-                        if descriptions[(cluster_name, f"Clustering: {clustering_name}")] != "":
-                            descriptions[(cluster_name, f"Clustering: {clustering_name}")] += ", "
-                        descriptions[(cluster_name, f"Clustering: {clustering_name}")] += description
+
+                        collapsedResults, descriptions = process_descriptions(
+                            r,
+                            collapsedResults,
+                            descriptions,
+                            cluster_name,
+                            f"Clustering: {clustering_name}",
+                            "is a suggested annotation of",
+                        )
                     del collapsedResults[r]
 
                 elif r[1] == "marker_gene":
@@ -257,23 +277,20 @@ class SCope(s_pb2_grpc.MainServicer):
                             clustering, cluster, secret=self.config["dataHashSecret"]
                         )
                         cluster_name = cluster["description"]
-                        description = f"{collapsedResults[r][0]} is a marker of {cluster_name}"
-                        if (cluster_name, f"Clustering: {clustering_name}") not in collapsedResults.keys():
-                            collapsedResults[(cluster_name, f"Clustering: {clustering_name}")] = collapsedResults[r][0]
-                            descriptions[(cluster_name, f"Clustering: {clustering_name}")] = ""
-                        if descriptions[(cluster_name, f"Clustering: {clustering_name}")] != "":
-                            descriptions[(cluster_name, f"Clustering: {clustering_name}")] += ", "
-                        descriptions[(cluster_name, f"Clustering: {clustering_name}")] += description
+                        collapsedResults, descriptions = process_descriptions(
+                            r,
+                            collapsedResults,
+                            descriptions,
+                            cluster_name,
+                            f"Clustering: {clustering_name}",
+                            "is a marker of",
+                        )
                     del collapsedResults[r]
                 elif r[1] == "region_gene_link":
                     for region in r[0]:
-                        description = f"{region} is linked to {collapsedResults[r][0]}"
-                        if (region, "gene") not in collapsedResults.keys():
-                            collapsedResults[(region, "gene")] = collapsedResults[r][0]
-                            descriptions[(region, "gene")] = ""
-                        if descriptions[(region, "gene")] != "":
-                            descriptions[(region, "gene")] += ", "
-                        descriptions[(region, "gene")] += description
+                        collapsedResults, descriptions = process_descriptions(
+                            r, collapsedResults, descriptions, region, "gene", "is a linked to"
+                        )
                     del collapsedResults[r]
                 elif len(synonyms) > 0:
                     if description != "":
