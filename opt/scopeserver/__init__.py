@@ -71,6 +71,7 @@ def log_ascii_header() -> None:
     with open(Path("data") / Path("motd.txt")) as motd:
         logger.info(motd.read())
 
+
 def generate_config(args) -> Dict[str, Any]:
     from scopeserver.scope.config import from_file
 
