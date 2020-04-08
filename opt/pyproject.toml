@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "scopeserver"
-version = "1.8.2"
+version = "1.8.3"
 description = "Visualization tool for large-scale and high dimensional single-cell data"
 
 license = "GPL-3.0-only"

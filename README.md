@@ -1,6 +1,6 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/aertslab/scope/badge)](https://www.codefactor.io/repository/github/aertslab/scope)
 
-# SCope v1.8.1: Visualization of large-scale and high dimensional single cell data
+# SCope v1.8.3: Visualization of large-scale and high dimensional single cell data
 
 <img src="images/SCope_Logo.png" width="640">
 
