@@ -88,22 +88,11 @@ def log_ascii_header() -> None:
 
 
 def generate_config(args) -> Dict[str, Any]:
-    if args.config_file is not None:
-        if not os.path.isfile(args.config_file):
-            raise FileNotFoundError(f"The config file {args.config_file} does not exist!")
+    from scopeserver.scope.config import from_file
 
-        with open(args.config_file, "r") as fh:
-            try:
-                config = json.loads(fh.read())
-            except json.JSONDecodeError:
-                config = {}
-                logger.error("Config file is not proper json and will not be used")
-    else:
-        config = {}
+    config = from_file(args.config_file)
 
-    dhs = config.get("dataHashSecret")
-
-    if not dhs or not dhs.strip():
+    if config.get("dataHashSecret") is None:
         new_secret = secrets.token_hex(32)
         config["dataHashSecret"] = new_secret
         logger.error(
