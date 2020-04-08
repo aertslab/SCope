@@ -47,7 +47,9 @@ jobs:
             - name: Run pytest
               run: |
                 ${HOME}/.poetry/bin/poetry run pytest --cov=scopeserver --cov-branch --cov-fail-under=23 test/
+              working-directory: ${{ env.working-directory }}
 
             - name: Run safety security checks
               run: |
                 ${HOME}/.poetry/bin/poetry run pip freeze | ${HOME}/.poetry/bin/poetry run safety check --stdin
+              working-directory: ${{ env.working-directory }}
