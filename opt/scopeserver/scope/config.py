@@ -9,6 +9,7 @@ import json
 def defaults() -> Dict[str, Union[str, int, bool]]:
     """ Default configuration values. """
     return {
+        "app_mode": True,
         "debug": True,
         "pPort": 55851,
         "xPort": 55852,
