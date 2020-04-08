@@ -168,6 +168,11 @@ class SearchSpace(dict):
         annotations = []
         for annotation in self.meta_data["annotations"]:
             annotations.append(annotation["name"])
+            for category in annotation["values"]:
+                if (category.casefold(), category, "annotation_category") in self.keys():
+                    self[(category.casefold(), category, "annotation_category")].append(annotation["name"])
+                else:
+                    self[(category.casefold(), category, "annotation_category")] = [annotation["name"]]
         self.add_elements(elements=annotations, element_type="annotation")
 
     def add_metrics(self) -> None:
