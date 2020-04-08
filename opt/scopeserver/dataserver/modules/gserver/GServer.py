@@ -181,68 +181,68 @@ class SCope(s_pb2_grpc.MainServicer):
         else:
             res = sorted(perfect_match) + sorted(good_match) + sorted(bad_match) + sorted(no_match)
 
-        collapsedResults: Dict[Any, Any] = OrderedDict()
+        collapsed_results: Dict[Any, Any] = OrderedDict()
         if cross_species == "":
             for r in res:
                 if type(search_space[r]) == list:
                     search_space[r] = tuple(search_space[r])
-                if (search_space[r], r[2]) not in collapsedResults.keys():
-                    collapsedResults[(search_space[r], r[2])] = [r[1]]
+                if (search_space[r], r[2]) not in collapsed_results.keys():
+                    collapsed_results[(search_space[r], r[2])] = [r[1]]
                 else:
-                    collapsedResults[(search_space[r], r[2])].append(r[1])
+                    collapsed_results[(search_space[r], r[2])].append(r[1])
         elif cross_species == "hsap":
             for r in res:
                 for dg in self.dfh.hsap_to_dmel_mappings[search_space[r]]:
-                    if (dg[0], r[2]) not in collapsedResults.keys():
-                        collapsedResults[(dg[0], r[2])] = (r[1], dg[1])
+                    if (dg[0], r[2]) not in collapsed_results.keys():
+                        collapsed_results[(dg[0], r[2])] = (r[1], dg[1])
         elif cross_species == "mmus":
             for r in res:
                 for dg in self.dfh.mmus_to_dmel_mappings[search_space[r]]:
-                    if (dg[0], r[2]) not in collapsedResults.keys():
-                        collapsedResults[(dg[0], r[2])] = (r[1], dg[1])
+                    if (dg[0], r[2]) not in collapsed_results.keys():
+                        collapsed_results[(dg[0], r[2])] = (r[1], dg[1])
 
         descriptions = {
             x: ""
-            for x in collapsedResults.keys()
+            for x in collapsed_results.keys()
             if x[1]
             not in ["region_gene_link", "regulon_target", "marker_gene", "cluster_annotation", "annotation_category"]
         }
 
         def process_descriptions(
-            r: object, collapsedResults: dict, descriptions: dict, element: str, element_type: str, join_text: str
+            r: object, collapsed_results: dict, descriptions: dict, element: str, element_type: str, join_text: str
         ):
-            toProcess = [collapsedResults[r]] if type(collapsedResults[r]) == str else collapsedResults[r]
-            for result in toProcess:
+            to_process = [collapsed_results[r]] if isinstance(collapsed_results[r], str) else collapsed_results[r]
+            for result in to_process:
                 description = f"{result} {join_text} {element}"
-                if (element, element_type) not in collapsedResults.keys():
-                    collapsedResults[(element, element_type)] = result
+                if (element, element_type) not in collapsed_results.keys():
+                    collapsed_results[(element, element_type)] = result
                     descriptions[(element, element_type)] = ""
                 if descriptions[(element, element_type)] != "":
                     descriptions[(element, element_type)] += ", "
                 descriptions[(element, element_type)] += description
-            return collapsedResults, descriptions
+            return collapsed_results, descriptions
 
-        for r in list(collapsedResults.keys()):
+        for r in list(collapsed_results.keys()):
             if cross_species == "":
                 description = ""
-                synonyms = sorted([x for x in collapsedResults[r]])
+                synonyms = sorted([x for x in collapsed_results[r]])
                 try:
                     synonyms.remove(r[0])
                 except ValueError:
                     pass
                 if r[1] == "annotation_category":
                     for annotation in r[0]:
-                        collapsedResults, descriptions = process_descriptions(
-                            r, collapsedResults, descriptions, annotation, "annotation", "is a category of"
+                        collapsed_results, descriptions = process_descriptions(
+                            r, collapsed_results, descriptions, annotation, "annotation", "is a category of"
                         )
-                    del collapsedResults[r]
+                    del collapsed_results[r]
 
                 if r[1] == "regulon_target":
                     for regulon in r[0]:
-                        collapsedResults, descriptions = process_descriptions(
-                            r, collapsedResults, descriptions, regulon, "regulon", "is a target of"
+                        collapsed_results, descriptions = process_descriptions(
+                            r, collapsed_results, descriptions, regulon, "regulon", "is a target of"
                         )
-                    del collapsedResults[r]
+                    del collapsed_results[r]
 
                 elif r[1] == "cluster_annotation":
                     for cluster in r[0]:
@@ -256,15 +256,15 @@ class SCope(s_pb2_grpc.MainServicer):
                         )
                         cluster_name = cluster["description"]
 
-                        collapsedResults, descriptions = process_descriptions(
+                        collapsed_results, descriptions = process_descriptions(
                             r,
-                            collapsedResults,
+                            collapsed_results,
                             descriptions,
                             cluster_name,
                             f"Clustering: {clustering_name}",
                             "is a suggested annotation of",
                         )
-                    del collapsedResults[r]
+                    del collapsed_results[r]
 
                 elif r[1] == "marker_gene":
                     for cluster in r[0]:
@@ -277,21 +277,21 @@ class SCope(s_pb2_grpc.MainServicer):
                             clustering, cluster, secret=self.config["dataHashSecret"]
                         )
                         cluster_name = cluster["description"]
-                        collapsedResults, descriptions = process_descriptions(
+                        collapsed_results, descriptions = process_descriptions(
                             r,
-                            collapsedResults,
+                            collapsed_results,
                             descriptions,
                             cluster_name,
                             f"Clustering: {clustering_name}",
                             "is a marker of",
                         )
-                    del collapsedResults[r]
+                    del collapsed_results[r]
                 elif r[1] == "region_gene_link":
                     for region in r[0]:
-                        collapsedResults, descriptions = process_descriptions(
-                            r, collapsedResults, descriptions, region, "gene", "is a linked to"
+                        collapsed_results, descriptions = process_descriptions(
+                            r, collapsed_results, descriptions, region, "gene", "is a linked to"
                         )
-                    del collapsedResults[r]
+                    del collapsed_results[r]
                 elif len(synonyms) > 0:
                     if description != "":
                         description += ", "
@@ -301,13 +301,13 @@ class SCope(s_pb2_grpc.MainServicer):
             elif cross_species == "hsap":
                 logger.debug(f"Performing hsap cross species search: {query}")
                 description = "Orthologue of {0}, {1:.2f}% identity (Human -> Drosophila)".format(
-                    collapsedResults[r][0], collapsedResults[r][1]
+                    collapsed_results[r][0], collapsed_results[r][1]
                 )
                 descriptions[r] = description
             elif cross_species == "mmus":
                 logger.debug(f"Performing mmus cross species search: {query}")
                 description = "Orthologue of {0}, {1:.2f}% identity (Mouse -> Drosophila)".format(
-                    collapsedResults[r][0], collapsedResults[r][1]
+                    collapsed_results[r][0], collapsed_results[r][1]
                 )
                 descriptions[r] = description
 
@@ -316,9 +316,9 @@ class SCope(s_pb2_grpc.MainServicer):
         logger.debug("{0} genes matching '{1}'".format(len(res), query))
         logger.debug("{0:.5f} seconds elapsed ---".format(time.time() - start_time))
         final_res = {
-            "feature": [r[0] for r in collapsedResults.keys()],
-            "featureType": [r[1] for r in collapsedResults.keys()],
-            "featureDescription": [descriptions[r] for r in collapsedResults.keys()],
+            "feature": [r[0] for r in collapsed_results.keys()],
+            "featureType": [r[1] for r in collapsed_results.keys()],
+            "featureDescription": [descriptions[r] for r in collapsed_results.keys()],
         }
         return final_res
 
