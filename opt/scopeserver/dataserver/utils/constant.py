@@ -4,6 +4,12 @@ _LOWER_LIMIT_RGB = 0
 _UPPER_LIMIT_RGB = 225
 _NO_EXPR_RGB = 166
 
+SPECIES_MAP = {
+    "dmel": {"short": "Fly", "long": "Drosophila Melanogaster"},
+    "hsap": {"short": "Human", "long": "Homo Sapiens"},
+    "mmus": {"short": "Mouse", "long": "Mus Musculus"},
+}
+
 BIG_COLOR_LIST = [
     "ff0000",
     "ffc480",
