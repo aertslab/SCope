@@ -48,6 +48,9 @@ pyscenic = "^0.9.14"
 multiprocessing_on_dill = { version = "*", allow-prereleases = true }
 safety = "^1.8.5"
 requests = "^2.22.0"
+flask-restful = "^0.3.8"
+flask-sqlalchemy = "^2.4.1"
+flask-marshmallow = "^0.11.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
