@@ -1,5 +1,12 @@
 # Changelog
 
+April 8, 2020
+
+-   Version 1.8.3
+
+    -   Add ability to search for categories in loom annotations
+
+
 March 3, 2020
 
 -   Version 1.8.2
