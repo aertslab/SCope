@@ -23,7 +23,7 @@ import { withCookies, Cookies } from 'react-cookie';
 
 import { delimiter } from 'path';
 import { min } from 'moment';
-import { fileDownload } from 'js-file-download';
+import fileDownload from 'js-file-download';
 import { parse as json2csv } from 'json2csv';
 
 import { BackendAPI } from '../common/API';
