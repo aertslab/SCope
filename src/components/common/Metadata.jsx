@@ -9,7 +9,7 @@ import {
     Dropdown
 } from 'semantic-ui-react';
 import ReactGA from 'react-ga';
-import { fileDownload } from 'js-file-download';
+import fileDownload from 'js-file-download';
 import { parse as json2csv } from 'json2csv';
 
 import { BackendAPI } from '../common/API';
