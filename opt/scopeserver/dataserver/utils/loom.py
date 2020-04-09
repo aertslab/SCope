@@ -858,7 +858,9 @@ class Loom:
 
     def get_cluster_marker_genes(self, clustering_id: int, cluster_id: int):
         try:
-            return self.get_genes()[self.get_cluster_marker_genes_mask(clustering_id=clustering_id, cluster_id=cluster_id)]
+            return self.get_genes()[
+                self.get_cluster_marker_genes_mask(clustering_id=clustering_id, cluster_id=cluster_id)
+            ]
         except Exception as err:
             logger.error(err)
             return []

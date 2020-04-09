@@ -604,14 +604,7 @@ class SCope(s_pb2_grpc.MainServicer):
             nonan_marker_mask = cluster_marker_metrics.apply(
                 lambda x: functools.reduce(np.logical_and, ~np.isnan(x)), axis=1
             )
-            cluster_marker_metrics_final = cluster_marker_metrics[
-                np.logical_and(
-                    nonan_marker_mask,
-                    loom.get_cluster_marker_genes_mask(
-                        clustering_id=request.clusteringID, cluster_id=request.clusterID
-                    ),
-                )
-            ]
+            cluster_marker_metrics_final = cluster_marker_metrics[nonan_marker_mask]
 
         metrics = [protoize_cluster_marker_metric(x) for x in md_cmm]
         return s_pb2.MarkerGenesReply(genes=cluster_marker_metrics_final.index, metrics=metrics)
