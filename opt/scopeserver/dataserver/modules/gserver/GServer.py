@@ -589,7 +589,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     accessor=metric["accessor"],
                     name=metric["name"],
                     description=metric["description"],
-                    values=cluster_marker_metrics[metric["accessor"]],
+                    values=cluster_marker_metrics_final[metric["accessor"]],
                 )
 
             def merge_cluster_marker_metrics(metrics):
@@ -601,13 +601,13 @@ class SCope(s_pb2_grpc.MainServicer):
                 metrics=[create_cluster_marker_metric(x) for x in md_cmm]
             )
             # Keep only non-zeros elements
-            nonzero_mask = cluster_marker_metrics.apply(
-                lambda x: functools.reduce(np.logical_and, np.logical_and(~np.isnan(x), x != 0)), axis=1
+            nonan_marker_mask = cluster_marker_metrics.apply(
+                lambda x: functools.reduce(np.logical_and, ~np.isnan(x)), axis=1
             )
-            cluster_marker_metrics_nonzero = cluster_marker_metrics[nonzero_mask]
+            cluster_marker_metrics_final = cluster_marker_metrics[nonan_marker_mask]
 
         metrics = [protoize_cluster_marker_metric(x) for x in md_cmm]
-        return s_pb2.MarkerGenesReply(genes=cluster_marker_metrics_nonzero.index, metrics=metrics)
+        return s_pb2.MarkerGenesReply(genes=cluster_marker_metrics_final.index, metrics=metrics)
 
     def getMyGeneSets(self, request, context):
         userDir = dfh.DataFileHandler.get_data_dir_path_by_file_type("GeneSet", UUID=request.UUID)

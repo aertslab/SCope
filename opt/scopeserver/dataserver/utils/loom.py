@@ -853,10 +853,13 @@ class Loom:
     def has_cluster_markers(self, clustering_id: int):
         return "ClusterMarkers_{0}".format(clustering_id) in self.loom_connection.ra.keys()
 
+    def get_cluster_marker_genes_mask(self, clustering_id: int, cluster_id: int):
+        return self.loom_connection.ra["ClusterMarkers_{0}".format(clustering_id)][str(cluster_id)] == 1
+
     def get_cluster_marker_genes(self, clustering_id: int, cluster_id: int):
         try:
             return self.get_genes()[
-                self.loom_connection.ra["ClusterMarkers_{0}".format(clustering_id)][str(cluster_id)] == 1
+                self.get_cluster_marker_genes_mask(clustering_id=clustering_id, cluster_id=cluster_id)
             ]
         except Exception as err:
             logger.error(err)
