@@ -34,6 +34,8 @@ A **Windows** app is under development, but currently has no ETA.
 
 ### Command Line
 
+You will need access to at least Python 3.7 do run this.
+
 1. Clone the GitHub repository and install,
 
 ```bash
