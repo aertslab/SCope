@@ -12,21 +12,24 @@ import {
     Progress,
     Popup
 } from 'semantic-ui-react';
-import { BackendAPI } from '../common/API';
-import Metadata from '../common/Metadata';
+
 import ReactGA from 'react-ga';
 import Alert from 'react-popup';
 
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
-import FileDownloader from '../../js/http';
 import { instanceOf } from 'prop-types';
 import { withCookies, Cookies } from 'react-cookie';
 
-import CollaborativeAnnotation from './CollaborativeAnnotation';
-
 import { delimiter } from 'path';
 import { min } from 'moment';
+import fileDownload from 'js-file-download';
+import { parse as json2csv } from 'json2csv';
+
+import { BackendAPI } from '../common/API';
+import Metadata from '../common/Metadata';
+import FileDownloader from '../../js/http';
+import CollaborativeAnnotation from './CollaborativeAnnotation';
 
 class ViewerSidebar extends Component {
     static propTypes = {
@@ -910,10 +913,10 @@ class ViewerSidebar extends Component {
                             <Button
                                 primary
                                 onClick={() => {
-                                    const opts = { delimiter: '\t', quote: '' };
-                                    let fileDownload = require('react-file-download');
-                                    const json2csv = require('json2csv').parse;
-                                    const tsv = json2csv(markerTableData, opts);
+                                    const tsv = json2csv(markerTableData, {
+                                        delimiter: '\t',
+                                        quote: ''
+                                    });
                                     fileDownload(tsv, genesFileName());
                                 }}
                                 style={{ marginTop: '10px', width: '100%' }}>

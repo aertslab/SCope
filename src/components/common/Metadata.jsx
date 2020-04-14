@@ -8,8 +8,11 @@ import {
     Loader,
     Dropdown
 } from 'semantic-ui-react';
-import { BackendAPI } from '../common/API';
 import ReactGA from 'react-ga';
+import fileDownload from 'js-file-download';
+import { parse as json2csv } from 'json2csv';
+
+import { BackendAPI } from '../common/API';
 
 export default class Metadata extends Component {
     constructor(props) {
@@ -281,10 +284,8 @@ export default class Metadata extends Component {
                                 }
                                 data.push(cellData);
                             });
-                            let fileDownload = require('react-file-download');
-                            const json2csv = require('json2csv').parse;
-                            const csv = json2csv(data);
-                            fileDownload(csv, 'metadata.csv');
+
+                            fileDownload(json2csv(data), 'metadata.csv');
                             ReactGA.event({
                                 category: 'metadata',
                                 action: 'downloaded csv file',
