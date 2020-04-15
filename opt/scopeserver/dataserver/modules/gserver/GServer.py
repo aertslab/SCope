@@ -951,7 +951,10 @@ class SCope(s_pb2_grpc.MainServicer):
 
 def serve(run_event, config: Dict[str, Any]) -> None:
     SCope.app_mode = config["app_mode"]
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    server = grpc.server(
+        futures.ThreadPoolExecutor(max_workers=10),
+        options=[("grpc.max_send_message_length", -1), ("grpc.max_receive_message_length", -1)],
+    )
     scope = SCope(config=config)
     s_pb2_grpc.add_MainServicer_to_server(scope, server)
     server.add_insecure_port("[::]:{0}".format(config["gPort"]))
