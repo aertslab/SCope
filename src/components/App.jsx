@@ -48,7 +48,6 @@ class App extends Component {
         super();
         this.state = {
             metadata: null,
-            loading: true,
             loaded: false,
             error: false,
             isSidebarVisible: true,
@@ -87,13 +86,14 @@ class App extends Component {
 
     render() {
         const {
-            loading,
             metadata,
             error,
             loaded,
             isSidebarVisible,
             sessionsLimitReached
         } = this.state;
+
+        const { isLoading } = this.props;
 
         let errorDimmer = (
             <Dimmer active={error}>
@@ -137,7 +137,7 @@ class App extends Component {
         );
 
         let limitReachedDimmer = (
-            <Dimmer active={!loading && sessionsLimitReached}>
+            <Dimmer active={!isLoading && sessionsLimitReached}>
                 <br />
                 <br />
                 <Icon name='warning circle' color='orange' size='big' />
@@ -267,14 +267,14 @@ class App extends Component {
                                         />
                                     </Sidebar.Pusher>
                                 </Sidebar.Pushable>
-                                <Dimmer active={loading} inverted>
+                                <Dimmer active={isLoading} inverted>
                                     <Loader inverted>
                                         Your SCope session is starting
                                     </Loader>
                                 </Dimmer>
                                 <Dimmer
                                     active={
-                                        !loading &&
+                                        !isLoading &&
                                         this.timeout != null &&
                                         this.timeout <= 0
                                     }>
@@ -502,8 +502,8 @@ class App extends Component {
                         if (DEBUG)
                             console.log('getRemainingUUIDTime', response);
                         if (response.sessionsLimitReached) {
+                            this.props.setLoading(false);
                             this.setState({
-                                loading: false,
                                 sessionsLimitReached: true
                             });
                         } else {
@@ -512,8 +512,8 @@ class App extends Component {
                                 : 0;
                             // cookies.set(cookieName, uuid, { path: '/', maxAge: this.timeout });
                             if (!ping) {
+                                this.props.setLoading(false);
                                 this.setState({
-                                    loading: false,
                                     uuid: uuid,
                                     sessionMode: response.sessionMode
                                 });
