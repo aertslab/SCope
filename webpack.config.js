@@ -19,7 +19,7 @@ console.log(_config);
 let config = {
     mode: process.env.NODE_ENV,
     devtool: 'inline-source-map',
-    entry: './src/main.tsx',
+    entry: './src/main.jsx',
     devServer: {
         host: '0.0.0.0',
         port: _config.mPort,
