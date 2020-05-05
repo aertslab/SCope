@@ -48,7 +48,7 @@ export default class Viewer extends Component {
         this.w = parseInt(this.props.width);
         this.h = parseInt(this.props.height);
         // Increase the maxSize if displaying more than 1500 (default) objects
-        this.maxn = 200000;
+        this.maxn = 2000;
         this.texture = PIXI.Texture.fromImage('src/images/dot.png');
         this.settingsListener = (settings, customScale) => {
             if (this.props.settings) {
@@ -332,8 +332,8 @@ export default class Viewer extends Component {
         ticker.stop();
     }
 
-    addMainLayer() {
-        this.mainLayer = new PIXI.particles.ParticleContainer(this.maxn, [
+    addMainLayer(maxn = this.maxn, index = null) {
+        this.mainLayer = new PIXI.particles.ParticleContainer(maxn, [
             false,
             true,
             false,
@@ -345,13 +345,22 @@ export default class Viewer extends Component {
         this.bcr = document
             .getElementById('viewer' + this.props.name)
             .getBoundingClientRect();
-        this.stage.addChild(this.mainLayer);
+        if (index != null) {
+            this.stage.addChildAt(this.mainLayer, index);
+        } else {
+            this.stage.addChild(this.mainLayer);
+        }
+    }
+
+    updateMainLayerSize(maxn) {
+        let pcIndex = this.stage.getChildIndex(this.mainLayer);
+        this.mainLayer.destroy([true, true, true]);
+        this.addMainLayer(maxn, pcIndex);
     }
 
     destroyGraphics() {
         if (DEBUG) console.log('Destroying Viewer ', this.props.name);
-        this.mainLayer.removeChildren();
-        this.mainLayer.destroy();
+        this.mainLayer.destroy([true, true, true]);
         this.lassoLayer.removeChildren();
         this.lassoLayer.destroy();
         this.selectionsLayer.removeChildren();
@@ -914,6 +923,7 @@ export default class Viewer extends Component {
                             );
                             this.setState({ coord: { idx: [], x: [], y: [] } });
                         }
+
                         this.endBenchmark('getCoordinates');
                         this.initializeDataPoints(callback ? true : false);
                         this.drawTrajectory();
@@ -943,8 +953,10 @@ export default class Viewer extends Component {
         let c = this.state.coord;
         if (c.x.length !== c.y.length)
             throw 'Coordinates does not have the same size.';
-        let dP = [],
-            n = c.x.length;
+        let n = c.x.length;
+        if (n > this.maxn) {
+            this.updateMainLayerSize(n);
+        }
         for (let i = 0; i < n; ++i) {
             let point = this.getTexturedColorPoint(c.x[i], c.y[i], '000000');
             point._originalData.idx = c.idx[i];
