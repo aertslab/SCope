@@ -1,3 +1,4 @@
+import argparse
 import threading
 import time
 from urllib.request import urlopen
@@ -12,6 +13,7 @@ from scopeserver.dataserver.modules.gserver import GServer as gs
 from scopeserver.dataserver.modules.pserver import PServer as ps
 from scopeserver.bindserver import XServer as xs
 from scopeserver.dataserver.utils import sys_utils as su
+from scopeserver.scope.config import from_file
 
 LOG_FMT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(format=LOG_FMT, level=logging.INFO)
@@ -73,15 +75,15 @@ def log_ascii_header() -> None:
 
 
 def generate_config(args) -> Dict[str, Any]:
-    from scopeserver.scope.config import from_file
-
     config = from_file(args.config_file)
 
     if config.get("dataHashSecret") is None:
         new_secret = secrets.token_hex(32)
         config["dataHashSecret"] = new_secret
-        logger.warn(
-            f"The following secret key will be used to hash annotation data: {new_secret}\nLosing this key will mean all annotations will display as unvalidated."
+        logger.warning(
+            f"""This secret key will be used to hash annotation data: {new_secret}
+            Losing this key will mean all annotations will display as unvalidated.
+            """
         )
 
     if args.debug:
@@ -98,8 +100,6 @@ def run() -> None:
 
     # Unbuffer the standard output: important for process communication
     sys.stdout = su.Unbuffered(sys.stdout)  # type: ignore
-
-    import argparse
 
     parser = argparse.ArgumentParser(description="Launch the scope server")
     parser.add_argument("--g_port", metavar="gPort", type=int, help="gPort", default=55853)
