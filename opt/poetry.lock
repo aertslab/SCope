@@ -1,13 +1,5 @@
 [[package]]
 category = "main"
-description = "A library for parsing ISO 8601 strings."
-name = "aniso8601"
-optional = false
-python-versions = "*"
-version = "8.0.0"
-
-[[package]]
-category = "main"
 description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 name = "appdirs"
 optional = false
