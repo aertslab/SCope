@@ -180,7 +180,7 @@ class DataServer {
                     this.pPort,
                     '--x_port',
                     this.xPort,
-                    '--app_mode'
+                    '--app_mode',
                 ],
                 {}
             );
@@ -198,7 +198,7 @@ class DataServer {
                 output = cp.execSync(
                     'python -c "import sys; print(sys.version)"',
                     {
-                        encoding: 'utf-8'
+                        encoding: 'utf-8',
                     }
                 );
                 python = 'python';
@@ -220,7 +220,7 @@ class DataServer {
                     this.pPort,
                     '--x_port',
                     this.xPort,
-                    '--app_mode'
+                    '--app_mode',
                 ],
                 {}
             );
@@ -296,7 +296,7 @@ class BindServer {
         const exec = cp.exec;
         this.proc = cp.spawn('node', [
             path.join(BINDSERVER_FOLDER, BINDSERVER_MODULE),
-            this.port
+            this.port,
         ]);
 
         if (this.proc == null) {
@@ -332,7 +332,7 @@ class SCope {
             } else {
                 cp.execSync('cd resources/app && npm rebuild');
             }
-            fs.writeFile('INSTALLED', '', function(err) {
+            fs.writeFile('INSTALLED', '', function (err) {
                 console.log('Successfully installed!');
             });
             resolve(true);
@@ -367,21 +367,21 @@ class SCope {
         // Set the size of the window to the size of the available screen
         const {
             width,
-            height
+            height,
         } = electron.screen.getPrimaryDisplay().workAreaSize;
         this.view = new electron.BrowserWindow({
             width: width,
             height: height,
             icon: 'images/SCope_Icon.png',
             webPreferences: {
-                devTools: true
-            }
+                devTools: true,
+            },
         });
         this.view.loadURL(
             require('url').format({
                 pathname: path.join(__dirname, 'index.html'),
                 protocol: 'file:',
-                slashes: true
+                slashes: true,
             }) +
                 '?WSport=' +
                 this.model.xPort +
@@ -442,9 +442,9 @@ function setMainMenu() {
                         //   console.log(files[0])
                         //   electron.shell.openItem(files[0])
                         // }
-                    }
-                }
-            ]
+                    },
+                },
+            ],
         },
         {
             label: 'Edit',
@@ -457,8 +457,8 @@ function setMainMenu() {
                 { role: 'paste' },
                 { role: 'pasteandmatchstyle' },
                 { role: 'delete' },
-                { role: 'selectall' }
-            ]
+                { role: 'selectall' },
+            ],
         },
         {
             label: 'View',
@@ -471,12 +471,12 @@ function setMainMenu() {
                 { role: 'zoomin' },
                 { role: 'zoomout' },
                 { type: 'separator' },
-                { role: 'togglefullscreen' }
-            ]
+                { role: 'togglefullscreen' },
+            ],
         },
         {
             role: 'window',
-            submenu: [{ role: 'minimize' }, { role: 'close' }]
+            submenu: [{ role: 'minimize' }, { role: 'close' }],
         },
         {
             role: 'help',
@@ -487,10 +487,10 @@ function setMainMenu() {
                         require('electron').shell.openExternal(
                             'https://electronjs.org'
                         );
-                    }
-                }
-            ]
-        }
+                    },
+                },
+            ],
+        },
     ];
 
     if (process.platform === 'darwin') {
@@ -505,8 +505,8 @@ function setMainMenu() {
                 { role: 'hideothers' },
                 { role: 'unhide' },
                 { type: 'separator' },
-                { role: 'quit' }
-            ]
+                { role: 'quit' },
+            ],
         });
 
         // Window menu
@@ -515,7 +515,7 @@ function setMainMenu() {
             { role: 'minimize' },
             { role: 'zoom' },
             { type: 'separator' },
-            { role: 'front' }
+            { role: 'front' },
         ];
     }
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));

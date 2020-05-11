@@ -32,7 +32,7 @@ resultRenderer.propTypes = {
     label: PropTypes.string,
     ontology_name: PropTypes.string,
     ontology_prefix: PropTypes.string,
-    type: PropTypes.string
+    type: PropTypes.string,
 };
 
 const initialState = {
@@ -40,7 +40,7 @@ const initialState = {
     results: [],
     value: '',
     term_name: '',
-    term_id: ''
+    term_id: '',
 };
 
 export default class OLSAutocomplete extends Component {
@@ -50,7 +50,7 @@ export default class OLSAutocomplete extends Component {
         this.setState({
             value: result.label + ' (' + result.obo_id + ')',
             term_id: result.id,
-            result: result
+            result: result,
         });
     };
 
@@ -68,14 +68,14 @@ export default class OLSAutocomplete extends Component {
             .then((response) => {
                 response.json().then((data) => {
                     this.setState({
-                        results: data.response.docs
+                        results: data.response.docs,
                     });
                 });
             })
-            .catch(function(error) {
+            .catch(function (error) {
                 console.log(error);
             })
-            .finally(function() {});
+            .finally(function () {});
     };
 
     handleSearchChange = (e, { value }) => {
@@ -89,7 +89,7 @@ export default class OLSAutocomplete extends Component {
 
             this.setState({
                 isLoading: false,
-                results: _.filter(this.state.results, isMatch)
+                results: _.filter(this.state.results, isMatch),
             });
         }, 300);
     };
@@ -103,7 +103,7 @@ export default class OLSAutocomplete extends Component {
                     loading={isLoading}
                     onResultSelect={this.handleResultSelect}
                     onSearchChange={_.debounce(this.handleSearchChange, 500, {
-                        leading: true
+                        leading: true,
                     })}
                     results={results}
                     value={this.state.value}

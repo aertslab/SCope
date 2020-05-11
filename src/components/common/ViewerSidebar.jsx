@@ -10,7 +10,7 @@ import {
     Label,
     Button,
     Progress,
-    Popup
+    Popup,
 } from 'semantic-ui-react';
 
 import ReactGA from 'react-ga';
@@ -33,7 +33,7 @@ import CollaborativeAnnotation from './CollaborativeAnnotation';
 
 class ViewerSidebar extends Component {
     static propTypes = {
-        cookies: instanceOf(Cookies).isRequired
+        cookies: instanceOf(Cookies).isRequired,
     };
 
     constructor() {
@@ -49,7 +49,7 @@ class ViewerSidebar extends Component {
             activeTab: 0,
             processSubLoomPercentage: null,
             downloadSubLoomPercentage: null,
-            imageErrored: false
+            imageErrored: false,
         };
         this.selectionsListener = (selections) => {
             this.setState({ lassoSelections: selections, activeTab: 0 });
@@ -58,7 +58,7 @@ class ViewerSidebar extends Component {
             this.props.onActiveFeaturesChange(features, id);
             this.setState({
                 activeFeatures: features,
-                activeTab: parseInt(id) + 1
+                activeTab: parseInt(id) + 1,
             });
         };
         this.setNewAnnotationName.bind(this);
@@ -117,7 +117,7 @@ class ViewerSidebar extends Component {
             lassoSelections,
             activeFeatures,
             activeTab,
-            activePage
+            activePage,
         } = this.state;
 
         let lassoTab = () => {
@@ -154,8 +154,8 @@ class ViewerSidebar extends Component {
                                         style={{ width: 75, height: 15 }}
                                         label={{
                                             style: {
-                                                backgroundColor: '#' + lS.color
-                                            }
+                                                backgroundColor: '#' + lS.color,
+                                            },
                                         }}
                                         labelPosition='right'
                                         placeholder={'#' + lS.color}
@@ -171,7 +171,7 @@ class ViewerSidebar extends Component {
                                         }
                                         style={{
                                             display: 'inline',
-                                            opacity: lS.selected ? 1 : 0.5
+                                            opacity: lS.selected ? 1 : 0.5,
                                         }}
                                         className='pointer'
                                     />
@@ -196,7 +196,7 @@ class ViewerSidebar extends Component {
                                             ReactGA.event({
                                                 category: 'metadata',
                                                 action: 'modal opened',
-                                                value: i
+                                                value: i,
                                             });
                                         }}
                                         className='pointer'
@@ -281,7 +281,7 @@ class ViewerSidebar extends Component {
                                             BETA: Some SCope functionality may
                                             be imparied until the loom is
                                             reloaded
-                                        </b>
+                                        </b>,
                                     ]}
                                 </p>
                             ),
@@ -290,10 +290,10 @@ class ViewerSidebar extends Component {
                                     {
                                         text: 'Cancel',
                                         className: 'danger',
-                                        action: function() {
+                                        action: function () {
                                             Alert.close();
-                                        }
-                                    }
+                                        },
+                                    },
                                 ],
                                 right: [
                                     {
@@ -307,10 +307,10 @@ class ViewerSidebar extends Component {
                                                 this.props.match.params.uuid
                                             );
                                             Alert.close();
-                                        }
-                                    }
-                                ]
-                            }
+                                        },
+                                    },
+                                ],
+                            },
                         });
                     }
                     if (this.state.newAnnoName === '') {
@@ -330,7 +330,7 @@ class ViewerSidebar extends Component {
                                 ref={this.state.newAnnoRef}
                                 style={{
                                     'margin-bottom': '5px',
-                                    width: '100%'
+                                    width: '100%',
                                 }}
                                 placeholder={activeFeatures[i].feature}
                                 onChange={this.onNewAnnotationChange}
@@ -346,7 +346,7 @@ class ViewerSidebar extends Component {
                                         'PERMANENT CHANGE and forces refresh!',
                                     'data-variation': 'basic',
                                     'data-position': 'left center',
-                                    content: 'Update Description'
+                                    content: 'Update Description',
                                 }}
                                 value={this.state.newAnnoName}
                             />
@@ -408,7 +408,7 @@ class ViewerSidebar extends Component {
                 let newMarkerTableColumn = (header, id, accessor, cell) => {
                     let column = {
                         Header: header,
-                        id: id
+                        id: id,
                     };
                     if (accessor != null) {
                         column['accessor'] = (d) => d[accessor];
@@ -422,7 +422,7 @@ class ViewerSidebar extends Component {
                 let newCellTypeAnnoColumn = (header, id, accessor, cell) => {
                     let column = {
                         Header: header,
-                        id: id
+                        id: id,
                     };
 
                     if (accessor != null) {
@@ -579,7 +579,7 @@ class ViewerSidebar extends Component {
                                 {
                                     orcidName: this.state.orcid_name,
                                     orcidID: this.state.orcid_id,
-                                    orcidUUID: this.state.orcid_uuid
+                                    orcidUUID: this.state.orcid_uuid,
                                 },
                                 match.params.uuid,
                                 (response) => console.log(response)
@@ -686,7 +686,7 @@ class ViewerSidebar extends Component {
                                 'votes',
                                 'votes',
                                 newCellTypeAnnoTableVotesCell
-                            )
+                            ),
                         ];
 
                         let cellTypeAnnoTableData = md.cellTypeAnno.map(
@@ -696,13 +696,13 @@ class ViewerSidebar extends Component {
                                     orcid_info: {
                                         curator_name: a.data.curator_name,
                                         curator_id: a.data.curator_id,
-                                        validated: a.validate_hash
+                                        validated: a.validate_hash,
                                     },
                                     votes: {
                                         votes_for: a.votes_for,
                                         votes_against: a.votes_against,
-                                        data: a.data
-                                    }
+                                        data: a.data,
+                                    },
                                 };
                                 return cellTypeAnnoTableRowData;
                             }
@@ -717,15 +717,15 @@ class ViewerSidebar extends Component {
                             <div
                                 style={{
                                     marginBottom: '15px',
-                                    align: 'center'
+                                    align: 'center',
                                 }}>
                                 <ReactTable
                                     data={cellTypeAnnoTableData}
                                     columns={[
                                         {
                                             Header: cellTypeAnnoTableHeaderName,
-                                            columns: cellTypeAnnoColumns
-                                        }
+                                            columns: cellTypeAnnoColumns,
+                                        },
                                     ]}
                                     pageSizeOptions={[3]}
                                     defaultPageSize={3}
@@ -741,7 +741,7 @@ class ViewerSidebar extends Component {
                             <div
                                 style={{
                                     marginBottom: '5px',
-                                    align: 'center'
+                                    align: 'center',
                                 }}>
                                 No annotations currently exist.{' '}
                                 {BackendAPI.getLoomRWStatus() == 'rw'
@@ -760,7 +760,7 @@ class ViewerSidebar extends Component {
                                 onClick={() => {
                                     let query = {
                                         loomFilePath: BackendAPI.getActiveLoom(),
-                                        query: props.value
+                                        query: props.value,
                                     };
                                     if (activePage == 'regulon') {
                                         this.setState({ currentPage: 'gene' });
@@ -772,7 +772,7 @@ class ViewerSidebar extends Component {
                                                     match.params.loom
                                                         ? match.params.loom
                                                         : '*',
-                                                    'gene'
+                                                    'gene',
                                                 ].join('/')
                                         );
                                     }
@@ -790,7 +790,7 @@ class ViewerSidebar extends Component {
                                                         {
                                                             description:
                                                                 response
-                                                                    .featureDescription[0]
+                                                                    .featureDescription[0],
                                                         }
                                                     );
                                                 }
@@ -804,7 +804,7 @@ class ViewerSidebar extends Component {
                                         category: 'action',
                                         action: 'gene clicked',
                                         label: props.value,
-                                        value: i
+                                        value: i,
                                     });
                                 }}>
                                 {props.value}
@@ -820,7 +820,7 @@ class ViewerSidebar extends Component {
                             'gene',
                             'gene',
                             newMarkerTableGeneCell
-                        )
+                        ),
                     ];
 
                     if ('metrics' in md) {
@@ -833,7 +833,7 @@ class ViewerSidebar extends Component {
                                     metric.accessor,
                                     metric.accessor,
                                     null
-                                )
+                                ),
                             ];
                         }
                     }
@@ -900,13 +900,13 @@ class ViewerSidebar extends Component {
                                 columns={[
                                     {
                                         Header: markerTableHeaderName(),
-                                        columns: markerTableColumns
-                                    }
+                                        columns: markerTableColumns,
+                                    },
                                 ]}
                                 pageSizeOptions={[5, 10, 25, 50, 100]}
                                 defaultPageSize={25}
                                 style={{
-                                    height: markerTableHeight + 'px' // This will force the table body to overflow and scroll, since there is not enough room
+                                    height: markerTableHeight + 'px', // This will force the table body to overflow and scroll, since there is not enough room
                                 }}
                                 className='-striped -highlight'
                             />
@@ -915,7 +915,7 @@ class ViewerSidebar extends Component {
                                 onClick={() => {
                                     const tsv = json2csv(markerTableData, {
                                         delimiter: '\t',
-                                        quote: ''
+                                        quote: '',
                                     });
                                     fileDownload(tsv, genesFileName());
                                 }}
@@ -934,7 +934,7 @@ class ViewerSidebar extends Component {
                     let aL = this.props.activeLegend;
                     let legendTableData = aL.values.map((v, j) => ({
                         value: v,
-                        color: aL.colors[j]
+                        color: aL.colors[j],
                     }));
                     let newLegendTableColorCell = (props) => {
                         let colorLegendStyle = {
@@ -942,7 +942,7 @@ class ViewerSidebar extends Component {
                             height: '25px',
                             '-webkit-mask-box-image':
                                 "url('src/images/dot.png')",
-                            backgroundColor: '#' + props.value
+                            backgroundColor: '#' + props.value,
                         };
                         return <div style={colorLegendStyle}></div>;
                     };
@@ -953,7 +953,7 @@ class ViewerSidebar extends Component {
                             'color',
                             'color',
                             newLegendTableColorCell
-                        )
+                        ),
                     ];
                     legendTable = (
                         <div style={{ marginBottom: '15px' }}>
@@ -962,8 +962,8 @@ class ViewerSidebar extends Component {
                                 columns={[
                                     {
                                         Header: 'Legend',
-                                        columns: legendTableColumns
-                                    }
+                                        columns: legendTableColumns,
+                                    },
                                 ]}
                                 pageSizeOptions={[5, 10, 20]}
                                 defaultPageSize={10}
@@ -994,7 +994,7 @@ class ViewerSidebar extends Component {
                                             ),
                                             featureValue:
                                                 activeFeatures[i].feature,
-                                            operator: '=='
+                                            operator: '==',
                                         };
                                         BackendAPI.getConnection().then(
                                             (gbc) => {
@@ -1013,7 +1013,7 @@ class ViewerSidebar extends Component {
                                                     if (dsl == null) {
                                                         this.setState({
                                                             loomDownloading: null,
-                                                            downloadSubLoomPercentage: null
+                                                            downloadSubLoomPercentage: null,
                                                         });
                                                         return;
                                                     }
@@ -1022,7 +1022,7 @@ class ViewerSidebar extends Component {
                                                             processSubLoomPercentage: Math.round(
                                                                 dsl.progress
                                                                     .value * 100
-                                                            )
+                                                            ),
                                                         });
                                                     } else {
                                                         // Start downloading the subsetted loom file
@@ -1038,7 +1038,7 @@ class ViewerSidebar extends Component {
                                                                     processSubLoomPercentage: null,
                                                                     loomDownloading: encodeURIComponent(
                                                                         dsl.loomFilePath
-                                                                    )
+                                                                    ),
                                                                 });
                                                             }
                                                         );
@@ -1046,7 +1046,7 @@ class ViewerSidebar extends Component {
                                                             'progress',
                                                             (progress) => {
                                                                 this.setState({
-                                                                    downloadSubLoomPercentage: progress
+                                                                    downloadSubLoomPercentage: progress,
                                                                 });
                                                             }
                                                         );
@@ -1055,7 +1055,7 @@ class ViewerSidebar extends Component {
                                                             (finished) => {
                                                                 this.setState({
                                                                     loomDownloading: null,
-                                                                    downloadSubLoomPercentage: null
+                                                                    downloadSubLoomPercentage: null,
                                                                 });
                                                             }
                                                         );
@@ -1074,7 +1074,7 @@ class ViewerSidebar extends Component {
                                                 this.setState({
                                                     loomDownloading: null,
                                                     downloadSubLoomPercentage: null,
-                                                    processSubLoomPercentage: null
+                                                    processSubLoomPercentage: null,
                                                 });
                                                 BackendAPI.showError();
                                             }
@@ -1082,7 +1082,7 @@ class ViewerSidebar extends Component {
                                     }}
                                     style={{
                                         marginTop: '10px',
-                                        width: '100%'
+                                        width: '100%',
                                     }}>
                                     {'Download ' +
                                         activeFeatures[i].feature +
@@ -1170,7 +1170,7 @@ class ViewerSidebar extends Component {
                         activeFeatures[i] && activeFeatures[i].feature
                             ? 'F' + (i + 1) + ': ' + activeFeatures[i].feature
                             : 'F' + (i + 1),
-                    render: () => featureTab(i)
+                    render: () => featureTab(i),
                 });
             });
         }
@@ -1198,7 +1198,7 @@ class ViewerSidebar extends Component {
                         ReactGA.event({
                             category: 'metadata',
                             action: 'modal closed',
-                            value: this.state.modalID
+                            value: this.state.modalID,
                         });
                         this.setState({ modalID: null });
                         this.forceUpdate();
@@ -1217,7 +1217,7 @@ class ViewerSidebar extends Component {
         this.setState({
             orcid_name: orcid_name,
             orcid_id: orcid_id,
-            orcid_uuid: orcid_uuid
+            orcid_uuid: orcid_uuid,
         });
         this.timer = null;
         BackendAPI.onViewerSelectionsChange(this.selectionsListener);
@@ -1247,7 +1247,7 @@ class ViewerSidebar extends Component {
             category: 'viewer',
             action: 'selection toggled',
             label: selected ? 'on' : 'off',
-            value: id
+            value: id,
         });
     }
 
@@ -1256,7 +1256,7 @@ class ViewerSidebar extends Component {
         ReactGA.event({
             category: 'viewer',
             action: 'selection removed',
-            value: id
+            value: id,
         });
     }
 }

@@ -5,7 +5,7 @@ import {
     Dropdown,
     Select,
     Icon,
-    Segment
+    Segment,
 } from 'semantic-ui-react';
 import { BackendAPI } from './API';
 import ReactGA from 'react-ga';
@@ -21,7 +21,7 @@ export default class CollabAnnoGeneSearch extends React.Component {
             type: 'gene',
             searchQuery: '',
             options: [],
-            value: []
+            value: [],
         };
         this.call = null;
     }
@@ -68,7 +68,7 @@ export default class CollabAnnoGeneSearch extends React.Component {
             options: value.map((v) => {
                 return { key: v, text: v, value: v };
             }),
-            searchQuery: ''
+            searchQuery: '',
         });
     }
 
@@ -86,7 +86,7 @@ export default class CollabAnnoGeneSearch extends React.Component {
 
         let query = {
             loomFilePath: BackendAPI.getActiveLoom(),
-            query: e.target.value
+            query: e.target.value,
         };
         if (DEBUG) console.log('getFeatures', query);
         BackendAPI.getConnection().then(
@@ -110,7 +110,7 @@ export default class CollabAnnoGeneSearch extends React.Component {
                                         text: feature,
                                         description: featureDescription,
                                         key: feature,
-                                        value: feature
+                                        value: feature,
                                     };
                                 });
                             console.log(this.state);
@@ -118,13 +118,13 @@ export default class CollabAnnoGeneSearch extends React.Component {
                             this.setState({
                                 isLoading: false,
                                 results: this.state.results.concat(genes),
-                                options: this.state.options.concat(genes)
+                                options: this.state.options.concat(genes),
                                 // results: _.filter(this.state.results, (opt) => {_.includes(this.state.value, opt.value)})
                             });
                         } else {
                             this.setState({
                                 isLoading: false,
-                                results: []
+                                results: [],
                             });
                         }
                     }

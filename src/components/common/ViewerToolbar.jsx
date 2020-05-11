@@ -19,7 +19,7 @@ export default class ViewerToolbar extends Component {
             activePage: BackendAPI.getActivePage(),
             featuresScale: BackendAPI.getFeatureScale(),
             customScale: BackendAPI.getCustomScale(),
-            colors: BackendAPI.getColors()
+            colors: BackendAPI.getColors(),
         };
         this.activeFeaturesListener = (
             features,
@@ -30,7 +30,7 @@ export default class ViewerToolbar extends Component {
             this.setState({
                 activeFeatures: features,
                 featuresScale: featuresScale,
-                customScale: customScale
+                customScale: customScale,
             });
         };
         this.featuresScaleListener = (featuresScale) => {
@@ -39,7 +39,7 @@ export default class ViewerToolbar extends Component {
         this.settingsListener = (settings, customScale, featuresScale) => {
             this.setState({
                 featuresScale: featuresScale,
-                customScale: customScale
+                customScale: customScale,
             });
         };
     }
@@ -50,7 +50,7 @@ export default class ViewerToolbar extends Component {
             activeFeatures,
             colors,
             featuresScale,
-            customScale
+            customScale,
         } = this.state;
 
         let levels = false;
@@ -69,13 +69,13 @@ export default class ViewerToolbar extends Component {
                         style={{
                             minHeight: '400px',
                             margin: '5px',
-                            float: 'left'
+                            float: 'left',
                         }}
                         trackStyle={{
                             background:
                                 'linear-gradient(to top, black, ' +
                                 colors[i] +
-                                ')'
+                                ')',
                         }}
                         handleStyle={[{ border: '2px solid ' + colors[i] }]}
                         max={featuresScale[i]}
@@ -122,7 +122,7 @@ export default class ViewerToolbar extends Component {
                                     height: 20,
                                     backgroundImage:
                                         'url("src/images/lasso.svg")',
-                                    backgroundSize: 'cover'
+                                    backgroundSize: 'cover',
                                 }}></div>
                         </Menu.Item>
                         <Menu.Item
@@ -137,7 +137,7 @@ export default class ViewerToolbar extends Component {
                                     height: 20,
                                     backgroundImage:
                                         'url("src/images/expad-arrows.svg")',
-                                    backgroundSize: 'cover'
+                                    backgroundSize: 'cover',
                                 }}></div>
                         </Menu.Item>
                     </Menu>
@@ -174,7 +174,7 @@ export default class ViewerToolbar extends Component {
         ReactGA.event({
             category: 'viewer',
             action: 'selected tool',
-            label: tool.name
+            label: tool.name,
         });
     }
 
@@ -187,7 +187,7 @@ export default class ViewerToolbar extends Component {
         ReactGA.event({
             category: 'viewer',
             action: 'expression level changed',
-            value: slider
+            value: slider,
         });
     }
 }

@@ -16,7 +16,7 @@ export default class Regulon extends Component {
             activeCoordinates: BackendAPI.getActiveCoordinates(),
             activeFeatures: BackendAPI.getActiveFeatures(),
             sidebar: BackendAPI.getSidebarVisible(),
-            colors: BackendAPI.getColors()
+            colors: BackendAPI.getColors(),
         };
         this.activeLoomListener = (loom, metadata, coordinates) => {
             this.setState({ activeLoom: loom, activeCoordinates: coordinates });
@@ -37,7 +37,7 @@ export default class Regulon extends Component {
             activeFeatures,
             colors,
             geneFeatures,
-            sidebar
+            sidebar,
         } = this.state;
         let featureSearch = _.times(3, (i) => (
             <Grid.Column key={i}>

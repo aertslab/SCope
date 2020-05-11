@@ -12,7 +12,7 @@ const targetBehaviour = {
             props.position
         );
         return { dropped: dropped };
-    }
+    },
 };
 
 class ViewerDropContainer extends Component {
@@ -135,6 +135,6 @@ export default DropTarget(
     (connect, monitor) => ({
         connectDropTarget: connect.dropTarget(),
         isOver: monitor.isOver(),
-        canDrop: monitor.canDrop()
+        canDrop: monitor.canDrop(),
     })
 )(ViewerDropContainer);

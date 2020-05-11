@@ -15,7 +15,7 @@ export default class Expression extends Component {
             activeMetadata: BackendAPI.getActiveLoomMetadata(),
             activeFeatures: BackendAPI.getActiveFeatures(),
             sidebar: BackendAPI.getSidebarVisible(),
-            colors: BackendAPI.getColors()
+            colors: BackendAPI.getColors(),
         };
         this.activeLoomListener = (loom, metadata, coordinates) => {
             if (DEBUG)
@@ -23,7 +23,7 @@ export default class Expression extends Component {
             this.setState({
                 activeLoom: loom,
                 activeCoordinates: coordinates,
-                activeMetadata: metadata
+                activeMetadata: metadata,
             });
         };
         this.sidebarVisibleListener = (state) => {
@@ -40,7 +40,7 @@ export default class Expression extends Component {
             activeCoordinates,
             sidebar,
             activeMetadata,
-            colors
+            colors,
         } = this.state;
         let featureSearch = () =>
             _.times(3, (i) => (
