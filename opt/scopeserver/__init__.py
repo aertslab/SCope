@@ -87,10 +87,7 @@ def message_of_the_day(motd: IO) -> None:
 
 def generate_config(args: argparse.Namespace) -> Dict[str, Any]:
     """ Combine parsed command line arguments with configuration from a config file. """
-    argscfg = {"gPort": args.g_port,
-               "pPort": args.p_port,
-               "xPort": args.x_port,
-               "app_mode": args.app_mode}
+    argscfg = {"gPort": args.g_port, "pPort": args.p_port, "xPort": args.x_port, "app_mode": args.app_mode}
     return {**configuration.from_file(args.config_file), **argscfg}
 
 
@@ -117,7 +114,6 @@ def run() -> None:
         Losing this key will mean all annotations will display as unvalidated.
         """
     )
-
 
     # Start an instance of SCope Server
     scope_server = SCopeServer(config)

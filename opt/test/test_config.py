@@ -37,6 +37,7 @@ def test_load_from_file():
     # Check new values
     assert cfg["extra setting"] == "value"
 
+
 def test_blank_dataHashSecret():
     cfg = config.from_string('{"dataHashSecret": "    "}')
 

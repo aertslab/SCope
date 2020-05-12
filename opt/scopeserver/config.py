@@ -9,19 +9,18 @@ import secrets
 
 Config = Dict[str, Union[str, int, bool, Path]]
 
+
 def default_validator():
     """ The default validator does not check its argument, assumes it is valid. """
     return lambda arg: True
 
+
 def validate(config: Config) -> Config:
     """ Check a config has valid keys and values. """
 
-    validators = defaultdict(default_validator,
-                             [("dataHashSecret", lambda secret: not secret.isspace())])
+    validators = defaultdict(default_validator, [("dataHashSecret", lambda secret: not secret.isspace())])
 
-    return {key: value
-            for key, value in config.items()
-            if validators[key](value)}
+    return {key: value for key, value in config.items() if validators[key](value)}
 
 
 def defaults() -> Config:
@@ -33,13 +32,14 @@ def defaults() -> Config:
         "xPort": 55852,
         "gPort": 55853,
         "dataHashSecret": secrets.token_hex(32),
-        "data": Path("data")
+        "data": Path("data"),
     }
 
 
 def from_string(config: str) -> Config:
     """ Read configuration from a string. """
     return {**defaults(), **validate(json.loads(config))}
+
 
 def from_file(config_filename: Optional[Union[Path, str]]) -> Config:
     """
