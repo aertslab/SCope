@@ -13,7 +13,7 @@ from scopeserver.dataserver.modules.gserver import GServer as gs
 from scopeserver.dataserver.modules.pserver import PServer as ps
 from scopeserver.bindserver import XServer as xs
 from scopeserver.dataserver.utils import sys_utils as su
-from scopeserver.scope.config import from_file
+import scopeserver.config as configuration
 
 LOG_FMT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(format=LOG_FMT, level=logging.INFO)
@@ -74,24 +74,13 @@ def log_ascii_header() -> None:
         logger.info(motd.read())
 
 
-def generate_config(args) -> Dict[str, Any]:
-    config = from_file(args.config_file)
-
-    if config.get("dataHashSecret") is None:
-        new_secret = secrets.token_hex(32)
-        config["dataHashSecret"] = new_secret
-        logger.warning(
-            f"""This secret key will be used to hash annotation data: {new_secret}
-            Losing this key will mean all annotations will display as unvalidated.
-            """
-        )
-
-    if args.debug:
-        logger.setLevel(logging.DEBUG)
-
-    config = {**config, **{"gPort": args.g_port, "pPort": args.p_port, "xPort": args.x_port, "app_mode": args.app_mode}}
-
-    return config
+def generate_config(args: argparse.Namespace) -> Dict[str, Any]:
+    """ Combine parsed command line arguments with configuration from a config file. """
+    argscfg = {"gPort": args.g_port,
+               "pPort": args.p_port,
+               "xPort": args.x_port,
+               "app_mode": args.app_mode}
+    return {**configuration.from_file(args.config_file), **argscfg}
 
 
 def run() -> None:
@@ -111,6 +100,16 @@ def run() -> None:
     args = parser.parse_args()
 
     config = generate_config(args)
+
+    logger.info(
+        f"""This secret key will be used to hash annotation data: {config['dataHashSecret']}
+        Losing this key will mean all annotations will display as unvalidated.
+        """
+    )
+
+    if config["debug"]:
+        logger.setLevel(logging.DEBUG)
+
 
     # Start an instance of SCope Server
     scope_server = SCopeServer(config)

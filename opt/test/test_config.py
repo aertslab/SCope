@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from json.decoder import JSONDecodeError
 
-import scopeserver.scope.config as config
+import scopeserver.config as config
 
 
 def test_defaults():
@@ -27,6 +27,11 @@ def test_load_from_file():
 
     # Check new values
     assert cfg["extra setting"] == "value"
+
+def test_blank_dataHashSecret():
+    cfg = config.from_string('{"dataHashSecret": "    "}')
+
+    assert len(cfg["dataHashSecret"].strip()) > 0
 
 
 def test_load_from_nonexistant_file():
