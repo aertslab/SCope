@@ -1,8 +1,11 @@
-from pathlib import Path
+"""
+Tests for the scopeserver.config module
+"""
 
-import pytest
 from json.decoder import JSONDecodeError
 from pathlib import Path, PureWindowsPath
+
+import pytest
 
 import scopeserver.config as config
 
