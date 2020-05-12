@@ -3,6 +3,7 @@ on:
   pull_request:
     paths-ignore:
     - 'opt/**'
+    - 'docs/**'
 
 jobs:
   client-quality-checks:
