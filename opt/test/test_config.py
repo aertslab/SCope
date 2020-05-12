@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 from json.decoder import JSONDecodeError
+from pathlib import Path
 
 import scopeserver.config as config
 
@@ -14,6 +15,8 @@ def test_defaults():
     assert cfg["pPort"] == 55851
     assert cfg["xPort"] == 55852
     assert cfg["gPort"] == 55853
+    assert len(cfg["dataHashSecret"]) == 64 and not cfg["dataHashSecret"].isspace()
+    assert cfg["data"] == Path("data")
 
 
 def test_load_from_file():
@@ -21,9 +24,12 @@ def test_load_from_file():
 
     # Check unchanged defaults are the same
     assert cfg["app_mode"]
+    assert not cfg["debug"]
     assert cfg["pPort"] == 55851
     assert cfg["xPort"] == 55852
     assert cfg["gPort"] == 55853
+    assert len(cfg["dataHashSecret"]) == 64 and not cfg["dataHashSecret"].isspace()
+    assert cfg["data"] == Path("data")
 
     # Check new values
     assert cfg["extra setting"] == "value"
@@ -31,7 +37,7 @@ def test_load_from_file():
 def test_blank_dataHashSecret():
     cfg = config.from_string('{"dataHashSecret": "    "}')
 
-    assert len(cfg["dataHashSecret"].strip()) > 0
+    assert len(cfg["dataHashSecret"]) == 64 and not cfg["dataHashSecret"].isspace()
 
 
 def test_load_from_nonexistant_file():

@@ -5,9 +5,8 @@ from urllib.request import urlopen
 import http
 import sys
 import logging
-import secrets
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, IO
 
 from scopeserver.dataserver.modules.gserver import GServer as gs
 from scopeserver.dataserver.modules.pserver import PServer as ps
@@ -25,6 +24,9 @@ class SCopeServer:
         self.run_event = threading.Event()
         self.run_event.set()
         self.config = config
+
+        if self.config["debug"]:
+            LOGGER.setLevel(logging.DEBUG)
 
     def start_bind_server(self) -> None:
         LOGGER.debug(f"Starting bind server on port {self.config['xPort']}")
@@ -69,9 +71,9 @@ class SCopeServer:
         self.wait()
 
 
-def log_ascii_header() -> None:
-    with open(Path("data") / Path("motd.txt")) as motd:
-        LOGGER.info(motd.read())
+def message_of_the_day(motd: IO) -> None:
+    """ Log a server message. """
+    LOGGER.info(motd.read())
 
 
 def generate_config(args: argparse.Namespace) -> Dict[str, Any]:
@@ -84,11 +86,7 @@ def generate_config(args: argparse.Namespace) -> Dict[str, Any]:
 
 
 def run() -> None:
-    log_ascii_header()
-    LOGGER.info("Running SCope Server in production mode...")
-
-    # Unbuffer the standard output: important for process communication
-    sys.stdout = su.Unbuffered(sys.stdout)  # type: ignore
+    """ Top-level entry point. """
 
     parser = argparse.ArgumentParser(description="Launch the scope server")
     parser.add_argument("--g_port", metavar="gPort", type=int, help="gPort", default=55853)
@@ -101,14 +99,16 @@ def run() -> None:
 
     config = generate_config(args)
 
+    
+    with open(Path(config["data"]) / Path("motd.txt")) as motd:
+        message_of_the_day(motd)
+    LOGGER.info(f"Running SCope in {'debug' if config['debug'] else 'production'} mode...")
+
     LOGGER.info(
         f"""This secret key will be used to hash annotation data: {config['dataHashSecret']}
         Losing this key will mean all annotations will display as unvalidated.
         """
     )
-
-    if config["debug"]:
-        LOGGER.setLevel(logging.DEBUG)
 
 
     # Start an instance of SCope Server
@@ -117,4 +117,7 @@ def run() -> None:
 
 
 if __name__ == "__main__":
+    print(Path(__file__).parent)
+    sys.exit(0)
+    
     run()

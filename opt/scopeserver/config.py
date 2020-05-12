@@ -7,7 +7,7 @@ from collections import defaultdict
 import json
 import secrets
 
-Config = Dict[str, Union[str, int, bool]]
+Config = Dict[str, Union[str, int, bool, Path]]
 
 def default_validator():
     """ The default validator does not check its argument, assumes it is valid. """
@@ -33,6 +33,7 @@ def defaults() -> Config:
         "xPort": 55852,
         "gPort": 55853,
         "dataHashSecret": secrets.token_hex(32),
+        "data": Path("data")
     }
 
 
