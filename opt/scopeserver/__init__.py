@@ -1,3 +1,7 @@
+"""
+Main definition and entrypoint for the legacy SCope server
+"""
+
 import argparse
 import threading
 import time
@@ -20,10 +24,15 @@ LOGGER = logging.getLogger(__name__)
 
 
 class SCopeServer:
+    """ Legacy SCope server. """
+
     def __init__(self, config):
         self.run_event = threading.Event()
         self.run_event.set()
         self.config = config
+        self.xs_thread = None
+        self.gs_thread = None
+        self.ps_thread = None
 
         if self.config["debug"]:
             LOGGER.setLevel(logging.DEBUG)
@@ -99,7 +108,6 @@ def run() -> None:
 
     config = generate_config(args)
 
-    
     with open(Path(config["data"]) / Path("motd.txt")) as motd:
         message_of_the_day(motd)
     LOGGER.info(f"Running SCope in {'debug' if config['debug'] else 'production'} mode...")
@@ -117,7 +125,4 @@ def run() -> None:
 
 
 if __name__ == "__main__":
-    print(Path(__file__).parent)
-    sys.exit(0)
-    
     run()
