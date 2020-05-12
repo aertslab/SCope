@@ -17,7 +17,7 @@ import scopeserver.config as configuration
 
 LOG_FMT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(format=LOG_FMT, level=logging.INFO)
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class SCopeServer:
@@ -27,14 +27,14 @@ class SCopeServer:
         self.config = config
 
     def start_bind_server(self) -> None:
-        logger.debug(f"Starting bind server on port {self.config['xPort']}")
+        LOGGER.debug(f"Starting bind server on port {self.config['xPort']}")
         self.xs_thread = threading.Thread(target=xs.run, args=(self.run_event,), kwargs={"port": self.config["xPort"]})
         self.xs_thread.start()
 
     def start_data_server(self) -> None:
-        logger.debug(f"Starting data server on port {self.config['gPort']}. app_mode: {self.config['app_mode']}")
+        LOGGER.debug(f"Starting data server on port {self.config['gPort']}. app_mode: {self.config['app_mode']}")
         self.gs_thread = threading.Thread(target=gs.serve, args=(self.run_event, self.config,))
-        logger.debug(f"Starting upload server on port {self.config['pPort']}")
+        LOGGER.debug(f"Starting upload server on port {self.config['pPort']}")
         self.ps_thread = threading.Thread(target=ps.run, args=(self.run_event,), kwargs={"port": self.config["pPort"]})
         self.gs_thread.start()
         self.ps_thread.start()
@@ -49,7 +49,7 @@ class SCopeServer:
             while True:
                 time.sleep(0.1)
         except KeyboardInterrupt:
-            logger.info("Terminating servers...")
+            LOGGER.info("Terminating servers...")
             self.run_event.clear()
             self.gs_thread.join()
             try:
@@ -60,7 +60,7 @@ class SCopeServer:
 
             if not self.config["app_mode"]:
                 self.xs_thread.join()
-            logger.info("Servers successfully terminated. Exiting.")
+            LOGGER.info("Servers successfully terminated. Exiting.")
 
     def run(self) -> None:
         # Unbuffer the standard output: important for process communication
@@ -71,7 +71,7 @@ class SCopeServer:
 
 def log_ascii_header() -> None:
     with open(Path("data") / Path("motd.txt")) as motd:
-        logger.info(motd.read())
+        LOGGER.info(motd.read())
 
 
 def generate_config(args: argparse.Namespace) -> Dict[str, Any]:
@@ -85,7 +85,7 @@ def generate_config(args: argparse.Namespace) -> Dict[str, Any]:
 
 def run() -> None:
     log_ascii_header()
-    logger.info("Running SCope Server in production mode...")
+    LOGGER.info("Running SCope Server in production mode...")
 
     # Unbuffer the standard output: important for process communication
     sys.stdout = su.Unbuffered(sys.stdout)  # type: ignore
@@ -101,14 +101,14 @@ def run() -> None:
 
     config = generate_config(args)
 
-    logger.info(
+    LOGGER.info(
         f"""This secret key will be used to hash annotation data: {config['dataHashSecret']}
         Losing this key will mean all annotations will display as unvalidated.
         """
     )
 
     if config["debug"]:
-        logger.setLevel(logging.DEBUG)
+        LOGGER.setLevel(logging.DEBUG)
 
 
     # Start an instance of SCope Server
