@@ -16,7 +16,7 @@ def default_validator():
 
 
 def validate(config: Config) -> Config:
-    """ Check a config has valid keys and values. """
+    """ Check a config has valid keys and values and strips invalid values. """
 
     validators = defaultdict(default_validator, [("dataHashSecret", lambda secret: not secret.isspace())])
 
