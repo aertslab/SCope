@@ -19,5 +19,16 @@ def echo(value):
     return {"echo": value}
 
 
-log_ascii_header()
-SCopeServer(CONFIG).start_scope_server()
+scope_legacy = SCopeServer(CONFIG)
+
+@scope_api.on_event("startup")
+def startup():
+    """ Start the legacy server. """
+    log_ascii_header()
+    scope_legacy.start_scope_server()
+
+@scope_api.on_event("shutdown")
+def shutdown():
+    """ Stop the legacy server. """
+    scope_legacy.stop_servers()
+
