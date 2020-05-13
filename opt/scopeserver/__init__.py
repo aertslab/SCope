@@ -10,7 +10,7 @@ import http
 import sys
 import logging
 from pathlib import Path
-from typing import Dict, Any, IO
+from typing import Dict, Any, Union
 
 from scopeserver.dataserver.modules.gserver import GServer as gs
 from scopeserver.dataserver.modules.pserver import PServer as ps
@@ -80,9 +80,14 @@ class SCopeServer:
         self.wait()
 
 
-def message_of_the_day(motd: IO) -> None:
+def message_of_the_day(data_path: Union[str, Path]) -> None:
     """ Log a server startup message. """
-    LOGGER.info(motd.read())
+    motd_path = data_path / Path("motd.txt")
+    if motd_path.is_file():
+        with open(motd_path) as motd:
+            LOGGER.info(motd.read())
+    else:
+        LOGGER.info("Welcome to SCope.")
 
 
 def generate_config(args: argparse.Namespace) -> configuration.Config:
@@ -105,8 +110,7 @@ def run() -> None:
 
     config = generate_config(args)
 
-    with open(str(config["data"]) / Path("motd.txt")) as motd:
-        message_of_the_day(motd)
+    message_of_the_day(str(config["data"]))
     LOGGER.info(f"Running SCope in {'debug' if config['debug'] else 'production'} mode...")
 
     LOGGER.info(
