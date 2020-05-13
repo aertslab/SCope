@@ -81,11 +81,11 @@ class SCopeServer:
 
 
 def message_of_the_day(motd: IO) -> None:
-    """ Log a server message. """
+    """ Log a server startup message. """
     LOGGER.info(motd.read())
 
 
-def generate_config(args: argparse.Namespace) -> Dict[str, Any]:
+def generate_config(args: argparse.Namespace) -> configuration.Config:
     """ Combine parsed command line arguments with configuration from a config file. """
     argscfg = {"gPort": args.g_port, "pPort": args.p_port, "xPort": args.x_port, "app_mode": args.app_mode}
     return {**configuration.from_file(args.config_file), **argscfg}
@@ -105,7 +105,7 @@ def run() -> None:
 
     config = generate_config(args)
 
-    with open(Path(config["data"]) / Path("motd.txt")) as motd:
+    with open(str(config["data"]) / Path("motd.txt")) as motd:
         message_of_the_day(motd)
     LOGGER.info(f"Running SCope in {'debug' if config['debug'] else 'production'} mode...")
 
