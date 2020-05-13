@@ -109,3 +109,9 @@ scope-server
 cd ..
 npm run dev
 ```
+
+### Configuration file (`config.json`)
+
+Keys:
+* `data`: This is a directory containing data files (e.g. the `motd.txt` message of the day).
+  Can be an absolute path or a relative path from where you start SCope.
