@@ -1,5 +1,6 @@
 import { instanceOf } from 'prop-types';
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { withRouter, Route, Link } from 'react-router-dom';
 import { withCookies, Cookies } from 'react-cookie';
 import CookieConsent from 'react-cookie-consent';
@@ -32,6 +33,8 @@ import Tutorial from './pages/Tutorial';
 import About from './pages/About';
 import Alert from 'react-popup';
 import 'react-popup/style.css';
+
+import { setLoading as reduxAction_setLoading } from '../redux/actions';
 
 const pako = require('pako');
 const publicIp = require('public-ip');
@@ -641,4 +644,17 @@ class App extends Component {
     }
 }
 
-export default withRouter(withCookies(App));
+let app = withRouter(withCookies(App));
+
+const mapStateToProps = (state) => {
+    const { isLoading } = state.main;
+    return { isLoading };
+};
+
+const mapDispatchToProps = (dispatch) => {
+    const setLoading = (isLoading) =>
+        dispatch(reduxAction_setLoading(isLoading));
+    return { setLoading };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(app);

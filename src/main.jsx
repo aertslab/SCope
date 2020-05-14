@@ -8,48 +8,21 @@ import './css/viewer.css';
 import './css/features.css';
 import { HashRouter, Route } from 'react-router-dom';
 import { CookiesProvider } from 'react-cookie';
-import { configureStore } from '@reduxjs/toolkit';
-import { connect, Provider } from 'react-redux';
+import { Provider } from 'react-redux';
 
-import dummyReducer, { setLoading } from './stores/dummy/Reducer';
-
-const store = configureStore({
-    reducer: {
-        dummyReducer: dummyReducer
-    }
-});
-
-const mapState = (state) => {
-    const { isLoading } = state.dummyReducer;
-    return {
-        isLoading
-    };
-};
-
-const actionCreators = {
-    setLoading
-};
-
-const ConnectedApp = connect(
-    mapState,
-    actionCreators
-)(function(props) {
-    return (
-        <CookiesProvider>
-            <HashRouter>
-                <Route
-                    path='/:uuid?/:loom?/:page?'
-                    component={() => <App {...props} />}
-                />
-            </HashRouter>
-        </CookiesProvider>
-    );
-});
+import store from './redux/store';
 
 const renderApp = () => {
     render(
         <Provider store={store}>
-            <ConnectedApp />
+            <CookiesProvider>
+                <HashRouter>
+                    <Route
+                        path='/:uuid?/:loom?/:page?'
+                        component={() => <App />}
+                    />
+                </HashRouter>
+            </CookiesProvider>
         </Provider>,
         document.getElementById('scope')
     );
