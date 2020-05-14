@@ -57,7 +57,7 @@ class SCopeServer:
 
     def stop_servers(self) -> None:
         """ Stop all running threads. """
-        logger.info("Terminating servers...")
+        LOGGER.info("Terminating servers...")
         self.run_event.clear()
         self.gs_thread.join()
         try:
@@ -68,7 +68,7 @@ class SCopeServer:
 
         if not self.config["app_mode"]:
             self.xs_thread.join()
-        logger.info("Servers successfully terminated. Exiting.")
+        LOGGER.info("Servers successfully terminated. Exiting.")
 
     def wait(self) -> None:
         try:

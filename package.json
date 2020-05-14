@@ -86,7 +86,7 @@
         "react-table": "^6.8.6",
         "react-toggle-display": "^2.2.0",
         "scriptjs": "^2.5.8",
-        "semantic-ui-css": "^2.2.12",
+        "semantic-ui-css": "^2.4.1",
         "shelljs": "^0.8.4",
         "url-loader": "^0.6.2"
     },
