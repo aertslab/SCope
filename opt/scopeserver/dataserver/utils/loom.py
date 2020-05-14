@@ -647,7 +647,7 @@ class Loom:
         # Possibly faster fix totals = ds.map([np.sum], axis=1)[0]
 
         calc_nUMI_start_time = time.time()
-        self.nUMI = self.loom_connection[:, :].sum(axis=0)
+        self.nUMI = self.loom_connection.map([np.sum], axis=1)[0]
         logger.debug("{0:.5f} seconds elapsed (calculating nUMI) ---".format(time.time() - calc_nUMI_start_time))
         return self.nUMI
 
