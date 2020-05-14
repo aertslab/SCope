@@ -62,6 +62,12 @@ export default class ViewerToolbar extends Component {
                 featuresScale[i]
             ) {
                 levels = true;
+                let midScalePerc =
+                    (1 -
+                        (customScale[i][1] + customScale[i][0]) /
+                            2 /
+                            featuresScale[i]) *
+                    100;
                 return (
                     <TooltipRange
                         vertical
@@ -78,6 +84,16 @@ export default class ViewerToolbar extends Component {
                             },
                         ]}
                         handleStyle={[{ border: '2px solid ' + colors[i] }]}
+                        railStyle={{
+                            background:
+                                'linear-gradient(' +
+                                colors[i] +
+                                ' ' +
+                                midScalePerc +
+                                '%, black ' +
+                                midScalePerc +
+                                '%)',
+                        }}
                         max={featuresScale[i]}
                         defaultValue={val}
                         pushable={featuresScale[i] / 100}
