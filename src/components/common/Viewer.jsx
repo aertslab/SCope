@@ -1072,7 +1072,8 @@ export default class Viewer extends Component {
             logic: superposition,
         };
         if (this.props.customScale && scale) {
-            query['vmax'] = scale;
+            query['vmax'] = scale.map((x) => x[1]);
+            query['vmin'] = scale.map((x) => x[0]);
         }
         if (DEBUG)
             console.log(this.props.name, 'getFeatureColors', query, scale);
