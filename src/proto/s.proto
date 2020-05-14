@@ -59,7 +59,8 @@ message CellColorByFeaturesRequest {
   bool scaleThresholded=7;
   repeated Annotation annotation=8;
   repeated float vmax=9;
-  string logic=10;
+  repeated float vmin=10;
+  string logic=11;
 }
 
 message ColorLegend {
