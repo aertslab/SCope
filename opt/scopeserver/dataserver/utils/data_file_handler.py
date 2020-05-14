@@ -1,16 +1,15 @@
 import os
-from appdirs import AppDirs
 import time
 from uuid import uuid4
 import pickle
-from pathlib import Path
 from typing import TextIO
-
-import scopeserver
-from scopeserver.dataserver.modules.gserver import GServer as gs
 import logging
 
-logger = logging.getLogger(__name__)
+from appdirs import AppDirs
+
+import scopeserver
+
+LOGGER = logging.getLogger(__name__)
 
 app_name = "SCope"
 app_author = "Aertslab"
@@ -111,13 +110,13 @@ class DataFileHandler:
     def create_global_dirs(self) -> None:
         for data_type in self.data_dirs.keys():
             if not os.path.isdir(data_dirs[data_type]["path"]):
-                logger.error(self.data_dirs[data_type]["message"])
+                LOGGER.error(self.data_dirs[data_type]["message"])
                 os.makedirs(self.data_dirs[data_type]["path"])
 
     # ORCID_ID  UUID1,UUID2,UUID3   NAME
 
     def read_ORCID_db(self) -> None:
-        logger.debug('Building UUID "database"')
+        LOGGER.debug('Building UUID "database"')
         if os.path.isfile(os.path.join(self.config_dir, "ORCID_IDs.txt")):
             with open(os.path.join(self.config_dir, "ORCID_IDs.txt"), "r") as fh:
                 for line in fh.readlines():
@@ -125,8 +124,8 @@ class DataFileHandler:
                     self.orcid_ids[orcid_id] = (set([x for x in orcid_scope_uuids.split(",")]), name)
 
     def confirm_orcid_uuid(self, user_id, user_uuid) -> bool:
-        logger.debug(f"Confirming User: {user_id}, uuid: {user_id}")
-        logger.debug(f"Current DB {self.orcid_ids}")
+        LOGGER.debug(f"Confirming User: {user_id}, uuid: {user_id}")
+        LOGGER.debug(f"Current DB {self.orcid_ids}")
 
         if user_id in self.orcid_ids.keys():
             if user_uuid in self.orcid_ids[user_id][0]:
@@ -160,7 +159,7 @@ class DataFileHandler:
                     try:
                         uuid, sessionMode = line.rstrip("\n").split("\t")
                     except Exception as e:
-                        logger.error(f"Exception raised {e}")
+                        LOGGER.error(f"Exception raised {e}")
                         uuid = line.rstrip("\n")
                         sessionMode = "rw"
                     self.permanent_UUIDs.add(uuid)
@@ -170,14 +169,14 @@ class DataFileHandler:
             return False
 
     def read_UUID_db(self) -> None:
-        logger.debug('Building UUID "database"')
+        LOGGER.debug('Building UUID "database"')
         if os.path.isfile(os.path.join(self.config_dir, "UUID_Timeouts.tsv")):
-            logger.debug("Existing User UUIDs:")
+            LOGGER.debug("Existing User UUIDs:")
             with open(os.path.join(self.config_dir, "UUID_Timeouts.tsv"), "r") as fh:
                 for line in fh.readlines():
                     ls = line.rstrip("\n").split("\t")
                     self.current_UUIDs[ls[0]] = [float(ls[1]), "rw"]  # All user sessions are rw
-                    logger.debug(
+                    LOGGER.debug(
                         f'\tUUID {ls[0]}, mode rw. Generated on {time.strftime("%Y-%m-%d at %H:%M:%S", time.localtime(float(ls[1])))}'
                     )
 
@@ -185,17 +184,17 @@ class DataFileHandler:
             perm_sessions_exist = self.read_permanent_sessions()
             if perm_sessions_exist:
                 for session in self.get_permanent_UUIDs():
-                    logger.debug('Existing Permanent Sessions:"')
-                    logger.debug(
+                    LOGGER.debug('Existing Permanent Sessions:"')
+                    LOGGER.debug(
                         f'\tUUID {session}, mode {self.current_UUIDs[session][1]}. Valid until {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + (_ONE_DAY_IN_SECONDS * 365)))}'
                     )
         else:
-            logger.debug('No Existing Permanent Sessions, generating rw App UUID:"')
+            LOGGER.debug('No Existing Permanent Sessions, generating rw App UUID:"')
             with open(os.path.join(self.config_dir, "Permanent_Session_IDs.txt"), "w") as fh:
                 newUUID = "SCopeApp__{0}".format(str(uuid4()))
                 fh.write("{0}\trw\n".format(newUUID))  # App sessions are always rw
                 self.current_UUIDs[newUUID] = [time.time() + (_ONE_DAY_IN_SECONDS * 365), "rw"]
-                logger.debug(
+                LOGGER.debug(
                     f'\tUUID {newUUID}, mode rw. Valid until {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + (_ONE_DAY_IN_SECONDS * 365)))}'
                 )
 

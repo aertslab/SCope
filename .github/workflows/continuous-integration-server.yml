@@ -1,8 +1,8 @@
 name: Server CI
 on:
   pull_request:
-    paths-ignore:
-    - 'src/**'
+    paths:
+    - 'opt/**'
 
 jobs:
     quality-checks:
@@ -46,7 +46,7 @@ jobs:
 
             - name: Run pytest
               run: |
-                ${HOME}/.poetry/bin/poetry run pytest --cov=scopeserver --cov-branch --cov-fail-under=23 test/
+                ${HOME}/.poetry/bin/poetry run pytest --cov=scopeserver --cov-branch --cov-fail-under=25 test/
               working-directory: ${{ env.working-directory }}
 
             - name: Run safety security checks
