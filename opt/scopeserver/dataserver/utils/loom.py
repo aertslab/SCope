@@ -670,7 +670,7 @@ class Loom:
         gene_expr = self.get_gene_expression_by_gene_symbol(gene_symbol=gene_symbol)
         if cpm_normalise:
             logger.debug("Debug: CPM normalising gene expression...")
-            gene_expr = gene_expr / self.get_nUMI()
+            gene_expr = (gene_expr / self.get_nUMI()) * 1000000
         if log_transform:
             logger.debug("Debug: log-transforming gene expression...")
             gene_expr = np.log2(gene_expr + 1)
