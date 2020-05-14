@@ -10,7 +10,7 @@ const sourceBehaviour = {
         return {
             name: props.name,
             value: props.value,
-            src: props.src
+            src: props.src,
         };
     },
     endDrag(props, monitor) {
@@ -24,7 +24,7 @@ const sourceBehaviour = {
             dropResult.dropEffect == 'move'
         )
             props.handleRemove(item.src, item.name, item.value);
-    }
+    },
 };
 
 class Annotation extends Component {
@@ -37,7 +37,7 @@ class Annotation extends Component {
             isDragging,
             connectDragSource,
             label,
-            orientation
+            orientation,
         } = this.props;
         const opacity = isDragging ? 0.4 : 1;
 
@@ -82,6 +82,6 @@ export default DragSource(
     sourceBehaviour,
     (connect, monitor) => ({
         connectDragSource: connect.dragSource(),
-        isDragging: monitor.isDragging()
+        isDragging: monitor.isDragging(),
     })
 )(Annotation);

@@ -6,7 +6,7 @@ import {
     Modal,
     Dimmer,
     Loader,
-    Dropdown
+    Dropdown,
 } from 'semantic-ui-react';
 import ReactGA from 'react-ga';
 import fileDownload from 'js-file-download';
@@ -23,7 +23,7 @@ export default class Metadata extends Component {
             annotation: props.annotations,
             clustering: null,
             cellIDs: null,
-            metadata: null
+            metadata: null,
         };
     }
 
@@ -31,14 +31,14 @@ export default class Metadata extends Component {
         const {
             selectedGenes,
             selectedRegulons,
-            selectedClusters
+            selectedClusters,
         } = BackendAPI.getParsedFeatures();
         const {
             metadata,
             cellIDs,
             loading,
             annotation,
-            clustering
+            clustering,
         } = this.state;
         const { selectionId } = this.props;
         let selections = BackendAPI.getViewerSelections();
@@ -194,13 +194,13 @@ export default class Metadata extends Component {
                                             this.setState({
                                                 annotation: s.value,
                                                 metadata: null,
-                                                loading: true
+                                                loading: true,
                                             });
                                             this.getMetadata();
                                             ReactGA.event({
                                                 category: 'metadata',
                                                 action: 'selected annotation',
-                                                label: s.text
+                                                label: s.text,
                                             });
                                         }, 50);
                                     }}
@@ -218,13 +218,13 @@ export default class Metadata extends Component {
                                             this.setState({
                                                 clustering: s.value,
                                                 metadata: null,
-                                                loading: true
+                                                loading: true,
                                             });
                                             this.getMetadata();
                                             ReactGA.event({
                                                 category: 'metadata',
                                                 action: 'selected clustering',
-                                                label: s.text
+                                                label: s.text,
                                             });
                                         }, 50);
                                     }}
@@ -289,7 +289,7 @@ export default class Metadata extends Component {
                             ReactGA.event({
                                 category: 'metadata',
                                 action: 'downloaded csv file',
-                                value: selection.points.length
+                                value: selection.points.length,
                             });
                         }}>
                         <Icon name='download' /> Download
@@ -305,7 +305,7 @@ export default class Metadata extends Component {
     UNSAFE_componentWillReceiveProps() {
         this.setState({
             annotation: this.props.annotations,
-            clustering: this.props.clustering
+            clustering: this.props.clustering,
         });
     }
 
@@ -322,7 +322,7 @@ export default class Metadata extends Component {
         const {
             selectedGenes,
             selectedRegulons,
-            selectedClusters
+            selectedClusters,
         } = BackendAPI.getParsedFeatures();
         let query = {
             loomFilePath: loomFilePath,
@@ -334,11 +334,11 @@ export default class Metadata extends Component {
             clusterings:
                 this.state.clustering != null ? [this.state.clustering] : [],
             annotations:
-                this.state.annotation != null ? this.state.annotation : []
+                this.state.annotation != null ? this.state.annotation : [],
         };
         let queryCells = {
             loomFilePath: loomFilePath,
-            cellIndices: selections[this.props.selectionId].points
+            cellIndices: selections[this.props.selectionId].points,
         };
         BackendAPI.getConnection().then(
             (gbc) => {
@@ -358,7 +358,7 @@ export default class Metadata extends Component {
                                     metadata: response,
                                     selection:
                                         selections[this.state.selectionId],
-                                    cellIDs: cellsResponse.cellIds
+                                    cellIDs: cellsResponse.cellIds,
                                 });
                             }
                         );

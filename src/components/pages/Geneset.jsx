@@ -9,7 +9,7 @@ import {
     Dimmer,
     Loader,
     Input,
-    TextArea
+    TextArea,
 } from 'semantic-ui-react';
 import FeatureSearchBox from '../common/FeatureSearchBox';
 import { BackendAPI } from '../common/API';
@@ -38,7 +38,7 @@ class Geneset extends Component {
             selectedGeneset: null,
             uploadModalOpened: false,
             sidebar: BackendAPI.getSidebarVisible(),
-            colors: []
+            colors: [],
         };
         this.activeLoomListener = (loom, metadata, coordinates) => {
             this.setState({ activeLoom: loom, activeCoordinates: coordinates });
@@ -65,7 +65,7 @@ class Geneset extends Component {
             loading,
             uploadModalOpened,
             selectedGeneset,
-            loadingMessage
+            loadingMessage,
         } = this.state;
 
         if (!activeLoom) return <div>Select the dataset to be analyzed</div>;
@@ -102,7 +102,7 @@ class Geneset extends Component {
                                             onClick={() => {
                                                 this.setState({
                                                     selectedGeneset:
-                                                        set.geneSetFilePath
+                                                        set.geneSetFilePath,
                                                 });
                                             }}>
                                             <Icon
@@ -273,7 +273,7 @@ class Geneset extends Component {
         this.setState({ uploadModalOpened: true });
         ReactGA.event({
             category: 'upload',
-            action: 'toggle geneset upload modal'
+            action: 'toggle geneset upload modal',
         });
     }
 
@@ -281,7 +281,7 @@ class Geneset extends Component {
         this.setState({ uploadModalOpened: false });
         ReactGA.event({
             category: 'upload',
-            action: 'toggle geneset upload modal'
+            action: 'toggle geneset upload modal',
         });
     }
 
@@ -293,7 +293,7 @@ class Geneset extends Component {
             match.params.uuid,
             'GeneSet',
             new File([fileContent], this.state.genesetName, {
-                type: 'text/plain'
+                type: 'text/plain',
             }),
             () => {},
             this.onGenesetUploaded.bind(this)
@@ -303,7 +303,7 @@ class Geneset extends Component {
     getGeneSets() {
         const { match } = this.props;
         let query = {
-            UUID: match.params.uuid
+            UUID: match.params.uuid,
         };
         BackendAPI.getConnection().then(
             (gbc) => {
@@ -315,7 +315,7 @@ class Geneset extends Component {
                             if (DEBUG) console.log('getMyGeneSets', response);
                             this.setState({
                                 genesets: response.myGeneSets,
-                                loading: false
+                                loading: false,
                             });
                         } else {
                             this.setState({ loading: false });
@@ -334,7 +334,7 @@ class Geneset extends Component {
         const { match } = this.props;
         ReactGA.event({
             category: 'geneset',
-            action: 'removed geneset file'
+            action: 'removed geneset file',
         });
         let execute = confirm(
             'Are you sure that you want to remove the file: ' +
@@ -345,7 +345,7 @@ class Geneset extends Component {
             let query = {
                 UUID: match.params.uuid,
                 filePath: geneSetFilePath,
-                fileType: 'GeneSet'
+                fileType: 'GeneSet',
             };
             BackendAPI.getConnection().then((gbc) => {
                 if (DEBUG) console.log('deleteUserFile', query);
@@ -366,7 +366,7 @@ class Geneset extends Component {
         let query = {
             loomFilePath: BackendAPI.getActiveLoom(),
             geneSetFilePath: this.state.selectedGeneset,
-            method: 'AUCell'
+            method: 'AUCell',
         };
         BackendAPI.getConnection().then(
             (gbc) => {
@@ -378,7 +378,7 @@ class Geneset extends Component {
                     if (gse.isDone) {
                         this.setState({
                             loading: false,
-                            colors: gse.cellValues.color
+                            colors: gse.cellValues.color,
                         });
                     } else {
                         this.setState({ loadingMessage: gse.progress.status });
@@ -389,7 +389,7 @@ class Geneset extends Component {
                     ReactGA.event({
                         category: 'geneset',
                         action: 'enrichment finished',
-                        nonInteraction: true
+                        nonInteraction: true,
                     });
                 });
             },
@@ -399,7 +399,7 @@ class Geneset extends Component {
         );
         ReactGA.event({
             category: 'geneset',
-            action: 'enrichment started'
+            action: 'enrichment started',
         });
     }
 
@@ -408,12 +408,12 @@ class Geneset extends Component {
         this.hideUploadModal();
         this.setState({
             geneset: '',
-            genesetName: ''
+            genesetName: '',
         });
         ReactGA.event({
             category: 'upload',
             action: 'uploaded geneset file',
-            nonInteraction: true
+            nonInteraction: true,
         });
     }
 }

@@ -8,7 +8,7 @@ export default class Dataset extends Component {
         super();
         this.state = {
             activeLoom: BackendAPI.getActiveLoom(),
-            metadata: BackendAPI.getActiveLoomMetadata()
+            metadata: BackendAPI.getActiveLoomMetadata(),
         };
         this.activeLoomListener = (loom, metadata, coordinates) => {
             this.setState({ activeLoom: loom, metadata: metadata });

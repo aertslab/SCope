@@ -16,7 +16,7 @@ export default class Gene extends Component {
             activeFeatures: BackendAPI.getActiveFeatures(),
             activeLegend: null,
             sidebar: BackendAPI.getSidebarVisible(),
-            colors: BackendAPI.getColors()
+            colors: BackendAPI.getColors(),
         };
         this.activeLoomListener = (loom, metadata, coordinates) => {
             if (DEBUG)
@@ -24,7 +24,7 @@ export default class Gene extends Component {
             this.setState({
                 activeLoom: loom,
                 activeCoordinates: coordinates,
-                activeMetadata: metadata
+                activeMetadata: metadata,
             });
         };
         this.sidebarVisibleListener = (state) => {
@@ -41,7 +41,7 @@ export default class Gene extends Component {
             sidebar,
             activeMetadata,
             colors,
-            activeLegend
+            activeLegend,
         } = this.state;
         const isQueryingAnnotation = activeFeatures.some((e) => {
             return e.featureType == 'annotation';

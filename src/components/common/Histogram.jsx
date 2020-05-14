@@ -17,7 +17,7 @@ export default class Histogram extends Component {
             selected: props.feature ? props.feature.threshold : 0,
             matched: 0,
             total: 0,
-            points: []
+            points: [],
         };
         this.w = 0;
         this.h = 0;
@@ -56,7 +56,7 @@ export default class Histogram extends Component {
                         ReactGA.event({
                             category: 'regulon',
                             action: 'threshold changed',
-                            value: field
+                            value: field,
                         });
                         this.handleUpdateTSNE();
                     }}
@@ -91,7 +91,7 @@ export default class Histogram extends Component {
             .domain([0, this.state.max])
             .rangeRound([0, this.state.width]);
         let svg = d3.select('#thresholdSVG' + this.props.field);
-        svg.select('.threshold').attr('transform', function() {
+        svg.select('.threshold').attr('transform', function () {
             let cx = x(value);
             let cy = 0;
             return 'translate(' + cx + ',' + cy + ')';
@@ -111,7 +111,7 @@ export default class Histogram extends Component {
         let query = {
             loomFilePath: loomFile,
             featureType: feature.featureType,
-            feature: feature.feature
+            feature: feature.feature,
         };
         BackendAPI.getConnection().then(
             (gbc) => {
@@ -162,7 +162,7 @@ export default class Histogram extends Component {
             total: points.length,
             points: points,
             matched: points.length,
-            selected: 0
+            selected: 0,
         });
 
         if (points.length == 0) {
@@ -183,23 +183,19 @@ export default class Histogram extends Component {
             return;
         }
 
-        let x = d3
-            .scaleLinear()
-            .domain([0, max])
-            .rangeRound([0, width]);
+        let x = d3.scaleLinear().domain([0, max]).rangeRound([0, width]);
 
-        let bins = d3
-            .histogram()
-            .domain(x.domain())
-            .thresholds(x.ticks(100))(points);
+        let bins = d3.histogram().domain(x.domain()).thresholds(x.ticks(100))(
+            points
+        );
 
         let y = d3
             .scaleLinear()
             .domain([
                 0,
-                d3.max(bins, function(d) {
+                d3.max(bins, function (d) {
                     return d.length;
-                })
+                }),
             ])
             .range([height, 0]);
 
@@ -209,14 +205,14 @@ export default class Histogram extends Component {
             .enter()
             .append('g')
             .attr('class', 'bar')
-            .attr('transform', function(d) {
+            .attr('transform', function (d) {
                 return 'translate(' + x(d.x0) + ',' + y(d.length) + ')';
             });
 
         bar.append('rect')
             .attr('x', 1)
             .attr('width', x(bins[0].x1) - x(bins[0].x0))
-            .attr('height', function(d) {
+            .attr('height', function (d) {
                 return height - y(d.length);
             })
             .attr('stroke', '#000')
@@ -253,14 +249,14 @@ export default class Histogram extends Component {
                     .attr('text-anchor', 'middle')
                     .attr('transform', 'translate(' + tx + ',5)')
                     .text(t.name)
-                    .on('click', function() {
+                    .on('click', function () {
                         component.handleThresholdChange(t.threshold);
                         component.handleUpdateTSNE();
                         ReactGA.event({
                             category: 'regulon',
                             action: 'threshold clicked',
                             label: t.name,
-                            value: this.props.field
+                            value: this.props.field,
                         });
                     })
                     .append('title')
