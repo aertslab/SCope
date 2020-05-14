@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Load node dependencies
-const exec = require('child_process').exec;
+const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
@@ -110,7 +110,6 @@ class Launcher {
         return new Promise((resolve, reject) => {
             exec(
                 'cd opt; poetry env list',
-                { stdio: [0, 1, 2] },
                 (error, stdout, stderr) => {
                     if (error) return resolve(false);
                     if (stderr) return resolve(false);
@@ -223,7 +222,6 @@ class Launcher {
         return new Promise((resolve, reject) => {
             exec(
                 scopeClientStartCmd,
-                { stdio: [0, 1, 2] },
                 (error, stdout, stderr) => {
                     if (error) return resolve(false);
                     if (stderr) return resolve(false);
@@ -280,7 +278,7 @@ class Launcher {
     }
 
     startSCopeServer() {
-        let scopeStartCmd = 'scope-server';
+        let scopeStartCmd = 'hypercorn opt/main:scope_api';
         if (!this.scopeServerActivated) {
             console.log('SCope Server installed but not activated');
             scopeStartCmd =
@@ -300,7 +298,6 @@ class Launcher {
         return new Promise((resolve, reject) => {
             exec(
                 scopeStartCmd,
-                { stdio: [0, 1, 2] },
                 (error, stdout, stderr) => {
                     if (error) return resolve(false);
                     if (stderr) return resolve(false);
