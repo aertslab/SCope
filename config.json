@@ -12,5 +12,6 @@
     "orcidAPIClientID": "",
     "orcidAPIClientSecret": "",
     "orcidAPIRedirectURI": "",
-    "dataHashSecret": ""
+    "dataHashSecret": "",
+    "data": ""
 }

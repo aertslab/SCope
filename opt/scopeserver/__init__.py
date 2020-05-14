@@ -1,39 +1,51 @@
-from scopeserver.dataserver.modules.gserver import GServer as gs
-from scopeserver.dataserver.modules.pserver import PServer as ps
-from scopeserver.bindserver import XServer as xs
-from scopeserver.dataserver.utils import sys_utils as su
+"""
+Main definition and entrypoint for the legacy SCope server
+"""
 
+import argparse
 import threading
-import os
 import time
 from urllib.request import urlopen
 import http
 import sys
 import logging
-import json
-import secrets
-from typing import Dict, Any
+from pathlib import Path
+from typing import Dict, Any, Union
+
+from scopeserver.dataserver.modules.gserver import GServer as gs
+from scopeserver.dataserver.modules.pserver import PServer as ps
+from scopeserver.bindserver import XServer as xs
+from scopeserver.dataserver.utils import sys_utils as su
+import scopeserver.config as configuration
 
 LOG_FMT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(format=LOG_FMT, level=logging.INFO)
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class SCopeServer:
+    """ Legacy SCope server. """
+
     def __init__(self, config):
         self.run_event = threading.Event()
         self.run_event.set()
         self.config = config
+        self.xs_thread = None
+        self.gs_thread = None
+        self.ps_thread = None
+
+        if self.config["debug"]:
+            LOGGER.setLevel(logging.DEBUG)
 
     def start_bind_server(self) -> None:
-        logger.debug(f"Starting bind server on port {self.config['xPort']}")
+        LOGGER.debug(f"Starting bind server on port {self.config['xPort']}")
         self.xs_thread = threading.Thread(target=xs.run, args=(self.run_event,), kwargs={"port": self.config["xPort"]})
         self.xs_thread.start()
 
     def start_data_server(self) -> None:
-        logger.debug(f"Starting data server on port {self.config['gPort']}. app_mode: {self.config['app_mode']}")
+        LOGGER.debug(f"Starting data server on port {self.config['gPort']}. app_mode: {self.config['app_mode']}")
         self.gs_thread = threading.Thread(target=gs.serve, args=(self.run_event, self.config,))
-        logger.debug(f"Starting upload server on port {self.config['pPort']}")
+        LOGGER.debug(f"Starting upload server on port {self.config['pPort']}")
         self.ps_thread = threading.Thread(target=ps.run, args=(self.run_event,), kwargs={"port": self.config["pPort"]})
         self.gs_thread.start()
         self.ps_thread.start()
@@ -48,7 +60,7 @@ class SCopeServer:
             while True:
                 time.sleep(0.1)
         except KeyboardInterrupt:
-            logger.info("Terminating servers...")
+            LOGGER.info("Terminating servers...")
             self.run_event.clear()
             self.gs_thread.join()
             try:
@@ -59,7 +71,7 @@ class SCopeServer:
 
             if not self.config["app_mode"]:
                 self.xs_thread.join()
-            logger.info("Servers successfully terminated. Exiting.")
+            LOGGER.info("Servers successfully terminated. Exiting.")
 
     def run(self) -> None:
         # Unbuffer the standard output: important for process communication
@@ -68,64 +80,24 @@ class SCopeServer:
         self.wait()
 
 
-def log_ascii_header() -> None:
-    logger.info(
-        """\n
-
-  /$$$$$$   /$$$$$$                                       /$$$$$$
- /$$__  $$ /$$__  $$                                     /$$__  $$
-| $$  \__/| $$  \__/  /$$$$$$   /$$$$$$   /$$$$$$       | $$  \__/  /$$$$$$   /$$$$$$  /$$    /$$ /$$$$$$   /$$$$$$
-|  $$$$$$ | $$       /$$__  $$ /$$__  $$ /$$__  $$      |  $$$$$$  /$$__  $$ /$$__  $$|  $$  /$$//$$__  $$ /$$__  $$
- \____  $$| $$      | $$  \ $$| $$  \ $$| $$$$$$$$       \____  $$| $$$$$$$$| $$  \__/ \  $$/$$/| $$$$$$$$| $$  \__/
- /$$  \ $$| $$    $$| $$  | $$| $$  | $$| $$_____/       /$$  \ $$| $$_____/| $$        \  $$$/ | $$_____/| $$
-|  $$$$$$/|  $$$$$$/|  $$$$$$/| $$$$$$$/|  $$$$$$$      |  $$$$$$/|  $$$$$$$| $$         \  $/  |  $$$$$$$| $$
- \______/  \______/  \______/ | $$____/  \_______/       \______/  \_______/|__/          \_/    \_______/|__/
-                              | $$
-                              | $$
-                              |__/
-        """
-    )
-
-
-def generate_config(args) -> Dict[str, Any]:
-    if args.config_file is not None:
-        if not os.path.isfile(args.config_file):
-            raise FileNotFoundError(f"The config file {args.config_file} does not exist!")
-
-        with open(args.config_file, "r") as fh:
-            try:
-                config = json.loads(fh.read())
-            except json.JSONDecodeError:
-                config = {}
-                logger.error("Config file is not proper json and will not be used")
+def message_of_the_day(data_path: Union[str, Path]) -> None:
+    """ Log a server startup message. """
+    motd_path = data_path / Path("motd.txt")
+    if motd_path.is_file():
+        with open(motd_path) as motd:
+            LOGGER.info(motd.read())
     else:
-        config = {}
+        LOGGER.info("Welcome to SCope.")
 
-    dhs = config.get("dataHashSecret")
 
-    if not dhs or not dhs.strip():
-        new_secret = secrets.token_hex(32)
-        config["dataHashSecret"] = new_secret
-        logger.error(
-            f"The following secret key will be used to hash annotation data: {new_secret}\nLosing this key will mean all annotations will display as unvalidated."
-        )
-
-    if args.debug:
-        logger.setLevel(logging.DEBUG)
-
-    config = {**config, **{"gPort": args.g_port, "pPort": args.p_port, "xPort": args.x_port, "app_mode": args.app_mode}}
-
-    return config
+def generate_config(args: argparse.Namespace) -> configuration.Config:
+    """ Combine parsed command line arguments with configuration from a config file. """
+    argscfg = {"gPort": args.g_port, "pPort": args.p_port, "xPort": args.x_port, "app_mode": args.app_mode}
+    return {**configuration.from_file(args.config_file), **argscfg}
 
 
 def run() -> None:
-    log_ascii_header()
-    logger.info("Running SCope Server in production mode...")
-
-    # Unbuffer the standard output: important for process communication
-    sys.stdout = su.Unbuffered(sys.stdout)  # type: ignore
-
-    import argparse
+    """ Top-level entry point. """
 
     parser = argparse.ArgumentParser(description="Launch the scope server")
     parser.add_argument("--g_port", metavar="gPort", type=int, help="gPort", default=55853)
@@ -137,6 +109,15 @@ def run() -> None:
     args = parser.parse_args()
 
     config = generate_config(args)
+
+    message_of_the_day(str(config["data"]))
+    LOGGER.info(f"Running SCope in {'debug' if config['debug'] else 'production'} mode...")
+
+    LOGGER.info(
+        f"""This secret key will be used to hash annotation data: {config['dataHashSecret']}
+        Losing this key will mean all annotations will display as unvalidated.
+        """
+    )
 
     # Start an instance of SCope Server
     scope_server = SCopeServer(config)

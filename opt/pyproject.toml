@@ -62,7 +62,7 @@ mypy-protobuf = "^1.19"
 dev-script = 'scopeserver:run'
 
 [tool.pylint.'MESSAGES CONTROL']
-max-line-length = 120
+max-line-length = '120'
 
 [tool.black]
 line-length = 120
