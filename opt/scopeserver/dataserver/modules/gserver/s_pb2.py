@@ -23,7 +23,6 @@ DESCRIPTOR = _descriptor.FileDescriptor(
 )
 
 
-
 _ERRORREPLY = _descriptor.Descriptor(
     name="ErrorReply",
     full_name="scope.ErrorReply",
