@@ -1015,6 +1015,14 @@ export default class Viewer extends Component {
         }
     };
 
+    getVmins(scale) {
+        return scale.map((x) => x[0]);
+    }
+
+    getVmaxes(scale) {
+        return scale.map((x) => x[1]);
+    }
+
     getFeatureColors(
         features,
         loomFile,
@@ -1072,8 +1080,8 @@ export default class Viewer extends Component {
             logic: superposition,
         };
         if (this.props.customScale && scale) {
-            query['vmax'] = scale.map((x) => x[1]);
-            query['vmin'] = scale.map((x) => x[0]);
+            query['vmax'] = this.getVmaxes(scale);
+            query['vmin'] = this.getVmins(scale);
         }
         if (DEBUG)
             console.log(this.props.name, 'getFeatureColors', query, scale);
