@@ -95,6 +95,11 @@ class API {
 
         this.maxValues = {};
         this.maxValuesChangeListeners = [];
+        this.emptyColorScale = [
+            [0, 0],
+            [0, 0],
+            [0, 0],
+        ];
         this.customValues = {};
         this.customValuesChangeListeners = [];
 
@@ -924,13 +929,7 @@ class API {
     }
 
     getCustomScale() {
-        return (
-            this.customValues[this.activePage] || [
-                [0, 0],
-                [0, 0],
-                [0, 0],
-            ]
-        );
+        return this.customValues[this.activePage] || this.emptyColorScale;
     }
 
     setCustomScale(scale) {
@@ -957,11 +956,8 @@ class API {
 
     setActivePage(page) {
         this.maxValues[page] = this.maxValues[page] || [0, 0, 0];
-        this.customValues[page] = this.customValues[page] || [
-            [0, 0],
-            [0, 0],
-            [0, 0],
-        ];
+        this.customValues[page] =
+            this.customValues[page] || this.emptyColorScale;
         this.activePage = page;
         this.activePageListeners.forEach((listener) => {
             listener(this.activePage);
