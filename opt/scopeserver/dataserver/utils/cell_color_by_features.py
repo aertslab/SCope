@@ -183,19 +183,15 @@ class CellColorByFeatures:
                 clusteringID = str(clustering["id"])
                 if request.feature[n] == "All Clusters":
                     numClusters = max(self.loom.get_clustering_by_id(clusteringID))
-                    if numClusters <= 245:
-                        self.legend = set()
-                        clustering_meta = self.loom.get_meta_data_clustering_by_id(int(clusteringID), secret=secret)
-                        cluster_dict = {int(x["id"]): x["description"] for x in clustering_meta["clusters"]}
-                        for i in self.loom.get_clustering_by_id(clusteringID):
-                            self.hex_vec.append(constant.BIG_COLOR_LIST[i])
-                            self.legend.add((cluster_dict[i], constant.BIG_COLOR_LIST[i]))
-                        self.legend = s_pb2.ColorLegend(
-                            values=[x[0] for x in self.legend], colors=[x[1] for x in self.legend]
-                        )
-                    else:
-                        interval = int(RGB_COLORS / numClusters)
-                        self.hex_vec = [hex(i)[2:].zfill(6) for i in range(0, numClusters, interval)]
+                    legend = set()
+                    clustering_meta = self.loom.get_meta_data_clustering_by_id(int(clusteringID), secret=secret)
+                    cluster_dict = {int(x["id"]): x["description"] for x in clustering_meta["clusters"]}
+                    for i in self.loom.get_clustering_by_id(clusteringID):
+                        colour = constant.BIG_COLOR_LIST[i % len(constant.BIG_COLOR_LIST)]
+                        self.hex_vec.append(colour)
+                        legend.add((cluster_dict[i], colour))
+                    values, colors = zip(*legend)
+                    self.legend = s_pb2.ColorLegend(values=values, colors=colors)
                     if len(request.annotation) > 0:
                         cellIndices = self.loom.get_anno_cells(annotations=request.annotation, logic=request.logic)
                         self.hex_vec = np.array(self.hex_vec)[cellIndices]
