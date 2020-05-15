@@ -76,18 +76,17 @@ class CellColorByFeatures:
         return self.cell_indices
 
     def normalise_vals(self, vals: np.ndarray, v_max: int, v_min: int) -> np.ndarray:
-        non_zeros_mask = vals != 0
-        non_zeros_vals = vals[non_zeros_mask]
-        vals_min_non_zero = min(non_zeros_vals)
-        non_zeros_clipped = np.clip(non_zeros_vals, v_min, v_max)
-        vals_min = max([vals_min_non_zero, v_min])
+        if v_max < min(vals[vals != 0]):
+            vals[vals != 0] = constant._UPPER_LIMIT_RGB
+            return vals
 
+        clipped = np.clip(vals[vals != 0], v_min, v_max)
+        vals_min = np.amin(clipped)
         non_zeros_scaled = (constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB) * (
-            (non_zeros_clipped - vals_min) / (v_max - vals_min)
+            (clipped - vals_min) / (v_max - vals_min)
         ) + (constant._LOWER_LIMIT_RGB + 1)
 
-        non_zeros_scaled_clipped = np.clip(non_zeros_scaled, 0, constant._UPPER_LIMIT_RGB)
-        vals[non_zeros_mask] = non_zeros_scaled_clipped
+        vals[vals != 0] = np.clip(non_zeros_scaled, 0, constant._UPPER_LIMIT_RGB)
         return vals
 
     def setGeneFeature(self, request, feature, n):
