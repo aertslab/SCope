@@ -75,8 +75,7 @@ class CellColorByFeatures:
     def get_cell_indices(self):
         return self.cell_indices
 
-    def normalise_vals(self, vals: np.ndarray, v_max: int, v_min: int) -> np.ndarray:
-        if v_max < min(vals[vals != 0]):
+        if v_max <= min(vals[vals != 0]):
             vals[vals != 0] = constant._UPPER_LIMIT_RGB
             return vals
 
