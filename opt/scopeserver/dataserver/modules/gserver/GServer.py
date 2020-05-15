@@ -750,19 +750,19 @@ class SCope(s_pb2_grpc.MainServicer):
             timeRemaining = int(dfh._UUID_TIMEOUT)
 
         self.dfh.active_session_check()
-        if request.mouseEvents >= constant._MOUSE_EVENTS_THRESHOLD:
+        if request.mouseEvents >= constant.MOUSE_EVENTS_THRESHOLD:
             self.dfh.reset_active_session_timeout(uid)
 
         sessionsLimitReached = False
 
         if (
-            len(self.dfh.get_active_sessions().keys()) >= constant._ACTIVE_SESSIONS_LIMIT
+            len(self.dfh.get_active_sessions().keys()) >= constant.ACTIVE_SESSIONS_LIMIT
             and uid not in self.dfh.get_permanent_UUIDs()
             and uid not in self.dfh.get_active_sessions().keys()
         ):
             sessionsLimitReached = True
             logger.warning(
-                f"Maximum number of concurrent active sessions ({constant._ACTIVE_SESSIONS_LIMIT}) reached. IP {request.ip} will not be able to access SCope."
+                f"Maximum number of concurrent active sessions ({constant.ACTIVE_SESSIONS_LIMIT}) reached. IP {request.ip} will not be able to access SCope."
             )
 
         if uid not in self.dfh.get_active_sessions().keys() and not sessionsLimitReached:
