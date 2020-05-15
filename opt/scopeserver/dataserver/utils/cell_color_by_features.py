@@ -79,7 +79,7 @@ class CellColorByFeatures:
     def normalise_vals(vals: np.ndarray, v_max: int, v_min: int) -> np.ndarray:
         if len(vals[vals != 0]) == 0:
             return vals
-        if v_max <= min(vals[vals != 0]):
+        if v_max <= np.amin(vals[vals != 0]):
             vals[vals != 0] = constant.UPPER_LIMIT_RGB
             return vals
         clipped = np.clip(vals[vals != 0], v_min, v_max)
