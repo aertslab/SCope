@@ -1077,6 +1077,7 @@ export default class Viewer extends Component {
             scaleThresholded: this.props.scale,
             annotation: queryAnnotations,
             vmax: [0, 0, 0],
+            vmin: [0, 0, 0],
             logic: superposition,
         };
         if (this.props.customScale && scale) {

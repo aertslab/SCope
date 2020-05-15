@@ -123,7 +123,7 @@ class CellColorByFeatures:
             else:
                 self.v_max[n], self.max_v_max[n] = CellColorByFeatures.get_vmax(vals)
             if request.scaleThresholded:
-                vals = [auc if auc >= request.threshold[n] else 0 for auc in vals]
+                vals = np.array([auc if auc >= request.threshold[n] else 0 for auc in vals])
 
                 vals = CellColorByFeatures.normalise_vals(vals, self.v_max[n], request.vmin[n])
                 self.features.append(vals)
