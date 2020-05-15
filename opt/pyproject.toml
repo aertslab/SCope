@@ -57,6 +57,7 @@ pylint-fail-under = "*"
 black = { version = "*", allow-prereleases = true }
 mypy = "*"
 mypy-protobuf = "^1.19"
+hypothesis = {extras = ["numpy"], version = "^5.14.0"}
 
 [tool.poetry.scripts]
 dev-script = 'scopeserver:run'
