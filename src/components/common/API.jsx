@@ -95,6 +95,11 @@ class API {
 
         this.maxValues = {};
         this.maxValuesChangeListeners = [];
+        this.emptyColorScale = [
+            [0, 0],
+            [0, 0],
+            [0, 0],
+        ];
         this.customValues = {};
         this.customValuesChangeListeners = [];
 
@@ -847,8 +852,12 @@ class API {
                 gbc.services.scope.Main.getVmax(query, (err, response) => {
                     if (DEBUG) console.log('getVmax', response);
                     if (id != null)
-                        this.customValues[page][id] = response.vmax[id];
-                    else this.customValues[page] = response.vmax;
+                        this.customValues[page][id][1] = response.vmax[id];
+                    else
+                        this.customValues[page] = response.vmax.map((x) => [
+                            0,
+                            x,
+                        ]);
                     this.maxValues[page] = response.maxVmax;
                     this.maxValuesChangeListeners.forEach((listener) => {
                         listener(this.maxValues[page]);
@@ -920,7 +929,7 @@ class API {
     }
 
     getCustomScale() {
-        return this.customValues[this.activePage] || [0, 0, 0];
+        return this.customValues[this.activePage] || this.emptyColorScale;
     }
 
     setCustomScale(scale) {
@@ -947,7 +956,8 @@ class API {
 
     setActivePage(page) {
         this.maxValues[page] = this.maxValues[page] || [0, 0, 0];
-        this.customValues[page] = this.customValues[page] || [0, 0, 0];
+        this.customValues[page] =
+            this.customValues[page] || this.emptyColorScale;
         this.activePage = page;
         this.activePageListeners.forEach((listener) => {
             listener(this.activePage);

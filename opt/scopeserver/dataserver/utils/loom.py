@@ -13,6 +13,7 @@ from typing import Tuple, Dict, Any
 from scopeserver.dataserver.utils import data_file_handler as dfh
 from scopeserver.dataserver.utils import search_space as ss
 from scopeserver.dataserver.modules.gserver import s_pb2
+from scopeserver.dataserver.utils import constant
 
 import logging
 
@@ -670,7 +671,7 @@ class Loom:
         gene_expr = self.get_gene_expression_by_gene_symbol(gene_symbol=gene_symbol)
         if cpm_normalise:
             logger.debug("Debug: CPM normalising gene expression...")
-            gene_expr = gene_expr / self.get_nUMI()
+            gene_expr = (gene_expr / self.get_nUMI()) * constant.COUNTS_PER_MILLION
         if log_transform:
             logger.debug("Debug: log-transforming gene expression...")
             gene_expr = np.log2(gene_expr + 1)

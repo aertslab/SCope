@@ -6,9 +6,10 @@ import { Menu, Grid } from 'semantic-ui-react';
 import Slider, { Range } from 'rc-slider';
 import { BackendAPI } from '../common/API';
 import ReactGA from 'react-ga';
+import * as R from 'ramda';
 
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
-const TooltipSlider = createSliderWithTooltip(Slider);
+const TooltipRange = createSliderWithTooltip(Slider.Range);
 
 export default class ViewerToolbar extends Component {
     constructor() {
@@ -55,15 +56,16 @@ export default class ViewerToolbar extends Component {
 
         let levels = false;
         let sliders = _.times(3, (i) => {
-            let val = customScale[i] ? customScale[i] : featuresScale[i];
+            let val = customScale[i] ? customScale[i] : [0, featuresScale[i]];
             if (
                 activeFeatures[i] &&
                 activeFeatures[i].feature.length &&
                 featuresScale[i]
             ) {
                 levels = true;
+                const midScale = 1 - R.mean(customScale[i]) / featuresScale[i];
                 return (
-                    <TooltipSlider
+                    <TooltipRange
                         vertical
                         key={i}
                         style={{
@@ -71,19 +73,24 @@ export default class ViewerToolbar extends Component {
                             margin: '5px',
                             float: 'left',
                         }}
-                        trackStyle={{
-                            background:
-                                'linear-gradient(to top, black, ' +
-                                colors[i] +
-                                ')',
-                        }}
+                        trackStyle={[
+                            {
+                                background: `linear-gradient(${colors[i]}, black)`,
+                            },
+                        ]}
                         handleStyle={[{ border: '2px solid ' + colors[i] }]}
+                        railStyle={{
+                            background: `linear-gradient(${colors[i]}, ${
+                                midScale * 100
+                            }%, black ${midScale * 100}%)`,
+                        }}
                         max={featuresScale[i]}
                         defaultValue={val}
+                        pushable={featuresScale[i] / 100}
                         onAfterChange={(v) => {
                             this.handleUpdateScale(i, v);
                         }}
-                        min={featuresScale[i] / 1000}
+                        min={0}
                         step={featuresScale[i] / 1000}
                         tipFormatter={(v) => {
                             return v.toFixed(3);
