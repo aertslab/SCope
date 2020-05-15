@@ -6,6 +6,7 @@ import { Menu, Grid } from 'semantic-ui-react';
 import Slider, { Range } from 'rc-slider';
 import { BackendAPI } from '../common/API';
 import ReactGA from 'react-ga';
+import * as R from 'ramda';
 
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
 const TooltipRange = createSliderWithTooltip(Slider.Range);
@@ -62,12 +63,7 @@ export default class ViewerToolbar extends Component {
                 featuresScale[i]
             ) {
                 levels = true;
-                let midScalePerc =
-                    (1 -
-                        (customScale[i][1] + customScale[i][0]) /
-                            2 /
-                            featuresScale[i]) *
-                    100;
+                const midScale = 1 - R.mean(customScale[i]) / featuresScale[i];
                 return (
                     <TooltipRange
                         vertical
@@ -79,20 +75,14 @@ export default class ViewerToolbar extends Component {
                         }}
                         trackStyle={[
                             {
-                                background:
-                                    'linear-gradient(' + colors[i] + ', black)',
+                                background: `linear-gradient(${colors[i]}, black)`,
                             },
                         ]}
                         handleStyle={[{ border: '2px solid ' + colors[i] }]}
                         railStyle={{
-                            background:
-                                'linear-gradient(' +
-                                colors[i] +
-                                ' ' +
-                                midScalePerc +
-                                '%, black ' +
-                                midScalePerc +
-                                '%)',
+                            background: `linear-gradient(${colors[i]}, ${
+                                midScale * 100
+                            }%, black ${midScale * 100}%)`,
                         }}
                         max={featuresScale[i]}
                         defaultValue={val}
