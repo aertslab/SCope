@@ -642,12 +642,14 @@ class Loom:
             return self.nUMI
         if self.has_ca_attr(name="nUMI"):
             return self.loom_connection.ca.nUMI
+        if self.has_ca_attr(name="n_counts"):
+            return self.loom_connection.ca.n_counts
         # Compute nUMI on the fly
         # TODO: Add case here for large files. Sum across 1mio rows takes a very long time to compute
         # Possibly faster fix totals = ds.map([np.sum], axis=1)[0]
 
         calc_nUMI_start_time = time.time()
-        self.nUMI = self.loom_connection[:, :].sum(axis=0)
+        self.nUMI = self.loom_connection.map([np.sum], axis=1)[0]
         logger.debug("{0:.5f} seconds elapsed (calculating nUMI) ---".format(time.time() - calc_nUMI_start_time))
         return self.nUMI
 
