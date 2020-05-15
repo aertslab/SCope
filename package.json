@@ -63,6 +63,7 @@
         "pixi.js": "^4.6.2",
         "protobufjs": "^6.9.0",
         "public-ip": "^2.4.0",
+        "ramda": "^0.27.0",
         "rc-slider": "^8.6.0",
         "react": "^16.2.0",
         "react-addons-css-transition-group": "^15.6.2",
