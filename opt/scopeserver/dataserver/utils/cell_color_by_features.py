@@ -172,19 +172,15 @@ class CellColorByFeatures:
                 clusteringID = str(clustering["id"])
                 if request.feature[n] == "All Clusters":
                     numClusters = max(self.loom.get_clustering_by_id(clusteringID))
-                    self.legend = set()
+                    legend = set()
                     clustering_meta = self.loom.get_meta_data_clustering_by_id(int(clusteringID), secret=secret)
                     cluster_dict = {int(x["id"]): x["description"] for x in clustering_meta["clusters"]}
                     for i in self.loom.get_clustering_by_id(clusteringID):
-                        if i >= len(constant.BIG_COLOR_LIST):
-                            colour = constant.BIG_COLOR_LIST[i % len(constant.BIG_COLOR_LIST)]
-                        else:
-                            colour = constant.BIG_COLOR_LIST[i]
+                        colour = constant.BIG_COLOR_LIST[i % len(constant.BIG_COLOR_LIST)]
                         self.hex_vec.append(colour)
-                        self.legend.add((cluster_dict[i], colour))
-                    self.legend = s_pb2.ColorLegend(
-                        values=[x[0] for x in self.legend], colors=[x[1] for x in self.legend]
-                    )
+                        legend.add((cluster_dict[i], colour))
+                    values, colors = zip(*legend)
+                    self.legend = s_pb2.ColorLegend(values=values, colors=colors)
                     if len(request.annotation) > 0:
                         cellIndices = self.loom.get_anno_cells(annotations=request.annotation, logic=request.logic)
                         self.hex_vec = np.array(self.hex_vec)[cellIndices]
