@@ -50,6 +50,12 @@ class LoomFileHandler:
                 f.seek(-last_n_kb * 1024, 2)
             return hashlib.md5(f.read() + file_path.encode("ASCII")).hexdigest()
 
+    def drop_loom(self, loom_file_path: str) -> str:
+        loom = self.get_loom(loom_file_path=loom_file_path).get_connection().close()
+        abs_file_path = self.get_loom_absolute_file_path(loom_file_path)
+        del self.active_looms[abs_file_path]
+        return abs_file_path
+
     def change_loom_mode(self, loom_file_path: str, mode: str = "r", partial_md5_hash: str = None):
         abs_file_path = self.get_loom_absolute_file_path(loom_file_path)
         if partial_md5_hash is None:
