@@ -31,7 +31,7 @@ jobs:
 
             - name: Run pylint
               run: |
-                ${HOME}/.poetry/bin/poetry run pylint-fail-under --fail_under "6.6" --rcfile pyproject.toml scopeserver main.py
+                ${HOME}/.poetry/bin/poetry run pylint-fail-under --fail_under "6.7" --rcfile pyproject.toml scopeserver main.py
               working-directory: ${{ env.working-directory }}
 
             - name: Run black
@@ -46,7 +46,7 @@ jobs:
 
             - name: Run pytest
               run: |
-                ${HOME}/.poetry/bin/poetry run pytest --cov=scopeserver --cov-branch --cov-fail-under=25 test/
+                ${HOME}/.poetry/bin/poetry run pytest --cov=scopeserver --cov-branch --cov-fail-under=27 test/
               working-directory: ${{ env.working-directory }}
 
             - name: Run safety security checks
