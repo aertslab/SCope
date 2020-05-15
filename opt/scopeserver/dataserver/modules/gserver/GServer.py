@@ -795,10 +795,22 @@ class SCope(s_pb2_grpc.MainServicer):
         finalPath = os.path.join(self.dfh.get_data_dirs()[request.fileType]["path"], request.UUID, basename)
         if self.dfh.current_UUIDs[request.UUID][1] == "rw":
             if os.path.isfile(finalPath) and (basename.endswith(".loom") or basename.endswith(".txt")):
-                logger.info(f"File {request.filePath} deleted at request of user with UUID {request.UUID}.")
                 try:
+                    if basename.endswith(".loom"):
+                        loom = self.lfh.get_loom(loom_file_path=request.filePath).get_connection().close()
+                        abs_file_path = self.lfh.get_loom_absolute_file_path(request.filePath)
+                        del self.lfh.active_looms[abs_file_path]
+                        try:
+                            partial_md5_hash = self.lfh.get_partial_md5_hash(abs_file_path, 10000)
+                            os.remove(os.path.join(os.path.dirname(abs_file_path), partial_md5_hash + ".ss_pkl"))
+                        except:
+                            logger.error(
+                                f"Could not find associated search space pickle when deleting {request.filePath}"
+                            )
                     os.remove(finalPath)
                     success = True
+                    logger.info(f"File {request.filePath} deleted at request of user with UUID {request.UUID}.")
+
                 except Exception as e:
                     logger.error(f"OS Error, couldn't remove file: {finalPath}")
                     logger.error(e)
