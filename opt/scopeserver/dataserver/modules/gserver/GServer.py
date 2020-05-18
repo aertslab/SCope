@@ -400,10 +400,18 @@ class SCope(s_pb2_grpc.MainServicer):
         clustering_meta = loom.get_meta_data_clustering_by_id(
             request.clusteringID, secret=self.config["dataHashSecret"]
         )
+        max_cluster = max([int(x["id"]) for x in clustering_meta["clusters"]])
+        min_cluster = min([int(x["id"]) for x in clustering_meta["clusters"]])
+
         if request.direction == "next":
             next_clusterID = request.clusterID + 1
         elif request.direction == "previous":
             next_clusterID = request.clusterID - 1
+
+        if next_clusterID > max_cluster:
+            next_clusterID = min_cluster
+        elif next_clusterID < min_cluster:
+            next_clusterID = max_cluster
 
         try:
             cluster_metadata = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(
