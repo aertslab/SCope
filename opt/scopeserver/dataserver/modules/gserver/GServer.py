@@ -397,6 +397,9 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getNextCluster(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        clustering_meta = loom.get_meta_data_clustering_by_id(
+            request.clusteringID, secret=self.config["dataHashSecret"]
+        )
         if request.direction == "next":
             next_clusterID = request.clusterID + 1
         elif request.direction == "previous":
@@ -412,10 +415,16 @@ class SCope(s_pb2_grpc.MainServicer):
             )
 
         f = self.get_features(loom=loom, query=cluster_metadata["description"])
+
+        for n, featureType in enumerate(f["featureType"]):
+            if featureType == f"Clustering: {clustering_meta['name']}":
+                clustering_index = n
+                break
+
         return s_pb2.FeatureReply(
-            feature=[f["feature"][0]],
-            featureType=[f["featureType"][0]],
-            featureDescription=[f["featureDescription"][0]],
+            feature=[f["feature"][clustering_index]],
+            featureType=[f["featureType"][clustering_index]],
+            featureDescription=[f["featureDescription"][clustering_index]],
         )
 
     def getCellMetaData(self, request, context):
