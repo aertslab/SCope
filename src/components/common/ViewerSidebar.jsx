@@ -329,7 +329,7 @@ class ViewerSidebar extends Component {
                             <Input
                                 ref={this.state.newAnnoRef}
                                 style={{
-                                    'margin-bottom': '5px',
+                                    marginBottom: '5px',
                                     width: '100%',
                                 }}
                                 placeholder={activeFeatures[i].feature}
@@ -419,7 +419,13 @@ class ViewerSidebar extends Component {
                     return column;
                 };
 
-                let newCellTypeAnnoColumn = (header, id, accessor, cell) => {
+                let newCellTypeAnnoColumn = (
+                    header,
+                    id,
+                    accessor,
+                    cell,
+                    sortMethod
+                ) => {
                     let column = {
                         Header: header,
                         id: id,
@@ -431,6 +437,9 @@ class ViewerSidebar extends Component {
 
                     if (cell != null) {
                         column['Cell'] = (props) => cell(props);
+                    }
+                    if (sortMethod != null) {
+                        column['sortMethod'] = sortMethod;
                     }
                     return column;
                 };
@@ -673,19 +682,45 @@ class ViewerSidebar extends Component {
                                 </div>,
                                 'annotation',
                                 'annotation',
-                                newCellTypeAnnoTableOboCell
+                                newCellTypeAnnoTableOboCell,
+                                (a, b) => {
+                                    if (
+                                        a.annotation_label ===
+                                        b.annotation_label
+                                    ) {
+                                        return 0;
+                                    }
+                                    return a.annotation_label >
+                                        b.annotation_label
+                                        ? 1
+                                        : -1;
+                                }
                             ),
                             newCellTypeAnnoColumn(
                                 'Curator',
                                 'orcid_info',
                                 'orcid_info',
-                                newCellTypeAnnoTableCuratorCell
+                                newCellTypeAnnoTableCuratorCell,
+                                (a, b) => {
+                                    if (a.curator_name === b.curator_name) {
+                                        return 0;
+                                    }
+                                    return a.curator_name > b.curator_name
+                                        ? 1
+                                        : -1;
+                                }
                             ),
                             newCellTypeAnnoColumn(
                                 'Endorsements',
                                 'votes',
                                 'votes',
-                                newCellTypeAnnoTableVotesCell
+                                newCellTypeAnnoTableVotesCell,
+                                (a, b) => {
+                                    if (a.totVotes === b.totVotes) {
+                                        return 0;
+                                    }
+                                    return a.totVotes > b.totVotes ? 1 : -1;
+                                }
                             ),
                         ];
 
@@ -701,6 +736,9 @@ class ViewerSidebar extends Component {
                                     votes: {
                                         votes_for: a.votes_for,
                                         votes_against: a.votes_against,
+                                        totVotes:
+                                            a.votes_for.total -
+                                            a.votes_against.total,
                                         data: a.data,
                                     },
                                 };
