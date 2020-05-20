@@ -42,6 +42,7 @@ service Main {
   rpc setColabAnnotationData (setColabAnnotationDataRequest) returns (setColabAnnotationDataReply) {}
   rpc voteAnnotation (voteAnnotationRequest) returns (voteAnnotationReply) {}
   rpc getNextCluster (getNextClusterRequest) returns (FeatureReply) {} 
+  rpc addNewClustering (AddNewClusteringRequest) returns (AddNewClusteringReply) {}
 }
 
 message ErrorReply {
@@ -510,4 +511,20 @@ message getNextClusterRequest {
   int32 clusteringID=2;
   int32 clusterID=3;
   string direction=4;
+}
+
+message NewClusterInfo {
+  repeated string cellIDs=1;
+  repeated string clusterIDs=2;
+  string clusteringName=3;
+}
+
+message AddNewClusteringRequest {
+  string loomFilePath=1;
+  orcidInfoMessage orcidInfo=2;
+  NewClusterInfo clusterInfo=3;
+}
+
+message AddNewClusteringReply {
+  bool success=1;
 }

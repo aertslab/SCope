@@ -6,11 +6,9 @@ import {
     Menu,
     Icon,
     Input,
-    Image,
     Divider,
     Checkbox,
     Dropdown,
-    Grid,
     Dimmer,
     Loader,
     Progress,
@@ -21,6 +19,7 @@ import Slider, { Range } from 'rc-slider';
 import ReactGA from 'react-ga';
 import FileDownloader from '../js/http';
 import Alert from 'react-popup';
+import OptionsPopup from './common/OptionsPopup';
 
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
 const TooltipSlider = createSliderWithTooltip(Slider);
@@ -278,6 +277,7 @@ class AppSidebar extends Component {
                                     className='pointer'
                                 />
                             )}
+                            {canRemove && <OptionsPopup />}
                             {file.loomDisplayName}
                         </Menu.Item>
                     </Link>

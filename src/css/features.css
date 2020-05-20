@@ -1,49 +1,57 @@
-.ui.category.search>.results {
-	overflow-y: auto;
-	max-height: 550px;
-	width: auto;
-	float: none;
+.ui.category.search > .results {
+    overflow-y: auto;
+    max-height: 550px;
+    width: auto;
+    float: none;
 }
 
-.ui.category.search>.results .category>.name {
-	width: auto;
-	float: none;
+.ui.category.search > .results .category > .name {
+    width: auto;
+    float: none;
 }
 
 a.active.item.annotation {
-	font-weight: bold !important;
+    font-weight: bold !important;
 }
 
 .noFrame {
-	padding: 0px !important;
+    padding: 0px !important;
 }
 
 .highlight-enter {
-	background: white;
+    background: white;
 }
 
 .highlight-enter.highlight-enter-active {
-	background: yellow;
+    background: yellow;
 }
 
 .highlight-leave {
-	background: yellow;
-	opacity: 1;
+    background: yellow;
+    opacity: 1;
 }
 
 .highlight-leave.highlight-leave-active {
-	background: white;
-	opacity: 0;
-	transition: opacity 10ms ease-in;
+    background: white;
+    opacity: 0;
+    transition: opacity 10ms ease-in;
 }
 
 .ui.modal.transition.visible.active.collab-anno {
-	margin-top: 2% !important;
-	position: absolute;
-	left: 30%;
-	/* transform: translate(-50%, -50%); */
+    margin-top: 2% !important;
+    position: absolute;
+    left: 30%;
+    /* transform: translate(-50%, -50%); */
 }
 
-.collab-anno-drop>.search {
-	width: 100% !important;
+.collab-anno-drop > .search {
+    width: 100% !important;
+}
+
+.ui.modal.transition.visible.active.clustering-add {
+    margin-top: 2% !important;
+    position: absolute;
+    left: 30%;
+    z-index: 10;
+    /* transform: translate(-50%, -50%); */
 }
