@@ -99,8 +99,9 @@ export default class ClusteringAddPopup extends Component {
                 if (response.success == true) {
                     this.closeModal();
                     // Maybe we can auto load the new clustering
+                } else if (response.success == false) {
+                    alert(response.message);
                 }
-                console.log(response);
             });
         });
     };
