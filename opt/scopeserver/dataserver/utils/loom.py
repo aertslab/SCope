@@ -365,12 +365,20 @@ class Loom:
         self.update_metadata(metaJson)
 
         cellIDs = list(self.get_cell_ids())
-        chosenCells = [cellIDs.index(cell) for cell in request.clusterInfo.cellIDs]
+
+        missing_cells = set()
+        chosen_cells = []
+        new_cluster_ids = []
+        for cell, cluster in zip(request.clusterInfo.cellIDs, request.clusterInfo.clusterIDs):
+            try:
+                chosen_cells.append(cellIDs.index(cell))
+                new_cluster_ids.append(all_clust_dict[cluster])
+            except IndexError:
+                missing_cells.add(cell)
 
         clusterings = pd.DataFrame(self.loom_connection.ca.Clusterings)
         clusterings[str(new_clustering_id)] = -1
-        new_cluster_ids = [all_clust_dict[x] for x in request.clusterInfo.clusterIDs]
-        clusterings.loc[chosenCells, str(new_clustering_id)] = new_cluster_ids
+        clusterings.loc[chosen_cells, str(new_clustering_id)] = new_cluster_ids
 
         new_clusterings = Loom.dfToNamedMatrix(clusterings)
 
@@ -384,7 +392,7 @@ class Loom:
         )
         loom = self.loom_connection
 
-        if loom.ca.Clusterings[str(new_clustering_id)][chosenCells] == request.clusterInfo.clusterIDs:
+        if loom.ca.Clusterings[str(new_clustering_id)][chosen_cells] == request.clusterInfo.clusterIDs:
             logger.debug("Success")
             return True, "Success"
         else:
