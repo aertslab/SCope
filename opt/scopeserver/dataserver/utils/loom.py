@@ -357,7 +357,7 @@ class Loom:
             clustDict: Dict[str, Any] = {}
             clustDict["id"] = n
             clustDict["description"] = i if annotated else f"Unannotated Cluster {i}"
-            all_clust_dict[i] = n
+            all_clust_dict[str(i)] = n
             cluster_meta["clusters"].append(clustDict)
 
         metaJson["clusterings"].append(cluster_meta)
