@@ -373,7 +373,7 @@ class Loom:
             try:
                 chosen_cells.append(cellIDs.index(cell))
                 new_cluster_ids.append(all_clust_dict[cluster])
-            except IndexError:
+            except ValueError:
                 missing_cells.add(cell)
 
         clusterings = pd.DataFrame(self.loom_connection.ca.Clusterings)
