@@ -84,7 +84,7 @@ class Loom:
 
     @staticmethod
     def dfToNamedMatrix(df):
-        arr_ip = [tuple(i) for i in df.as_matrix()]
+        arr_ip = [tuple(i) for i in df.values]
         dtyp = np.dtype(list(zip(df.dtypes.index, df.dtypes)))
         arr = np.array(arr_ip, dtype=dtyp)
         return arr
@@ -424,7 +424,7 @@ class Loom:
         metaJson = {}
 
         def dfToNamedMatrix(df):
-            arr_ip = [tuple(i) for i in df.as_matrix()]
+            arr_ip = [tuple(i) for i in df.values]
             dtyp = np.dtype(list(zip(df.dtypes.index, df.dtypes)))
             arr = np.array(arr_ip, dtype=dtyp)
             return arr
