@@ -316,6 +316,81 @@ class Loom:
             logger.debug("Failure")
             return (False, "Metadata was not correct after re-reading file")
 
+    def add_user_clustering(self, request) -> Tuple[bool, str]:
+        logger.info("Adding user clustering for {0}".format(self.get_abs_file_path()))
+
+        if not self.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
+            logger.error(
+                f"AUTHENTICATION FAILURE: {self.file_path}, user: {request.orcidInfo.orcidID}, uuid: {request.orcidInfo.orcidUUID}"
+            )
+            return (False, "Could not confirm user")
+
+        metaJson = self.get_meta_data()
+
+        new_clustering_id = max([int(x["id"]) for x in metaJson["clusterings"]]) + 1
+
+        new_clustering_name = (
+            f"{request.orcidInfo.orcidID} ({request.orcidInfo.orcidName}) - {request.clusterInfo.clusteringName}"
+        )
+        if new_clustering_name in (x["name"] for x in metaJson["clusterings"]):
+            logger.error(f"Clustering name {new_clustering_name} already exists in {self.abs_file_path}")
+            return (False, "That clustering name already exists in this file. Please choose another name.")
+
+        cluster_meta: Dict[str, Any] = {
+            "id": new_clustering_id,
+            "group": f"{request.orcidInfo.orcidID} ({request.orcidInfo.orcidName})",
+            "name": new_clustering_name,
+            "clusters": [],
+            "clusterMarkerMetrics": [],
+        }
+
+        try:
+            clusters_list = sorted(list(set([int(c) for c in request.clusterInfo.clusterIDs])))
+            annotated = False
+        except ValueError:
+            clusters_list = sorted(list(set([c for c in request.clusterInfo.clusterIDs])))
+            annotated = True
+
+        all_clust_dict = {}
+
+        for n, i in enumerate(clusters_list):
+            clustDict: Dict[str, Any] = {}
+            clustDict["id"] = n
+            clustDict["description"] = i if annotated else f"Unannotated Cluster {i}"
+            all_clust_dict[i] = n
+            cluster_meta["clusters"].append(clustDict)
+
+        metaJson["clusterings"].append(cluster_meta)
+
+        self.update_metadata(metaJson)
+
+        cellIDs = list(self.get_cell_ids())
+        chosenCells = [cellIDs.index(cell) for cell in request.clusterInfo.cellIDs]
+
+        clusterings = pd.DataFrame(self.loom_connection.ca.Clusterings)
+        clusterings[str(new_clustering_id)] = -1
+        new_cluster_ids = [all_clust_dict[x] for x in request.clusterInfo.clusterIDs]
+        clusterings.loc[chosenCells, str(new_clustering_id)] = new_cluster_ids
+
+        new_clusterings = Loom.dfToNamedMatrix(clusterings)
+
+        self.loom_connection = self.lfh.change_loom_mode(
+            self.file_path, mode="r+", partial_md5_hash=self.partial_md5_hash
+        )
+        loom = self.loom_connection
+        loom.ca.Clusterings = new_clusterings
+        self.loom_connection = self.lfh.change_loom_mode(
+            self.file_path, mode="r", partial_md5_hash=self.partial_md5_hash
+        )
+        loom = self.loom_connection
+
+        if loom.ca.Clusterings[str(new_clustering_id)][chosenCells] == request.clusterInfo.clusterIDs:
+            logger.debug("Success")
+            return True, "Success"
+        else:
+            logger.debug("Failure")
+            return False, "Clusterings are not as entered"
+
     def set_hierarchy(self, L1: str, L2: str, L3: str) -> bool:
         logger.info("Changing hierarchy name for {0}".format(self.get_abs_file_path()))
 
