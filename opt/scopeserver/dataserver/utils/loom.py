@@ -374,6 +374,9 @@ class Loom:
             except ValueError:
                 missing_cells.add(cell)
 
+        if len(chosen_cells) == 0:
+            return (False, "No cells matched this dataset")
+
         clusterings = pd.DataFrame(self.loom_connection.ca.Clusterings)
         clusterings[str(new_clustering_id)] = -1
         clusterings.loc[chosen_cells, str(new_clustering_id)] = new_cluster_ids
@@ -391,12 +394,13 @@ class Loom:
         )
         loom = self.loom_connection
 
-        if loom.ca.Clusterings[str(new_clustering_id)][chosen_cells] == request.clusterInfo.clusterIDs:
+        try:
+            new_clusetring_data = self.get_clustering_by_id(new_clustering_id)
             logger.debug("Success")
-            return True, "Success"
-        else:
+            return (True, "Success")
+        except IndexError:
             logger.debug("Failure")
-            return False, "Clusterings are not as entered"
+            return (False, "Updated clusterings do not exist in file. Write error.")
 
     def set_hierarchy(self, L1: str, L2: str, L3: str) -> bool:
         logger.info("Changing hierarchy name for {0}".format(self.get_abs_file_path()))
