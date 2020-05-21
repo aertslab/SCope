@@ -362,8 +362,6 @@ class Loom:
 
         metaJson["clusterings"].append(cluster_meta)
 
-        self.update_metadata(metaJson)
-
         cellIDs = list(self.get_cell_ids())
 
         missing_cells = set()
@@ -387,6 +385,7 @@ class Loom:
         )
         loom = self.loom_connection
         loom.ca.Clusterings = new_clusterings
+        loom.attrs["MetaData"] = json.dumps(metaJson)
         self.loom_connection = self.lfh.change_loom_mode(
             self.file_path, mode="r", partial_md5_hash=self.partial_md5_hash
         )
