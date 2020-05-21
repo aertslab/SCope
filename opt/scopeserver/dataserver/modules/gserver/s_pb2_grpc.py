@@ -139,6 +139,11 @@ class MainStub(object):
             request_serializer=s__pb2.getNextClusterRequest.SerializeToString,
             response_deserializer=s__pb2.FeatureReply.FromString,
         )
+        self.addNewClustering = channel.unary_unary(
+            "/scope.Main/addNewClustering",
+            request_serializer=s__pb2.AddNewClusteringRequest.SerializeToString,
+            response_deserializer=s__pb2.AddNewClusteringReply.FromString,
+        )
 
 
 class MainServicer(object):
@@ -294,6 +299,12 @@ class MainServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def addNewClustering(self, request, context):
+        """Missing associated documentation comment in .proto file"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
 
 def add_MainServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -421,6 +432,11 @@ def add_MainServicer_to_server(servicer, server):
             servicer.getNextCluster,
             request_deserializer=s__pb2.getNextClusterRequest.FromString,
             response_serializer=s__pb2.FeatureReply.SerializeToString,
+        ),
+        "addNewClustering": grpc.unary_unary_rpc_method_handler(
+            servicer.addNewClustering,
+            request_deserializer=s__pb2.AddNewClusteringRequest.FromString,
+            response_serializer=s__pb2.AddNewClusteringReply.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler("scope.Main", rpc_method_handlers)
@@ -1097,6 +1113,33 @@ class Main(object):
             "/scope.Main/getNextCluster",
             s__pb2.getNextClusterRequest.SerializeToString,
             s__pb2.FeatureReply.FromString,
+            options,
+            channel_credentials,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def addNewClustering(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/scope.Main/addNewClustering",
+            s__pb2.AddNewClusteringRequest.SerializeToString,
+            s__pb2.AddNewClusteringReply.FromString,
             options,
             channel_credentials,
             call_credentials,

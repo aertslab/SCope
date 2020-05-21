@@ -499,6 +499,11 @@ class SCope(s_pb2_grpc.MainServicer):
         success, message = loom.add_collab_annotation(request, self.config["dataHashSecret"])
         return s_pb2.setColabAnnotationDataReply(success=success, message=message)
 
+    def addNewClustering(self, request, context):
+        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        success, message = loom.add_user_clustering(request)
+        return s_pb2.AddNewClusteringReply(success=True, message=message)
+
     def voteAnnotation(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
         success, message = loom.annotation_vote(request, self.config["dataHashSecret"])
