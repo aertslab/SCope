@@ -87,9 +87,9 @@ export default class ClusteringAddPopup extends Component {
             let query = {
                 loomFilePath: BackendAPI.getActiveLoom(),
                 orcidInfo: {
-                    orcidName: this.state.orcid_name,
-                    orcidID: this.state.orcid_id,
-                    orcidUUID: this.state.orcid_uuid,
+                    orcidName: this.props.orcid_name,
+                    orcidID: this.props.orcid_id,
+                    orcidUUID: this.props.orcid_uuid,
                 },
                 clusterInfo: this.state.newclusterInfo,
             };
