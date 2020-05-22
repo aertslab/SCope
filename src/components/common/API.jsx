@@ -574,7 +574,8 @@ class API {
             let loomMetadata = this.getActiveLoomMetadata();
             let clusteringID, clusterID, cellTypeAnno;
             loomMetadata.cellMetaData.clusterings.map((clustering) => {
-                if (featureType.indexOf(clustering.name) != -1) {
+                const clusteringName = featureType.replace('Clustering: ', '');
+                if (clusteringName == clustering.name) {
                     clusteringID = clustering.id;
                     clustering.clusters.map((c) => {
                         if (c.description == feature) {
