@@ -25,9 +25,8 @@ export default class ClusteringAddPopup extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            submitError: false,
+            status: 'ready',
             showModal: false,
-            dataError: false,
             clusteringName: '',
         };
     }
@@ -54,25 +53,24 @@ export default class ClusteringAddPopup extends Component {
 
         cols.delete(0);
         if (cols.size != 1) {
-            this.setState({ dataError: true });
+            this.setState({ status: 'dataError' });
             console.log(cols);
             alert(
                 'Mismatched column lengths, please select a correctly formatted file!'
             );
         } else if (!cols.has(2)) {
             console.log(cols);
-            this.setState({ dataError: true });
+            this.setState({ status: 'dataError' });
             alert(
                 'Incorrect number of columns, please select a correctly formatted file!'
             );
         } else {
             const clusterInfo = _.zip(...data);
             this.setState({
-                dataError: false,
+                status: 'ready',
                 newclusterInfo: {
                     cellIDs: clusterInfo[0],
                     clusterIDs: clusterInfo[1],
-                    clusteringName: this.state.clusteringName,
                 },
             });
         }
@@ -97,20 +95,58 @@ export default class ClusteringAddPopup extends Component {
                 },
             };
             if (DEBUG) console.log('addNewClustering', query);
-            gbc.services.scope.Main.addNewClustering(query, (err, response) => {
-                if (DEBUG) console.log('addNewClustering', response);
-                if (response.success == true) {
-                    this.closeModal();
-                    // Maybe we can auto load the new clustering
-                } else if (response.success == false) {
-                    alert(response.message);
-                }
+            this.setState({ status: 'processing' }, () => {
+                gbc.services.scope.Main.addNewClustering(
+                    query,
+                    (err, response) => {
+                        this.setState({ status: 'ready' });
+                        if (DEBUG) console.log('addNewClustering', response);
+                        if (response.success == true) {
+                            this.closeModal();
+                            // Maybe we can auto load the new clustering
+                        } else if (response.success == false) {
+                            alert(response.message);
+                        }
+                    }
+                );
             });
         });
     };
 
+    getButtonDisabledStatus = () => {
+        const enabledStatuses = ['ready'];
+        if (
+            enabledStatuses.includes(this.state.status) &&
+            this.state.newclusterInfo &&
+            this.state.clusteringName != ''
+        ) {
+            return false;
+        } else {
+            return true;
+        }
+    };
+
+    getButtonText = () => {
+        console.log(this.state.status);
+        if (this.state.status == 'ready') {
+            return (
+                <React.Fragment>
+                    Submit Clustering... <Icon name='chevron right' />
+                </React.Fragment>
+            );
+        } else if (this.state.status == 'processing') {
+            return (
+                <React.Fragment>
+                    <Icon loading name='spinner' /> Processing
+                </React.Fragment>
+            );
+        } else if (this.state.status == 'dataError') {
+            return 'Bad file!';
+        }
+    };
+
     render() {
-        const { showModal, submitError, dataError } = this.state;
+        const { showModal, status } = this.state;
 
         let cardStyle = {
             display: 'block',
@@ -128,7 +164,7 @@ export default class ClusteringAddPopup extends Component {
         };
 
         let clusteringModal = () => {
-            const { orcid_name, orcid_id, orcid_uuid } = this.props;
+            const { orcid_name, orcid_id } = this.props;
             return (
                 <React.Fragment>
                     <Modal
@@ -224,17 +260,9 @@ export default class ClusteringAddPopup extends Component {
                                     type='submit'
                                     value='submit'
                                     onClick={(e) => this.sendData(e)}
-                                    disabled={
-                                        dataError || !this.state.newclusterInfo
-                                    }
-                                    primary
-                                    color={dataError ? 'red' : 'blue'}>
-                                    {dataError
-                                        ? 'Bad File!'
-                                        : this.state.newclusterInfo
-                                        ? 'Submit Clustering'
-                                        : 'No file selected.'}
-                                    <Icon name='right chevron' />
+                                    disabled={this.getButtonDisabledStatus()}
+                                    primary>
+                                    {this.getButtonText()}
                                 </Button>
                             )}
                         </Modal.Actions>
