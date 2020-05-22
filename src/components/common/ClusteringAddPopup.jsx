@@ -204,12 +204,7 @@ export default class ClusteringAddPopup extends Component {
                                         </label>
                                         <input
                                             disabled
-                                            value={
-                                                orcid_id +
-                                                ' (' +
-                                                orcid_name +
-                                                ')'
-                                            }
+                                            value={`${orcid_id} (${orcid_name})`}
                                         />
                                     </Form.Field>
                                 </CardContent>
