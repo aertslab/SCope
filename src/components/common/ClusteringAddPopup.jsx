@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { withRouter, Link } from 'react-router-dom';
 import {
     Icon,
     Popup,
@@ -13,13 +12,9 @@ import {
     Input,
 } from 'semantic-ui-react';
 import { BackendAPI } from './API';
-import Alert from 'react-popup';
 import _ from 'lodash';
 
 import CSVReader from 'react-csv-reader';
-
-import { instanceOf } from 'prop-types';
-import { withCookies, Cookies } from 'react-cookie';
 
 export default class ClusteringAddPopup extends Component {
     constructor(props) {
