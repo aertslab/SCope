@@ -227,7 +227,6 @@ class ViewerSidebar extends Component {
                         <br />
                     </div>
                 );
-            console.log(activeFeatures[i]);
             if (activeFeatures[i] && activeFeatures[i].metadata) {
                 let image = '';
                 let md = activeFeatures[i].metadata;
