@@ -178,12 +178,6 @@ export default class ClusteringAddPopup extends Component {
                                             onChange={
                                                 this.onClusteringNameChange
                                             }
-                                            label={
-                                                orcid_id +
-                                                ' (' +
-                                                orcid_name +
-                                                ') - '
-                                            }
                                             value={this.state.clusteringName}
                                             placeholder='Name of clustering'
                                         />
