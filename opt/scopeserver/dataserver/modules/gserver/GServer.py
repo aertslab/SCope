@@ -485,7 +485,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def addNewClustering(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
         success, message = loom.add_user_clustering(request)
-        return s_pb2.AddNewClusteringReply(success=True, message=message)
+        return s_pb2.AddNewClusteringReply(success=success, message=message)
 
     def voteAnnotation(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
