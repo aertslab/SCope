@@ -395,7 +395,7 @@ class Loom:
         loom = self.loom_connection
 
         try:
-            new_clusetring_data = self.get_clustering_by_id(new_clustering_id)
+            new_clustering_data = self.get_clustering_by_id(new_clustering_id)
             logger.debug("Success")
             return (True, "Success")
         except IndexError:
