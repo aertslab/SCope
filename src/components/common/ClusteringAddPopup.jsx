@@ -81,6 +81,12 @@ export default class ClusteringAddPopup extends Component {
             alert('You must enter a name for your clustering!');
             return;
         }
+        const retVal = confirm(
+            `Are you sure you want to add this new clustering?\n\n--> ${this.state.clusteringName} <--\n\nThis is a PERMANENT change!`
+        );
+        if (retVal == false) {
+            return;
+        }
         BackendAPI.getConnection().then((gbc) => {
             let query = {
                 loomFilePath: BackendAPI.getActiveLoom(),
