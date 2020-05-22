@@ -91,7 +91,10 @@ export default class ClusteringAddPopup extends Component {
                     orcidID: this.props.orcid_id,
                     orcidUUID: this.props.orcid_uuid,
                 },
-                clusterInfo: this.state.newclusterInfo,
+                clusterInfo: {
+                    ...{ clusteringName: this.state.clusteringName },
+                    ...this.state.newclusterInfo,
+                },
             };
             if (DEBUG) console.log('addNewClustering', query);
             gbc.services.scope.Main.addNewClustering(query, (err, response) => {
