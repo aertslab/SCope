@@ -329,9 +329,7 @@ class Loom:
 
         new_clustering_id = max([int(x["id"]) for x in metaJson["clusterings"]]) + 1
 
-        new_clustering_name = (
-            f"{request.orcidInfo.orcidID} ({request.orcidInfo.orcidName}) - {request.clusterInfo.clusteringName}"
-        )
+        new_clustering_name = f"{request.clusterInfo.clusteringName}"
         if new_clustering_name in (x["name"] for x in metaJson["clusterings"]):
             logger.error(f"Clustering name {new_clustering_name} already exists in {self.abs_file_path}")
             return (False, "That clustering name already exists in this file. Please choose another name.")
