@@ -2,7 +2,7 @@ import numpy as np
 import json
 import zlib
 import base64
-from functools import lru_cache
+from methodtools import lru_cache
 import pandas as pd
 import time
 import hashlib
