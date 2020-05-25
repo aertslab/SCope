@@ -946,6 +946,12 @@ export default class Viewer extends Component {
             this.renderer.height /
             (d3.max(this.state.coord.y) - d3.min(this.state.coord.y));
         this.scalingFactor = Math.floor(d3.min([min, max])) - 1;
+        if (this.scalingFactor <= 0) {
+            console.warn(
+                '[WARNING] Scaling factor is zero or negative! The factor will be set to 1.'
+            );
+            this.scalingFactor = 1;
+        }
     }
 
     initializeDataPoints(stillLoading) {
