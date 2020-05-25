@@ -977,6 +977,9 @@ def serve(run_event, config: Dict[str, Any]) -> None:
     while run_event.is_set():
         time.sleep(0.1)
 
+    for loom in scope.lfh.active_looms.values():
+        loom.get_connection().close()
+
     # Write UUIDs to file here
     scope.dfh.get_uuid_log().close()
     scope.dfh.update_UUID_db()
