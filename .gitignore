@@ -16,7 +16,6 @@
 
 .coverage
 
-/**/*lock.json
 *.pptx
 *.save
 *.spec
