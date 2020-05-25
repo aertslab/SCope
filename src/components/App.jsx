@@ -17,7 +17,7 @@ import {
     Dimmer,
     Loader,
     Button,
-    Icon
+    Icon,
 } from 'semantic-ui-react';
 
 import AppHeader from './AppHeader';
@@ -44,7 +44,7 @@ const sidebarCookieName = 'SCOPE_SIDEBAR';
 
 class App extends Component {
     static propTypes = {
-        cookies: instanceOf(Cookies).isRequired
+        cookies: instanceOf(Cookies).isRequired,
     };
 
     constructor() {
@@ -59,7 +59,7 @@ class App extends Component {
             orcid_active: true,
             orcid_data: null,
             cookiesAllowed: false,
-            cookieBannerRef: React.createRef()
+            cookieBannerRef: React.createRef(),
         };
 
         BackendAPI.getORCIDStatus((active) => {
@@ -82,7 +82,7 @@ class App extends Component {
     acceptCookies = () => {
         this.props.cookies.set('CookieConsent', 'true');
         this.props.cookies.set(cookieName, this.props.match.params.uuid, {
-            path: '/'
+            path: '/',
         });
         this.setState({ cookiesAllowed: true });
     };
@@ -93,7 +93,7 @@ class App extends Component {
             error,
             loaded,
             isSidebarVisible,
-            sessionsLimitReached
+            sessionsLimitReached,
         } = this.state;
 
         const { isLoading } = this.props;
@@ -176,15 +176,15 @@ class App extends Component {
 
         let sidebarStyle = {
             root: {
-                position: 'relative'
+                position: 'relative',
             },
             content: {
-                position: 'relative'
+                position: 'relative',
             },
             sidebar: {
                 position: 'absolute',
-                zIndex: 2
-            }
+                zIndex: 2,
+            },
         };
 
         return (
@@ -466,7 +466,7 @@ class App extends Component {
         BackendAPI.getConnection().then(
             (gbc) => {
                 let query = {
-                    ip: ip
+                    ip: ip,
                 };
                 if (DEBUG) console.log('getUUID', query);
                 gbc.services.scope.Main.getUUID(query, (err, response) => {
@@ -488,12 +488,12 @@ class App extends Component {
                 let query = {
                     ip: ip,
                     UUID: uuid,
-                    mouseEvents: this.mouseClicks
+                    mouseEvents: this.mouseClicks,
                 };
                 gbc.ws.onclose = (err) => {
                     ReactGA.event({
                         category: 'errors',
-                        action: 'socket closed'
+                        action: 'socket closed',
                     });
                     this.setState({ error: true });
                 };
@@ -507,7 +507,8 @@ class App extends Component {
                         if (response.sessionsLimitReached) {
                             this.props.setLoading(false);
                             this.setState({
-                                sessionsLimitReached: true
+                                loading: false,
+                                sessionsLimitReached: true,
                             });
                         } else {
                             this.timeout = response
@@ -518,7 +519,7 @@ class App extends Component {
                                 this.props.setLoading(false);
                                 this.setState({
                                     uuid: uuid,
-                                    sessionMode: response.sessionMode
+                                    sessionMode: response.sessionMode,
                                 });
                                 BackendAPI.setSessionMode(response.sessionMode);
                             }
@@ -558,7 +559,7 @@ class App extends Component {
                                         [
                                             uuid,
                                             encodeURIComponent(loom),
-                                            encodeURIComponent(page)
+                                            encodeURIComponent(page),
                                         ].join('/')
                                 );
                             }
@@ -580,14 +581,14 @@ class App extends Component {
         let state = !this.state.isSidebarVisible;
         if (this.state.cookiesAllowed) {
             this.props.cookies.set(sidebarCookieName, state ? 1 : 0, {
-                path: '/'
+                path: '/',
             });
         }
         this.setState({ isSidebarVisible: state });
         ReactGA.event({
             category: 'settings',
             action: 'toggle sidebar',
-            label: state ? 'on' : 'off'
+            label: state ? 'on' : 'off',
         });
     }
 
@@ -624,7 +625,7 @@ class App extends Component {
                                 [
                                     uuid,
                                     encodeURIComponent(settings.loom),
-                                    encodeURIComponent(settings.page)
+                                    encodeURIComponent(settings.page),
                                 ].join('/')
                         );
                         BackendAPI.forceUpdate();

@@ -43,6 +43,8 @@ class ErrorReply(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["message", b"message", "type", b"type"]) -> None: ...
 
+global___ErrorReply = ErrorReply
+
 class CellColorByFeaturesRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
@@ -53,9 +55,12 @@ class CellColorByFeaturesRequest(google___protobuf___message___Message):
     threshold = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
     scaleThresholded = ...  # type: builtin___bool
     vmax = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
+    vmin = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
     logic = ...  # type: typing___Text
     @property
-    def annotation(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[Annotation]: ...
+    def annotation(
+        self,
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___Annotation]: ...
     def __init__(
         self,
         *,
@@ -66,8 +71,9 @@ class CellColorByFeaturesRequest(google___protobuf___message___Message):
         hasCpmTransform: typing___Optional[builtin___bool] = None,
         threshold: typing___Optional[typing___Iterable[builtin___float]] = None,
         scaleThresholded: typing___Optional[builtin___bool] = None,
-        annotation: typing___Optional[typing___Iterable[Annotation]] = None,
+        annotation: typing___Optional[typing___Iterable[global___Annotation]] = None,
         vmax: typing___Optional[typing___Iterable[builtin___float]] = None,
+        vmin: typing___Optional[typing___Iterable[builtin___float]] = None,
         logic: typing___Optional[typing___Text] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
@@ -103,8 +109,12 @@ class CellColorByFeaturesRequest(google___protobuf___message___Message):
             b"threshold",
             "vmax",
             b"vmax",
+            "vmin",
+            b"vmin",
         ],
     ) -> None: ...
+
+global___CellColorByFeaturesRequest = CellColorByFeaturesRequest
 
 class ColorLegend(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -126,6 +136,8 @@ class ColorLegend(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["colors", b"colors", "values", b"values"]) -> None: ...
 
+global___ColorLegend = ColorLegend
+
 class CellColorByFeaturesReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     hasAddCompressionLayer = ...  # type: builtin___bool
@@ -135,9 +147,9 @@ class CellColorByFeaturesReply(google___protobuf___message___Message):
     maxVmax = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
     cellIndices = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int]
     @property
-    def legend(self) -> ColorLegend: ...
+    def legend(self) -> global___ColorLegend: ...
     @property
-    def error(self) -> ErrorReply: ...
+    def error(self) -> global___ErrorReply: ...
     def __init__(
         self,
         *,
@@ -147,8 +159,8 @@ class CellColorByFeaturesReply(google___protobuf___message___Message):
         vmax: typing___Optional[typing___Iterable[builtin___float]] = None,
         maxVmax: typing___Optional[typing___Iterable[builtin___float]] = None,
         cellIndices: typing___Optional[typing___Iterable[builtin___int]] = None,
-        legend: typing___Optional[ColorLegend] = None,
-        error: typing___Optional[ErrorReply] = None,
+        legend: typing___Optional[global___ColorLegend] = None,
+        error: typing___Optional[global___ErrorReply] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -185,6 +197,8 @@ class CellColorByFeaturesReply(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___CellColorByFeaturesReply = CellColorByFeaturesReply
+
 class CellAUCValuesByFeaturesRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
@@ -214,6 +228,8 @@ class CellAUCValuesByFeaturesRequest(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___CellAUCValuesByFeaturesRequest = CellAUCValuesByFeaturesRequest
+
 class CellAUCValuesByFeaturesReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     value = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
@@ -229,6 +245,8 @@ class CellAUCValuesByFeaturesReply(google___protobuf___message___Message):
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["value", b"value"]) -> None: ...
+
+global___CellAUCValuesByFeaturesReply = CellAUCValuesByFeaturesReply
 
 class FeatureRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -250,6 +268,8 @@ class FeatureRequest(google___protobuf___message___Message):
     def ClearField(
         self, field_name: typing_extensions___Literal["loomFilePath", b"loomFilePath", "query", b"query"]
     ) -> None: ...
+
+global___FeatureRequest = FeatureRequest
 
 class CellMetaDataRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -307,6 +327,8 @@ class CellMetaDataRequest(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___CellMetaDataRequest = CellMetaDataRequest
+
 class FeatureReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     feature = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
@@ -338,19 +360,23 @@ class FeatureReply(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___FeatureReply = FeatureReply
+
 class CoordinatesRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
     coordinatesID = ...  # type: builtin___int
     logic = ...  # type: typing___Text
     @property
-    def annotation(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[Annotation]: ...
+    def annotation(
+        self,
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___Annotation]: ...
     def __init__(
         self,
         *,
         loomFilePath: typing___Optional[typing___Text] = None,
         coordinatesID: typing___Optional[builtin___int] = None,
-        annotation: typing___Optional[typing___Iterable[Annotation]] = None,
+        annotation: typing___Optional[typing___Iterable[global___Annotation]] = None,
         logic: typing___Optional[typing___Text] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
@@ -376,6 +402,8 @@ class CoordinatesRequest(google___protobuf___message___Message):
             b"loomFilePath",
         ],
     ) -> None: ...
+
+global___CoordinatesRequest = CoordinatesRequest
 
 class CoordinatesReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -403,6 +431,8 @@ class CoordinatesReply(google___protobuf___message___Message):
         self, field_name: typing_extensions___Literal["cellIndices", b"cellIndices", "x", b"x", "y", b"y"]
     ) -> None: ...
 
+global___CoordinatesReply = CoordinatesReply
+
 class Annotation(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     name = ...  # type: typing___Text
@@ -423,6 +453,8 @@ class Annotation(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["name", b"name", "values", b"values"]) -> None: ...
 
+global___Annotation = Annotation
+
 class Coordinate(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     x = ...  # type: builtin___float
@@ -439,6 +471,8 @@ class Coordinate(google___protobuf___message___Message):
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["x", b"x", "y", b"y"]) -> None: ...
+
+global___Coordinate = Coordinate
 
 class Edge(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -457,21 +491,23 @@ class Edge(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["source", b"source", "target", b"target"]) -> None: ...
 
+global___Edge = Edge
+
 class Trajectory(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     nodes = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
     @property
-    def edges(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[Edge]: ...
+    def edges(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___Edge]: ...
     @property
     def coordinates(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[Coordinate]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___Coordinate]: ...
     def __init__(
         self,
         *,
         nodes: typing___Optional[typing___Iterable[typing___Text]] = None,
-        edges: typing___Optional[typing___Iterable[Edge]] = None,
-        coordinates: typing___Optional[typing___Iterable[Coordinate]] = None,
+        edges: typing___Optional[typing___Iterable[global___Edge]] = None,
+        coordinates: typing___Optional[typing___Iterable[global___Coordinate]] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -486,18 +522,20 @@ class Trajectory(google___protobuf___message___Message):
         field_name: typing_extensions___Literal["coordinates", b"coordinates", "edges", b"edges", "nodes", b"nodes"],
     ) -> None: ...
 
+global___Trajectory = Trajectory
+
 class Embedding(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     id = ...  # type: builtin___int
     name = ...  # type: typing___Text
     @property
-    def trajectory(self) -> Trajectory: ...
+    def trajectory(self) -> global___Trajectory: ...
     def __init__(
         self,
         *,
         id: typing___Optional[builtin___int] = None,
         name: typing___Optional[typing___Text] = None,
-        trajectory: typing___Optional[Trajectory] = None,
+        trajectory: typing___Optional[global___Trajectory] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -511,6 +549,8 @@ class Embedding(google___protobuf___message___Message):
     def ClearField(
         self, field_name: typing_extensions___Literal["id", b"id", "name", b"name", "trajectory", b"trajectory"]
     ) -> None: ...
+
+global___Embedding = Embedding
 
 class ClusterMarkerMetric(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -540,6 +580,8 @@ class ClusterMarkerMetric(google___protobuf___message___Message):
             "accessor", b"accessor", "description", b"description", "name", b"name"
         ],
     ) -> None: ...
+
+global___ClusterMarkerMetric = ClusterMarkerMetric
 
 class CollabAnnoData(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -599,6 +641,8 @@ class CollabAnnoData(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___CollabAnnoData = CollabAnnoData
+
 class CollabAnnoVoter(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     voter_name = ...  # type: typing___Text
@@ -628,18 +672,20 @@ class CollabAnnoVoter(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___CollabAnnoVoter = CollabAnnoVoter
+
 class CollabAnnoVotes(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     total = ...  # type: builtin___int
     @property
     def voters(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[CollabAnnoVoter]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___CollabAnnoVoter]: ...
     def __init__(
         self,
         *,
         total: typing___Optional[builtin___int] = None,
-        voters: typing___Optional[typing___Iterable[CollabAnnoVoter]] = None,
+        voters: typing___Optional[typing___Iterable[global___CollabAnnoVoter]] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -653,22 +699,24 @@ class CollabAnnoVotes(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["total", b"total", "voters", b"voters"]) -> None: ...
 
+global___CollabAnnoVotes = CollabAnnoVotes
+
 class CellTypeAnnotation(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     validate_hash = ...  # type: builtin___bool
     @property
-    def data(self) -> CollabAnnoData: ...
+    def data(self) -> global___CollabAnnoData: ...
     @property
-    def votes_for(self) -> CollabAnnoVotes: ...
+    def votes_for(self) -> global___CollabAnnoVotes: ...
     @property
-    def votes_against(self) -> CollabAnnoVotes: ...
+    def votes_against(self) -> global___CollabAnnoVotes: ...
     def __init__(
         self,
         *,
-        data: typing___Optional[CollabAnnoData] = None,
+        data: typing___Optional[global___CollabAnnoData] = None,
         validate_hash: typing___Optional[builtin___bool] = None,
-        votes_for: typing___Optional[CollabAnnoVotes] = None,
-        votes_against: typing___Optional[CollabAnnoVotes] = None,
+        votes_for: typing___Optional[global___CollabAnnoVotes] = None,
+        votes_against: typing___Optional[global___CollabAnnoVotes] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -700,6 +748,8 @@ class CellTypeAnnotation(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___CellTypeAnnotation = CellTypeAnnotation
+
 class ClusterAnnotation(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     id = ...  # type: builtin___int
@@ -707,13 +757,13 @@ class ClusterAnnotation(google___protobuf___message___Message):
     @property
     def cell_type_annotation(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[CellTypeAnnotation]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___CellTypeAnnotation]: ...
     def __init__(
         self,
         *,
         id: typing___Optional[builtin___int] = None,
         description: typing___Optional[typing___Text] = None,
-        cell_type_annotation: typing___Optional[typing___Iterable[CellTypeAnnotation]] = None,
+        cell_type_annotation: typing___Optional[typing___Iterable[global___CellTypeAnnotation]] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -732,6 +782,8 @@ class ClusterAnnotation(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___ClusterAnnotation = ClusterAnnotation
+
 class Clustering(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     id = ...  # type: builtin___int
@@ -740,19 +792,19 @@ class Clustering(google___protobuf___message___Message):
     @property
     def clusterMarkerMetrics(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[ClusterMarkerMetric]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___ClusterMarkerMetric]: ...
     @property
     def clusters(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[ClusterAnnotation]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___ClusterAnnotation]: ...
     def __init__(
         self,
         *,
         id: typing___Optional[builtin___int] = None,
         group: typing___Optional[typing___Text] = None,
         name: typing___Optional[typing___Text] = None,
-        clusterMarkerMetrics: typing___Optional[typing___Iterable[ClusterMarkerMetric]] = None,
-        clusters: typing___Optional[typing___Iterable[ClusterAnnotation]] = None,
+        clusterMarkerMetrics: typing___Optional[typing___Iterable[global___ClusterMarkerMetric]] = None,
+        clusters: typing___Optional[typing___Iterable[global___ClusterAnnotation]] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -778,24 +830,28 @@ class Clustering(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___Clustering = Clustering
+
 class CellMetaData(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     @property
     def annotations(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[Annotation]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___Annotation]: ...
     @property
-    def embeddings(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[Embedding]: ...
+    def embeddings(
+        self,
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___Embedding]: ...
     @property
     def clusterings(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[Clustering]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___Clustering]: ...
     def __init__(
         self,
         *,
-        annotations: typing___Optional[typing___Iterable[Annotation]] = None,
-        embeddings: typing___Optional[typing___Iterable[Embedding]] = None,
-        clusterings: typing___Optional[typing___Iterable[Clustering]] = None,
+        annotations: typing___Optional[typing___Iterable[global___Annotation]] = None,
+        embeddings: typing___Optional[typing___Iterable[global___Embedding]] = None,
+        clusterings: typing___Optional[typing___Iterable[global___Clustering]] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -813,6 +869,8 @@ class CellMetaData(google___protobuf___message___Message):
             "annotations", b"annotations", "clusterings", b"clusterings", "embeddings", b"embeddings"
         ],
     ) -> None: ...
+
+global___CellMetaData = CellMetaData
 
 class AUCThreshold(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -834,6 +892,8 @@ class AUCThreshold(google___protobuf___message___Message):
     def ClearField(
         self, field_name: typing_extensions___Literal["name", b"name", "threshold", b"threshold"]
     ) -> None: ...
+
+global___AUCThreshold = AUCThreshold
 
 class RegulonGenesMetric(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -866,6 +926,8 @@ class RegulonGenesMetric(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___RegulonGenesMetric = RegulonGenesMetric
+
 class Regulon(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     genes = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
@@ -874,19 +936,19 @@ class Regulon(google___protobuf___message___Message):
     @property
     def autoThresholds(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[AUCThreshold]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___AUCThreshold]: ...
     @property
     def metrics(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[RegulonGenesMetric]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___RegulonGenesMetric]: ...
     def __init__(
         self,
         *,
         genes: typing___Optional[typing___Iterable[typing___Text]] = None,
-        autoThresholds: typing___Optional[typing___Iterable[AUCThreshold]] = None,
+        autoThresholds: typing___Optional[typing___Iterable[global___AUCThreshold]] = None,
         defaultThreshold: typing___Optional[typing___Text] = None,
         motifName: typing___Optional[typing___Text] = None,
-        metrics: typing___Optional[typing___Iterable[RegulonGenesMetric]] = None,
+        metrics: typing___Optional[typing___Iterable[global___RegulonGenesMetric]] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -911,6 +973,8 @@ class Regulon(google___protobuf___message___Message):
             b"motifName",
         ],
     ) -> None: ...
+
+global___Regulon = Regulon
 
 class FileMetaData(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -958,6 +1022,8 @@ class FileMetaData(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___FileMetaData = FileMetaData
+
 class FeatureValues(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     features = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
@@ -973,6 +1039,8 @@ class FeatureValues(google___protobuf___message___Message):
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["features", b"features"]) -> None: ...
+
+global___FeatureValues = FeatureValues
 
 class CellAnnotations(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -990,6 +1058,8 @@ class CellAnnotations(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["annotations", b"annotations"]) -> None: ...
 
+global___CellAnnotations = CellAnnotations
+
 class CellClusters(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     clusters = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int]
@@ -1006,31 +1076,33 @@ class CellClusters(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["clusters", b"clusters"]) -> None: ...
 
+global___CellClusters = CellClusters
+
 class CellMetaDataReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     @property
     def clusterIDs(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[CellClusters]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___CellClusters]: ...
     @property
     def geneExpression(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[FeatureValues]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___FeatureValues]: ...
     @property
     def aucValues(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[FeatureValues]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___FeatureValues]: ...
     @property
     def annotations(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[CellAnnotations]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___CellAnnotations]: ...
     def __init__(
         self,
         *,
-        clusterIDs: typing___Optional[typing___Iterable[CellClusters]] = None,
-        geneExpression: typing___Optional[typing___Iterable[FeatureValues]] = None,
-        aucValues: typing___Optional[typing___Iterable[FeatureValues]] = None,
-        annotations: typing___Optional[typing___Iterable[CellAnnotations]] = None,
+        clusterIDs: typing___Optional[typing___Iterable[global___CellClusters]] = None,
+        geneExpression: typing___Optional[typing___Iterable[global___FeatureValues]] = None,
+        aucValues: typing___Optional[typing___Iterable[global___FeatureValues]] = None,
+        annotations: typing___Optional[typing___Iterable[global___CellAnnotations]] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -1056,6 +1128,8 @@ class CellMetaDataReply(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___CellMetaDataReply = CellMetaDataReply
+
 class RegulonMetaDataRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
@@ -1080,11 +1154,13 @@ class RegulonMetaDataRequest(google___protobuf___message___Message):
         self, field_name: typing_extensions___Literal["loomFilePath", b"loomFilePath", "regulon", b"regulon"]
     ) -> None: ...
 
+global___RegulonMetaDataRequest = RegulonMetaDataRequest
+
 class RegulonMetaDataReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     @property
-    def regulonMeta(self) -> Regulon: ...
-    def __init__(self, *, regulonMeta: typing___Optional[Regulon] = None,) -> None: ...
+    def regulonMeta(self) -> global___Regulon: ...
+    def __init__(self, *, regulonMeta: typing___Optional[global___Regulon] = None,) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> RegulonMetaDataReply: ...
@@ -1097,6 +1173,8 @@ class RegulonMetaDataReply(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal["regulonMeta", b"regulonMeta"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal["regulonMeta", b"regulonMeta"]) -> None: ...
+
+global___RegulonMetaDataReply = RegulonMetaDataReply
 
 class MarkerGenesRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1126,6 +1204,8 @@ class MarkerGenesRequest(google___protobuf___message___Message):
             "clusterID", b"clusterID", "clusteringID", b"clusteringID", "loomFilePath", b"loomFilePath"
         ],
     ) -> None: ...
+
+global___MarkerGenesRequest = MarkerGenesRequest
 
 class MarkerGenesMetric(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1158,18 +1238,20 @@ class MarkerGenesMetric(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___MarkerGenesMetric = MarkerGenesMetric
+
 class MarkerGenesReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     genes = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
     @property
     def metrics(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[MarkerGenesMetric]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___MarkerGenesMetric]: ...
     def __init__(
         self,
         *,
         genes: typing___Optional[typing___Iterable[typing___Text]] = None,
-        metrics: typing___Optional[typing___Iterable[MarkerGenesMetric]] = None,
+        metrics: typing___Optional[typing___Iterable[global___MarkerGenesMetric]] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -1182,6 +1264,8 @@ class MarkerGenesReply(google___protobuf___message___Message):
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["genes", b"genes", "metrics", b"metrics"]) -> None: ...
+
+global___MarkerGenesReply = MarkerGenesReply
 
 class MyLoomsRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1201,6 +1285,8 @@ class MyLoomsRequest(google___protobuf___message___Message):
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["UUID", b"UUID", "loomFile", b"loomFile"]) -> None: ...
+
+global___MyLoomsRequest = MyLoomsRequest
 
 class LoomHeierarchy(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1226,26 +1312,28 @@ class LoomHeierarchy(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["L1", b"L1", "L2", b"L2", "L3", b"L3"]) -> None: ...
 
+global___LoomHeierarchy = LoomHeierarchy
+
 class MyLoom(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
     loomDisplayName = ...  # type: typing___Text
     loomSize = ...  # type: builtin___int
     @property
-    def cellMetaData(self) -> CellMetaData: ...
+    def cellMetaData(self) -> global___CellMetaData: ...
     @property
-    def fileMetaData(self) -> FileMetaData: ...
+    def fileMetaData(self) -> global___FileMetaData: ...
     @property
-    def loomHeierarchy(self) -> LoomHeierarchy: ...
+    def loomHeierarchy(self) -> global___LoomHeierarchy: ...
     def __init__(
         self,
         *,
         loomFilePath: typing___Optional[typing___Text] = None,
         loomDisplayName: typing___Optional[typing___Text] = None,
         loomSize: typing___Optional[builtin___int] = None,
-        cellMetaData: typing___Optional[CellMetaData] = None,
-        fileMetaData: typing___Optional[FileMetaData] = None,
-        loomHeierarchy: typing___Optional[LoomHeierarchy] = None,
+        cellMetaData: typing___Optional[global___CellMetaData] = None,
+        fileMetaData: typing___Optional[global___FileMetaData] = None,
+        loomHeierarchy: typing___Optional[global___LoomHeierarchy] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -1279,15 +1367,19 @@ class MyLoom(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___MyLoom = MyLoom
+
 class MyLoomsReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     update = ...  # type: builtin___bool
     @property
-    def myLooms(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[MyLoom]: ...
+    def myLooms(
+        self,
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___MyLoom]: ...
     def __init__(
         self,
         *,
-        myLooms: typing___Optional[typing___Iterable[MyLoom]] = None,
+        myLooms: typing___Optional[typing___Iterable[global___MyLoom]] = None,
         update: typing___Optional[builtin___bool] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
@@ -1303,6 +1395,8 @@ class MyLoomsReply(google___protobuf___message___Message):
     def ClearField(
         self, field_name: typing_extensions___Literal["myLooms", b"myLooms", "update", b"update"]
     ) -> None: ...
+
+global___MyLoomsReply = MyLoomsReply
 
 class TranslateLassoSelectionRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1338,6 +1432,8 @@ class TranslateLassoSelectionRequest(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___TranslateLassoSelectionRequest = TranslateLassoSelectionRequest
+
 class TranslateLassoSelectionReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     cellIndices = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int]
@@ -1353,6 +1449,8 @@ class TranslateLassoSelectionReply(google___protobuf___message___Message):
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["cellIndices", b"cellIndices"]) -> None: ...
+
+global___TranslateLassoSelectionReply = TranslateLassoSelectionReply
 
 class CellIDsRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1378,6 +1476,8 @@ class CellIDsRequest(google___protobuf___message___Message):
         self, field_name: typing_extensions___Literal["cellIndices", b"cellIndices", "loomFilePath", b"loomFilePath"]
     ) -> None: ...
 
+global___CellIDsRequest = CellIDsRequest
+
 class CellIDsReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     cellIds = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
@@ -1393,6 +1493,8 @@ class CellIDsReply(google___protobuf___message___Message):
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["cellIds", b"cellIds"]) -> None: ...
+
+global___CellIDsReply = CellIDsReply
 
 class GeneSetEnrichmentRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1423,6 +1525,8 @@ class GeneSetEnrichmentRequest(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___GeneSetEnrichmentRequest = GeneSetEnrichmentRequest
+
 class Progress(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     value = ...  # type: builtin___float
@@ -1440,19 +1544,21 @@ class Progress(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["status", b"status", "value", b"value"]) -> None: ...
 
+global___Progress = Progress
+
 class GeneSetEnrichmentReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     isDone = ...  # type: builtin___bool
     @property
-    def progress(self) -> Progress: ...
+    def progress(self) -> global___Progress: ...
     @property
-    def cellValues(self) -> CellColorByFeaturesReply: ...
+    def cellValues(self) -> global___CellColorByFeaturesReply: ...
     def __init__(
         self,
         *,
-        progress: typing___Optional[Progress] = None,
+        progress: typing___Optional[global___Progress] = None,
         isDone: typing___Optional[builtin___bool] = None,
-        cellValues: typing___Optional[CellColorByFeaturesReply] = None,
+        cellValues: typing___Optional[global___CellColorByFeaturesReply] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -1473,6 +1579,8 @@ class GeneSetEnrichmentReply(google___protobuf___message___Message):
             "cellValues", b"cellValues", "isDone", b"isDone", "progress", b"progress"
         ],
     ) -> None: ...
+
+global___GeneSetEnrichmentReply = GeneSetEnrichmentReply
 
 class VmaxRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1514,6 +1622,8 @@ class VmaxRequest(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___VmaxRequest = VmaxRequest
+
 class VmaxReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     vmax = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
@@ -1534,6 +1644,8 @@ class VmaxReply(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["maxVmax", b"maxVmax", "vmax", b"vmax"]) -> None: ...
 
+global___VmaxReply = VmaxReply
+
 class UUIDRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     ip = ...  # type: typing___Text
@@ -1548,6 +1660,8 @@ class UUIDRequest(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["ip", b"ip"]) -> None: ...
 
+global___UUIDRequest = UUIDRequest
+
 class UUIDReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     UUID = ...  # type: typing___Text
@@ -1561,6 +1675,8 @@ class UUIDReply(google___protobuf___message___Message):
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["UUID", b"UUID"]) -> None: ...
+
+global___UUIDReply = UUIDReply
 
 class RemainingUUIDTimeRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1587,6 +1703,8 @@ class RemainingUUIDTimeRequest(google___protobuf___message___Message):
     def ClearField(
         self, field_name: typing_extensions___Literal["UUID", b"UUID", "ip", b"ip", "mouseEvents", b"mouseEvents"]
     ) -> None: ...
+
+global___RemainingUUIDTimeRequest = RemainingUUIDTimeRequest
 
 class RemainingUUIDTimeReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1626,6 +1744,8 @@ class RemainingUUIDTimeReply(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___RemainingUUIDTimeReply = RemainingUUIDTimeReply
+
 class LoomUploadedRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     UUID = ...  # type: typing___Text
@@ -1645,6 +1765,8 @@ class LoomUploadedRequest(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["UUID", b"UUID", "filename", b"filename"]) -> None: ...
 
+global___LoomUploadedRequest = LoomUploadedRequest
+
 class LoomUploadedReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     def __init__(self,) -> None: ...
@@ -1658,6 +1780,8 @@ class LoomUploadedReply(google___protobuf___message___Message):
         ) -> LoomUploadedReply: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+
+global___LoomUploadedReply = LoomUploadedReply
 
 class MyGeneSet(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1684,6 +1808,8 @@ class MyGeneSet(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___MyGeneSet = MyGeneSet
+
 class MyGeneSetsRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     UUID = ...  # type: typing___Text
@@ -1700,11 +1826,15 @@ class MyGeneSetsRequest(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["UUID", b"UUID"]) -> None: ...
 
+global___MyGeneSetsRequest = MyGeneSetsRequest
+
 class MyGeneSetsReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     @property
-    def myGeneSets(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[MyGeneSet]: ...
-    def __init__(self, *, myGeneSets: typing___Optional[typing___Iterable[MyGeneSet]] = None,) -> None: ...
+    def myGeneSets(
+        self,
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___MyGeneSet]: ...
+    def __init__(self, *, myGeneSets: typing___Optional[typing___Iterable[global___MyGeneSet]] = None,) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> MyGeneSetsReply: ...
@@ -1716,6 +1846,8 @@ class MyGeneSetsReply(google___protobuf___message___Message):
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["myGeneSets", b"myGeneSets"]) -> None: ...
+
+global___MyGeneSetsReply = MyGeneSetsReply
 
 class DeleteUserFileRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1743,6 +1875,8 @@ class DeleteUserFileRequest(google___protobuf___message___Message):
         self, field_name: typing_extensions___Literal["UUID", b"UUID", "filePath", b"filePath", "fileType", b"fileType"]
     ) -> None: ...
 
+global___DeleteUserFileRequest = DeleteUserFileRequest
+
 class DeleteUserFileReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     deletedSuccessfully = ...  # type: builtin___bool
@@ -1760,6 +1894,8 @@ class DeleteUserFileReply(google___protobuf___message___Message):
     def ClearField(
         self, field_name: typing_extensions___Literal["deletedSuccessfully", b"deletedSuccessfully"]
     ) -> None: ...
+
+global___DeleteUserFileReply = DeleteUserFileReply
 
 class DownloadSubLoomRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1803,23 +1939,25 @@ class DownloadSubLoomRequest(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___DownloadSubLoomRequest = DownloadSubLoomRequest
+
 class DownloadSubLoomReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
     loomFileSize = ...  # type: builtin___int
     isDone = ...  # type: builtin___bool
     @property
-    def progress(self) -> Progress: ...
+    def progress(self) -> global___Progress: ...
     @property
-    def error(self) -> ErrorReply: ...
+    def error(self) -> global___ErrorReply: ...
     def __init__(
         self,
         *,
         loomFilePath: typing___Optional[typing___Text] = None,
         loomFileSize: typing___Optional[builtin___int] = None,
-        progress: typing___Optional[Progress] = None,
+        progress: typing___Optional[global___Progress] = None,
         isDone: typing___Optional[builtin___bool] = None,
-        error: typing___Optional[ErrorReply] = None,
+        error: typing___Optional[global___ErrorReply] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -1849,6 +1987,8 @@ class DownloadSubLoomReply(google___protobuf___message___Message):
             b"progress",
         ],
     ) -> None: ...
+
+global___DownloadSubLoomReply = DownloadSubLoomReply
 
 class SetAnnotationNameRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1888,6 +2028,8 @@ class SetAnnotationNameRequest(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___SetAnnotationNameRequest = SetAnnotationNameRequest
+
 class SetAnnotationNameReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     success = ...  # type: builtin___bool
@@ -1903,6 +2045,8 @@ class SetAnnotationNameReply(google___protobuf___message___Message):
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["success", b"success"]) -> None: ...
+
+global___SetAnnotationNameReply = SetAnnotationNameReply
 
 class SetLoomHierarchyRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1942,6 +2086,8 @@ class SetLoomHierarchyRequest(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___SetLoomHierarchyRequest = SetLoomHierarchyRequest
+
 class SetLoomHierarchyReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     success = ...  # type: builtin___bool
@@ -1958,6 +2104,8 @@ class SetLoomHierarchyReply(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["success", b"success"]) -> None: ...
 
+global___SetLoomHierarchyReply = SetLoomHierarchyReply
+
 class getORCIDRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     auth_code = ...  # type: typing___Text
@@ -1973,6 +2121,8 @@ class getORCIDRequest(google___protobuf___message___Message):
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["auth_code", b"auth_code"]) -> None: ...
+
+global___getORCIDRequest = getORCIDRequest
 
 class getORCIDReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -2005,6 +2155,8 @@ class getORCIDReply(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___getORCIDReply = getORCIDReply
+
 class getORCIDStatusRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     def __init__(self,) -> None: ...
@@ -2018,6 +2170,8 @@ class getORCIDStatusRequest(google___protobuf___message___Message):
         ) -> getORCIDStatusRequest: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+
+global___getORCIDStatusRequest = getORCIDStatusRequest
 
 class getORCIDStatusReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -2034,6 +2188,8 @@ class getORCIDStatusReply(google___protobuf___message___Message):
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def ClearField(self, field_name: typing_extensions___Literal["active", b"active"]) -> None: ...
+
+global___getORCIDStatusReply = getORCIDStatusReply
 
 class orcidInfoMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -2064,23 +2220,25 @@ class orcidInfoMessage(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___orcidInfoMessage = orcidInfoMessage
+
 class setColabAnnotationDataRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
     clusteringID = ...  # type: builtin___int
     clusterID = ...  # type: builtin___int
     @property
-    def orcidInfo(self) -> orcidInfoMessage: ...
+    def orcidInfo(self) -> global___orcidInfoMessage: ...
     @property
-    def annoData(self) -> CollabAnnoData: ...
+    def annoData(self) -> global___CollabAnnoData: ...
     def __init__(
         self,
         *,
         loomFilePath: typing___Optional[typing___Text] = None,
         clusteringID: typing___Optional[builtin___int] = None,
         clusterID: typing___Optional[builtin___int] = None,
-        orcidInfo: typing___Optional[orcidInfoMessage] = None,
-        annoData: typing___Optional[CollabAnnoData] = None,
+        orcidInfo: typing___Optional[global___orcidInfoMessage] = None,
+        annoData: typing___Optional[global___CollabAnnoData] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -2111,6 +2269,8 @@ class setColabAnnotationDataRequest(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___setColabAnnotationDataRequest = setColabAnnotationDataRequest
+
 class setColabAnnotationDataReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     success = ...  # type: builtin___bool
@@ -2132,6 +2292,8 @@ class setColabAnnotationDataReply(google___protobuf___message___Message):
         self, field_name: typing_extensions___Literal["message", b"message", "success", b"success"]
     ) -> None: ...
 
+global___setColabAnnotationDataReply = setColabAnnotationDataReply
+
 class voteAnnotationRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
@@ -2139,17 +2301,17 @@ class voteAnnotationRequest(google___protobuf___message___Message):
     clusterID = ...  # type: builtin___int
     direction = ...  # type: typing___Text
     @property
-    def orcidInfo(self) -> orcidInfoMessage: ...
+    def orcidInfo(self) -> global___orcidInfoMessage: ...
     @property
-    def annoData(self) -> CollabAnnoData: ...
+    def annoData(self) -> global___CollabAnnoData: ...
     def __init__(
         self,
         *,
         loomFilePath: typing___Optional[typing___Text] = None,
         clusteringID: typing___Optional[builtin___int] = None,
         clusterID: typing___Optional[builtin___int] = None,
-        orcidInfo: typing___Optional[orcidInfoMessage] = None,
-        annoData: typing___Optional[CollabAnnoData] = None,
+        orcidInfo: typing___Optional[global___orcidInfoMessage] = None,
+        annoData: typing___Optional[global___CollabAnnoData] = None,
         direction: typing___Optional[typing___Text] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
@@ -2183,6 +2345,8 @@ class voteAnnotationRequest(google___protobuf___message___Message):
         ],
     ) -> None: ...
 
+global___voteAnnotationRequest = voteAnnotationRequest
+
 class voteAnnotationReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     success = ...  # type: builtin___bool
@@ -2203,6 +2367,8 @@ class voteAnnotationReply(google___protobuf___message___Message):
     def ClearField(
         self, field_name: typing_extensions___Literal["message", b"message", "success", b"success"]
     ) -> None: ...
+
+global___voteAnnotationReply = voteAnnotationReply
 
 class getNextClusterRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -2241,3 +2407,5 @@ class getNextClusterRequest(google___protobuf___message___Message):
             b"loomFilePath",
         ],
     ) -> None: ...
+
+global___getNextClusterRequest = getNextClusterRequest

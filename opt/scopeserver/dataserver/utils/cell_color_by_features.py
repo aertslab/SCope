@@ -75,12 +75,23 @@ class CellColorByFeatures:
     def get_cell_indices(self):
         return self.cell_indices
 
-    def normalise_vals(self, vals: np.ndarray, v_max: int) -> np.ndarray:
-        vals = np.clip(vals / v_max, None, 1)
-        vals = (
-            (constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB) * ((vals - min(vals))) / (1 - min(vals))
-        ) + constant._LOWER_LIMIT_RGB
-        vals = np.clip(vals, 0, constant._UPPER_LIMIT_RGB)
+    @staticmethod
+    def normalise_vals(vals: np.ndarray, v_max: int, v_min: int) -> np.ndarray:
+        if len(vals[vals != 0]) == 0:
+            return vals
+        if v_max <= np.amin(vals[vals != 0]):
+            vals[vals != 0] = constant.UPPER_LIMIT_RGB
+            return vals
+        clipped = np.clip(vals[vals != 0], v_min, v_max)
+        vals_min = np.amin(clipped)
+        non_zeros_scaled = (constant.UPPER_LIMIT_RGB - constant.LOWER_LIMIT_RGB) * (
+            (clipped - vals_min) / (v_max - vals_min)
+        ) + (constant.LOWER_LIMIT_RGB + 1)
+
+        if np.isnan(np.dot(non_zeros_scaled, non_zeros_scaled)):
+            non_zeros_scaled = np.nan_to_num(non_zeros_scaled, 1)
+
+        vals[vals != 0] = np.clip(non_zeros_scaled, 0, constant.UPPER_LIMIT_RGB)
         return vals
 
     def setGeneFeature(self, request, feature, n):
@@ -97,7 +108,7 @@ class CellColorByFeatures:
             else:
                 self.v_max[n], self.max_v_max[n] = CellColorByFeatures.get_vmax(vals)
 
-            vals = self.normalise_vals(vals, self.v_max[n])
+            vals = CellColorByFeatures.normalise_vals(vals, self.v_max[n], request.vmin[n])
             self.features.append(vals)
         else:
             self.features.append(np.zeros(self.n_cells))
@@ -112,12 +123,12 @@ class CellColorByFeatures:
             else:
                 self.v_max[n], self.max_v_max[n] = CellColorByFeatures.get_vmax(vals)
             if request.scaleThresholded:
-                vals = [auc if auc >= request.threshold[n] else 0 for auc in vals]
+                vals = np.array([auc if auc >= request.threshold[n] else 0 for auc in vals])
 
-                vals = self.normalise_vals(vals, self.v_max[n])
+                vals = CellColorByFeatures.normalise_vals(vals, self.v_max[n], request.vmin[n])
                 self.features.append(vals)
             else:
-                self.features.append([constant._UPPER_LIMIT_RGB if auc >= request.threshold[n] else 0 for auc in vals])
+                self.features.append([constant.UPPER_LIMIT_RGB if auc >= request.threshold[n] else 0 for auc in vals])
         else:
             self.features.append(np.zeros(self.n_cells))
 
@@ -158,7 +169,7 @@ class CellColorByFeatures:
             else:
                 self.v_max[n], self.max_v_max[n] = CellColorByFeatures.get_vmax(vals)
 
-            vals = self.normalise_vals(vals, self.v_max[n])
+            vals = CellColorByFeatures.normalise_vals(vals, self.v_max[n], request.vmin[n])
             self.features.append(vals)
         else:
             self.features.append(np.zeros(self.n_cells))
@@ -172,19 +183,15 @@ class CellColorByFeatures:
                 clusteringID = str(clustering["id"])
                 if request.feature[n] == "All Clusters":
                     numClusters = max(self.loom.get_clustering_by_id(clusteringID))
-                    if numClusters <= 245:
-                        self.legend = set()
-                        clustering_meta = self.loom.get_meta_data_clustering_by_id(int(clusteringID), secret=secret)
-                        cluster_dict = {int(x["id"]): x["description"] for x in clustering_meta["clusters"]}
-                        for i in self.loom.get_clustering_by_id(clusteringID):
-                            self.hex_vec.append(constant.BIG_COLOR_LIST[i])
-                            self.legend.add((cluster_dict[i], constant.BIG_COLOR_LIST[i]))
-                        self.legend = s_pb2.ColorLegend(
-                            values=[x[0] for x in self.legend], colors=[x[1] for x in self.legend]
-                        )
-                    else:
-                        interval = int(RGB_COLORS / numClusters)
-                        self.hex_vec = [hex(i)[2:].zfill(6) for i in range(0, numClusters, interval)]
+                    legend = set()
+                    clustering_meta = self.loom.get_meta_data_clustering_by_id(int(clusteringID), secret=secret)
+                    cluster_dict = {int(x["id"]): x["description"] for x in clustering_meta["clusters"]}
+                    for i in self.loom.get_clustering_by_id(clusteringID):
+                        colour = constant.BIG_COLOR_LIST[i % len(constant.BIG_COLOR_LIST)]
+                        self.hex_vec.append(colour)
+                        legend.add((cluster_dict[i], colour))
+                    values, colors = zip(*legend)
+                    self.legend = s_pb2.ColorLegend(values=values, colors=colors)
                     if len(request.annotation) > 0:
                         cellIndices = self.loom.get_anno_cells(annotations=request.annotation, logic=request.logic)
                         self.hex_vec = np.array(self.hex_vec)[cellIndices]
@@ -207,14 +214,14 @@ class CellColorByFeatures:
 
         if clusteringID is not None and clusterID is not None:
             clusterIndices = self.loom.get_clustering_by_id(clusteringID) == clusterID
-            clusterCol = np.array([constant._UPPER_LIMIT_RGB if x else 0 for x in clusterIndices])
+            clusterCol = np.array([constant.UPPER_LIMIT_RGB if x else 0 for x in clusterIndices])
             if len(request.annotation) > 0:
                 cellIndices = self.loom.get_anno_cells(annotations=request.annotation, logic=request.logic)
                 clusterCol = clusterCol[cellIndices]
             self.features.append(clusterCol)
 
     def addEmptyFeature(self):
-        self.features.append([constant._LOWER_LIMIT_RGB for n in range(self.n_cells)])
+        self.features.append([constant.LOWER_LIMIT_RGB for n in range(self.n_cells)])
 
     def hasReply(self):
         if self.reply is not None:

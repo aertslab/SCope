@@ -13,7 +13,7 @@ const targetBehaviour = {
             props.position
         );
         return { dropped: dropped };
-    }
+    },
 };
 
 class AnnotationDropContainer extends Component {
@@ -25,7 +25,7 @@ class AnnotationDropContainer extends Component {
             height,
             activeAnnotations,
             viewerName,
-            orientation
+            orientation,
         } = this.props;
         const isActive = isOver && canDrop;
 
@@ -57,7 +57,7 @@ class AnnotationDropContainer extends Component {
                             width:
                                 orientation == 'vertical'
                                     ? height + 'px'
-                                    : 'auto'
+                                    : 'auto',
                         }}>
                         <b>
                             Drag and drop here the annotations to
@@ -98,6 +98,6 @@ export default DropTarget(
     (connect, monitor) => ({
         connectDropTarget: connect.dropTarget(),
         isOver: monitor.isOver(),
-        canDrop: monitor.canDrop()
+        canDrop: monitor.canDrop(),
     })
 )(AnnotationDropContainer);

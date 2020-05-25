@@ -12,7 +12,7 @@ export default class FeatureSearchInput extends Search {
             color,
             type,
             inputLocked = false,
-            selectLocked = false
+            selectLocked = false,
         } = this.props;
         const { value } = this.state;
         let options = this.props.options;
@@ -21,7 +21,7 @@ export default class FeatureSearchInput extends Search {
                 { key: 'all', text: 'all features', value: 'all' },
                 { key: 'gene', text: 'gene', value: 'gene' },
                 { key: 'regulon', text: 'regulon', value: 'regulon' },
-                { key: 'cluster', text: 'cluster', value: 'cluster' }
+                { key: 'cluster', text: 'cluster', value: 'cluster' },
             ];
         }
 

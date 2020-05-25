@@ -65,8 +65,8 @@ class GeneSetEnrichment:
             max_vmax[0] = _vmax[1]
             vals = aucs / vmax[0]
             vals = (
-                ((constant._UPPER_LIMIT_RGB - constant._LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))
-            ) + constant._LOWER_LIMIT_RGB
+                ((constant.UPPER_LIMIT_RGB - constant.LOWER_LIMIT_RGB) * (vals - min(vals))) / (1 - min(vals))
+            ) + constant.LOWER_LIMIT_RGB
             hex_vec = [
                 "null" if r == g == b == 0 else "{0:02x}{1:02x}{2:02x}".format(int(r), int(g), int(b))
                 for r, g, b in zip(vals, np.zeros(len(aucs)), np.zeros(len(aucs)))

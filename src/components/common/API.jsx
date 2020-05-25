@@ -49,7 +49,7 @@ class API {
 
         this.spriteSettings = {
             scale: 5,
-            alpha: 1
+            alpha: 1,
         };
         this.spriteSettingsChangeListeners = [];
 
@@ -65,7 +65,7 @@ class API {
             type: '',
             featureType: '',
             feature: '',
-            threshold: 0
+            threshold: 0,
         };
 
         this.featureChangeListeners = {};
@@ -75,7 +75,7 @@ class API {
             sortCells: true,
             hasLogTransform: true,
             hasCpmNormalization: false,
-            dissociateViewers: true
+            dissociateViewers: true,
         };
         this.settingsChangeListeners = [];
 
@@ -95,6 +95,11 @@ class API {
 
         this.maxValues = {};
         this.maxValuesChangeListeners = [];
+        this.emptyColorScale = [
+            [0, 0],
+            [0, 0],
+            [0, 0],
+        ];
         this.customValues = {};
         this.customValuesChangeListeners = [];
 
@@ -154,7 +159,7 @@ class API {
             'viewerTransform',
             'sidebarVisible',
             'maxValues',
-            'customValues'
+            'customValues',
         ];
     }
 
@@ -220,7 +225,7 @@ class API {
     obtainNewUUID(ip, onSuccess) {
         BackendAPI.getConnection().then((gbc) => {
             let query = {
-                ip: ip
+                ip: ip,
             };
             if (DEBUG) console.log('getUUIDAPI', query);
             gbc.services.scope.Main.getUUID(query, (err, response) => {
@@ -330,7 +335,7 @@ class API {
 
     queryLoomFiles(uuid, callback, loomFile = null) {
         let query = {
-            UUID: uuid
+            UUID: uuid,
         };
 
         console.log(loomFile);
@@ -401,14 +406,14 @@ class API {
         let selectedFeatures = this.features[page] || [
             this.emptyFeature,
             this.emptyFeature,
-            this.emptyFeature
+            this.emptyFeature,
         ];
         selectedFeatures[featureId] = {
             type: type,
             featureType: featureType ? featureType : '',
             feature: feature ? feature : '',
             threshold: threshold,
-            metadata: metadata
+            metadata: metadata,
         };
         this.features[page] = selectedFeatures;
         this.getMaxScale(featureId, (customValues, maxValues) => {
@@ -429,7 +434,7 @@ class API {
                 loomFilePath: loomFilePath,
                 clusteringID: clusteringID,
                 clusterID: clusterID,
-                newAnnoName: newAnnoName
+                newAnnoName: newAnnoName,
             };
             this.getConnection().then(
                 (gbc) => {
@@ -487,7 +492,7 @@ class API {
             loomFilePath: this.getActiveLoom(),
             newHierarchy_L1: L1,
             newHierarchy_L2: L2,
-            newHierarchy_L3: L3
+            newHierarchy_L3: L3,
         };
         this.getConnection().then(
             (gbc) => {
@@ -511,7 +516,7 @@ class API {
             loomFilePath: this.getActiveLoom(),
             clusteringID: clusteringID,
             clusterID: clusterID,
-            direction: direction
+            direction: direction,
         };
         this.getConnection().then((gbc) => {
             if (DEBUG) console.log('getNextCluster', query);
@@ -525,7 +530,7 @@ class API {
         if (featureType == 'regulon') {
             let regulonQuery = {
                 loomFilePath: this.getActiveLoom(),
-                regulon: feature
+                regulon: feature,
             };
             this.getConnection().then(
                 (gbc) => {
@@ -583,7 +588,7 @@ class API {
                 let markerQuery = {
                     loomFilePath: this.getActiveLoom(),
                     clusterID: clusterID,
-                    clusteringID: clusteringID
+                    clusteringID: clusteringID,
                 };
                 this.getConnection().then(
                     (gbc) => {
@@ -608,7 +613,7 @@ class API {
                                         ...markerResponse,
                                         clusterID: clusterID,
                                         clusteringID: clusteringID,
-                                        cellTypeAnno: cellTypeAnno
+                                        cellTypeAnno: cellTypeAnno,
                                     },
                                     page
                                 );
@@ -648,7 +653,7 @@ class API {
         let selectedFeatures = this.features[page] || [
             this.emptyFeature,
             this.emptyFeature,
-            this.emptyFeature
+            this.emptyFeature,
         ];
         selectedFeatures[id].threshold = threshold;
         this.features[page] = selectedFeatures;
@@ -725,8 +730,8 @@ class API {
                 annotation_label: annotationData['label'],
                 markers: annotationData['selectedMarkers'],
                 publication: annotationData['publication'],
-                comment: annotationData['comment']
-            }
+                comment: annotationData['comment'],
+            },
         };
         if (DEBUG) console.log('setColabAnnotationData', query);
         BackendAPI.getConnection().then(
@@ -780,7 +785,7 @@ class API {
             clusterID: feature.metadata['clusterID'],
             orcidInfo: orcidInfo,
             annoData: data,
-            direction: direction
+            direction: direction,
         };
         if (DEBUG) console.log('voteAnnotation', query);
         BackendAPI.getConnection().then(
@@ -839,7 +844,7 @@ class API {
                 return page == 'regulon' ? 'gene' : f.featureType;
             }),
             hasLogTransform: settings.hasLogTransform,
-            hasCpmTransform: settings.hasCpmNormalization
+            hasCpmTransform: settings.hasCpmNormalization,
         };
         if (DEBUG) console.log('getVmax', query);
         BackendAPI.getConnection().then(
@@ -847,8 +852,12 @@ class API {
                 gbc.services.scope.Main.getVmax(query, (err, response) => {
                     if (DEBUG) console.log('getVmax', response);
                     if (id != null)
-                        this.customValues[page][id] = response.vmax[id];
-                    else this.customValues[page] = response.vmax;
+                        this.customValues[page][id][1] = response.vmax[id];
+                    else
+                        this.customValues[page] = response.vmax.map((x) => [
+                            0,
+                            x,
+                        ]);
                     this.maxValues[page] = response.maxVmax;
                     this.maxValuesChangeListeners.forEach((listener) => {
                         listener(this.maxValues[page]);
@@ -904,7 +913,7 @@ class API {
                                     clusteringName: clustering.name,
                                     clusteringID: clustering.id,
                                     clusteName: c.name,
-                                    clusterID: c.id
+                                    clusterID: c.id,
                                 });
                             }
                         });
@@ -920,7 +929,7 @@ class API {
     }
 
     getCustomScale() {
-        return this.customValues[this.activePage] || [0, 0, 0];
+        return this.customValues[this.activePage] || this.emptyColorScale;
     }
 
     setCustomScale(scale) {
@@ -947,7 +956,8 @@ class API {
 
     setActivePage(page) {
         this.maxValues[page] = this.maxValues[page] || [0, 0, 0];
-        this.customValues[page] = this.customValues[page] || [0, 0, 0];
+        this.customValues[page] =
+            this.customValues[page] || this.emptyColorScale;
         this.activePage = page;
         this.activePageListeners.forEach((listener) => {
             listener(this.activePage);

@@ -15,7 +15,7 @@ import {
     Tab,
     Grid,
     Card,
-    CardContent
+    CardContent,
 } from 'semantic-ui-react';
 import { instanceOf } from 'prop-types';
 import CollabAnnoGeneSearch from './CollabAnnoGeneSearch';
@@ -24,7 +24,7 @@ import { withCookies, Cookies } from 'react-cookie';
 
 class CollaborativeAnnotation extends Component {
     static propTypes = {
-        cookies: instanceOf(Cookies).isRequired
+        cookies: instanceOf(Cookies).isRequired,
     };
 
     constructor() {
@@ -38,7 +38,7 @@ class CollaborativeAnnotation extends Component {
             showModal: false,
             freeInput: '',
             submitError: false,
-            cookiesAllowed: false
+            cookiesAllowed: false,
         };
     }
 
@@ -103,7 +103,7 @@ class CollaborativeAnnotation extends Component {
                     {
                         orcidName: this.state.orcid_name,
                         orcidID: this.state.orcid_id,
-                        orcidUUID: this.state.orcid_uuid
+                        orcidUUID: this.state.orcid_uuid,
                     },
                     this.props.match.params.uuid,
                     (response) => {
@@ -149,13 +149,13 @@ class CollaborativeAnnotation extends Component {
             orcid_name,
             orcid_id,
             orcid_uuid,
-            cookiesAllowed
+            cookiesAllowed,
         } = this.state;
 
         let cardStyle = {
             display: 'block',
             width: '100vw',
-            transitionDuration: '0.3s'
+            transitionDuration: '0.3s',
         };
 
         let olsWidget = () => {
@@ -188,7 +188,7 @@ class CollaborativeAnnotation extends Component {
                                 </a>
                             </Grid.Row>
                         </Tab.Pane>
-                    )
+                    ),
                 },
                 {
                     menuItem: 'Free Text',
@@ -200,8 +200,8 @@ class CollaborativeAnnotation extends Component {
                                 value={this.state.freeInput}
                             />
                         </Tab.Pane>
-                    )
-                }
+                    ),
+                },
             ];
 
             return (
@@ -420,7 +420,7 @@ class CollaborativeAnnotation extends Component {
             orcid_name: orcid_name,
             orcid_id: orcid_id,
             orcid_uuid: orcid_uuid,
-            cookiesAllowed: cookiesAllowed
+            cookiesAllowed: cookiesAllowed,
         });
     }
 }

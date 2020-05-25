@@ -11,7 +11,7 @@ commandExists('poetry')
         console.log('Installing SCope Data Server...');
         shell.exec('cd opt && poetry install');
     })
-    .catch(function() {
+    .catch(function () {
         console.log(
             'The poetry program does not exist. Abort. Please install it.'
         );

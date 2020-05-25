@@ -8,7 +8,7 @@ import {
     Image,
     Input,
     Popup,
-    Checkbox
+    Checkbox,
 } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
 import { instanceOf } from 'prop-types';
@@ -23,7 +23,7 @@ const cookieName = 'SCOPE_UUID';
 
 class AppHeader extends Component {
     static propTypes = {
-        cookies: instanceOf(Cookies).isRequired
+        cookies: instanceOf(Cookies).isRequired,
     };
 
     constructor(props) {
@@ -34,7 +34,7 @@ class AppHeader extends Component {
             cookies: props.cookies,
             permalinkUUID: false,
             orcid_active: true,
-            cookiesAllowed: this.props.cookiesAllowed
+            cookiesAllowed: this.props.cookiesAllowed,
         };
 
         BackendAPI.getORCIDStatus((active) => {
@@ -46,7 +46,7 @@ class AppHeader extends Component {
         this.props.cookieBannerRef.current.setState({ visible: false });
         this.props.cookies.set('CookieConsent', 'true');
         this.props.cookies.set(cookieName, this.props.match.params.uuid, {
-            path: '/'
+            path: '/',
         });
         this.setState({ cookiesAllowed: true });
     };
@@ -219,7 +219,7 @@ class AppHeader extends Component {
                                         [
                                             match.params.uuid,
                                             match.params.loom,
-                                            item.path
+                                            item.path,
                                         ].join('/')
                                     }>
                                     <Button
@@ -345,7 +345,7 @@ class AppHeader extends Component {
                 display: true,
                 path: 'welcome',
                 title: 'SCope',
-                icon: 'home'
+                icon: 'home',
             },
             /*
 			{
@@ -359,13 +359,13 @@ class AppHeader extends Component {
                 display: metadata ? true : false,
                 path: 'gene',
                 title: 'Gene',
-                icon: false
+                icon: false,
             },
             {
                 display: metadata ? true : false,
                 path: 'geneset',
                 title: 'Geneset',
-                icon: false
+                icon: false,
             },
             {
                 display:
@@ -374,26 +374,26 @@ class AppHeader extends Component {
                         : false,
                 path: 'regulon',
                 title: 'Regulon',
-                icon: false
+                icon: false,
             },
             {
                 display: metadata ? true : false,
                 path: 'compare',
                 title: 'Compare',
-                icon: false
+                icon: false,
             },
             {
                 display: true,
                 path: 'tutorial',
                 title: 'Tutorial',
-                icon: false
+                icon: false,
             },
             {
                 display: true,
                 path: 'about',
                 title: 'About',
-                icon: false
-            }
+                icon: false,
+            },
         ];
     }
 
@@ -402,7 +402,7 @@ class AppHeader extends Component {
         if (togglePermalinkUUID) {
             let state = !this.state.permalinkUUID;
             this.state.setState({
-                permalinkUUID: state
+                permalinkUUID: state,
             });
         }
         let j = JSON.stringify(

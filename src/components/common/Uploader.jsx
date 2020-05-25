@@ -50,7 +50,7 @@ export default class Uploader {
             if (DEBUG) console.log('file uploaded: ' + file.name);
         });
 
-        xhr.onreadystatechange = function() {
+        xhr.onreadystatechange = function () {
             if (xhr.readyState == 4) {
                 setTimeout(() => {
                     onUploaded(file.name, xhr.status);

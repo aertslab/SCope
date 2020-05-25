@@ -47,13 +47,13 @@ class Compare extends Component {
                 horizontal: [],
                 vertical: [],
                 both: [],
-                one: []
+                one: [],
             },
             configuration: configurationDefaultValue,
             superposition: superpositionDefaultValue,
             isConfigurationLocked: isConfigurationLocked,
             isSuperpositionLocked: isSuperpositionLocked,
-            activeLegend: null
+            activeLegend: null,
         };
 
         this.loomConf = [];
@@ -66,7 +66,7 @@ class Compare extends Component {
                 horizontal: [],
                 vertical: [],
                 both: [],
-                one: []
+                one: [],
             };
             multiLoom[0] = loom;
             multiCoordinates[0] = coordinates;
@@ -75,7 +75,7 @@ class Compare extends Component {
                 multiLoom,
                 multiCoordinates,
                 multiMetadata,
-                crossAnnotations
+                crossAnnotations,
             });
             this.rebuildLoomOptions();
         };
@@ -89,18 +89,18 @@ class Compare extends Component {
             { text: '2', value: 2 },
             { text: '4', value: 4 },
             { text: '6', value: 6 },
-            { text: '9', value: 9 }
+            { text: '9', value: 9 },
         ];
         this.superpositionConf = [
             { text: 'N/A', value: 'NA', disabled: true },
             { text: 'AND', value: 'AND' },
-            { text: 'OR', value: 'OR' }
+            { text: 'OR', value: 'OR' },
         ];
         this.configurationConf = [
             { text: 'drag-and-drop', value: 'simple' },
             { text: 'one-type', value: 'one' },
             { text: 'cross-reference', value: 'cross' },
-            { text: 'multi-dataset', value: 'multi' }
+            { text: 'multi-dataset', value: 'multi' },
         ];
     }
 
@@ -120,7 +120,7 @@ class Compare extends Component {
             isConfigurationLocked,
             multiLoom,
             multiCoordinates,
-            multiMetadata
+            multiMetadata,
         } = this.state;
 
         let annotationLinks = () => {
@@ -289,7 +289,7 @@ class Compare extends Component {
                                             (coords) => {
                                                 coordOptions.push({
                                                     text: coords.name,
-                                                    value: coords.id
+                                                    value: coords.id,
                                                 });
                                             }
                                         );
@@ -309,14 +309,14 @@ class Compare extends Component {
                                                         let mc = multiCoordinates;
                                                         mc[j] = select.value;
                                                         this.setState({
-                                                            multiCoordinates: mc
+                                                            multiCoordinates: mc,
                                                         });
                                                         ReactGA.event({
                                                             category: 'compare',
                                                             action:
                                                                 'comparison coordinates selected',
                                                             label: select.text,
-                                                            value: j
+                                                            value: j,
                                                         });
                                                     }}
                                                 />
@@ -349,14 +349,14 @@ class Compare extends Component {
                                                     );
                                                     this.setState({
                                                         multiLoom: ml,
-                                                        multiCoordinates: mc
+                                                        multiCoordinates: mc,
                                                     });
                                                     ReactGA.event({
                                                         category: 'compare',
                                                         action:
                                                             'comparison dataset selected',
                                                         label: select.value,
-                                                        value: j
+                                                        value: j,
                                                     });
                                                 }}
                                             />
@@ -421,7 +421,7 @@ class Compare extends Component {
                                             scale={true}
                                             onActiveLegendChange={(legend) => {
                                                 this.setState({
-                                                    activeLegend: legend
+                                                    activeLegend: legend,
                                                 });
                                             }}
                                         />
@@ -561,7 +561,7 @@ class Compare extends Component {
         ReactGA.event({
             category: 'compare',
             action: 'annotation added',
-            label: item.name + ': ' + item.value
+            label: item.name + ': ' + item.value,
         });
         return true;
     }
@@ -595,7 +595,7 @@ class Compare extends Component {
         ReactGA.event({
             category: 'compare',
             action: 'annotation removed',
-            label: name + ': ' + value
+            label: name + ': ' + value,
         });
     }
 
@@ -615,7 +615,7 @@ class Compare extends Component {
             ReactGA.event({
                 category: 'compare',
                 action: 'display number changed',
-                value: selection.value
+                value: selection.value,
             });
         }, 100);
     }
@@ -635,7 +635,7 @@ class Compare extends Component {
                 horizontal: [],
                 vertical: [],
                 both: [],
-                one: []
+                one: [],
             };
             if (conf == 'one') {
                 displays = 0;
@@ -654,13 +654,13 @@ class Compare extends Component {
                 configuration: conf,
                 displays: displays,
                 superposition: superposition,
-                crossAnnotations: crossAnnotations
+                crossAnnotations: crossAnnotations,
             });
             this.getCellMetadata();
             ReactGA.event({
                 category: 'compare',
                 action: 'configuration changed',
-                label: selection.value
+                label: selection.value,
             });
         }, 100);
     }
@@ -669,7 +669,7 @@ class Compare extends Component {
         const {
             crossAnnotations,
             activeAnnotation,
-            multiMetadata
+            multiMetadata,
         } = this.state;
         let annotationIDs = [];
         let annotationGroup =
@@ -685,7 +685,7 @@ class Compare extends Component {
         ReactGA.event({
             category: 'compare',
             action: 'all annotations selected',
-            label: annotationGroup.name
+            label: annotationGroup.name,
         });
     }
 
@@ -700,7 +700,7 @@ class Compare extends Component {
         ReactGA.event({
             category: 'compare',
             action: 'none annotations selected',
-            label: annotationGroup.name
+            label: annotationGroup.name,
         });
     }
 
@@ -733,7 +733,7 @@ class Compare extends Component {
             ReactGA.event({
                 category: 'compare',
                 action: 'annotation toggled',
-                label: value
+                label: value,
             });
         }
     }
@@ -745,13 +745,13 @@ class Compare extends Component {
         crossAnnotations['one'] = [];
         this.setState({
             activeAnnotation: activeAnnotation == index ? -1 : index,
-            crossAnnotations: crossAnnotations
+            crossAnnotations: crossAnnotations,
         });
         let annotationGroup = multiMetadata[0].cellMetaData.annotations[index];
         ReactGA.event({
             category: 'compare',
             action: 'toggle annotation group',
-            label: annotationGroup.name
+            label: annotationGroup.name,
         });
     }
 
@@ -800,7 +800,7 @@ class Compare extends Component {
         const {
             selectedGenes,
             selectedRegulons,
-            selectedClusters
+            selectedClusters,
         } = BackendAPI.getParsedFeatures();
         let query = {
             loomFilePath: this.state.multiLoom[0],
@@ -810,7 +810,7 @@ class Compare extends Component {
             selectedGenes: selectedGenes,
             selectedRegulons: selectedRegulons,
             clusterings: [],
-            annotations: Object.keys(selectedAnnotations)
+            annotations: Object.keys(selectedAnnotations),
         };
         BackendAPI.getConnection().then(
             (gbc) => {
@@ -833,13 +833,11 @@ class Compare extends Component {
         const {
             selectedGenes,
             selectedRegulons,
-            selectedClusters
+            selectedClusters,
         } = BackendAPI.getParsedFeatures();
         if (selectedGenes.length + selectedRegulons.length == 0) return;
         let selectedAnnotations = this.getSelectedAnnotations();
-        d3.select('#chart-distro1')
-            .select('svg')
-            .remove();
+        d3.select('#chart-distro1').select('svg').remove();
         Object.keys(selectedAnnotations).map((annotation, ai) => {
             let selections = 0;
             let dataset = [];
@@ -848,7 +846,7 @@ class Compare extends Component {
                     dataset.push({
                         feature: selections,
                         annotation: av,
-                        value: data.geneExpression[gi].features[i]
+                        value: data.geneExpression[gi].features[i],
                     });
                 });
                 selections++;
@@ -858,7 +856,7 @@ class Compare extends Component {
                     dataset.push({
                         feature: selections,
                         annotation: av,
-                        value: data.aucValues[ri].features[i]
+                        value: data.aucValues[ri].features[i],
                     });
                 });
                 selections++;
@@ -891,22 +889,22 @@ class Compare extends Component {
                     'translate(' + margin.left + ',' + margin.top + ')'
                 );
             let features = d3
-                .map(dataset, function(d) {
+                .map(dataset, function (d) {
                     return d.feature;
                 })
                 .keys();
             let annotations = d3
-                .map(dataset, function(d) {
+                .map(dataset, function (d) {
                     return d.annotation;
                 })
                 .keys();
             let graphData = [];
             let tmp = [];
-            annotations.forEach(function(a) {
+            annotations.forEach(function (a) {
                 let annotatedFeatures = [];
-                features.forEach(function(f) {
+                features.forEach(function (f) {
                     let featureValues = [];
-                    dataset.forEach(function(d) {
+                    dataset.forEach(function (d) {
                         if (d.annotation == a && d.feature == f) {
                             featureValues.push(d.value);
                         }
@@ -917,11 +915,11 @@ class Compare extends Component {
                     graphData.push({ annotation: a, Data: annotatedFeatures });
             });
             min =
-                d3.min(dataset, function(d) {
+                d3.min(dataset, function (d) {
                     return d.value;
                 }) * 0.995;
             max =
-                d3.max(dataset, function(d) {
+                d3.max(dataset, function (d) {
                     return d.value;
                 }) * 1.005;
             x0.domain(selectedAnnotations[annotation]);
@@ -967,18 +965,18 @@ class Compare extends Component {
                 .enter()
                 .append('g')
                 .attr('class', 'state')
-                .attr('transform', function(d) {
+                .attr('transform', function (d) {
                     return 'translate(' + x0(d.annotation) + ',0)';
                 });
 
             state
                 .selectAll('.box')
-                .data(function(d) {
+                .data(function (d) {
                     return d.Data;
                 })
                 .enter()
                 .append('g')
-                .attr('transform', function(d) {
+                .attr('transform', function (d) {
                     return (
                         'translate(' + (x_1(d.group) + 5 + translate) + ',0)'
                     );
@@ -988,7 +986,7 @@ class Compare extends Component {
     }
 
     iqr(k) {
-        return function(d) {
+        return function (d) {
             let q1 = d.quartiles[0],
                 q3 = d.quartiles[2],
                 iqr = (q3 - q1) * k,
@@ -1006,7 +1004,7 @@ class Compare extends Component {
         Object.keys(loomFiles).map((l) => {
             this.loomConf.push({
                 text: loomFiles[l].loomDisplayName,
-                value: l
+                value: l,
             });
         });
     }

@@ -10,7 +10,7 @@ export default class UploadModal extends Component {
             uploadLoomFile: null,
             uploadLoomFileName: null,
             uploadLoomProgress: 0,
-            uploadError: false
+            uploadError: false,
         };
     }
 
@@ -39,7 +39,7 @@ export default class UploadModal extends Component {
                                                 color: this.state.uploadLoomFile
                                                     ? 'grey'
                                                     : 'orange',
-                                                content: 'Select a file...'
+                                                content: 'Select a file...',
                                             }}
                                             fluid
                                             placeholder={
@@ -92,7 +92,7 @@ export default class UploadModal extends Component {
             this.setState({
                 uploadLoomFile: file,
                 uploadLoomFileName: file.name,
-                uploadError: false
+                uploadError: false,
             });
         });
     }
@@ -111,7 +111,7 @@ export default class UploadModal extends Component {
                 if (status_code == 200) {
                     this.setState({
                         uploadLoomFile: null,
-                        uploadLoomProgress: 0
+                        uploadLoomProgress: 0,
                     });
                     this.props.onUploaded(filename);
                 } else if (status_code == 415) {
@@ -120,12 +120,12 @@ export default class UploadModal extends Component {
                         uploadLoomFileName:
                             'Error with upload. Please try again or another file.',
                         uploadLoomProgress: -1,
-                        uploadError: true
+                        uploadError: true,
                     });
                 } else {
                     this.setState({
                         uploadLoomFile: null,
-                        uploadLoomProgress: 0
+                        uploadLoomProgress: 0,
                     });
                     this.props.onUploaded(filename);
                 }

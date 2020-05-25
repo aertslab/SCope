@@ -13,7 +13,7 @@ import {
     Grid,
     Dimmer,
     Loader,
-    Progress
+    Progress,
 } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
 import UploadModal from './common/UploadModal';
@@ -43,7 +43,7 @@ class AppSidebar extends Component {
             downloadPercentage: null,
             newHierarchy_L1: '',
             newHierarchy_L2: '',
-            newHierarchy_L3: ''
+            newHierarchy_L3: '',
         };
     }
 
@@ -59,7 +59,7 @@ class AppSidebar extends Component {
             uncategorizedLoomFiles,
             uploadModalOpened,
             spriteScale,
-            spriteAlpha
+            spriteAlpha,
         } = this.state;
         let metadata = BackendAPI.getActiveLoomMetadata(),
             coordinates = [];
@@ -69,7 +69,7 @@ class AppSidebar extends Component {
                 coordinates = loom.cellMetaData.embeddings.map((coords) => {
                     return {
                         text: coords.name,
-                        value: coords.id
+                        value: coords.id,
                     };
                 });
             }
@@ -83,7 +83,7 @@ class AppSidebar extends Component {
             this.setState({
                 newHierarchy_L1: loomHeierarchy['L1'],
                 newHierarchy_L2: loomHeierarchy['L2'],
-                newHierarchy_L3: loomHeierarchy['L3']
+                newHierarchy_L3: loomHeierarchy['L3'],
             });
             Alert.create({
                 title: 'BETA: Hierarchy Change!',
@@ -106,7 +106,7 @@ class AppSidebar extends Component {
                                 defaultValue={loomHeierarchy['L1']}
                                 onChange={(e) =>
                                     this.setState({
-                                        newHierarchy_L1: e.target.value
+                                        newHierarchy_L1: e.target.value,
                                     })
                                 }
                             />,
@@ -117,7 +117,7 @@ class AppSidebar extends Component {
                                 defaultValue={loomHeierarchy['L2']}
                                 onChange={(e) =>
                                     this.setState({
-                                        newHierarchy_L2: e.target.value
+                                        newHierarchy_L2: e.target.value,
                                     })
                                 }
                             />,
@@ -128,7 +128,7 @@ class AppSidebar extends Component {
                                 defaultValue={loomHeierarchy['L3']}
                                 onChange={(e) =>
                                     this.setState({
-                                        newHierarchy_L3: e.target.value
+                                        newHierarchy_L3: e.target.value,
                                     })
                                 }
                             />,
@@ -137,7 +137,7 @@ class AppSidebar extends Component {
                                 {' '}
                                 BETA: Some SCope functionality may be imparied
                                 until the loom is reloaded
-                            </b>
+                            </b>,
                         ]}
                     </p>
                 ),
@@ -146,10 +146,10 @@ class AppSidebar extends Component {
                         {
                             text: 'Cancel',
                             className: 'danger',
-                            action: function() {
+                            action: function () {
                                 Alert.close();
-                            }
-                        }
+                            },
+                        },
                     ],
                     right: [
                         {
@@ -168,10 +168,10 @@ class AppSidebar extends Component {
                                 );
 
                                 Alert.close();
-                            }
-                        }
-                    ]
-                }
+                            },
+                        },
+                    ],
+                },
             });
         };
 
@@ -205,7 +205,7 @@ class AppSidebar extends Component {
                                 loomUri,
                                 match.params.page == 'welcome'
                                     ? 'gene'
-                                    : match.params.page
+                                    : match.params.page,
                             ].join('/')
                         }
                         onClick={() => {
@@ -435,7 +435,7 @@ class AppSidebar extends Component {
                                     ReactGA.event({
                                         category: 'settings',
                                         action: 'changed point size',
-                                        value: v
+                                        value: v,
                                     });
                                 }}
                                 min={1}
@@ -456,7 +456,7 @@ class AppSidebar extends Component {
                                     ReactGA.event({
                                         category: 'settings',
                                         action: 'changed point alpha',
-                                        value: v
+                                        value: v,
                                     });
                                 }}
                                 min={0}
@@ -514,7 +514,7 @@ class AppSidebar extends Component {
             settings: BackendAPI.getSettings(),
             activeCoordinates: BackendAPI.getActiveCoordinates(),
             spriteAlpha: sprite.alpha,
-            spriteScale: sprite.scale
+            spriteScale: sprite.scale,
         });
         this.getLoomFiles();
     }
@@ -559,7 +559,7 @@ class AppSidebar extends Component {
                 loomFiles: files,
                 loading: false,
                 userLoomTree: userLoomTree,
-                generalLoomTree: generalLoomTree
+                generalLoomTree: generalLoomTree,
             });
             this.props.onMetadataChange(BackendAPI.getActiveLoomMetadata());
         });
@@ -569,7 +569,7 @@ class AppSidebar extends Component {
         return {
             nodes: [],
             children: {},
-            collapsed: true
+            collapsed: true,
         };
     }
 
@@ -579,7 +579,7 @@ class AppSidebar extends Component {
         fd.on('started', (isStarted) => {
             this.setState({
                 downloading: true,
-                loomDownloading: encodeURIComponent(loomFilePath)
+                loomDownloading: encodeURIComponent(loomFilePath),
             });
         });
         fd.on('progress', (progress) => {
@@ -589,7 +589,7 @@ class AppSidebar extends Component {
             this.setState({
                 downloading: false,
                 loomDownloading: null,
-                downloadPercentage: null
+                downloadPercentage: null,
             });
         });
         fd.start();
@@ -599,7 +599,7 @@ class AppSidebar extends Component {
         const { match } = this.props;
         ReactGA.event({
             category: 'upload',
-            action: 'removed loom file'
+            action: 'removed loom file',
         });
         let execute = confirm(
             'Are you sure that you want to remove the file: ' +
@@ -610,7 +610,7 @@ class AppSidebar extends Component {
             let query = {
                 UUID: match.params.uuid,
                 filePath: loomFilePath,
-                fileType: 'Loom'
+                fileType: 'Loom',
             };
             BackendAPI.getConnection().then((gbc) => {
                 if (DEBUG) console.log('deleteUserFile', query);
@@ -634,7 +634,7 @@ class AppSidebar extends Component {
         ReactGA.event({
             category: 'upload',
             action: 'toggle loom upload modal',
-            label: state ? 'on' : 'off'
+            label: state ? 'on' : 'off',
         });
     }
 
@@ -647,7 +647,7 @@ class AppSidebar extends Component {
         ReactGA.event({
             category: 'settings',
             action: 'toggle cell sorting',
-            label: settings.sortCells ? 'on' : 'off'
+            label: settings.sortCells ? 'on' : 'off',
         });
     }
 
@@ -660,7 +660,7 @@ class AppSidebar extends Component {
         ReactGA.event({
             category: 'settings',
             action: 'toggle cpm normalization',
-            label: settings.hasCpmNormalization ? 'on' : 'off'
+            label: settings.hasCpmNormalization ? 'on' : 'off',
         });
     }
 
@@ -673,7 +673,7 @@ class AppSidebar extends Component {
         ReactGA.event({
             category: 'settings',
             action: 'toggle log transform',
-            label: settings.hasCpmNormalization ? 'on' : 'off'
+            label: settings.hasCpmNormalization ? 'on' : 'off',
         });
     }
 
@@ -686,7 +686,7 @@ class AppSidebar extends Component {
         ReactGA.event({
             category: 'settings',
             action: 'toggle dissociate viewers',
-            label: settings.dissociateViewers ? 'on' : 'off'
+            label: settings.dissociateViewers ? 'on' : 'off',
         });
     }
 
@@ -699,7 +699,7 @@ class AppSidebar extends Component {
         ReactGA.event({
             category: 'settings',
             action: 'toggle hide trajectory',
-            label: settings.hideTrajectory ? 'on' : 'off'
+            label: settings.hideTrajectory ? 'on' : 'off',
         });
     }
 
@@ -709,7 +709,7 @@ class AppSidebar extends Component {
         ReactGA.event({
             category: 'settings',
             action: 'changed active coordinates',
-            label: coords.text
+            label: coords.text,
         });
     }
 
@@ -719,7 +719,7 @@ class AppSidebar extends Component {
         ReactGA.event({
             category: 'upload',
             action: 'uploaded loom file',
-            nonInteraction: true
+            nonInteraction: true,
         });
     }
 

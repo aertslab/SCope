@@ -20,7 +20,7 @@ import uuid
 import functools
 from typing import DefaultDict, Set, List, Dict, Any, Tuple
 from collections import OrderedDict, defaultdict, deque
-from functools import lru_cache
+from methodtools import lru_cache
 from itertools import compress
 from pathlib import Path
 
@@ -397,10 +397,21 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getNextCluster(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        clustering_meta = loom.get_meta_data_clustering_by_id(
+            request.clusteringID, secret=self.config["dataHashSecret"]
+        )
+        max_cluster = max([int(x["id"]) for x in clustering_meta["clusters"]])
+        min_cluster = min([int(x["id"]) for x in clustering_meta["clusters"]])
+
         if request.direction == "next":
             next_clusterID = request.clusterID + 1
         elif request.direction == "previous":
             next_clusterID = request.clusterID - 1
+
+        if next_clusterID > max_cluster:
+            next_clusterID = min_cluster
+        elif next_clusterID < min_cluster:
+            next_clusterID = max_cluster
 
         try:
             cluster_metadata = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(
@@ -412,10 +423,16 @@ class SCope(s_pb2_grpc.MainServicer):
             )
 
         f = self.get_features(loom=loom, query=cluster_metadata["description"])
+
+        for n, featureType in enumerate(f["featureType"]):
+            if featureType == f"Clustering: {clustering_meta['name']}":
+                clustering_index = n
+                break
+
         return s_pb2.FeatureReply(
-            feature=[f["feature"][0]],
-            featureType=[f["featureType"][0]],
-            featureDescription=[f["featureDescription"][0]],
+            feature=[f["feature"][clustering_index]],
+            featureType=[f["featureType"][clustering_index]],
+            featureDescription=[f["featureDescription"][clustering_index]],
         )
 
     def getCellMetaData(self, request, context):
@@ -750,19 +767,19 @@ class SCope(s_pb2_grpc.MainServicer):
             timeRemaining = int(dfh._UUID_TIMEOUT)
 
         self.dfh.active_session_check()
-        if request.mouseEvents >= constant._MOUSE_EVENTS_THRESHOLD:
+        if request.mouseEvents >= constant.MOUSE_EVENTS_THRESHOLD:
             self.dfh.reset_active_session_timeout(uid)
 
         sessionsLimitReached = False
 
         if (
-            len(self.dfh.get_active_sessions().keys()) >= constant._ACTIVE_SESSIONS_LIMIT
+            len(self.dfh.get_active_sessions().keys()) >= constant.ACTIVE_SESSIONS_LIMIT
             and uid not in self.dfh.get_permanent_UUIDs()
             and uid not in self.dfh.get_active_sessions().keys()
         ):
             sessionsLimitReached = True
             logger.warning(
-                f"Maximum number of concurrent active sessions ({constant._ACTIVE_SESSIONS_LIMIT}) reached. IP {request.ip} will not be able to access SCope."
+                f"Maximum number of concurrent active sessions ({constant.ACTIVE_SESSIONS_LIMIT}) reached. IP {request.ip} will not be able to access SCope."
             )
 
         if uid not in self.dfh.get_active_sessions().keys() and not sessionsLimitReached:
@@ -795,10 +812,21 @@ class SCope(s_pb2_grpc.MainServicer):
         finalPath = os.path.join(self.dfh.get_data_dirs()[request.fileType]["path"], request.UUID, basename)
         if self.dfh.current_UUIDs[request.UUID][1] == "rw":
             if os.path.isfile(finalPath) and (basename.endswith(".loom") or basename.endswith(".txt")):
-                logger.info(f"File {request.filePath} deleted at request of user with UUID {request.UUID}.")
                 try:
-                    os.remove(finalPath)
+                    if basename.endswith(".loom"):
+                        abs_file_path = self.lfh.drop_loom(request.filePath)
+                        try:
+                            partial_md5_hash = self.lfh.get_partial_md5_hash(abs_file_path, 10000)
+                            os.remove(os.path.join(os.path.dirname(abs_file_path), partial_md5_hash + ".ss_pkl"))
+                        except OSError as err:
+                            logger.error(f"Could not delete search space pickle from {request.filePath}. {err}")
+                    try:
+                        os.remove(finalPath)
+                    except OSError as err:
+                        logger.error(f"Couldn't delete {finalPath}. {err}")
                     success = True
+                    logger.info(f"File {request.filePath} deleted at request of user with UUID {request.UUID}.")
+
                 except Exception as e:
                     logger.error(f"OS Error, couldn't remove file: {finalPath}")
                     logger.error(e)
@@ -965,6 +993,9 @@ def serve(run_event, config: Dict[str, Any]) -> None:
 
     while run_event.is_set():
         time.sleep(0.1)
+
+    for loom in scope.lfh.active_looms.values():
+        loom.get_connection().close()
 
     # Write UUIDs to file here
     scope.dfh.get_uuid_log().close()

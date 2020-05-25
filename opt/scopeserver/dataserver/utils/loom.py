@@ -2,7 +2,7 @@ import numpy as np
 import json
 import zlib
 import base64
-from functools import lru_cache
+from methodtools import lru_cache
 import pandas as pd
 import time
 import hashlib
@@ -13,6 +13,7 @@ from typing import Tuple, Dict, Any
 from scopeserver.dataserver.utils import data_file_handler as dfh
 from scopeserver.dataserver.utils import search_space as ss
 from scopeserver.dataserver.modules.gserver import s_pb2
+from scopeserver.dataserver.utils import constant
 
 import logging
 
@@ -479,6 +480,7 @@ class Loom:
             raise ValueError("Multiple clusters matches the given id: {0}".format(cluster_id))
         return md_cluster[0]
 
+    @lru_cache(maxsize=1024)
     def get_meta_data_clustering_by_id(self, id: int, secret: str = None):
         md_clusterings = self.get_meta_data_by_key(key="clusterings", secret=secret)
         md_clustering = list(filter(lambda x: x["id"] == id, md_clusterings))
@@ -642,12 +644,14 @@ class Loom:
             return self.nUMI
         if self.has_ca_attr(name="nUMI"):
             return self.loom_connection.ca.nUMI
+        if self.has_ca_attr(name="n_counts"):
+            return self.loom_connection.ca.n_counts
         # Compute nUMI on the fly
         # TODO: Add case here for large files. Sum across 1mio rows takes a very long time to compute
         # Possibly faster fix totals = ds.map([np.sum], axis=1)[0]
 
         calc_nUMI_start_time = time.time()
-        self.nUMI = self.loom_connection[:, :].sum(axis=0)
+        self.nUMI = self.loom_connection.map([np.sum], axis=1)[0]
         logger.debug("{0:.5f} seconds elapsed (calculating nUMI) ---".format(time.time() - calc_nUMI_start_time))
         return self.nUMI
 
@@ -668,7 +672,7 @@ class Loom:
         gene_expr = self.get_gene_expression_by_gene_symbol(gene_symbol=gene_symbol)
         if cpm_normalise:
             logger.debug("Debug: CPM normalising gene expression...")
-            gene_expr = gene_expr / self.get_nUMI()
+            gene_expr = (gene_expr / self.get_nUMI()) * constant.COUNTS_PER_MILLION
         if log_transform:
             logger.debug("Debug: log-transforming gene expression...")
             gene_expr = np.log2(gene_expr + 1)

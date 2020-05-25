@@ -48,6 +48,7 @@ pyscenic = "^0.9.14"
 multiprocessing_on_dill = { version = "*", allow-prereleases = true }
 safety = "^1.8.5"
 requests = "^2.22.0"
+methodtools = "^0.1.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
@@ -57,12 +58,13 @@ pylint-fail-under = "*"
 black = { version = "*", allow-prereleases = true }
 mypy = "*"
 mypy-protobuf = "^1.19"
+hypothesis = {extras = ["numpy"], version = "^5.14.0"}
 
 [tool.poetry.scripts]
 dev-script = 'scopeserver:run'
 
 [tool.pylint.'MESSAGES CONTROL']
-max-line-length = 120
+max-line-length = '120'
 
 [tool.black]
 line-length = 120

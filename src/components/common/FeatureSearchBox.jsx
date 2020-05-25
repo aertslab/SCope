@@ -12,7 +12,7 @@ export default class FeatureSearch extends React.Component {
             results: [],
             value: props.value,
             selection: null,
-            type: props.type
+            type: props.type,
         };
         this.call = null;
     }
@@ -55,7 +55,7 @@ export default class FeatureSearch extends React.Component {
             isLoading: false,
             results: [],
             value: '',
-            selection: null
+            selection: null,
         });
         BackendAPI.setActiveFeature(
             this.props.field,
@@ -80,7 +80,7 @@ export default class FeatureSearch extends React.Component {
             category: 'action',
             action: 'feature selected',
             label: featureType + ': ' + feature,
-            value: this.props.field
+            value: this.props.field,
         });
     }
 
@@ -106,7 +106,7 @@ export default class FeatureSearch extends React.Component {
             category: 'action',
             action: 'feature type selected',
             label: type,
-            value: this.props.field
+            value: this.props.field,
         });
     }
 
@@ -137,7 +137,7 @@ export default class FeatureSearch extends React.Component {
         if (this.state.value.length < 1) return this.resetComponent();
         let query = {
             loomFilePath: BackendAPI.getActiveLoom(),
-            query: this.state.value
+            query: this.state.value,
         };
         if (DEBUG) console.log('getFeatures', query);
         BackendAPI.getConnection().then(
@@ -164,28 +164,28 @@ export default class FeatureSearch extends React.Component {
                                     genes.push({
                                         title: f,
                                         type: ft,
-                                        description: d
+                                        description: d,
                                     });
                                     // Regulons
                                 } else if (ft == 'regulon') {
                                     regulons.push({
                                         title: f,
                                         type: ft,
-                                        description: d
+                                        description: d,
                                     });
                                     // Annotations
                                 } else if (ft == 'annotation') {
                                     annotations.push({
                                         title: f,
                                         type: ft,
-                                        description: d
+                                        description: d,
                                     });
                                     // Metric
                                 } else if (ft == 'metric') {
                                     metrics.push({
                                         title: f,
                                         type: ft,
-                                        description: d
+                                        description: d,
                                     });
                                     // Clustering
                                 } else if (ft.indexOf('Clustering:') == 0) {
@@ -193,7 +193,7 @@ export default class FeatureSearch extends React.Component {
                                     clusters[ft].push({
                                         title: f,
                                         type: ft,
-                                        description: d
+                                        description: d,
                                     });
                                 } else if (ft.indexOf('cluster#') == 0) {
                                     let cid = ft.split('#')[1],
@@ -208,12 +208,12 @@ export default class FeatureSearch extends React.Component {
                                     if (!clusters[ft])
                                         clusters[ft] = {
                                             name: name,
-                                            results: []
+                                            results: [],
                                         };
                                     clusters[ft].push({
                                         title: f,
                                         type: ft,
-                                        description: d
+                                        description: d,
                                     });
                                 }
                             }
@@ -223,7 +223,7 @@ export default class FeatureSearch extends React.Component {
                             regulons = { name: 'regulon', results: regulons };
                             annotations = {
                                 name: 'annotation',
-                                results: annotations
+                                results: annotations,
                             };
                             metrics = { name: 'metric', results: metrics };
 
@@ -257,19 +257,19 @@ export default class FeatureSearch extends React.Component {
                                 Object.keys(clusters).map((ft) => {
                                     res.push({
                                         name: ft,
-                                        results: clusters[ft].slice(0, 10)
+                                        results: clusters[ft].slice(0, 10),
                                     });
                                 });
                             }
 
                             this.setState({
                                 isLoading: false,
-                                results: res
+                                results: res,
                             });
                         } else {
                             this.setState({
                                 isLoading: false,
-                                results: []
+                                results: [],
                             });
                         }
                     }
@@ -283,7 +283,7 @@ export default class FeatureSearch extends React.Component {
             category: 'action',
             action: 'feature search',
             label: value,
-            value: this.props.field
+            value: this.props.field,
         });
     }
 
