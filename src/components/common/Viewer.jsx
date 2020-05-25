@@ -941,16 +941,16 @@ export default class Viewer extends Component {
 
     setScalingFactor() {
         if (!this.renderer) return;
-        let min =
+        let horizontalScale =
             this.renderer.width /
             (d3.max(this.state.coord.x) - d3.min(this.state.coord.x));
-        let max =
+        let verticalScale =
             this.renderer.height /
             (d3.max(this.state.coord.y) - d3.min(this.state.coord.y));
         this.scalingFactor = R.clamp(
             MIN_SCALING_FACTOR,
             Infinity,
-            Math.floor(Math.min(min, max)) - 1
+            Math.floor(Math.min(horizontalScale, verticalScale)) - 1
         );
     }
 
