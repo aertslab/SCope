@@ -15,7 +15,7 @@ import {
 
 import ReactGA from 'react-ga';
 import Alert from 'react-popup';
-
+import * as R from 'ramda';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import { instanceOf } from 'prop-types';
@@ -438,7 +438,7 @@ class ViewerSidebar extends Component {
                     if (cell != null) {
                         column['Cell'] = (props) => cell(props);
                     }
-                    if (sortMethod != null) {
+                    if (sortMethod !== null) {
                         column['sortMethod'] = sortMethod;
                     }
                     return column;
@@ -683,44 +683,26 @@ class ViewerSidebar extends Component {
                                 'annotation',
                                 'annotation',
                                 newCellTypeAnnoTableOboCell,
-                                (a, b) => {
-                                    if (
-                                        a.annotation_label ===
-                                        b.annotation_label
-                                    ) {
-                                        return 0;
-                                    }
-                                    return a.annotation_label >
-                                        b.annotation_label
-                                        ? 1
-                                        : -1;
-                                }
+                                R.comparator(
+                                    (a, b) =>
+                                        a.annotation_label < b.annotation_label
+                                )
                             ),
                             newCellTypeAnnoColumn(
                                 'Curator',
                                 'orcid_info',
                                 'orcid_info',
                                 newCellTypeAnnoTableCuratorCell,
-                                (a, b) => {
-                                    if (a.curator_name === b.curator_name) {
-                                        return 0;
-                                    }
-                                    return a.curator_name > b.curator_name
-                                        ? 1
-                                        : -1;
-                                }
+                                R.comparator(
+                                    (a, b) => a.curator_name < b.curator_name
+                                )
                             ),
                             newCellTypeAnnoColumn(
                                 'Endorsements',
                                 'votes',
                                 'votes',
                                 newCellTypeAnnoTableVotesCell,
-                                (a, b) => {
-                                    if (a.totVotes === b.totVotes) {
-                                        return 0;
-                                    }
-                                    return a.totVotes > b.totVotes ? 1 : -1;
-                                }
+                                R.comparator((a, b) => a.totVotes < b.totVotes)
                             ),
                         ];
 
