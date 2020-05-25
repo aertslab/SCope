@@ -20,7 +20,7 @@ import uuid
 import functools
 from typing import DefaultDict, Set, List, Dict, Any, Tuple
 from collections import OrderedDict, defaultdict, deque
-from functools import lru_cache
+from methodtools import lru_cache
 from itertools import compress
 from pathlib import Path
 

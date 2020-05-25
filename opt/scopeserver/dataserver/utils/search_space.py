@@ -1,5 +1,4 @@
 import functools
-from functools import lru_cache
 import re
 from typing import Any
 
