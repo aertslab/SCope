@@ -15,7 +15,7 @@ import {
 
 import ReactGA from 'react-ga';
 import Alert from 'react-popup';
-
+import * as R from 'ramda';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import { instanceOf } from 'prop-types';
@@ -329,7 +329,7 @@ class ViewerSidebar extends Component {
                             <Input
                                 ref={this.state.newAnnoRef}
                                 style={{
-                                    'margin-bottom': '5px',
+                                    marginBottom: '5px',
                                     width: '100%',
                                 }}
                                 placeholder={activeFeatures[i].feature}
@@ -419,7 +419,13 @@ class ViewerSidebar extends Component {
                     return column;
                 };
 
-                let newCellTypeAnnoColumn = (header, id, accessor, cell) => {
+                let newCellTypeAnnoColumn = (
+                    header,
+                    id,
+                    accessor,
+                    cell,
+                    sortMethod
+                ) => {
                     let column = {
                         Header: header,
                         id: id,
@@ -431,6 +437,9 @@ class ViewerSidebar extends Component {
 
                     if (cell != null) {
                         column['Cell'] = (props) => cell(props);
+                    }
+                    if (sortMethod !== null) {
+                        column['sortMethod'] = sortMethod;
                     }
                     return column;
                 };
@@ -673,19 +682,27 @@ class ViewerSidebar extends Component {
                                 </div>,
                                 'annotation',
                                 'annotation',
-                                newCellTypeAnnoTableOboCell
+                                newCellTypeAnnoTableOboCell,
+                                R.comparator(
+                                    (a, b) =>
+                                        a.annotation_label < b.annotation_label
+                                )
                             ),
                             newCellTypeAnnoColumn(
                                 'Curator',
                                 'orcid_info',
                                 'orcid_info',
-                                newCellTypeAnnoTableCuratorCell
+                                newCellTypeAnnoTableCuratorCell,
+                                R.comparator(
+                                    (a, b) => a.curator_name < b.curator_name
+                                )
                             ),
                             newCellTypeAnnoColumn(
                                 'Endorsements',
                                 'votes',
                                 'votes',
-                                newCellTypeAnnoTableVotesCell
+                                newCellTypeAnnoTableVotesCell,
+                                R.comparator((a, b) => a.totVotes < b.totVotes)
                             ),
                         ];
 
@@ -701,6 +718,9 @@ class ViewerSidebar extends Component {
                                     votes: {
                                         votes_for: a.votes_for,
                                         votes_against: a.votes_against,
+                                        totVotes:
+                                            a.votes_for.total -
+                                            a.votes_against.total,
                                         data: a.data,
                                     },
                                 };
