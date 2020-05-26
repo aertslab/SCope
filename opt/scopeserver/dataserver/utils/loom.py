@@ -313,7 +313,7 @@ class Loom:
             return (False, "Metadata was not correct after re-reading file")
 
     @staticmethod
-    def create_clusters_meta(cluster_ids: RepeatedScalarFieldContainer[str]) -> Tuple[List[Cluster], Dict[str, int]]:
+    def create_clusters_meta(cluster_ids: RepeatedScalarFieldContainer) -> Tuple[List[Cluster], Dict[str, int]]:
         try:
             int_sorted_list = sorted(set((int(c) for c in cluster_ids)))
             clusters_list = [str(c) for c in int_sorted_list]
