@@ -186,104 +186,97 @@ export default class ClusteringAddPopup extends Component<
             );
         };
 
-        let clusteringModal = () => {
-            const { orcid_name, orcid_id } = this.props;
-            return (
-                <React.Fragment>
-                    <Modal
-                        as={Form}
-                        className='clustering-add'
-                        onOpen={this.handleModalOpen}
-                        onClose={() => this.closeModal()}
-                        closeIcon
-                        open={showModal}
-                        trigger={
-                            <Button
-                                onClick={() => {
-                                    this.setState({ showModal: true });
-                                }}
-                                className='clustering-button'>
-                                Add Clustering
-                            </Button>
-                        }
-                        id='clusteringAdd'>
-                        <Modal.Header>Add Clustering</Modal.Header>
-                        <Modal.Content scrolling>
-                            <Divider horizontal>
-                                <Header as='h4'>Basic Information</Header>
-                            </Divider>
-                            <Card style={cardStyle}>
-                                <CardContent>
-                                    <Form.Field>
-                                        <label>
-                                            Clustering Group (Read Only)
-                                        </label>
-                                        <input
-                                            disabled
-                                            value={`${orcid_id} (${orcid_name})`}
-                                        />
-                                    </Form.Field>
-                                </CardContent>
-                            </Card>
-                            <Card style={cardStyle}>
-                                <CardContent>
-                                    <Form.Field required>
-                                        <label>Clustering Name</label>
-                                        <Input
-                                            name='clusteringName'
-                                            onChange={
-                                                this.onClusteringNameChange
-                                            }
-                                            value={this.state.clusteringName}
-                                            placeholder='Name of clustering'
-                                        />
-                                    </Form.Field>
-                                </CardContent>
-                            </Card>
-                            <Divider horizontal>
-                                <Header as='h4'>Cluster Information</Header>
-                            </Divider>
-                            <Card style={cardStyle}>
-                                <CardContent>
-                                    <Form.Field required>
-                                        <label>Clusters File</label>
-                                        <div>
-                                            Please provide a .tsv or .csv file
-                                            with two columns.
-                                            <br />
-                                            Column 1: Cell identifiers
-                                            <br /> Column 2: Cluster identifiers
-                                        </div>
-                                    </Form.Field>
-                                    <CSVReader
-                                        accept='.csv,.tsv'
-                                        parserOptions={{
-                                            skipEmptyLines: true,
-                                        }}
-                                        onFileLoaded={(data, fileInfo) =>
-                                            this.validateClusterData(data)
-                                        }
+        const { orcid_name, orcid_id } = this.props;
+        return (
+            <React.Fragment>
+                <Modal
+                    as={Form}
+                    className='clustering-add'
+                    onOpen={this.handleModalOpen}
+                    onClose={() => this.closeModal()}
+                    closeIcon
+                    open={showModal}
+                    trigger={
+                        <Button
+                            onClick={() => {
+                                this.setState({ showModal: true });
+                            }}
+                            className='clustering-button'>
+                            Add Clustering
+                        </Button>
+                    }
+                    id='clusteringAdd'>
+                    <Modal.Header>Add Clustering</Modal.Header>
+                    <Modal.Content scrolling>
+                        <Divider horizontal>
+                            <Header as='h4'>Basic Information</Header>
+                        </Divider>
+                        <Card style={cardStyle}>
+                            <CardContent>
+                                <Form.Field>
+                                    <label>Clustering Group (Read Only)</label>
+                                    <input
+                                        disabled
+                                        value={`${orcid_id} (${orcid_name})`}
                                     />
-                                </CardContent>
-                            </Card>
-                        </Modal.Content>
-                        <Modal.Actions>
-                            {warningPopup(
-                                <Button
-                                    form='annoForm'
-                                    type='submit'
-                                    value='submit'
-                                    onClick={(e) => this.sendData(e)}
-                                    disabled={this.getButtonDisabledStatus()}
-                                    primary>
-                                    {this.getButtonText()}
-                                </Button>
-                            )}
-                        </Modal.Actions>
-                    </Modal>
-                </React.Fragment>
-            );
-        };
-        return clusteringModal();
+                                </Form.Field>
+                            </CardContent>
+                        </Card>
+                        <Card style={cardStyle}>
+                            <CardContent>
+                                <Form.Field required>
+                                    <label>Clustering Name</label>
+                                    <Input
+                                        name='clusteringName'
+                                        onChange={this.onClusteringNameChange}
+                                        value={this.state.clusteringName}
+                                        placeholder='Name of clustering'
+                                    />
+                                </Form.Field>
+                            </CardContent>
+                        </Card>
+                        <Divider horizontal>
+                            <Header as='h4'>Cluster Information</Header>
+                        </Divider>
+                        <Card style={cardStyle}>
+                            <CardContent>
+                                <Form.Field required>
+                                    <label>Clusters File</label>
+                                    <div>
+                                        Please provide a .tsv or .csv file with
+                                        two columns.
+                                        <br />
+                                        Column 1: Cell identifiers
+                                        <br /> Column 2: Cluster identifiers
+                                    </div>
+                                </Form.Field>
+                                <CSVReader
+                                    accept='.csv,.tsv'
+                                    parserOptions={{
+                                        skipEmptyLines: true,
+                                    }}
+                                    onFileLoaded={(data, fileInfo) =>
+                                        this.validateClusterData(data)
+                                    }
+                                />
+                            </CardContent>
+                        </Card>
+                    </Modal.Content>
+                    <Modal.Actions>
+                        {warningPopup(
+                            <Button
+                                form='annoForm'
+                                type='submit'
+                                value='submit'
+                                onClick={(e) => this.sendData(e)}
+                                disabled={this.getButtonDisabledStatus()}
+                                primary>
+                                {this.getButtonText()}
+                            </Button>
+                        )}
+                    </Modal.Actions>
+                </Modal>
+            </React.Fragment>
+        );
     }
 }
