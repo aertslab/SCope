@@ -62,7 +62,7 @@ export default class ClusteringAddPopup extends Component<
         this.setState({ clusteringName: e.target.value });
     };
 
-    validateClusterData = (data: any[]) => {
+    validateClusterData = (data: [Array<string>, Array<string>]) => {
         let cols = new Set();
         data.map((x) => {
             cols.add(x.length);
@@ -82,7 +82,7 @@ export default class ClusteringAddPopup extends Component<
                 'Incorrect number of columns, please select a correctly formatted file!'
             );
         } else {
-            const clusterInfo: Array<Array<string>> = R.zip(...data);
+            const clusterInfo = R.zip(...data);
             this.setState({
                 status: 'ready',
                 newclusterInfo: {
@@ -260,9 +260,10 @@ export default class ClusteringAddPopup extends Component<
                                     parserOptions={{
                                         skipEmptyLines: true,
                                     }}
-                                    onFileLoaded={(data, fileInfo) =>
-                                        this.validateClusterData(data)
-                                    }
+                                    onFileLoaded={(
+                                        data: [Array<string>, Array<string>],
+                                        fileInfo
+                                    ) => this.validateClusterData(data)}
                                 />
                             </CardContent>
                         </Card>
