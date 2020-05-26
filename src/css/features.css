@@ -38,7 +38,7 @@ a.active.item.annotation {
 }
 
 .ui.modal.transition.visible.active.collab-anno {
-    margin-top: 2% !important;
+    margin-top: -5% !important;
     position: absolute;
     left: 30%;
     /* transform: translate(-50%, -50%); */
@@ -49,7 +49,7 @@ a.active.item.annotation {
 }
 
 .ui.modal.transition.visible.active.clustering-add {
-    margin-top: 2% !important;
+    margin-top: -10% !important;
     position: absolute;
     left: 30%;
     z-index: 10;
