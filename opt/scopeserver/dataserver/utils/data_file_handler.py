@@ -131,6 +131,7 @@ class DataFileHandler:
         if user_id in self.orcid_ids.keys():
             if user_uuid in self.orcid_ids[user_id][0]:
                 return True
+        LOGGER.error(f"AUTHENTICATION FAILURE: user: {user_id}, uuid: {user_uuid}")
         return False
 
     def add_ORCIDiD(self, orcid_scope_uuid: str, name: str, orcid_id: str) -> None:
