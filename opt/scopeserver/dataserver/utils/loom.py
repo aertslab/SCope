@@ -8,7 +8,8 @@ import time
 import hashlib
 import os
 import pickle
-from typing import Tuple, Dict, Any
+from typing import Tuple, Dict, Any, Union, List
+from typing_extensions import TypedDict
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
 from scopeserver.dataserver.utils import search_space as ss
@@ -18,6 +19,15 @@ from scopeserver.dataserver.utils import constant
 import logging
 
 logger = logging.getLogger(__name__)
+
+Cluster = TypedDict("Cluster", {"id": int, "description": str,})
+
+Clusters = List[Cluster]
+
+Clustering = TypedDict(
+    "Clustering", {"id": int, "group": str, "name": str, "clusters": List[Cluster], "clusterMarkerMetrics": Any}
+)
+[str, Union[str, int, Clusters]]
 
 
 class Loom:
@@ -302,19 +312,15 @@ class Loom:
             logger.debug("Failure")
             return (False, "Metadata was not correct after re-reading file")
 
-    def add_user_clustering(self, request) -> Tuple[bool, str]:
-        logger.info("Adding user clustering for {0}".format(self.get_abs_file_path()))
-
-        metaJson = self.get_meta_data()
+    @staticmethod
+    def create_new_clustering_meta(
+        metaJson: dict, request: s_pb2.AddNewClusteringRequest
+    ) -> Tuple[Clustering, Dict[str, int]]:
 
         new_clustering_id = max([int(x["id"]) for x in metaJson["clusterings"]]) + 1
-
         new_clustering_name = f"{request.clusterInfo.clusteringName}"
-        if new_clustering_name in (x["name"] for x in metaJson["clusterings"]):
-            logger.error(f"Clustering name {new_clustering_name} already exists in {self.abs_file_path}")
-            return (False, "That clustering name already exists in this file. Please choose another name.")
 
-        cluster_meta: Dict[str, Any] = {
+        cluster_meta: Clustering = {
             "id": new_clustering_id,
             "group": f"{request.orcidInfo.orcidID} ({request.orcidInfo.orcidName})",
             "name": new_clustering_name,
@@ -323,7 +329,8 @@ class Loom:
         }
 
         try:
-            clusters_list = sorted(list(set([int(c) for c in request.clusterInfo.clusterIDs])))
+            int_sorted_list = sorted(list(set([int(c) for c in request.clusterInfo.clusterIDs])))
+            clusters_list = [str(c) for c in int_sorted_list]
             annotated = False
         except ValueError:
             clusters_list = sorted(list(set([c for c in request.clusterInfo.clusterIDs])))
@@ -332,13 +339,24 @@ class Loom:
         all_clust_dict = {}
 
         for n, i in enumerate(clusters_list):
-            clustDict: Dict[str, Any] = {}
-            clustDict["id"] = n
-            clustDict["description"] = i if annotated else f"Unannotated Cluster {i}"
+            clustDict: Cluster = {"id": n, "description": i if annotated else f"Unannotated Cluster {i}"}
             all_clust_dict[str(i)] = n
             cluster_meta["clusters"].append(clustDict)
 
-        metaJson["clusterings"].append(cluster_meta)
+        return cluster_meta, all_clust_dict
+
+    def add_user_clustering(self, request) -> Tuple[bool, str]:
+        logger.info("Adding user clustering for {0}".format(self.get_abs_file_path()))
+
+        metaJson = self.get_meta_data()
+
+        new_clustering_meta, all_clust_dict = Loom.create_new_clustering_meta(metaJson, request)
+
+        if new_clustering_meta["name"] in (x["name"] for x in metaJson["clusterings"]):
+            logger.error(f"Clustering name {new_clustering_meta['name']} already exists in {self.abs_file_path}")
+            return (False, "That clustering name already exists in this file. Please choose another name.")
+
+        metaJson["clusterings"].append(new_clustering_meta)
 
         cellIDs = list(self.get_cell_ids())
 
@@ -356,8 +374,8 @@ class Loom:
             return (False, "No cells matched this dataset")
 
         clusterings = pd.DataFrame(self.loom_connection.ca.Clusterings)
-        clusterings[str(new_clustering_id)] = -1
-        clusterings.loc[chosen_cells, str(new_clustering_id)] = new_cluster_ids
+        clusterings[str(new_clustering_meta["id"])] = -1
+        clusterings.loc[chosen_cells, str(new_clustering_meta["id"])] = new_cluster_ids
 
         new_clusterings = Loom.dfToNamedMatrix(clusterings)
 
@@ -373,7 +391,7 @@ class Loom:
         loom = self.loom_connection
 
         try:
-            new_clustering_data = self.get_clustering_by_id(new_clustering_id)
+            new_clustering_data = self.get_clustering_by_id(new_clustering_meta["id"])
             logger.debug("Success")
             return (True, "Success")
         except IndexError:
