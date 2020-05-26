@@ -8,7 +8,7 @@ import time
 import hashlib
 import os
 import pickle
-from typing import Tuple, Dict, Any, Union, List
+from typing import Tuple, Dict, Any, Union, List, Set
 from typing_extensions import TypedDict
 from google.protobuf.internal.containers import RepeatedScalarFieldContainer
 
@@ -353,6 +353,24 @@ class Loom:
 
         return cluster_meta, cluster_mapping
 
+    def get_cells_overlap(
+        self, cluster_info: s_pb2.NewClusterInfo, cluster_mapping: Dict[str, int]
+    ) -> Tuple[List[int], List[int], Set[str]]:
+        chosen_cells = []
+        new_cluster_ids = []
+        missing_cells = set()
+
+        cellIDs = list(self.get_cell_ids())
+
+        for cell, cluster in zip(cluster_info.cellIDs, cluster_info.clusterIDs):
+            try:
+                chosen_cells.append(cellIDs.index(cell))
+                new_cluster_ids.append(cluster_mapping[cluster])
+            except ValueError:
+                missing_cells.add(cell)
+
+        return chosen_cells, new_cluster_ids, missing_cells
+
     def add_user_clustering(self, request) -> Tuple[bool, str]:
         logger.info("Adding user clustering for {0}".format(self.get_abs_file_path()))
 
@@ -366,17 +384,7 @@ class Loom:
 
         metaJson["clusterings"].append(new_clustering_meta)
 
-        cellIDs = list(self.get_cell_ids())
-
-        missing_cells = set()
-        chosen_cells = []
-        new_cluster_ids = []
-        for cell, cluster in zip(request.clusterInfo.cellIDs, request.clusterInfo.clusterIDs):
-            try:
-                chosen_cells.append(cellIDs.index(cell))
-                new_cluster_ids.append(cluster_mapping[cluster])
-            except ValueError:
-                missing_cells.add(cell)
+        chosen_cells, new_cluster_ids, missing_cells = self.get_cells_overlap(request.cluserInfo, cluster_mapping)
 
         if len(chosen_cells) == 0:
             return (False, "No cells matched this dataset")
