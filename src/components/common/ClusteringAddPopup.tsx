@@ -137,16 +137,11 @@ export default class ClusteringAddPopup extends Component<
     };
 
     getButtonDisabledStatus = () => {
-        const enabledStatuses = ['ready'];
-        if (
-            enabledStatuses.includes(this.state.status) &&
+        return !(
+            'ready' === this.state.status &&
             this.state.newclusterInfo &&
-            this.state.clusteringName != ''
-        ) {
-            return false;
-        } else {
-            return true;
-        }
+            this.state.clusteringName !== ''
+        );
     };
 
     getButtonText = () => {
