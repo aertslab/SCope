@@ -10,6 +10,7 @@ import os
 import pickle
 from typing import Tuple, Dict, Any, Union, List
 from typing_extensions import TypedDict
+from google.protobuf.internal.containers import RepeatedScalarFieldContainer
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
 from scopeserver.dataserver.utils import search_space as ss
@@ -313,6 +314,26 @@ class Loom:
             return (False, "Metadata was not correct after re-reading file")
 
     @staticmethod
+    def create_clusters_meta(cluster_ids: RepeatedScalarFieldContainer[str]) -> Tuple[List[Cluster], Dict[str, int]]:
+        try:
+            int_sorted_list = sorted(set((int(c) for c in cluster_ids)))
+            clusters_list = [str(c) for c in int_sorted_list]
+            annotated = False
+        except ValueError:
+            clusters_list = sorted(set((c for c in cluster_ids)))
+            annotated = True
+
+        clusters: List[Cluster] = []
+        cluster_mapping = {}
+        for cluster_id, cluster_name in enumerate(clusters_list):
+            clusters.append(
+                {"id": cluster_id, "description": cluster_name if annotated else f"Unannotated Cluster {cluster_name}"}
+            )
+            cluster_mapping[str(cluster_name)] = cluster_id
+
+        return clusters, cluster_mapping
+
+    @staticmethod
     def create_new_clustering_meta(
         metaJson: dict, request: s_pb2.AddNewClusteringRequest
     ) -> Tuple[Clustering, Dict[str, int]]:
@@ -320,37 +341,24 @@ class Loom:
         new_clustering_id = max([int(x["id"]) for x in metaJson["clusterings"]]) + 1
         new_clustering_name = f"{request.clusterInfo.clusteringName}"
 
+        clusters, cluster_mapping = Loom.create_clusters_meta(request.clusterInfo.clusterIDs)
+
         cluster_meta: Clustering = {
             "id": new_clustering_id,
             "group": f"{request.orcidInfo.orcidID} ({request.orcidInfo.orcidName})",
             "name": new_clustering_name,
-            "clusters": [],
+            "clusters": clusters,
             "clusterMarkerMetrics": [],
         }
 
-        try:
-            int_sorted_list = sorted(list(set([int(c) for c in request.clusterInfo.clusterIDs])))
-            clusters_list = [str(c) for c in int_sorted_list]
-            annotated = False
-        except ValueError:
-            clusters_list = sorted(list(set([c for c in request.clusterInfo.clusterIDs])))
-            annotated = True
-
-        all_clust_dict = {}
-
-        for n, i in enumerate(clusters_list):
-            clustDict: Cluster = {"id": n, "description": i if annotated else f"Unannotated Cluster {i}"}
-            all_clust_dict[str(i)] = n
-            cluster_meta["clusters"].append(clustDict)
-
-        return cluster_meta, all_clust_dict
+        return cluster_meta, cluster_mapping
 
     def add_user_clustering(self, request) -> Tuple[bool, str]:
         logger.info("Adding user clustering for {0}".format(self.get_abs_file_path()))
 
         metaJson = self.get_meta_data()
 
-        new_clustering_meta, all_clust_dict = Loom.create_new_clustering_meta(metaJson, request)
+        new_clustering_meta, cluster_mapping = Loom.create_new_clustering_meta(metaJson, request)
 
         if new_clustering_meta["name"] in (x["name"] for x in metaJson["clusterings"]):
             logger.error(f"Clustering name {new_clustering_meta['name']} already exists in {self.abs_file_path}")
@@ -366,7 +374,7 @@ class Loom:
         for cell, cluster in zip(request.clusterInfo.cellIDs, request.clusterInfo.clusterIDs):
             try:
                 chosen_cells.append(cellIDs.index(cell))
-                new_cluster_ids.append(all_clust_dict[cluster])
+                new_cluster_ids.append(cluster_mapping[cluster])
             except ValueError:
                 missing_cells.add(cell)
 
