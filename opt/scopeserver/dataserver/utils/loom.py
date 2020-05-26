@@ -28,7 +28,6 @@ Clusters = List[Cluster]
 Clustering = TypedDict(
     "Clustering", {"id": int, "group": str, "name": str, "clusters": List[Cluster], "clusterMarkerMetrics": Any}
 )
-[str, Union[str, int, Clusters]]
 
 
 class Loom:
