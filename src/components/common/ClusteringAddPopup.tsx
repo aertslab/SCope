@@ -82,7 +82,7 @@ export default class ClusteringAddPopup extends Component<
                 'Incorrect number of columns, please select a correctly formatted file!'
             );
         } else {
-            const clusterInfo = R.zip(...data);
+            const clusterInfo: Array<Array<string>> = R.zip(...data);
             this.setState({
                 status: 'ready',
                 newclusterInfo: {
