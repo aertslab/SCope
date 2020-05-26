@@ -83,7 +83,7 @@ class Loom:
         return fa
 
     @staticmethod
-    def dfToNamedMatrix(df):
+    def dfToNamedMatrix(df: pd.DataFrame) -> np.ndarray:
         arr_ip = [tuple(i) for i in df.values]
         dtyp = np.dtype(list(zip(df.dtypes.index, df.dtypes)))
         arr = np.array(arr_ip, dtype=dtyp)
@@ -432,12 +432,6 @@ class Loom:
         logger.info("Making metadata for {0}".format(self.get_abs_file_path()))
         metaJson = {}
 
-        def dfToNamedMatrix(df):
-            arr_ip = [tuple(i) for i in df.values]
-            dtyp = np.dtype(list(zip(df.dtypes.index, df.dtypes)))
-            arr = np.array(arr_ip, dtype=dtyp)
-            return arr
-
         self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode="r+")
         loom = self.loom_connection
         col_attrs = loom.ca.keys()
@@ -463,7 +457,7 @@ class Loom:
             if cf_col in ["tsne", "umap", "pca"] and loom.ca[col].shape[1] >= 2:
                 if not embeddings_default:
                     metaJson["embeddings"].append({"id": -1, "name": col})
-                    loom.ca["Embedding"] = dfToNamedMatrix(pd.DataFrame(loom.ca[col][:, :2], columns=["_X", "_Y"]))
+                    loom.ca["Embedding"] = Loom.dfToNamedMatrix(pd.DataFrame(loom.ca[col][:, :2], columns=["_X", "_Y"]))
                     embeddings_default = True
                 else:
                     metaJson["embeddings"].append({"id": embeddings_id, "name": col})
@@ -471,8 +465,8 @@ class Loom:
                     Embeddings_Y[str(embeddings_id)] = loom.ca[col][:, 1]
                     embeddings_id += 1
         if Embeddings_X.shape != (0, 0):
-            loom.ca["Embeddings_X"] = dfToNamedMatrix(Embeddings_X)
-            loom.ca["Embeddings_Y"] = dfToNamedMatrix(Embeddings_Y)
+            loom.ca["Embeddings_X"] = Loom.dfToNamedMatrix(Embeddings_X)
+            loom.ca["Embeddings_Y"] = Loom.dfToNamedMatrix(Embeddings_Y)
 
         # Annotations - What goes here?
         metaJson["annotations"] = []
@@ -491,9 +485,6 @@ class Loom:
             logger.debug(f"\tDetected clusterings in loom file. Adding metadata.")
             clusters_set = set(zip(loom.ca["Clusters"], loom.ca["ClusterName"]))
             clusters = [{"id": int(x[0]), "description": x[1]} for x in clusters_set]
-
-            # loom.ca['Clusterings'] = SCope.dfToNamedMatrix(pd.DataFrame(columns=[0], index=[x for x in range(loom.shape[1])], data=[int(x) for x in loom.ca['Clusters']]))
-
             clusterDF = pd.DataFrame(columns=["0"], index=[x for x in range(loom.shape[1])])
             clusterDF["0"] = [int(x) for x in loom.ca["Clusters"]]
             loom.ca["Clusterings"] = Loom.dfToNamedMatrix(clusterDF)
