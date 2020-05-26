@@ -188,7 +188,7 @@ class CellColorByFeatures:
                     cluster_dict = {int(x["id"]): x["description"] for x in clustering_meta["clusters"]}
                     for i in self.loom.get_clustering_by_id(clusteringID):
                         if i == -1:
-                            self.hex_vec.append(f"XX" * 3)
+                            self.hex_vec.append("XX" * 3)
                             continue
                         colour = constant.BIG_COLOR_LIST[i % len(constant.BIG_COLOR_LIST)]
                         self.hex_vec.append(colour)
