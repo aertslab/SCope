@@ -124,6 +124,7 @@ class DataFileHandler:
                     self.orcid_ids[orcid_id] = (set([x for x in orcid_scope_uuids.split(",")]), name)
 
     def confirm_orcid_uuid(self, user_id, user_uuid) -> bool:
+        self.read_ORCID_db()
         LOGGER.debug(f"Confirming User: {user_id}, uuid: {user_id}")
         LOGGER.debug(f"Current DB {self.orcid_ids}")
 
