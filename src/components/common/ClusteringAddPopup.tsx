@@ -117,13 +117,17 @@ export default class ClusteringAddPopup extends Component<
                     ...this.state.newclusterInfo,
                 },
             };
-            if (DEBUG) console.log('addNewClustering', query);
+            if (DEBUG) {
+                console.debug('addNewClustering', query);
+            }
             this.setState({ status: 'processing' }, () => {
                 gbc.services.scope.Main.addNewClustering(
                     query,
                     (_, response) => {
                         this.setState({ status: 'ready' });
-                        if (DEBUG) console.log('addNewClustering', response);
+                        if (DEBUG) {
+                            console.debug('addNewClustering', response);
+                        }
                         if (response.success == true) {
                             this.closeModal();
                             // Maybe we can auto load the new clustering
