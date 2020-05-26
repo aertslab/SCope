@@ -150,21 +150,27 @@ export default class ClusteringAddPopup extends Component<
     };
 
     getButtonText = () => {
-        console.log(this.state.status);
-        if (this.state.status == 'ready') {
-            return (
-                <React.Fragment>
-                    Submit Clustering... <Icon name='chevron right' />
-                </React.Fragment>
-            );
-        } else if (this.state.status == 'processing') {
-            return (
-                <React.Fragment>
-                    <Icon loading name='spinner' /> Processing
-                </React.Fragment>
-            );
-        } else if (this.state.status == 'dataError') {
-            return 'Bad file!';
+        switch (this.state.status) {
+            case 'ready':
+                return (
+                    <React.Fragment>
+                        Submit Clustering... <Icon name='chevron right' />
+                    </React.Fragment>
+                );
+            case 'processing':
+                return (
+                    <React.Fragment>
+                        <Icon loading name='spinner' /> Processing
+                    </React.Fragment>
+                );
+            case 'dataError':
+                return 'Bad file!';
+            default:
+                return (
+                    <React.Fragment>
+                        Submit Clustering... <Icon name='chevron right' />
+                    </React.Fragment>
+                );
         }
     };
 
