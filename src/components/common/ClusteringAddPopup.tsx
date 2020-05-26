@@ -12,11 +12,34 @@ import {
     Input,
 } from 'semantic-ui-react';
 import { BackendAPI } from './API';
-import _ from 'lodash';
+import * as R from 'ramda';
 
 import CSVReader from 'react-csv-reader';
 
-export default class ClusteringAddPopup extends Component {
+declare const DEBUG: boolean;
+
+interface ClusteringAddPopupProps {
+    handleModalOpen: Function;
+    handleModalClose: Function;
+    orcid_name: string;
+    orcid_id: string;
+    orcid_uuid: string;
+}
+
+interface ClusteringAddPopupState {
+    status: string;
+    showModal: boolean;
+    clusteringName: string;
+    newclusterInfo?: {
+        cellIDs: string[];
+        clusterIDs: string[];
+    };
+}
+
+export default class ClusteringAddPopup extends Component<
+    ClusteringAddPopupProps,
+    ClusteringAddPopupState
+> {
     constructor(props) {
         super(props);
         this.state = {
@@ -35,12 +58,11 @@ export default class ClusteringAddPopup extends Component {
         this.props.handleModalOpen();
     };
 
-    onClusteringNameChange = (e) => {
+    onClusteringNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         this.setState({ clusteringName: e.target.value });
     };
 
-    validateClusterData = (data, fileInfo) => {
-        console.log(data, fileInfo);
+    validateClusterData = (data: any[]) => {
         let cols = new Set();
         data.map((x) => {
             cols.add(x.length);
@@ -60,7 +82,7 @@ export default class ClusteringAddPopup extends Component {
                 'Incorrect number of columns, please select a correctly formatted file!'
             );
         } else {
-            const clusterInfo = _.zip(...data);
+            const clusterInfo = R.zip(...data);
             this.setState({
                 status: 'ready',
                 newclusterInfo: {
@@ -71,7 +93,7 @@ export default class ClusteringAddPopup extends Component {
         }
     };
 
-    sendData = (e) => {
+    sendData = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         if (this.state.clusteringName == '') {
             alert('You must enter a name for your clustering!');
             return;
@@ -99,7 +121,7 @@ export default class ClusteringAddPopup extends Component {
             this.setState({ status: 'processing' }, () => {
                 gbc.services.scope.Main.addNewClustering(
                     query,
-                    (err, response) => {
+                    (_, response) => {
                         this.setState({ status: 'ready' });
                         if (DEBUG) console.log('addNewClustering', response);
                         if (response.success == true) {
@@ -184,7 +206,6 @@ export default class ClusteringAddPopup extends Component {
                                 Add Clustering
                             </Button>
                         }
-                        // onSubmit={e => {this.sendData(e)}}
                         id='clusteringAdd'>
                         <Modal.Header>Add Clustering</Modal.Header>
                         <Modal.Content scrolling>
@@ -240,10 +261,7 @@ export default class ClusteringAddPopup extends Component {
                                             skipEmptyLines: true,
                                         }}
                                         onFileLoaded={(data, fileInfo) =>
-                                            this.validateClusterData(
-                                                data,
-                                                fileInfo
-                                            )
+                                            this.validateClusterData(data)
                                         }
                                     />
                                 </CardContent>
