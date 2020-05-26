@@ -479,16 +479,22 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def setColabAnnotationData(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        if not self.dfh.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
+            return s_pb2.setColabAnnotationDataReply(success=False, message="Could not confirm user!")
         success, message = loom.add_collab_annotation(request, self.config["dataHashSecret"])
         return s_pb2.setColabAnnotationDataReply(success=success, message=message)
 
     def addNewClustering(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        if not self.dfh.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
+            return s_pb2.AddNewClusteringReply(success=False, message="Could not confirm user!")
         success, message = loom.add_user_clustering(request)
         return s_pb2.AddNewClusteringReply(success=success, message=message)
 
     def voteAnnotation(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        if not self.dfh.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
+            return s_pb2.voteAnnotationReply(success=False, message="Could not confirm user!")
         success, message = loom.annotation_vote(request, self.config["dataHashSecret"])
         return s_pb2.voteAnnotationReply(success=success, message=message)
 

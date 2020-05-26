@@ -148,13 +148,6 @@ class Loom:
     def add_collab_annotation(self, request, secret: str) -> Tuple[bool, str]:
         logger.info("Adding collaborative annotation for {0}".format(self.get_abs_file_path()))
 
-        if not self.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
-            logger.error(
-                f"AUTHENTICATION FAILURE: {self.file_path}, user: {request.orcidInfo.orcidID}, uuid: {request.orcidInfo.orcidUUID}"
-            )
-            logger.error(request)
-            return (False, "Could not confirm user")
-
         metaJson = self.get_meta_data()
 
         cell_type_annotation: Dict[str, Any] = {
@@ -230,13 +223,6 @@ class Loom:
 
     def annotation_vote(self, request, secret: str) -> Tuple[bool, str]:
         logger.info("Adding vote annotation for {0}".format(self.get_abs_file_path()))
-
-        if not self.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
-            logger.error(
-                f"AUTHENTICATION FAILURE: {self.file_path}, user: {request.annoData.curator_id}, uuid: {request.orcid_scope_uuid}"
-            )
-            logger.error(request)
-            return (False, "Could not confirm user")
 
         metaJson = self.get_meta_data()
 
@@ -318,12 +304,6 @@ class Loom:
 
     def add_user_clustering(self, request) -> Tuple[bool, str]:
         logger.info("Adding user clustering for {0}".format(self.get_abs_file_path()))
-
-        if not self.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
-            logger.error(
-                f"AUTHENTICATION FAILURE: {self.file_path}, user: {request.orcidInfo.orcidID}, uuid: {request.orcidInfo.orcidUUID}"
-            )
-            return (False, "Could not confirm user")
 
         metaJson = self.get_meta_data()
 
