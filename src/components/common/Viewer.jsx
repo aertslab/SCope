@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import * as PIXI from 'pixi.js';
 import * as d3 from 'd3';
+import * as R from 'ramda';
 import { BackendAPI } from './API';
 import { Dimmer, Loader } from 'semantic-ui-react';
 import ReactResizeDetector from 'react-resize-detector';
@@ -8,6 +9,7 @@ import ReactGA from 'react-ga';
 import zlib from 'zlib';
 import Alert from 'react-popup';
 
+const MIN_SCALING_FACTOR = 1;
 const DEFAULT_POINT_COLOR = 'A6A6A6';
 const VIEWER_MARGIN = 5;
 
@@ -939,13 +941,17 @@ export default class Viewer extends Component {
 
     setScalingFactor() {
         if (!this.renderer) return;
-        let min =
+        let horizontalScale =
             this.renderer.width /
             (d3.max(this.state.coord.x) - d3.min(this.state.coord.x));
-        let max =
+        let verticalScale =
             this.renderer.height /
             (d3.max(this.state.coord.y) - d3.min(this.state.coord.y));
-        this.scalingFactor = Math.floor(d3.min([min, max])) - 1;
+        this.scalingFactor = R.clamp(
+            MIN_SCALING_FACTOR,
+            Infinity,
+            Math.floor(Math.min(horizontalScale, verticalScale)) - 1
+        );
     }
 
     initializeDataPoints(stillLoading) {
