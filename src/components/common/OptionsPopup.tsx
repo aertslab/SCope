@@ -1,21 +1,31 @@
 import React, { Component } from 'react';
-import { withRouter, Link } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import { Icon, Popup, Button } from 'semantic-ui-react';
-import { BackendAPI } from './API';
 import ClusteringAddPopup from './ClusteringAddPopup';
-import Alert from 'react-popup';
 
 import { instanceOf } from 'prop-types';
 import { withCookies, Cookies } from 'react-cookie';
-import { thresholdFreedmanDiaconis } from 'd3';
 
-class OptionsPopup extends Component {
+interface OptionsPopupProps {
+    cookies: Cookies;
+}
+
+interface OptionsPopupState {
+    optionsOpen: boolean;
+    cookiesAllowed: boolean;
+    someModalOpen: boolean;
+    orcid_name?: string;
+    orcid_id?: string;
+    orcid_uuid?: string;
+}
+
+class OptionsPopup extends Component<OptionsPopupProps, OptionsPopupState> {
     static propTypes = {
         cookies: instanceOf(Cookies).isRequired,
     };
 
-    constructor() {
-        super();
+    constructor(props: OptionsPopupProps) {
+        super(props);
         this.state = {
             optionsOpen: false,
             cookiesAllowed: false,
@@ -129,4 +139,4 @@ class OptionsPopup extends Component {
     }
 }
 
-export default withCookies(withRouter(OptionsPopup));
+export default withRouter(withCookies(OptionsPopup));
