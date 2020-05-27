@@ -26,7 +26,7 @@ Cluster = TypedDict("Cluster", {"id": int, "description": str,})
 Clusters = List[Cluster]
 
 Clustering = TypedDict(
-    "Clustering", {"id": int, "group": str, "name": str, "clusters": List[Cluster], "clusterMarkerMetrics": Any}
+    "Clustering", {"id": int, "group": str, "name": str, "clusters": Clusters, "clusterMarkerMetrics": Any}
 )
 
 
@@ -315,8 +315,8 @@ class Loom:
     @staticmethod
     def create_clusters_meta(cluster_ids: RepeatedScalarFieldContainer) -> Tuple[List[Cluster], Dict[str, int]]:
         try:
-            int_sorted_list = sorted(set((int(c) for c in cluster_ids)))
-            clusters_list = [str(c) for c in int_sorted_list]
+            unannotated_ids = set((int(c) for c in cluster_ids))
+            clusters_list = [str(c) for c in sorted(unannotated_ids)]
             annotated = False
         except ValueError:
             clusters_list = sorted(set((c for c in cluster_ids)))
