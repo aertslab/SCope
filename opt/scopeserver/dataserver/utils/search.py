@@ -1,6 +1,6 @@
 import logging
 
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, Optional
 from collections import OrderedDict
 from contextlib import suppress
 
@@ -41,29 +41,30 @@ DEFINED_SEARCH_TYPES = {
 
 class Searcher:
     def __init__(self, search_term: str, loom: Loom, data_hash_secret: str):
-        self.original_search_term = search_term
-        self.search_term = search_term
-        self.casefold_term = search_term.casefold()
-        self.loom = loom
+        self.original_search_term: str = search_term
+        self.search_term: str = search_term
+        self.casefold_term: str = search_term.casefold()
+        self.loom: Loom = loom
         self.cross_species_identity: Dict[str, float] = dict()
+        self.cross_species: Optional[constant.Species] = None
         self.determine_cross_species(search_term)
-        self.data_hash_secret = data_hash_secret
+        self.data_hash_secret: str = data_hash_secret
         self.dfh = dfh.DataFileHandler()
 
     def determine_cross_species(self, search_term: str) -> None:
         if search_term.startswith("hsap\\"):
             self.search_space = self.loom.hsap_ss
-            self.cross_species = "hsap"
+            self.cross_species = constant.Species.HSAP
             self.search_term = search_term[5:]
             self.casefold_term = self.search_term.casefold()
         elif search_term.startswith("mmus\\"):
             self.search_space = self.loom.mmus_ss
-            self.cross_species = "mmus"
+            self.cross_species = constant.Species.MMUS
             self.search_term = search_term[5:]
             self.casefold_term = self.search_term.casefold()
         else:
             self.search_space = self.loom.ss
-            self.cross_species = ""
+            self.cross_species = None
 
     def find_matches(self) -> List[SearchMatch]:
         """
@@ -131,8 +132,7 @@ class Searcher:
         """
 
         aggregated_matches: Dict[Tuple[str, str], List[str]] = OrderedDict()
-
-        if self.cross_species == "":
+        if not self.cross_species:
             for match in matches:
                 key = (match[1], match[2])
                 if key not in aggregated_matches.keys():
@@ -140,7 +140,7 @@ class Searcher:
                 else:
                     aggregated_matches[key].append(match[0])
 
-        elif self.cross_species == "hsap":
+        elif self.cross_species == constant.Species.HSAP:
             for match in matches:
                 key = (match[1], match[2])
                 for droso_gene in self.dfh.hsap_to_dmel_mappings[match[0]]:
@@ -149,8 +149,7 @@ class Searcher:
                     else:
                         aggregated_matches[key].append(droso_gene[0])
                     self.cross_species_identity[match[0]] = droso_gene[1]
-
-        elif self.cross_species == "mmus":
+        elif self.cross_species == constant.Species.MMUS:
             for match in matches:
                 key = (match[1], match[2])
                 for droso_gene in self.dfh.mmus_to_dmel_mappings[self.search_space[match]]:
@@ -176,7 +175,7 @@ class Searcher:
         descriptions: Dict[Tuple[str, str], str] = {}
 
         for k, v in aggregated_matches.items():
-            if self.cross_species != "":
+            if self.cross_species:
                 species_name = constant.SPECIES_MAP[self.cross_species]["short"]
                 identity_perc = self.cross_species_identity[k[0]]
                 descriptions[k] = f"Orthologue of {k[0]}, {identity_perc:.2f}% identity ({species_name} -> Drosophila)"
