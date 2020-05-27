@@ -124,12 +124,14 @@ class DataFileHandler:
                     self.orcid_ids[orcid_id] = (set([x for x in orcid_scope_uuids.split(",")]), name)
 
     def confirm_orcid_uuid(self, user_id, user_uuid) -> bool:
+        self.read_ORCID_db()
         LOGGER.debug(f"Confirming User: {user_id}, uuid: {user_id}")
         LOGGER.debug(f"Current DB {self.orcid_ids}")
 
         if user_id in self.orcid_ids.keys():
             if user_uuid in self.orcid_ids[user_id][0]:
                 return True
+        LOGGER.error(f"AUTHENTICATION FAILURE: user: {user_id}, uuid: {user_uuid}")
         return False
 
     def add_ORCIDiD(self, orcid_scope_uuid: str, name: str, orcid_id: str) -> None:

@@ -227,7 +227,6 @@ class ViewerSidebar extends Component {
                         <br />
                     </div>
                 );
-            console.log(activeFeatures[i]);
             if (activeFeatures[i] && activeFeatures[i].metadata) {
                 let image = '';
                 let md = activeFeatures[i].metadata;
@@ -1137,11 +1136,14 @@ class ViewerSidebar extends Component {
                             );
                     };
                 }
-
                 metadata = (
                     <Grid.Row columns='1' centered className='viewerRow'>
                         <Grid.Column stretched className='viewerCell'>
-                            {md.featureType} {md.feature}
+                            {md.featureType}{' '}
+                            {activeFeatures[i].featureType.startsWith(
+                                'Clustering'
+                            ) && `Group: ${md.clusteringGroup}`}{' '}
+                            {md.feature}
                             <br />
                             {image}
                             {clusterControls()}
