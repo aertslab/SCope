@@ -40,7 +40,7 @@ export default class ClusteringAddPopup extends Component<
     ClusteringAddPopupProps,
     ClusteringAddPopupState
 > {
-    constructor(props) {
+    constructor(props: ClusteringAddPopupProps) {
         super(props);
         this.state = {
             status: 'ready',
@@ -62,27 +62,27 @@ export default class ClusteringAddPopup extends Component<
         this.setState({ clusteringName: e.target.value });
     };
 
-    validateClusterData = (data: [Array<string>, Array<string>]) => {
-        let cols = new Set();
-        data.map((x) => {
-            cols.add(x.length);
-        });
-
-        cols.delete(0);
-        if (cols.size != 1) {
+    validateClusterData = (data: Array<Array<string>>) => {
+        const cols = new Set(
+            data
+                .map((x: Array<string>): number => x.length)
+                .filter((n: number) => n > 0)
+        );
+        if (cols.size !== 1) {
             this.setState({ status: 'dataError' });
-            console.log(cols);
             alert(
                 'Mismatched column lengths, please select a correctly formatted file!'
             );
         } else if (!cols.has(2)) {
-            console.log(cols);
             this.setState({ status: 'dataError' });
             alert(
                 'Incorrect number of columns, please select a correctly formatted file!'
             );
         } else {
-            const clusterInfo = R.zip(...data);
+            const clusterInfo = R.take(
+                2,
+                R.zip(...(data as [Array<string>, Array<string>]))
+            );
             this.setState({
                 status: 'ready',
                 newclusterInfo: {
@@ -94,14 +94,14 @@ export default class ClusteringAddPopup extends Component<
     };
 
     sendData = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        if (this.state.clusteringName == '') {
+        if (this.state.clusteringName === '') {
             alert('You must enter a name for your clustering!');
             return;
         }
         const retVal = confirm(
             `Are you sure you want to add this new clustering?\n\n--> ${this.state.clusteringName} <--\n\nThis is a PERMANENT change!`
         );
-        if (retVal == false) {
+        if (retVal === false) {
             return;
         }
         BackendAPI.getConnection().then((gbc) => {
@@ -176,7 +176,7 @@ export default class ClusteringAddPopup extends Component<
     render() {
         const { showModal, status } = this.state;
 
-        let cardStyle = {
+        const cardStyle = {
             display: 'block',
             width: '100vw',
             transitionDuration: '0.3s',
@@ -261,7 +261,7 @@ export default class ClusteringAddPopup extends Component<
                                         skipEmptyLines: true,
                                     }}
                                     onFileLoaded={(
-                                        data: [Array<string>, Array<string>],
+                                        data: Array<Array<string>>,
                                         fileInfo
                                     ) => this.validateClusterData(data)}
                                 />

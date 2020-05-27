@@ -59,9 +59,9 @@ class OptionsPopup extends Component<OptionsPopupProps, OptionsPopupState> {
                 orcid_name &&
                 orcid_id &&
                 orcid_uuid &&
-                orcid_name != '' &&
-                orcid_id != '' &&
-                orcid_uuid != '' &&
+                orcid_name !== '' &&
+                orcid_id !== '' &&
+                orcid_uuid !== '' &&
                 cookiesAllowed
             ) {
                 return (
