@@ -44,6 +44,20 @@ a.active.item.annotation {
     /* transform: translate(-50%, -50%); */
 }
 
+.ui.modal.transition.visible.active.metadata {
+    margin-top: -5% !important;
+    position: absolute;
+    left: 30%;
+    /* transform: translate(-50%, -50%); */
+}
+
+.ui.modal.transition.visible.active.upload {
+    margin-top: -15% !important;
+    position: absolute;
+    left: 30%;
+    /* transform: translate(-50%, -50%); */
+}
+
 .collab-anno-drop > .search {
     width: 100% !important;
 }
