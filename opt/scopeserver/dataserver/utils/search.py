@@ -2,6 +2,7 @@ import logging
 
 from typing import Dict, Tuple, List
 from collections import OrderedDict
+from contextlib import suppress
 
 from scopeserver.dataserver.utils.loom import Loom
 from scopeserver.dataserver.utils import constant
@@ -188,10 +189,8 @@ class Searcher:
                 identity_perc = self.cross_species_identity[k[0]]
                 descriptions[k] = f"Orthologue of {k[0]}, {identity_perc:.2f}% identity ({species_name} -> Drosophila)"
             synonyms = v.copy()
-            try:
+            with suppress(ValueError):
                 synonyms.remove(k[0])
-            except ValueError:
-                pass
             if k[1] == "gene" and len(synonyms) > 0:
                 descriptions[k] = f"Synonyms: {', '.join(synonyms)}"
             elif k[1] in DEFINED_SEARCH_TYPES:
