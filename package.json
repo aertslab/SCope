@@ -54,7 +54,7 @@
         "grpc-bus-websocket-client": "^0.3.1",
         "grpc-bus-websocket-server": "file:opt/scopeserver/bindserver",
         "grpc-caller": "^0.13.0",
-        "grpc-tools": "^1.9.6",
+        "grpc-tools": "^1.9.0",
         "js-file-download": "^0.4.12",
         "json-schema": "^0.2.3",
         "json2csv": "^4.0.1",
