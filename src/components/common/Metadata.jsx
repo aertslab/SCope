@@ -246,7 +246,8 @@ export default class Metadata extends Component {
                     });
                 }}
                 onClose={this.closeModal.bind(this)}
-                size={'fullscreen'}>
+                size={'fullscreen'}
+                className='metadata'>
                 <Modal.Content image scrolling>
                     {tableMetadata}
                 </Modal.Content>
