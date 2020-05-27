@@ -1,13 +1,25 @@
+from enum import Enum, auto, unique
+
 _ACTIVE_SESSIONS_LIMIT = 25
 _MOUSE_EVENTS_THRESHOLD = 1
 _LOWER_LIMIT_RGB = 0
 _UPPER_LIMIT_RGB = 225
 _NO_EXPR_RGB = 166
 
+
+@unique
+class Species(Enum):
+    DMEL = auto()
+    HSAP = auto()
+    MMUS = auto()
+    UNKN = auto()
+
+
 SPECIES_MAP = {
-    "dmel": {"short": "Fly", "long": "Drosophila Melanogaster"},
-    "hsap": {"short": "Human", "long": "Homo Sapiens"},
-    "mmus": {"short": "Mouse", "long": "Mus Musculus"},
+    Species.DMEL: {"short": "Fly", "long": "Drosophila Melanogaster"},
+    Species.HSAP: {"short": "Human", "long": "Homo Sapiens"},
+    Species.MMUS: {"short": "Mouse", "long": "Mus Musculus"},
+    Species.UNKN: {"short": "Unknown", "long": "Unknown Species"},
 }
 
 BIG_COLOR_LIST = [
