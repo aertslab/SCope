@@ -48,29 +48,22 @@ class Searcher:
         self.cross_species_identity: Dict[str, float] = dict()
         self.determine_cross_species(search_term)
         self.data_hash_secret = data_hash_secret
-
         self.dfh = dfh.DataFileHandler()
-
-    def set_search_space(self, search_space: SearchSpace) -> None:
-        self.search_space = search_space
-
-    def set_cross_species(self, species: str) -> None:
-        self.cross_species = species
 
     def determine_cross_species(self, search_term: str) -> None:
         if search_term.startswith("hsap\\"):
-            self.set_search_space(self.loom.hsap_ss)
-            self.set_cross_species("hsap")
+            self.search_space = self.loom.hsap_ss
+            self.cross_species = "hsap"
             self.search_term = search_term[5:]
             self.casefold_term = self.search_term.casefold()
         elif search_term.startswith("mmus\\"):
-            self.set_search_space(self.loom.mmus_ss)
-            self.set_cross_species("mmus")
+            self.search_space = self.loom.mmus_ss
+            self.cross_species = "mmus"
             self.search_term = search_term[5:]
             self.casefold_term = self.search_term.casefold()
         else:
-            self.set_search_space(self.loom.ss)
-            self.set_cross_species("")
+            self.search_space = self.loom.ss
+            self.cross_species = ""
 
     def find_matches(self) -> List[SearchMatch]:
         """
