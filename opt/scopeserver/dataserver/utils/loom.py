@@ -383,7 +383,7 @@ class Loom:
 
         metaJson["clusterings"].append(new_clustering_meta)
 
-        chosen_cells, new_cluster_ids, missing_cells = self.get_cells_overlap(request.cluserInfo, cluster_mapping)
+        chosen_cells, new_cluster_ids, missing_cells = self.get_cells_overlap(request.clusterInfo, cluster_mapping)
 
         if len(chosen_cells) == 0:
             return (False, "No cells matched this dataset")
