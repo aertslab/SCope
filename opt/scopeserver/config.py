@@ -26,7 +26,7 @@ def validate(config: Config) -> Config:
 def defaults() -> Config:
     """ Default configuration values. """
     return {
-        "app_mode": True,
+        "app_mode": False,
         "debug": True,
         "pPort": 55851,
         "xPort": 55852,

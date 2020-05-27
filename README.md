@@ -54,7 +54,7 @@ npm install
 ```bash
 # Go to your local cloned SCope repository.
 cd "${LOCAL_SCOPE_REPO}"
-npm run scope
+SCOPE_CONFIG=config.json npm run scope
 ```
 
 ## Deploy a Cloud-based Instance
@@ -102,8 +102,7 @@ cd "${LOCAL_SCOPE_REPO}"
 
 # Start SCope Server (terminal 1).
 cd opt
-poetry shell
-scope-server
+poetry run hypercorn main:scope_api --reload
 
 # Start SCope Client (terminal 2).
 cd ..
@@ -114,4 +113,5 @@ npm run dev
 
 Keys:
 * `data`: This is a directory containing data files (e.g. the `motd.txt` message of the day).
-  Can be an absolute path or a relative path from where you start SCope.
+  Can be an absolute path or a relative path from where you start SCope. By default it is
+  `./data/`.
