@@ -2,7 +2,7 @@ import numpy as np
 import json
 import zlib
 import base64
-from functools import lru_cache
+from methodtools import lru_cache
 import pandas as pd
 import time
 import hashlib
@@ -480,6 +480,7 @@ class Loom:
             raise ValueError("Multiple clusters matches the given id: {0}".format(cluster_id))
         return md_cluster[0]
 
+    @lru_cache(maxsize=1024)
     def get_meta_data_clustering_by_id(self, id: int, secret: str = None):
         md_clusterings = self.get_meta_data_by_key(key="clusterings", secret=secret)
         md_clustering = list(filter(lambda x: x["id"] == id, md_clusterings))

@@ -409,6 +409,14 @@ testing = ["packaging", "importlib-resources"]
 
 [[package]]
 category = "main"
+description = "Backport of the Python 3.6 inspect module to Python 2.7-3.5"
+name = "inspect2"
+optional = false
+python-versions = "*"
+version = "0.1.2"
+
+[[package]]
+category = "main"
 description = "interlap: fast, simple interval overlap testing"
 name = "interlap"
 optional = false
@@ -477,6 +485,22 @@ name = "mccabe"
 optional = false
 python-versions = "*"
 version = "0.6.1"
+
+[[package]]
+category = "main"
+description = "Expand standard functools to methods"
+name = "methodtools"
+optional = false
+python-versions = "*"
+version = "0.1.2"
+
+[package.dependencies]
+wirerope = "0.3.1"
+
+[package.extras]
+dev = ["pytest (>=3.0.2)", "pytest-cov", "sphinx"]
+docs = ["sphinx"]
+tests = ["pytest (>=3.0.2)", "pytest-cov"]
 
 [[package]]
 category = "dev"
@@ -917,6 +941,17 @@ numpy = ">=1.13.3"
 
 [[package]]
 category = "main"
+description = "This library brings functools.singledispatch from Python 3.4 to Python 2.6-3.3."
+name = "singledispatch"
+optional = false
+python-versions = "*"
+version = "3.4.0.3"
+
+[package.dependencies]
+six = "*"
+
+[[package]]
+category = "main"
 description = "Python 2 and 3 compatibility utilities"
 name = "six"
 optional = false
@@ -1056,6 +1091,24 @@ name = "wcwidth"
 optional = false
 python-versions = "*"
 version = "0.1.9"
+
+[[package]]
+category = "main"
+description = "Turn functions and methods into fully controllable objects"
+name = "wirerope"
+optional = false
+python-versions = "*"
+version = "0.3.1"
+
+[package.dependencies]
+inspect2 = ">=0.1.0"
+singledispatch = ">=3.4.0.3"
+six = ">=1.11.0"
+
+[package.extras]
+dev = ["pytest (>=3.0.2)", "pytest-cov", "sphinx"]
+docs = ["sphinx"]
+tests = ["pytest (>=3.0.2)", "pytest-cov"]
 
 [[package]]
 category = "dev"
@@ -1348,6 +1401,10 @@ importlib-metadata = [
     {file = "importlib_metadata-1.6.0-py2.py3-none-any.whl", hash = "sha256:2a688cbaa90e0cc587f1df48bdc97a6eadccdcd9c35fb3f976a09e3b5016d90f"},
     {file = "importlib_metadata-1.6.0.tar.gz", hash = "sha256:34513a8a0c4962bc66d35b359558fd8a5e10cd472d37aec5f66858addef32c1e"},
 ]
+inspect2 = [
+    {file = "inspect2-0.1.2-py2.py3-none-any.whl", hash = "sha256:e8940b8de645e3533605d1a40d12b3541f1da4f784c305eb512212a8fb2db3d3"},
+    {file = "inspect2-0.1.2.tar.gz", hash = "sha256:4d27f1d036b2346a6ec7c6abf6b121dd2adab45c796ae45080d7988bed786d5e"},
+]
 interlap = [
     {file = "interlap-0.2.6.tar.gz", hash = "sha256:a8585a165bf7e94d4d262811b4cb00674059414c50afc7561c949b0feb78fa09"},
 ]
@@ -1406,6 +1463,9 @@ loompy = [
 mccabe = [
     {file = "mccabe-0.6.1-py2.py3-none-any.whl", hash = "sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42"},
     {file = "mccabe-0.6.1.tar.gz", hash = "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"},
+]
+methodtools = [
+    {file = "methodtools-0.1.2.tar.gz", hash = "sha256:03e05f69150cb2a931f71dc542ee80856e91ae00e179c1df384285078b0dc118"},
 ]
 more-itertools = [
     {file = "more-itertools-8.2.0.tar.gz", hash = "sha256:b1ddb932186d8a6ac451e1d95844b382f55e12686d51ca0c68b6f61f2ab7a507"},
@@ -1735,6 +1795,10 @@ scipy = [
     {file = "scipy-1.4.1-cp38-cp38-win_amd64.whl", hash = "sha256:2cce3f9847a1a51019e8c5b47620da93950e58ebc611f13e0d11f4980ca5fecb"},
     {file = "scipy-1.4.1.tar.gz", hash = "sha256:dee1bbf3a6c8f73b6b218cb28eed8dd13347ea2f87d572ce19b289d6fd3fbc59"},
 ]
+singledispatch = [
+    {file = "singledispatch-3.4.0.3-py2.py3-none-any.whl", hash = "sha256:833b46966687b3de7f438c761ac475213e53b306740f1abfaa86e1d1aae56aa8"},
+    {file = "singledispatch-3.4.0.3.tar.gz", hash = "sha256:5b06af87df13818d14f08a028e42f566640aef80805c3b50c5056b086e3c2b9c"},
+]
 six = [
     {file = "six-1.14.0-py2.py3-none-any.whl", hash = "sha256:8f3cd2e254d8f793e7f3d6d9df77b92252b52637291d0f0da013c76ea2724b6c"},
     {file = "six-1.14.0.tar.gz", hash = "sha256:236bdbdce46e6e6a3d61a337c0f8b763ca1e8717c03b369e87a7ec7ce1319c0a"},
@@ -1818,6 +1882,9 @@ urllib3 = [
 wcwidth = [
     {file = "wcwidth-0.1.9-py2.py3-none-any.whl", hash = "sha256:cafe2186b3c009a04067022ce1dcd79cb38d8d65ee4f4791b8888d6599d1bbe1"},
     {file = "wcwidth-0.1.9.tar.gz", hash = "sha256:ee73862862a156bf77ff92b09034fc4825dd3af9cf81bc5b360668d425f3c5f1"},
+]
+wirerope = [
+    {file = "wirerope-0.3.1.tar.gz", hash = "sha256:0ca7c9af15b04b7c21e254d910d658eef908646ae74beb86cc4981b281df2a91"},
 ]
 wrapt = [
     {file = "wrapt-1.12.1.tar.gz", hash = "sha256:b62ffa81fb85f4332a4f609cab4ac40709470da05643a082ec1eb88e6d9b97d7"},

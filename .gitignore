@@ -17,7 +17,6 @@
 .coverage
 .hypothesis/
 
-/**/*lock.json
 *.pptx
 *.save
 *.spec
