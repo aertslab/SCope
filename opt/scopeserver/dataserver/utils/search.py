@@ -51,9 +51,6 @@ class Searcher:
 
         self.dfh = dfh.DataFileHandler()
 
-    def set_search_term(self, search_term: str) -> None:
-        self.search_term = search_term
-
     def set_search_space(self, search_space: SearchSpace) -> None:
         self.search_space = search_space
 
@@ -64,11 +61,13 @@ class Searcher:
         if search_term.startswith("hsap\\"):
             self.set_search_space(self.loom.hsap_ss)
             self.set_cross_species("hsap")
-            self.set_search_term(search_term[5:])
+            self.search_term = search_term[5:]
+            self.casefold_term = self.search_term.casefold()
         elif search_term.startswith("mmus\\"):
             self.set_search_space(self.loom.mmus_ss)
             self.set_cross_species("mmus")
-            self.set_search_term(search_term[5:])
+            self.search_term = search_term[5:]
+            self.casefold_term = self.search_term.casefold()
         else:
             self.set_search_space(self.loom.ss)
             self.set_cross_species("")
