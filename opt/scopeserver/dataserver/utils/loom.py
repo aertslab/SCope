@@ -755,7 +755,14 @@ class Loom:
         logic: str = "OR",
     ) -> Tuple[np.ndarray, list]:
         if gene_symbol not in set(self.get_genes()):
-            gene_symbol = self.get_gene_names()[gene_symbol]
+            try:
+                gene_symbol = self.get_gene_names()[gene_symbol]
+            except KeyError:
+                # No gene is present, likely ATAC data, return 0's
+                cell_indices = list(range(self.get_nb_cells()))
+                gene_expr = [0] * len(cell_indices)
+                return gene_expr, cell_indices
+
         logger.debug("Debug: getting expression of {0} ...".format(gene_symbol))
         gene_expr = self.get_gene_expression_by_gene_symbol(gene_symbol=gene_symbol)
         if cpm_normalise:
