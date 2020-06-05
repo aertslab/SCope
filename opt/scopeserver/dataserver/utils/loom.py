@@ -760,7 +760,7 @@ class Loom:
             except KeyError:
                 # No gene is present, likely ATAC data, return 0's
                 cell_indices = list(range(self.get_nb_cells()))
-                gene_expr = [0] * len(cell_indices)
+                gene_expr = np.zeros(len(cell_indices))
                 return gene_expr, cell_indices
 
         logger.debug("Debug: getting expression of {0} ...".format(gene_symbol))
