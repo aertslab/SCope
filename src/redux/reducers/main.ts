@@ -8,7 +8,7 @@ type Loading = {
 type MainState = {} & Loading;
 
 const initialState: MainState = {
-    isLoading: true
+    isLoading: true,
 };
 
 const main = (state = initialState, action: SetLoadingAction) => {
@@ -16,7 +16,7 @@ const main = (state = initialState, action: SetLoadingAction) => {
         case SET_LOADING: {
             return {
                 ...state,
-                isLoading: action.payload.isLoading
+                isLoading: action.payload.isLoading,
             };
         }
         default: {
