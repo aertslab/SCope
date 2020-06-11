@@ -40,8 +40,8 @@
     "dependencies": {
         "@improbable-eng/grpc-web": "^0.12.0",
         "@types/google-protobuf": "^3.7.2",
-        "@types/react-redux": "^7.1.7",
         "@types/ramda": "^0.27.6",
+        "@types/react-redux": "^7.1.7",
         "appdirs": "^1.1.0",
         "bitly4api": "^1.0.1",
         "command-exists": "^1.2.9",
