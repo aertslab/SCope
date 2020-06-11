@@ -19,6 +19,7 @@ export default class UploadModal extends Component {
             <Modal
                 open={this.props.opened}
                 onClose={this.props.onClose}
+                className='upload'
                 closeIcon>
                 <Modal.Header>{this.props.title}</Modal.Header>
                 <Modal.Content image>

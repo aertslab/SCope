@@ -15,8 +15,8 @@
 .mypy_cache/
 
 .coverage
+.hypothesis/
 
-/**/*lock.json
 *.pptx
 *.save
 *.spec

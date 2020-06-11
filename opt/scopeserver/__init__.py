@@ -55,23 +55,27 @@ class SCopeServer:
         if not self.config["app_mode"]:
             self.start_bind_server()
 
+    def stop_servers(self) -> None:
+        """ Stop all running threads. """
+        LOGGER.info("Terminating servers...")
+        self.run_event.clear()
+        self.gs_thread.join()
+        try:
+            urlopen("http://127.0.0.1:{0}/".format(self.config["pPort"]))
+        except http.client.RemoteDisconnected:
+            pass
+        self.ps_thread.join()
+
+        if not self.config["app_mode"]:
+            self.xs_thread.join()
+        LOGGER.info("Servers successfully terminated. Exiting.")
+
     def wait(self) -> None:
         try:
             while True:
                 time.sleep(0.1)
         except KeyboardInterrupt:
-            LOGGER.info("Terminating servers...")
-            self.run_event.clear()
-            self.gs_thread.join()
-            try:
-                urlopen("http://127.0.0.1:{0}/".format(self.config["pPort"]))
-            except http.client.RemoteDisconnected:
-                pass
-            self.ps_thread.join()
-
-            if not self.config["app_mode"]:
-                self.xs_thread.join()
-            LOGGER.info("Servers successfully terminated. Exiting.")
+            self.stop_servers()
 
     def run(self) -> None:
         # Unbuffer the standard output: important for process communication

@@ -1,148 +1,147 @@
 .menu.logos {
-	text-align: center;
+    text-align: center;
 }
 
 .header {
-	padding-left: 0.5em;
+    padding-left: 0.5em;
 }
 
 .pushable {
-	flex-grow: 1;
-	overflow: auto;
+    flex-grow: 1;
+    overflow: auto;
 }
 
 .ui {
-	font-size: 0.75rem !important;
+    font-size: 0.75rem !important;
 }
 
 .push.sidebar {
-	overflow-y: visible !important;
+    overflow-y: visible !important;
 }
 
 .vertical .active.item {
-	font-weight: bold !important;
-	color: black !important;
+    font-weight: bold !important;
+    color: black !important;
 }
 
 .vertical.menu .active.item {
-	background: rgba(255, 104, 30, 1) !important;
+    background: rgba(255, 104, 30, 1) !important;
 }
 
-.vertical.menu .active.item>i.icon:hover {
-	color: #ffffff !important;
-
+.vertical.menu .active.item > i.icon:hover {
+    color: #ffffff !important;
 }
 
 .vertical.menu .progress {
-	/* background-color: #ffffff !important; */
-	opacity: 1 !important;
+    /* background-color: #ffffff !important; */
+    opacity: 1 !important;
 }
 
 .vertical .item:hover {
-	font-weight: bold !important;
-	color: black !important;
+    font-weight: bold !important;
+    color: black !important;
 }
 
 .anno-button {
-	margin-bottom: 15px !important;
-	width: 50%
+    margin-bottom: 15px !important;
+    width: 50%;
 }
 
 .change-cluster-button {
-	margin-bottom: 15px !important;
-	width: 23%;
-	white-space: pre;
+    margin-bottom: 15px !important;
+    width: 23%;
+    white-space: pre;
 }
 
 .vote-tooltip {
-	z-index: 99999;
-	font-size: 12;
-	position: fixed !important;
+    z-index: 99999;
+    font-size: 12;
+    position: fixed !important;
 }
 
 .sidebarTabs {
-	display: flex;
-	width: 100%;
-	flex-direction: column;
+    display: flex;
+    width: 100%;
+    flex-direction: column;
 }
 
 .sidebarTabs a:nth-child(2) {
-	color: red !important;
+    color: red !important;
 }
 
-.sidebarTabs a.active:nth-child(2)  {
-	border-color: red !important;
+.sidebarTabs a.active:nth-child(2) {
+    border-color: red !important;
 }
 
 .sidebarTabs a:nth-child(3) {
-	color: green !important;
+    color: green !important;
 }
 
-.sidebarTabs a.active:nth-child(3)  {
-	border-color: green !important;
+.sidebarTabs a.active:nth-child(3) {
+    border-color: green !important;
 }
 
 .sidebarTabs a:nth-child(4) {
-	color: blue !important;
+    color: blue !important;
 }
 
-.sidebarTabs a.active:nth-child(4)  {
-	border-color: blue !important;
+.sidebarTabs a.active:nth-child(4) {
+    border-color: blue !important;
 }
 
 .geneInfo {
-	max-height: 200px;
-	overflow-y: scroll;
+    max-height: 200px;
+    overflow-y: scroll;
 }
 
 .selectionRow {
-	padding-top: 5px !important;
+    padding-top: 5px !important;
 }
 
 .viewerToolbar {
-	flex-basis: 100px;
+    flex-basis: 100px;
 }
 
 .ui.segment.basic {
-	padding: 0px;
-	padding-left: 10px;
+    padding: 0px;
+    padding-left: 10px;
 }
 
 .ui.accordion {
-	flex-grow: 0 !important;
+    flex-grow: 0 !important;
 }
 
 .ui.pointing.secondary.menu {
-	margin: 0px;
+    margin: 0px;
 }
 
 .ui.modal.transition.visible.active {
-	margin-top: 5% !important;
-	margin-left: auto;
-	margin-right: auto;
-	margin-bottom: auto
+    margin-top: -15% !important;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: auto;
 }
 
 .rc-slider {
-	margin: 0px !important;
+    margin: 0px !important;
 }
 .level0 {
-	font-weight: bold;
-	padding-left: 5px !important;
-	font-size: 1.2em;
+    font-weight: bold;
+    padding-left: 5px !important;
+    font-size: 1.2em;
 }
 .level1 {
-	padding-left: 10px !important;
-	font-size: 1.15em;
+    padding-left: 10px !important;
+    font-size: 1.15em;
 }
 .level2 {
-	padding-left: 15px !important;
-	font-size: 1.1em;
+    padding-left: 15px !important;
+    font-size: 1.1em;
 }
 .level3 {
-	padding-left: 20px !important;
-	font-size: 1.05em;
+    padding-left: 20px !important;
+    font-size: 1.05em;
 }
 .level4 {
-	padding-left: 25px !important;
+    padding-left: 25px !important;
 }

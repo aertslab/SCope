@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Load node dependencies
-const exec = require('child_process').exec;
+const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
@@ -108,28 +108,24 @@ class Launcher {
     checkSCopePoetryEnvExists() {
         console.log('- Checking SCope poetry environment...');
         return new Promise((resolve, reject) => {
-            exec(
-                'cd opt; poetry env list',
-                { stdio: [0, 1, 2] },
-                (error, stdout, stderr) => {
-                    if (error) return resolve(false);
-                    if (stderr) return resolve(false);
-                    if (!this.scopeServerActivated) {
-                        if (stdout.includes('scopeserver')) {
-                            throw new Error(
-                                "SCope Server is installed but not activated. Please activate your 'scope' poetry environment using either 'cd opt; poetry shell; cd ..;' command."
-                            );
-                        } else {
-                            throw new Error(
-                                "SCope Server is not installed. Please install SCope Server using 'npm install'."
-                            );
-                        }
+            exec('cd opt; poetry env list', (error, stdout, stderr) => {
+                if (error) return resolve(false);
+                if (stderr) return resolve(false);
+                if (!this.scopeServerActivated) {
+                    if (stdout.includes('scopeserver')) {
+                        throw new Error(
+                            "SCope Server is installed but not activated. Please activate your 'scope' poetry environment using either 'cd opt; poetry shell; cd ..;' command."
+                        );
                     } else {
-                        console.log('SCope Server is installed and activated!');
-                        resolve(true);
+                        throw new Error(
+                            "SCope Server is not installed. Please install SCope Server using 'npm install'."
+                        );
                     }
+                } else {
+                    console.log('SCope Server is installed and activated!');
+                    resolve(true);
                 }
-            );
+            });
         });
     }
 
@@ -221,14 +217,10 @@ class Launcher {
             "It can be accessed using 'tmux a -t scope-client' command."
         );
         return new Promise((resolve, reject) => {
-            exec(
-                scopeClientStartCmd,
-                { stdio: [0, 1, 2] },
-                (error, stdout, stderr) => {
-                    if (error) return resolve(false);
-                    if (stderr) return resolve(false);
-                }
-            );
+            exec(scopeClientStartCmd, (error, stdout, stderr) => {
+                if (error) return resolve(false);
+                if (stderr) return resolve(false);
+            });
             resolve(true);
         });
     }
@@ -280,7 +272,7 @@ class Launcher {
     }
 
     startSCopeServer() {
-        let scopeStartCmd = 'scope-server';
+        let scopeStartCmd = 'hypercorn opt/main:scope_api';
         if (!this.scopeServerActivated) {
             console.log('SCope Server installed but not activated');
             scopeStartCmd =
@@ -298,14 +290,10 @@ class Launcher {
             );
         }
         return new Promise((resolve, reject) => {
-            exec(
-                scopeStartCmd,
-                { stdio: [0, 1, 2] },
-                (error, stdout, stderr) => {
-                    if (error) return resolve(false);
-                    if (stderr) return resolve(false);
-                }
-            );
+            exec(scopeStartCmd, (error, stdout, stderr) => {
+                if (error) return resolve(false);
+                if (stderr) return resolve(false);
+            });
             resolve(true);
         });
     }

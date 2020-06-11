@@ -2409,3 +2409,93 @@ class getNextClusterRequest(google___protobuf___message___Message):
     ) -> None: ...
 
 global___getNextClusterRequest = getNextClusterRequest
+
+class NewClusterInfo(google___protobuf___message___Message):
+    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+    cellIDs = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
+    clusterIDs = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
+    clusteringName = ...  # type: typing___Text
+    def __init__(
+        self,
+        *,
+        cellIDs: typing___Optional[typing___Iterable[typing___Text]] = None,
+        clusterIDs: typing___Optional[typing___Iterable[typing___Text]] = None,
+        clusteringName: typing___Optional[typing___Text] = None,
+    ) -> None: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> NewClusterInfo: ...
+    else:
+        @classmethod
+        def FromString(
+            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
+        ) -> NewClusterInfo: ...
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+    def ClearField(
+        self,
+        field_name: typing_extensions___Literal[
+            "cellIDs", b"cellIDs", "clusterIDs", b"clusterIDs", "clusteringName", b"clusteringName"
+        ],
+    ) -> None: ...
+
+global___NewClusterInfo = NewClusterInfo
+
+class AddNewClusteringRequest(google___protobuf___message___Message):
+    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+    loomFilePath = ...  # type: typing___Text
+    @property
+    def orcidInfo(self) -> global___orcidInfoMessage: ...
+    @property
+    def clusterInfo(self) -> global___NewClusterInfo: ...
+    def __init__(
+        self,
+        *,
+        loomFilePath: typing___Optional[typing___Text] = None,
+        orcidInfo: typing___Optional[global___orcidInfoMessage] = None,
+        clusterInfo: typing___Optional[global___NewClusterInfo] = None,
+    ) -> None: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> AddNewClusteringRequest: ...
+    else:
+        @classmethod
+        def FromString(
+            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
+        ) -> AddNewClusteringRequest: ...
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+    def HasField(
+        self, field_name: typing_extensions___Literal["clusterInfo", b"clusterInfo", "orcidInfo", b"orcidInfo"]
+    ) -> builtin___bool: ...
+    def ClearField(
+        self,
+        field_name: typing_extensions___Literal[
+            "clusterInfo", b"clusterInfo", "loomFilePath", b"loomFilePath", "orcidInfo", b"orcidInfo"
+        ],
+    ) -> None: ...
+
+global___AddNewClusteringRequest = AddNewClusteringRequest
+
+class AddNewClusteringReply(google___protobuf___message___Message):
+    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+    success = ...  # type: builtin___bool
+    message = ...  # type: typing___Text
+    def __init__(
+        self, *, success: typing___Optional[builtin___bool] = None, message: typing___Optional[typing___Text] = None,
+    ) -> None: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> AddNewClusteringReply: ...
+    else:
+        @classmethod
+        def FromString(
+            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
+        ) -> AddNewClusteringReply: ...
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+    def ClearField(
+        self, field_name: typing_extensions___Literal["message", b"message", "success", b"success"]
+    ) -> None: ...
+
+global___AddNewClusteringReply = AddNewClusteringReply

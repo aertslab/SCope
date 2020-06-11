@@ -572,10 +572,12 @@ class API {
             );
         } else if (featureType.indexOf('Clustering:') == 0) {
             let loomMetadata = this.getActiveLoomMetadata();
-            let clusteringID, clusterID, cellTypeAnno;
+            let clusteringID, clusterID, cellTypeAnno, clusteringGroup;
             loomMetadata.cellMetaData.clusterings.map((clustering) => {
-                if (featureType.indexOf(clustering.name) != -1) {
+                const clusteringName = featureType.replace('Clustering: ', '');
+                if (clusteringName == clustering.name) {
                     clusteringID = clustering.id;
+                    clusteringGroup = clustering.group;
                     clustering.clusters.map((c) => {
                         if (c.description == feature) {
                             clusterID = c.id;
@@ -614,6 +616,7 @@ class API {
                                         clusterID: clusterID,
                                         clusteringID: clusteringID,
                                         cellTypeAnno: cellTypeAnno,
+                                        clusteringGroup: clusteringGroup,
                                     },
                                     page
                                 );
@@ -631,7 +634,10 @@ class API {
                     featureType,
                     feature,
                     0,
-                    { description: featureDescription },
+                    {
+                        description: featureDescription,
+                        clusteringGroup: clusteringGroup,
+                    },
                     page
                 );
             }

@@ -8,7 +8,9 @@ import time
 import hashlib
 import os
 import pickle
-from typing import Tuple, Dict, Any
+from typing import Tuple, Dict, Any, Union, List, Set
+from typing_extensions import TypedDict
+from google.protobuf.internal.containers import RepeatedScalarFieldContainer
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
 from scopeserver.dataserver.utils import search_space as ss
@@ -18,6 +20,14 @@ from scopeserver.dataserver.utils import constant
 import logging
 
 logger = logging.getLogger(__name__)
+
+Cluster = TypedDict("Cluster", {"id": int, "description": str,})
+
+Clusters = List[Cluster]
+
+Clustering = TypedDict(
+    "Clustering", {"id": int, "group": str, "name": str, "clusters": Clusters, "clusterMarkerMetrics": Any}
+)
 
 
 class Loom:
@@ -83,8 +93,8 @@ class Loom:
         return fa
 
     @staticmethod
-    def dfToNamedMatrix(df):
-        arr_ip = [tuple(i) for i in df.as_matrix()]
+    def dfToNamedMatrix(df: pd.DataFrame) -> np.ndarray:
+        arr_ip = [tuple(i) for i in df.values]
         dtyp = np.dtype(list(zip(df.dtypes.index, df.dtypes)))
         arr = np.array(arr_ip, dtype=dtyp)
         return arr
@@ -147,13 +157,6 @@ class Loom:
 
     def add_collab_annotation(self, request, secret: str) -> Tuple[bool, str]:
         logger.info("Adding collaborative annotation for {0}".format(self.get_abs_file_path()))
-
-        if not self.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
-            logger.error(
-                f"AUTHENTICATION FAILURE: {self.file_path}, user: {request.orcidInfo.orcidID}, uuid: {request.orcidInfo.orcidUUID}"
-            )
-            logger.error(request)
-            return (False, "Could not confirm user")
 
         metaJson = self.get_meta_data()
 
@@ -230,13 +233,6 @@ class Loom:
 
     def annotation_vote(self, request, secret: str) -> Tuple[bool, str]:
         logger.info("Adding vote annotation for {0}".format(self.get_abs_file_path()))
-
-        if not self.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
-            logger.error(
-                f"AUTHENTICATION FAILURE: {self.file_path}, user: {request.annoData.curator_id}, uuid: {request.orcid_scope_uuid}"
-            )
-            logger.error(request)
-            return (False, "Could not confirm user")
 
         metaJson = self.get_meta_data()
 
@@ -316,6 +312,107 @@ class Loom:
             logger.debug("Failure")
             return (False, "Metadata was not correct after re-reading file")
 
+    @staticmethod
+    def create_clusters_meta(cluster_ids: RepeatedScalarFieldContainer) -> Tuple[List[Cluster], Dict[str, int]]:
+        try:
+            unannotated_ids = set((int(c) for c in cluster_ids))
+            clusters_list = [str(c) for c in sorted(unannotated_ids)]
+            annotated = False
+        except ValueError:
+            clusters_list = sorted(set((c for c in cluster_ids)))
+            annotated = True
+
+        clusters: List[Cluster] = []
+        cluster_mapping = {}
+        for cluster_id, cluster_name in enumerate(clusters_list):
+            clusters.append(
+                {"id": cluster_id, "description": cluster_name if annotated else f"Unannotated Cluster {cluster_name}"}
+            )
+            cluster_mapping[str(cluster_name)] = cluster_id
+
+        return clusters, cluster_mapping
+
+    @staticmethod
+    def create_new_clustering_meta(
+        metaJson: dict, request: s_pb2.AddNewClusteringRequest
+    ) -> Tuple[Clustering, Dict[str, int]]:
+
+        new_clustering_id = max([int(x["id"]) for x in metaJson["clusterings"]]) + 1
+        new_clustering_name = f"{request.clusterInfo.clusteringName}"
+
+        clusters, cluster_mapping = Loom.create_clusters_meta(request.clusterInfo.clusterIDs)
+
+        cluster_meta: Clustering = {
+            "id": new_clustering_id,
+            "group": f"{request.orcidInfo.orcidID} ({request.orcidInfo.orcidName})",
+            "name": new_clustering_name,
+            "clusters": clusters,
+            "clusterMarkerMetrics": [],
+        }
+
+        return cluster_meta, cluster_mapping
+
+    def get_cells_overlap(
+        self, cluster_info: s_pb2.NewClusterInfo, cluster_mapping: Dict[str, int]
+    ) -> Tuple[List[int], List[int], Set[str]]:
+        chosen_cells = []
+        new_cluster_ids = []
+        missing_cells = set()
+
+        cellIDs = list(self.get_cell_ids())
+
+        for cell, cluster in zip(cluster_info.cellIDs, cluster_info.clusterIDs):
+            try:
+                chosen_cells.append(cellIDs.index(cell))
+                new_cluster_ids.append(cluster_mapping[cluster])
+            except ValueError:
+                missing_cells.add(cell)
+
+        return chosen_cells, new_cluster_ids, missing_cells
+
+    def add_user_clustering(self, request) -> Tuple[bool, str]:
+        logger.info("Adding user clustering for {0}".format(self.get_abs_file_path()))
+
+        metaJson = self.get_meta_data()
+
+        new_clustering_meta, cluster_mapping = Loom.create_new_clustering_meta(metaJson, request)
+
+        if new_clustering_meta["name"] in (x["name"] for x in metaJson["clusterings"]):
+            logger.error(f"Clustering name {new_clustering_meta['name']} already exists in {self.abs_file_path}")
+            return (False, "That clustering name already exists in this file. Please choose another name.")
+
+        metaJson["clusterings"].append(new_clustering_meta)
+
+        chosen_cells, new_cluster_ids, missing_cells = self.get_cells_overlap(request.clusterInfo, cluster_mapping)
+
+        if len(chosen_cells) == 0:
+            return (False, "No cells matched this dataset")
+
+        clusterings = pd.DataFrame(self.loom_connection.ca.Clusterings)
+        clusterings[str(new_clustering_meta["id"])] = -1
+        clusterings.loc[chosen_cells, str(new_clustering_meta["id"])] = new_cluster_ids
+
+        new_clusterings = Loom.dfToNamedMatrix(clusterings)
+
+        self.loom_connection = self.lfh.change_loom_mode(
+            self.file_path, mode="r+", partial_md5_hash=self.partial_md5_hash
+        )
+        loom = self.loom_connection
+        loom.ca.Clusterings = new_clusterings
+        loom.attrs["MetaData"] = json.dumps(metaJson)
+        self.loom_connection = self.lfh.change_loom_mode(
+            self.file_path, mode="r", partial_md5_hash=self.partial_md5_hash
+        )
+        loom = self.loom_connection
+
+        try:
+            new_clustering_data = self.get_clustering_by_id(new_clustering_meta["id"])
+            logger.debug("Success")
+            return (True, "Success")
+        except IndexError:
+            logger.debug("Failure")
+            return (False, "Updated clusterings do not exist in file. Write error.")
+
     def set_hierarchy(self, L1: str, L2: str, L3: str) -> bool:
         logger.info("Changing hierarchy name for {0}".format(self.get_abs_file_path()))
 
@@ -348,12 +445,6 @@ class Loom:
         logger.info("Making metadata for {0}".format(self.get_abs_file_path()))
         metaJson = {}
 
-        def dfToNamedMatrix(df):
-            arr_ip = [tuple(i) for i in df.as_matrix()]
-            dtyp = np.dtype(list(zip(df.dtypes.index, df.dtypes)))
-            arr = np.array(arr_ip, dtype=dtyp)
-            return arr
-
         self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode="r+")
         loom = self.loom_connection
         col_attrs = loom.ca.keys()
@@ -379,7 +470,7 @@ class Loom:
             if cf_col in ["tsne", "umap", "pca"] and loom.ca[col].shape[1] >= 2:
                 if not embeddings_default:
                     metaJson["embeddings"].append({"id": -1, "name": col})
-                    loom.ca["Embedding"] = dfToNamedMatrix(pd.DataFrame(loom.ca[col][:, :2], columns=["_X", "_Y"]))
+                    loom.ca["Embedding"] = Loom.dfToNamedMatrix(pd.DataFrame(loom.ca[col][:, :2], columns=["_X", "_Y"]))
                     embeddings_default = True
                 else:
                     metaJson["embeddings"].append({"id": embeddings_id, "name": col})
@@ -387,8 +478,8 @@ class Loom:
                     Embeddings_Y[str(embeddings_id)] = loom.ca[col][:, 1]
                     embeddings_id += 1
         if Embeddings_X.shape != (0, 0):
-            loom.ca["Embeddings_X"] = dfToNamedMatrix(Embeddings_X)
-            loom.ca["Embeddings_Y"] = dfToNamedMatrix(Embeddings_Y)
+            loom.ca["Embeddings_X"] = Loom.dfToNamedMatrix(Embeddings_X)
+            loom.ca["Embeddings_Y"] = Loom.dfToNamedMatrix(Embeddings_Y)
 
         # Annotations - What goes here?
         metaJson["annotations"] = []
@@ -407,9 +498,6 @@ class Loom:
             logger.debug(f"\tDetected clusterings in loom file. Adding metadata.")
             clusters_set = set(zip(loom.ca["Clusters"], loom.ca["ClusterName"]))
             clusters = [{"id": int(x[0]), "description": x[1]} for x in clusters_set]
-
-            # loom.ca['Clusterings'] = SCope.dfToNamedMatrix(pd.DataFrame(columns=[0], index=[x for x in range(loom.shape[1])], data=[int(x) for x in loom.ca['Clusters']]))
-
             clusterDF = pd.DataFrame(columns=["0"], index=[x for x in range(loom.shape[1])])
             clusterDF["0"] = [int(x) for x in loom.ca["Clusters"]]
             loom.ca["Clusterings"] = Loom.dfToNamedMatrix(clusterDF)
@@ -667,7 +755,14 @@ class Loom:
         logic: str = "OR",
     ) -> Tuple[np.ndarray, list]:
         if gene_symbol not in set(self.get_genes()):
-            gene_symbol = self.get_gene_names()[gene_symbol]
+            try:
+                gene_symbol = self.get_gene_names()[gene_symbol]
+            except KeyError:
+                # No gene is present, likely ATAC data, return 0's
+                cell_indices = list(range(self.get_nb_cells()))
+                gene_expr = np.zeros(self.get_nb_cells())
+                return gene_expr, cell_indices
+
         logger.debug("Debug: getting expression of {0} ...".format(gene_symbol))
         gene_expr = self.get_gene_expression_by_gene_symbol(gene_symbol=gene_symbol)
         if cpm_normalise:
