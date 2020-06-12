@@ -122,6 +122,7 @@ class LoomFileHandler:
                 logger.info(f"Update required for Loom {loom_file_path}")
                 try:
                     os.remove(os.path.join(os.path.dirname(abs_loom_file_path), current_loom_file_hash + ".ss_pkl"))
+                    self.active_looms[abs_loom_file_path].close()
                     del self.active_looms[abs_loom_file_path]
                 except OSError as err:
                     logger.error(f"Could not delete search space pickle from {loom_file_path}. {err}")
