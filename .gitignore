@@ -49,3 +49,4 @@ assets
 release/*
 release/logs
 debug
+tests/
