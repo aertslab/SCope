@@ -121,14 +121,10 @@ class Loom:
             return json.loads(zlib.decompress(base64.b64decode(meta.encode("ascii"))).decode("ascii"))
 
     def update_metadata(self, meta):
-        self.loom_connection = self.lfh.change_loom_mode(
-            self.file_path, mode="r+", file_hash=self.file_hash
-        )
+        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode="r+", file_hash=self.file_hash)
         orig_metaJson = self.get_meta_data()
         self.loom_connection.attrs["MetaData"] = json.dumps(meta)
-        self.loom_connection = self.lfh.change_loom_mode(
-            self.file_path, mode="r", file_hash=self.file_hash
-        )
+        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode="r", file_hash=self.file_hash)
         new_metaJson = self.get_meta_data()
         return orig_metaJson != new_metaJson
 
@@ -400,15 +396,11 @@ class Loom:
 
         new_clusterings = Loom.dfToNamedMatrix(clusterings)
 
-        self.loom_connection = self.lfh.change_loom_mode(
-            self.file_path, mode="r+", file_hash=self.file_hash
-        )
+        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode="r+", file_hash=self.file_hash)
         loom = self.loom_connection
         loom.ca.Clusterings = new_clusterings
         loom.attrs["MetaData"] = json.dumps(metaJson)
-        self.loom_connection = self.lfh.change_loom_mode(
-            self.file_path, mode="r", file_hash=self.file_hash
-        )
+        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode="r", file_hash=self.file_hash)
         loom = self.loom_connection
 
         try:
@@ -422,9 +414,7 @@ class Loom:
     def set_hierarchy(self, L1: str, L2: str, L3: str) -> bool:
         logger.info("Changing hierarchy name for {0}".format(self.get_abs_file_path()))
 
-        self.loom_connection = self.lfh.change_loom_mode(
-            self.file_path, mode="r+", file_hash=self.file_hash
-        )
+        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode="r+", file_hash=self.file_hash)
         loom = self.loom_connection
         attrs = self.loom_connection.attrs
 
@@ -433,9 +423,7 @@ class Loom:
         attrs["SCopeTreeL3"] = L3
 
         loom.attrs = attrs
-        self.loom_connection = self.lfh.change_loom_mode(
-            self.file_path, mode="r", file_hash=self.file_hash
-        )
+        self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode="r", file_hash=self.file_hash)
         loom = self.loom_connection
         newAttrs = self.loom_connection.attrs
 

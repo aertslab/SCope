@@ -35,10 +35,7 @@ class LoomFileHandler:
             logger.warning(f"Deleting malformed loom {file_path}")
             return None
         return self.add_loom(
-            file_hash=file_hash,
-            file_path=file_path,
-            abs_file_path=abs_file_path,
-            loom_connection=loom_connection,
+            file_hash=file_hash, file_path=file_path, abs_file_path=abs_file_path, loom_connection=loom_connection,
         )
 
     @staticmethod
