@@ -827,8 +827,8 @@ class SCope(s_pb2_grpc.MainServicer):
                     if basename.endswith(".loom"):
                         abs_file_path = self.lfh.drop_loom(request.filePath)
                         try:
-                            partial_md5_hash = self.lfh.get_partial_md5_hash(abs_file_path, 10000)
-                            os.remove(os.path.join(os.path.dirname(abs_file_path), partial_md5_hash + ".ss_pkl"))
+                            file_hash = self.lfh.get_file_hash(abs_file_path)
+                            os.remove(os.path.join(os.path.dirname(abs_file_path), file_hash + ".ss_pkl"))
                         except OSError as err:
                             logger.error(f"Could not delete search space pickle from {request.filePath}. {err}")
                     try:
