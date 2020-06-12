@@ -120,20 +120,29 @@ class LoomFileHandler:
         # To check if the given file path is given specified url!
         file_hash = LoomFileHandler.get_file_hash(abs_loom_file_path)
         if abs_loom_file_path in self.active_looms:
-            logger.debug("Should be preloaded")
-            try:
-                logger.debug(
-                    f"Current mode: {self.active_looms[abs_loom_file_path].get_connection().mode}, wanted mode {mode}"
-                )
-
-                if self.active_looms[abs_loom_file_path].get_connection().mode == mode:
-                    loom = self.active_looms[abs_loom_file_path]
+            current_loom_file_hash = self.active_looms[abs_loom_file_path].get_file_hash()
+            if current_loom_file_hash != file_hash:
+                logger.info(f"Update required for Loom {loom_file_path}")
+                try:
+                    os.remove(os.path.join(os.path.dirname(abs_loom_file_path), current_loom_file_hash + ".ss_pkl"))
+                    del self.active_looms[abs_loom_file_path]
+                except OSError as err:
+                    logger.error(f"Could not delete search space pickle from {loom_file_path}. {err}")
+            else:
+                logger.debug("Should be preloaded")
+                try:
                     logger.debug(
-                        f"Returning pre-loaded loom file {loom_file_path}. Hash {partial_md5_hash}, object {id(loom)}"
+                        f"Current mode: {self.active_looms[abs_loom_file_path].get_connection().mode}, wanted mode {mode}"
                     )
-                    return loom
-            except AttributeError:
-                logger.error("Loom was previously closed")
+
+                    if self.active_looms[abs_loom_file_path].get_connection().mode == mode:
+                        loom = self.active_looms[abs_loom_file_path]
+                        logger.debug(
+                            f"Returning pre-loaded loom file {loom_file_path}. Hash {file_hash}, object {id(loom)}"
+                        )
+                        return loom
+                except AttributeError:
+                    logger.error("Loom was previously closed")
 
         loom = self.load_loom_file(
             file_hash=file_hash, mode=mode, file_path=loom_file_path, abs_file_path=abs_loom_file_path
