@@ -114,14 +114,14 @@ class Loom:
         except AttributeError:
             return json.loads(zlib.decompress(base64.b64decode(meta.encode("ascii"))).decode("ascii"))
 
-    def update_metadata(self, meta):
+    def update_metadata(self, meta, keep_ss: bool = False):
         self.loom_connection = self.lfh.change_loom_mode(
             self.file_path, mode="r+", partial_md5_hash=self.partial_md5_hash
         )
         orig_metaJson = self.get_meta_data()
         self.loom_connection.attrs["MetaData"] = json.dumps(meta)
         self.loom_connection = self.lfh.change_loom_mode(
-            self.file_path, mode="r", partial_md5_hash=self.partial_md5_hash
+            self.file_path, mode="r", partial_md5_hash=self.partial_md5_hash, keep_ss=keep_ss
         )
         new_metaJson = self.get_meta_data()
         return orig_metaJson != new_metaJson
@@ -303,7 +303,10 @@ class Loom:
             logger.error("Could not find cell type annotation to change vote")
             return (False, "Could not find cell type annotation to change vote")
 
-        self.update_metadata(metaJson)
+        try:
+            self.update_metadata(metaJson, keep_ss=True)
+        except OSError:
+            return (False, "Couldn't write metadata!")
 
         if check_data == self.get_meta_data():
             logger.debug("Success")

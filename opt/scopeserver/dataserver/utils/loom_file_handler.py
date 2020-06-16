@@ -48,7 +48,8 @@ class LoomFileHandler:
                 f.seek(-file_size, 2)
             else:
                 f.seek(-last_n_kb * 1024, 2)
-            return hashlib.md5(f.read() + file_path.encode("ASCII")).hexdigest()
+            data = f.read()
+        return hashlib.md5(data + file_path.encode("ASCII")).hexdigest()
 
     def drop_loom(self, loom_file_path: str) -> str:
         loom = self.get_loom(loom_file_path=loom_file_path).get_connection().close()
@@ -56,7 +57,9 @@ class LoomFileHandler:
         del self.active_looms[abs_file_path]
         return abs_file_path
 
-    def change_loom_mode(self, loom_file_path: str, mode: str = "r", partial_md5_hash: str = None):
+    def change_loom_mode(
+        self, loom_file_path: str, mode: str = "r", partial_md5_hash: str = None, keep_ss: bool = False
+    ):
         abs_file_path = self.get_loom_absolute_file_path(loom_file_path)
         if partial_md5_hash is None:
             partial_md5_hash = LoomFileHandler.get_partial_md5_hash(abs_file_path, 10000)
@@ -77,6 +80,16 @@ class LoomFileHandler:
 
         else:
             logger.debug(f"Reopening file as r")
+            if keep_ss:
+                new_partial_md5_hash = LoomFileHandler.get_partial_md5_hash(abs_file_path, 10000)
+                logger.debug(
+                    f'Keeping old SS, moving {os.path.join(os.path.dirname(abs_file_path), partial_md5_hash + ".ss_pkl")} \
+                        to {os.path.join(os.path.dirname(abs_file_path), new_partial_md5_hash + ".ss_pkl")}'
+                )
+                os.rename(
+                    os.path.join(os.path.dirname(abs_file_path), partial_md5_hash + ".ss_pkl"),
+                    os.path.join(os.path.dirname(abs_file_path), new_partial_md5_hash + ".ss_pkl"),
+                )
             self.active_looms[abs_file_path] = self.get_loom(loom_file_path=loom_file_path)
             logger.info(f"{loom_file_path} now {self.active_looms[abs_file_path].get_connection().mode}")
 
@@ -84,14 +97,14 @@ class LoomFileHandler:
         new_partial_md5_hash = LoomFileHandler.get_partial_md5_hash(abs_file_path, 10000)
         logger.debug(f"Old MD5 is: {partial_md5_hash} New MD5 is: {new_partial_md5_hash}")
 
-        if partial_md5_hash != new_partial_md5_hash:
+        if (partial_md5_hash != new_partial_md5_hash) and not keep_ss:
             try:
+                logger.debug("Removing old SS")
                 os.remove(os.path.join(os.path.dirname(abs_file_path), partial_md5_hash + ".ss_pkl"))
             except Exception as e:
                 logger.debug("Couldn't remove pickle SS")
                 logger.debug(e)
                 pass
-
         return self.active_looms[abs_file_path].get_connection()
 
     def get_loom_absolute_file_path(self, loom_file_path: str) -> str:
