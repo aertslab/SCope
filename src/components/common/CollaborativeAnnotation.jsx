@@ -37,6 +37,8 @@ class CollaborativeAnnotation extends Component {
             selected: [],
             showModal: false,
             freeInput: '',
+            olsResult: '',
+            status: 'ready',
             submitError: false,
             cookiesAllowed: false,
         };
@@ -49,7 +51,7 @@ class CollaborativeAnnotation extends Component {
     };
 
     closeModal = () => {
-        this.setState({ showModal: false });
+        this.setState({ showModal: false, olsResult: '', freeInput: '' });
     };
 
     closeErrorModal = (e) => {
@@ -65,7 +67,7 @@ class CollaborativeAnnotation extends Component {
     };
 
     handleTabChange = () => {
-        this.setState({ freeInput: '' });
+        this.setState({ freeInput: '', olsResult: '' });
     };
 
     sendData = (e) => {
@@ -95,7 +97,11 @@ class CollaborativeAnnotation extends Component {
 
         annoData['selectedMarkers'] = this.AnnoGeneSearch.current.state.value;
         this.setState(
-            { annoData: annoData, submitAction: e.target.value },
+            {
+                annoData: annoData,
+                submitAction: e.target.value,
+                status: 'processing',
+            },
             () => {
                 BackendAPI.setColabAnnotationData(
                     this.props.feature,
@@ -107,9 +113,11 @@ class CollaborativeAnnotation extends Component {
                     },
                     this.props.match.params.uuid,
                     (response) => {
+                        this.setState({ status: 'ready', annoData: {} });
                         if (response.success) {
-                            this.setState({ annoData: {} });
                             this.closeModal();
+                        } else if (response.success == false) {
+                            alert(response.message);
                         }
                         if (
                             this.state.submitAction == 'submitNext' ||
@@ -140,6 +148,17 @@ class CollaborativeAnnotation extends Component {
         );
     };
 
+    getButtonDisabledStatus = () => {
+        return !(
+            'ready' === this.state.status &&
+            (this.state.freeInput !== '' || this.state.olsResult !== '')
+        );
+    };
+
+    updateOLSResult = (s) => {
+        this.setState({ olsResult: s });
+    };
+
     render() {
         const {
             annoData,
@@ -159,13 +178,62 @@ class CollaborativeAnnotation extends Component {
         };
 
         let olsWidget = () => {
-            return <OLSAutocomplete ref={this.OLSAutocomplete} />;
+            return (
+                <OLSAutocomplete
+                    ref={this.OLSAutocomplete}
+                    updateParent={this.updateOLSResult}
+                />
+            );
+        };
+
+        let getButtonText = (button) => {
+            switch (this.state.status) {
+                case 'ready':
+                    switch (button) {
+                        case 'submit':
+                            return (
+                                <React.Fragment>
+                                    Submit Annotation{' '}
+                                    <Icon name='right chevron' />
+                                </React.Fragment>
+                            );
+                        case 'submitNext':
+                            return (
+                                <React.Fragment>
+                                    Submit and view next cluster{' '}
+                                    <Icon name='right chevron' />
+                                </React.Fragment>
+                            );
+                        default:
+                            return (
+                                <React.Fragment>
+                                    Submit Annotation{' '}
+                                    <Icon name='right chevron' />
+                                </React.Fragment>
+                            );
+                    }
+                case 'processing':
+                    return (
+                        <React.Fragment>
+                            <Icon loading name='spinner' /> Processing
+                        </React.Fragment>
+                    );
+                case 'dataError':
+                    return 'Bad file!';
+                default:
+                    return (
+                        <React.Fragment>
+                            Submit Annotation <Icon name='chevron right' />
+                        </React.Fragment>
+                    );
+            }
         };
 
         let warningPopup = (trigger) => {
             return (
                 <Popup
                     trigger={trigger}
+                    on={'hover'}
                     content='By submitting an annotation, your ORCID details will be permanently added to this loom file. Anyone with access to this file will be able to see your full name and ORCID ID'
                 />
             );
@@ -210,7 +278,9 @@ class CollaborativeAnnotation extends Component {
                         as={Form}
                         className='collab-anno'
                         onClose={() => this.closeModal()}
-                        closeIcon
+                        closeIcon={'ready' == this.state.status}
+                        closeOnDimmerClick={'ready' == this.state.status}
+                        closeOnDocumentClick={'ready' == this.state.status}
                         open={showModal}
                         trigger={
                             <Button
@@ -332,9 +402,9 @@ class CollaborativeAnnotation extends Component {
                                     type='submit'
                                     value='submitNext'
                                     onClick={(e) => this.sendData(e)}
+                                    disabled={this.getButtonDisabledStatus()}
                                     secondary>
-                                    Submit and view next cluster
-                                    <Icon name='right chevron' />
+                                    {getButtonText('submitNext')}
                                 </Button>
                             )}
                             {warningPopup(
@@ -343,9 +413,9 @@ class CollaborativeAnnotation extends Component {
                                     type='submit'
                                     value='submit'
                                     onClick={(e) => this.sendData(e)}
+                                    disabled={this.getButtonDisabledStatus()}
                                     primary>
-                                    Submit Annotation{' '}
-                                    <Icon name='right chevron' />
+                                    {getButtonText('submit')}
                                 </Button>
                             )}
                         </Modal.Actions>

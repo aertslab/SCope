@@ -47,6 +47,7 @@ export default class OLSAutocomplete extends Component {
     state = initialState;
 
     handleResultSelect = (e, { result }) => {
+        this.props.updateParent(result);
         this.setState({
             value: result.label + ' (' + result.obo_id + ')',
             term_id: result.id,
