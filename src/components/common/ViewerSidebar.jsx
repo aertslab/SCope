@@ -50,6 +50,7 @@ class ViewerSidebar extends Component {
             processSubLoomPercentage: null,
             downloadSubLoomPercentage: null,
             imageErrored: false,
+            status: 'ready',
         };
         this.selectionsListener = (selections) => {
             this.setState({ lassoSelections: selections, activeTab: 0 });
@@ -109,6 +110,45 @@ class ViewerSidebar extends Component {
             },
             this.state.activeLoom
         );
+    };
+
+    getButtonText = (text) => {
+        switch (this.state.status) {
+            case 'ready':
+                switch (button) {
+                    case 'submit':
+                        return (
+                            <React.Fragment>
+                                Submit Annotation <Icon name='right chevron' />
+                            </React.Fragment>
+                        );
+                    case 'submitNext':
+                        return (
+                            <React.Fragment>
+                                Submit and view next cluster{' '}
+                                <Icon name='right chevron' />
+                            </React.Fragment>
+                        );
+                    default:
+                        return (
+                            <React.Fragment>
+                                Submit Annotation <Icon name='right chevron' />
+                            </React.Fragment>
+                        );
+                }
+            case 'processing':
+                return (
+                    <React.Fragment>
+                        <Icon loading name='spinner' />
+                    </React.Fragment>
+                );
+            default:
+                return (
+                    <React.Fragment>
+                        Submit Annotation <Icon name='chevron right' />
+                    </React.Fragment>
+                );
+        }
     };
 
     render() {
@@ -580,6 +620,7 @@ class ViewerSidebar extends Component {
                         };
 
                         let submitVote = (annoData, direction) => {
+                            this.setState({ status: 'processing' });
                             BackendAPI.voteAnnotation(
                                 direction,
                                 annoData,
@@ -590,7 +631,10 @@ class ViewerSidebar extends Component {
                                     orcidUUID: this.state.orcid_uuid,
                                 },
                                 match.params.uuid,
-                                (response) => console.log(response)
+                                (response) => {
+                                    console.log(response);
+                                    this.setState({ status: 'ready' });
+                                }
                             );
                         };
 
@@ -601,6 +645,12 @@ class ViewerSidebar extends Component {
                                         className='vote-tooltip'
                                         trigger={
                                             <Button
+                                                disabled={
+                                                    !(
+                                                        this.state.status ===
+                                                        'ready'
+                                                    )
+                                                }
                                                 onClick={() =>
                                                     submitVote(
                                                         props.value.data,
@@ -609,7 +659,16 @@ class ViewerSidebar extends Component {
                                                 }
                                                 icon='thumbs up outline'
                                                 content={
-                                                    props.value.votes_for.total
+                                                    this.state.status ==
+                                                    'ready' ? (
+                                                        props.value.votes_for
+                                                            .total
+                                                    ) : (
+                                                        <Icon
+                                                            loading
+                                                            name='spinner'
+                                                        />
+                                                    )
                                                 }
                                             />
                                         }
@@ -637,6 +696,12 @@ class ViewerSidebar extends Component {
                                         className='vote-tooltip'
                                         trigger={
                                             <Button
+                                                disabled={
+                                                    !(
+                                                        this.state.status ===
+                                                        'ready'
+                                                    )
+                                                }
                                                 onClick={() =>
                                                     submitVote(
                                                         props.value.data,
@@ -645,8 +710,16 @@ class ViewerSidebar extends Component {
                                                 }
                                                 icon='thumbs down outline'
                                                 content={
-                                                    props.value.votes_against
-                                                        .total
+                                                    this.state.status ==
+                                                    'ready' ? (
+                                                        props.value
+                                                            .votes_against.total
+                                                    ) : (
+                                                        <Icon
+                                                            loading
+                                                            name='spinner'
+                                                        />
+                                                    )
                                                 }
                                             />
                                         }
