@@ -455,7 +455,7 @@ class SCope(s_pb2_grpc.MainServicer):
         auc_vals = []
         for regulon in request.selectedRegulons:
             if regulon != "":
-                vals, _ = auc_vals.append(loom.get_auc_values(regulon=regulon))
+                vals, _ = loom.get_auc_values(regulon=regulon)
                 auc_vals.append(vals[[cell_indices]])
         annotations = []
         for anno in request.annotations:
@@ -464,8 +464,8 @@ class SCope(s_pb2_grpc.MainServicer):
 
         return s_pb2.CellMetaDataReply(
             clusterIDs=[s_pb2.CellClusters(clusters=x) for x in cell_clusters],
-            geneExpression=[s_pb2.FeatureValues(features=x) for x in auc_vals],
-            aucValues=[s_pb2.FeatureValues(features=x) for x in gene_exp],
+            geneExpression=[s_pb2.FeatureValues(features=x) for x in gene_exp],
+            aucValues=[s_pb2.FeatureValues(features=x) for x in auc_vals],
             annotations=[s_pb2.CellAnnotations(annotations=x) for x in annotations],
         )
 
