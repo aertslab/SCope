@@ -7,7 +7,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-CURRENT_SS_VERISON = 0
+CURRENT_SS_VERISON = 1
 
 
 class SSKey(NamedTuple):
