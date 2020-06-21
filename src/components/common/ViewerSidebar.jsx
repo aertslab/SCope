@@ -30,6 +30,7 @@ import { BackendAPI } from '../common/API';
 import Metadata from '../common/Metadata';
 import FileDownloader from '../../js/http';
 import CollaborativeAnnotation from './CollaborativeAnnotation';
+import GProfilerModal from './GProfilerModal.tsx';
 
 class ViewerSidebar extends Component {
     static propTypes = {
@@ -1225,6 +1226,13 @@ class ViewerSidebar extends Component {
                             {markerTable}
                             {legendTable}
                             {downloadSubLoomButton()}
+                            <GProfilerModal
+                                numFeatures={md.genes.length}
+                                clusteringID={
+                                    activeFeatures[i].metadata.clusteringID
+                                }
+                                clusterID={activeFeatures[i].metadata.clusterID}
+                            />
                             <br />
                         </Grid.Column>
                     </Grid.Row>
