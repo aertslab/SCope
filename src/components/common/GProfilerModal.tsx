@@ -3,12 +3,13 @@ import { BackendAPI } from './API';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import React, { Component } from 'react';
-import { Button, Modal, Form, Checkbox } from 'semantic-ui-react';
+import { Button, Modal, Form, Checkbox, Table } from 'semantic-ui-react';
 import { instanceOf } from 'prop-types';
 import { withCookies, Cookies, ReactCookieProps } from 'react-cookie';
 
 interface IGProfilerPopupState {
     showModal: boolean;
+    topNumFeatures: number[];
 }
 
 interface IGProfilerPopupProps {
@@ -30,6 +31,7 @@ class GProfilerPopup extends Component<
         super(props);
         this.state = {
             showModal: false,
+            topNumFeatures: [],
         };
     }
 
@@ -64,21 +66,17 @@ class GProfilerPopup extends Component<
             300,
             400,
             500,
-        ].filter((topNumFeatures) =>
-            topNumFeatures < this.props.numFeatures ? true : false
+        ].filter((topNumFeaturesValue) =>
+            topNumFeaturesValue < this.props.numFeatures ? true : false
         );
-
-        const topNumFeatures = [];
-
-        const handleToggleTopNumFeatures = (e) => {
-            console.log(e);
-        };
 
         const handleClickCreateGProfilerLink = () => {
             let query = {
                 loomFilePath: BackendAPI.getActiveLoom(),
             };
         };
+
+        console.log(this.state.topNumFeatures);
 
         return (
             <>
@@ -108,21 +106,83 @@ class GProfilerPopup extends Component<
                         <Modal.Description>
                             <div>Run As Multi-query</div>
                             <div>
-                                Totral number of features detected:
+                                Totral number of features:
                                 {this.props.numFeatures}
                             </div>
-                            {topNumFeaturesArray.map(
-                                (topNumFeatures, index) => {
-                                    return (
-                                        <Checkbox
-                                            label={`Top ${topNumFeatures}`}
-                                            onChange={
-                                                handleToggleTopNumFeatures
-                                            }
-                                        />
-                                    );
-                                }
-                            )}
+                            <Table compact celled definition>
+                                <Table.Header>
+                                    <Table.Row>
+                                        <Table.HeaderCell />
+                                        <Table.HeaderCell>
+                                            Gene List with Number of Top
+                                            Features to Use
+                                        </Table.HeaderCell>
+                                    </Table.Row>
+                                </Table.Header>
+                                <Table.Body>
+                                    {topNumFeaturesArray.map(
+                                        (
+                                            topNumFeaturesValue,
+                                            topNumFeaturesIndex
+                                        ) => {
+                                            const handleToggleTopNumFeatures = () => {
+                                                if (
+                                                    this.state.topNumFeatures.includes(
+                                                        topNumFeaturesValue
+                                                    )
+                                                ) {
+                                                    this.setState({
+                                                        topNumFeatures: this.state.topNumFeatures.filter(
+                                                            (value) =>
+                                                                value !=
+                                                                topNumFeaturesValue
+                                                        ),
+                                                    });
+                                                } else {
+                                                    this.setState({
+                                                        topNumFeatures: [
+                                                            ...this.state
+                                                                .topNumFeatures,
+                                                            topNumFeaturesValue,
+                                                        ],
+                                                    });
+                                                }
+                                            };
+
+                                            const isSelected = this.state.topNumFeatures.includes(
+                                                topNumFeaturesValue
+                                            );
+
+                                            return (
+                                                <Table.Row>
+                                                    <Table.Cell collapsing>
+                                                        <Checkbox
+                                                            onChange={
+                                                                handleToggleTopNumFeatures
+                                                            }
+                                                        />
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        {isSelected ? (
+                                                            <b>
+                                                                {`Top ${topNumFeaturesValue}`}
+                                                            </b>
+                                                        ) : (
+                                                            <span
+                                                                style={{
+                                                                    textDecorationLine:
+                                                                        'line-through',
+                                                                    textDecorationStyle:
+                                                                        'solid',
+                                                                }}>{`Top ${topNumFeaturesValue}`}</span>
+                                                        )}
+                                                    </Table.Cell>
+                                                </Table.Row>
+                                            );
+                                        }
+                                    )}
+                                </Table.Body>
+                            </Table>
                         </Modal.Description>
                     </Modal.Content>
                     <Modal.Actions>
