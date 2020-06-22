@@ -94,7 +94,10 @@ class GProfilerPopup extends Component<
         );
 
         const handleClickCreateGProfilerLink = async () => {
-            if (selectedOrganism === null) {
+            if (
+                (gProfilerToken === null || gProfilerToken === '') &&
+                selectedOrganism === null
+            ) {
                 this.setState({
                     error: 'Please select an organism',
                     gProfilerURL: null,
