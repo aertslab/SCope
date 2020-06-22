@@ -128,10 +128,13 @@ class GProfilerPopup extends Component<
         ];
 
         const handleSelectOrganism = (e, { value }) => {
-            this.setState({ selectedOrganism: value });
+            this.setState({ selectedOrganism: value, gProfilerURL: null });
         };
 
         const handleChangeToken = (e, { value }) => {
+            this.setState({ gProfilerToken: value, gProfilerURL: null });
+        };
+
         const handleClickGotoGProfilerURL = () => {
             window.open(this.state.gProfilerURL);
         };
@@ -196,6 +199,7 @@ class GProfilerPopup extends Component<
                                                                     value !=
                                                                     topNumFeaturesValue
                                                             ),
+                                                            gProfilerURL: null,
                                                         });
                                                     } else {
                                                         this.setState({
@@ -204,6 +208,7 @@ class GProfilerPopup extends Component<
                                                                     .topNumFeatures,
                                                                 topNumFeaturesValue,
                                                             ],
+                                                            gProfilerURL: null,
                                                         });
                                                     }
                                                 };
