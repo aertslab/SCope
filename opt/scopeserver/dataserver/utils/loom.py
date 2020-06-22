@@ -45,7 +45,7 @@ class Loom:
         self.ss_pickle_name = self.abs_file_path + ".ss_pkl"
         self.load_ss(self.ss_pickle_name)
 
-    def load_ss(self, ss_pickle_name: str):
+    def load_ss(self, ss_pickle_name: str) -> None:
         try:
             with open(ss_pickle_name, "rb") as fh:
                 logger.debug(f"Loading prebuilt SS for {self.file_path} from {ss_pickle_name}")
@@ -55,7 +55,9 @@ class Loom:
                 try:
                     assert self.ss.search_space_version == ss.CURRENT_SS_VERISON
                 except AssertionError:
-                    logger.error(f"Cached search space version {self.ss.search_space_version} is not {ss.CURRENT_SS_VERISON}. Rebuilding search space...")
+                    logger.error(
+                        f"Cached search space version {self.ss.search_space_version} is not {ss.CURRENT_SS_VERISON}. Rebuilding search space..."
+                    )
                     self.build_ss()
                 except AttributeError:
                     logger.error(f"Search space has no version key and is likely legacy. Rebuilding search space...")
@@ -69,7 +71,7 @@ class Loom:
         logger.debug(f"Built Search Space for {self.file_path}")
         self.write_ss()
 
-    def write_ss(self):
+    def write_ss(self) -> None:
         self.ss.loom = None  # Remove loom connection to enable pickling
         self.ss.dfh = None
         logger.debug(f"Built all Search Spaces for {self.file_path}")
@@ -77,7 +79,7 @@ class Loom:
             logger.debug(f"Writing prebuilt SS for {self.file_path} to {self.ss_pickle_name}")
             pickle.dump(self.ss, fh)
 
-    def update_ss(self, update: str):
+    def update_ss(self, update: str) -> None:
         self.ss.loom = self
         self.ss.meta_data = self.get_meta_data()
         if update == "clusterings":
