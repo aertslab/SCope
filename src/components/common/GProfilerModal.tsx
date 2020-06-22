@@ -1,29 +1,32 @@
 import _ from 'lodash';
 import { BackendAPI } from './API';
-import { withRouter } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import React, { Component } from 'react';
 import { Button, Modal, Form, Checkbox } from 'semantic-ui-react';
 import { instanceOf } from 'prop-types';
-import { withCookies, Cookies } from 'react-cookie';
+import { withCookies, Cookies, ReactCookieProps } from 'react-cookie';
 
-interface IState {
+interface IGProfilerPopupState {
     showModal: boolean;
 }
 
-interface TProps {
+interface IGProfilerPopupProps {
     numFeatures: number;
     clusteringID: number;
     clusterID: number;
     cookies: Cookies;
 }
 
-class GProfilerPopup extends Component<TProps, IState> {
+class GProfilerPopup extends Component<
+    IGProfilerPopupProps & RouteComponentProps,
+    IGProfilerPopupState
+> {
     static propTypes = {
         cookies: instanceOf(Cookies).isRequired,
     };
 
-    constructor(props: TProps) {
+    constructor(props: IGProfilerPopupProps & RouteComponentProps) {
         super(props);
         this.state = {
             showModal: false,
@@ -65,6 +68,18 @@ class GProfilerPopup extends Component<TProps, IState> {
             topNumFeatures < this.props.numFeatures ? true : false
         );
 
+        const topNumFeatures = [];
+
+        const handleToggleTopNumFeatures = (e) => {
+            console.log(e);
+        };
+
+        const handleClickCreateGProfilerLink = () => {
+            let query = {
+                loomFilePath: BackendAPI.getActiveLoom(),
+            };
+        };
+
         return (
             <>
                 <Modal
@@ -96,15 +111,18 @@ class GProfilerPopup extends Component<TProps, IState> {
                                 Totral number of features detected:
                                 {this.props.numFeatures}
                             </div>
-                            {topNumFeaturesArray.map((topNumFeatures) => {
-                                return (
-                                    <Checkbox
-                                        label={`Top ${topNumFeatures}`}
-                                        // onChange={this.toggle}
-                                        // checked={this.state.checked}
-                                    />
-                                );
-                            })}
+                            {topNumFeaturesArray.map(
+                                (topNumFeatures, index) => {
+                                    return (
+                                        <Checkbox
+                                            label={`Top ${topNumFeatures}`}
+                                            onChange={
+                                                handleToggleTopNumFeatures
+                                            }
+                                        />
+                                    );
+                                }
+                            )}
                         </Modal.Description>
                     </Modal.Content>
                     <Modal.Actions>
@@ -112,7 +130,7 @@ class GProfilerPopup extends Component<TProps, IState> {
                             <Button
                                 type='button'
                                 value='create-gprofiler-link'
-                                // onClick={(e) => this.sendData(e)}
+                                onClick={handleClickCreateGProfilerLink}
                                 // disabled={this.getButtonDisabledStatus()}
                                 secondary>
                                 {'Create Link'}
