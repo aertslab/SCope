@@ -1022,7 +1022,7 @@ class SCope(s_pb2_grpc.MainServicer):
             return np.insert(top_genes_ranked, 0, f">Top_{n}")
 
         top_ranked_gene_lists = [
-            get_top_marker_genes_by(n=topNumFeaturesValue) for topNumFeaturesValue in request.topNumFeatures
+            get_top_marker_genes_by(n=topNumFeaturesValue) for topNumFeaturesValue in sorted(request.topNumFeatures)
         ]
         top_ranked_gene_lists_flattened = np.concatenate(top_ranked_gene_lists).ravel()
         query_content = "\n".join(top_ranked_gene_lists_flattened)
