@@ -1146,6 +1146,41 @@ class API {
     getColors() {
         return this.colors;
     }
+
+    /**
+     * Vendor
+     */
+
+    async getGProfilerLink(
+        clusteringID,
+        clusterID,
+        topNumFeatures,
+        organism,
+        token
+    ) {
+        let query = {
+            loomFilePath: this.getActiveLoom(),
+            clusteringID: clusteringID,
+            clusterID: clusterID,
+            topNumFeatures: topNumFeatures,
+            organism: organism,
+            token: token === null ? '' : token,
+        };
+        console.log('Run getGProfilerLink');
+        console.log(query);
+
+        return new Promise((resolve, reject) => {
+            this.getConnection().then((gbc) => {
+                if (DEBUG) console.log('getGProfilerLink', query);
+                gbc.services.scope.Main.getGProfilerLink(
+                    query,
+                    (err, response) => {
+                        resolve(response);
+                    }
+                );
+            });
+        });
+    }
 }
 
 export let BackendAPI = new API();
