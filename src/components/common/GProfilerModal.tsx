@@ -32,6 +32,15 @@ interface IGProfilerPopupProps {
     cookies: Cookies;
 }
 
+const INITIAL_STATE = {
+    error: null,
+    showModal: false,
+    topNumFeatures: [],
+    selectedOrganism: null,
+    gProfilerToken: null,
+    gProfilerURL: null,
+};
+
 class GProfilerPopup extends Component<
     IGProfilerPopupProps & RouteComponentProps,
     IGProfilerPopupState
@@ -42,18 +51,14 @@ class GProfilerPopup extends Component<
 
     constructor(props: IGProfilerPopupProps & RouteComponentProps) {
         super(props);
-        this.state = {
-            error: null,
-            showModal: false,
-            topNumFeatures: [],
-            selectedOrganism: null,
-            gProfilerToken: null,
-            gProfilerURL: null,
-        };
+        this.state = INITIAL_STATE;
     }
 
     openModal = () => {
-        this.setState({ showModal: true });
+        this.setState({
+            ...INITIAL_STATE,
+            showModal: true,
+        });
     };
 
     closeModal = () => {
