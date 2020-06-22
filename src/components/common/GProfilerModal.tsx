@@ -16,6 +16,7 @@ import { instanceOf } from 'prop-types';
 import { withCookies, Cookies } from 'react-cookie';
 
 interface IGProfilerPopupState {
+    error: string;
     showModal: boolean;
     topNumFeatures: number[];
     selectedOrganism: string;
@@ -40,6 +41,7 @@ class GProfilerPopup extends Component<
     constructor(props: IGProfilerPopupProps & RouteComponentProps) {
         super(props);
         this.state = {
+            error: null,
             showModal: false,
             topNumFeatures: [],
             selectedOrganism: null,
@@ -82,10 +84,21 @@ class GProfilerPopup extends Component<
             topNumFeaturesValue < this.props.numFeatures ? true : false
         );
 
-        const handleClickCreateGProfilerLink = () => {
-            let query = {
-                loomFilePath: BackendAPI.getActiveLoom(),
-            };
+            if (selectedOrganism === null) {
+                this.setState({
+                    error: 'Please select an organism',
+                    gProfilerURL: null,
+                });
+                return;
+            }
+            if (topNumFeatures.length == 0) {
+                this.setState({
+                    error:
+                        'No gene list selected. One gene list is at least required. ',
+                    gProfilerURL: null,
+                });
+                return;
+            }
         };
 
         const organisms = [
@@ -224,6 +237,13 @@ class GProfilerPopup extends Component<
                                         onChange={handleChangeToken}
                                     />
                                 </Form.Group>
+                                {this.state.error !== null && (
+                                    <Form.Group>
+                                        <Label basic color='red'>
+                                            {this.state.error}
+                                        </Label>
+                                    </Form.Group>
+                                )}
                             </Form>
                         </Modal.Description>
                     </Modal.Content>
