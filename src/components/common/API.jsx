@@ -1163,7 +1163,7 @@ class API {
             clusteringID: clusteringID,
             clusterID: clusterID,
             topNumFeatures: topNumFeatures,
-            organism: organism,
+            organism: token !== null ? '' : organism,
             token: token === null ? '' : token,
         };
         console.log('Run getGProfilerLink');
