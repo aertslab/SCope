@@ -134,7 +134,11 @@ class GProfilerPopup extends Component<
         };
 
         const handleChangeToken = (e, { value }) => {
-            this.setState({ gProfilerToken: value, gProfilerURL: null });
+            this.setState({
+                selectedOrganism: null,
+                gProfilerToken: value,
+                gProfilerURL: null,
+            });
         };
 
         const handleClickGotoGProfilerURL = () => {
@@ -256,6 +260,13 @@ class GProfilerPopup extends Component<
                                         options={organisms}
                                         placeholder='Choose an organism'
                                         onChange={handleSelectOrganism}
+                                        disabled={
+                                            gProfilerToken !== null &&
+                                            gProfilerToken !== ''
+                                                ? true
+                                                : false
+                                        }
+                                        value={selectedOrganism}
                                     />
                                     <Form.Field
                                         control={Input}
