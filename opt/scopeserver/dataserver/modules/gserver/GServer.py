@@ -18,6 +18,7 @@ import pickle
 import requests
 import uuid
 import functools
+import urllib
 from typing import DefaultDict, Set, List, Dict, Any, Tuple
 from collections import OrderedDict, defaultdict, deque
 from methodtools import lru_cache
@@ -986,6 +987,65 @@ class SCope(s_pb2_grpc.MainServicer):
     def loomUploaded(self, request, content):
         uploadedLooms[request.UUID].add(request.filename)
         return s_pb2.LoomUploadedReply()
+
+    def get_cluster_marker_table(self, loomFilePath, clusteringID, clusterID) -> pd.DataFrame:
+        loom = self.lfh.get_loom(loom_file_path=loomFilePath)
+
+        def create_cluster_marker_metric(metric):
+            return loom.get_cluster_marker_metrics(
+                clustering_id=clusteringID, cluster_id=clusterID, metric_accessor=metric["accessor"]
+            )
+
+        def merge_cluster_marker_metrics(metrics):
+            return functools.reduce(
+                lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how="outer"), metrics,
+            )
+
+        md_clustering = loom.get_meta_data_clustering_by_id(id=clusteringID, secret=self.config["dataHashSecret"])
+        md_cmm = md_clustering["clusterMarkerMetrics"]
+        cluster_marker_metrics = merge_cluster_marker_metrics(metrics=[create_cluster_marker_metric(x) for x in md_cmm])
+        # Keep only non-zeros elements
+        nonan_marker_mask = cluster_marker_metrics.apply(
+            lambda x: functools.reduce(np.logical_and, ~np.isnan(x)), axis=1
+        )
+        return cluster_marker_metrics[nonan_marker_mask]
+
+    def getGProfilerLink(self, request, context):
+        cluster_marker_table = self.get_cluster_marker_table(
+            loomFilePath=request.loomFilePath, clusteringID=request.clusteringID, clusterID=request.clusterID
+        )
+        if "avg_logFC" not in cluster_marker_table.columns:
+            return s_pb2.GProfilerLinkOutReply(url="Error")
+
+        def get_top_marker_genes_by(n, by="avg_logFC"):
+            top_genes_ranked = cluster_marker_table.sort_values(by=by, ascending=False).head(n=n).index.values
+            return np.insert(top_genes_ranked, 0, f">Top_{n}")
+
+        top_ranked_gene_lists = [
+            get_top_marker_genes_by(n=topNumFeaturesValue) for topNumFeaturesValue in request.topNumFeatures
+        ]
+        top_ranked_gene_lists_flattened = np.concatenate(top_ranked_gene_lists).ravel()
+        query_content = "\n".join(top_ranked_gene_lists_flattened)
+
+        gprofile_query_dict = {
+            "organism": request.token if len(request.token) > 0 else request.organism,
+            "query": query_content,
+            "ordered": "true",
+            "all_results": "false",
+            "no_iea": "false",
+            "combined": "true",
+            "measure_underrepresentation": "false",
+            "domain_scope": "annotated",
+            "significance_threshold_method": "g_SCS",
+            "user_threshold": "0.05",
+            "numeric_namespace": "ENTREZGENE_ACC",
+            "sources": "GO:MF,GO:CC,GO:BP,KEGG,TF,REAC,MIRNA,HPA,CORUM,HP,WP",
+            "background": "",
+        }
+
+        gprofile_query_url = "https://biit.cs.ut.ee/gprofiler/gost?" + urllib.parse.urlencode(gprofile_query_dict)
+
+        return s_pb2.GProfilerLinkOutReply(url=gprofile_query_url)
 
 
 def serve(run_event, config: Dict[str, Any]) -> None:
