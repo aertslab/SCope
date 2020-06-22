@@ -74,12 +74,6 @@ class GProfilerPopup extends Component<
         } = this.state;
         const { clusteringID, clusterID } = this.props;
 
-        let cardStyle = {
-            display: 'block',
-            width: '100vw',
-            transitionDuration: '0.3s',
-        };
-
         const handleOpenModal = () => {
             this.openModal();
         };
