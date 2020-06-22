@@ -11,6 +11,7 @@ import {
     Table,
     Input,
     Select,
+    Label,
 } from 'semantic-ui-react';
 import { instanceOf } from 'prop-types';
 import { withCookies, Cookies } from 'react-cookie';
@@ -21,6 +22,7 @@ interface IGProfilerPopupState {
     topNumFeatures: number[];
     selectedOrganism: string;
     gProfilerToken: string;
+    gProfilerURL: string;
 }
 
 interface IGProfilerPopupProps {
@@ -46,6 +48,7 @@ class GProfilerPopup extends Component<
             topNumFeatures: [],
             selectedOrganism: null,
             gProfilerToken: null,
+            gProfilerURL: null,
         };
     }
 
@@ -58,7 +61,13 @@ class GProfilerPopup extends Component<
     };
 
     render() {
-        const { showModal } = this.state;
+        const {
+            showModal,
+            topNumFeatures,
+            selectedOrganism,
+            gProfilerToken,
+        } = this.state;
+        const { clusteringID, clusterID } = this.props;
 
         let cardStyle = {
             display: 'block',
@@ -84,6 +93,7 @@ class GProfilerPopup extends Component<
             topNumFeaturesValue < this.props.numFeatures ? true : false
         );
 
+        const handleClickCreateGProfilerLink = async () => {
             if (selectedOrganism === null) {
                 this.setState({
                     error: 'Please select an organism',
@@ -99,6 +109,16 @@ class GProfilerPopup extends Component<
                 });
                 return;
             }
+            const gProfilerLinkResponse = await BackendAPI.getGProfilerLink(
+                clusteringID,
+                clusterID,
+                topNumFeatures,
+                selectedOrganism,
+                gProfilerToken
+            );
+            this.setState({
+                gProfilerURL: gProfilerLinkResponse.url,
+            });
         };
 
         const organisms = [
@@ -112,7 +132,8 @@ class GProfilerPopup extends Component<
         };
 
         const handleChangeToken = (e, { value }) => {
-            this.setState({ gProfilerToken: value });
+        const handleClickGotoGProfilerURL = () => {
+            window.open(this.state.gProfilerURL);
         };
 
         return (
@@ -253,21 +274,19 @@ class GProfilerPopup extends Component<
                                 type='button'
                                 value='create-gprofiler-link'
                                 onClick={handleClickCreateGProfilerLink}
-                                // disabled={this.getButtonDisabledStatus()}
                                 secondary>
                                 {'Create Link'}
                             </Button>
                         }
-                        {
+                        {this.state.gProfilerURL !== null && (
                             <Button
                                 type='button'
                                 value='goto-gprofiler'
-                                // onClick={(e) => this.sendData(e)}
-                                // disabled={this.getButtonDisabledStatus()}
+                                onClick={handleClickGotoGProfilerURL}
                                 primary>
                                 {'Go to g:Profiler'}
                             </Button>
-                        }
+                        )}
                     </Modal.Actions>
                 </Modal>
             </>
