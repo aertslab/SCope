@@ -979,7 +979,12 @@ class SCope(s_pb2_grpc.MainServicer):
             clusteringID=request.clusteringID, clusterID=request.clusterID
         )
         if "avg_logFC" not in cluster_marker_table.columns:
-            return s_pb2.GProfilerLinkOutReply(url="Error")
+            return s_pb2.GProfilerLinkOutReply(
+                error=s_pb2.ErrorReply(
+                    type="Value Error",
+                    message="Log fold change metric (avg_logFC) is not found in the cluster marker metric table.",
+                )
+            )
 
         def get_top_marker_genes_by(n, by="avg_logFC"):
             top_genes_ranked = cluster_marker_table.sort_values(by=by, ascending=False).head(n=n).index.values

@@ -541,4 +541,5 @@ message GProfilerLinkOutRequest {
 
 message GProfilerLinkOutReply {
   string url=1;
+  ErrorReply error=2;
 }
