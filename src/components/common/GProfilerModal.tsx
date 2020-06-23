@@ -111,6 +111,16 @@ class GProfilerPopup extends Component<
                 });
                 return;
             }
+
+            if (topNumFeatures.length == 0) {
+                this.setState({
+                    error:
+                        'No gene list selected. One gene list is at least required. ',
+                    gProfilerURL: null,
+                });
+                return;
+            }
+
             const gProfilerLinkResponse = await BackendAPI.getGProfilerLink(
                 clusteringID,
                 clusterID,
@@ -118,6 +128,16 @@ class GProfilerPopup extends Component<
                 selectedOrganism,
                 gProfilerToken
             );
+
+            if (gProfilerLinkResponse.url.length > 8000) {
+                this.setState({
+                    error:
+                        'Too many genes in total. Try to select a combination of gene lists with fewer genes.',
+                    gProfilerURL: null,
+                });
+                return;
+            }
+
             this.setState({
                 gProfilerURL: gProfilerLinkResponse.url,
             });
