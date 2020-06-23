@@ -608,35 +608,20 @@ class SCope(s_pb2_grpc.MainServicer):
         if "clusterMarkerMetrics" in md_clustering.keys():
             md_cmm = md_clustering["clusterMarkerMetrics"]
 
-            def create_cluster_marker_metric(metric):
-                return loom.get_cluster_marker_metrics(
-                    clustering_id=request.clusteringID, cluster_id=request.clusterID, metric_accessor=metric["accessor"]
-                )
-
             def protoize_cluster_marker_metric(metric):
                 return s_pb2.MarkerGenesMetric(
                     accessor=metric["accessor"],
                     name=metric["name"],
                     description=metric["description"],
-                    values=cluster_marker_metrics_final[metric["accessor"]],
+                    values=cluster_marker_metrics[metric["accessor"]],
                 )
 
-            def merge_cluster_marker_metrics(metrics):
-                return functools.reduce(
-                    lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how="outer"), metrics,
-                )
-
-            cluster_marker_metrics = merge_cluster_marker_metrics(
-                metrics=[create_cluster_marker_metric(x) for x in md_cmm]
+            cluster_marker_metrics = loom.get_cluster_marker_table(
+                clusteringID=request.clusteringID, clusterID=request.clusterID
             )
-            # Keep only non-zeros elements
-            nonan_marker_mask = cluster_marker_metrics.apply(
-                lambda x: functools.reduce(np.logical_and, ~np.isnan(x)), axis=1
-            )
-            cluster_marker_metrics_final = cluster_marker_metrics[nonan_marker_mask]
 
         metrics = [protoize_cluster_marker_metric(x) for x in md_cmm]
-        return s_pb2.MarkerGenesReply(genes=cluster_marker_metrics_final.index, metrics=metrics)
+        return s_pb2.MarkerGenesReply(genes=cluster_marker_metrics.index, metrics=metrics)
 
     def getMyGeneSets(self, request, context):
         userDir = dfh.DataFileHandler.get_data_dir_path_by_file_type("GeneSet", UUID=request.UUID)
@@ -988,31 +973,10 @@ class SCope(s_pb2_grpc.MainServicer):
         uploadedLooms[request.UUID].add(request.filename)
         return s_pb2.LoomUploadedReply()
 
-    def get_cluster_marker_table(self, loomFilePath, clusteringID, clusterID) -> pd.DataFrame:
-        loom = self.lfh.get_loom(loom_file_path=loomFilePath)
-
-        def create_cluster_marker_metric(metric):
-            return loom.get_cluster_marker_metrics(
-                clustering_id=clusteringID, cluster_id=clusterID, metric_accessor=metric["accessor"]
-            )
-
-        def merge_cluster_marker_metrics(metrics):
-            return functools.reduce(
-                lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how="outer"), metrics,
-            )
-
-        md_clustering = loom.get_meta_data_clustering_by_id(id=clusteringID, secret=self.config["dataHashSecret"])
-        md_cmm = md_clustering["clusterMarkerMetrics"]
-        cluster_marker_metrics = merge_cluster_marker_metrics(metrics=[create_cluster_marker_metric(x) for x in md_cmm])
-        # Keep only non-zeros elements
-        nonan_marker_mask = cluster_marker_metrics.apply(
-            lambda x: functools.reduce(np.logical_and, ~np.isnan(x)), axis=1
-        )
-        return cluster_marker_metrics[nonan_marker_mask]
-
     def getGProfilerLink(self, request, context):
-        cluster_marker_table = self.get_cluster_marker_table(
-            loomFilePath=request.loomFilePath, clusteringID=request.clusteringID, clusterID=request.clusterID
+        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        cluster_marker_table = loom.get_cluster_marker_table(
+            clusteringID=request.clusteringID, clusterID=request.clusterID
         )
         if "avg_logFC" not in cluster_marker_table.columns:
             return s_pb2.GProfilerLinkOutReply(url="Error")

@@ -8,6 +8,7 @@ import time
 import hashlib
 import os
 import pickle
+import functools
 from typing import Tuple, Dict, Any, Union, List, Set
 from typing_extensions import TypedDict
 from google.protobuf.internal.containers import RepeatedScalarFieldContainer
@@ -976,3 +977,23 @@ class Loom:
             cluster_marker_metric, index=self.get_genes()[marker_mask], columns=[metric_accessor]
         )
         return cluster_marker_metric_df
+
+    def get_cluster_marker_table(self, clusteringID, clusterID) -> pd.DataFrame:
+        def create_cluster_marker_metric(metric):
+            return self.get_cluster_marker_metrics(
+                clustering_id=clusteringID, cluster_id=clusterID, metric_accessor=metric["accessor"]
+            )
+
+        def merge_cluster_marker_metrics(metrics):
+            return functools.reduce(
+                lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how="outer"), metrics,
+            )
+
+        md_clustering = self.get_meta_data_clustering_by_id(id=clusteringID)
+        md_cmm = md_clustering["clusterMarkerMetrics"]
+        cluster_marker_metrics = merge_cluster_marker_metrics(metrics=[create_cluster_marker_metric(x) for x in md_cmm])
+        # Keep only non-zeros elements
+        nonan_marker_mask = cluster_marker_metrics.apply(
+            lambda x: functools.reduce(np.logical_and, ~np.isnan(x)), axis=1
+        )
+        return cluster_marker_metrics[nonan_marker_mask]
