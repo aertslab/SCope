@@ -537,7 +537,6 @@ message GProfilerLinkOutRequest {
   int32 clusterID=3;
   repeated int32 topNumFeatures=4;
   string organism=5;
-  string token=6;
 }
 
 message GProfilerLinkOutReply {

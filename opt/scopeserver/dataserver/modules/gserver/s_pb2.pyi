@@ -2509,7 +2509,6 @@ class GProfilerLinkOutRequest(google___protobuf___message___Message):
         ...
     )  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int]
     organism = ...  # type: typing___Text
-    token = ...  # type: typing___Text
     def __init__(
         self,
         *,
@@ -2518,7 +2517,6 @@ class GProfilerLinkOutRequest(google___protobuf___message___Message):
         clusterID: typing___Optional[builtin___int] = None,
         topNumFeatures: typing___Optional[typing___Iterable[builtin___int]] = None,
         organism: typing___Optional[typing___Text] = None,
-        token: typing___Optional[typing___Text] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -2541,8 +2539,6 @@ class GProfilerLinkOutRequest(google___protobuf___message___Message):
             b"loomFilePath",
             "organism",
             b"organism",
-            "token",
-            b"token",
             "topNumFeatures",
             b"topNumFeatures",
         ],

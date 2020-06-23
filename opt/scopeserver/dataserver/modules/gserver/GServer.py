@@ -1028,7 +1028,7 @@ class SCope(s_pb2_grpc.MainServicer):
         query_content = "\n".join(top_ranked_gene_lists_flattened)
 
         gprofile_query_dict = {
-            "organism": request.token if len(request.token) > 0 else request.organism,
+            "organism": request.organism,
             "query": query_content,
             "ordered": "true",
             "all_results": "false",
