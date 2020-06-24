@@ -8,6 +8,7 @@ import time
 import hashlib
 import os
 import pickle
+from pathlib import Path
 from typing import Tuple, Dict, Any, Union, List, Set
 from typing_extensions import TypedDict
 from google.protobuf.internal.containers import RepeatedScalarFieldContainer
@@ -42,10 +43,10 @@ class Loom:
         # Metrics
         self.nUMI = None
         self.species, self.gene_mappings = self.infer_species()
-        self.ss_pickle_name = self.abs_file_path + ".ss_pkl"
+        self.ss_pickle_name = self.abs_file_path.with_suffix(".ss_pkl")
         self.load_ss(self.ss_pickle_name)
 
-    def load_ss(self, ss_pickle_name: str) -> None:
+    def load_ss(self, ss_pickle_name: Path) -> None:
         try:
             with open(ss_pickle_name, "rb") as fh:
                 logger.debug(f"Loading prebuilt SS for {self.file_path} from {ss_pickle_name}")
@@ -91,10 +92,10 @@ class Loom:
     def get_connection(self):
         return self.loom_connection
 
-    def get_file_path(self) -> str:
+    def get_file_path(self) -> Path:
         return self.file_path
 
-    def get_abs_file_path(self) -> str:
+    def get_abs_file_path(self) -> Path:
         return self.abs_file_path
 
     def get_global_attribute_by_name(self, name):
