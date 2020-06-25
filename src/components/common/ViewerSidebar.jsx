@@ -443,7 +443,8 @@ class ViewerSidebar extends Component {
                 let markerTable = '',
                     legendTable = '',
                     cellTypeAnnoTable = '',
-                    downloadSubLoomButton = () => '';
+                    downloadSubLoomButton = () => '',
+                    gProfilerModal = '';
 
                 let newMarkerTableColumn = (header, id, accessor, cell) => {
                     let column = {
@@ -1017,6 +1018,16 @@ class ViewerSidebar extends Component {
                             </Button>
                         </div>
                     );
+
+                    gProfilerModal = (
+                        <GProfilerModal
+                            numFeatures={md.genes.length}
+                            clusteringID={
+                                activeFeatures[i].metadata.clusteringID
+                            }
+                            clusterID={activeFeatures[i].metadata.clusterID}
+                        />
+                    );
                 }
 
                 if (
@@ -1226,13 +1237,7 @@ class ViewerSidebar extends Component {
                             {markerTable}
                             {legendTable}
                             {downloadSubLoomButton()}
-                            <GProfilerModal
-                                numFeatures={md.genes.length}
-                                clusteringID={
-                                    activeFeatures[i].metadata.clusteringID
-                                }
-                                clusterID={activeFeatures[i].metadata.clusterID}
-                            />
+                            {gProfilerModal}
                             <br />
                         </Grid.Column>
                     </Grid.Row>
