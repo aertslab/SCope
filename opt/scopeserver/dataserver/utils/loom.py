@@ -991,9 +991,7 @@ class Loom:
 
         md_clustering = self.get_meta_data_clustering_by_id(id=clustering_id, secret=secret)
         md_cmm = md_clustering["clusterMarkerMetrics"]
-        cluster_marker_metrics = merge_cluster_marker_metrics(metrics=[create_cluster_marker_metric(x) for x in md_cmm])
+        cluster_marker_table = merge_cluster_marker_metrics(metrics=[create_cluster_marker_metric(x) for x in md_cmm])
         # Keep only non-zeros elements
-        nonan_marker_mask = cluster_marker_metrics.apply(
-            lambda x: functools.reduce(np.logical_and, ~np.isnan(x)), axis=1
-        )
-        return cluster_marker_metrics[nonan_marker_mask]
+        nonan_marker_mask = cluster_marker_table.apply(lambda x: functools.reduce(np.logical_and, ~np.isnan(x)), axis=1)
+        return cluster_marker_table[nonan_marker_mask]
