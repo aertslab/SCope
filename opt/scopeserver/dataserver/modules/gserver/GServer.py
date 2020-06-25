@@ -617,7 +617,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 )
 
             cluster_marker_metrics = loom.get_cluster_marker_table(
-                clusteringID=request.clusteringID, clusterID=request.clusterID
+                clusteringID=request.clusteringID, clusterID=request.clusterID, secret=self.config["dataHashSecret"]
             )
 
         metrics = [protoize_cluster_marker_metric(x) for x in md_cmm]
@@ -976,7 +976,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def getGProfilerLink(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
         cluster_marker_table = loom.get_cluster_marker_table(
-            clusteringID=request.clusteringID, clusterID=request.clusterID
+            clusteringID=request.clusteringID, clusterID=request.clusterID, secret=self.config["dataHashSecret"]
         )
         if "avg_logFC" not in cluster_marker_table.columns:
             error_message = f"Log fold change metric (avg_logFC) is not found in the cluster marker metric table."

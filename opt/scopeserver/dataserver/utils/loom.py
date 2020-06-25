@@ -978,7 +978,7 @@ class Loom:
         )
         return cluster_marker_metric_df
 
-    def get_cluster_marker_table(self, clusteringID, clusterID) -> pd.DataFrame:
+    def get_cluster_marker_table(self, clusteringID, clusterID, secret) -> pd.DataFrame:
         def create_cluster_marker_metric(metric):
             return self.get_cluster_marker_metrics(
                 clustering_id=clusteringID, cluster_id=clusterID, metric_accessor=metric["accessor"]
@@ -989,7 +989,7 @@ class Loom:
                 lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how="outer"), metrics,
             )
 
-        md_clustering = self.get_meta_data_clustering_by_id(id=clusteringID)
+        md_clustering = self.get_meta_data_clustering_by_id(id=clusteringID, secret=secret)
         md_cmm = md_clustering["clusterMarkerMetrics"]
         cluster_marker_metrics = merge_cluster_marker_metrics(metrics=[create_cluster_marker_metric(x) for x in md_cmm])
         # Keep only non-zeros elements
