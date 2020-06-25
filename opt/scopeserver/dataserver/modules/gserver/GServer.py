@@ -18,7 +18,7 @@ import pickle
 import requests
 import uuid
 import functools
-import urllib
+from urllib.parse import urlencode
 from typing import DefaultDict, Set, List, Dict, Any, Tuple
 from collections import OrderedDict, defaultdict, deque
 from methodtools import lru_cache
@@ -1009,7 +1009,7 @@ class SCope(s_pb2_grpc.MainServicer):
             "background": "",
         }
 
-        gprofile_query_url = "https://biit.cs.ut.ee/gprofiler/gost?" + urllib.parse.urlencode(gprofile_query_dict)
+        gprofile_query_url = "https://biit.cs.ut.ee/gprofiler/gost?" + urlencode(gprofile_query_dict)
 
         return s_pb2.GProfilerLinkOutReply(url=gprofile_query_url)
 
