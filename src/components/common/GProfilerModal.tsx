@@ -13,7 +13,6 @@ import {
     Label,
 } from 'semantic-ui-react';
 import { instanceOf } from 'prop-types';
-import { withCookies, Cookies } from 'react-cookie';
 
 interface IGProfilerPopupState {
     error: string;
@@ -28,7 +27,6 @@ interface IGProfilerPopupProps {
     numFeatures: number;
     clusteringID: number;
     clusterID: number;
-    cookies: Cookies;
 }
 
 const INITIAL_STATE = {
@@ -44,10 +42,6 @@ class GProfilerPopup extends Component<
     IGProfilerPopupProps & RouteComponentProps,
     IGProfilerPopupState
 > {
-    static propTypes = {
-        cookies: instanceOf(Cookies).isRequired,
-    };
-
     constructor(props: IGProfilerPopupProps & RouteComponentProps) {
         super(props);
         this.state = INITIAL_STATE;
@@ -331,4 +325,4 @@ class GProfilerPopup extends Component<
     }
 }
 
-export default withCookies(withRouter(GProfilerPopup));
+export default withRouter(GProfilerPopup);
