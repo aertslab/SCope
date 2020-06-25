@@ -300,7 +300,7 @@ class GProfilerPopup extends Component<
                         </Modal.Description>
                     </Modal.Content>
                     <Modal.Actions>
-                        {
+                        {this.state.gProfilerURL == null ? (
                             <Button
                                 type='button'
                                 value='create-gprofiler-link'
@@ -308,8 +308,7 @@ class GProfilerPopup extends Component<
                                 secondary>
                                 {'Create Link'}
                             </Button>
-                        }
-                        {this.state.gProfilerURL !== null && (
+                        ) : (
                             <Button
                                 type='button'
                                 value='goto-gprofiler'
