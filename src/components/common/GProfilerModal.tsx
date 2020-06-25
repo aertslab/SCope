@@ -184,11 +184,11 @@ class GProfilerPopup extends Component<
                     </Modal.Header>
                     <Modal.Content>
                         <Modal.Description>
-                            <div>Run As Multi-query</div>
-                            <div>
-                                Totral number of features:
+                            <h3>Run As Multi-query</h3>
+                            <h4>
+                                Total number of features:&nbsp;
                                 {this.props.numFeatures}
-                            </div>
+                            </h4>
                             <Form>
                                 <Table compact celled definition>
                                     <Table.Header>
