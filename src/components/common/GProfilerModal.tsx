@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { BackendAPI } from './API';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
