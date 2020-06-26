@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import ReactTable from 'react-table';
+import * as R from 'ramda';
 
 declare const DEBUG: boolean;
 
@@ -10,11 +11,18 @@ interface ClusterOverlaps {
     cells_in_cluster: number;
     cluster_in_cells: number;
 }
+
+interface SortOptions {
+    id: string;
+    desc: boolean;
+}
 interface ClusterOverlapsTableProps {
     clusterOverlaps: ClusterOverlaps[];
 }
 
-interface ClusterOverlapsTableState {}
+interface ClusterOverlapsTableState {
+    sortOptions: Array<SortOptions>;
+}
 
 export default class ClusterOverlapsTable extends Component<
     ClusterOverlapsTableProps,
@@ -22,7 +30,12 @@ export default class ClusterOverlapsTable extends Component<
 > {
     constructor(props: ClusterOverlapsTableProps) {
         super(props);
-        this.state = {};
+        this.state = {
+            sortOptions: [
+                { id: 'cells_in_cluster', desc: false },
+                { id: 'cluster_in_cells', desc: false },
+            ],
+        };
     }
 
     getColumnWidth = (
@@ -50,8 +63,14 @@ export default class ClusterOverlapsTable extends Component<
 
         let clusterOverlapsColumns = [];
 
+        const numericSortCols = [
+            'n_cells',
+            'cells_in_cluster',
+            'cluster_in_cells',
+        ];
+
         for (const accessor in columns) {
-            clusterOverlapsColumns.push({
+            let column = {
                 Header: columns[accessor],
                 accessor: accessor,
                 style: { whiteSpace: 'unset' },
@@ -60,11 +79,24 @@ export default class ClusterOverlapsTable extends Component<
                     accessor,
                     columns[accessor]
                 ),
-            });
+            };
+
+            if (numericSortCols.includes(accessor)) {
+                console.log(accessor, 'needs custom sort');
+                column['sortMethod'] = R.comparator(
+                    (a, b) => Number(a) > Number(b)
+                );
+            }
+            clusterOverlapsColumns.push(column);
         }
+
         return (
             <ReactTable
                 data={this.props.clusterOverlaps}
+                sorted={this.state.sortOptions}
+                onSortedChange={(val) => {
+                    this.setState({ sortOptions: val });
+                }}
                 columns={[
                     {
                         Header: 'Selection/Cluster Overlaps',
