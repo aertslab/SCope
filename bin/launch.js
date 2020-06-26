@@ -3,7 +3,6 @@
 // Load node dependencies
 const { exec } = require('child_process');
 const fs = require('fs');
-const path = require('path');
 
 // Load custom dependencies
 const apache = require('../apache/apache.conf.js');
@@ -107,7 +106,7 @@ class Launcher {
 
     checkSCopePoetryEnvExists() {
         console.log('- Checking SCope poetry environment...');
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, _) => {
             exec('cd opt; poetry env list', (error, stdout, stderr) => {
                 if (error) return resolve(false);
                 if (stderr) return resolve(false);
@@ -216,7 +215,7 @@ class Launcher {
         console.log(
             "It can be accessed using 'tmux a -t scope-client' command."
         );
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, _) => {
             exec(scopeClientStartCmd, (error, stdout, stderr) => {
                 if (error) return resolve(false);
                 if (stderr) return resolve(false);
@@ -289,7 +288,7 @@ class Launcher {
                 "It can be accessed using 'tmux a -t scope-server' command."
             );
         }
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, _) => {
             exec(scopeStartCmd, (error, stdout, stderr) => {
                 if (error) return resolve(false);
                 if (stderr) return resolve(false);

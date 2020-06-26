@@ -22,8 +22,6 @@ const dataDir = appdirs.userDataDir(
     (appauthor = app_author)
 );
 
-const home = process.env['HOME'];
-
 /*************************************************************
  * SCope Server
  *************************************************************/
@@ -227,7 +225,6 @@ class DataServer {
         }
         this.proc.stdout.on('data', (data) => {
             let buff = new Buffer(data).toString('utf8');
-            let buff_json;
             console.log(buff);
             try {
                 const buff_json = JSON.parse(buff);
@@ -293,7 +290,6 @@ class BindServer {
     }
 
     start() {
-        const exec = cp.exec;
         this.proc = cp.spawn('node', [
             path.join(BINDSERVER_FOLDER, BINDSERVER_MODULE),
             this.port,
@@ -332,7 +328,7 @@ class SCope {
             } else {
                 cp.execSync('cd resources/app && npm rebuild');
             }
-            fs.writeFile('INSTALLED', '', function (err) {
+            fs.writeFile('INSTALLED', '', function (_) {
                 console.log('Successfully installed!');
             });
             resolve(true);

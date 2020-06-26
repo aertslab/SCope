@@ -30,7 +30,7 @@ function runCheckCommand(
         }
     }
     if (sync) {
-        proc = execSync(command, (error, stdout, stderr) => {
+        proc = execSync(command, (error, stdout, _) => {
             if (error) {
                 console.log(error);
                 process.exit();
@@ -40,7 +40,7 @@ function runCheckCommand(
             }
         });
     } else {
-        proc = exec(command, (error, stdout, stderr) => {
+        proc = exec(command, (error, stdout, _) => {
             if (error) {
                 console.log(error);
                 process.exit();
@@ -61,7 +61,7 @@ function runCheckCommand(
 }
 
 function runSimpleCommandAsPromise(command) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _) => {
         exec(command, { stdio: [0, 1, 2] }, (error, stdout, stderr) => {
             if (error) return resolve(false);
             if (stderr) return resolve(false);
