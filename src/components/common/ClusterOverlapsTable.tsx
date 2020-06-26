@@ -81,7 +81,6 @@ export default class ClusterOverlapsTable extends Component<
                                 className='pointer'
                             />
                         }
-                        style={{ zIndex: 9 }}
                     />
                 </React.Fragment>
             ),
@@ -100,7 +99,6 @@ export default class ClusterOverlapsTable extends Component<
                                 className='pointer'
                             />
                         }
-                        style={{ zIndex: 9 }}
                     />
                 </React.Fragment>
             ),
