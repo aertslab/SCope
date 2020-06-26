@@ -179,7 +179,7 @@
             "react/prop-types": "off",
             "react/jsx-key": "off",
             "semi": "error",
-            "quote": [
+            "quotes": [
                 "error",
                 "single"
             ],
@@ -189,7 +189,13 @@
             ],
             "comma-dangle": [
                 "error",
-                "always-multiline"
+                {
+                    "arrays": "always-multiline",
+                    "objects": "always-multiline",
+                    "imports": "always-multiline",
+                    "exports": "never",
+                    "functions": "never"
+                }
             ],
             "arrow-parens": [
                 "error",
