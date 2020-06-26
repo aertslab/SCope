@@ -181,7 +181,11 @@
             "semi": "error",
             "quotes": [
                 "error",
-                "single"
+                "single",
+                {
+                    "avoidEscape": true,
+                    "allowTemplateLiterals": true
+                }
             ],
             "jsx-quotes": [
                 "error",
