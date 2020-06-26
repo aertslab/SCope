@@ -177,7 +177,21 @@
             "no-undef": "off",
             "no-var": "warn",
             "react/prop-types": "off",
-            "react/jsx-key": "off"
+            "react/jsx-key": "off",
+            "semi": "error",
+            "quote": "single",
+            "jsx-quotes": [
+                "error",
+                "prefer-single"
+            ],
+            "comma-dangle": [
+                "error",
+                "always"
+            ],
+            "arrow-parens": [
+                "error",
+                "always"
+            ]
         },
         "settings": {
             "react": {
