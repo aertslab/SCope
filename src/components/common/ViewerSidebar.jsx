@@ -187,7 +187,9 @@ class ViewerSidebar extends Component {
                                 key={i}
                                 className='selectionRow'>
                                 <Grid.Column>
-                                    {'Selection ' + (lS.id + 1)}
+                                    {`Selection ${lS.id + 1} (${
+                                        lS.points.length
+                                    } cells)`}
                                 </Grid.Column>
                                 <Grid.Column>
                                     <Input
