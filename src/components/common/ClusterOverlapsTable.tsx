@@ -3,8 +3,15 @@ import ReactTable from 'react-table';
 
 declare const DEBUG: boolean;
 
+interface ClusterOverlaps {
+    clustering_name: string;
+    cluster_name: string;
+    n_cells: number;
+    cells_in_cluster: number;
+    cluster_in_cells: number;
+}
 interface ClusterOverlapsTableProps {
-    clusterOverlaps: Object;
+    clusterOverlaps: ClusterOverlaps[];
 }
 
 interface ClusterOverlapsTableState {}
@@ -18,7 +25,11 @@ export default class ClusterOverlapsTable extends Component<
         this.state = {};
     }
 
-    getColumnWidth = (rows, accessor, headerText) => {
+    getColumnWidth = (
+        rows: ClusterOverlaps[],
+        accessor: string,
+        headerText: string
+    ) => {
         const maxWidth = 75;
         const magicSpacing = 7;
         const cellLength = Math.max(
