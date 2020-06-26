@@ -1047,18 +1047,24 @@ class API {
                 query,
                 (err, response) => {
                     console.debug('getClusterOverlaps', response);
-                    const clusterOverlaps = response.clusterOverlaps.map(
-                        (clusterOverlap) => {
-                            clusterOverlap['cells_in_cluster'] = clusterOverlap[
-                                'cells_in_cluster'
-                            ].toFixed(2);
-                            clusterOverlap['cluster_in_cells'] = clusterOverlap[
-                                'cluster_in_cells'
-                            ].toFixed(2);
-                            return clusterOverlap;
-                        }
-                    );
-                    selection['clusterOverlaps'] = clusterOverlaps;
+                    if (response) {
+                        const clusterOverlaps = response.clusterOverlaps.map(
+                            (clusterOverlap) => {
+                                clusterOverlap[
+                                    'cells_in_cluster'
+                                ] = clusterOverlap['cells_in_cluster'].toFixed(
+                                    2
+                                );
+                                clusterOverlap[
+                                    'cluster_in_cells'
+                                ] = clusterOverlap['cluster_in_cells'].toFixed(
+                                    2
+                                );
+                                return clusterOverlap;
+                            }
+                        );
+                        selection['clusterOverlaps'] = clusterOverlaps;
+                    }
                     this.viewerSelections[this.activePage].push(selection);
                     this.viewerSelectionsChangeListeners.forEach((listener) => {
                         listener(this.viewerSelections[this.activePage]);

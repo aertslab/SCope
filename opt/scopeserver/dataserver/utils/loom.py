@@ -420,6 +420,8 @@ class Loom:
     def get_cluster_overlaps(self, cell_idxs):
         metadata = self.get_meta_data()
         cluster_overlap_data = []
+        if not self.has_md_clusterings:
+            return []
         for clustering_meta in metadata["clusterings"]:
             clustering_name = clustering_meta["name"]
             clustering_id = clustering_meta["id"]

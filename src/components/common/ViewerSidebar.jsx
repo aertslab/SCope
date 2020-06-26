@@ -248,9 +248,13 @@ class ViewerSidebar extends Component {
                             </Grid.Row>
                             <Grid.Row>
                                 <Grid.Column>
-                                    <ClusterOverlapsTable
-                                        clusterOverlaps={lS.clusterOverlaps}
-                                    />
+                                    {lS.clusterOverlaps ? (
+                                        <ClusterOverlapsTable
+                                            clusterOverlaps={lS.clusterOverlaps}
+                                        />
+                                    ) : (
+                                        ''
+                                    )}
                                 </Grid.Column>
                             </Grid.Row>
                         </Grid>
