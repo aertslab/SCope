@@ -8,6 +8,7 @@ import time
 import hashlib
 import os
 import pickle
+from collections import Counter
 from typing import Tuple, Dict, Any, Union, List, Set
 from typing_extensions import TypedDict
 from google.protobuf.internal.containers import RepeatedScalarFieldContainer
@@ -415,6 +416,30 @@ class Loom:
         except IndexError:
             logger.debug("Failure")
             return (False, "Updated clusterings do not exist in file. Write error.")
+
+    def get_cluster_overlaps(self, cell_idxs):
+        metadata = self.get_meta_data()
+        cluster_overlap_data = []
+        for clustering_meta in metadata["clusterings"]:
+            clustering_name = clustering_meta["name"]
+            clustering_id = clustering_meta["id"]
+            clustering = self.get_clustering_by_id(clustering_id)
+            counts = Counter(clustering[cell_idxs])
+            all_counts = Counter(clustering)
+            for cluster_id in counts.keys():
+                cluster_name = self.get_meta_data_cluster_by_clustering_id_and_cluster_id(
+                    clustering_id, cluster_id, ""
+                )["description"]
+                cluster_overlap_data.append(
+                    s_pb2.ClusterOverlap(
+                        clustering_name=clustering_name,
+                        cluster_name=cluster_name,
+                        n_cells=counts[cluster_id],
+                        cells_in_cluster=(counts[cluster_id] / len(cell_idxs)) * 100,
+                        cluster_in_cells=(counts[cluster_id] / all_counts[cluster_id]) * 100,
+                    )
+                )
+        return cluster_overlap_data
 
     def set_hierarchy(self, L1: str, L2: str, L3: str) -> bool:
         logger.info("Changing hierarchy name for {0}".format(self.get_abs_file_path()))
