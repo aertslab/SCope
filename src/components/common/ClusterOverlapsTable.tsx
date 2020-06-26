@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import ReactTable from 'react-table';
 import * as R from 'ramda';
+import { Icon, Popup } from 'semantic-ui-react';
 
 declare const DEBUG: boolean;
 
@@ -53,12 +54,56 @@ export default class ClusterOverlapsTable extends Component<
     };
 
     render() {
-        const columns = {
+        const columnsText = {
             clustering_name: 'Clustering',
             cluster_name: 'Cluster',
             n_cells: '# Cells',
             cells_in_cluster: '% Cells',
             cluster_in_cells: '% Cluster',
+        };
+
+        const columnsHeaders = {
+            clustering_name: 'Clustering',
+            cluster_name: 'Cluster',
+            n_cells: '# Cells',
+            cells_in_cluster: (
+                <React.Fragment>
+                    % Cells
+                    <br />
+                    <Popup
+                        basic
+                        content='The percentage of the selected cells within the cluster'
+                        position='top left'
+                        trigger={
+                            <Icon
+                                name='question circle'
+                                style={{ display: 'inline' }}
+                                className='pointer'
+                            />
+                        }
+                        style={{ zIndex: 9 }}
+                    />
+                </React.Fragment>
+            ),
+            cluster_in_cells: (
+                <React.Fragment>
+                    % Cluster
+                    <br />
+                    <Popup
+                        basic
+                        content='The percentage of the cluster within the selection'
+                        position='top left'
+                        trigger={
+                            <Icon
+                                name='question circle'
+                                style={{ display: 'inline' }}
+                                className='pointer'
+                            />
+                        }
+                        style={{ zIndex: 9 }}
+                    />
+                </React.Fragment>
+            ),
         };
 
         let clusterOverlapsColumns = [];
@@ -69,15 +114,15 @@ export default class ClusterOverlapsTable extends Component<
             'cluster_in_cells',
         ];
 
-        for (const accessor in columns) {
+        for (const accessor in columnsText) {
             let column = {
-                Header: columns[accessor],
+                Header: columnsHeaders[accessor],
                 accessor: accessor,
                 style: { whiteSpace: 'unset' },
                 width: this.getColumnWidth(
                     this.props.clusterOverlaps,
                     accessor,
-                    columns[accessor]
+                    columnsText[accessor]
                 ),
             };
 
