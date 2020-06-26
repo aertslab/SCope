@@ -189,7 +189,7 @@
             ],
             "comma-dangle": [
                 "error",
-                "always"
+                "always-multiline"
             ],
             "arrow-parens": [
                 "error",
