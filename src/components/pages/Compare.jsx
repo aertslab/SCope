@@ -492,7 +492,7 @@ class Compare extends Component {
                     <Grid.Column width={11} className='viewerCell'>
                         {viewers()}
                     </Grid.Column>
-                    <Grid.Column width={3}>
+                    <Grid.Column width={4}>
                         <div
                             className='chart-wrapper noStretch'
                             id='chart-distro1'
