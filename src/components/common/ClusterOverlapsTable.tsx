@@ -30,7 +30,7 @@ export default class ClusterOverlapsTable extends Component<
         accessor: string,
         headerText: string
     ) => {
-        const maxWidth = 75;
+        const maxWidth = 90;
         const magicSpacing = 7;
         const cellLength = Math.max(
             ...rows.map((row) => (`${row[accessor]}` || '').length),
