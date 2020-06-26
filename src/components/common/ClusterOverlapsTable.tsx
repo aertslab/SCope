@@ -46,7 +46,7 @@ export default class ClusterOverlapsTable extends Component<
         const maxWidth = 90;
         const magicSpacing = 7;
         const cellLength = Math.max(
-            ...rows.map((row) => (`${row[accessor]}` || '').length),
+            ...rows.map((row) => row[accessor].length),
             headerText.length
         );
         return Math.min(maxWidth, cellLength * magicSpacing);
@@ -82,7 +82,6 @@ export default class ClusterOverlapsTable extends Component<
             };
 
             if (numericSortCols.includes(accessor)) {
-                console.log(accessor, 'needs custom sort');
                 column['sortMethod'] = R.comparator(
                     (a, b) => Number(a) > Number(b)
                 );
