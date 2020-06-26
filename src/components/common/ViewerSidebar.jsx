@@ -186,7 +186,7 @@ class ViewerSidebar extends Component {
                                 columns={3}
                                 key={i}
                                 className='selectionRow'>
-                                <Grid.Column>
+                                <Grid.Column style={{ whiteSpace: 'unset' }}>
                                     {`Selection ${lS.id + 1} (${
                                         lS.points.length
                                     } cells)`}
