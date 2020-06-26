@@ -179,7 +179,10 @@
             "react/prop-types": "off",
             "react/jsx-key": "off",
             "semi": "error",
-            "quote": "single",
+            "quote": [
+                "error",
+                "single"
+            ],
             "jsx-quotes": [
                 "error",
                 "prefer-single"
