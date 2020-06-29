@@ -45,7 +45,7 @@ export default class ClusterOverlapsTable extends Component<
         headerText: string
     ) => {
         const maxWidth = 90;
-        const magicSpacing = 7;
+        const magicSpacing = 7; // This number gives correct spacing based on the font size
         const cellLength = Math.max(
             ...rows.map((row) => (`${row[accessor]}` || '').length),
             headerText.length
@@ -117,18 +117,19 @@ export default class ClusterOverlapsTable extends Component<
                 Header: columnsHeaders[accessor],
                 accessor: accessor,
                 style: { whiteSpace: 'unset' },
-                width: this.getColumnWidth(
-                    this.props.clusterOverlaps,
-                    accessor,
-                    columnsText[accessor]
-                ),
             };
 
             if (numericSortCols.includes(accessor)) {
                 column['sortMethod'] = R.comparator(
                     (a, b) => Number(a) > Number(b)
                 );
+                column['width'] = this.getColumnWidth(
+                    this.props.clusterOverlaps,
+                    accessor,
+                    columnsText[accessor]
+                );
             }
+
             clusterOverlapsColumns.push(column);
         }
 
