@@ -1,4 +1,4 @@
-import { instanceOf } from 'prop-types';
+import { PropTypes, instanceOf } from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { withRouter, Route, Link } from 'react-router-dom';
@@ -43,10 +43,6 @@ const cookieName = 'SCOPE_UUID';
 const sidebarCookieName = 'SCOPE_SIDEBAR';
 
 class App extends Component {
-    static propTypes = {
-        cookies: instanceOf(Cookies).isRequired,
-    };
-
     constructor() {
         super();
         this.state = {
@@ -644,6 +640,11 @@ class App extends Component {
         }
     }
 }
+
+App.propTypes = {
+    isAppLoading: PropTypes.bool.isRequired,
+    cookies: instanceOf(Cookies).isRequired,
+};
 
 let app = withRouter(withCookies(App));
 
