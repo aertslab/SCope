@@ -12,7 +12,6 @@ import Favicon from 'react-favicon';
 import {
     Sidebar,
     Header,
-    Image,
     Segment,
     Dimmer,
     Loader,
@@ -167,21 +166,6 @@ class App extends Component {
         let pusherWidth = isSidebarVisible
             ? screen.width - 340
             : screen.width - 75;
-
-        let sidebarContent = <b>Sidebar content</b>;
-
-        let sidebarStyle = {
-            root: {
-                position: 'relative',
-            },
-            content: {
-                position: 'relative',
-            },
-            sidebar: {
-                position: 'absolute',
-                zIndex: 2,
-            },
-        };
 
         return (
             <div>
