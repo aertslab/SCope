@@ -654,9 +654,9 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => {
-    const setAppLoading = (isAppLoading) =>
-        dispatch(setAppLoading(isAppLoading));
-    return { setAppLoading };
+    return {
+        setAppLoading: (isAppLoading) => dispatch(setAppLoading(isAppLoading)),
+    };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(app);
