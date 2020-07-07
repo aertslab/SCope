@@ -76,13 +76,13 @@ class GProfilerPopup extends Component<
         };
 
         const topNumFeaturesArray = [
-            100,
+            this.props.numFeatures < 100 ? this.props.numFeatures : 100,
             200,
             300,
             400,
             500,
         ].filter((topNumFeaturesValue) =>
-            topNumFeaturesValue < this.props.numFeatures ? true : false
+            topNumFeaturesValue <= this.props.numFeatures ? true : false
         );
 
         const handleClickCreateGProfilerLink = async () => {
@@ -202,10 +202,7 @@ class GProfilerPopup extends Component<
                                     </Table.Header>
                                     <Table.Body>
                                         {topNumFeaturesArray.map(
-                                            (
-                                                topNumFeaturesValue,
-                                                topNumFeaturesIndex
-                                            ) => {
+                                            (topNumFeaturesValue) => {
                                                 const handleToggleTopNumFeatures = () => {
                                                     if (
                                                         this.state.topNumFeatures.includes(
