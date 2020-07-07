@@ -1,8 +1,8 @@
-import { SET_LOADING } from './actionTypes';
+import { SET_APP_LOADING } from './actionTypes';
 
-export const setLoading = (isLoading: boolean) => ({
-    type: SET_LOADING,
+export const setAppLoading = (isAppLoading: boolean) => ({
+    type: SET_APP_LOADING,
     payload: {
-        isLoading: isLoading,
+        isAppLoading,
     },
 });

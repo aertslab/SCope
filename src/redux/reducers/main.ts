@@ -1,22 +1,23 @@
-import { SET_LOADING } from '../actionTypes';
+import { SET_APP_LOADING } from '../actionTypes';
 import { SetLoadingAction } from '../types';
 
 type Loading = {
-    isLoading: boolean;
+    isAppLoading: boolean;
 };
 
 type MainState = {} & Loading;
 
 const initialState: MainState = {
-    isLoading: true,
+    isAppLoading: true,
 };
 
 const main = (state = initialState, action: SetLoadingAction) => {
-    switch (action.type) {
-        case SET_LOADING: {
+    const { type, payload } = action;
+    switch (type) {
+        case SET_APP_LOADING: {
             return {
                 ...state,
-                isLoading: action.payload.isLoading,
+                isLoading: payload.isAppLoading,
             };
         }
         default: {

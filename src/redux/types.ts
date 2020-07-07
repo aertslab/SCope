@@ -1,10 +1,10 @@
-import { SET_LOADING } from './actionTypes';
+import { SET_APP_LOADING } from './actionTypes';
 
-export interface Loading {
-    isLoading: boolean;
+export interface AppLoading {
+    isAppLoading: boolean;
 }
 
 export interface SetLoadingAction {
-    type: typeof SET_LOADING;
-    payload: Loading;
+    type: typeof SET_APP_LOADING;
+    payload: AppLoading;
 }

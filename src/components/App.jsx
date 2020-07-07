@@ -34,7 +34,7 @@ import About from './pages/About';
 import Alert from 'react-popup';
 import 'react-popup/style.css';
 
-import { setLoading as reduxAction_setLoading } from '../redux/actions';
+import { setAppLoading } from '../redux/actions';
 
 const pako = require('pako');
 const publicIp = require('public-ip');
@@ -96,7 +96,7 @@ class App extends Component {
             sessionsLimitReached,
         } = this.state;
 
-        const { isLoading } = this.props;
+        const { isAppLoading } = this.props;
 
         let errorDimmer = (
             <Dimmer active={error}>
@@ -140,7 +140,7 @@ class App extends Component {
         );
 
         let limitReachedDimmer = (
-            <Dimmer active={!isLoading && sessionsLimitReached}>
+            <Dimmer active={!isAppLoading && sessionsLimitReached}>
                 <br />
                 <br />
                 <Icon name='warning circle' color='orange' size='big' />
@@ -270,14 +270,14 @@ class App extends Component {
                                         />
                                     </Sidebar.Pusher>
                                 </Sidebar.Pushable>
-                                <Dimmer active={isLoading} inverted>
+                                <Dimmer active={isAppLoading} inverted>
                                     <Loader inverted>
                                         Your SCope session is starting
                                     </Loader>
                                 </Dimmer>
                                 <Dimmer
                                     active={
-                                        !isLoading &&
+                                        !isAppLoading &&
                                         this.timeout != null &&
                                         this.timeout <= 0
                                     }>
@@ -648,14 +648,14 @@ class App extends Component {
 let app = withRouter(withCookies(App));
 
 const mapStateToProps = (state) => {
-    const { isLoading } = state.main;
-    return { isLoading };
+    const { isAppLoading } = state.main;
+    return { isAppLoading };
 };
 
 const mapDispatchToProps = (dispatch) => {
-    const setLoading = (isLoading) =>
-        dispatch(reduxAction_setLoading(isLoading));
-    return { setLoading };
+    const setAppLoading = (isAppLoading) =>
+        dispatch(setAppLoading(isAppLoading));
+    return { setAppLoading };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(app);
