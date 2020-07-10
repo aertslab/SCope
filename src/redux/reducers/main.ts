@@ -1,11 +1,7 @@
 import { SET_APP_LOADING } from '../actionTypes';
-import { SetLoadingAction } from '../types';
+import { AppLoading, SetLoadingAction } from '../types';
 
-type Loading = {
-    isAppLoading: boolean;
-};
-
-type MainState = {} & Loading;
+type MainState = {} & AppLoading;
 
 const initialState: MainState = {
     isAppLoading: true,
