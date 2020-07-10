@@ -31,7 +31,7 @@ classifiers = ["Development Status :: 5 - Production/Stable",
                "Topic :: Scientific/Engineering :: Bio-Informatics"]
 
 [tool.poetry.dependencies]
-python = "^3.6.1"
+python = "^3.7"
 
 grpcio = "^1.26.0"
 grpcio-tools = "^1.26.0"
@@ -48,6 +48,8 @@ pyscenic = "^0.9.14"
 multiprocessing_on_dill = { version = "*", allow-prereleases = true }
 safety = "^1.8.5"
 requests = "^2.22.0"
+fastapi = "^0.54.1"
+hypercorn = "^0.9.5"
 methodtools = "^0.1.2"
 
 [tool.poetry.dev-dependencies]
