@@ -1,5 +1,6 @@
-import { instanceOf } from 'prop-types';
+import { PropTypes, instanceOf } from 'prop-types';
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { withRouter, Route, Link } from 'react-router-dom';
 import { withCookies, Cookies } from 'react-cookie';
 import CookieConsent from 'react-cookie-consent';
@@ -11,7 +12,6 @@ import Favicon from 'react-favicon';
 import {
     Sidebar,
     Header,
-    Image,
     Segment,
     Dimmer,
     Loader,
@@ -33,6 +33,8 @@ import About from './pages/About';
 import Alert from 'react-popup';
 import 'react-popup/style.css';
 
+import { setAppLoading } from '../redux/actions';
+
 const pako = require('pako');
 const publicIp = require('public-ip');
 const timer = 60 * 1000;
@@ -40,15 +42,10 @@ const cookieName = 'SCOPE_UUID';
 const sidebarCookieName = 'SCOPE_SIDEBAR';
 
 class App extends Component {
-    static propTypes = {
-        cookies: instanceOf(Cookies).isRequired,
-    };
-
     constructor() {
         super();
         this.state = {
             metadata: null,
-            loading: true,
             loaded: false,
             error: false,
             isSidebarVisible: true,
@@ -87,13 +84,14 @@ class App extends Component {
 
     render() {
         const {
-            loading,
             metadata,
             error,
             loaded,
             isSidebarVisible,
             sessionsLimitReached,
         } = this.state;
+
+        const { isAppLoading } = this.props;
 
         let errorDimmer = (
             <Dimmer active={error}>
@@ -137,7 +135,7 @@ class App extends Component {
         );
 
         let limitReachedDimmer = (
-            <Dimmer active={!loading && sessionsLimitReached}>
+            <Dimmer active={!isAppLoading && sessionsLimitReached}>
                 <br />
                 <br />
                 <Icon name='warning circle' color='orange' size='big' />
@@ -168,21 +166,6 @@ class App extends Component {
         let pusherWidth = isSidebarVisible
             ? screen.width - 340
             : screen.width - 75;
-
-        let sidebarContent = <b>Sidebar content</b>;
-
-        let sidebarStyle = {
-            root: {
-                position: 'relative',
-            },
-            content: {
-                position: 'relative',
-            },
-            sidebar: {
-                position: 'absolute',
-                zIndex: 2,
-            },
-        };
 
         return (
             <div>
@@ -267,14 +250,14 @@ class App extends Component {
                                         />
                                     </Sidebar.Pusher>
                                 </Sidebar.Pushable>
-                                <Dimmer active={loading} inverted>
+                                <Dimmer active={isAppLoading} inverted>
                                     <Loader inverted>
                                         Your SCope session is starting
                                     </Loader>
                                 </Dimmer>
                                 <Dimmer
                                     active={
-                                        !loading &&
+                                        !isAppLoading &&
                                         this.timeout != null &&
                                         this.timeout <= 0
                                     }>
@@ -502,6 +485,7 @@ class App extends Component {
                         if (DEBUG)
                             console.log('getRemainingUUIDTime', response);
                         if (response.sessionsLimitReached) {
+                            this.props.setLoading(false);
                             this.setState({
                                 loading: false,
                                 sessionsLimitReached: true,
@@ -512,8 +496,8 @@ class App extends Component {
                                 : 0;
                             // cookies.set(cookieName, uuid, { path: '/', maxAge: this.timeout });
                             if (!ping) {
+                                this.props.setLoading(false);
                                 this.setState({
-                                    loading: false,
                                     uuid: uuid,
                                     sessionMode: response.sessionMode,
                                 });
@@ -641,4 +625,22 @@ class App extends Component {
     }
 }
 
-export default withRouter(withCookies(App));
+App.propTypes = {
+    isAppLoading: PropTypes.bool.isRequired,
+    cookies: instanceOf(Cookies).isRequired,
+};
+
+let app = withRouter(withCookies(App));
+
+const mapStateToProps = (state) => {
+    const { isAppLoading } = state.main;
+    return { isAppLoading };
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        setAppLoading: (isAppLoading) => dispatch(setAppLoading(isAppLoading)),
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(app);
