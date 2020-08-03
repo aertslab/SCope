@@ -90,6 +90,10 @@ class LoomFileHandler:
                     if self.active_looms[abs_loom_file_path].get_connection().mode == mode:
                         logger.debug(f"Returning pre-loaded loom file {loom_file_path}. Object {id(loom)}")
                         return loom
+                    else:
+                        logger.error(
+                            f"Mode {mode} was requested for {loom_file_path}, but mode is currently {self.active_looms[abs_loom_file_path].get_connection().mode}"
+                        )
                 except AttributeError:
                     logger.error("Loom was previously closed")
                     loom.loom_connection = lp.connect(abs_loom_file_path, mode=mode, validate=False)
