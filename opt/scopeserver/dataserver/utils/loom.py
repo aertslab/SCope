@@ -435,13 +435,13 @@ class Loom:
                     clustering_id, cluster_id, ""
                 )["description"]
                 cluster_overlap_data.append(
-                    s_pb2.ClusterOverlap(
-                        clustering_name=clustering_name,
-                        cluster_name=cluster_name,
-                        n_cells=counts[cluster_id],
-                        cells_in_cluster=(counts[cluster_id] / len(cell_idxs)) * 100,
-                        cluster_in_cells=(counts[cluster_id] / all_counts[cluster_id]) * 100,
-                    )
+                    {
+                        "clustering_name": clustering_name,
+                        "cluster_name": cluster_name,
+                        "n_cells": counts[cluster_id],
+                        "cells_in_cluster": (counts[cluster_id] / len(cell_idxs)) * 100,
+                        "cluster_in_cells": (counts[cluster_id] / all_counts[cluster_id]) * 100,
+                    }
                 )
         return cluster_overlap_data
 

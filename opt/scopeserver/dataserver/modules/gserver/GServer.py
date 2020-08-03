@@ -518,7 +518,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def getClusterOverlaps(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         cluster_overlap_data = loom.get_cluster_overlaps(request.cellIndices)
-        return s_pb2.ClusterOverlaps(clusterOverlaps=cluster_overlap_data)
+        return s_pb2.ClusterOverlaps(clusterOverlaps=[s_pb2.ClusterOverlap(**x) for x in cluster_overlap_data])
 
     def getRegulonMetaData(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
