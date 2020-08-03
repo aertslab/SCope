@@ -833,7 +833,7 @@ def serve(run_event, config: Dict[str, Any]) -> None:
     )
     scope = SCope(config=config)
     s_pb2_grpc.add_MainServicer_to_server(scope, server)
-    server.add_insecure_port(f"{config['localHostAddress']}:{config['gPort']}")
+    server.add_insecure_port("[::]:{0}".format(config["gPort"]))
     server.start()
 
     # Let the main process know that GServer has started.
