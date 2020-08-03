@@ -428,11 +428,10 @@ class Loom:
 
         self.update_ss(update="clusterings")
 
-        try:
-            _ = self.get_clustering_by_id(new_clustering_meta["id"])
+        if new_clustering_meta["id"] in self.loom_connection.ca.Clusterings.dtype.names:
             logger.debug("Success")
             return (True, "Success")
-        except IndexError:
+        else:
             logger.debug("Failure")
             return (False, "Updated clusterings do not exist in file. Write error.")
 
