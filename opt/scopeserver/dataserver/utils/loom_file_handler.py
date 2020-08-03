@@ -77,7 +77,7 @@ class LoomFileHandler:
     def get_loom(self, loom_file_path: Path, mode: str = "r") -> Loom:
         abs_loom_file_path = self.get_loom_absolute_file_path(loom_file_path)
         with self.file_locks[abs_loom_file_path]:
-            if not os.path.exists(abs_loom_file_path):
+            if not abs_loom_file_path.exists():
                 logger.error(f"The file {loom_file_path} does not exists.")
                 raise ValueError(f"The file located at {abs_loom_file_path} does not exist.")
             if abs_loom_file_path in self.active_looms:
