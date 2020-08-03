@@ -418,6 +418,15 @@ class Loom:
             return (False, "Updated clusterings do not exist in file. Write error.")
 
     def get_cluster_overlaps(self, cell_idxs):
+        """Calculate clusters overlapped by provided cell indices
+
+        Args:
+            cell_idxs (list[int]): A list of cell indices within the loom file
+
+        Returns:
+            list[dict]: A list containing a dict with the overlaps information
+        """
+
         metadata = self.get_meta_data()
         cluster_overlap_data = []
         if not self.has_md_clusterings:
