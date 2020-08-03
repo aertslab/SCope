@@ -25,6 +25,14 @@ interface ClusterOverlapsTableState {
     sortOptions: Array<SortOptions>;
 }
 
+interface Column {
+    Header: string;
+    accessor: string;
+    style: { whiteSpace: string };
+    sortMethod: (x: Number, y: Number) => number;
+    width: number;
+}
+
 export default class ClusterOverlapsTable extends Component<
     ClusterOverlapsTableProps,
     ClusterOverlapsTableState
@@ -53,86 +61,88 @@ export default class ClusterOverlapsTable extends Component<
         return Math.min(maxWidth, cellLength * magicSpacing);
     };
 
-    render() {
-        const columnsText = {
-            clustering_name: 'Clustering',
-            cluster_name: 'Cluster',
-            n_cells: '# Cells',
-            cells_in_cluster: '% Cells',
-            cluster_in_cells: '% Cluster',
-        };
+    columnsText: Object = {
+        clustering_name: 'Clustering',
+        cluster_name: 'Cluster',
+        n_cells: '# Cells',
+        cells_in_cluster: '% Cells',
+        cluster_in_cells: '% Cluster',
+    };
 
-        const columnsHeaders = {
-            clustering_name: 'Clustering',
-            cluster_name: 'Cluster',
-            n_cells: '# Cells',
-            cells_in_cluster: (
-                <React.Fragment>
-                    % Cells
-                    <br />
-                    <Popup
-                        basic
-                        content='The percentage of the selected cells within the cluster'
-                        position='top left'
-                        trigger={
-                            <Icon
-                                name='question circle'
-                                style={{ display: 'inline' }}
-                                className='pointer'
-                            />
-                        }
-                    />
-                </React.Fragment>
-            ),
-            cluster_in_cells: (
-                <React.Fragment>
-                    % Cluster
-                    <br />
-                    <Popup
-                        basic
-                        content='The percentage of the cluster within the selection'
-                        position='top left'
-                        trigger={
-                            <Icon
-                                name='question circle'
-                                style={{ display: 'inline' }}
-                                className='pointer'
-                            />
-                        }
-                    />
-                </React.Fragment>
-            ),
-        };
+    columnsHeaders: Object = {
+        clustering_name: 'Clustering',
+        cluster_name: 'Cluster',
+        n_cells: '# Cells',
+        cells_in_cluster: (
+            <React.Fragment>
+                % Cells
+                <br />
+                <Popup
+                    basic
+                    content='The percentage of the selected cells within the cluster'
+                    position='top left'
+                    trigger={
+                        <Icon
+                            name='question circle'
+                            style={{ display: 'inline' }}
+                            className='pointer'
+                        />
+                    }
+                />
+            </React.Fragment>
+        ),
+        cluster_in_cells: (
+            <React.Fragment>
+                % Cluster
+                <br />
+                <Popup
+                    basic
+                    content='The percentage of the cluster within the selection'
+                    position='top left'
+                    trigger={
+                        <Icon
+                            name='question circle'
+                            style={{ display: 'inline' }}
+                            className='pointer'
+                        />
+                    }
+                />
+            </React.Fragment>
+        ),
+    };
 
-        let clusterOverlapsColumns = [];
-
+    toColumn = (name: string): Column => {
         const numericSortCols = [
             'n_cells',
             'cells_in_cluster',
             'cluster_in_cells',
         ];
 
-        for (const accessor in columnsText) {
-            let column = {
-                Header: columnsHeaders[accessor],
-                accessor: accessor,
-                style: { whiteSpace: 'unset' },
-            };
+        const sort = numericSortCols.includes(name);
 
-            if (numericSortCols.includes(accessor)) {
-                column['sortMethod'] = R.comparator(
-                    (a, b) => Number(a) > Number(b)
-                );
-                column['width'] = this.getColumnWidth(
-                    this.props.clusterOverlaps,
-                    accessor,
-                    columnsText[accessor]
-                );
-            }
+        return {
+            Header: this.columnsHeaders[name],
+            accessor: name,
+            style: { whiteSpace: 'unset' },
+            sortMethod: sort
+                ? R.comparator((a, b) => Number(a) > Number(b))
+                : undefined,
+            width: sort
+                ? this.getColumnWidth(
+                      this.props.clusterOverlaps,
+                      name,
+                      this.columnsText[name]
+                  )
+                : undefined,
+        };
+    };
 
-            clusterOverlapsColumns.push(column);
-        }
+    clusterOverlapsColumns = R.map(
+        this.toColumn,
+        Object.keys(this.columnsText)
+    );
 
+    render() {
         return (
             <ReactTable
                 data={this.props.clusterOverlaps}
@@ -143,10 +153,10 @@ export default class ClusterOverlapsTable extends Component<
                 columns={[
                     {
                         Header: 'Selection/Cluster Overlaps',
-                        columns: clusterOverlapsColumns,
+                        columns: this.clusterOverlapsColumns,
                     },
                 ]}
-                pageSizeOptions={[3]}
+                pageSizeOptions={[3, 5, 10, 15]}
                 defaultPageSize={3}
                 className='-striped -highlight'
             />
