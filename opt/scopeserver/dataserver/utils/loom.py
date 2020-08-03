@@ -11,6 +11,8 @@ import pickle
 from copy import deepcopy
 from pathlib import Path
 from typing import Tuple, Dict, Any, Union, List, Set
+from loompy.loompy import LoomConnection
+from scopeserver.dataserver.utils.loom_file_handler import LoomFileHandler
 from typing_extensions import TypedDict
 from google.protobuf.internal.containers import RepeatedScalarFieldContainer
 
@@ -33,7 +35,9 @@ Clustering = TypedDict(
 
 
 class Loom:
-    def __init__(self, file_path, abs_file_path, loom_connection, loom_file_handler):
+    def __init__(
+        self, file_path: Path, abs_file_path: Path, loom_connection: LoomConnection, loom_file_handler: LoomFileHandler
+    ):
         self.lfh = loom_file_handler
         self.file_path = file_path
         self.abs_file_path = abs_file_path
