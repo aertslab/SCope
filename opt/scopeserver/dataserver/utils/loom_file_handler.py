@@ -2,7 +2,7 @@ import os
 import loompy as lp
 from loompy import LoomConnection
 import threading
-import collections as c
+from collections import defaultdict
 from pathlib import Path
 from typing import Optional
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class LoomFileHandler:
     def __init__(self):
         self.active_looms = {}
-        self.file_locks = c.defaultdict(lambda: threading.Lock())
+        self.file_locks = defaultdict(lambda: threading.Lock())
         self.loom_dir = Path(dfh.DataFileHandler.get_data_dir_path_by_file_type(file_type="Loom"))
 
     def add_loom(self, file_path: Path, abs_file_path: Path, loom_connection) -> Loom:
