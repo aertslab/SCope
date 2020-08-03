@@ -34,7 +34,6 @@ class LoomFileHandler:
             logger.error(e)
             os.remove(file_path)
             logger.warning(f"Deleting malformed loom {file_path}")
-            self.file_locks[abs_file_path].release()
             return None
 
     def drop_loom(self, loom_file_path: Path) -> Path:
