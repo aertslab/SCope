@@ -16,7 +16,6 @@ from typing_extensions import TypedDict
 from google.protobuf.internal.containers import RepeatedScalarFieldContainer
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
-from scopeserver.dataserver.utils.loom_file_handler import LoomFileHandler
 from scopeserver.dataserver.utils import search_space as ss
 from scopeserver.dataserver.modules.gserver import s_pb2
 from scopeserver.dataserver.utils import constant
