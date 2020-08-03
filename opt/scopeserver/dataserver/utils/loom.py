@@ -8,6 +8,7 @@ import time
 import hashlib
 import os
 import pickle
+from copy import deepcopy
 from pathlib import Path
 from typing import Tuple, Dict, Any, Union, List, Set
 from typing_extensions import TypedDict
@@ -75,10 +76,11 @@ class Loom:
     def write_ss(self) -> None:
         self.ss.loom = None  # Remove loom connection to enable pickling
         self.ss.dfh = None
+        cur_ss = deepcopy(self.ss)
         logger.debug(f"Built all Search Spaces for {self.file_path}")
         with open(self.ss_pickle_name, "wb") as fh:
             logger.debug(f"Writing prebuilt SS for {self.file_path} to {self.ss_pickle_name}")
-            pickle.dump(self.ss, fh)
+            pickle.dump(cur_ss, fh)
 
     def update_ss(self, update: str) -> None:
         self.ss.loom = self
