@@ -248,7 +248,7 @@ def get_search_results(search_term: str, loom: Loom, data_hash_secret: str) -> D
     """
 
     search_space, search_term, cross_species = determine_species_parameters(loom, search_term)
-    matches = find_matches(search_term, search_term.casefold(), loom)
+    matches = find_matches(search_term, search_term.casefold(), search_space)
     cross_species_identity, aggregated_matches = aggregate_matches(cross_species, matches, search_space)
     features, feature_types = get_final_feature_and_type(loom, aggregated_matches, data_hash_secret)
     descriptions = create_feature_description(cross_species, cross_species_identity, aggregated_matches, features)
