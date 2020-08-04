@@ -13,7 +13,7 @@ const main = (state = initialState, action: SetLoadingAction) => {
         case SET_APP_LOADING: {
             return {
                 ...state,
-                isLoading: payload.isAppLoading,
+                isAppLoading: payload.isAppLoading,
             };
         }
         default: {
