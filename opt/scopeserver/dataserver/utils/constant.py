@@ -23,22 +23,6 @@ SPECIES_MAP = {
     Species.UNKN: {"short": "Unknown", "long": "Unknown Species"},
 }
 
-
-@unique
-class Species(Enum):
-    DMEL = auto()
-    HSAP = auto()
-    MMUS = auto()
-    UNKN = auto()
-
-
-SPECIES_MAP = {
-    Species.DMEL: {"short": "Fly", "long": "Drosophila Melanogaster"},
-    Species.HSAP: {"short": "Human", "long": "Homo Sapiens"},
-    Species.MMUS: {"short": "Mouse", "long": "Mus Musculus"},
-    Species.UNKN: {"short": "Unknown", "long": "Unknown Species"},
-}
-
 BIG_COLOR_LIST = [
     "ff0000",
     "ffc480",
