@@ -33,7 +33,7 @@ from scopeserver.dataserver.utils import gene_set_enrichment as _gse
 from scopeserver.dataserver.utils import cell_color_by_features as ccbf
 from scopeserver.dataserver.utils import constant
 from scopeserver.dataserver.utils import search_space as ss
-from scopeserver.dataserver.utils.search import Searcher
+from scopeserver.dataserver.utils.search import get_search_results
 from scopeserver.dataserver.utils.loom import Loom
 
 from pyscenic.genesig import GeneSignature
@@ -140,8 +140,7 @@ class SCope(s_pb2_grpc.MainServicer):
         logger.debug("Searching for {0}".format(query))
         start_time = time.time()
 
-        searcher = Searcher(query, loom, self.config["dataHashSecret"])
-        features = searcher.get_results()
+        features = get_search_results(query, loom, self.config["dataHashSecret"])
         return features
 
     @staticmethod
