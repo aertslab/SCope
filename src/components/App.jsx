@@ -485,9 +485,8 @@ class App extends Component {
                         if (DEBUG)
                             console.log('getRemainingUUIDTime', response);
                         if (response.sessionsLimitReached) {
-                            this.props.setLoading(false);
+                            this.props.setAppLoading(false);
                             this.setState({
-                                loading: false,
                                 sessionsLimitReached: true,
                             });
                         } else {
@@ -496,7 +495,7 @@ class App extends Component {
                                 : 0;
                             // cookies.set(cookieName, uuid, { path: '/', maxAge: this.timeout });
                             if (!ping) {
-                                this.props.setLoading(false);
+                                this.props.setAppLoading(false);
                                 this.setState({
                                     uuid: uuid,
                                     sessionMode: response.sessionMode,
