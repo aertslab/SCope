@@ -60,9 +60,9 @@ class DataFileHandler:
 
     def __init__(self):
         self.current_UUIDs = {}
-        self.hsap_to_dmel_mappings = None
-        self.mmus_to_dmel_mappings = None
-        self.dmel_mappings = None
+        self.hsap_to_dmel_mappings = {}
+        self.mmus_to_dmel_mappings = {}
+        self.dmel_mappings = {}
         self.permanent_UUIDs = set()
         self.orcid_ids = {}
         self.active_sessions = {}
