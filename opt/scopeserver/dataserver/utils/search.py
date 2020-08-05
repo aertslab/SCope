@@ -14,7 +14,7 @@ from scopeserver.dataserver.utils import data_file_handler as dfh
 logger = logging.getLogger(__name__)
 
 # casefold feature, original feature, feature type
-SearchMatch = NamedTuple("SearchResult", [("casefold_feature", str), ("original_feature", str), ("feature_type", str)])
+SearchMatch = NamedTuple("SearchResult", [("original_feature", str), ("resolved_feature", str), ("feature_type", str)])
 
 
 DEFINED_SEARCH_TYPES = {
@@ -44,7 +44,18 @@ DEFINED_SEARCH_TYPES = {
 
 def determine_species_parameters(
     loom: Loom, search_term: str
-) -> Tuple[SearchSpace, str, Union[constant.Species, Type[None]]]:
+) -> Tuple[SearchSpace, str, Union[constant.Species, None]]:
+    """Identify the species in the case of a cross species search
+
+    Args:
+        loom (Loom): Loom object
+        search_term (str): Term the user has searched for
+
+    Returns:
+        Tuple[SearchSpace, str, Union[constant.Species, None]]: 
+        Return the correct (cross-species or not) search space, 
+        the trimmed search term and the species being searched for.
+    """
     if search_term.startswith("hsap\\"):
         search_space = loom.hsap_ss
         cross_species = constant.Species.HSAP
@@ -65,12 +76,27 @@ def find_matches(search_term: str, casefold_term: str, search_space: SearchSpace
 
     Find keys in the search space where the search term matches (casefolded)
     the searchable element. Return the match, the matches category and relationship.
+
+    Args:
+        search_term (str): Term the user typed
+        casefold_term (str): Casefolded term
+        search_space (SearchSpace): Search space from loom object
+
+    Returns:
+        List[SearchMatch]: A sorted list of the matches to the users search term
     """
 
     if len(casefold_term) == 1:
-        matches = [x for x in search_space.keys() if casefold_term == x[0]]
+        matches = [x for x in search_space if casefold_term == x[0]]
     else:
-        matches = [x for x in search_space.keys() if casefold_term in x[0]]
+        matches = [x for x in search_space if casefold_term in x[0]]
+
+    # match_result tuple:
+    # [0]: key from search_space
+    # [1]: Tuple:
+    #    [0]: name of feature (i.e. A gene name)
+    #    [1]: resolved feature (i.e. A cluster in the case of a marker gene)
+    #    [2]: type of the feature (e.g. Gene, Cluster)
 
     match_results = []
 
@@ -86,7 +112,7 @@ def find_matches(search_term: str, casefold_term: str, search_space: SearchSpace
     bad_match: List[SearchMatch] = []
 
     for match_result in match_results:
-        # This contains the full match, it's category and their relationship
+        # This contains the full match, its category and their relationship
         match, result = match_result
 
         if match[1] == search_term or match[0] == casefold_term:
@@ -117,14 +143,22 @@ def find_matches(search_term: str, casefold_term: str, search_space: SearchSpace
 
 
 def aggregate_matches(
-    cross_species: Union[constant.Species, Type[None]], matches: List[SearchMatch], search_space: SearchSpace
-) -> Tuple[Dict[SearchMatch, str], Dict[Tuple[str, str], List[str]]]:
+    cross_species: Union[constant.Species, None], matches: List[SearchMatch], search_space: SearchSpace
+) -> Tuple[Dict[str, str], Dict[Tuple[str, str], List[str]]]:
     """
     Collapse matches based on returned element.
 
-    match[0]: Match from search space
+    match[0]: Key of the match from the search space
     match[1]: Category of match
     match[2]: Relationship
+
+    Args:
+        cross_species (Union[constant.Species, None]): The species for cross species searches
+        matches (List[SearchMatch]): The sorted matches from the search space
+        search_space (SearchSpace): The appropriate search space
+
+    Returns:
+        Tuple[Dict[str, str], Dict[Tuple[str, str], List[str]]]: The percentage identites and search matches aggregated by feature and feature type
     """
 
     dfh = data_file_handler.DataFileHandler()
@@ -162,8 +196,8 @@ def aggregate_matches(
 
 
 def create_feature_description(
-    cross_species: Union[constant.Species, Type[None]],
-    cross_species_identity: Dict[SearchMatch, str],
+    cross_species: Union[constant.Species, None],
+    cross_species_identity: Dict[str, str],
     aggregated_matches: Dict[Tuple[str, str], List[str]],
     features: Dict[Tuple[str, str], str],
 ) -> Dict[Tuple[str, str], str]:
@@ -173,6 +207,15 @@ def create_feature_description(
     Some matches translate into something other than the term searched for. For example,
     searching for a gene that is a marker of a cluster, will result in the searched gene
     being translated into the name of the cluster that it is a marker of.
+
+    Args:
+        cross_species (Union[constant.Species, None]): A species Enum if a cross species search is requested
+        cross_species_identity (Dict[SearchMatch, str]): A dict of identity %'s between homologous genes
+        aggregated_matches (Dict[Tuple[str, str], List[str]]): Results aggregated by final term
+        features (Dict[Tuple[str, str], str]): A list of features corresponding to the aggregated matches
+
+    Returns:
+        Dict[Tuple[str, str], str]: The final descriptions to send to the user
     """
 
     descriptions: Dict[Tuple[str, str], str] = {}
@@ -210,12 +253,23 @@ def create_feature_description(
     return descriptions
 
 
-def get_final_feature_and_type(loom: Loom, aggregated_matches: Dict[Tuple[str, str], List[str]], data_hash_secret: str):
+def get_final_feature_and_type(
+    loom: Loom, aggregated_matches: Dict[Tuple[str, str], List[str]], data_hash_secret: str
+) -> Tuple[Dict[Tuple[str, str], str], Dict[Tuple[str, str], str]]:
     """
     Determine final features and types.
 
     Build the lists needed to correctly associate each match with its final category.
+
+    Args:
+        loom (Loom): Loom object
+        aggregated_matches (Dict[Tuple[str, str], List[str]]): Aggregated matches from aggregate_matches
+        data_hash_secret (str): Secret used to hash annotations on clusters
+
+    Returns:
+        Tuple[Dict[Tuple[str, str], str], Dict[Tuple[str, str], str]]: Features and Feature types
     """
+
     features: Dict[Tuple[str, str], str] = {}
     feature_types: Dict[Tuple[str, str], str] = {}
 
@@ -243,8 +297,15 @@ def get_final_feature_and_type(loom: Loom, aggregated_matches: Dict[Tuple[str, s
 
 
 def get_search_results(search_term: str, loom: Loom, data_hash_secret: str) -> Dict[str, List[str]]:
-    """
-    Get all results for this search.
+    """Take a user search term and a loom file and extract the results to display to the user
+
+    Args:
+        search_term (str): Search term from the user
+        loom (Loom): Loom file to be searched
+        data_hash_secret (str): Secret used to hash annotations
+
+    Returns:
+        Dict[str, List[str]]: A dict of the compiled results
     """
 
     search_space, search_term, cross_species = determine_species_parameters(loom, search_term)
@@ -254,9 +315,9 @@ def get_search_results(search_term: str, loom: Loom, data_hash_secret: str) -> D
     descriptions = create_feature_description(cross_species, cross_species_identity, aggregated_matches, features)
 
     final_res = {
-        "feature": [features[k] for k in aggregated_matches.keys()],
-        "featureType": [feature_types[k] for k in aggregated_matches.keys()],
-        "featureDescription": [descriptions[k] for k in aggregated_matches.keys()],
+        "feature": [features[k] for k in aggregated_matches],
+        "featureType": [feature_types[k] for k in aggregated_matches],
+        "featureDescription": [descriptions[k] for k in aggregated_matches],
     }
 
     return final_res
