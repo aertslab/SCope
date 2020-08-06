@@ -63,6 +63,8 @@ def find_matches(search_term: str, search_space: SearchSpace) -> List[SearchMatc
     else:
         matches = [x for x in search_space if casefold_term in x[0]]
 
+    logger.debug(f"Found {len(matches)} unique results")
+
     # match_result tuple:
     # [0]: key from search_space
     # [1]: Tuple:
@@ -114,7 +116,7 @@ def find_matches(search_term: str, search_space: SearchSpace) -> List[SearchMatc
     return final_matches
 
 
-def aggregate_matches(matches: List[SearchMatch]) -> Tuple[Dict[str, str], Dict[Tuple[str, str], List[str]]]:
+def aggregate_matches(matches: List[SearchMatch]) -> Dict[Tuple[str, str], List[str]]:
     """
     Collapse matches based on returned element.
 
