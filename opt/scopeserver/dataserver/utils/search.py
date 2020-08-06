@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 # casefold feature, original feature, feature type
 SearchMatch = NamedTuple("SearchResult", [("original_feature", str), ("resolved_feature", str), ("feature_type", str)])
 
-
 DEFINED_SEARCH_TYPES = {
     "region_gene_link": {
         "final_category": "gene",
@@ -41,6 +40,28 @@ DEFINED_SEARCH_TYPES = {
 }
 
 
+def match_result_cost(term: str, result: str) -> Optional[int]:
+    if term == result:
+        return 0
+    if term.casefold() == result.casefold():
+        return 1
+    if result.startswith(term) or result.endswith(term):
+        return 2
+    if result.casefold().startswith(term.casefold()) or result.casefold().endswith(term.casefold()):
+        return 3
+    if term in result:
+        return 4
+    if term.casefold() in result.casefold():
+        return 5
+    return None
+
+
+def sort_results(search_term: str, results: List) -> List[SearchMatch]:
+    costs = [(match_result_cost(search_term, match[1]), result) for match, result in results]
+    sorted_costs = sorted([(cost, result) for cost, result in costs if cost is not None], key=lambda cost: cost[0])
+    return [result for _, result in sorted_costs]
+
+
 def find_matches(search_term: str, search_space: SearchSpace) -> List[SearchMatch]:
     """
     Search for matches in the search space.
@@ -63,8 +84,6 @@ def find_matches(search_term: str, search_space: SearchSpace) -> List[SearchMatc
     else:
         matches = [x for x in search_space if casefold_term in x[0]]
 
-    logger.debug(f"Found {len(matches)} unique results")
-
     # match_result tuple:
     # [0]: key from search_space
     # [1]: Tuple:
@@ -81,39 +100,7 @@ def find_matches(search_term: str, search_space: SearchSpace) -> List[SearchMatc
         else:
             match_results.append((match, (match[1], search_space[match], match[2])))
 
-    perfect_match: List[SearchMatch] = []
-    good_match: List[SearchMatch] = []
-    bad_match: List[SearchMatch] = []
-
-    for match_result in match_results:
-        # This contains the full match, its category and their relationship
-        match, result = match_result
-
-        if match[1] == search_term or match[0] == casefold_term:
-            perfect_match.append(result)
-            continue
-        if (
-            match[1].startswith(search_term)
-            or match[1].endswith(search_term)
-            or match[0].startswith(casefold_term)
-            or match[0].endswith(casefold_term)
-        ):
-            good_match.append(result)
-            continue
-        if search_term in match[0]:
-            bad_match.append(result)
-            continue
-
-    def sort_matches(match: SearchMatch) -> str:
-        return match[0]
-
-    final_matches = (
-        sorted(perfect_match, key=sort_matches)
-        + sorted(good_match, key=sort_matches)
-        + sorted(bad_match, key=sort_matches)
-    )
-
-    return final_matches
+    return sort_results(search_term, match_results)
 
 
 def aggregate_matches(matches: List[SearchMatch]) -> Dict[Tuple[str, str], List[str]]:
