@@ -1,6 +1,6 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/aertslab/scope/badge)](https://www.codefactor.io/repository/github/aertslab/scope)
 
-# SCope v1.8.3: Visualization of large-scale and high dimensional single cell data
+# SCope v1.8.2: Visualization of large-scale and high dimensional single cell data
 
 <img src="images/SCope_Logo.png" width="640">
 
@@ -112,6 +112,7 @@ npm run dev
 ### Configuration file (`config.json`)
 
 Keys:
-* `data`: This is a directory containing data files (e.g. the `motd.txt` message of the day).
-  Can be an absolute path or a relative path from where you start SCope. By default it is
-  `./data/`.
+
+-   `data`: This is a directory containing data files (e.g. the `motd.txt` message of the day).
+    Can be an absolute path or a relative path from where you start SCope. By default it is
+    `./data/`.
