@@ -54,6 +54,7 @@ class Loom:
             logger.debug(f"Building Search Space for {file_path}")
             self.ss = ss.SearchSpace(loom=self).build()
             self.ss.loom = None  # Remove loom connection to enable pickling
+            self.ss.dfh = None
             logger.debug(f"Built Search Space for {file_path}")
             with open(self.ss_pickle_name, "wb") as fh:
                 logger.debug(f"Writing prebuilt SS for {file_path} to {self.ss_pickle_name}")
@@ -668,7 +669,7 @@ class Loom:
         genes = set(self.get_genes())
         maxPerc = 0.0
         maxSpecies = ""
-        mappings = {"dmel": dfh.DataFileHandler.dmel_mappings}
+        mappings = {"dmel": self.dfh.dmel_mappings}
         for species in mappings.keys():
             intersect = genes.intersection(mappings[species].keys())
             if (len(intersect) / len(genes)) > maxPerc:

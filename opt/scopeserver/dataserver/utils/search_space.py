@@ -23,6 +23,7 @@ class SearchSpace(dict):
         dict.__init__(self)
         self.loom = loom
         self.species, self.gene_mappings = loom.infer_species()
+        self.dfh = dfh.DataFileHandler()
 
     def add_element(self, element: str, element_type: str) -> None:
         if element_type == "gene" and len(self.gene_mappings) > 0:
@@ -63,11 +64,7 @@ class SearchSpace(dict):
         if len(self.gene_mappings) > 0:
             genes = set(self.loom.get_genes())
             shrink_mappings = set(
-                [
-                    x
-                    for x in dfh.DataFileHandler.dmel_mappings.keys()
-                    if x in genes or dfh.DataFileHandler.dmel_mappings[x] in genes
-                ]
+                [x for x in self.dfh.dmel_mappings.keys() if x in genes or self.dfh.dmel_mappings[x] in genes]
             )
             self.add_elements(elements=shrink_mappings, element_type="gene")
         else:

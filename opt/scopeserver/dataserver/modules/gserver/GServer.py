@@ -62,7 +62,6 @@ class SCope(s_pb2_grpc.MainServicer):
         self.dfh = dfh.DataFileHandler()
         self.lfh = lfh.LoomFileHandler()
 
-        self.dfh.load_gene_mappings()
         self.dfh.set_global_data()
         self.lfh.set_global_data()
         self.dfh.read_UUID_db()
