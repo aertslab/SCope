@@ -665,7 +665,7 @@ class Loom:
         return self.loom_connection.ra.Gene.astype(str)
 
     @lru_cache(maxsize=32)
-    def infer_species(self) -> Tuple[str, Any]:
+    def infer_species(self) -> Tuple[str, Dict[str, str]]:
         genes = set(self.get_genes())
         maxPerc = 0.0
         maxSpecies = ""

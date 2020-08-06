@@ -1,11 +1,14 @@
 import functools
 import re
-from typing import Any
+from typing import Any, Dict, NamedTuple, Optional, Tuple, Union
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+SearchSpaceKey = NamedTuple("SearchSpaceKey", [("casefold_element", str), ("element", str), ("element_type", str)])
 
 
 class SearchSpace(dict):
@@ -19,20 +22,22 @@ class SearchSpace(dict):
     - Metrics
     """
 
-    def __init__(self, loom):
+    def __init__(self, loom) -> None:
         dict.__init__(self)
         self.loom = loom
+        self.species: str
+        self.gene_mappings: Dict[str, str]
         self.species, self.gene_mappings = loom.infer_species()
-        self.dfh = dfh.DataFileHandler()
+        self.dfh: Optional[dfh.DataFileHandler] = dfh.DataFileHandler()
 
     def add_element(self, element: str, element_type: str) -> None:
         if element_type == "gene" and len(self.gene_mappings) > 0:
             if self.gene_mappings[element] != element:
-                self[("{0}".format(str(element)).casefold(), element, element_type)] = self.gene_mappings[element]
+                self[(f"{element}".casefold(), element, element_type)] = [self.gene_mappings[element]]
             else:
                 self[(element.casefold(), element, element_type)] = element
         else:
-            self[(element.casefold(), element, element_type)] = element
+            self[(element.casefold(), element, element_type)] = [element]
 
     def add_elements(self, elements: Any, element_type: Any) -> None:
         for element in elements:
