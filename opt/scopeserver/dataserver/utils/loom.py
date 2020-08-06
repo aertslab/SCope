@@ -51,18 +51,10 @@ class Loom:
                 self.ss = pickle.load(fh)
 
         except (EOFError, FileNotFoundError):
-            logger.debug(f"Building Search Spaces for {file_path}")
-            if self.species == "dmel":
-                logger.debug(f"Building hsap Search Spaces for {file_path}")
-                self.hsap_ss = ss.SearchSpace(loom=self, cross_species="hsap").build()
-                logger.debug(f"Building mmus Search Spaces for {file_path}")
-
-                self.mmus_ss = ss.SearchSpace(loom=self, cross_species="mmus").build()
-            logger.debug(f"Building self Search Spaces for {file_path}")
-
+            logger.debug(f"Building Search Space for {file_path}")
             self.ss = ss.SearchSpace(loom=self).build()
             self.ss.loom = None  # Remove loom connection to enable pickling
-            logger.debug(f"Built all Search Spaces for {file_path}")
+            logger.debug(f"Built Search Space for {file_path}")
             with open(self.ss_pickle_name, "wb") as fh:
                 logger.debug(f"Writing prebuilt SS for {file_path} to {self.ss_pickle_name}")
                 pickle.dump(self.ss, fh)

@@ -9,7 +9,6 @@ from scopeserver.dataserver.utils.constant import Species
 from scopeserver.dataserver.utils.loom import Loom
 from scopeserver.dataserver.utils import constant
 from scopeserver.dataserver.utils.search_space import SearchSpace
-from scopeserver.dataserver.utils import data_file_handler as dfh
 
 logger = logging.getLogger(__name__)
 
@@ -42,35 +41,7 @@ DEFINED_SEARCH_TYPES = {
 }
 
 
-def determine_species_parameters(
-    loom: Loom, search_term: str
-) -> Tuple[SearchSpace, str, Union[constant.Species, None]]:
-    """Identify the species in the case of a cross species search
-
-    Args:
-        loom (Loom): Loom object
-        search_term (str): Term the user has searched for
-
-    Returns:
-        Tuple[SearchSpace, str, Union[constant.Species, None]]: 
-        Return the correct (cross-species or not) search space, 
-        the trimmed search term and the species being searched for.
-    """
-    if search_term.startswith("hsap\\"):
-        search_space = loom.hsap_ss
-        cross_species = constant.Species.HSAP
-        search_term = search_term[5:]
-    elif search_term.startswith("mmus\\"):
-        search_space = loom.mmus_ss
-        cross_species = constant.Species.MMUS
-        search_term = search_term[5:]
-    else:
-        search_space = loom.ss
-        cross_species = None
-    return search_space, search_term, cross_species
-
-
-def find_matches(search_term: str, casefold_term: str, search_space: SearchSpace) -> List[SearchMatch]:
+def find_matches(search_term: str, search_space: SearchSpace) -> List[SearchMatch]:
     """
     Search for matches in the search space.
 
@@ -79,12 +50,13 @@ def find_matches(search_term: str, casefold_term: str, search_space: SearchSpace
 
     Args:
         search_term (str): Term the user typed
-        casefold_term (str): Casefolded term
         search_space (SearchSpace): Search space from loom object
 
     Returns:
         List[SearchMatch]: A sorted list of the matches to the users search term
     """
+
+    casefold_term = search_term.casefold()
 
     if len(casefold_term) == 1:
         matches = [x for x in search_space if casefold_term == x[0]]
@@ -142,9 +114,7 @@ def find_matches(search_term: str, casefold_term: str, search_space: SearchSpace
     return final_matches
 
 
-def aggregate_matches(
-    cross_species: Union[constant.Species, None], matches: List[SearchMatch], search_space: SearchSpace
-) -> Tuple[Dict[str, str], Dict[Tuple[str, str], List[str]]]:
+def aggregate_matches(matches: List[SearchMatch]) -> Tuple[Dict[str, str], Dict[Tuple[str, str], List[str]]]:
     """
     Collapse matches based on returned element.
 
@@ -153,53 +123,26 @@ def aggregate_matches(
     match[2]: Relationship
 
     Args:
-        cross_species (Union[constant.Species, None]): The species for cross species searches
         matches (List[SearchMatch]): The sorted matches from the search space
         search_space (SearchSpace): The appropriate search space
 
     Returns:
-        Tuple[Dict[str, str], Dict[Tuple[str, str], List[str]]]: The percentage identites and search matches aggregated by feature and feature type
+        Dict[Tuple[str, str], List[str]]: Search matches aggregated by feature and feature type
     """
 
-    dfh = data_file_handler.DataFileHandler()
-    cross_species_identity = {}
-
     aggregated_matches: Dict[Tuple[str, str], List[str]] = OrderedDict()
-    if not cross_species:
-        for match in matches:
-            key = (match[1], match[2])
-            if key not in aggregated_matches.keys():
-                aggregated_matches[key] = [match[0]]
-            else:
-                aggregated_matches[key].append(match[0])
+    for match in matches:
+        key = (match[1], match[2])
+        if key not in aggregated_matches.keys():
+            aggregated_matches[key] = [match[0]]
+        else:
+            aggregated_matches[key].append(match[0])
 
-    elif cross_species == constant.Species.HSAP:
-        for match in matches:
-            key = (match[1], match[2])
-            for droso_gene in dfh.hsap_to_dmel_mappings[match[0]]:
-                if key not in aggregated_matches.keys():
-                    aggregated_matches[key] = [droso_gene[0]]
-                else:
-                    aggregated_matches[key].append(droso_gene[0])
-                cross_species_identity[match[0]] = droso_gene[1]
-    elif cross_species == constant.Species.MMUS:
-        for match in matches:
-            key = (match[1], match[2])
-            for droso_gene in dfh.mmus_to_dmel_mappings[search_space[match]]:
-                if key not in aggregated_matches.keys():
-                    aggregated_matches[key] = [droso_gene[0]]
-                else:
-                    aggregated_matches[key].append(droso_gene[0])
-                cross_species_identity[match[0]] = droso_gene[1]
-
-    return cross_species_identity, aggregated_matches
+    return aggregated_matches
 
 
 def create_feature_description(
-    cross_species: Union[constant.Species, None],
-    cross_species_identity: Dict[str, str],
-    aggregated_matches: Dict[Tuple[str, str], List[str]],
-    features: Dict[Tuple[str, str], str],
+    aggregated_matches: Dict[Tuple[str, str], List[str]], features: Dict[Tuple[str, str], str],
 ) -> Dict[Tuple[str, str], str]:
     """
     Generate descriptions for final results.
@@ -209,8 +152,6 @@ def create_feature_description(
     being translated into the name of the cluster that it is a marker of.
 
     Args:
-        cross_species (Union[constant.Species, None]): A species Enum if a cross species search is requested
-        cross_species_identity (Dict[SearchMatch, str]): A dict of identity %'s between homologous genes
         aggregated_matches (Dict[Tuple[str, str], List[str]]): Results aggregated by final term
         features (Dict[Tuple[str, str], str]): A list of features corresponding to the aggregated matches
 
@@ -221,10 +162,6 @@ def create_feature_description(
     descriptions: Dict[Tuple[str, str], str] = {}
 
     for k, v in aggregated_matches.items():
-        if cross_species:
-            species_name = constant.SPECIES_MAP[cross_species]["short"]
-            identity_perc = cross_species_identity[k[0]]
-            descriptions[k] = f"Orthologue of {k[0]}, {identity_perc:.2f}% identity ({species_name} -> Drosophila)"
         synonyms = v.copy()
         with suppress(ValueError):
             synonyms.remove(k[0])
@@ -303,16 +240,16 @@ def get_search_results(search_term: str, loom: Loom, data_hash_secret: str) -> D
         search_term (str): Search term from the user
         loom (Loom): Loom file to be searched
         data_hash_secret (str): Secret used to hash annotations
+        data_file_handler (DataFileHandler): The data file handler object from the Gserver
 
     Returns:
         Dict[str, List[str]]: A dict of the compiled results
     """
 
-    search_space, search_term, cross_species = determine_species_parameters(loom, search_term)
-    matches = find_matches(search_term, search_term.casefold(), search_space)
-    cross_species_identity, aggregated_matches = aggregate_matches(cross_species, matches, search_space)
+    matches = find_matches(search_term, loom.ss)
+    aggregated_matches = aggregate_matches(matches)
     features, feature_types = get_final_feature_and_type(loom, aggregated_matches, data_hash_secret)
-    descriptions = create_feature_description(cross_species, cross_species_identity, aggregated_matches, features)
+    descriptions = create_feature_description(aggregated_matches, features)
 
     final_res = {
         "feature": [features[k] for k in aggregated_matches],

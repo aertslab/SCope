@@ -12,8 +12,6 @@ class SearchSpace(dict):
 
     """
     SearchSpace class is used to build the search space that contain all the queryable elements:
-    - Homo sapiens to Drosophila melanogaster gene mappings
-    - Mus musculus to Drosophila melanogaster gene mappings
     - Genes
     - Clusterings (inferred from e.g.: Seurat, ...)
     - Regulons (inferred from SCENIC)
@@ -21,16 +19,13 @@ class SearchSpace(dict):
     - Metrics
     """
 
-    def __init__(self, loom, cross_species=""):
+    def __init__(self, loom):
         dict.__init__(self)
         self.loom = loom
-        self.cross_species = cross_species
         self.species, self.gene_mappings = loom.infer_species()
-        if self.species != "dmel":
-            self.cross_species = ""
 
     def add_element(self, element: str, element_type: str) -> None:
-        if element_type == "gene" and self.cross_species == "" and len(self.gene_mappings) > 0:
+        if element_type == "gene" and len(self.gene_mappings) > 0:
             if self.gene_mappings[element] != element:
                 self[("{0}".format(str(element)).casefold(), element, element_type)] = self.gene_mappings[element]
             else:
@@ -43,34 +38,25 @@ class SearchSpace(dict):
             self.add_element(element=element, element_type=element_type)
 
     def build(self):
-        if self.cross_species != "":
-            self.add_cross_species_genes()
-        else:
-            if self.loom.has_meta_data():
-                self.meta_data = self.loom.get_meta_data()
-            # Add genes to the search space
-            self.add_genes()
-            # Add clusterings to the search space if present in .loom
-            if self.loom.has_md_clusterings():
-                self.add_clusterings()
-            # Add regulons to the search space if present in .loom
-            if self.loom.has_regulons_AUC():
-                self.add_regulons()
-            # Add annotations to the search space if present in .loom
-            if self.loom.has_md_annotations():
-                self.add_annotations()
-            # Add metrics to the search space if present in .loom
-            if self.loom.has_md_metrics():
-                self.add_metrics()
-            if self.loom.has_region_gene_links():
-                self.add_markers(element_type="region_gene_link")
+        if self.loom.has_meta_data():
+            self.meta_data = self.loom.get_meta_data()
+        # Add genes to the search space
+        self.add_genes()
+        # Add clusterings to the search space if present in .loom
+        if self.loom.has_md_clusterings():
+            self.add_clusterings()
+        # Add regulons to the search space if present in .loom
+        if self.loom.has_regulons_AUC():
+            self.add_regulons()
+        # Add annotations to the search space if present in .loom
+        if self.loom.has_md_annotations():
+            self.add_annotations()
+        # Add metrics to the search space if present in .loom
+        if self.loom.has_md_metrics():
+            self.add_metrics()
+        if self.loom.has_region_gene_links():
+            self.add_markers(element_type="region_gene_link")
         return self
-
-    def add_cross_species_genes(self) -> None:
-        if self.cross_species == "hsap" and self.species == "dmel":
-            self.add_elements(elements=dfh.DataFileHandler.hsap_to_dmel_mappings.keys(), element_type="gene")
-        elif self.cross_species == "mmus" and self.species == "dmel":
-            self.add_elements(elements=dfh.DataFileHandler.mmus_to_dmel_mappings.keys(), element_type="gene")
 
     def add_genes(self) -> None:
         # Add genes to search space

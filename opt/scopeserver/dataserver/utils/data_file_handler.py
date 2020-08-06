@@ -60,8 +60,6 @@ class DataFileHandler:
 
     def __init__(self):
         self.current_UUIDs = {}
-        self.hsap_to_dmel_mappings = {}
-        self.mmus_to_dmel_mappings = {}
         self.dmel_mappings = {}
         self.permanent_UUIDs = set()
         self.orcid_ids = {}
@@ -232,10 +230,4 @@ class DataFileHandler:
         gene_mappings_dir_path = os.path.join(scopeserver.__path__[0], "dataserver", "data", "gene_mappings")  # type: ignore
         DataFileHandler.dmel_mappings = pickle.load(
             open(os.path.join(gene_mappings_dir_path, "terminal_mappings.pickle"), "rb")
-        )
-        DataFileHandler.hsap_to_dmel_mappings = pickle.load(
-            open(os.path.join(gene_mappings_dir_path, "hsap_to_dmel_mappings.pickle"), "rb")
-        )
-        DataFileHandler.mmus_to_dmel_mappings = pickle.load(
-            open(os.path.join(gene_mappings_dir_path, "mmus_to_dmel_mappings.pickle"), "rb")
         )
