@@ -12,7 +12,6 @@ import {
     Select,
     Label,
 } from 'semantic-ui-react';
-import { instanceOf } from 'prop-types';
 
 interface IGProfilerPopupState {
     error: string;
@@ -29,6 +28,12 @@ interface IGProfilerPopupProps {
     clusterID: number;
 }
 
+const GPROFILER_AVAILABLE_ORGANISMS = [
+    { key: 1, text: 'Human', value: 'hsapiens' },
+    { key: 2, text: 'Mouse', value: 'mmusculus' },
+    { key: 3, text: 'Drosophila melanogaster', value: 'dmelanogaster' },
+];
+
 const INITIAL_STATE = {
     error: null,
     showModal: false,
@@ -42,9 +47,17 @@ class GProfilerPopup extends Component<
     IGProfilerPopupProps & RouteComponentProps,
     IGProfilerPopupState
 > {
+    clusteringID: number;
+    clusterID: number;
+
     constructor(props: IGProfilerPopupProps & RouteComponentProps) {
         super(props);
         this.state = INITIAL_STATE;
+        this.handleOpenModal.bind(this);
+        this.handleCloseModal.bind(this);
+        this.handleSelectOrganism.bind(this);
+        this.handleChangeToken.bind(this);
+        this.handleClickGotoGProfilerURL.bind(this);
     }
 
     openModal = () => {
@@ -58,24 +71,16 @@ class GProfilerPopup extends Component<
         this.setState({ showModal: false });
     };
 
-    render() {
-        const {
-            showModal,
-            topNumFeatures,
-            selectedOrganism,
-            gProfilerToken,
-        } = this.state;
-        const { clusteringID, clusterID } = this.props;
+    handleOpenModal = () => {
+        this.openModal();
+    };
 
-        const handleOpenModal = () => {
-            this.openModal();
-        };
+    handleCloseModal = () => {
+        this.closeModal();
+    };
 
-        const handleCloseModal = () => {
-            this.closeModal();
-        };
-
-        const topNumFeaturesArray = [
+    getTopNumFeaturesArray = () => {
+        return [
             this.props.numFeatures < 100 ? this.props.numFeatures : 100,
             200,
             300,
@@ -84,79 +89,79 @@ class GProfilerPopup extends Component<
         ].filter((topNumFeaturesValue) =>
             topNumFeaturesValue <= this.props.numFeatures ? true : false
         );
+    };
 
-        const handleClickCreateGProfilerLink = async () => {
-            if (
-                (gProfilerToken === null || gProfilerToken === '') &&
-                selectedOrganism === null
-            ) {
-                this.setState({
-                    error: 'Please select an organism',
-                    gProfilerURL: null,
-                });
-                return;
-            }
-            if (topNumFeatures.length == 0) {
-                this.setState({
-                    error:
-                        'No gene list selected. One gene list is at least required. ',
-                    gProfilerURL: null,
-                });
-                return;
-            }
+    handleSelectOrganism = (e, { value }) => {
+        this.setState({ selectedOrganism: value, gProfilerURL: null });
+    };
 
-            if (topNumFeatures.length == 0) {
-                this.setState({
-                    error:
-                        'No gene list selected. One gene list is at least required. ',
-                    gProfilerURL: null,
-                });
-                return;
-            }
+    handleChangeToken = (e, { value }) => {
+        this.setState({
+            selectedOrganism: null,
+            gProfilerToken: value,
+            gProfilerURL: null,
+        });
+    };
 
-            const gProfilerLinkResponse = await BackendAPI.getGProfilerLink(
-                clusteringID,
-                clusterID,
-                topNumFeatures,
-                selectedOrganism,
-                gProfilerToken
-            );
+    handleClickGotoGProfilerURL = () => {
+        window.open(this.state.gProfilerURL);
+    };
 
-            if (gProfilerLinkResponse.url.length > 8000) {
-                this.setState({
-                    error:
-                        'Too many genes in total. Try to select a combination of gene lists with fewer genes.',
-                    gProfilerURL: null,
-                });
-                return;
-            }
-
+    handleClickCreateGProfilerLink = async () => {
+        const { topNumFeatures, gProfilerToken, selectedOrganism } = this.state;
+        const { clusteringID, clusterID } = this.props;
+        if (
+            (gProfilerToken === null || gProfilerToken === '') &&
+            selectedOrganism === null
+        ) {
             this.setState({
-                gProfilerURL: gProfilerLinkResponse.url,
-            });
-        };
-
-        const organisms = [
-            { key: 1, text: 'Human', value: 'hsapiens' },
-            { key: 2, text: 'Mouse', value: 'mmusculus' },
-            { key: 3, text: 'Drosophila melanogaster', value: 'dmelanogaster' },
-        ];
-
-        const handleSelectOrganism = (e, { value }) => {
-            this.setState({ selectedOrganism: value, gProfilerURL: null });
-        };
-
-        const handleChangeToken = (e, { value }) => {
-            this.setState({
-                selectedOrganism: null,
-                gProfilerToken: value,
+                error: 'Please select an organism',
                 gProfilerURL: null,
             });
-        };
+            return;
+        }
+        if (topNumFeatures.length == 0) {
+            this.setState({
+                error:
+                    'No gene list selected. One gene list is at least required. ',
+                gProfilerURL: null,
+            });
+            return;
+        }
 
-        const handleClickGotoGProfilerURL = () => {
-            window.open(this.state.gProfilerURL);
-        };
+        if (topNumFeatures.length == 0) {
+            this.setState({
+                error:
+                    'No gene list selected. One gene list is at least required. ',
+                gProfilerURL: null,
+            });
+            return;
+        }
+
+        const gProfilerLinkResponse = await BackendAPI.getGProfilerLink(
+            clusteringID,
+            clusterID,
+            topNumFeatures,
+            selectedOrganism,
+            gProfilerToken
+        );
+
+        if (gProfilerLinkResponse.url.length > 8000) {
+            this.setState({
+                error:
+                    'Too many genes in total. Try to select a combination of gene lists with fewer genes.',
+                gProfilerURL: null,
+            });
+            return;
+        }
+
+        this.setState({
+            gProfilerURL: gProfilerLinkResponse.url,
+        });
+    };
+
+    render() {
+        const { showModal, selectedOrganism, gProfilerToken } = this.state;
 
         return (
             <>
@@ -165,7 +170,7 @@ class GProfilerPopup extends Component<
                     trigger={
                         <Button
                             color='orange'
-                            onClick={handleOpenModal}
+                            onClick={this.handleOpenModal}
                             style={{
                                 marginTop: '10px',
                                 marginBottom: '10px',
@@ -174,11 +179,8 @@ class GProfilerPopup extends Component<
                             Run g:Profiler Gene List Enrichment
                         </Button>
                     }
-                    onClose={handleCloseModal}
-                    // closeOnDocumentClick={'ready' == this.state.status}
-                    open={showModal}
-                    // onSubmit={e => {this.sendData(e)}}
-                >
+                    onClose={this.handleCloseModal}
+                    open={showModal}>
                     <Modal.Header>
                         Run g:Profiler Gene List Enrichment
                     </Modal.Header>
@@ -201,7 +203,7 @@ class GProfilerPopup extends Component<
                                         </Table.Row>
                                     </Table.Header>
                                     <Table.Body>
-                                        {topNumFeaturesArray.map(
+                                        {this.getTopNumFeaturesArray().map(
                                             (topNumFeaturesValue) => {
                                                 const handleToggleTopNumFeatures = () => {
                                                     if (
@@ -267,9 +269,9 @@ class GProfilerPopup extends Component<
                                     <Form.Field
                                         control={Select}
                                         label='Organism'
-                                        options={organisms}
+                                        options={GPROFILER_AVAILABLE_ORGANISMS}
                                         placeholder='Choose an organism'
-                                        onChange={handleSelectOrganism}
+                                        onChange={this.handleSelectOrganism}
                                         disabled={
                                             gProfilerToken !== null &&
                                             gProfilerToken !== ''
@@ -283,7 +285,7 @@ class GProfilerPopup extends Component<
                                         label='g:Profiler Token (Optional)'
                                         placeholder='Token'
                                         value={this.state.gProfilerToken}
-                                        onChange={handleChangeToken}
+                                        onChange={this.handleChangeToken}
                                     />
                                 </Form.Group>
                                 {this.state.error !== null && (
@@ -301,7 +303,7 @@ class GProfilerPopup extends Component<
                             <Button
                                 type='button'
                                 value='create-gprofiler-link'
-                                onClick={handleClickCreateGProfilerLink}
+                                onClick={this.handleClickCreateGProfilerLink}
                                 secondary>
                                 {'Create Link'}
                             </Button>
@@ -309,7 +311,7 @@ class GProfilerPopup extends Component<
                             <Button
                                 type='button'
                                 value='goto-gprofiler'
-                                onClick={handleClickGotoGProfilerURL}
+                                onClick={this.handleClickGotoGProfilerURL}
                                 primary>
                                 {'Go to g:Profiler'}
                             </Button>
