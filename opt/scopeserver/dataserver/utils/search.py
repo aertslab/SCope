@@ -212,8 +212,7 @@ def get_final_feature_and_type(
     features: Dict[Tuple[str, str], str] = {}
     feature_types: Dict[Tuple[str, str], str] = {}
 
-    for k, v in aggregated_matches.items():
-        print(k, v)
+    for k in aggregated_matches:
         try:
             category = DEFINED_SEARCH_TYPES[k[1]]["final_category"]
         except KeyError:
