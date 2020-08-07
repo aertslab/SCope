@@ -11,7 +11,6 @@ CURRENT_SS_VERISON = 0
 
 
 class SSKey(NamedTuple):
-    casefold_element: str
     element: str
     element_type: str
 
@@ -41,7 +40,7 @@ class SearchSpace:
         self.dfh: Optional[dfh.DataFileHandler] = dfh.DataFileHandler()
 
     def add_element(self, element: str, element_type: str) -> None:
-        key = SSKey(element.casefold(), element, element_type)
+        key = SSKey(element, element_type)
         if element_type == "gene" and len(self.gene_mappings) > 0:
             if self.gene_mappings[element] != element:
                 self.search_space_dict[key] = [self.gene_mappings[element]]
@@ -106,8 +105,8 @@ class SearchSpace:
                     continue
                 annotations = [f'{an["data"]["annotation_label"]} ({an["data"]["obo_id"]})' for an in annotations]
                 for annotation in annotations:
-                    key = SSKey(annotation.casefold(), annotation, element_type)
-                    if (annotation.casefold(), annotation, element_type) in self.search_space_dict.keys():
+                    key = SSKey(annotation, element_type)
+                    if (annotation, element_type) in self.search_space_dict.keys():
                         self.search_space_dict[key].append(f"{clusteringID}_{clusterID}")
                     else:
                         self.search_space_dict[key] = [f"{clusteringID}_{clusterID}"]
@@ -137,8 +136,8 @@ class SearchSpace:
             for regulon in regulons:
                 genes = self.loom.get_regulon_genes(regulon=regulon)
                 for gene in genes:
-                    key = SSKey(gene.casefold(), gene, element_type)
-                    if (gene.casefold(), gene, element_type) in self.search_space_dict.keys():
+                    key = SSKey(gene, element_type)
+                    if (gene, element_type) in self.search_space_dict.keys():
                         self.search_space_dict[key].append(regulon)
                     else:
                         self.search_space_dict[key] = [regulon]
@@ -151,8 +150,8 @@ class SearchSpace:
                 for cluster in range(len(self.meta_data["clusterings"][clustering]["clusters"])):
                     genes = self.loom.get_cluster_marker_genes(clustering, cluster)
                     for gene in genes:
-                        key = SSKey(gene.casefold(), gene, element_type)
-                        if (gene.casefold(), gene, element_type) in self.search_space_dict.keys():
+                        key = SSKey(gene, element_type)
+                        if (gene, element_type) in self.search_space_dict.keys():
                             self.search_space_dict[key].append(f"{clustering}_{cluster}")
                         else:
                             self.search_space_dict[key] = [f"{clustering}_{cluster}"]
@@ -160,8 +159,8 @@ class SearchSpace:
             for n, region in enumerate(self.loom.get_genes()):
                 gene = self.loom.loom_connection.ra.linkedGene[n]
                 if gene != "":
-                    key = SSKey(gene.casefold(), gene, element_type)
-                    if (gene.casefold(), gene, element_type) in self.search_space_dict.keys():
+                    key = SSKey(gene, element_type)
+                    if (gene, element_type) in self.search_space_dict.keys():
                         self.search_space_dict[key].append(region)
                     else:
                         self.search_space_dict[key] = [region]
@@ -171,7 +170,7 @@ class SearchSpace:
         for annotation in self.meta_data["annotations"]:
             annotations.append(annotation["name"])
             for category in annotation["values"]:
-                key = SSKey(category.casefold(), category, "annotation_category")
+                key = SSKey(category, "annotation_category")
                 if key in self.search_space_dict:
                     self.search_space_dict[key].append(annotation["name"])
                 else:

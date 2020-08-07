@@ -89,16 +89,9 @@ def find_matches(search_term: str, search_space: SearchSpaceDict) -> List[Search
     casefold_term = search_term.casefold()
 
     if len(casefold_term) == 1:
-        matches = [x for x in search_space if casefold_term == x[0]]
+        matches = (x for x in search_space if casefold_term == x.element.casefold())
     else:
-        matches = [x for x in search_space if casefold_term in x[0]]
-
-    # match_result tuple:
-    # [0]: key from search_space
-    # [1]: Tuple:
-    #    [0]: name of feature (i.e. A gene name)
-    #    [1]: resolved feature (i.e. A cluster in the case of a marker gene)
-    #    [2]: type of the feature (e.g. Gene, Cluster)
+        matches = (x for x in search_space if casefold_term in x.element.casefold())
 
     match_results: List[MatchResult] = []
 
