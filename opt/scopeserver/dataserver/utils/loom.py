@@ -49,8 +49,14 @@ class Loom:
             with open(self.ss_pickle_name, "rb") as fh:
                 logger.debug(f"Loading prebuilt SS for {file_path} from {self.ss_pickle_name}")
                 self.ss = pickle.load(fh)
+                if self.ss.search_space_version < ss.CURRENT_SS_VERISON:
+                    raise AttributeError(
+                        f"Cached search space is an old version or does not exist, upgrading to {ss.CURRENT_SS_VERISON}"
+                    )
+                self.ss.loom = self
+                self.ss.dfh = dfh.DataFileHandler()
 
-        except (EOFError, FileNotFoundError):
+        except (EOFError, FileNotFoundError, AttributeError, TypeError):
             logger.debug(f"Building Search Space for {file_path}")
             self.ss = ss.SearchSpace(loom=self).build()
             self.ss.loom = None  # Remove loom connection to enable pickling

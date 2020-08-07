@@ -7,6 +7,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+CURRENT_SS_VERISON = 0
 
 SearchSpaceKey = NamedTuple("SearchSpaceKey", [("casefold_element", str), ("element", str), ("element_type", str)])
 
@@ -25,6 +26,7 @@ class SearchSpace(dict):
     def __init__(self, loom) -> None:
         dict.__init__(self)
         self.loom = loom
+        self.search_space_version: int = CURRENT_SS_VERISON
         self.species: str
         self.gene_mappings: Dict[str, str]
         self.species, self.gene_mappings = loom.infer_species()
