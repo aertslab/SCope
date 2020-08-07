@@ -12,7 +12,7 @@ from scopeserver.dataserver.utils.search_space import SSKey, SearchSpaceDict
 
 logger = logging.getLogger(__name__)
 
-# casefold feature, original feature, feature type
+
 class SearchMatch(NamedTuple):
     original_feature: str
     resolved_feature: str
@@ -21,7 +21,7 @@ class SearchMatch(NamedTuple):
 
 class MatchResult(NamedTuple):
     search_space_match: SSKey
-    formatted_result: SearchMatch
+    result: str
 
 
 DEFINED_SEARCH_TYPES = {
@@ -65,13 +65,15 @@ def match_result_cost(term: str, result: str) -> Optional[int]:
     return None
 
 
-def sort_results(search_term: str, results: List) -> List[SearchMatch]:
-    costs = [(match_result_cost(search_term, match[1]), result) for match, result in results]
-    sorted_costs = sorted([(cost, result) for cost, result in costs if cost is not None], key=lambda cost: cost[0])
-    return [result for _, result in sorted_costs]
+def sort_results(search_term: str, results: List[MatchResult]) -> List[MatchResult]:
+    costs = [(match_result_cost(search_term, match.element), match, result) for match, result in results]
+    sorted_costs = sorted(
+        [(cost, match, result) for cost, match, result in costs if cost is not None], key=lambda cost: cost[0]
+    )
+    return [MatchResult(match, result) for _, match, result in sorted_costs]
 
 
-def find_matches(search_term: str, search_space: SearchSpaceDict) -> List[SearchMatch]:
+def find_matches(search_term: str, search_space: SearchSpaceDict) -> List[MatchResult]:
     """
     Search for matches in the search space.
 
@@ -97,11 +99,11 @@ def find_matches(search_term: str, search_space: SearchSpaceDict) -> List[Search
 
     for ss_match in matches:
         for element in search_space[ss_match]:
-            match_results.append(MatchResult(ss_match, SearchMatch(ss_match.element, element, ss_match.element_type)))
+            match_results.append(MatchResult(ss_match, element))
     return sort_results(search_term, match_results)
 
 
-def aggregate_matches(matches: List[SearchMatch]) -> Dict[Tuple[str, str], List[str]]:
+def aggregate_matches(matches: List[MatchResult]) -> Dict[Tuple[str, str], List[str]]:
     """
     Collapse matches based on returned element.
 
@@ -119,11 +121,11 @@ def aggregate_matches(matches: List[SearchMatch]) -> Dict[Tuple[str, str], List[
 
     aggregated_matches: Dict[Tuple[str, str], List[str]] = OrderedDict()
     for match in matches:
-        key = (match[1], match[2])
+        key = (match.result, match.search_space_match.element_type)
         if key not in aggregated_matches.keys():
-            aggregated_matches[key] = [match[0]]
+            aggregated_matches[key] = [match.search_space_match.element]
         else:
-            aggregated_matches[key].append(match[0])
+            aggregated_matches[key].append(match.search_space_match.element)
 
     return aggregated_matches
 
