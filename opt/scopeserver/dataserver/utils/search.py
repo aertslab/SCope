@@ -8,12 +8,21 @@ from scopeserver.dataserver.utils.constant import Species
 
 from scopeserver.dataserver.utils.loom import Loom
 from scopeserver.dataserver.utils import constant
-from scopeserver.dataserver.utils.search_space import SearchSpace
+from scopeserver.dataserver.utils.search_space import SSKey, SearchSpaceDict
 
 logger = logging.getLogger(__name__)
 
 # casefold feature, original feature, feature type
-SearchMatch = NamedTuple("SearchResult", [("original_feature", str), ("resolved_feature", str), ("feature_type", str)])
+class SearchMatch(NamedTuple):
+    original_feature: str
+    resolved_feature: str
+    feature_type: str
+
+
+class MatchResult(NamedTuple):
+    search_space_match: SSKey
+    formatted_result: SearchMatch
+
 
 DEFINED_SEARCH_TYPES = {
     "region_gene_link": {
@@ -62,7 +71,7 @@ def sort_results(search_term: str, results: List) -> List[SearchMatch]:
     return [result for _, result in sorted_costs]
 
 
-def find_matches(search_term: str, search_space: SearchSpace) -> List[SearchMatch]:
+def find_matches(search_term: str, search_space: SearchSpaceDict) -> List[SearchMatch]:
     """
     Search for matches in the search space.
 
@@ -91,15 +100,11 @@ def find_matches(search_term: str, search_space: SearchSpace) -> List[SearchMatc
     #    [1]: resolved feature (i.e. A cluster in the case of a marker gene)
     #    [2]: type of the feature (e.g. Gene, Cluster)
 
-    match_results = []
+    match_results: List[MatchResult] = []
 
-    for match in matches:
-        if isinstance(search_space[match], list):
-            for element in search_space[match]:
-                match_results.append((match, (match[1], element, match[2])))
-        else:
-            match_results.append((match, (match[1], search_space[match], match[2])))
-
+    for ss_match in matches:
+        for element in search_space[ss_match]:
+            match_results.append(MatchResult(ss_match, SearchMatch(ss_match.element, element, ss_match.element_type)))
     return sort_results(search_term, match_results)
 
 
@@ -234,7 +239,7 @@ def get_search_results(search_term: str, loom: Loom, data_hash_secret: str) -> D
         Dict[str, List[str]]: A dict of the compiled results
     """
 
-    matches = find_matches(search_term, loom.ss)
+    matches = find_matches(search_term, loom.ss.search_space_dict)
     aggregated_matches = aggregate_matches(matches)
     features, feature_types = get_final_feature_and_type(loom, aggregated_matches, data_hash_secret)
     descriptions = create_feature_description(aggregated_matches, features)
