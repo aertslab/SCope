@@ -79,7 +79,7 @@ class SearchSpace:
         if len(self.gene_mappings) > 0:
             genes = set(self.loom.get_genes())
             shrink_mappings = set(
-                [x for x in self.dfh.dmel_mappings.keys() if x in genes or self.dfh.dmel_mappings[x] in genes]
+                [x for x in self.dfh.dmel_mappings.keys() if x in genes or self.dfh.dmel_mappings[x] in genes]  # type: ignore
             )
             self.add_elements(elements=shrink_mappings, element_type="gene")
         else:
