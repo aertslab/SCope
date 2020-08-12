@@ -44,7 +44,7 @@ class Result(Generic[T, E]):
 
     def is_ok(self) -> bool:
         """
-        Check is the computation succeeded.
+        Check if the computation succeeded.
 
         >>> ok(1).is_ok()
         True
