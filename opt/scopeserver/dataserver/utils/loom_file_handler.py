@@ -28,7 +28,7 @@ class LoomFileHandler:
 
     def load_loom_file(self, file_path: Path, abs_file_path: Path, mode: str = "r") -> Optional[Loom]:
         try:
-            loom_connection = lp.connect(abs_file_path, mode=mode, validate=False)
+            loom_connection = lp.connect(abs_file_path.as_posix(), mode=mode, validate=False)
             return self.add_loom(file_path=file_path, abs_file_path=abs_file_path, loom_connection=loom_connection,)
         except KeyError as e:
             logger.error(e)
@@ -62,7 +62,7 @@ class LoomFileHandler:
         return self.active_looms[abs_file_path].get_connection()
 
     def get_loom_absolute_file_path(self, loom_file_path: Path) -> Path:
-        return self.loom_dir / loom_file_path
+        return (self.loom_dir / loom_file_path).resolve()
 
     def get_global_looms(self) -> list:
         return self.global_looms
@@ -96,7 +96,7 @@ class LoomFileHandler:
                         )
                 except AttributeError:
                     logger.error("Loom was previously closed")
-                    loom.loom_connection = lp.connect(abs_loom_file_path, mode=mode, validate=False)
+                    loom.loom_connection = lp.connect(abs_loom_file_path.as_posix(), mode=mode, validate=False)
 
             else:
                 loom = self.load_loom_file(mode=mode, file_path=loom_file_path, abs_file_path=abs_loom_file_path)
