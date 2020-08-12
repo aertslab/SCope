@@ -18,12 +18,14 @@ interface IGProfilerPopupState {
     topNumFeatures: number[];
     availableOrganisms: object[];
     selectedOrganism: string;
+    selectedSortBy: string;
     gProfilerToken: string;
     gProfilerURL: string;
 }
 
 interface IGProfilerPopupProps {
     featureMetadata: any;
+    availableSortBy: object[];
 }
 
 const INITIAL_STATE = {
@@ -32,6 +34,7 @@ const INITIAL_STATE = {
     topNumFeatures: [],
     availableOrganisms: [],
     selectedOrganism: null,
+    selectedSortBy: null,
     gProfilerToken: null,
     gProfilerURL: null,
 };
@@ -42,15 +45,26 @@ class GProfilerPopup extends Component<
 > {
     featureMetadata: any;
     featureMetricTable: any;
+    availableSortBy: object[];
 
     constructor(props: IGProfilerPopupProps & RouteComponentProps) {
         super(props);
         this.state = INITIAL_STATE;
         this.featureMetadata = props.featureMetadata;
+        this.availableSortBy = props.featureMetadata.metrics.map(
+            (metric, idx) => {
+                return {
+                    key: idx,
+                    text: metric.name,
+                    value: metric.accessor,
+                };
+            }
+        );
         this.featureMetricTable = this.buildMetricTable();
         this.handleOpenModal.bind(this);
         this.handleCloseModal.bind(this);
         this.handleSelectOrganism.bind(this);
+        this.handleSelectSortBy.bind(this);
         this.handleChangeToken.bind(this);
         this.handleClickGotoGProfilerURL.bind(this);
     }
@@ -94,6 +108,10 @@ class GProfilerPopup extends Component<
 
     handleSelectOrganism = (e, { value }) => {
         this.setState({ selectedOrganism: value, gProfilerURL: null });
+    };
+
+    handleSelectSortBy = (e, { value }) => {
+        this.setState({ selectedSortBy: value, gProfilerURL: null });
     };
 
     handleChangeToken = (e, { value }) => {
@@ -182,7 +200,12 @@ class GProfilerPopup extends Component<
     };
 
     handleClickCreateGProfilerLink = async () => {
-        const { topNumFeatures, gProfilerToken, selectedOrganism } = this.state;
+        const {
+            topNumFeatures,
+            gProfilerToken,
+            selectedOrganism,
+            selectedSortBy,
+        } = this.state;
         if (
             (gProfilerToken === null || gProfilerToken === '') &&
             selectedOrganism === null
@@ -211,7 +234,7 @@ class GProfilerPopup extends Component<
         }
 
         const sortedFeatureMetricTable = this.featureMetricTable.sort(
-            (a, b) => b['avg_logFC'] - a['avg_logFC']
+            (a, b) => b[selectedSortBy] - a[selectedSortBy]
         );
         const topFeatureQuery = this.buildFeatureQuery(
             topNumFeatures,
@@ -265,8 +288,8 @@ class GProfilerPopup extends Component<
         const {
             showModal,
             selectedOrganism,
+            selectedSortBy,
             gProfilerToken,
-            availableOrganisms,
         } = this.state;
 
         console.log(this.state);
@@ -374,6 +397,14 @@ class GProfilerPopup extends Component<
                                     </Table.Body>
                                 </Table>
                                 <Form.Group widths='equal'>
+                                    <Form.Field
+                                        control={Select}
+                                        label='Sort Features By'
+                                        options={this.availableSortBy}
+                                        placeholder='Sort By'
+                                        onChange={this.handleSelectSortBy}
+                                        value={selectedSortBy}
+                                    />
                                     <Form.Field
                                         control={Select}
                                         label='Organism'
