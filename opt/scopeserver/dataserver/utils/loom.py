@@ -985,13 +985,13 @@ class Loom:
             )
 
         def merge_cluster_marker_metrics(metrics):
-            return functools.reduce(
-                lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how="outer"), metrics,
-            )
+            return lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how="outer")
 
         md_clustering = self.get_meta_data_clustering_by_id(id=clustering_id, secret=secret)
         md_cmm = md_clustering["clusterMarkerMetrics"]
-        cluster_marker_table = merge_cluster_marker_metrics(metrics=[create_cluster_marker_metric(x) for x in md_cmm])
+        cluster_marker_table = functools.reduce(
+            merge_cluster_marker_metrics, [create_cluster_marker_metric(x) for x in md_cmm]
+        )
         # Keep only non-zeros elements
         nonan_marker_mask = cluster_marker_table.apply(lambda x: functools.reduce(np.logical_and, ~np.isnan(x)), axis=1)
         return cluster_marker_table[nonan_marker_mask]
