@@ -1019,15 +1019,7 @@ class ViewerSidebar extends Component {
                         </div>
                     );
 
-                    gProfilerModal = (
-                        <GProfilerModal
-                            numFeatures={md.genes.length}
-                            clusteringID={
-                                activeFeatures[i].metadata.clusteringID
-                            }
-                            clusterID={activeFeatures[i].metadata.clusterID}
-                        />
-                    );
+                    gProfilerModal = <GProfilerModal featureMetadata={md} />;
                 }
 
                 if (

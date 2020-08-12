@@ -1,4 +1,3 @@
-import { BackendAPI } from './API';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import React, { Component } from 'react';
@@ -23,9 +22,7 @@ interface IGProfilerPopupState {
 }
 
 interface IGProfilerPopupProps {
-    numFeatures: number;
-    clusteringID: number;
-    clusterID: number;
+    featureMetadata: any;
 }
 
 const GPROFILER_AVAILABLE_ORGANISMS = [
@@ -47,12 +44,14 @@ class GProfilerPopup extends Component<
     IGProfilerPopupProps & RouteComponentProps,
     IGProfilerPopupState
 > {
-    clusteringID: number;
-    clusterID: number;
+    featureMetadata: any;
+    featureMetricTable: any;
 
     constructor(props: IGProfilerPopupProps & RouteComponentProps) {
         super(props);
         this.state = INITIAL_STATE;
+        this.featureMetadata = props.featureMetadata;
+        this.featureMetricTable = this.buildMetricTable();
         this.handleOpenModal.bind(this);
         this.handleCloseModal.bind(this);
         this.handleSelectOrganism.bind(this);
@@ -79,15 +78,19 @@ class GProfilerPopup extends Component<
         this.closeModal();
     };
 
+    getNumFeatures = () => {
+        return this.featureMetadata.genes.length;
+    };
+
     getTopNumFeaturesArray = () => {
         return [
-            this.props.numFeatures < 100 ? this.props.numFeatures : 100,
+            this.getNumFeatures() < 100 ? this.getNumFeatures() : 100,
             200,
             300,
             400,
             500,
         ].filter((topNumFeaturesValue) =>
-            topNumFeaturesValue <= this.props.numFeatures ? true : false
+            topNumFeaturesValue <= this.getNumFeatures() ? true : false
         );
     };
 
@@ -107,9 +110,81 @@ class GProfilerPopup extends Component<
         window.open(this.state.gProfilerURL);
     };
 
+    buildMetricTable = () => {
+        return this.featureMetadata.genes.map((gene: string, idx: number) => {
+            return {
+                gene: gene,
+                ...this.featureMetadata.metrics.reduce(
+                    (accumalatedMetrics, metric) => ({
+                        ...accumalatedMetrics,
+                        [metric.accessor]: metric.values[idx],
+                    }),
+                    {}
+                ),
+            };
+        });
+    };
+
+    buildFeatureQuery = (topNumFeatures, sortedFeatureMetricTable) => {
+        return topNumFeatures
+            .map((topNumFeaturesElement) => {
+                return {
+                    numFeatures: topNumFeaturesElement,
+                    topSortedFeatures: sortedFeatureMetricTable
+                        .slice(0, topNumFeaturesElement)
+                        .reduce(
+                            (acc, sortedFeatureMetricTableRow) => [
+                                ...acc,
+                                sortedFeatureMetricTableRow['gene'],
+                            ],
+                            []
+                        )
+                        .join('\n'),
+                };
+            })
+            .reduce((acc, el) => {
+                return (
+                    acc +
+                    `>Top_${el.numFeatures}` +
+                    '\n' +
+                    el.topSortedFeatures +
+                    '\n'
+                );
+            }, '');
+    };
+
+    buildGProfilerLink = (organism: string, query: string) => {
+        const gProfilerQueryData = {
+            organism: organism,
+            query: query,
+            ordered: 'true',
+            all_results: 'false',
+            no_iea: 'false',
+            combined: 'true',
+            measure_underrepresentation: 'false',
+            domain_scope: 'annotated',
+            significance_threshold_method: 'g_SCS',
+            user_threshold: '0.05',
+            numeric_namespace: 'ENTREZGENE_ACC',
+            sources: 'GO:MF,GO:CC,GO:BP,KEGG,TF,REAC,MIRNA,HPA,CORUM,HP,WP',
+            background: '',
+        };
+
+        var gProfilerQueryString = Object.keys(gProfilerQueryData)
+            .map((key) => {
+                return (
+                    encodeURIComponent(key) +
+                    '=' +
+                    encodeURIComponent(gProfilerQueryData[key])
+                );
+            })
+            .join('&');
+
+        return 'https://biit.cs.ut.ee/gprofiler/gost?' + gProfilerQueryString;
+    };
+
     handleClickCreateGProfilerLink = async () => {
         const { topNumFeatures, gProfilerToken, selectedOrganism } = this.state;
-        const { clusteringID, clusterID } = this.props;
         if (
             (gProfilerToken === null || gProfilerToken === '') &&
             selectedOrganism === null
@@ -128,7 +203,6 @@ class GProfilerPopup extends Component<
             });
             return;
         }
-
         if (topNumFeatures.length == 0) {
             this.setState({
                 error:
@@ -138,15 +212,20 @@ class GProfilerPopup extends Component<
             return;
         }
 
-        const gProfilerLinkResponse = await BackendAPI.getGProfilerLink(
-            clusteringID,
-            clusterID,
-            topNumFeatures,
-            selectedOrganism,
-            gProfilerToken
+        const sortedFeatureMetricTable = this.featureMetricTable.sort(
+            (a, b) => b['avg_logFC'] - a['avg_logFC']
         );
-
-        if (gProfilerLinkResponse.url.length > 8000) {
+        const topFeatureQuery = this.buildFeatureQuery(
+            topNumFeatures,
+            sortedFeatureMetricTable
+        );
+        const organism =
+            gProfilerToken !== null ? gProfilerToken : selectedOrganism;
+        const gProfilerLink = this.buildGProfilerLink(
+            organism,
+            topFeatureQuery
+        );
+        if (gProfilerLink.length > 8000) {
             this.setState({
                 error:
                     'Too many genes in total. Try to select a combination of gene lists with fewer genes.',
@@ -154,9 +233,8 @@ class GProfilerPopup extends Component<
             });
             return;
         }
-
         this.setState({
-            gProfilerURL: gProfilerLinkResponse.url,
+            gProfilerURL: gProfilerLink,
         });
     };
 
@@ -189,7 +267,7 @@ class GProfilerPopup extends Component<
                             <h3>Run As Multi-query</h3>
                             <h4>
                                 Total number of features:&nbsp;
-                                {this.props.numFeatures}
+                                {this.getNumFeatures()}
                             </h4>
                             <Form>
                                 <Table compact celled definition>
