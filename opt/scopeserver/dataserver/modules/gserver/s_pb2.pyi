@@ -26,24 +26,38 @@ if sys.version_info < (3,):
     builtin___buffer = buffer
     builtin___unicode = unicode
 
+
 class ErrorReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     type = ...  # type: typing___Text
     message = ...  # type: typing___Text
+
     def __init__(
         self, *, type: typing___Optional[typing___Text] = None, message: typing___Optional[typing___Text] = None,
-    ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> ErrorReply: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ErrorReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["message", b"message", "type", b"type"]) -> None: ...
+    ) -> None:
+        ...
 
-global___ErrorReply = ErrorReply
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> ErrorReply:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ErrorReply:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["message", b"message", "type", b"type"]) -> None:
+        ...
+
 
 class CellColorByFeaturesRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -57,10 +71,11 @@ class CellColorByFeaturesRequest(google___protobuf___message___Message):
     vmax = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
     vmin = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
     logic = ...  # type: typing___Text
+
     @property
-    def annotation(
-        self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___Annotation]: ...
+    def annotation(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[Annotation]:
+        ...
+
     def __init__(
         self,
         *,
@@ -71,21 +86,33 @@ class CellColorByFeaturesRequest(google___protobuf___message___Message):
         hasCpmTransform: typing___Optional[builtin___bool] = None,
         threshold: typing___Optional[typing___Iterable[builtin___float]] = None,
         scaleThresholded: typing___Optional[builtin___bool] = None,
-        annotation: typing___Optional[typing___Iterable[global___Annotation]] = None,
+        annotation: typing___Optional[typing___Iterable[Annotation]] = None,
         vmax: typing___Optional[typing___Iterable[builtin___float]] = None,
         vmin: typing___Optional[typing___Iterable[builtin___float]] = None,
         logic: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> CellColorByFeaturesRequest: ...
+        def FromString(cls, s: builtin___bytes) -> CellColorByFeaturesRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> CellColorByFeaturesRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> CellColorByFeaturesRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -112,31 +139,44 @@ class CellColorByFeaturesRequest(google___protobuf___message___Message):
             "vmin",
             b"vmin",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___CellColorByFeaturesRequest = CellColorByFeaturesRequest
 
 class ColorLegend(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     values = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
     colors = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
+
     def __init__(
         self,
         *,
         values: typing___Optional[typing___Iterable[typing___Text]] = None,
         colors: typing___Optional[typing___Iterable[typing___Text]] = None,
-    ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> ColorLegend: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ColorLegend: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["colors", b"colors", "values", b"values"]) -> None: ...
+    ) -> None:
+        ...
 
-global___ColorLegend = ColorLegend
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> ColorLegend:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ColorLegend:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["colors", b"colors", "values", b"values"]) -> None:
+        ...
+
 
 class CellColorByFeaturesReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -146,10 +186,15 @@ class CellColorByFeaturesReply(google___protobuf___message___Message):
     vmax = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
     maxVmax = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
     cellIndices = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int]
+
     @property
-    def legend(self) -> global___ColorLegend: ...
+    def legend(self) -> ColorLegend:
+        ...
+
     @property
-    def error(self) -> global___ErrorReply: ...
+    def error(self) -> ErrorReply:
+        ...
+
     def __init__(
         self,
         *,
@@ -159,22 +204,36 @@ class CellColorByFeaturesReply(google___protobuf___message___Message):
         vmax: typing___Optional[typing___Iterable[builtin___float]] = None,
         maxVmax: typing___Optional[typing___Iterable[builtin___float]] = None,
         cellIndices: typing___Optional[typing___Iterable[builtin___int]] = None,
-        legend: typing___Optional[global___ColorLegend] = None,
-        error: typing___Optional[global___ErrorReply] = None,
-    ) -> None: ...
+        legend: typing___Optional[ColorLegend] = None,
+        error: typing___Optional[ErrorReply] = None,
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> CellColorByFeaturesReply: ...
+        def FromString(cls, s: builtin___bytes) -> CellColorByFeaturesReply:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> CellColorByFeaturesReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> CellColorByFeaturesReply:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def HasField(
         self, field_name: typing_extensions___Literal["error", b"error", "legend", b"legend"]
-    ) -> builtin___bool: ...
+    ) -> builtin___bool:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -195,81 +254,118 @@ class CellColorByFeaturesReply(google___protobuf___message___Message):
             "vmax",
             b"vmax",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___CellColorByFeaturesReply = CellColorByFeaturesReply
 
 class CellAUCValuesByFeaturesRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
     feature = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
     featureType = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
+
     def __init__(
         self,
         *,
         loomFilePath: typing___Optional[typing___Text] = None,
         feature: typing___Optional[typing___Iterable[typing___Text]] = None,
         featureType: typing___Optional[typing___Iterable[typing___Text]] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> CellAUCValuesByFeaturesRequest: ...
+        def FromString(cls, s: builtin___bytes) -> CellAUCValuesByFeaturesRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> CellAUCValuesByFeaturesRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> CellAUCValuesByFeaturesRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
             "feature", b"feature", "featureType", b"featureType", "loomFilePath", b"loomFilePath"
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___CellAUCValuesByFeaturesRequest = CellAUCValuesByFeaturesRequest
 
 class CellAUCValuesByFeaturesReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     value = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
-    def __init__(self, *, value: typing___Optional[typing___Iterable[builtin___float]] = None,) -> None: ...
+
+    def __init__(self, *, value: typing___Optional[typing___Iterable[builtin___float]] = None,) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> CellAUCValuesByFeaturesReply: ...
+        def FromString(cls, s: builtin___bytes) -> CellAUCValuesByFeaturesReply:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> CellAUCValuesByFeaturesReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["value", b"value"]) -> None: ...
+        ) -> CellAUCValuesByFeaturesReply:
+            ...
 
-global___CellAUCValuesByFeaturesReply = CellAUCValuesByFeaturesReply
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["value", b"value"]) -> None:
+        ...
+
 
 class FeatureRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
     query = ...  # type: typing___Text
+
     def __init__(
         self, *, loomFilePath: typing___Optional[typing___Text] = None, query: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> FeatureRequest: ...
+        def FromString(cls, s: builtin___bytes) -> FeatureRequest:
+            ...
+
     else:
+
         @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> FeatureRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> FeatureRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self, field_name: typing_extensions___Literal["loomFilePath", b"loomFilePath", "query", b"query"]
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___FeatureRequest = FeatureRequest
 
 class CellMetaDataRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -283,6 +379,7 @@ class CellMetaDataRequest(google___protobuf___message___Message):
     )  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
     clusterings = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int]
     annotations = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
+
     def __init__(
         self,
         *,
@@ -294,17 +391,29 @@ class CellMetaDataRequest(google___protobuf___message___Message):
         selectedRegulons: typing___Optional[typing___Iterable[typing___Text]] = None,
         clusterings: typing___Optional[typing___Iterable[builtin___int]] = None,
         annotations: typing___Optional[typing___Iterable[typing___Text]] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> CellMetaDataRequest: ...
+        def FromString(cls, s: builtin___bytes) -> CellMetaDataRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> CellMetaDataRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> CellMetaDataRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -325,9 +434,9 @@ class CellMetaDataRequest(google___protobuf___message___Message):
             "selectedRegulons",
             b"selectedRegulons",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___CellMetaDataRequest = CellMetaDataRequest
 
 class FeatureReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -336,59 +445,83 @@ class FeatureReply(google___protobuf___message___Message):
     featureDescription = (
         ...
     )  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
+
     def __init__(
         self,
         *,
         feature: typing___Optional[typing___Iterable[typing___Text]] = None,
         featureType: typing___Optional[typing___Iterable[typing___Text]] = None,
         featureDescription: typing___Optional[typing___Iterable[typing___Text]] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> FeatureReply: ...
+        def FromString(cls, s: builtin___bytes) -> FeatureReply:
+            ...
+
     else:
+
         @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> FeatureReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> FeatureReply:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
             "feature", b"feature", "featureDescription", b"featureDescription", "featureType", b"featureType"
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___FeatureReply = FeatureReply
 
 class CoordinatesRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
     coordinatesID = ...  # type: builtin___int
     logic = ...  # type: typing___Text
+
     @property
-    def annotation(
-        self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___Annotation]: ...
+    def annotation(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[Annotation]:
+        ...
+
     def __init__(
         self,
         *,
         loomFilePath: typing___Optional[typing___Text] = None,
         coordinatesID: typing___Optional[builtin___int] = None,
-        annotation: typing___Optional[typing___Iterable[global___Annotation]] = None,
+        annotation: typing___Optional[typing___Iterable[Annotation]] = None,
         logic: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> CoordinatesRequest: ...
+        def FromString(cls, s: builtin___bytes) -> CoordinatesRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> CoordinatesRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> CoordinatesRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -401,187 +534,284 @@ class CoordinatesRequest(google___protobuf___message___Message):
             "loomFilePath",
             b"loomFilePath",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___CoordinatesRequest = CoordinatesRequest
 
 class CoordinatesReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     x = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
     y = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
     cellIndices = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int]
+
     def __init__(
         self,
         *,
         x: typing___Optional[typing___Iterable[builtin___float]] = None,
         y: typing___Optional[typing___Iterable[builtin___float]] = None,
         cellIndices: typing___Optional[typing___Iterable[builtin___int]] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> CoordinatesReply: ...
+        def FromString(cls, s: builtin___bytes) -> CoordinatesReply:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> CoordinatesReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> CoordinatesReply:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self, field_name: typing_extensions___Literal["cellIndices", b"cellIndices", "x", b"x", "y", b"y"]
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___CoordinatesReply = CoordinatesReply
 
 class Annotation(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     name = ...  # type: typing___Text
     values = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
+
     def __init__(
         self,
         *,
         name: typing___Optional[typing___Text] = None,
         values: typing___Optional[typing___Iterable[typing___Text]] = None,
-    ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> Annotation: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Annotation: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["name", b"name", "values", b"values"]) -> None: ...
+    ) -> None:
+        ...
 
-global___Annotation = Annotation
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> Annotation:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Annotation:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["name", b"name", "values", b"values"]) -> None:
+        ...
+
 
 class Coordinate(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     x = ...  # type: builtin___float
     y = ...  # type: builtin___float
+
     def __init__(
         self, *, x: typing___Optional[builtin___float] = None, y: typing___Optional[builtin___float] = None,
-    ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> Coordinate: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Coordinate: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["x", b"x", "y", b"y"]) -> None: ...
+    ) -> None:
+        ...
 
-global___Coordinate = Coordinate
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> Coordinate:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Coordinate:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["x", b"x", "y", b"y"]) -> None:
+        ...
+
 
 class Edge(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     source = ...  # type: typing___Text
     target = ...  # type: typing___Text
+
     def __init__(
         self, *, source: typing___Optional[typing___Text] = None, target: typing___Optional[typing___Text] = None,
-    ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> Edge: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Edge: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["source", b"source", "target", b"target"]) -> None: ...
+    ) -> None:
+        ...
 
-global___Edge = Edge
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> Edge:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Edge:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["source", b"source", "target", b"target"]) -> None:
+        ...
+
 
 class Trajectory(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     nodes = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
+
     @property
-    def edges(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___Edge]: ...
+    def edges(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[Edge]:
+        ...
+
     @property
-    def coordinates(
-        self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___Coordinate]: ...
+    def coordinates(self,) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[Coordinate]:
+        ...
+
     def __init__(
         self,
         *,
         nodes: typing___Optional[typing___Iterable[typing___Text]] = None,
-        edges: typing___Optional[typing___Iterable[global___Edge]] = None,
-        coordinates: typing___Optional[typing___Iterable[global___Coordinate]] = None,
-    ) -> None: ...
+        edges: typing___Optional[typing___Iterable[Edge]] = None,
+        coordinates: typing___Optional[typing___Iterable[Coordinate]] = None,
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> Trajectory: ...
+        def FromString(cls, s: builtin___bytes) -> Trajectory:
+            ...
+
     else:
+
         @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Trajectory: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Trajectory:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal["coordinates", b"coordinates", "edges", b"edges", "nodes", b"nodes"],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___Trajectory = Trajectory
 
 class Embedding(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     id = ...  # type: builtin___int
     name = ...  # type: typing___Text
+
     @property
-    def trajectory(self) -> global___Trajectory: ...
+    def trajectory(self) -> Trajectory:
+        ...
+
     def __init__(
         self,
         *,
         id: typing___Optional[builtin___int] = None,
         name: typing___Optional[typing___Text] = None,
-        trajectory: typing___Optional[global___Trajectory] = None,
-    ) -> None: ...
+        trajectory: typing___Optional[Trajectory] = None,
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> Embedding: ...
+        def FromString(cls, s: builtin___bytes) -> Embedding:
+            ...
+
     else:
+
         @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Embedding: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def HasField(self, field_name: typing_extensions___Literal["trajectory", b"trajectory"]) -> builtin___bool: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Embedding:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def HasField(self, field_name: typing_extensions___Literal["trajectory", b"trajectory"]) -> builtin___bool:
+        ...
+
     def ClearField(
         self, field_name: typing_extensions___Literal["id", b"id", "name", b"name", "trajectory", b"trajectory"]
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___Embedding = Embedding
 
 class ClusterMarkerMetric(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     accessor = ...  # type: typing___Text
     name = ...  # type: typing___Text
     description = ...  # type: typing___Text
+
     def __init__(
         self,
         *,
         accessor: typing___Optional[typing___Text] = None,
         name: typing___Optional[typing___Text] = None,
         description: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> ClusterMarkerMetric: ...
+        def FromString(cls, s: builtin___bytes) -> ClusterMarkerMetric:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> ClusterMarkerMetric: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> ClusterMarkerMetric:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
             "accessor", b"accessor", "description", b"description", "name", b"name"
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___ClusterMarkerMetric = ClusterMarkerMetric
 
 class CollabAnnoData(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -594,6 +824,7 @@ class CollabAnnoData(google___protobuf___message___Message):
     markers = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
     publication = ...  # type: typing___Text
     comment = ...  # type: typing___Text
+
     def __init__(
         self,
         *,
@@ -606,17 +837,27 @@ class CollabAnnoData(google___protobuf___message___Message):
         markers: typing___Optional[typing___Iterable[typing___Text]] = None,
         publication: typing___Optional[typing___Text] = None,
         comment: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> CollabAnnoData: ...
+        def FromString(cls, s: builtin___bytes) -> CollabAnnoData:
+            ...
+
     else:
+
         @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> CollabAnnoData: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> CollabAnnoData:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -639,101 +880,144 @@ class CollabAnnoData(google___protobuf___message___Message):
             "timestamp",
             b"timestamp",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___CollabAnnoData = CollabAnnoData
 
 class CollabAnnoVoter(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     voter_name = ...  # type: typing___Text
     voter_id = ...  # type: typing___Text
     voter_hash = ...  # type: builtin___bool
+
     def __init__(
         self,
         *,
         voter_name: typing___Optional[typing___Text] = None,
         voter_id: typing___Optional[typing___Text] = None,
         voter_hash: typing___Optional[builtin___bool] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> CollabAnnoVoter: ...
+        def FromString(cls, s: builtin___bytes) -> CollabAnnoVoter:
+            ...
+
     else:
+
         @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> CollabAnnoVoter: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> CollabAnnoVoter:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
             "voter_hash", b"voter_hash", "voter_id", b"voter_id", "voter_name", b"voter_name"
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___CollabAnnoVoter = CollabAnnoVoter
 
 class CollabAnnoVotes(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     total = ...  # type: builtin___int
+
     @property
-    def voters(
-        self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___CollabAnnoVoter]: ...
+    def voters(self,) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[CollabAnnoVoter]:
+        ...
+
     def __init__(
         self,
         *,
         total: typing___Optional[builtin___int] = None,
-        voters: typing___Optional[typing___Iterable[global___CollabAnnoVoter]] = None,
-    ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> CollabAnnoVotes: ...
-    else:
-        @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> CollabAnnoVotes: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["total", b"total", "voters", b"voters"]) -> None: ...
+        voters: typing___Optional[typing___Iterable[CollabAnnoVoter]] = None,
+    ) -> None:
+        ...
 
-global___CollabAnnoVotes = CollabAnnoVotes
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> CollabAnnoVotes:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> CollabAnnoVotes:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["total", b"total", "voters", b"voters"]) -> None:
+        ...
+
 
 class CellTypeAnnotation(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     validate_hash = ...  # type: builtin___bool
+
     @property
-    def data(self) -> global___CollabAnnoData: ...
+    def data(self) -> CollabAnnoData:
+        ...
+
     @property
-    def votes_for(self) -> global___CollabAnnoVotes: ...
+    def votes_for(self) -> CollabAnnoVotes:
+        ...
+
     @property
-    def votes_against(self) -> global___CollabAnnoVotes: ...
+    def votes_against(self) -> CollabAnnoVotes:
+        ...
+
     def __init__(
         self,
         *,
-        data: typing___Optional[global___CollabAnnoData] = None,
+        data: typing___Optional[CollabAnnoData] = None,
         validate_hash: typing___Optional[builtin___bool] = None,
-        votes_for: typing___Optional[global___CollabAnnoVotes] = None,
-        votes_against: typing___Optional[global___CollabAnnoVotes] = None,
-    ) -> None: ...
+        votes_for: typing___Optional[CollabAnnoVotes] = None,
+        votes_against: typing___Optional[CollabAnnoVotes] = None,
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> CellTypeAnnotation: ...
+        def FromString(cls, s: builtin___bytes) -> CellTypeAnnotation:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> CellTypeAnnotation: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> CellTypeAnnotation:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def HasField(
         self,
         field_name: typing_extensions___Literal[
             "data", b"data", "votes_against", b"votes_against", "votes_for", b"votes_for"
         ],
-    ) -> builtin___bool: ...
+    ) -> builtin___bool:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -746,74 +1030,106 @@ class CellTypeAnnotation(google___protobuf___message___Message):
             "votes_for",
             b"votes_for",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___CellTypeAnnotation = CellTypeAnnotation
 
 class ClusterAnnotation(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     id = ...  # type: builtin___int
     description = ...  # type: typing___Text
+
     @property
     def cell_type_annotation(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___CellTypeAnnotation]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[CellTypeAnnotation]:
+        ...
+
     def __init__(
         self,
         *,
         id: typing___Optional[builtin___int] = None,
         description: typing___Optional[typing___Text] = None,
-        cell_type_annotation: typing___Optional[typing___Iterable[global___CellTypeAnnotation]] = None,
-    ) -> None: ...
+        cell_type_annotation: typing___Optional[typing___Iterable[CellTypeAnnotation]] = None,
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> ClusterAnnotation: ...
+        def FromString(cls, s: builtin___bytes) -> ClusterAnnotation:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> ClusterAnnotation: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> ClusterAnnotation:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
             "cell_type_annotation", b"cell_type_annotation", "description", b"description", "id", b"id"
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___ClusterAnnotation = ClusterAnnotation
 
 class Clustering(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     id = ...  # type: builtin___int
     group = ...  # type: typing___Text
     name = ...  # type: typing___Text
+
     @property
     def clusterMarkerMetrics(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___ClusterMarkerMetric]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[ClusterMarkerMetric]:
+        ...
+
     @property
     def clusters(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___ClusterAnnotation]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[ClusterAnnotation]:
+        ...
+
     def __init__(
         self,
         *,
         id: typing___Optional[builtin___int] = None,
         group: typing___Optional[typing___Text] = None,
         name: typing___Optional[typing___Text] = None,
-        clusterMarkerMetrics: typing___Optional[typing___Iterable[global___ClusterMarkerMetric]] = None,
-        clusters: typing___Optional[typing___Iterable[global___ClusterAnnotation]] = None,
-    ) -> None: ...
+        clusterMarkerMetrics: typing___Optional[typing___Iterable[ClusterMarkerMetric]] = None,
+        clusters: typing___Optional[typing___Iterable[ClusterAnnotation]] = None,
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> Clustering: ...
+        def FromString(cls, s: builtin___bytes) -> Clustering:
+            ...
+
     else:
+
         @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Clustering: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Clustering:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -828,72 +1144,92 @@ class Clustering(google___protobuf___message___Message):
             "name",
             b"name",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___Clustering = Clustering
 
 class CellMetaData(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+
     @property
-    def annotations(
-        self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___Annotation]: ...
+    def annotations(self,) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[Annotation]:
+        ...
+
     @property
-    def embeddings(
-        self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___Embedding]: ...
+    def embeddings(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[Embedding]:
+        ...
+
     @property
-    def clusterings(
-        self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___Clustering]: ...
+    def clusterings(self,) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[Clustering]:
+        ...
+
     def __init__(
         self,
         *,
-        annotations: typing___Optional[typing___Iterable[global___Annotation]] = None,
-        embeddings: typing___Optional[typing___Iterable[global___Embedding]] = None,
-        clusterings: typing___Optional[typing___Iterable[global___Clustering]] = None,
-    ) -> None: ...
+        annotations: typing___Optional[typing___Iterable[Annotation]] = None,
+        embeddings: typing___Optional[typing___Iterable[Embedding]] = None,
+        clusterings: typing___Optional[typing___Iterable[Clustering]] = None,
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> CellMetaData: ...
+        def FromString(cls, s: builtin___bytes) -> CellMetaData:
+            ...
+
     else:
+
         @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> CellMetaData: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> CellMetaData:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
             "annotations", b"annotations", "clusterings", b"clusterings", "embeddings", b"embeddings"
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___CellMetaData = CellMetaData
 
 class AUCThreshold(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     name = ...  # type: typing___Text
     threshold = ...  # type: builtin___float
+
     def __init__(
         self, *, name: typing___Optional[typing___Text] = None, threshold: typing___Optional[builtin___float] = None,
-    ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> AUCThreshold: ...
-    else:
-        @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> AUCThreshold: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(
-        self, field_name: typing_extensions___Literal["name", b"name", "threshold", b"threshold"]
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___AUCThreshold = AUCThreshold
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> AUCThreshold:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> AUCThreshold:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["name", b"name", "threshold", b"threshold"]) -> None:
+        ...
+
 
 class RegulonGenesMetric(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -901,6 +1237,7 @@ class RegulonGenesMetric(google___protobuf___message___Message):
     name = ...  # type: typing___Text
     description = ...  # type: typing___Text
     values = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
+
     def __init__(
         self,
         *,
@@ -908,56 +1245,85 @@ class RegulonGenesMetric(google___protobuf___message___Message):
         name: typing___Optional[typing___Text] = None,
         description: typing___Optional[typing___Text] = None,
         values: typing___Optional[typing___Iterable[builtin___float]] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> RegulonGenesMetric: ...
+        def FromString(cls, s: builtin___bytes) -> RegulonGenesMetric:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> RegulonGenesMetric: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> RegulonGenesMetric:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
             "accessor", b"accessor", "description", b"description", "name", b"name", "values", b"values"
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___RegulonGenesMetric = RegulonGenesMetric
 
 class Regulon(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     genes = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
     defaultThreshold = ...  # type: typing___Text
     motifName = ...  # type: typing___Text
+
     @property
     def autoThresholds(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___AUCThreshold]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[AUCThreshold]:
+        ...
+
     @property
     def metrics(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___RegulonGenesMetric]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[RegulonGenesMetric]:
+        ...
+
     def __init__(
         self,
         *,
         genes: typing___Optional[typing___Iterable[typing___Text]] = None,
-        autoThresholds: typing___Optional[typing___Iterable[global___AUCThreshold]] = None,
+        autoThresholds: typing___Optional[typing___Iterable[AUCThreshold]] = None,
         defaultThreshold: typing___Optional[typing___Text] = None,
         motifName: typing___Optional[typing___Text] = None,
-        metrics: typing___Optional[typing___Iterable[global___RegulonGenesMetric]] = None,
-    ) -> None: ...
+        metrics: typing___Optional[typing___Iterable[RegulonGenesMetric]] = None,
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> Regulon: ...
+        def FromString(cls, s: builtin___bytes) -> Regulon:
+            ...
+
     else:
+
         @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Regulon: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Regulon:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -972,9 +1338,9 @@ class Regulon(google___protobuf___message___Message):
             "motifName",
             b"motifName",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___Regulon = Regulon
 
 class FileMetaData(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -984,6 +1350,7 @@ class FileMetaData(google___protobuf___message___Message):
     hasExtraEmbeddings = ...  # type: builtin___bool
     hasGlobalMeta = ...  # type: builtin___bool
     species = ...  # type: typing___Text
+
     def __init__(
         self,
         *,
@@ -993,17 +1360,27 @@ class FileMetaData(google___protobuf___message___Message):
         hasExtraEmbeddings: typing___Optional[builtin___bool] = None,
         hasGlobalMeta: typing___Optional[builtin___bool] = None,
         species: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> FileMetaData: ...
+        def FromString(cls, s: builtin___bytes) -> FileMetaData:
+            ...
+
     else:
+
         @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> FileMetaData: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> FileMetaData:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -1020,100 +1397,150 @@ class FileMetaData(google___protobuf___message___Message):
             "species",
             b"species",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___FileMetaData = FileMetaData
 
 class FeatureValues(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     features = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
-    def __init__(self, *, features: typing___Optional[typing___Iterable[builtin___float]] = None,) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> FeatureValues: ...
-    else:
-        @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> FeatureValues: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["features", b"features"]) -> None: ...
 
-global___FeatureValues = FeatureValues
+    def __init__(self, *, features: typing___Optional[typing___Iterable[builtin___float]] = None,) -> None:
+        ...
+
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> FeatureValues:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> FeatureValues:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["features", b"features"]) -> None:
+        ...
+
 
 class CellAnnotations(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     annotations = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
-    def __init__(self, *, annotations: typing___Optional[typing___Iterable[typing___Text]] = None,) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> CellAnnotations: ...
-    else:
-        @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> CellAnnotations: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["annotations", b"annotations"]) -> None: ...
 
-global___CellAnnotations = CellAnnotations
+    def __init__(self, *, annotations: typing___Optional[typing___Iterable[typing___Text]] = None,) -> None:
+        ...
+
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> CellAnnotations:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> CellAnnotations:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["annotations", b"annotations"]) -> None:
+        ...
+
 
 class CellClusters(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     clusters = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int]
-    def __init__(self, *, clusters: typing___Optional[typing___Iterable[builtin___int]] = None,) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> CellClusters: ...
-    else:
-        @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> CellClusters: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["clusters", b"clusters"]) -> None: ...
 
-global___CellClusters = CellClusters
+    def __init__(self, *, clusters: typing___Optional[typing___Iterable[builtin___int]] = None,) -> None:
+        ...
+
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> CellClusters:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> CellClusters:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["clusters", b"clusters"]) -> None:
+        ...
+
 
 class CellMetaDataReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+
     @property
-    def clusterIDs(
-        self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___CellClusters]: ...
+    def clusterIDs(self,) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[CellClusters]:
+        ...
+
     @property
     def geneExpression(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___FeatureValues]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[FeatureValues]:
+        ...
+
     @property
-    def aucValues(
-        self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___FeatureValues]: ...
+    def aucValues(self,) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[FeatureValues]:
+        ...
+
     @property
     def annotations(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___CellAnnotations]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[CellAnnotations]:
+        ...
+
     def __init__(
         self,
         *,
-        clusterIDs: typing___Optional[typing___Iterable[global___CellClusters]] = None,
-        geneExpression: typing___Optional[typing___Iterable[global___FeatureValues]] = None,
-        aucValues: typing___Optional[typing___Iterable[global___FeatureValues]] = None,
-        annotations: typing___Optional[typing___Iterable[global___CellAnnotations]] = None,
-    ) -> None: ...
+        clusterIDs: typing___Optional[typing___Iterable[CellClusters]] = None,
+        geneExpression: typing___Optional[typing___Iterable[FeatureValues]] = None,
+        aucValues: typing___Optional[typing___Iterable[FeatureValues]] = None,
+        annotations: typing___Optional[typing___Iterable[CellAnnotations]] = None,
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> CellMetaDataReply: ...
+        def FromString(cls, s: builtin___bytes) -> CellMetaDataReply:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> CellMetaDataReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> CellMetaDataReply:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -1126,86 +1553,129 @@ class CellMetaDataReply(google___protobuf___message___Message):
             "geneExpression",
             b"geneExpression",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___CellMetaDataReply = CellMetaDataReply
 
 class RegulonMetaDataRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
     regulon = ...  # type: typing___Text
+
     def __init__(
         self,
         *,
         loomFilePath: typing___Optional[typing___Text] = None,
         regulon: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> RegulonMetaDataRequest: ...
+        def FromString(cls, s: builtin___bytes) -> RegulonMetaDataRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> RegulonMetaDataRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> RegulonMetaDataRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self, field_name: typing_extensions___Literal["loomFilePath", b"loomFilePath", "regulon", b"regulon"]
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___RegulonMetaDataRequest = RegulonMetaDataRequest
 
 class RegulonMetaDataReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+
     @property
-    def regulonMeta(self) -> global___Regulon: ...
-    def __init__(self, *, regulonMeta: typing___Optional[global___Regulon] = None,) -> None: ...
+    def regulonMeta(self) -> Regulon:
+        ...
+
+    def __init__(self, *, regulonMeta: typing___Optional[Regulon] = None,) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> RegulonMetaDataReply: ...
+        def FromString(cls, s: builtin___bytes) -> RegulonMetaDataReply:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> RegulonMetaDataReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def HasField(self, field_name: typing_extensions___Literal["regulonMeta", b"regulonMeta"]) -> builtin___bool: ...
-    def ClearField(self, field_name: typing_extensions___Literal["regulonMeta", b"regulonMeta"]) -> None: ...
+        ) -> RegulonMetaDataReply:
+            ...
 
-global___RegulonMetaDataReply = RegulonMetaDataReply
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def HasField(self, field_name: typing_extensions___Literal["regulonMeta", b"regulonMeta"]) -> builtin___bool:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["regulonMeta", b"regulonMeta"]) -> None:
+        ...
+
 
 class MarkerGenesRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
     clusteringID = ...  # type: builtin___int
     clusterID = ...  # type: builtin___int
+
     def __init__(
         self,
         *,
         loomFilePath: typing___Optional[typing___Text] = None,
         clusteringID: typing___Optional[builtin___int] = None,
         clusterID: typing___Optional[builtin___int] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> MarkerGenesRequest: ...
+        def FromString(cls, s: builtin___bytes) -> MarkerGenesRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> MarkerGenesRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> MarkerGenesRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
             "clusterID", b"clusterID", "clusteringID", b"clusteringID", "loomFilePath", b"loomFilePath"
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___MarkerGenesRequest = MarkerGenesRequest
 
 class MarkerGenesMetric(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1213,6 +1683,7 @@ class MarkerGenesMetric(google___protobuf___message___Message):
     name = ...  # type: typing___Text
     description = ...  # type: typing___Text
     values = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
+
     def __init__(
         self,
         *,
@@ -1220,135 +1691,205 @@ class MarkerGenesMetric(google___protobuf___message___Message):
         name: typing___Optional[typing___Text] = None,
         description: typing___Optional[typing___Text] = None,
         values: typing___Optional[typing___Iterable[builtin___float]] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> MarkerGenesMetric: ...
+        def FromString(cls, s: builtin___bytes) -> MarkerGenesMetric:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> MarkerGenesMetric: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> MarkerGenesMetric:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
             "accessor", b"accessor", "description", b"description", "name", b"name", "values", b"values"
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___MarkerGenesMetric = MarkerGenesMetric
 
 class MarkerGenesReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     genes = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
+
     @property
     def metrics(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___MarkerGenesMetric]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[MarkerGenesMetric]:
+        ...
+
     def __init__(
         self,
         *,
         genes: typing___Optional[typing___Iterable[typing___Text]] = None,
-        metrics: typing___Optional[typing___Iterable[global___MarkerGenesMetric]] = None,
-    ) -> None: ...
+        metrics: typing___Optional[typing___Iterable[MarkerGenesMetric]] = None,
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> MarkerGenesReply: ...
+        def FromString(cls, s: builtin___bytes) -> MarkerGenesReply:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> MarkerGenesReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["genes", b"genes", "metrics", b"metrics"]) -> None: ...
+        ) -> MarkerGenesReply:
+            ...
 
-global___MarkerGenesReply = MarkerGenesReply
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["genes", b"genes", "metrics", b"metrics"]) -> None:
+        ...
+
 
 class MyLoomsRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     UUID = ...  # type: typing___Text
     loomFile = ...  # type: typing___Text
+
     def __init__(
         self, *, UUID: typing___Optional[typing___Text] = None, loomFile: typing___Optional[typing___Text] = None,
-    ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> MyLoomsRequest: ...
-    else:
-        @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> MyLoomsRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["UUID", b"UUID", "loomFile", b"loomFile"]) -> None: ...
+    ) -> None:
+        ...
 
-global___MyLoomsRequest = MyLoomsRequest
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> MyLoomsRequest:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> MyLoomsRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["UUID", b"UUID", "loomFile", b"loomFile"]) -> None:
+        ...
+
 
 class LoomHeierarchy(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     L1 = ...  # type: typing___Text
     L2 = ...  # type: typing___Text
     L3 = ...  # type: typing___Text
+
     def __init__(
         self,
         *,
         L1: typing___Optional[typing___Text] = None,
         L2: typing___Optional[typing___Text] = None,
         L3: typing___Optional[typing___Text] = None,
-    ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> LoomHeierarchy: ...
-    else:
-        @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> LoomHeierarchy: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["L1", b"L1", "L2", b"L2", "L3", b"L3"]) -> None: ...
+    ) -> None:
+        ...
 
-global___LoomHeierarchy = LoomHeierarchy
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> LoomHeierarchy:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> LoomHeierarchy:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["L1", b"L1", "L2", b"L2", "L3", b"L3"]) -> None:
+        ...
+
 
 class MyLoom(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
     loomDisplayName = ...  # type: typing___Text
     loomSize = ...  # type: builtin___int
+
     @property
-    def cellMetaData(self) -> global___CellMetaData: ...
+    def cellMetaData(self) -> CellMetaData:
+        ...
+
     @property
-    def fileMetaData(self) -> global___FileMetaData: ...
+    def fileMetaData(self) -> FileMetaData:
+        ...
+
     @property
-    def loomHeierarchy(self) -> global___LoomHeierarchy: ...
+    def loomHeierarchy(self) -> LoomHeierarchy:
+        ...
+
     def __init__(
         self,
         *,
         loomFilePath: typing___Optional[typing___Text] = None,
         loomDisplayName: typing___Optional[typing___Text] = None,
         loomSize: typing___Optional[builtin___int] = None,
-        cellMetaData: typing___Optional[global___CellMetaData] = None,
-        fileMetaData: typing___Optional[global___FileMetaData] = None,
-        loomHeierarchy: typing___Optional[global___LoomHeierarchy] = None,
-    ) -> None: ...
+        cellMetaData: typing___Optional[CellMetaData] = None,
+        fileMetaData: typing___Optional[FileMetaData] = None,
+        loomHeierarchy: typing___Optional[LoomHeierarchy] = None,
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> MyLoom: ...
+        def FromString(cls, s: builtin___bytes) -> MyLoom:
+            ...
+
     else:
+
         @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> MyLoom: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> MyLoom:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def HasField(
         self,
         field_name: typing_extensions___Literal[
             "cellMetaData", b"cellMetaData", "fileMetaData", b"fileMetaData", "loomHeierarchy", b"loomHeierarchy"
         ],
-    ) -> builtin___bool: ...
+    ) -> builtin___bool:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -1365,61 +1906,83 @@ class MyLoom(google___protobuf___message___Message):
             "loomSize",
             b"loomSize",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___MyLoom = MyLoom
 
 class MyLoomsReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     update = ...  # type: builtin___bool
+
     @property
-    def myLooms(
-        self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___MyLoom]: ...
+    def myLooms(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[MyLoom]:
+        ...
+
     def __init__(
         self,
         *,
-        myLooms: typing___Optional[typing___Iterable[global___MyLoom]] = None,
+        myLooms: typing___Optional[typing___Iterable[MyLoom]] = None,
         update: typing___Optional[builtin___bool] = None,
-    ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> MyLoomsReply: ...
-    else:
-        @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> MyLoomsReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(
-        self, field_name: typing_extensions___Literal["myLooms", b"myLooms", "update", b"update"]
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___MyLoomsReply = MyLoomsReply
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> MyLoomsReply:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> MyLoomsReply:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["myLooms", b"myLooms", "update", b"update"]) -> None:
+        ...
+
 
 class TranslateLassoSelectionRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     srcLoomFilePath = ...  # type: typing___Text
     destLoomFilePath = ...  # type: typing___Text
     cellIndices = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int]
+
     def __init__(
         self,
         *,
         srcLoomFilePath: typing___Optional[typing___Text] = None,
         destLoomFilePath: typing___Optional[typing___Text] = None,
         cellIndices: typing___Optional[typing___Iterable[builtin___int]] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> TranslateLassoSelectionRequest: ...
+        def FromString(cls, s: builtin___bytes) -> TranslateLassoSelectionRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> TranslateLassoSelectionRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> TranslateLassoSelectionRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -1430,157 +1993,237 @@ class TranslateLassoSelectionRequest(google___protobuf___message___Message):
             "srcLoomFilePath",
             b"srcLoomFilePath",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___TranslateLassoSelectionRequest = TranslateLassoSelectionRequest
 
 class TranslateLassoSelectionReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     cellIndices = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int]
-    def __init__(self, *, cellIndices: typing___Optional[typing___Iterable[builtin___int]] = None,) -> None: ...
+
+    def __init__(self, *, cellIndices: typing___Optional[typing___Iterable[builtin___int]] = None,) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> TranslateLassoSelectionReply: ...
+        def FromString(cls, s: builtin___bytes) -> TranslateLassoSelectionReply:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> TranslateLassoSelectionReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["cellIndices", b"cellIndices"]) -> None: ...
+        ) -> TranslateLassoSelectionReply:
+            ...
 
-global___TranslateLassoSelectionReply = TranslateLassoSelectionReply
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["cellIndices", b"cellIndices"]) -> None:
+        ...
+
 
 class CellIDsRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
     cellIndices = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int]
+
     def __init__(
         self,
         *,
         loomFilePath: typing___Optional[typing___Text] = None,
         cellIndices: typing___Optional[typing___Iterable[builtin___int]] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> CellIDsRequest: ...
+        def FromString(cls, s: builtin___bytes) -> CellIDsRequest:
+            ...
+
     else:
+
         @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> CellIDsRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> CellIDsRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self, field_name: typing_extensions___Literal["cellIndices", b"cellIndices", "loomFilePath", b"loomFilePath"]
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___CellIDsRequest = CellIDsRequest
 
 class CellIDsReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     cellIds = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
-    def __init__(self, *, cellIds: typing___Optional[typing___Iterable[typing___Text]] = None,) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> CellIDsReply: ...
-    else:
-        @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> CellIDsReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["cellIds", b"cellIds"]) -> None: ...
 
-global___CellIDsReply = CellIDsReply
+    def __init__(self, *, cellIds: typing___Optional[typing___Iterable[typing___Text]] = None,) -> None:
+        ...
+
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> CellIDsReply:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> CellIDsReply:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["cellIds", b"cellIds"]) -> None:
+        ...
+
 
 class GeneSetEnrichmentRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
     geneSetFilePath = ...  # type: typing___Text
     method = ...  # type: typing___Text
+
     def __init__(
         self,
         *,
         loomFilePath: typing___Optional[typing___Text] = None,
         geneSetFilePath: typing___Optional[typing___Text] = None,
         method: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> GeneSetEnrichmentRequest: ...
+        def FromString(cls, s: builtin___bytes) -> GeneSetEnrichmentRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> GeneSetEnrichmentRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> GeneSetEnrichmentRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
             "geneSetFilePath", b"geneSetFilePath", "loomFilePath", b"loomFilePath", "method", b"method"
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___GeneSetEnrichmentRequest = GeneSetEnrichmentRequest
 
 class Progress(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     value = ...  # type: builtin___float
     status = ...  # type: typing___Text
+
     def __init__(
         self, *, value: typing___Optional[builtin___float] = None, status: typing___Optional[typing___Text] = None,
-    ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> Progress: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Progress: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["status", b"status", "value", b"value"]) -> None: ...
+    ) -> None:
+        ...
 
-global___Progress = Progress
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> Progress:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Progress:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["status", b"status", "value", b"value"]) -> None:
+        ...
+
 
 class GeneSetEnrichmentReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     isDone = ...  # type: builtin___bool
+
     @property
-    def progress(self) -> global___Progress: ...
+    def progress(self) -> Progress:
+        ...
+
     @property
-    def cellValues(self) -> global___CellColorByFeaturesReply: ...
+    def cellValues(self) -> CellColorByFeaturesReply:
+        ...
+
     def __init__(
         self,
         *,
-        progress: typing___Optional[global___Progress] = None,
+        progress: typing___Optional[Progress] = None,
         isDone: typing___Optional[builtin___bool] = None,
-        cellValues: typing___Optional[global___CellColorByFeaturesReply] = None,
-    ) -> None: ...
+        cellValues: typing___Optional[CellColorByFeaturesReply] = None,
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> GeneSetEnrichmentReply: ...
+        def FromString(cls, s: builtin___bytes) -> GeneSetEnrichmentReply:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> GeneSetEnrichmentReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> GeneSetEnrichmentReply:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def HasField(
         self, field_name: typing_extensions___Literal["cellValues", b"cellValues", "progress", b"progress"]
-    ) -> builtin___bool: ...
+    ) -> builtin___bool:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
             "cellValues", b"cellValues", "isDone", b"isDone", "progress", b"progress"
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___GeneSetEnrichmentReply = GeneSetEnrichmentReply
 
 class VmaxRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1589,6 +2232,7 @@ class VmaxRequest(google___protobuf___message___Message):
     featureType = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
     hasLogTransform = ...  # type: builtin___bool
     hasCpmTransform = ...  # type: builtin___bool
+
     def __init__(
         self,
         *,
@@ -1597,15 +2241,27 @@ class VmaxRequest(google___protobuf___message___Message):
         featureType: typing___Optional[typing___Iterable[typing___Text]] = None,
         hasLogTransform: typing___Optional[builtin___bool] = None,
         hasCpmTransform: typing___Optional[builtin___bool] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> VmaxRequest: ...
+        def FromString(cls, s: builtin___bytes) -> VmaxRequest:
+            ...
+
     else:
+
         @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> VmaxRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> VmaxRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -1620,91 +2276,143 @@ class VmaxRequest(google___protobuf___message___Message):
             "loomFilePath",
             b"loomFilePath",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___VmaxRequest = VmaxRequest
 
 class VmaxReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     vmax = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
     maxVmax = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
+
     def __init__(
         self,
         *,
         vmax: typing___Optional[typing___Iterable[builtin___float]] = None,
         maxVmax: typing___Optional[typing___Iterable[builtin___float]] = None,
-    ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> VmaxReply: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> VmaxReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["maxVmax", b"maxVmax", "vmax", b"vmax"]) -> None: ...
+    ) -> None:
+        ...
 
-global___VmaxReply = VmaxReply
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> VmaxReply:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> VmaxReply:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["maxVmax", b"maxVmax", "vmax", b"vmax"]) -> None:
+        ...
+
 
 class UUIDRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     ip = ...  # type: typing___Text
-    def __init__(self, *, ip: typing___Optional[typing___Text] = None,) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> UUIDRequest: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> UUIDRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["ip", b"ip"]) -> None: ...
 
-global___UUIDRequest = UUIDRequest
+    def __init__(self, *, ip: typing___Optional[typing___Text] = None,) -> None:
+        ...
+
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> UUIDRequest:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> UUIDRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["ip", b"ip"]) -> None:
+        ...
+
 
 class UUIDReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     UUID = ...  # type: typing___Text
-    def __init__(self, *, UUID: typing___Optional[typing___Text] = None,) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> UUIDReply: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> UUIDReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["UUID", b"UUID"]) -> None: ...
 
-global___UUIDReply = UUIDReply
+    def __init__(self, *, UUID: typing___Optional[typing___Text] = None,) -> None:
+        ...
+
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> UUIDReply:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> UUIDReply:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["UUID", b"UUID"]) -> None:
+        ...
+
 
 class RemainingUUIDTimeRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     ip = ...  # type: typing___Text
     UUID = ...  # type: typing___Text
     mouseEvents = ...  # type: builtin___int
+
     def __init__(
         self,
         *,
         ip: typing___Optional[typing___Text] = None,
         UUID: typing___Optional[typing___Text] = None,
         mouseEvents: typing___Optional[builtin___int] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> RemainingUUIDTimeRequest: ...
+        def FromString(cls, s: builtin___bytes) -> RemainingUUIDTimeRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> RemainingUUIDTimeRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> RemainingUUIDTimeRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self, field_name: typing_extensions___Literal["UUID", b"UUID", "ip", b"ip", "mouseEvents", b"mouseEvents"]
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___RemainingUUIDTimeRequest = RemainingUUIDTimeRequest
 
 class RemainingUUIDTimeReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1712,6 +2420,7 @@ class RemainingUUIDTimeReply(google___protobuf___message___Message):
     timeRemaining = ...  # type: builtin___int
     sessionsLimitReached = ...  # type: builtin___bool
     sessionMode = ...  # type: typing___Text
+
     def __init__(
         self,
         *,
@@ -1719,17 +2428,29 @@ class RemainingUUIDTimeReply(google___protobuf___message___Message):
         timeRemaining: typing___Optional[builtin___int] = None,
         sessionsLimitReached: typing___Optional[builtin___bool] = None,
         sessionMode: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> RemainingUUIDTimeReply: ...
+        def FromString(cls, s: builtin___bytes) -> RemainingUUIDTimeReply:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> RemainingUUIDTimeReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> RemainingUUIDTimeReply:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -1742,160 +2463,247 @@ class RemainingUUIDTimeReply(google___protobuf___message___Message):
             "timeRemaining",
             b"timeRemaining",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___RemainingUUIDTimeReply = RemainingUUIDTimeReply
 
 class LoomUploadedRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     UUID = ...  # type: typing___Text
     filename = ...  # type: typing___Text
+
     def __init__(
         self, *, UUID: typing___Optional[typing___Text] = None, filename: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> LoomUploadedRequest: ...
+        def FromString(cls, s: builtin___bytes) -> LoomUploadedRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> LoomUploadedRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["UUID", b"UUID", "filename", b"filename"]) -> None: ...
+        ) -> LoomUploadedRequest:
+            ...
 
-global___LoomUploadedRequest = LoomUploadedRequest
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["UUID", b"UUID", "filename", b"filename"]) -> None:
+        ...
+
 
 class LoomUploadedReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    def __init__(self,) -> None: ...
+
+    def __init__(self,) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> LoomUploadedReply: ...
+        def FromString(cls, s: builtin___bytes) -> LoomUploadedReply:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> LoomUploadedReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> LoomUploadedReply:
+            ...
 
-global___LoomUploadedReply = LoomUploadedReply
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
 
 class MyGeneSet(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     geneSetFilePath = ...  # type: typing___Text
     geneSetDisplayName = ...  # type: typing___Text
+
     def __init__(
         self,
         *,
         geneSetFilePath: typing___Optional[typing___Text] = None,
         geneSetDisplayName: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> MyGeneSet: ...
+        def FromString(cls, s: builtin___bytes) -> MyGeneSet:
+            ...
+
     else:
+
         @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> MyGeneSet: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> MyGeneSet:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
             "geneSetDisplayName", b"geneSetDisplayName", "geneSetFilePath", b"geneSetFilePath"
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___MyGeneSet = MyGeneSet
 
 class MyGeneSetsRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     UUID = ...  # type: typing___Text
-    def __init__(self, *, UUID: typing___Optional[typing___Text] = None,) -> None: ...
+
+    def __init__(self, *, UUID: typing___Optional[typing___Text] = None,) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> MyGeneSetsRequest: ...
+        def FromString(cls, s: builtin___bytes) -> MyGeneSetsRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> MyGeneSetsRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["UUID", b"UUID"]) -> None: ...
+        ) -> MyGeneSetsRequest:
+            ...
 
-global___MyGeneSetsRequest = MyGeneSetsRequest
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["UUID", b"UUID"]) -> None:
+        ...
+
 
 class MyGeneSetsReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    @property
-    def myGeneSets(
-        self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___MyGeneSet]: ...
-    def __init__(self, *, myGeneSets: typing___Optional[typing___Iterable[global___MyGeneSet]] = None,) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> MyGeneSetsReply: ...
-    else:
-        @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> MyGeneSetsReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["myGeneSets", b"myGeneSets"]) -> None: ...
 
-global___MyGeneSetsReply = MyGeneSetsReply
+    @property
+    def myGeneSets(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[MyGeneSet]:
+        ...
+
+    def __init__(self, *, myGeneSets: typing___Optional[typing___Iterable[MyGeneSet]] = None,) -> None:
+        ...
+
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> MyGeneSetsReply:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> MyGeneSetsReply:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["myGeneSets", b"myGeneSets"]) -> None:
+        ...
+
 
 class DeleteUserFileRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     UUID = ...  # type: typing___Text
     filePath = ...  # type: typing___Text
     fileType = ...  # type: typing___Text
+
     def __init__(
         self,
         *,
         UUID: typing___Optional[typing___Text] = None,
         filePath: typing___Optional[typing___Text] = None,
         fileType: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> DeleteUserFileRequest: ...
+        def FromString(cls, s: builtin___bytes) -> DeleteUserFileRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> DeleteUserFileRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> DeleteUserFileRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self, field_name: typing_extensions___Literal["UUID", b"UUID", "filePath", b"filePath", "fileType", b"fileType"]
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___DeleteUserFileRequest = DeleteUserFileRequest
 
 class DeleteUserFileReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     deletedSuccessfully = ...  # type: builtin___bool
-    def __init__(self, *, deletedSuccessfully: typing___Optional[builtin___bool] = None,) -> None: ...
+
+    def __init__(self, *, deletedSuccessfully: typing___Optional[builtin___bool] = None,) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> DeleteUserFileReply: ...
+        def FromString(cls, s: builtin___bytes) -> DeleteUserFileReply:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> DeleteUserFileReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> DeleteUserFileReply:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self, field_name: typing_extensions___Literal["deletedSuccessfully", b"deletedSuccessfully"]
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___DeleteUserFileReply = DeleteUserFileReply
 
 class DownloadSubLoomRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1904,6 +2712,7 @@ class DownloadSubLoomRequest(google___protobuf___message___Message):
     featureName = ...  # type: typing___Text
     featureValue = ...  # type: typing___Text
     operator = ...  # type: typing___Text
+
     def __init__(
         self,
         *,
@@ -1912,17 +2721,29 @@ class DownloadSubLoomRequest(google___protobuf___message___Message):
         featureName: typing___Optional[typing___Text] = None,
         featureValue: typing___Optional[typing___Text] = None,
         operator: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> DownloadSubLoomRequest: ...
+        def FromString(cls, s: builtin___bytes) -> DownloadSubLoomRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> DownloadSubLoomRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> DownloadSubLoomRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -1937,41 +2758,60 @@ class DownloadSubLoomRequest(google___protobuf___message___Message):
             "operator",
             b"operator",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___DownloadSubLoomRequest = DownloadSubLoomRequest
 
 class DownloadSubLoomReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
     loomFileSize = ...  # type: builtin___int
     isDone = ...  # type: builtin___bool
+
     @property
-    def progress(self) -> global___Progress: ...
+    def progress(self) -> Progress:
+        ...
+
     @property
-    def error(self) -> global___ErrorReply: ...
+    def error(self) -> ErrorReply:
+        ...
+
     def __init__(
         self,
         *,
         loomFilePath: typing___Optional[typing___Text] = None,
         loomFileSize: typing___Optional[builtin___int] = None,
-        progress: typing___Optional[global___Progress] = None,
+        progress: typing___Optional[Progress] = None,
         isDone: typing___Optional[builtin___bool] = None,
-        error: typing___Optional[global___ErrorReply] = None,
-    ) -> None: ...
+        error: typing___Optional[ErrorReply] = None,
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> DownloadSubLoomReply: ...
+        def FromString(cls, s: builtin___bytes) -> DownloadSubLoomReply:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> DownloadSubLoomReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> DownloadSubLoomReply:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def HasField(
         self, field_name: typing_extensions___Literal["error", b"error", "progress", b"progress"]
-    ) -> builtin___bool: ...
+    ) -> builtin___bool:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -1986,9 +2826,9 @@ class DownloadSubLoomReply(google___protobuf___message___Message):
             "progress",
             b"progress",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___DownloadSubLoomReply = DownloadSubLoomReply
 
 class SetAnnotationNameRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1996,6 +2836,7 @@ class SetAnnotationNameRequest(google___protobuf___message___Message):
     clusteringID = ...  # type: builtin___int
     clusterID = ...  # type: builtin___int
     newAnnoName = ...  # type: typing___Text
+
     def __init__(
         self,
         *,
@@ -2003,17 +2844,29 @@ class SetAnnotationNameRequest(google___protobuf___message___Message):
         clusteringID: typing___Optional[builtin___int] = None,
         clusterID: typing___Optional[builtin___int] = None,
         newAnnoName: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> SetAnnotationNameRequest: ...
+        def FromString(cls, s: builtin___bytes) -> SetAnnotationNameRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> SetAnnotationNameRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> SetAnnotationNameRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -2026,27 +2879,40 @@ class SetAnnotationNameRequest(google___protobuf___message___Message):
             "newAnnoName",
             b"newAnnoName",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___SetAnnotationNameRequest = SetAnnotationNameRequest
 
 class SetAnnotationNameReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     success = ...  # type: builtin___bool
-    def __init__(self, *, success: typing___Optional[builtin___bool] = None,) -> None: ...
+
+    def __init__(self, *, success: typing___Optional[builtin___bool] = None,) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> SetAnnotationNameReply: ...
+        def FromString(cls, s: builtin___bytes) -> SetAnnotationNameReply:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> SetAnnotationNameReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["success", b"success"]) -> None: ...
+        ) -> SetAnnotationNameReply:
+            ...
 
-global___SetAnnotationNameReply = SetAnnotationNameReply
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["success", b"success"]) -> None:
+        ...
+
 
 class SetLoomHierarchyRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -2054,6 +2920,7 @@ class SetLoomHierarchyRequest(google___protobuf___message___Message):
     newHierarchy_L1 = ...  # type: typing___Text
     newHierarchy_L2 = ...  # type: typing___Text
     newHierarchy_L3 = ...  # type: typing___Text
+
     def __init__(
         self,
         *,
@@ -2061,17 +2928,29 @@ class SetLoomHierarchyRequest(google___protobuf___message___Message):
         newHierarchy_L1: typing___Optional[typing___Text] = None,
         newHierarchy_L2: typing___Optional[typing___Text] = None,
         newHierarchy_L3: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> SetLoomHierarchyRequest: ...
+        def FromString(cls, s: builtin___bytes) -> SetLoomHierarchyRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> SetLoomHierarchyRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> SetLoomHierarchyRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -2084,45 +2963,69 @@ class SetLoomHierarchyRequest(google___protobuf___message___Message):
             "newHierarchy_L3",
             b"newHierarchy_L3",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___SetLoomHierarchyRequest = SetLoomHierarchyRequest
 
 class SetLoomHierarchyReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     success = ...  # type: builtin___bool
-    def __init__(self, *, success: typing___Optional[builtin___bool] = None,) -> None: ...
+
+    def __init__(self, *, success: typing___Optional[builtin___bool] = None,) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> SetLoomHierarchyReply: ...
+        def FromString(cls, s: builtin___bytes) -> SetLoomHierarchyReply:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> SetLoomHierarchyReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["success", b"success"]) -> None: ...
+        ) -> SetLoomHierarchyReply:
+            ...
 
-global___SetLoomHierarchyReply = SetLoomHierarchyReply
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["success", b"success"]) -> None:
+        ...
+
 
 class getORCIDRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     auth_code = ...  # type: typing___Text
-    def __init__(self, *, auth_code: typing___Optional[typing___Text] = None,) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> getORCIDRequest: ...
-    else:
-        @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> getORCIDRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["auth_code", b"auth_code"]) -> None: ...
 
-global___getORCIDRequest = getORCIDRequest
+    def __init__(self, *, auth_code: typing___Optional[typing___Text] = None,) -> None:
+        ...
+
+    if sys.version_info >= (3,):
+
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> getORCIDRequest:
+            ...
+
+    else:
+
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> getORCIDRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["auth_code", b"auth_code"]) -> None:
+        ...
+
 
 class getORCIDReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -2130,6 +3033,7 @@ class getORCIDReply(google___protobuf___message___Message):
     name = ...  # type: typing___Text
     orcid_id = ...  # type: typing___Text
     success = ...  # type: builtin___bool
+
     def __init__(
         self,
         *,
@@ -2137,122 +3041,188 @@ class getORCIDReply(google___protobuf___message___Message):
         name: typing___Optional[typing___Text] = None,
         orcid_id: typing___Optional[typing___Text] = None,
         success: typing___Optional[builtin___bool] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> getORCIDReply: ...
+        def FromString(cls, s: builtin___bytes) -> getORCIDReply:
+            ...
+
     else:
+
         @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> getORCIDReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> getORCIDReply:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
             "name", b"name", "orcid_id", b"orcid_id", "orcid_scope_uuid", b"orcid_scope_uuid", "success", b"success"
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___getORCIDReply = getORCIDReply
 
 class getORCIDStatusRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    def __init__(self,) -> None: ...
+
+    def __init__(self,) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> getORCIDStatusRequest: ...
+        def FromString(cls, s: builtin___bytes) -> getORCIDStatusRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> getORCIDStatusRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> getORCIDStatusRequest:
+            ...
 
-global___getORCIDStatusRequest = getORCIDStatusRequest
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
 
 class getORCIDStatusReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     active = ...  # type: builtin___bool
-    def __init__(self, *, active: typing___Optional[builtin___bool] = None,) -> None: ...
+
+    def __init__(self, *, active: typing___Optional[builtin___bool] = None,) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> getORCIDStatusReply: ...
+        def FromString(cls, s: builtin___bytes) -> getORCIDStatusReply:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> getORCIDStatusReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["active", b"active"]) -> None: ...
+        ) -> getORCIDStatusReply:
+            ...
 
-global___getORCIDStatusReply = getORCIDStatusReply
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["active", b"active"]) -> None:
+        ...
+
 
 class orcidInfoMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     orcidName = ...  # type: typing___Text
     orcidID = ...  # type: typing___Text
     orcidUUID = ...  # type: typing___Text
+
     def __init__(
         self,
         *,
         orcidName: typing___Optional[typing___Text] = None,
         orcidID: typing___Optional[typing___Text] = None,
         orcidUUID: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> orcidInfoMessage: ...
+        def FromString(cls, s: builtin___bytes) -> orcidInfoMessage:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> orcidInfoMessage: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> orcidInfoMessage:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
             "orcidID", b"orcidID", "orcidName", b"orcidName", "orcidUUID", b"orcidUUID"
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___orcidInfoMessage = orcidInfoMessage
 
 class setColabAnnotationDataRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
     clusteringID = ...  # type: builtin___int
     clusterID = ...  # type: builtin___int
+
     @property
-    def orcidInfo(self) -> global___orcidInfoMessage: ...
+    def orcidInfo(self) -> orcidInfoMessage:
+        ...
+
     @property
-    def annoData(self) -> global___CollabAnnoData: ...
+    def annoData(self) -> CollabAnnoData:
+        ...
+
     def __init__(
         self,
         *,
         loomFilePath: typing___Optional[typing___Text] = None,
         clusteringID: typing___Optional[builtin___int] = None,
         clusterID: typing___Optional[builtin___int] = None,
-        orcidInfo: typing___Optional[global___orcidInfoMessage] = None,
-        annoData: typing___Optional[global___CollabAnnoData] = None,
-    ) -> None: ...
+        orcidInfo: typing___Optional[orcidInfoMessage] = None,
+        annoData: typing___Optional[CollabAnnoData] = None,
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> setColabAnnotationDataRequest: ...
+        def FromString(cls, s: builtin___bytes) -> setColabAnnotationDataRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> setColabAnnotationDataRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> setColabAnnotationDataRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def HasField(
         self, field_name: typing_extensions___Literal["annoData", b"annoData", "orcidInfo", b"orcidInfo"]
-    ) -> builtin___bool: ...
+    ) -> builtin___bool:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -2267,32 +3237,43 @@ class setColabAnnotationDataRequest(google___protobuf___message___Message):
             "orcidInfo",
             b"orcidInfo",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___setColabAnnotationDataRequest = setColabAnnotationDataRequest
 
 class setColabAnnotationDataReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     success = ...  # type: builtin___bool
     message = ...  # type: typing___Text
+
     def __init__(
         self, *, success: typing___Optional[builtin___bool] = None, message: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> setColabAnnotationDataReply: ...
+        def FromString(cls, s: builtin___bytes) -> setColabAnnotationDataReply:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> setColabAnnotationDataReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(
-        self, field_name: typing_extensions___Literal["message", b"message", "success", b"success"]
-    ) -> None: ...
+        ) -> setColabAnnotationDataReply:
+            ...
 
-global___setColabAnnotationDataReply = setColabAnnotationDataReply
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["message", b"message", "success", b"success"]) -> None:
+        ...
+
 
 class voteAnnotationRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -2300,33 +3281,52 @@ class voteAnnotationRequest(google___protobuf___message___Message):
     clusteringID = ...  # type: builtin___int
     clusterID = ...  # type: builtin___int
     direction = ...  # type: typing___Text
+
     @property
-    def orcidInfo(self) -> global___orcidInfoMessage: ...
+    def orcidInfo(self) -> orcidInfoMessage:
+        ...
+
     @property
-    def annoData(self) -> global___CollabAnnoData: ...
+    def annoData(self) -> CollabAnnoData:
+        ...
+
     def __init__(
         self,
         *,
         loomFilePath: typing___Optional[typing___Text] = None,
         clusteringID: typing___Optional[builtin___int] = None,
         clusterID: typing___Optional[builtin___int] = None,
-        orcidInfo: typing___Optional[global___orcidInfoMessage] = None,
-        annoData: typing___Optional[global___CollabAnnoData] = None,
+        orcidInfo: typing___Optional[orcidInfoMessage] = None,
+        annoData: typing___Optional[CollabAnnoData] = None,
         direction: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> voteAnnotationRequest: ...
+        def FromString(cls, s: builtin___bytes) -> voteAnnotationRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> voteAnnotationRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> voteAnnotationRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def HasField(
         self, field_name: typing_extensions___Literal["annoData", b"annoData", "orcidInfo", b"orcidInfo"]
-    ) -> builtin___bool: ...
+    ) -> builtin___bool:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -2343,32 +3343,43 @@ class voteAnnotationRequest(google___protobuf___message___Message):
             "orcidInfo",
             b"orcidInfo",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___voteAnnotationRequest = voteAnnotationRequest
 
 class voteAnnotationReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     success = ...  # type: builtin___bool
     message = ...  # type: typing___Text
+
     def __init__(
         self, *, success: typing___Optional[builtin___bool] = None, message: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> voteAnnotationReply: ...
+        def FromString(cls, s: builtin___bytes) -> voteAnnotationReply:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> voteAnnotationReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(
-        self, field_name: typing_extensions___Literal["message", b"message", "success", b"success"]
-    ) -> None: ...
+        ) -> voteAnnotationReply:
+            ...
 
-global___voteAnnotationReply = voteAnnotationReply
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def ClearField(self, field_name: typing_extensions___Literal["message", b"message", "success", b"success"]) -> None:
+        ...
+
 
 class getNextClusterRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -2376,6 +3387,7 @@ class getNextClusterRequest(google___protobuf___message___Message):
     clusteringID = ...  # type: builtin___int
     clusterID = ...  # type: builtin___int
     direction = ...  # type: typing___Text
+
     def __init__(
         self,
         *,
@@ -2383,17 +3395,29 @@ class getNextClusterRequest(google___protobuf___message___Message):
         clusteringID: typing___Optional[builtin___int] = None,
         clusterID: typing___Optional[builtin___int] = None,
         direction: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> getNextClusterRequest: ...
+        def FromString(cls, s: builtin___bytes) -> getNextClusterRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> getNextClusterRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> getNextClusterRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
@@ -2406,165 +3430,136 @@ class getNextClusterRequest(google___protobuf___message___Message):
             "loomFilePath",
             b"loomFilePath",
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___getNextClusterRequest = getNextClusterRequest
 
 class NewClusterInfo(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     cellIDs = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
     clusterIDs = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
     clusteringName = ...  # type: typing___Text
+
     def __init__(
         self,
         *,
         cellIDs: typing___Optional[typing___Iterable[typing___Text]] = None,
         clusterIDs: typing___Optional[typing___Iterable[typing___Text]] = None,
         clusteringName: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> NewClusterInfo: ...
+        def FromString(cls, s: builtin___bytes) -> NewClusterInfo:
+            ...
+
     else:
+
         @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> NewClusterInfo: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> NewClusterInfo:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
             "cellIDs", b"cellIDs", "clusterIDs", b"clusterIDs", "clusteringName", b"clusteringName"
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___NewClusterInfo = NewClusterInfo
 
 class AddNewClusteringRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath = ...  # type: typing___Text
+
     @property
-    def orcidInfo(self) -> global___orcidInfoMessage: ...
+    def orcidInfo(self) -> orcidInfoMessage:
+        ...
+
     @property
-    def clusterInfo(self) -> global___NewClusterInfo: ...
+    def clusterInfo(self) -> NewClusterInfo:
+        ...
+
     def __init__(
         self,
         *,
         loomFilePath: typing___Optional[typing___Text] = None,
-        orcidInfo: typing___Optional[global___orcidInfoMessage] = None,
-        clusterInfo: typing___Optional[global___NewClusterInfo] = None,
-    ) -> None: ...
+        orcidInfo: typing___Optional[orcidInfoMessage] = None,
+        clusterInfo: typing___Optional[NewClusterInfo] = None,
+    ) -> None:
+        ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> AddNewClusteringRequest: ...
+        def FromString(cls, s: builtin___bytes) -> AddNewClusteringRequest:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> AddNewClusteringRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        ) -> AddNewClusteringRequest:
+            ...
+
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
+
     def HasField(
         self, field_name: typing_extensions___Literal["clusterInfo", b"clusterInfo", "orcidInfo", b"orcidInfo"]
-    ) -> builtin___bool: ...
+    ) -> builtin___bool:
+        ...
+
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
             "clusterInfo", b"clusterInfo", "loomFilePath", b"loomFilePath", "orcidInfo", b"orcidInfo"
         ],
-    ) -> None: ...
+    ) -> None:
+        ...
 
-global___AddNewClusteringRequest = AddNewClusteringRequest
 
 class AddNewClusteringReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     success = ...  # type: builtin___bool
     message = ...  # type: typing___Text
+
     def __init__(
         self, *, success: typing___Optional[builtin___bool] = None, message: typing___Optional[typing___Text] = None,
-    ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> AddNewClusteringReply: ...
-    else:
-        @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> AddNewClusteringReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(
-        self, field_name: typing_extensions___Literal["message", b"message", "success", b"success"]
-    ) -> None: ...
-
-global___AddNewClusteringReply = AddNewClusteringReply
-
-class GProfilerLinkOutRequest(google___protobuf___message___Message):
-    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    loomFilePath = ...  # type: typing___Text
-    clusteringID = ...  # type: builtin___int
-    clusterID = ...  # type: builtin___int
-    topNumFeatures = (
+    ) -> None:
         ...
-    )  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int]
-    organism = ...  # type: typing___Text
-    def __init__(
-        self,
-        *,
-        loomFilePath: typing___Optional[typing___Text] = None,
-        clusteringID: typing___Optional[builtin___int] = None,
-        clusterID: typing___Optional[builtin___int] = None,
-        topNumFeatures: typing___Optional[typing___Iterable[builtin___int]] = None,
-        organism: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+
     if sys.version_info >= (3,):
+
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> GProfilerLinkOutRequest: ...
+        def FromString(cls, s: builtin___bytes) -> AddNewClusteringReply:
+            ...
+
     else:
+
         @classmethod
         def FromString(
             cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> GProfilerLinkOutRequest: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing_extensions___Literal[
-            "clusterID",
-            b"clusterID",
-            "clusteringID",
-            b"clusteringID",
-            "loomFilePath",
-            b"loomFilePath",
-            "organism",
-            b"organism",
-            "topNumFeatures",
-            b"topNumFeatures",
-        ],
-    ) -> None: ...
+        ) -> AddNewClusteringReply:
+            ...
 
-global___GProfilerLinkOutRequest = GProfilerLinkOutRequest
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
 
-class GProfilerLinkOutReply(google___protobuf___message___Message):
-    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    url = ...  # type: typing___Text
-    @property
-    def error(self) -> global___ErrorReply: ...
-    def __init__(
-        self, *, url: typing___Optional[typing___Text] = None, error: typing___Optional[global___ErrorReply] = None,
-    ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> GProfilerLinkOutReply: ...
-    else:
-        @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> GProfilerLinkOutReply: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def HasField(self, field_name: typing_extensions___Literal["error", b"error"]) -> builtin___bool: ...
-    def ClearField(self, field_name: typing_extensions___Literal["error", b"error", "url", b"url"]) -> None: ...
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None:
+        ...
 
-global___GProfilerLinkOutReply = GProfilerLinkOutReply
+    def ClearField(self, field_name: typing_extensions___Literal["message", b"message", "success", b"success"]) -> None:
+        ...

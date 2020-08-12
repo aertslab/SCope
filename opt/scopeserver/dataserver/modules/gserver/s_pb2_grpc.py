@@ -6,14 +6,15 @@ from scopeserver.dataserver.modules.gserver import s_pb2 as s__pb2
 
 
 class MainStub(object):
-    """Missing associated documentation comment in .proto file"""
+    # missing associated documentation comment in .proto file
+    pass
 
     def __init__(self, channel):
         """Constructor.
 
-        Args:
-            channel: A grpc.Channel.
-        """
+    Args:
+      channel: A grpc.Channel.
+    """
         self.getCellColorByFeatures = channel.unary_unary(
             "/scope.Main/getCellColorByFeatures",
             request_serializer=s__pb2.CellColorByFeaturesRequest.SerializeToString,
@@ -144,174 +145,190 @@ class MainStub(object):
             request_serializer=s__pb2.AddNewClusteringRequest.SerializeToString,
             response_deserializer=s__pb2.AddNewClusteringReply.FromString,
         )
-        self.getGProfilerLink = channel.unary_unary(
-            "/scope.Main/getGProfilerLink",
-            request_serializer=s__pb2.GProfilerLinkOutRequest.SerializeToString,
-            response_deserializer=s__pb2.GProfilerLinkOutReply.FromString,
-        )
 
 
 class MainServicer(object):
-    """Missing associated documentation comment in .proto file"""
+    # missing associated documentation comment in .proto file
+    pass
 
     def getCellColorByFeatures(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def getCellAUCValuesByFeatures(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def getCellMetaData(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def getFeatures(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def getCoordinates(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def getRegulonMetaData(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def getMarkerGenes(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def getMyLooms(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def translateLassoSelection(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def getCellIDs(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def doGeneSetEnrichment(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def getVmax(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def getUUID(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def getRemainingUUIDTime(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def loomUploaded(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def getMyGeneSets(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def deleteUserFile(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def downloadSubLoom(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def setAnnotationName(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def setLoomHierarchy(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def getORCID(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def getORCIDStatus(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def setColabAnnotationData(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def voteAnnotation(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def getNextCluster(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def addNewClustering(self, request, context):
-        """Missing associated documentation comment in .proto file"""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
-    def getGProfilerLink(self, request, context):
-        """Missing associated documentation comment in .proto file"""
+        # missing associated documentation comment in .proto file
+        pass
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
@@ -449,745 +466,6 @@ def add_MainServicer_to_server(servicer, server):
             request_deserializer=s__pb2.AddNewClusteringRequest.FromString,
             response_serializer=s__pb2.AddNewClusteringReply.SerializeToString,
         ),
-        "getGProfilerLink": grpc.unary_unary_rpc_method_handler(
-            servicer.getGProfilerLink,
-            request_deserializer=s__pb2.GProfilerLinkOutRequest.FromString,
-            response_serializer=s__pb2.GProfilerLinkOutReply.SerializeToString,
-        ),
     }
     generic_handler = grpc.method_handlers_generic_handler("scope.Main", rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-
-
-# This class is part of an EXPERIMENTAL API.
-class Main(object):
-    """Missing associated documentation comment in .proto file"""
-
-    @staticmethod
-    def getCellColorByFeatures(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getCellColorByFeatures",
-            s__pb2.CellColorByFeaturesRequest.SerializeToString,
-            s__pb2.CellColorByFeaturesReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getCellAUCValuesByFeatures(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getCellAUCValuesByFeatures",
-            s__pb2.CellAUCValuesByFeaturesRequest.SerializeToString,
-            s__pb2.CellAUCValuesByFeaturesReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getCellMetaData(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getCellMetaData",
-            s__pb2.CellMetaDataRequest.SerializeToString,
-            s__pb2.CellMetaDataReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getFeatures(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getFeatures",
-            s__pb2.FeatureRequest.SerializeToString,
-            s__pb2.FeatureReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getCoordinates(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getCoordinates",
-            s__pb2.CoordinatesRequest.SerializeToString,
-            s__pb2.CoordinatesReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getRegulonMetaData(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getRegulonMetaData",
-            s__pb2.RegulonMetaDataRequest.SerializeToString,
-            s__pb2.RegulonMetaDataReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getMarkerGenes(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getMarkerGenes",
-            s__pb2.MarkerGenesRequest.SerializeToString,
-            s__pb2.MarkerGenesReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getMyLooms(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getMyLooms",
-            s__pb2.MyLoomsRequest.SerializeToString,
-            s__pb2.MyLoomsReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def translateLassoSelection(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/translateLassoSelection",
-            s__pb2.TranslateLassoSelectionRequest.SerializeToString,
-            s__pb2.TranslateLassoSelectionReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getCellIDs(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getCellIDs",
-            s__pb2.CellIDsRequest.SerializeToString,
-            s__pb2.CellIDsReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def doGeneSetEnrichment(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_stream(
-            request,
-            target,
-            "/scope.Main/doGeneSetEnrichment",
-            s__pb2.GeneSetEnrichmentRequest.SerializeToString,
-            s__pb2.GeneSetEnrichmentReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getVmax(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getVmax",
-            s__pb2.VmaxRequest.SerializeToString,
-            s__pb2.VmaxReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getUUID(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getUUID",
-            s__pb2.UUIDRequest.SerializeToString,
-            s__pb2.UUIDReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getRemainingUUIDTime(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getRemainingUUIDTime",
-            s__pb2.RemainingUUIDTimeRequest.SerializeToString,
-            s__pb2.RemainingUUIDTimeReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def loomUploaded(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/loomUploaded",
-            s__pb2.LoomUploadedRequest.SerializeToString,
-            s__pb2.LoomUploadedReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getMyGeneSets(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getMyGeneSets",
-            s__pb2.MyGeneSetsRequest.SerializeToString,
-            s__pb2.MyGeneSetsReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def deleteUserFile(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/deleteUserFile",
-            s__pb2.DeleteUserFileRequest.SerializeToString,
-            s__pb2.DeleteUserFileReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def downloadSubLoom(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_stream(
-            request,
-            target,
-            "/scope.Main/downloadSubLoom",
-            s__pb2.DownloadSubLoomRequest.SerializeToString,
-            s__pb2.DownloadSubLoomReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def setAnnotationName(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/setAnnotationName",
-            s__pb2.SetAnnotationNameRequest.SerializeToString,
-            s__pb2.SetAnnotationNameReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def setLoomHierarchy(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/setLoomHierarchy",
-            s__pb2.SetLoomHierarchyRequest.SerializeToString,
-            s__pb2.SetLoomHierarchyReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getORCID(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getORCID",
-            s__pb2.getORCIDRequest.SerializeToString,
-            s__pb2.getORCIDReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getORCIDStatus(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getORCIDStatus",
-            s__pb2.getORCIDStatusRequest.SerializeToString,
-            s__pb2.getORCIDStatusReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def setColabAnnotationData(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/setColabAnnotationData",
-            s__pb2.setColabAnnotationDataRequest.SerializeToString,
-            s__pb2.setColabAnnotationDataReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def voteAnnotation(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/voteAnnotation",
-            s__pb2.voteAnnotationRequest.SerializeToString,
-            s__pb2.voteAnnotationReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getNextCluster(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getNextCluster",
-            s__pb2.getNextClusterRequest.SerializeToString,
-            s__pb2.FeatureReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def addNewClustering(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/addNewClustering",
-            s__pb2.AddNewClusteringRequest.SerializeToString,
-            s__pb2.AddNewClusteringReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getGProfilerLink(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getGProfilerLink",
-            s__pb2.GProfilerLinkOutRequest.SerializeToString,
-            s__pb2.GProfilerLinkOutReply.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )

@@ -973,46 +973,6 @@ class SCope(s_pb2_grpc.MainServicer):
         uploadedLooms[request.UUID].add(request.filename)
         return s_pb2.LoomUploadedReply()
 
-    def getGProfilerLink(self, request, context):
-        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
-        cluster_marker_table = loom.get_cluster_marker_table(
-            clustering_id=request.clusteringID, cluster_id=request.clusterID, secret=self.config["dataHashSecret"]
-        )
-        if "avg_logFC" not in cluster_marker_table.columns:
-            error_message = f"Log fold change metric (avg_logFC) is not found in the cluster marker metric table."
-            logger.info(error_message)
-            return s_pb2.GProfilerLinkOutReply(error=s_pb2.ErrorReply(type="Value Error", message=error_message,))
-
-        def get_top_marker_genes_by(n, by="avg_logFC"):
-            top_genes_ranked = cluster_marker_table.sort_values(by=by, ascending=False).head(n=n).index.values
-            return np.insert(top_genes_ranked, 0, f">Top_{n}")
-
-        top_ranked_gene_lists = [
-            get_top_marker_genes_by(n=topNumFeaturesValue) for topNumFeaturesValue in sorted(request.topNumFeatures)
-        ]
-        top_ranked_gene_lists_flattened = np.concatenate(top_ranked_gene_lists).ravel()
-        query_content = "\n".join(top_ranked_gene_lists_flattened)
-
-        gprofile_query_dict = {
-            "organism": request.organism,
-            "query": query_content,
-            "ordered": "true",
-            "all_results": "false",
-            "no_iea": "false",
-            "combined": "true",
-            "measure_underrepresentation": "false",
-            "domain_scope": "annotated",
-            "significance_threshold_method": "g_SCS",
-            "user_threshold": "0.05",
-            "numeric_namespace": "ENTREZGENE_ACC",
-            "sources": "GO:MF,GO:CC,GO:BP,KEGG,TF,REAC,MIRNA,HPA,CORUM,HP,WP",
-            "background": "",
-        }
-
-        gprofile_query_url = "https://biit.cs.ut.ee/gprofiler/gost?" + urlencode(gprofile_query_dict)
-
-        return s_pb2.GProfilerLinkOutReply(url=gprofile_query_url)
-
 
 def serve(run_event, config: Dict[str, Any]) -> None:
     SCope.app_mode = config["app_mode"]
