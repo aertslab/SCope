@@ -237,17 +237,15 @@ class GProfilerPopup extends Component<
     };
 
     setAvailableOrganisms(availableOrganisms) {
-        const _availableOrganisms = availableOrganisms.map(
-            (availableOrganism, idx: number) => {
+        const _availableOrganisms = availableOrganisms
+            .map((availableOrganism, idx: number) => {
                 return {
                     key: idx + 1,
                     text: availableOrganism['display_name'],
                     value: availableOrganism['id'],
                 };
-            }
-        );
-        console.log('>>>>>>>>>>>>>>>>>');
-        console.log(_availableOrganisms);
+            })
+            .sort((a, b) => (a['text'] < b['text'] ? -1 : 1));
         this.setState({ availableOrganisms: _availableOrganisms });
     }
 
