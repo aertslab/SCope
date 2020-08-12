@@ -984,7 +984,7 @@ class Loom:
                 clustering_id=clustering_id, cluster_id=cluster_id, metric_accessor=metric["accessor"]
             )
 
-        def merge_cluster_marker_metrics(metrics):
+        def merge_cluster_marker_metrics(left, right):
             return lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how="outer")
 
         md_clustering = self.get_meta_data_clustering_by_id(id=clustering_id, secret=secret)
