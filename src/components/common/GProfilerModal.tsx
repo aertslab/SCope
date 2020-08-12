@@ -16,6 +16,7 @@ interface IGProfilerPopupState {
     error: string;
     showModal: boolean;
     topNumFeatures: number[];
+    availableOrganisms: object[];
     selectedOrganism: string;
     gProfilerToken: string;
     gProfilerURL: string;
@@ -25,16 +26,11 @@ interface IGProfilerPopupProps {
     featureMetadata: any;
 }
 
-const GPROFILER_AVAILABLE_ORGANISMS = [
-    { key: 1, text: 'Human', value: 'hsapiens' },
-    { key: 2, text: 'Mouse', value: 'mmusculus' },
-    { key: 3, text: 'Drosophila melanogaster', value: 'dmelanogaster' },
-];
-
 const INITIAL_STATE = {
     error: null,
     showModal: false,
     topNumFeatures: [],
+    availableOrganisms: [],
     selectedOrganism: null,
     gProfilerToken: null,
     gProfilerURL: null,
@@ -60,8 +56,9 @@ class GProfilerPopup extends Component<
     }
 
     openModal = () => {
+        const { availableOrganisms, ...rest } = INITIAL_STATE;
         this.setState({
-            ...INITIAL_STATE,
+            ...rest,
             showModal: true,
         });
     };
@@ -71,6 +68,7 @@ class GProfilerPopup extends Component<
     };
 
     handleOpenModal = () => {
+        console.log(this.state);
         this.openModal();
     };
 
@@ -238,8 +236,42 @@ class GProfilerPopup extends Component<
         });
     };
 
+    setAvailableOrganisms(availableOrganisms) {
+        const _availableOrganisms = availableOrganisms.map(
+            (availableOrganism, idx: number) => {
+                return {
+                    key: idx + 1,
+                    text: availableOrganism['display_name'],
+                    value: availableOrganism['id'],
+                };
+            }
+        );
+        console.log('>>>>>>>>>>>>>>>>>');
+        console.log(_availableOrganisms);
+        this.setState({ availableOrganisms: _availableOrganisms });
+    }
+
+    async fetchAvailableOrganisms() {
+        const response = await fetch(
+            'https://biit.cs.ut.ee/gprofiler/api/util/organisms_list/'
+        );
+        return await response.json();
+    }
+
+    async componentDidMount() {
+        const availableOrganisms = await this.fetchAvailableOrganisms();
+        this.setAvailableOrganisms(availableOrganisms);
+    }
+
     render() {
-        const { showModal, selectedOrganism, gProfilerToken } = this.state;
+        const {
+            showModal,
+            selectedOrganism,
+            gProfilerToken,
+            availableOrganisms,
+        } = this.state;
+
+        console.log(this.state);
 
         return (
             <>
@@ -347,7 +379,7 @@ class GProfilerPopup extends Component<
                                     <Form.Field
                                         control={Select}
                                         label='Organism'
-                                        options={GPROFILER_AVAILABLE_ORGANISMS}
+                                        options={this.state.availableOrganisms}
                                         placeholder='Choose an organism'
                                         onChange={this.handleSelectOrganism}
                                         disabled={
