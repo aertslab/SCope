@@ -74,7 +74,7 @@ class LoomFileHandler:
         logger.debug(f"Getting connection for {loom_file_path} in mode {mode}")
         return self.get_loom(loom_file_path=loom_file_path, mode=mode).get_connection()
 
-    def get_loom(self, loom_file_path: Path, mode: str = "r") -> Loom:
+    def get_loom(self, loom_file_path: Path, mode: str = "r") -> Optional[Loom]:
         abs_loom_file_path = self.get_loom_absolute_file_path(loom_file_path)
         with self.file_locks[abs_loom_file_path]:
             if not abs_loom_file_path.exists():
