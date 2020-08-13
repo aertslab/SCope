@@ -21,24 +21,10 @@ repos:
       hooks:
           - id: mypy
             files: ^opt/
-            args:
-                [
-                    --config-file,
-                    opt/pyproject.toml,
-                    --ignore-missing-imports,
-                    opt/scopeserver,
-                    opt/main.py,
-                ]
+            args: [--config-file, opt/pyproject.toml, --ignore-missing-imports]
     - repo: https://github.com/PyCQA/pylint
       rev: pylint-2.5.3
       hooks:
           - id: pylint
             files: ^opt/
-            args:
-                [
-                    --fail-under=6,
-                    --rcfile,
-                    opt/pyproject.toml,
-                    opt/scopeserver,
-                    opt/main.py,
-                ]
+            args: [--fail-under=6, --rcfile, opt/pyproject.toml]
