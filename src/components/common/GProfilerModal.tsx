@@ -21,7 +21,6 @@ interface IGProfilerPopupState {
     selectedOrganism: string;
     selectedSortBy: string;
     gProfilerToken: string;
-    gProfilerURL: string;
 }
 
 interface IGProfilerPopupProps {
@@ -37,7 +36,6 @@ const INITIAL_STATE = {
     selectedOrganism: null,
     selectedSortBy: null,
     gProfilerToken: null,
-    gProfilerURL: null,
 };
 
 class GProfilerPopup extends Component<
@@ -108,23 +106,24 @@ class GProfilerPopup extends Component<
     };
 
     handleSelectOrganism = (e, { value }) => {
-        this.setState({ selectedOrganism: value, gProfilerURL: null });
+        this.setState({ selectedOrganism: value });
     };
 
     handleSelectSortBy = (e, { value }) => {
-        this.setState({ selectedSortBy: value, gProfilerURL: null });
+        this.setState({ selectedSortBy: value });
     };
 
     handleChangeToken = (e, { value }) => {
         this.setState({
             selectedOrganism: null,
             gProfilerToken: value,
-            gProfilerURL: null,
         });
     };
 
-    handleClickGotoGProfilerURL = () => {
-        window.open(this.state.gProfilerURL);
+    handleClickGotoGProfilerURL = async () => {
+        const gProfilerLink = await this.handleClickCreateGProfilerLink();
+        if (gProfilerLink === null) return;
+        window.open(gProfilerLink);
     };
 
     buildMetricTable = () => {
@@ -213,7 +212,6 @@ class GProfilerPopup extends Component<
         ) {
             this.setState({
                 error: 'Please select an organism',
-                gProfilerURL: null,
             });
             return;
         }
@@ -221,7 +219,6 @@ class GProfilerPopup extends Component<
             this.setState({
                 error:
                     'No gene list selected. One gene list is at least required. ',
-                gProfilerURL: null,
             });
             return;
         }
@@ -229,7 +226,6 @@ class GProfilerPopup extends Component<
             this.setState({
                 error:
                     'No gene list selected. One gene list is at least required. ',
-                gProfilerURL: null,
             });
             return;
         }
@@ -251,13 +247,10 @@ class GProfilerPopup extends Component<
             this.setState({
                 error:
                     'Too many genes in total. Try to select a combination of gene lists with fewer genes.',
-                gProfilerURL: null,
             });
-            return;
+            return null;
         }
-        this.setState({
-            gProfilerURL: gProfilerLink,
-        });
+        return gProfilerLink;
     };
 
     setAvailableOrganisms(availableOrganisms) {
@@ -349,7 +342,6 @@ class GProfilerPopup extends Component<
                                                                     value !=
                                                                     topNumFeaturesValue
                                                             ),
-                                                            gProfilerURL: null,
                                                         });
                                                     } else {
                                                         this.setState({
@@ -358,7 +350,6 @@ class GProfilerPopup extends Component<
                                                                     .topNumFeatures,
                                                                 topNumFeaturesValue,
                                                             ],
-                                                            gProfilerURL: null,
                                                         });
                                                     }
                                                 };
@@ -441,23 +432,13 @@ class GProfilerPopup extends Component<
                         </Modal.Description>
                     </Modal.Content>
                     <Modal.Actions>
-                        {this.state.gProfilerURL == null ? (
-                            <Button
-                                type='button'
-                                value='create-gprofiler-link'
-                                onClick={this.handleClickCreateGProfilerLink}
-                                secondary>
-                                {'Create Link'}
-                            </Button>
-                        ) : (
-                            <Button
-                                type='button'
-                                value='goto-gprofiler'
-                                onClick={this.handleClickGotoGProfilerURL}
-                                primary>
-                                {'Go to g:Profiler'}
-                            </Button>
-                        )}
+                        <Button
+                            type='button'
+                            value='goto-gprofiler'
+                            onClick={this.handleClickGotoGProfilerURL}
+                            primary>
+                            {'Go to g:Profiler'}
+                        </Button>
                     </Modal.Actions>
                 </Modal>
             </>
