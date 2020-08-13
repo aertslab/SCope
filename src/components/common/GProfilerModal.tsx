@@ -225,14 +225,14 @@ class GProfilerPopup extends Component<
         if (topNumFeatures.length == 0) {
             this.setState({
                 error:
-                    'No gene list selected. One gene list is at least required. ',
+                    'No gene list selected. At least one gene list is required.',
             });
             return null;
         }
         if (topNumFeatures.length == 0) {
             this.setState({
                 error:
-                    'No gene list selected. One gene list is at least required. ',
+                    'No gene list selected. At least one gene list is required.',
             });
             return null;
         }
