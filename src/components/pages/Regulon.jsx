@@ -55,7 +55,7 @@ export default class Regulon extends Component {
 
         return (
             <Grid className='flexDisplay'>
-                <FeatureSearch feature='regulon' singleFeature={true}/>
+                <FeatureSearch feature='regulon' singleFeature={true} />
                 <Grid.Row columns='4' centered>
                     {featureThreshold}
                     <Grid.Column>&nbsp;</Grid.Column>
