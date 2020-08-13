@@ -23,19 +23,37 @@ import './FeatureSearchBox.css';
 declare const DEBUG: boolean;
 
 interface FeatureSearchBoxProps {
+    /** Index into the list of these boxes */
     field: number;
+    /** The feature type to search for */
     type: FeatureType;
+    /** Restrict the dropdown to _only_ this initialised feature type */
     singleFeature: boolean;
+    /** Used to en/dis-able the entire search box */
     enabled: boolean;
 }
 
 interface FeatureSearchBoxState {
+    /** Currently fetching search results from the server */
     isLoading: boolean;
+    /** The search results */
     results: Array<StrictSearchCategoryProps>;
+    /** Current value of the text input (the search term; or the result) */
     value: string;
+    /** The current feature type being filtered for */
     type: FeatureType;
 }
 
+/**
+ * Initialise an "empty" categorical results array.
+ */
+function emptyResults(): Array<StrictSearchCategoryProps> {
+    return [{ name: '', results: [] }];
+}
+
+/**
+ * A text search input for (selectable categories) properties on the dataset.
+ */
 class FeatureSearchBox extends React.Component<
     FeatureSearchBoxProps,
     FeatureSearchBoxState
@@ -46,7 +64,7 @@ class FeatureSearchBox extends React.Component<
         super(props);
         this.state = {
             isLoading: false,
-            results: [{ name: '', results: [] }],
+            results: emptyResults(),
             value: '',
             type: this.props.type,
         };
@@ -95,7 +113,7 @@ class FeatureSearchBox extends React.Component<
     resetComponent() {
         this.setState({
             isLoading: false,
-            results: [{ name: '', results: [] }],
+            results: emptyResults(),
         });
         BackendAPI.setActiveFeature(
             this.props.field,
@@ -254,7 +272,7 @@ class FeatureSearchBox extends React.Component<
         } else {
             this.setState({
                 isLoading: false,
-                results: [],
+                results: emptyResults(),
             });
         }
     }

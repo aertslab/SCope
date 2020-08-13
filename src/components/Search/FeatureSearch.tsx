@@ -6,7 +6,9 @@ import { FeatureType } from '../../features';
 import { FeatureSearchBox } from './FeatureSearchBox';
 
 interface FeatureSearchProps {
+    /** Use this to initialise the feature types dropdown */
     feature: FeatureType;
+    /** Use this to restrict selectable feature types (to only `feature`) */
     singleFeature: boolean;
 }
 
