@@ -7,7 +7,7 @@ import HTML5Backend, { NativeTypes } from 'react-dnd-html5-backend';
 import { Accordion, Grid, Menu, Icon, Dropdown } from 'semantic-ui-react';
 import { BackendAPI } from '../common/API';
 import Annotation from '../common/Annotation';
-import FeatureSearchBox from '../common/FeatureSearchBox';
+import { FeatureSearch } from '../Search';
 import ViewerSidebar from '../common/ViewerSidebar';
 import ViewerToolbar from '../common/ViewerToolbar';
 import AnnotationDropContainer from '../common/AnnotationDropContainer';
@@ -434,22 +434,12 @@ class Compare extends Component {
             );
         };
 
-        let featureSearch = _.times(3, (i) => (
-            <Grid.Column key={i}>
-                <FeatureSearchBox
-                    field={i}
-                    color={colors[i]}
-                    type='all'
-                    value={activeFeatures[i] ? activeFeatures[i].feature : ''}
-                />
-            </Grid.Column>
-        ));
-
         if (!multiLoom[0]) return <div>Select the dataset to be analyzed</div>;
 
         return (
             <Grid>
-                <Grid.Row columns='5'>
+                <FeatureSearch feature='all'/>
+                <Grid.Row columns={3} stretched className='viewerRow'>
                     <Grid.Column width={2}>
                         Number of displays: &nbsp;
                         <Dropdown
@@ -479,12 +469,6 @@ class Compare extends Component {
                             defaultValue={configuration}
                             onChange={this.configurationChanged.bind(this)}
                         />
-                    </Grid.Column>
-                    {featureSearch}
-                    <Grid.Column>&nbsp;</Grid.Column>
-                </Grid.Row>
-                <Grid.Row columns={3} stretched className='viewerRow'>
-                    <Grid.Column width={2}>
                         <Accordion styled>{annotationTabs()}</Accordion>
                         <br />
                         <ViewerToolbar />

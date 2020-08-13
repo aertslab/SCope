@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { Segment, Grid } from 'semantic-ui-react';
-import FeatureSearchBox from '../common/FeatureSearchBox';
+import { FeatureSearch } from '../Search';
 import { BackendAPI } from '../common/API';
 import Viewer from '../common/Viewer';
 import ViewerSidebar from '../common/ViewerSidebar';
@@ -39,17 +39,6 @@ export default class Regulon extends Component {
             geneFeatures,
             sidebar,
         } = this.state;
-        let featureSearch = _.times(3, (i) => (
-            <Grid.Column key={i}>
-                <FeatureSearchBox
-                    field={i}
-                    color={colors[i]}
-                    type='regulon'
-                    selectLocked={true}
-                    value={activeFeatures[i] ? activeFeatures[i].feature : ''}
-                />
-            </Grid.Column>
-        ));
         let featureThreshold = _.times(3, (i) => (
             <Grid.Column key={i} className='flexDisplay' stretched>
                 <Histogram
@@ -66,10 +55,7 @@ export default class Regulon extends Component {
 
         return (
             <Grid className='flexDisplay'>
-                <Grid.Row columns='4' centered>
-                    {featureSearch}
-                    <Grid.Column>&nbsp;</Grid.Column>
-                </Grid.Row>
+                <FeatureSearch feature='regulon' singleFeature={true}/>
                 <Grid.Row columns='4' centered>
                     {featureThreshold}
                     <Grid.Column>&nbsp;</Grid.Column>
