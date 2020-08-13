@@ -187,7 +187,7 @@ class GProfilerPopup extends Component<
             background: '',
         };
 
-        var gProfilerQueryString = Object.keys(gProfilerQueryData)
+        const gProfilerQueryString = Object.keys(gProfilerQueryData)
             .map((key) => {
                 return (
                     encodeURIComponent(key) +
