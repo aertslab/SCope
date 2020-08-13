@@ -18,7 +18,6 @@ import pickle
 import requests
 import uuid
 import functools
-from urllib.parse import urlencode
 from typing import DefaultDict, Set, List, Dict, Any, Tuple
 from collections import OrderedDict, defaultdict, deque
 from methodtools import lru_cache
