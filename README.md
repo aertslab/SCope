@@ -92,6 +92,8 @@ git clone https://github.com/aertslab/SCope "${LOCAL_SCOPE_REPO}"
 cd "${LOCAL_SCOPE_REPO}"
 # Install SCope.
 npm install
+# Install pre-push checks for linting etc.
+pre-commit install -t pre-push
 ```
 
 2. Run,
@@ -112,6 +114,7 @@ npm run dev
 ### Configuration file (`config.json`)
 
 Keys:
-* `data`: This is a directory containing data files (e.g. the `motd.txt` message of the day).
-  Can be an absolute path or a relative path from where you start SCope. By default it is
-  `./data/`.
+
+-   `data`: This is a directory containing data files (e.g. the `motd.txt` message of the day).
+    Can be an absolute path or a relative path from where you start SCope. By default it is
+    `./data/`.
