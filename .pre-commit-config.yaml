@@ -28,3 +28,17 @@ repos:
           - id: pylint
             files: ^opt/
             args: [--fail-under=6, --rcfile, opt/pyproject.toml]
+    - repo: https://github.com/pre-commit/mirrors-eslint
+      rev: 'v6.8.0'
+      hooks:
+          - id: eslint
+            language_version: 11.15.0
+            additional_dependencies:
+                - eslint@6.8.0
+                - eslint-config-prettier@6.11.0
+                - eslint-plugin-prettier@3.1.4
+                - eslint-plugin-react@7.20.5
+                - eslint-scope@5.1.0 #dep
+            files: \.[jt]sx?$ # *.js, *.jsx, *.ts and *.tsx
+            types: [file]
+            args: [--fix]
