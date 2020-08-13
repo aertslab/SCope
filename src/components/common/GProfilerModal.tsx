@@ -81,7 +81,6 @@ class GProfilerPopup extends Component<
     };
 
     handleOpenModal = () => {
-        console.log(this.state);
         this.openModal();
     };
 
@@ -292,8 +291,6 @@ class GProfilerPopup extends Component<
             selectedSortBy,
             gProfilerToken,
         } = this.state;
-
-        console.log(this.state);
 
         return (
             <>
