@@ -1146,10 +1146,6 @@ class API {
     getColors() {
         return this.colors;
     }
-
-    /**
-     * Vendor
-     */
 }
 
 export let BackendAPI = new API();
