@@ -1,0 +1,44 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v2.4.0
+      hooks:
+          - id: trailing-whitespace
+          - id: end-of-file-fixer
+          - id: check-yaml
+          - id: check-added-large-files
+    - repo: https://github.com/psf/black
+      rev: 19.10b0
+      hooks:
+          - id: black
+            language_version: python3.7
+            files: ^opt/
+            types: [python]
+            args: [--config, opt/pyproject.toml, -v]
+    - repo: https://github.com/pre-commit/mirrors-mypy
+      rev: v0.770
+      hooks:
+          - id: mypy
+            files: ^opt/
+            args:
+                [
+                    --config-file,
+                    opt/pyproject.toml,
+                    --ignore-missing-imports,
+                    opt/scopeserver,
+                    opt/main.py,
+                ]
+    - repo: https://github.com/PyCQA/pylint
+      rev: pylint-2.5.3
+      hooks:
+          - id: pylint
+            files: ^opt/
+            args:
+                [
+                    --fail-under=6,
+                    --rcfile,
+                    opt/pyproject.toml,
+                    opt/scopeserver,
+                    opt/main.py,
+                ]
