@@ -10,6 +10,7 @@ import {
     Input,
     Select,
     Label,
+    Dropdown,
 } from 'semantic-ui-react';
 
 interface IGProfilerPopupState {
@@ -406,7 +407,9 @@ class GProfilerPopup extends Component<
                                         value={selectedSortBy}
                                     />
                                     <Form.Field
-                                        control={Select}
+                                        control={Dropdown}
+                                        search
+                                        selection
                                         label='Organism'
                                         options={this.state.availableOrganisms}
                                         placeholder='Choose an organism'
