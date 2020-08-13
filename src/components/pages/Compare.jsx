@@ -438,7 +438,7 @@ class Compare extends Component {
 
         return (
             <Grid>
-                <FeatureSearch feature='all'/>
+                <FeatureSearch feature='all' />
                 <Grid.Row columns={3} stretched className='viewerRow'>
                     <Grid.Column width={2}>
                         Number of displays: &nbsp;
