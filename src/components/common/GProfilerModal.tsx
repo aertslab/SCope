@@ -69,7 +69,7 @@ class GProfilerPopup extends Component<
     }
 
     openModal = () => {
-        const { availableOrganisms, ...rest } = INITIAL_STATE;
+        const { availableOrganisms, error, ...rest } = INITIAL_STATE;
         this.setState({
             ...rest,
             showModal: true,
@@ -273,15 +273,24 @@ class GProfilerPopup extends Component<
     }
 
     async fetchAvailableOrganisms() {
-        const response = await fetch(
-            'https://biit.cs.ut.ee/gprofiler/api/util/organisms_list/'
-        );
-        return await response.json();
+        let response = null;
+        try {
+            response = await fetch(
+                'https://biit.cs.ut.ee/gprofiler/api/util/organisms_list/'
+            );
+            return response.json();
+        } catch (err) {
+            this.setState({
+                error: `Unable to fetch list of organisms: ${err}`,
+            });
+        }
+        return response;
     }
 
     async componentDidMount() {
         const availableOrganisms = await this.fetchAvailableOrganisms();
-        this.setAvailableOrganisms(availableOrganisms);
+        if (availableOrganisms !== null)
+            this.setAvailableOrganisms(availableOrganisms);
     }
 
     render() {
