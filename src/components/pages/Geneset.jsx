@@ -11,7 +11,6 @@ import {
     Input,
     TextArea,
 } from 'semantic-ui-react';
-import FeatureSearchBox from '../common/FeatureSearchBox';
 import { BackendAPI } from '../common/API';
 import Viewer from '../common/Viewer';
 import ViewerSidebar from '../common/ViewerSidebar';
@@ -165,13 +164,6 @@ class Geneset extends Component {
                         />
                     </Grid.Column>
                     <Grid.Column width='7'>
-                        {/*
-                        <FeatureSearchBox type='gene' size="huge" onResultSelect={(result) => {
-                            let geneset = this.state.geneset;
-                            geneset.push(result.title);
-                            this.setState({geneset});
-                        }} />
-                        */}
                         <TextArea
                             placeholder='Gene1&#10;Gene2&#10;Gene3&#10;...'
                             rows={4}
