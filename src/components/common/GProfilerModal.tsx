@@ -122,7 +122,7 @@ class GProfilerPopup extends Component<
 
     handleClickGotoGProfilerURL = async () => {
         const gProfilerLink = await this.handleClickCreateGProfilerLink();
-        if (gProfilerLink === null) return;
+        if (gProfilerLink === null || typeof gProfilerLink !== 'string') return;
         window.open(gProfilerLink);
     };
 
@@ -206,6 +206,12 @@ class GProfilerPopup extends Component<
             selectedOrganism,
             selectedSortBy,
         } = this.state;
+        if (selectedSortBy === null) {
+            this.setState({
+                error: 'Please select a sort column',
+            });
+            return null;
+        }
         if (
             (gProfilerToken === null || gProfilerToken === '') &&
             selectedOrganism === null
@@ -213,21 +219,22 @@ class GProfilerPopup extends Component<
             this.setState({
                 error: 'Please select an organism',
             });
-            return;
+            return null;
+        }
+
+        if (topNumFeatures.length == 0) {
+            this.setState({
+                error:
+                    'No gene list selected. One gene list is at least required. ',
+            });
+            return null;
         }
         if (topNumFeatures.length == 0) {
             this.setState({
                 error:
                     'No gene list selected. One gene list is at least required. ',
             });
-            return;
-        }
-        if (topNumFeatures.length == 0) {
-            this.setState({
-                error:
-                    'No gene list selected. One gene list is at least required. ',
-            });
-            return;
+            return null;
         }
 
         const sortedFeatureMetricTable = this.featureMetricTable.sort(
