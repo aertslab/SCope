@@ -1,0 +1,16 @@
+.noPadding {
+    padding: 5px !important;
+}
+
+.feature-search-input {
+    display: inline-block;
+    width: 69.5%;
+}
+
+.feature-search-input > .input {
+    width: 100%;
+}
+
+.feature-search-input > .input > input{
+    border-radius: 3px !important;
+}
