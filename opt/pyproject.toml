@@ -51,6 +51,7 @@ requests = "^2.22.0"
 fastapi = "^0.54.1"
 hypercorn = "^0.9.5"
 methodtools = "^0.1.2"
+pre-commit = "^2.6.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
