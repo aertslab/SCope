@@ -1,5 +1,10 @@
 # Changelog
 
+Unreleased
+
+    -   Add ability to search for categories in loom annotations
+    -   Removed cross-species search functionality for Drosophila datasets
+
 March 3, 2020
 
 -   Version 1.8.2

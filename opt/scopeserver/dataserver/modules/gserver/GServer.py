@@ -33,6 +33,7 @@ from scopeserver.dataserver.utils import gene_set_enrichment as _gse
 from scopeserver.dataserver.utils import cell_color_by_features as ccbf
 from scopeserver.dataserver.utils import constant
 from scopeserver.dataserver.utils import search_space as ss
+from scopeserver.dataserver.utils.search import get_search_results
 from scopeserver.dataserver.utils.loom import Loom
 
 from pyscenic.genesig import GeneSignature
@@ -61,7 +62,6 @@ class SCope(s_pb2_grpc.MainServicer):
         self.dfh = dfh.DataFileHandler()
         self.lfh = lfh.LoomFileHandler()
 
-        self.dfh.load_gene_mappings()
         self.dfh.set_global_data()
         self.lfh.set_global_data()
         self.dfh.read_UUID_db()
@@ -139,171 +139,8 @@ class SCope(s_pb2_grpc.MainServicer):
         logger.debug("Searching for {0}".format(query))
         start_time = time.time()
 
-        if query.startswith("hsap\\"):
-            search_space = loom.hsap_ss
-            cross_species = "hsap"
-            query = query[5:]
-        elif query.startswith("mmus\\"):
-            search_space = loom.mmus_ss
-            cross_species = "mmus"
-            query = query[5:]
-        else:
-            search_space = loom.ss
-            cross_species = ""
-
-        # Filter the genes by the query
-
-        # Allow caps innsensitive searching, minor slowdown
-        start_time = time.time()
-        res = []
-
-        queryCF = query.casefold()
-        res = [x for x in search_space.keys() if queryCF in x[0]]
-
-        perfect_match: List[object] = []
-        good_match: List[object] = []
-        bad_match: List[object] = []
-        no_match: List[object] = []
-
-        for n, r in enumerate(res):
-            if r[1] == query or r[0] == queryCF:
-                perfect_match.append(r)
-                continue
-            if r[1].startswith(query) or r[1].endswith(query) or r[0].startswith(queryCF) or r[0].endswith(queryCF):
-                good_match.append(r)
-                continue
-            if query in r[0]:
-                bad_match.append(r)
-                continue
-
-        if len(query) == 1:
-            res = sorted(perfect_match)
-        else:
-            res = sorted(perfect_match) + sorted(good_match) + sorted(bad_match) + sorted(no_match)
-
-        collapsedResults: Dict[Any, Any] = OrderedDict()
-        if cross_species == "":
-            for r in res:
-                if type(search_space[r]) == list:
-                    search_space[r] = tuple(search_space[r])
-                if (search_space[r], r[2]) not in collapsedResults.keys():
-                    collapsedResults[(search_space[r], r[2])] = [r[1]]
-                else:
-                    collapsedResults[(search_space[r], r[2])].append(r[1])
-        elif cross_species == "hsap":
-            for r in res:
-                for dg in self.dfh.hsap_to_dmel_mappings[search_space[r]]:
-                    if (dg[0], r[2]) not in collapsedResults.keys():
-                        collapsedResults[(dg[0], r[2])] = (r[1], dg[1])
-        elif cross_species == "mmus":
-            for r in res:
-                for dg in self.dfh.mmus_to_dmel_mappings[search_space[r]]:
-                    if (dg[0], r[2]) not in collapsedResults.keys():
-                        collapsedResults[(dg[0], r[2])] = (r[1], dg[1])
-
-        descriptions = {
-            x: ""
-            for x in collapsedResults.keys()
-            if x[1] not in ["region_gene_link", "regulon_target", "marker_gene", "cluster_annotation"]
-        }
-
-        for r in list(collapsedResults.keys()):
-            if cross_species == "":
-                description = ""
-                synonyms = sorted([x for x in collapsedResults[r]])
-                try:
-                    synonyms.remove(r[0])
-                except ValueError:
-                    pass
-                if r[1] == "regulon_target":
-                    for regulon in r[0]:
-                        description = f"{collapsedResults[r][0]} is a target of {regulon}"
-                        if (regulon, "regulon") not in collapsedResults.keys():
-                            collapsedResults[(regulon, "regulon")] = collapsedResults[r][0]
-                            descriptions[(regulon, "regulon")] = ""
-                        if descriptions[(regulon, "regulon")] != "":
-                            descriptions[(regulon, "regulon")] += ", "
-                        descriptions[(regulon, "regulon")] += description
-                    del collapsedResults[r]
-
-                elif r[1] == "cluster_annotation":
-                    for cluster in r[0]:
-                        clustering = int(cluster.split("_")[0])
-                        cluster = int(cluster.split("_")[1])
-                        clustering_name = loom.get_meta_data_clustering_by_id(
-                            clustering, secret=self.config["dataHashSecret"]
-                        )["name"]
-                        cluster = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(
-                            clustering, cluster, secret=self.config["dataHashSecret"]
-                        )
-                        cluster_name = cluster["description"]
-                        description = f"{collapsedResults[r][0]} is a suggested annotation of {cluster_name}"
-                        if (cluster_name, f"Clustering: {clustering_name}") not in collapsedResults.keys():
-                            collapsedResults[(cluster_name, f"Clustering: {clustering_name}")] = collapsedResults[r][0]
-                            descriptions[(cluster_name, f"Clustering: {clustering_name}")] = ""
-                        if descriptions[(cluster_name, f"Clustering: {clustering_name}")] != "":
-                            descriptions[(cluster_name, f"Clustering: {clustering_name}")] += ", "
-                        descriptions[(cluster_name, f"Clustering: {clustering_name}")] += description
-                    del collapsedResults[r]
-
-                elif r[1] == "marker_gene":
-                    for cluster in r[0]:
-                        clustering = int(cluster.split("_")[0])
-                        cluster = int(cluster.split("_")[1])
-                        clustering_name = loom.get_meta_data_clustering_by_id(
-                            clustering, secret=self.config["dataHashSecret"]
-                        )["name"]
-                        cluster = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(
-                            clustering, cluster, secret=self.config["dataHashSecret"]
-                        )
-                        cluster_name = cluster["description"]
-                        description = f"{collapsedResults[r][0]} is a marker of {cluster_name}"
-                        if (cluster_name, f"Clustering: {clustering_name}") not in collapsedResults.keys():
-                            collapsedResults[(cluster_name, f"Clustering: {clustering_name}")] = collapsedResults[r][0]
-                            descriptions[(cluster_name, f"Clustering: {clustering_name}")] = ""
-                        if descriptions[(cluster_name, f"Clustering: {clustering_name}")] != "":
-                            descriptions[(cluster_name, f"Clustering: {clustering_name}")] += ", "
-                        descriptions[(cluster_name, f"Clustering: {clustering_name}")] += description
-                    del collapsedResults[r]
-                elif r[1] == "region_gene_link":
-                    for region in r[0]:
-                        description = f"{region} is linked to {collapsedResults[r][0]}"
-                        if (region, "gene") not in collapsedResults.keys():
-                            collapsedResults[(region, "gene")] = collapsedResults[r][0]
-                            descriptions[(region, "gene")] = ""
-                        if descriptions[(region, "gene")] != "":
-                            descriptions[(region, "gene")] += ", "
-                        descriptions[(region, "gene")] += description
-                    del collapsedResults[r]
-                elif len(synonyms) > 0:
-                    if description != "":
-                        description += ", "
-                    description += "Synonym of: {0}".format(", ".join(synonyms))
-                    descriptions[r] = description
-
-            elif cross_species == "hsap":
-                logger.debug(f"Performing hsap cross species search: {query}")
-                description = "Orthologue of {0}, {1:.2f}% identity (Human -> Drosophila)".format(
-                    collapsedResults[r][0], collapsedResults[r][1]
-                )
-                descriptions[r] = description
-            elif cross_species == "mmus":
-                logger.debug(f"Performing mmus cross species search: {query}")
-                description = "Orthologue of {0}, {1:.2f}% identity (Mouse -> Drosophila)".format(
-                    collapsedResults[r][0], collapsedResults[r][1]
-                )
-                descriptions[r] = description
-
-            # if mapping[result] != result: change title and description to indicate synonym
-
-        logger.debug("{0} genes matching '{1}'".format(len(res), query))
-        logger.debug("{0:.5f} seconds elapsed ---".format(time.time() - start_time))
-        final_res = {
-            "feature": [r[0] for r in collapsedResults.keys()],
-            "featureType": [r[1] for r in collapsedResults.keys()],
-            "featureDescription": [descriptions[r] for r in collapsedResults.keys()],
-        }
-        return final_res
+        features = get_search_results(query, loom, self.config["dataHashSecret"])
+        return features
 
     @staticmethod
     def get_vmax(vals: np.ndarray) -> Tuple[np.float, np.float]:

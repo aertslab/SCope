@@ -18,15 +18,11 @@ setup(
     data_files=[
         (
             "scopeserver/dataserver/data/gene_mappings",
-            [
-                "scopeserver/dataserver/data/gene_mappings/terminal_mappings.pickle",
-                "scopeserver/dataserver/data/gene_mappings/hsap_to_dmel_mappings.pickle",
-                "scopeserver/dataserver/data/gene_mappings/mmus_to_dmel_mappings.pickle",
-            ],
+            ["scopeserver/dataserver/data/gene_mappings/terminal_mappings.pickle",],
         )
     ]
     + get_bindserver_files(),
-    version="1.8.1",
+    version="1.8.2",
     description="SCope Data Server: a server for the SCope Client",
     url="",
     author="Maxime De Waegeneer",

@@ -49,20 +49,19 @@ class Loom:
             with open(self.ss_pickle_name, "rb") as fh:
                 logger.debug(f"Loading prebuilt SS for {file_path} from {self.ss_pickle_name}")
                 self.ss = pickle.load(fh)
+                if self.ss.search_space_version < ss.CURRENT_SS_VERISON:
+                    raise AttributeError(
+                        f"Cached search space is an old version or does not exist, upgrading to {ss.CURRENT_SS_VERISON}"
+                    )
+                self.ss.loom = self
+                self.ss.dfh = dfh.DataFileHandler()
 
-        except (EOFError, FileNotFoundError):
-            logger.debug(f"Building Search Spaces for {file_path}")
-            if self.species == "dmel":
-                logger.debug(f"Building hsap Search Spaces for {file_path}")
-                self.hsap_ss = ss.SearchSpace(loom=self, cross_species="hsap").build()
-                logger.debug(f"Building mmus Search Spaces for {file_path}")
-
-                self.mmus_ss = ss.SearchSpace(loom=self, cross_species="mmus").build()
-            logger.debug(f"Building self Search Spaces for {file_path}")
-
+        except (EOFError, FileNotFoundError, AttributeError, TypeError):
+            logger.debug(f"Building Search Space for {file_path}")
             self.ss = ss.SearchSpace(loom=self).build()
             self.ss.loom = None  # Remove loom connection to enable pickling
-            logger.debug(f"Built all Search Spaces for {file_path}")
+            self.ss.dfh = None
+            logger.debug(f"Built Search Space for {file_path}")
             with open(self.ss_pickle_name, "wb") as fh:
                 logger.debug(f"Writing prebuilt SS for {file_path} to {self.ss_pickle_name}")
                 pickle.dump(self.ss, fh)
@@ -672,11 +671,11 @@ class Loom:
         return self.loom_connection.ra.Gene.astype(str)
 
     @lru_cache(maxsize=32)
-    def infer_species(self) -> Tuple[str, Any]:
+    def infer_species(self) -> Tuple[str, Dict[str, str]]:
         genes = set(self.get_genes())
         maxPerc = 0.0
         maxSpecies = ""
-        mappings = {"dmel": dfh.DataFileHandler.dmel_mappings}
+        mappings = {"dmel": self.dfh.dmel_mappings}
         for species in mappings.keys():
             intersect = genes.intersection(mappings[species].keys())
             if (len(intersect) / len(genes)) > maxPerc:

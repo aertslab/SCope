@@ -1,19 +1,28 @@
 import functools
 import re
-from typing import Any
+from typing import Any, Dict, NamedTuple, Optional, List
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
 import logging
 
 logger = logging.getLogger(__name__)
 
+CURRENT_SS_VERISON = 0
 
-class SearchSpace(dict):
+
+class SSKey(NamedTuple):
+    element: str
+    element_type: str
+
+
+SSValue = List[str]
+SearchSpaceDict = Dict[SSKey, SSValue]
+
+
+class SearchSpace:
 
     """
     SearchSpace class is used to build the search space that contain all the queryable elements:
-    - Homo sapiens to Drosophila melanogaster gene mappings
-    - Mus musculus to Drosophila melanogaster gene mappings
     - Genes
     - Clusterings (inferred from e.g.: Seurat, ...)
     - Regulons (inferred from SCENIC)
@@ -21,67 +30,56 @@ class SearchSpace(dict):
     - Metrics
     """
 
-    def __init__(self, loom, cross_species=""):
-        dict.__init__(self)
+    def __init__(self, loom) -> None:
         self.loom = loom
-        self.cross_species = cross_species
+        self.search_space_dict: SearchSpaceDict = {}
+        self.search_space_version: int = CURRENT_SS_VERISON
+        self.species: str
+        self.gene_mappings: Dict[str, str]
         self.species, self.gene_mappings = loom.infer_species()
-        if self.species != "dmel":
-            self.cross_species = ""
+        self.dfh: Optional[dfh.DataFileHandler] = dfh.DataFileHandler()
 
     def add_element(self, element: str, element_type: str) -> None:
-        if element_type == "gene" and self.cross_species == "" and len(self.gene_mappings) > 0:
+        key = SSKey(element, element_type)
+        if element_type == "gene" and len(self.gene_mappings) > 0:
             if self.gene_mappings[element] != element:
-                self[("{0}".format(str(element)).casefold(), element, element_type)] = self.gene_mappings[element]
+                self.search_space_dict[key] = [self.gene_mappings[element]]
             else:
-                self[(element.casefold(), element, element_type)] = element
+                self.search_space_dict[key] = [element]
         else:
-            self[(element.casefold(), element, element_type)] = element
+            self.search_space_dict[key] = [element]
 
     def add_elements(self, elements: Any, element_type: Any) -> None:
         for element in elements:
             self.add_element(element=element, element_type=element_type)
 
     def build(self):
-        if self.cross_species != "":
-            self.add_cross_species_genes()
-        else:
-            if self.loom.has_meta_data():
-                self.meta_data = self.loom.get_meta_data()
-            # Add genes to the search space
-            self.add_genes()
-            # Add clusterings to the search space if present in .loom
-            if self.loom.has_md_clusterings():
-                self.add_clusterings()
-            # Add regulons to the search space if present in .loom
-            if self.loom.has_regulons_AUC():
-                self.add_regulons()
-            # Add annotations to the search space if present in .loom
-            if self.loom.has_md_annotations():
-                self.add_annotations()
-            # Add metrics to the search space if present in .loom
-            if self.loom.has_md_metrics():
-                self.add_metrics()
-            if self.loom.has_region_gene_links():
-                self.add_markers(element_type="region_gene_link")
+        if self.loom.has_meta_data():
+            self.meta_data = self.loom.get_meta_data()
+        # Add genes to the search space
+        self.add_genes()
+        # Add clusterings to the search space if present in .loom
+        if self.loom.has_md_clusterings():
+            self.add_clusterings()
+        # Add regulons to the search space if present in .loom
+        if self.loom.has_regulons_AUC():
+            self.add_regulons()
+        # Add annotations to the search space if present in .loom
+        if self.loom.has_md_annotations():
+            self.add_annotations()
+        # Add metrics to the search space if present in .loom
+        if self.loom.has_md_metrics():
+            self.add_metrics()
+        if self.loom.has_region_gene_links():
+            self.add_markers(element_type="region_gene_link")
         return self
-
-    def add_cross_species_genes(self) -> None:
-        if self.cross_species == "hsap" and self.species == "dmel":
-            self.add_elements(elements=dfh.DataFileHandler.hsap_to_dmel_mappings.keys(), element_type="gene")
-        elif self.cross_species == "mmus" and self.species == "dmel":
-            self.add_elements(elements=dfh.DataFileHandler.mmus_to_dmel_mappings.keys(), element_type="gene")
 
     def add_genes(self) -> None:
         # Add genes to search space
         if len(self.gene_mappings) > 0:
             genes = set(self.loom.get_genes())
             shrink_mappings = set(
-                [
-                    x
-                    for x in dfh.DataFileHandler.dmel_mappings.keys()
-                    if x in genes or dfh.DataFileHandler.dmel_mappings[x] in genes
-                ]
+                [x for x in self.dfh.dmel_mappings.keys() if x in genes or self.dfh.dmel_mappings[x] in genes]  # type: ignore
             )
             self.add_elements(elements=shrink_mappings, element_type="gene")
         else:
@@ -107,10 +105,11 @@ class SearchSpace(dict):
                     continue
                 annotations = [f'{an["data"]["annotation_label"]} ({an["data"]["obo_id"]})' for an in annotations]
                 for annotation in annotations:
-                    if (annotation.casefold(), annotation, element_type) in self.keys():
-                        self[(annotation.casefold(), annotation, element_type)].append(f"{clusteringID}_{clusterID}")
+                    key = SSKey(annotation, element_type)
+                    if (annotation, element_type) in self.search_space_dict.keys():
+                        self.search_space_dict[key].append(f"{clusteringID}_{clusterID}")
                     else:
-                        self[(annotation.casefold(), annotation, element_type)] = [f"{clusteringID}_{clusterID}"]
+                        self.search_space_dict[key] = [f"{clusteringID}_{clusterID}"]
 
     def add_regulons(self) -> None:
         if self.loom.has_motif_and_track_regulons():
@@ -137,10 +136,11 @@ class SearchSpace(dict):
             for regulon in regulons:
                 genes = self.loom.get_regulon_genes(regulon=regulon)
                 for gene in genes:
-                    if (gene.casefold(), gene, element_type) in self.keys():
-                        self[(gene.casefold(), gene, element_type)].append(regulon)
+                    key = SSKey(gene, element_type)
+                    if (gene, element_type) in self.search_space_dict.keys():
+                        self.search_space_dict[key].append(regulon)
                     else:
-                        self[(gene.casefold(), gene, element_type)] = [regulon]
+                        self.search_space_dict[key] = [regulon]
         if element_type == "marker_gene":
             searchable_clustering_ids = [
                 x.split("_")[-1] for x in loom.ra.keys() if bool(re.search("ClusterMarkers_[0-9]+$", x))
@@ -150,23 +150,31 @@ class SearchSpace(dict):
                 for cluster in range(len(self.meta_data["clusterings"][clustering]["clusters"])):
                     genes = self.loom.get_cluster_marker_genes(clustering, cluster)
                     for gene in genes:
-                        if (gene.casefold(), gene, element_type) in self.keys():
-                            self[(gene.casefold(), gene, element_type)].append(f"{clustering}_{cluster}")
+                        key = SSKey(gene, element_type)
+                        if (gene, element_type) in self.search_space_dict.keys():
+                            self.search_space_dict[key].append(f"{clustering}_{cluster}")
                         else:
-                            self[(gene.casefold(), gene, element_type)] = [f"{clustering}_{cluster}"]
+                            self.search_space_dict[key] = [f"{clustering}_{cluster}"]
         if element_type == "region_gene_link":
             for n, region in enumerate(self.loom.get_genes()):
                 gene = self.loom.loom_connection.ra.linkedGene[n]
                 if gene != "":
-                    if (gene.casefold(), gene, element_type) in self.keys():
-                        self[(gene.casefold(), gene, element_type)].append(region)
+                    key = SSKey(gene, element_type)
+                    if (gene, element_type) in self.search_space_dict.keys():
+                        self.search_space_dict[key].append(region)
                     else:
-                        self[(gene.casefold(), gene, element_type)] = [region]
+                        self.search_space_dict[key] = [region]
 
     def add_annotations(self) -> None:
         annotations = []
         for annotation in self.meta_data["annotations"]:
             annotations.append(annotation["name"])
+            for category in annotation["values"]:
+                key = SSKey(category, "annotation_category")
+                if key in self.search_space_dict:
+                    self.search_space_dict[key].append(annotation["name"])
+                else:
+                    self.search_space_dict[key] = [annotation["name"]]
         self.add_elements(elements=annotations, element_type="annotation")
 
     def add_metrics(self) -> None:
