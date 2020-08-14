@@ -1,25 +1,30 @@
-import { SET_APP_LOADING } from '../actionTypes';
-import { AppLoading, SetLoadingAction } from '../types';
+import produce from 'immer';
 
-type MainState = {} & AppLoading;
+import * as Action from '../actionTypes';
+import { MainState, MainAction } from '../types';
 
 const initialState: MainState = {
     isAppLoading: true,
+    uuid: '',
+    sessionMode: 'rw',
+    sidebarIsVisible: true,
 };
 
-const main = (state = initialState, action: SetLoadingAction) => {
-    const { type, payload } = action;
-    switch (type) {
-        case SET_APP_LOADING: {
-            return {
-                ...state,
-                isAppLoading: payload.isAppLoading,
-            };
-        }
-        default: {
-            return state;
-        }
+const main = produce((draft: MainState, action: MainAction) => {
+    switch (action.type) {
+        case Action.SET_APP_LOADING:
+            draft.isAppLoading = action.payload;
+            break;
+        case Action.SET_UUID:
+            draft.uuid = action.payload;
+            break;
+        case Action.SET_SESSION_MODE:
+            draft.sessionMode = action.payload;
+            break;
+        case Action.TOGGLE_SIDEBAR_VISIBLE:
+            draft.sidebarIsVisible = !draft.sidebarIsVisible;
+            break;
     }
-};
+}, initialState);
 
 export default main;

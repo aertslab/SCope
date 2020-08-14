@@ -5,13 +5,12 @@ import * as R from 'ramda';
 import { BackendAPI } from './API';
 import { Dimmer, Loader } from 'semantic-ui-react';
 import ReactResizeDetector from 'react-resize-detector';
-import ReactGA from 'react-ga';
 import zlib from 'zlib';
 import Alert from 'react-popup';
 
 const MIN_SCALING_FACTOR = 1;
 const DEFAULT_POINT_COLOR = 'A6A6A6';
-const VIEWER_MARGIN = 5;
+const VIEWER_MARGIN = 9; //5;
 
 const EMPTY_TRAJECTORY = {
     nodes: [],
@@ -38,7 +37,6 @@ export default class Viewer extends Component {
             loading: true,
             activeTool: BackendAPI.getViewerTool(),
             customScale: BackendAPI.getCustomScale(),
-            activePage: BackendAPI.getActivePage(),
             benchmark: {},
             featureLabels: [],
         };
@@ -52,7 +50,7 @@ export default class Viewer extends Component {
         this.h = parseInt(this.props.height);
         // Increase the maxSize if displaying more than 1500 (default) objects
         this.maxn = 2000;
-        this.texture = PIXI.Texture.fromImage('src/images/dot.png');
+        this.texture = PIXI.Texture.from('src/images/dot.png');
         this.settingsListener = (settings, customScale) => {
             if (this.props.settings) {
                 this.setState({ loading: true });
@@ -105,7 +103,7 @@ export default class Viewer extends Component {
                     skipOnMount
                     handleWidth
                     handleHeight
-                    onResize={this.onResize.bind(this)}
+                    onResize={() => this.onResize()}
                 />
                 <Dimmer
                     active={this.state.loading}
@@ -180,8 +178,10 @@ export default class Viewer extends Component {
         BackendAPI.onViewerSelectionsChange(this.viewerSelectionListener);
         BackendAPI.onViewerTransformChange(this.viewerTransformListener);
         BackendAPI.onCustomScaleChange(this.customScaleListener);
+        const activePage = decodeURI(this.props.location.pathname).split('/').slice(-1)[0];
+        console.log("Viewer active page is:", activePage);
         BackendAPI.onActiveFeaturesChange(
-            this.state.activePage,
+            activePage,
             this.activeFeaturesListener
         );
     }
@@ -194,16 +194,6 @@ export default class Viewer extends Component {
                 nextProps
             );
 
-        // TODO: dirty hacks
-        /*
-		let bbox = this.zoomSelection.select(function() {return this.parentNode}).node().getBoundingClientRect();
-		if ((parseInt(this.w) != parseInt(bbox.width - VIEWER_MARGIN)) || (parseInt(this.h) != parseInt(bbox.height - VIEWER_MARGIN))) {
-			if (DEBUG) console.log(nextProps.name, 'changing size', bbox);
-			this.w = bbox.width - VIEWER_MARGIN;
-			this.h = bbox.height - VIEWER_MARGIN;
-			this.resizeContainer();
-		}
-		*/
         this.onResize();
         if (
             this.props.loomFile != nextProps.loomFile ||
@@ -283,57 +273,45 @@ export default class Viewer extends Component {
         BackendAPI.removeViewerSelectionsChange(this.viewerSelectionListener);
         BackendAPI.removeViewerTransformChange(this.viewerTransformListener);
         BackendAPI.removeCustomScaleChange(this.customScaleListener);
+
+        const activePage = decodeURI(this.props.location.pathname).split('/').slice(-1)[0];
         BackendAPI.removeActiveFeaturesChange(
-            this.state.activePage,
+            activePage,
             this.activeFeaturesListener
         );
         BackendAPI.removeSpriteSettingsChange(this.spriteSettingsListener);
         this.destroyGraphics();
     }
-    /*
-	shouldComponentUpdate(nextProps, nextState) {
-		return false;
-	}
-*/
-    onResize(width, height) {
-        let bbox = this.zoomSelection
-            .select(function () {
-                return this.parentNode;
-            })
-            .node()
-            .getBoundingClientRect();
-        console.log(this.props.name, 'onResize', width, height, bbox);
+
+    onResize() {
+        const bbox = this.zoomSelection
+              .select(function () {
+                  return this.parentNode;
+              })
+              .node()
+              .getBoundingClientRect();
+
         let dw = bbox.width - this.w - VIEWER_MARGIN;
         let dh = bbox.height - this.h - VIEWER_MARGIN;
-        if (
-            (bbox.width != 0 &&
-                (2 * VIEWER_MARGIN < dw || dw < -2 * VIEWER_MARGIN)) ||
-            (bbox.height != 0 &&
-                (2 * VIEWER_MARGIN < dh || dh < -2 * VIEWER_MARGIN))
-        ) {
-            this.w = bbox.width - VIEWER_MARGIN;
-            this.h = bbox.height - VIEWER_MARGIN;
-            this.resizeContainer();
-        }
+
+        this.w = bbox.width - VIEWER_MARGIN;
+        this.h = bbox.height - VIEWER_MARGIN;
+        this.resizeContainer();
     }
 
     resizeContainer() {
-        if (DEBUG)
-            console.log(this.props.name, 'resizeContainer', this.w, this.h);
-        this.forceUpdate();
         this.renderer.resize(this.w, this.h);
-        this.renderer.reset();
-        this.mainLayer.removeChildren();
-        this.setScalingFactor();
-        this.initializeDataPoints();
         this.updateDataPoints();
     }
 
     initGraphics() {
         if (DEBUG) console.log('Initializing Viewer ', this.props.name);
-        this.renderer = PIXI.autoDetectRenderer(this.w, this.h, {
+        this.renderer = PIXI.autoDetectRenderer({
+            width: this.w,
+            height: this.h,
             backgroundColor: 0xffffff,
             antialias: true,
+            autoDensity: true,
             view: this.zoomSelection.node(),
         });
         this.stage = new PIXI.Container();
@@ -350,13 +328,13 @@ export default class Viewer extends Component {
             .scaleExtent([-1, 10])
             .on('zoom', this.zoom.bind(this));
         this.zoomSelection.call(this.zoomBehaviour);
-        let ticker = PIXI.ticker.shared;
+        let ticker = PIXI.Ticker.shared;
         ticker.autoStart = false;
         ticker.stop();
     }
 
     addMainLayer(maxn = this.maxn, index = null) {
-        this.mainLayer = new PIXI.particles.ParticleContainer(maxn, [
+        this.mainLayer = new PIXI.ParticleContainer(maxn, [
             false,
             true,
             false,
@@ -584,12 +562,6 @@ export default class Viewer extends Component {
             translations: {},
         };
         BackendAPI.addViewerSelection(lassoSelection);
-        ReactGA.event({
-            category: 'viewer',
-            action: 'selection added',
-            label: lassoPoints.length,
-            value: this.state.lassoSelections.length,
-        });
     }
 
     repaintLassoSelections(selections) {
@@ -1370,12 +1342,6 @@ export default class Viewer extends Component {
                     et.toFixed(3) +
                     ' milliseconds.'
             );
-        ReactGA.timing({
-            category: 'Backend',
-            variable: benchmark.msg,
-            value: et,
-            label: this.props.name,
-        });
     }
 
     containsPointer() {

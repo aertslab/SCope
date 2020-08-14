@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import React, { Component, createRef } from 'react';
 import { withRouter } from 'react-router-dom';
 import {
@@ -13,7 +12,6 @@ import {
     Popup,
 } from 'semantic-ui-react';
 
-import ReactGA from 'react-ga';
 import Alert from 'react-popup';
 import * as R from 'ramda';
 import ReactTable from 'react-table';
@@ -57,6 +55,7 @@ class ViewerSidebar extends Component {
         };
         this.activeFeaturesListener = (features, id) => {
             this.props.onActiveFeaturesChange(features, id);
+            console.log("ViewerSidebar features changed:", features, id);
             this.setState({
                 activeFeatures: features,
                 activeTab: parseInt(id) + 1,
@@ -368,11 +367,6 @@ class ViewerSidebar extends Component {
                                         onClick={(e, d) => {
                                             this.setState({ modalID: i });
                                             this.forceUpdate();
-                                            ReactGA.event({
-                                                category: 'metadata',
-                                                action: 'modal opened',
-                                                value: i,
-                                            });
                                         }}
                                         className='pointer'
                                     />
@@ -1043,12 +1037,6 @@ class ViewerSidebar extends Component {
                                             BackendAPI.showError();
                                         }
                                     );
-                                    ReactGA.event({
-                                        category: 'action',
-                                        action: 'gene clicked',
-                                        label: props.value,
-                                        value: i,
-                                    });
                                 }}>
                                 {props.value}
                             </a>
@@ -1417,7 +1405,7 @@ class ViewerSidebar extends Component {
 
         let panes = [{ menuItem: 'Cell selections', render: lassoTab }];
         if (!hideFeatures) {
-            _.times(3, (i) => {
+            [0, 1, 2].map((i) => {
                 panes.push({
                     menuItem:
                         activeFeatures[i] && activeFeatures[i].feature
@@ -1448,11 +1436,6 @@ class ViewerSidebar extends Component {
                 <Metadata
                     selectionId={this.state.modalID}
                     onClose={() => {
-                        ReactGA.event({
-                            category: 'metadata',
-                            action: 'modal closed',
-                            value: this.state.modalID,
-                        });
                         this.setState({ modalID: null });
                         this.forceUpdate();
                     }}
@@ -1462,20 +1445,23 @@ class ViewerSidebar extends Component {
         );
     }
 
-    UNSAFE_componentWillMount() {
+    componentDidMount() {
         let orcid_name = this.props.cookies.get('scope_orcid_name');
         let orcid_id = this.props.cookies.get('scope_orcid_id');
         let orcid_uuid = this.props.cookies.get('scope_orcid_uuid');
+        const activePage = decodeURI(this.props.location.pathname).split('/').slice(-1)[0];
 
         this.setState({
             orcid_name: orcid_name,
             orcid_id: orcid_id,
             orcid_uuid: orcid_uuid,
+            activePage
         });
         this.timer = null;
         BackendAPI.onViewerSelectionsChange(this.selectionsListener);
+        
         BackendAPI.onActiveFeaturesChange(
-            this.state.activePage,
+            activePage,
             this.activeFeaturesListener
         );
     }
@@ -1496,21 +1482,10 @@ class ViewerSidebar extends Component {
 
     toggleLassoSelection(id) {
         let selected = BackendAPI.toggleLassoSelection(id);
-        ReactGA.event({
-            category: 'viewer',
-            action: 'selection toggled',
-            label: selected ? 'on' : 'off',
-            value: id,
-        });
     }
 
     removeLassoSelection(id) {
         BackendAPI.removeViewerSelection(id);
-        ReactGA.event({
-            category: 'viewer',
-            action: 'selection removed',
-            value: id,
-        });
     }
 }
 export default withCookies(withRouter(ViewerSidebar));

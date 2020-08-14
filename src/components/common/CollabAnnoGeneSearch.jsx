@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'lodash';
 import {
     Search,
     Input,
@@ -7,9 +8,9 @@ import {
     Icon,
     Segment,
 } from 'semantic-ui-react';
+
 import { BackendAPI } from './API';
-import ReactGA from 'react-ga';
-import _ from 'lodash';
+
 
 export default class CollabAnnoGeneSearch extends React.Component {
     constructor(props) {
@@ -119,7 +120,6 @@ export default class CollabAnnoGeneSearch extends React.Component {
                                 isLoading: false,
                                 results: this.state.results.concat(genes),
                                 options: this.state.options.concat(genes),
-                                // results: _.filter(this.state.results, (opt) => {_.includes(this.state.value, opt.value)})
                             });
                         } else {
                             this.setState({
@@ -141,11 +141,4 @@ export default class CollabAnnoGeneSearch extends React.Component {
             this.handleSearchChange(evt, input);
         }, 750);
     }
-
-    // componentWillReceiveProps(nextProps) {
-    // 	this.setState({ value: nextProps.value, type: nextProps.type })
-    // 	if (this.props.value != nextProps.value) {
-    // 		this.handleSearchChange(null, nextProps.searchQuery)
-    // 	}
-    // }
 }
