@@ -54,7 +54,7 @@ class OptionsPopup extends Component<OptionsPopupProps, OptionsPopupState> {
     render() {
         const { orcid_name, orcid_id, orcid_uuid, cookiesAllowed } = this.state;
 
-        let clusteringAdd = () => {
+        const clusteringAdd = () => {
             if (
                 orcid_name &&
                 orcid_id &&
@@ -118,9 +118,9 @@ class OptionsPopup extends Component<OptionsPopupProps, OptionsPopupState> {
     }
 
     updateORCID = () => {
-        let orcid_name = this.props.cookies.get('scope_orcid_name');
-        let orcid_id = this.props.cookies.get('scope_orcid_id');
-        let orcid_uuid = this.props.cookies.get('scope_orcid_uuid');
+        const orcid_name = this.props.cookies.get('scope_orcid_name');
+        const orcid_id = this.props.cookies.get('scope_orcid_id');
+        const orcid_uuid = this.props.cookies.get('scope_orcid_uuid');
         let cookiesAllowed = false;
         if (this.props.cookies.get('CookieConsent') == 'true') {
             cookiesAllowed = true;

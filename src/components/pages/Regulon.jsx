@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { Segment, Grid } from 'semantic-ui-react';
-import { FeatureSearch } from '../Search';
+import FeatureSearch from '../Search';
 import { BackendAPI } from '../common/API';
 import Viewer from '../common/Viewer';
 import ViewerSidebar from '../common/ViewerSidebar';
@@ -15,7 +15,6 @@ export default class Regulon extends Component {
             activeLoom: BackendAPI.getActiveLoom(),
             activeCoordinates: BackendAPI.getActiveCoordinates(),
             activeFeatures: BackendAPI.getActiveFeatures(),
-            sidebar: BackendAPI.getSidebarVisible(),
             colors: BackendAPI.getColors(),
         };
         this.activeLoomListener = (loom, metadata, coordinates) => {
@@ -23,10 +22,6 @@ export default class Regulon extends Component {
         };
         this.activeFeaturesListener = (features, featureID) => {
             this.setState({ activeFeatures: features });
-        };
-        this.sidebarVisibleListener = (state) => {
-            this.setState({ sidebar: state });
-            this.forceUpdate();
         };
     }
 
@@ -37,7 +32,6 @@ export default class Regulon extends Component {
             activeFeatures,
             colors,
             geneFeatures,
-            sidebar,
         } = this.state;
         let featureThreshold = _.times(3, (i) => (
             <Grid.Column key={i} className='flexDisplay' stretched>
@@ -119,7 +113,6 @@ export default class Regulon extends Component {
             'regulon',
             this.activeFeaturesListener
         );
-        BackendAPI.onSidebarVisibleChange(this.sidebarVisibleListener);
     }
 
     componentWillUnmount() {
@@ -128,7 +121,6 @@ export default class Regulon extends Component {
             'regulon',
             this.activeFeaturesListener
         );
-        BackendAPI.removeSidebarVisibleChange(this.sidebarVisibleListener);
     }
 
     onThresholdChange(idx, threshold) {

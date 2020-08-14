@@ -48,10 +48,6 @@ VIB colours:
 	padding: 5px !important;
 }
 
-.typeSelect {
-	min-width: 115px !important;
-}
-
 .message.empty .header {
 	font-size: 0.75rem !important;
 }
