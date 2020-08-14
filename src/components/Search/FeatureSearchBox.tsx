@@ -179,18 +179,18 @@ class FeatureSearchBox extends React.Component<
     extractResults(err, response) {
         if (DEBUG) console.log('getFeatures response:', response, err);
         if (response != null) {
-            let res: any[] = [],
+            const res: any[] = [],
                 genes: any[] = [],
                 regulons: any[] = [],
                 clusters = {},
                 annotations: any[] = [],
                 metrics: any[] = [];
-            let type = this.state.type;
+            const type = this.state.type;
 
             for (let i = 0; i < response.feature.length; i++) {
-                let f = response.feature[i];
-                let ft = response.featureType[i];
-                let d = response.featureDescription[i];
+                const f = response.feature[i];
+                const ft = response.featureType[i];
+                const d = response.featureDescription[i];
                 // Gene
                 if (ft == 'gene') {
                     genes.push({
@@ -228,7 +228,7 @@ class FeatureSearchBox extends React.Component<
                         description: d,
                     });
                 } else if (ft.indexOf('cluster#') == 0) {
-                    let cid = ft.split('#')[1],
+                    const cid = ft.split('#')[1],
                         name = '';
                     if (!clusters[ft])
                         clusters[ft] = {
