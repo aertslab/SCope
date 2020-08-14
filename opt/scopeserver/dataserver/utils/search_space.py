@@ -1,4 +1,6 @@
-import functools
+from copy import deepcopy
+from pathlib import Path
+import pickle
 import re
 from typing import Any, Dict, NamedTuple, Optional, List
 
@@ -182,3 +184,53 @@ class SearchSpace:
         for metric in self.meta_data["metrics"]:
             metrics.append(metric["name"])
         self.add_elements(elements=metrics, element_type="metric")
+
+
+def load_ss(loom) -> SearchSpace:
+    ss_pickle_name: Path = loom.ss_pickle_name
+    try:
+        with open(ss_pickle_name, "rb") as fh:
+            logger.debug(f"Loading prebuilt SS for {loom.file_path} from {ss_pickle_name}")
+            ss = pickle.load(fh)
+            ss.loom = loom
+            ss.dfh = dfh.DataFileHandler()
+            if not hasattr(ss, "search_space_version"):
+                logger.error(f"Search space has no version key and is likely legacy. Rebuilding search space...")
+                ss = build_ss(loom)
+            elif ss.search_space_version != CURRENT_SS_VERISON:
+                logger.error(
+                    f"Cached search space version {ss.search_space_version} is not {CURRENT_SS_VERISON}. Rebuilding search space..."
+                )
+                ss = build_ss(loom)
+    except (EOFError, FileNotFoundError):
+        ss = build_ss(loom)
+    return ss
+
+
+def build_ss(loom) -> SearchSpace:
+    logger.debug(f"Building Search Spaces for {loom.file_path}")
+    ss = SearchSpace(loom=loom).build()
+    logger.debug(f"Built Search Space for {loom.file_path}")
+    write_ss(loom, ss)
+    return ss
+
+
+def write_ss(loom, ss: SearchSpace) -> None:
+    ss.loom = None  # Remove loom connection to enable pickling
+    ss.dfh = None
+    cur_ss = deepcopy(ss)
+    with open(loom.ss_pickle_name, "wb") as fh:
+        logger.debug(f"Writing SS for {loom.file_path} to {loom.ss_pickle_name}")
+        pickle.dump(cur_ss, fh)
+
+
+def update_ss(loom, update: str) -> SearchSpace:
+    ss = loom.ss
+    ss.loom = loom
+    ss.meta_data = loom.get_meta_data()
+    if update == "clusterings":
+        ss.add_clusterings()
+    elif update == "cluster_annotations":
+        ss.add_cluster_annotations()
+    write_ss(loom, ss)
+    return ss

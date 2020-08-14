@@ -6,9 +6,6 @@ from methodtools import lru_cache
 import pandas as pd
 import time
 import hashlib
-import os
-import pickle
-from copy import deepcopy
 from pathlib import Path
 from typing import Tuple, Dict, Any, Union, List, Set
 from loompy.loompy import LoomConnection
@@ -48,51 +45,7 @@ class Loom:
         self.nUMI = None
         self.species, self.gene_mappings = self.infer_species()
         self.ss_pickle_name = self.abs_file_path.with_suffix(".ss_pkl")
-        self.load_ss(self.ss_pickle_name)
-
-    def load_ss(self, ss_pickle_name: Path) -> None:
-        try:
-            with open(ss_pickle_name, "rb") as fh:
-                logger.debug(f"Loading prebuilt SS for {self.file_path} from {ss_pickle_name}")
-                self.ss = pickle.load(fh)
-                self.ss.loom = self
-                self.ss.dfh = dfh.DataFileHandler()
-                try:
-                    assert self.ss.search_space_version == ss.CURRENT_SS_VERISON
-                except AssertionError:
-                    logger.error(
-                        f"Cached search space version {self.ss.search_space_version} is not {ss.CURRENT_SS_VERISON}. Rebuilding search space..."
-                    )
-                    self.build_ss()
-                except AttributeError:
-                    logger.error(f"Search space has no version key and is likely legacy. Rebuilding search space...")
-                    self.build_ss()
-        except (EOFError, FileNotFoundError):
-            self.build_ss()
-
-    def build_ss(self):
-        logger.debug(f"Building Search Spaces for {self.file_path}")
-        self.ss = ss.SearchSpace(loom=self).build()
-        logger.debug(f"Built Search Space for {self.file_path}")
-        self.write_ss()
-
-    def write_ss(self) -> None:
-        self.ss.loom = None  # Remove loom connection to enable pickling
-        self.ss.dfh = None
-        cur_ss = deepcopy(self.ss)
-        logger.debug(f"Built all Search Spaces for {self.file_path}")
-        with open(self.ss_pickle_name, "wb") as fh:
-            logger.debug(f"Writing prebuilt SS for {self.file_path} to {self.ss_pickle_name}")
-            pickle.dump(cur_ss, fh)
-
-    def update_ss(self, update: str) -> None:
-        self.ss.loom = self
-        self.ss.meta_data = self.get_meta_data()
-        if update == "clusterings":
-            self.ss.add_clusterings()
-        elif update == "cluster_annotations":
-            self.ss.add_cluster_annotations()
-        self.write_ss()
+        self.ss = ss.load_ss(self)
 
     def get_connection(self):
         return self.loom_connection
@@ -164,7 +117,7 @@ class Loom:
         metaJson["clusterings"][clustering_n]["clusters"][cluster_n]["description"] = new_annotation_name
         self.update_metadata(metaJson)
 
-        self.update_ss(update="clusterings")
+        ss.update_ss(self, update="clusterings")
 
         if (
             self.get_meta_data()["clusterings"][clustering_n]["clusters"][cluster_n]["description"]
@@ -246,7 +199,7 @@ class Loom:
 
         self.update_metadata(metaJson)
 
-        self.update_ss(update="cluster_annotations")
+        ss.update_ss(self, update="cluster_annotations")
 
         if (
             cell_type_annotation
@@ -431,7 +384,7 @@ class Loom:
         loom.attrs["MetaData"] = json.dumps(metaJson)
         self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode="r")
 
-        self.update_ss(update="clusterings")
+        ss.update_ss(self, update="clusterings")
 
         if new_clustering_meta["id"] in self.loom_connection.ca.Clusterings.dtype.names:
             logger.debug("Success")
@@ -531,7 +484,7 @@ class Loom:
 
         loom.attrs["MetaData"] = json.dumps(metaJson)
         self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode="r")
-        self.build_ss()
+        self.ss = ss.build_ss(self)
 
     def get_file_metadata(self):
         """Summarize in a dict what feature data the loom file contains.
