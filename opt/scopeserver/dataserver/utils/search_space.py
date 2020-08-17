@@ -196,26 +196,26 @@ def load_ss(loom) -> SearchSpace:
             ss.dfh = dfh.DataFileHandler()
             if not hasattr(ss, "search_space_version"):
                 logger.error(f"Search space has no version key and is likely legacy. Rebuilding search space...")
-                ss = build_ss(loom)
+                ss = build(loom)
             elif ss.search_space_version != CURRENT_SS_VERISON:
                 logger.error(
                     f"Cached search space version {ss.search_space_version} is not {CURRENT_SS_VERISON}. Rebuilding search space..."
                 )
-                ss = build_ss(loom)
+                ss = build(loom)
     except (EOFError, FileNotFoundError):
-        ss = build_ss(loom)
+        ss = build(loom)
     return ss
 
 
-def build_ss(loom) -> SearchSpace:
+def build(loom) -> SearchSpace:
     logger.debug(f"Building Search Spaces for {loom.file_path}")
     ss = SearchSpace(loom=loom).build()
     logger.debug(f"Built Search Space for {loom.file_path}")
-    write_ss(loom, ss)
+    write(loom, ss)
     return ss
 
 
-def write_ss(loom, ss: SearchSpace) -> None:
+def write(loom, ss: SearchSpace) -> None:
     ss.loom = None  # Remove loom connection to enable pickling
     ss.dfh = None
     cur_ss = deepcopy(ss)
@@ -224,7 +224,7 @@ def write_ss(loom, ss: SearchSpace) -> None:
         pickle.dump(cur_ss, fh)
 
 
-def update_ss(loom, update: str) -> SearchSpace:
+def update(loom, update: str) -> SearchSpace:
     ss = loom.ss
     ss.loom = loom
     ss.meta_data = loom.get_meta_data()
@@ -232,5 +232,5 @@ def update_ss(loom, update: str) -> SearchSpace:
         ss.add_clusterings()
     elif update == "cluster_annotations":
         ss.add_cluster_annotations()
-    write_ss(loom, ss)
+    write(loom, ss)
     return ss

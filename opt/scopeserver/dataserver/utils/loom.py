@@ -117,7 +117,7 @@ class Loom:
         metaJson["clusterings"][clustering_n]["clusters"][cluster_n]["description"] = new_annotation_name
         self.update_metadata(metaJson)
 
-        ss.update_ss(self, update="clusterings")
+        self.ss = ss.update(self, update="clusterings")
 
         if (
             self.get_meta_data()["clusterings"][clustering_n]["clusters"][cluster_n]["description"]
@@ -199,7 +199,7 @@ class Loom:
 
         self.update_metadata(metaJson)
 
-        ss.update_ss(self, update="cluster_annotations")
+        self.ss = ss.update(self, update="cluster_annotations")
 
         if (
             cell_type_annotation
@@ -384,7 +384,7 @@ class Loom:
         loom.attrs["MetaData"] = json.dumps(metaJson)
         self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode="r")
 
-        ss.update_ss(self, update="clusterings")
+        self.ss = ss.update(self, update="clusterings")
 
         if new_clustering_meta["id"] in self.loom_connection.ca.Clusterings.dtype.names:
             logger.debug("Success")
@@ -484,7 +484,7 @@ class Loom:
 
         loom.attrs["MetaData"] = json.dumps(metaJson)
         self.loom_connection = self.lfh.change_loom_mode(self.file_path, mode="r")
-        self.ss = ss.build_ss(self)
+        self.ss = ss.build(self)
 
     def get_file_metadata(self):
         """Summarize in a dict what feature data the loom file contains.
