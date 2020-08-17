@@ -163,7 +163,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 for loomFilePath in request.loomFilePath:
                     l_v_max = 0
                     l_max_v_max = 0
-                    loom = self.lfh.get_loom(loom_file_path=loomFilePath)
+                    loom = self.lfh.get_loom(loom_file_path=Path(loomFilePath))
                     if request.featureType[n] == "gene":
                         vals, _ = loom.get_gene_expression(
                             gene_symbol=feature,
@@ -192,7 +192,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def getCellColorByFeatures(self, request, context):
         start_time = time.time()
         try:
-            loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+            loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         except ValueError:
             return
 
@@ -228,12 +228,12 @@ class SCope(s_pb2_grpc.MainServicer):
         )
 
     def getCellAUCValuesByFeatures(self, request, context):
-        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         vals, _ = loom.get_auc_values(regulon=request.feature[0])
         return s_pb2.CellAUCValuesByFeaturesReply(value=vals)
 
     def getNextCluster(self, request, context):
-        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         clustering_meta = loom.get_meta_data_clustering_by_id(
             request.clusteringID, secret=self.config["dataHashSecret"]
         )
@@ -273,7 +273,7 @@ class SCope(s_pb2_grpc.MainServicer):
         )
 
     def getCellMetaData(self, request, context):
-        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         cell_indices = request.cellIndices
         if len(cell_indices) == 0:
             cell_indices = list(range(loom.get_nb_cells()))
@@ -307,7 +307,7 @@ class SCope(s_pb2_grpc.MainServicer):
         )
 
     def getFeatures(self, request, context):
-        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         f = self.get_features(loom=loom, query=request.query)
         return s_pb2.FeatureReply(
             feature=f["feature"], featureType=f["featureType"], featureDescription=f["featureDescription"]
@@ -315,45 +315,45 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getCoordinates(self, request, context):
         # request content
-        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         c = loom.get_coordinates(
             coordinatesID=request.coordinatesID, annotation=request.annotation, logic=request.logic
         )
         return s_pb2.CoordinatesReply(x=c["x"], y=c["y"], cellIndices=c["cellIndices"])
 
     def setAnnotationName(self, request, context):
-        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         success = loom.rename_annotation(request.clusteringID, request.clusterID, request.newAnnoName)
         return s_pb2.SetAnnotationNameReply(success=success)
 
     def setLoomHierarchy(self, request, context):
-        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         success = loom.set_hierarchy(request.newHierarchy_L1, request.newHierarchy_L2, request.newHierarchy_L3)
         return s_pb2.SetLoomHierarchyReply(success=success)
 
     def setColabAnnotationData(self, request, context):
-        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         if not self.dfh.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
             return s_pb2.setColabAnnotationDataReply(success=False, message="Could not confirm user!")
         success, message = loom.add_collab_annotation(request, self.config["dataHashSecret"])
         return s_pb2.setColabAnnotationDataReply(success=success, message=message)
 
     def addNewClustering(self, request, context):
-        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         if not self.dfh.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
             return s_pb2.AddNewClusteringReply(success=False, message="Could not confirm user!")
         success, message = loom.add_user_clustering(request)
         return s_pb2.AddNewClusteringReply(success=success, message=message)
 
     def voteAnnotation(self, request, context):
-        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         if not self.dfh.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
             return s_pb2.voteAnnotationReply(success=False, message="Could not confirm user!")
         success, message = loom.annotation_vote(request, self.config["dataHashSecret"])
         return s_pb2.voteAnnotationReply(success=success, message=message)
 
     def getRegulonMetaData(self, request, context):
-        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         regulon_genes = None
         autoThresholds = None
         defaultThreshold = None
@@ -429,7 +429,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.RegulonMetaDataReply(regulonMeta=regulon)
 
     def getMarkerGenes(self, request, context):
-        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         # Check if cluster markers for the given clustering are present in the loom
         if not loom.has_cluster_markers(clustering_id=request.clusteringID):
             logger.info("No markers for clustering {0} present in active loom.".format(request.clusteringID))
@@ -515,7 +515,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 if f.endswith(".loom"):
                     with open(self.lfh.get_loom_absolute_file_path(f), "r") as fh:
                         loomSize = os.fstat(fh.fileno())[6]
-                    loom = self.lfh.get_loom(loom_file_path=f)
+                    loom = self.lfh.get_loom(loom_file_path=Path(f))
                     if loom is None:
                         continue
                     file_meta = loom.get_file_metadata()
@@ -639,8 +639,8 @@ class SCope(s_pb2_grpc.MainServicer):
         )
 
     def translateLassoSelection(self, request, context):
-        src_loom = self.lfh.get_loom(loom_file_path=request.srcLoomFilePath)
-        dest_loom = self.lfh.get_loom(loom_file_path=request.destLoomFilePath)
+        src_loom = self.lfh.get_loom(loom_file_path=Path(request.srcLoomFilePath))
+        dest_loom = self.lfh.get_loom(loom_file_path=Path(request.destLoomFilePath))
         src_cell_ids = [src_loom.get_cell_ids()[i] for i in request.cellIndices]
         src_fast_index = set(src_cell_ids)
         dest_mask = [x in src_fast_index for x in dest_loom.get_cell_ids()]
@@ -648,7 +648,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.TranslateLassoSelectionReply(cellIndices=dest_cell_indices)
 
     def getCellIDs(self, request, context):
-        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         cell_ids = loom.get_cell_ids()
         slctd_cell_ids = [cell_ids[i] for i in request.cellIndices]
         return s_pb2.CellIDsReply(cellIds=slctd_cell_ids)
@@ -664,8 +664,8 @@ class SCope(s_pb2_grpc.MainServicer):
                     if basename.endswith(".loom"):
                         abs_file_path = self.lfh.drop_loom(request.filePath)
                         try:
-                            partial_md5_hash = self.lfh.get_partial_md5_hash(abs_file_path, 10000)
-                            os.remove(os.path.join(os.path.dirname(abs_file_path), partial_md5_hash + ".ss_pkl"))
+                            os.remove(abs_file_path.with_suffix(".ss_pkl"))
+
                         except OSError as err:
                             logger.error(f"Could not delete search space pickle from {request.filePath}. {err}")
                     try:
@@ -685,7 +685,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def downloadSubLoom(self, request, context):
         start_time = time.time()
 
-        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         loom_connection = loom.get_connection()
         meta_data = loom.get_meta_data()
 
@@ -767,7 +767,7 @@ class SCope(s_pb2_grpc.MainServicer):
     #
     def doGeneSetEnrichment(self, request, context):
         gene_set_file_path = os.path.join(self.dfh.get_gene_sets_dir(), request.geneSetFilePath)
-        loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+        loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         gse = _gse.GeneSetEnrichment(
             scope=self, method="AUCell", loom=loom, gene_set_file_path=gene_set_file_path, annotation=""
         )
@@ -788,7 +788,7 @@ class SCope(s_pb2_grpc.MainServicer):
         if not gse.has_AUCell_rankings():
             # Creating the matrix as DataFrame...
             yield gse.update_state(step=1, status_code=200, status_message="Creating the matrix...", values=None)
-            loom = self.lfh.get_loom(loom_file_path=request.loomFilePath)
+            loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
             dgem = np.transpose(loom.get_connection()[:, :])
             ex_mtx = pd.DataFrame(data=dgem, index=loom.get_ca_attr_by_name("CellID"), columns=loom.get_genes())
             # Creating the rankings...
