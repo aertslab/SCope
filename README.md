@@ -92,6 +92,8 @@ git clone https://github.com/aertslab/SCope "${LOCAL_SCOPE_REPO}"
 cd "${LOCAL_SCOPE_REPO}"
 # Install SCope.
 npm install
+# Install pre-push checks for linting etc.
+pre-commit install -t pre-push
 ```
 
 2. Run,
