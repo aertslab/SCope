@@ -516,7 +516,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.voteAnnotationReply(success=success, message=message)
 
     def getClusterOverlaps(self, request, context):
-        """Get overlapping clusters of the requested cellIDs and return formatted protobuf object"""
+        """Get overlapping clusters of the requested cellIDs and return formatted protobuf object."""
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         cluster_overlap_data = loom.get_cluster_overlaps(request.cellIndices)
         return s_pb2.ClusterOverlaps(clusterOverlaps=[s_pb2.ClusterOverlap(**x) for x in cluster_overlap_data])
