@@ -29,7 +29,7 @@ interface Column {
     Header: string;
     accessor: string;
     style: { whiteSpace: string };
-    sortMethod: (x: Number, y: Number) => number;
+    sortMethod: (x: number, y: number) => number;
     width: number;
 }
 
@@ -137,10 +137,7 @@ export default class ClusterOverlapsTable extends Component<
         };
     };
 
-    clusterOverlapsColumns = R.map(
-        this.toColumn,
-        Object.keys(this.columnsText)
-    );
+    clusterOverlapsColumns = R.map(this.toColumn, R.keys(this.columnsText));
 
     render() {
         return (
