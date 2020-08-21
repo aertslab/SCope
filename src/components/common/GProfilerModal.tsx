@@ -302,159 +302,155 @@ class GProfilerPopup extends Component<
         } = this.state;
 
         return (
-            <>
-                <Modal
-                    as={Form}
-                    trigger={
-                        <Button
-                            color='orange'
-                            onClick={this.handleOpenModal}
-                            style={{
-                                marginTop: '10px',
-                                marginBottom: '10px',
-                                width: '100%',
-                            }}>
-                            Run g:Profiler Gene List Enrichment
-                        </Button>
-                    }
-                    onClose={this.handleCloseModal}
-                    open={showModal}>
-                    <Modal.Header>
+            <Modal
+                as={Form}
+                trigger={
+                    <Button
+                        color='orange'
+                        onClick={this.handleOpenModal}
+                        style={{
+                            marginTop: '10px',
+                            marginBottom: '10px',
+                            width: '100%',
+                        }}>
                         Run g:Profiler Gene List Enrichment
-                    </Modal.Header>
-                    <Modal.Content>
-                        <Modal.Description>
-                            <h3>Run As Multi-query</h3>
-                            <h4>
-                                Total number of features:&nbsp;
-                                {this.getNumFeatures()}
-                            </h4>
-                            <Form>
-                                <Table compact celled definition>
-                                    <Table.Header>
-                                        <Table.Row>
-                                            <Table.HeaderCell />
-                                            <Table.HeaderCell>
-                                                Gene List with Number of Top
-                                                Features to Use
-                                            </Table.HeaderCell>
-                                        </Table.Row>
-                                    </Table.Header>
-                                    <Table.Body>
-                                        {this.getTopNumFeaturesArray().map(
-                                            (topNumFeaturesValue) => {
-                                                const handleToggleTopNumFeatures = () => {
-                                                    if (
-                                                        this.state.topNumFeatures.includes(
-                                                            topNumFeaturesValue
-                                                        )
-                                                    ) {
-                                                        this.setState({
-                                                            topNumFeatures: this.state.topNumFeatures.filter(
-                                                                (value) =>
-                                                                    value !=
-                                                                    topNumFeaturesValue
-                                                            ),
-                                                        });
-                                                    } else {
-                                                        this.setState({
-                                                            topNumFeatures: [
-                                                                ...this.state
-                                                                    .topNumFeatures,
-                                                                topNumFeaturesValue,
-                                                            ],
-                                                        });
-                                                    }
-                                                };
+                    </Button>
+                }
+                onClose={this.handleCloseModal}
+                open={showModal}>
+                <Modal.Header>Run g:Profiler Gene List Enrichment</Modal.Header>
+                <Modal.Content>
+                    <Modal.Description>
+                        <h3>Run As Multi-query</h3>
+                        <h4>
+                            Total number of features:&nbsp;
+                            {this.getNumFeatures()}
+                        </h4>
+                        <Form>
+                            <Table compact celled definition>
+                                <Table.Header>
+                                    <Table.Row>
+                                        <Table.HeaderCell />
+                                        <Table.HeaderCell>
+                                            Gene List with Number of Top
+                                            Features to Use
+                                        </Table.HeaderCell>
+                                    </Table.Row>
+                                </Table.Header>
+                                <Table.Body>
+                                    {this.getTopNumFeaturesArray().map(
+                                        (topNumFeaturesValue) => {
+                                            const handleToggleTopNumFeatures = () => {
+                                                if (
+                                                    this.state.topNumFeatures.includes(
+                                                        topNumFeaturesValue
+                                                    )
+                                                ) {
+                                                    this.setState({
+                                                        topNumFeatures: this.state.topNumFeatures.filter(
+                                                            (value) =>
+                                                                value !=
+                                                                topNumFeaturesValue
+                                                        ),
+                                                    });
+                                                } else {
+                                                    this.setState({
+                                                        topNumFeatures: [
+                                                            ...this.state
+                                                                .topNumFeatures,
+                                                            topNumFeaturesValue,
+                                                        ],
+                                                    });
+                                                }
+                                            };
 
-                                                const isSelected = this.state.topNumFeatures.includes(
-                                                    topNumFeaturesValue
-                                                );
+                                            const isSelected = this.state.topNumFeatures.includes(
+                                                topNumFeaturesValue
+                                            );
 
-                                                return (
-                                                    <Table.Row>
-                                                        <Table.Cell collapsing>
-                                                            <Checkbox
-                                                                onChange={
-                                                                    handleToggleTopNumFeatures
-                                                                }
-                                                            />
-                                                        </Table.Cell>
-                                                        <Table.Cell>
-                                                            {isSelected ? (
-                                                                <b>
-                                                                    {`Top ${topNumFeaturesValue}`}
-                                                                </b>
-                                                            ) : (
-                                                                <span
-                                                                    style={{
-                                                                        textDecorationLine:
-                                                                            'line-through',
-                                                                        textDecorationStyle:
-                                                                            'solid',
-                                                                    }}>{`Top ${topNumFeaturesValue}`}</span>
-                                                            )}
-                                                        </Table.Cell>
-                                                    </Table.Row>
-                                                );
-                                            }
-                                        )}
-                                    </Table.Body>
-                                </Table>
-                                <Form.Group widths='equal'>
-                                    <Form.Field
-                                        control={Select}
-                                        label='Sort Features By'
-                                        options={this.availableSortBy}
-                                        placeholder='Sort By'
-                                        onChange={this.handleSelectSortBy}
-                                        value={selectedSortBy}
-                                    />
-                                    <Form.Field
-                                        control={Dropdown}
-                                        search
-                                        selection
-                                        label='Organism'
-                                        options={this.state.availableOrganisms}
-                                        placeholder='Choose an organism'
-                                        onChange={this.handleSelectOrganism}
-                                        disabled={
-                                            gProfilerToken !== null &&
-                                            gProfilerToken !== ''
-                                                ? true
-                                                : false
+                                            return (
+                                                <Table.Row>
+                                                    <Table.Cell collapsing>
+                                                        <Checkbox
+                                                            onChange={
+                                                                handleToggleTopNumFeatures
+                                                            }
+                                                        />
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        {isSelected ? (
+                                                            <b>
+                                                                {`Top ${topNumFeaturesValue}`}
+                                                            </b>
+                                                        ) : (
+                                                            <span
+                                                                style={{
+                                                                    textDecorationLine:
+                                                                        'line-through',
+                                                                    textDecorationStyle:
+                                                                        'solid',
+                                                                }}>{`Top ${topNumFeaturesValue}`}</span>
+                                                        )}
+                                                    </Table.Cell>
+                                                </Table.Row>
+                                            );
                                         }
-                                        value={selectedOrganism}
-                                    />
-                                    <Form.Field
-                                        control={Input}
-                                        label='g:Profiler Token (Optional)'
-                                        placeholder='Token'
-                                        value={this.state.gProfilerToken}
-                                        onChange={this.handleChangeToken}
-                                    />
+                                    )}
+                                </Table.Body>
+                            </Table>
+                            <Form.Group widths='equal'>
+                                <Form.Field
+                                    control={Select}
+                                    label='Sort Features By'
+                                    options={this.availableSortBy}
+                                    placeholder='Sort By'
+                                    onChange={this.handleSelectSortBy}
+                                    value={selectedSortBy}
+                                />
+                                <Form.Field
+                                    control={Dropdown}
+                                    search
+                                    selection
+                                    label='Organism'
+                                    options={this.state.availableOrganisms}
+                                    placeholder='Choose an organism'
+                                    onChange={this.handleSelectOrganism}
+                                    disabled={
+                                        gProfilerToken !== null &&
+                                        gProfilerToken !== ''
+                                            ? true
+                                            : false
+                                    }
+                                    value={selectedOrganism}
+                                />
+                                <Form.Field
+                                    control={Input}
+                                    label='g:Profiler Token (Optional)'
+                                    placeholder='Token'
+                                    value={this.state.gProfilerToken}
+                                    onChange={this.handleChangeToken}
+                                />
+                            </Form.Group>
+                            {this.state.error !== null && (
+                                <Form.Group>
+                                    <Label basic color='red'>
+                                        {this.state.error}
+                                    </Label>
                                 </Form.Group>
-                                {this.state.error !== null && (
-                                    <Form.Group>
-                                        <Label basic color='red'>
-                                            {this.state.error}
-                                        </Label>
-                                    </Form.Group>
-                                )}
-                            </Form>
-                        </Modal.Description>
-                    </Modal.Content>
-                    <Modal.Actions>
-                        <Button
-                            type='button'
-                            value='goto-gprofiler'
-                            onClick={this.handleClickGotoGProfilerURL}
-                            primary>
-                            {'Go to g:Profiler'}
-                        </Button>
-                    </Modal.Actions>
-                </Modal>
-            </>
+                            )}
+                        </Form>
+                    </Modal.Description>
+                </Modal.Content>
+                <Modal.Actions>
+                    <Button
+                        type='button'
+                        value='goto-gprofiler'
+                        onClick={this.handleClickGotoGProfilerURL}
+                        primary>
+                        {'Go to g:Profiler'}
+                    </Button>
+                </Modal.Actions>
+            </Modal>
         );
     }
 }
