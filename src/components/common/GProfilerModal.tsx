@@ -1,5 +1,5 @@
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-
+import R from 'ramda';
 import React, { Component } from 'react';
 import {
     Button,
@@ -268,7 +268,7 @@ class GProfilerPopup extends Component<
                     value: availableOrganism['id'],
                 };
             })
-            .sort((a, b) => (a['text'] < b['text'] ? -1 : 1));
+            .sort(R.comparator((a, b) => a['text'] < b['text']));
         this.setState({ availableOrganisms: _availableOrganisms });
     }
 
