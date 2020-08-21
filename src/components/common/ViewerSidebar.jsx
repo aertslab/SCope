@@ -21,8 +21,6 @@ import 'react-table/react-table.css';
 import { instanceOf } from 'prop-types';
 import { withCookies, Cookies } from 'react-cookie';
 
-import { delimiter } from 'path';
-import { min } from 'moment';
 import fileDownload from 'js-file-download';
 import { parse as json2csv } from 'json2csv';
 
