@@ -443,8 +443,7 @@ class ViewerSidebar extends Component {
                 let markerTable = '',
                     legendTable = '',
                     cellTypeAnnoTable = '',
-                    downloadSubLoomButton = () => '',
-                    gProfilerModal = '';
+                    downloadSubLoomButton = () => '';
 
                 let newMarkerTableColumn = (header, id, accessor, cell) => {
                     let column = {
@@ -1018,8 +1017,6 @@ class ViewerSidebar extends Component {
                             </Button>
                         </div>
                     );
-
-                    gProfilerModal = <GProfilerModal featureMetadata={md} />;
                 }
 
                 if (
@@ -1229,7 +1226,7 @@ class ViewerSidebar extends Component {
                             {markerTable}
                             {legendTable}
                             {downloadSubLoomButton()}
-                            {gProfilerModal}
+                            <GProfilerModal featureMetadata={md} />
                             <br />
                         </Grid.Column>
                     </Grid.Row>
