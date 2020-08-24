@@ -1,10 +1,12 @@
+import React, { Component } from 'react';
+import * as d3 from 'd3';
+
 import 'rc-slider/assets/index.css';
 import 'rc-tooltip/assets/bootstrap.css';
-import * as d3 from 'd3';
-import React, { Component } from 'react';
 import Slider from 'rc-slider';
+
 import { BackendAPI } from './API';
-import ReactGA from 'react-ga';
+
 
 const Handle = Slider.Handle;
 
@@ -52,14 +54,7 @@ export default class Histogram extends Component {
                     step={0.0001}
                     handle={handle}
                     onChange={this.handleThresholdChange.bind(this)}
-                    onAfterChange={() => {
-                        ReactGA.event({
-                            category: 'regulon',
-                            action: 'threshold changed',
-                            value: field,
-                        });
-                        this.handleUpdateTSNE();
-                    }}
+                    onAfterChange={() => this.handleUpdateTSNE()}
                 />
             </div>
         );
@@ -252,12 +247,6 @@ export default class Histogram extends Component {
                     .on('click', function () {
                         component.handleThresholdChange(t.threshold);
                         component.handleUpdateTSNE();
-                        ReactGA.event({
-                            category: 'regulon',
-                            action: 'threshold clicked',
-                            label: t.name,
-                            value: this.props.field,
-                        });
                     })
                     .append('title')
                     .text(t.name);

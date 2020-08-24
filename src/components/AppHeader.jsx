@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { withRouter, Link } from 'react-router-dom';
 import {
     Icon,
@@ -17,6 +18,8 @@ import Bitly from 'bitly4api';
 const moment = require('moment');
 const pako = require('pako');
 let bitly = new Bitly(BITLY.token);
+
+import { toggleSidebar } from '../redux/actions';
 
 const timer = 60 * 1000;
 const cookieName = 'SCOPE_UUID';
@@ -63,7 +66,7 @@ class AppHeader extends Component {
     };
 
     render() {
-        const { match, location } = this.props;
+        const { match, location, toggleSidebar } = this.props;
         const { timeout, shortUrl } = this.state;
         let metadata = BackendAPI.getLoomMetadata(
             decodeURIComponent(match.params.loom)
@@ -199,11 +202,11 @@ class AppHeader extends Component {
         };
 
         return (
-            <Menu secondary attached='top' className='vib' inverted>
+            <Menu stackable secondary attached='top' className='vib' inverted>
                 <Menu.Item>
                     <Icon
-                        name='sidebar'
-                        onClick={this.toggleSidebar.bind(this)}
+                        name={this.props.sidebarIsVisible ? 'close' : 'sidebar'}
+                        onClick={toggleSidebar}
                         className='pointer'
                         title='Toggle sidebar'
                     />
@@ -334,11 +337,6 @@ class AppHeader extends Component {
         if (this.timer) clearInterval(this.timer);
     }
 
-    toggleSidebar() {
-        this.props.toggleSidebar();
-        BackendAPI.setSidebarVisible(!BackendAPI.getSidebarVisible());
-    }
-
     menuList(metadata) {
         return [
             {
@@ -429,4 +427,18 @@ class AppHeader extends Component {
     }
 }
 
-export default withRouter(AppHeader);
+const appHeader = withRouter(AppHeader);
+
+const mapStateToProps = (state) => {
+    return {
+        sidebarIsVisible: state['main'].sidebarIsVisible,
+    };
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        toggleSidebar: () => dispatch(toggleSidebar()),
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(appHeader);

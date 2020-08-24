@@ -16,7 +16,6 @@ import {
 import { BackendAPI } from './common/API';
 import UploadModal from './common/UploadModal';
 import Slider, { Range } from 'rc-slider';
-import ReactGA from 'react-ga';
 import FileDownloader from '../js/http';
 import Alert from 'react-popup';
 import OptionsPopup from './common/OptionsPopup';
@@ -332,14 +331,11 @@ class AppSidebar extends Component {
         return (
             <Sidebar
                 as={Menu}
-                animation='push'
+                animation='overlay'
                 visible={this.props.visible}
                 vertical
                 className='clearfix'>
-                <Segment basic>
-                    <Icon name='arrow up' />
-                    <em>Hide me to get bigger workspace</em>
-                </Segment>
+
                 <Menu.Header>DATASETS</Menu.Header>
                 <Menu.Menu>
                     {this.props.sessionMode == 'rw' && (
@@ -432,11 +428,6 @@ class AppSidebar extends Component {
                                 defaultValue={spriteScale}
                                 onAfterChange={(v) => {
                                     this.handleUpdateSprite(v, spriteAlpha);
-                                    ReactGA.event({
-                                        category: 'settings',
-                                        action: 'changed point size',
-                                        value: v,
-                                    });
                                 }}
                                 min={1}
                                 step={1}
@@ -453,11 +444,6 @@ class AppSidebar extends Component {
                                 defaultValue={spriteAlpha}
                                 onAfterChange={(v) => {
                                     this.handleUpdateSprite(spriteScale, v);
-                                    ReactGA.event({
-                                        category: 'settings',
-                                        action: 'changed point alpha',
-                                        value: v,
-                                    });
                                 }}
                                 min={0}
                                 step={0.1}
@@ -597,10 +583,6 @@ class AppSidebar extends Component {
 
     deleteLoomFile(loomFilePath, loomDisplayName) {
         const { match } = this.props;
-        ReactGA.event({
-            category: 'upload',
-            action: 'removed loom file',
-        });
         let execute = confirm(
             'Are you sure that you want to remove the file: ' +
                 loomDisplayName +
@@ -631,11 +613,6 @@ class AppSidebar extends Component {
     toggleUploadModal(event) {
         let state = !this.state.uploadModalOpened;
         this.setState({ uploadModalOpened: state });
-        ReactGA.event({
-            category: 'upload',
-            action: 'toggle loom upload modal',
-            label: state ? 'on' : 'off',
-        });
     }
 
     toggleSortCells() {
@@ -644,11 +621,6 @@ class AppSidebar extends Component {
             !this.state.settings.sortCells
         );
         this.setState({ settings: settings });
-        ReactGA.event({
-            category: 'settings',
-            action: 'toggle cell sorting',
-            label: settings.sortCells ? 'on' : 'off',
-        });
     }
 
     toggleCpmNormization() {
@@ -657,11 +629,6 @@ class AppSidebar extends Component {
             !this.state.settings.hasCpmNormalization
         );
         this.setState({ settings: settings });
-        ReactGA.event({
-            category: 'settings',
-            action: 'toggle cpm normalization',
-            label: settings.hasCpmNormalization ? 'on' : 'off',
-        });
     }
 
     toggleLogTransform() {
@@ -670,11 +637,6 @@ class AppSidebar extends Component {
             !this.state.settings.hasLogTransform
         );
         this.setState({ settings: settings });
-        ReactGA.event({
-            category: 'settings',
-            action: 'toggle log transform',
-            label: settings.hasCpmNormalization ? 'on' : 'off',
-        });
     }
 
     toggleDissociateViewers() {
@@ -683,11 +645,6 @@ class AppSidebar extends Component {
             !this.state.settings.dissociateViewers
         );
         this.setState({ settings: settings });
-        ReactGA.event({
-            category: 'settings',
-            action: 'toggle dissociate viewers',
-            label: settings.dissociateViewers ? 'on' : 'off',
-        });
     }
 
     toggleHideTrajectory() {
@@ -696,31 +653,16 @@ class AppSidebar extends Component {
             !this.state.settings.hideTrajectory
         );
         this.setState({ settings: settings });
-        ReactGA.event({
-            category: 'settings',
-            action: 'toggle hide trajectory',
-            label: settings.hideTrajectory ? 'on' : 'off',
-        });
     }
 
     setActiveCoordinates(evt, coords) {
         BackendAPI.setActiveCoordinates(coords.value);
         this.setState({ activeCoordinates: coords.value });
-        ReactGA.event({
-            category: 'settings',
-            action: 'changed active coordinates',
-            label: coords.text,
-        });
     }
 
     onLoomUploaded(filename) {
         this.getLoomFiles(filename, 'gene');
         this.toggleUploadModal();
-        ReactGA.event({
-            category: 'upload',
-            action: 'uploaded loom file',
-            nonInteraction: true,
-        });
     }
 
     handleUpdateSprite(scale, alpha) {
