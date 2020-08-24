@@ -654,6 +654,7 @@ class API {
                 );
             }
         } else {
+            console.log("Viewer UpdateFeature", arguments);
             this.setActiveFeature(
                 field,
                 type,
@@ -903,6 +904,10 @@ class API {
     onActiveFeaturesChange(page, listener) {
         if (!this.featureChangeListeners[page])
             this.featureChangeListeners[page] = [];
+        /*this.featureChangeListeners[page].push((a, b, c, d) => {
+            console.log("FEATURE CHANGE LISTENER FIRED FOR", page);
+            listener(a, b, c, d);
+            });*/
         this.featureChangeListeners[page].push(listener);
     }
 
@@ -1136,28 +1141,6 @@ class API {
         let i = this.viewerTransformChangeListeners.indexOf(listener);
         if (i > -1) {
             this.viewerTransformChangeListeners.splice(i, 1);
-        }
-    }
-
-    getSidebarVisible() {
-        return this.sidebarVisible;
-    }
-
-    setSidebarVisible(state) {
-        this.sidebarVisible = state;
-        this.sidebarListeners.forEach((listener) => {
-            listener(this.sidebarVisible);
-        });
-    }
-
-    onSidebarVisibleChange(listener) {
-        this.sidebarListeners.push(listener);
-    }
-
-    removeSidebarVisibleChange(listener) {
-        let i = this.sidebarListeners.indexOf(listener);
-        if (i > -1) {
-            this.sidebarListeners.splice(i, 1);
         }
     }
 

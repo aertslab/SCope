@@ -1,10 +1,6 @@
-.noPadding {
-    padding: 5px !important;
-}
-
 .feature-search-input {
     display: inline-block;
-    width: 69.5%;
+    width: 70%;
 }
 
 .feature-search-input > .input {
@@ -13,4 +9,10 @@
 
 .feature-search-input > .input > input{
     border-radius: 3px !important;
+}
+
+.typeSelect {
+    display: inline-block;
+    width: 30% !important;
+    min-width: 85px !important;
 }

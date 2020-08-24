@@ -1,12 +1,12 @@
+import React, { Component } from 'react';
+import * as R from 'ramda';
+import { Menu, Grid } from 'semantic-ui-react';
+
 import 'rc-slider/assets/index.css';
 import 'rc-tooltip/assets/bootstrap.css';
-import _ from 'lodash';
-import React, { Component } from 'react';
-import { Menu, Grid } from 'semantic-ui-react';
+
 import Slider, { Range } from 'rc-slider';
 import { BackendAPI } from '../common/API';
-import ReactGA from 'react-ga';
-import * as R from 'ramda';
 
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
 const TooltipRange = createSliderWithTooltip(Slider.Range);
@@ -55,7 +55,7 @@ export default class ViewerToolbar extends Component {
         } = this.state;
 
         let levels = false;
-        let sliders = _.times(3, (i) => {
+        let sliders = [0, 1, 2].map( (i) => {
             let val = customScale[i] ? customScale[i] : [0, featuresScale[i]];
             if (
                 activeFeatures[i] &&
@@ -155,19 +155,20 @@ export default class ViewerToolbar extends Component {
         );
     }
 
-    UNSAFE_componentWillMount() {
+    componentDidMount() {
+        const activePage = decodeURI(this.props.location.pathname).split('/').slice(-1)[0];
         BackendAPI.onActiveFeaturesChange(
-            this.state.activePage,
+            activePage,
             this.activeFeaturesListener
         );
         BackendAPI.onSettingsChange(this.settingsListener);
         BackendAPI.onFeatureScaleChange(this.featuresScaleListener);
-        //this.onActiveFeaturesChange(this.state.activeFeatures);
     }
 
     componentWillUnmount() {
+        const activePage = decodeURI(this.props.location.pathname).split('/').slice(-1)[0];
         BackendAPI.removeActiveFeaturesChange(
-            this.state.activePage,
+            activePage,
             this.activeFeaturesListener
         );
         BackendAPI.removeSettingsChange(this.settingsListener);
@@ -178,11 +179,6 @@ export default class ViewerToolbar extends Component {
         if (DEBUG) console.log('handleItemClick', tool.name);
         this.setState({ activeTool: tool.name });
         BackendAPI.setViewerTool(tool.name);
-        ReactGA.event({
-            category: 'viewer',
-            action: 'selected tool',
-            label: tool.name,
-        });
     }
 
     handleUpdateScale(slider, value) {
@@ -191,10 +187,5 @@ export default class ViewerToolbar extends Component {
         if (DEBUG) console.log('handleUpdateScale', slider, value, scale);
         BackendAPI.setCustomScale(scale, slider);
         this.setState({ customScale: scale });
-        ReactGA.event({
-            category: 'viewer',
-            action: 'expression level changed',
-            value: slider,
-        });
     }
 }

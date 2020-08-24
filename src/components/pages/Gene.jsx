@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Grid } from 'semantic-ui-react';
 import { BackendAPI } from '../common/API';
-import { FeatureSearch } from '../Search';
+import Search from '../Search';
 import Viewer from '../common/Viewer';
 import ViewerToolbar from '../common/ViewerToolbar';
 import ViewerSidebar from '../common/ViewerSidebar';
@@ -15,7 +15,6 @@ export default class Gene extends Component {
             activeMetadata: BackendAPI.getActiveLoomMetadata(),
             activeFeatures: BackendAPI.getActiveFeatures(),
             activeLegend: null,
-            sidebar: BackendAPI.getSidebarVisible(),
         };
         this.activeLoomListener = (loom, metadata, coordinates) => {
             if (DEBUG)
@@ -26,9 +25,6 @@ export default class Gene extends Component {
                 activeMetadata: metadata,
             });
         };
-        this.sidebarVisibleListener = (state) => {
-            this.setState({ sidebar: state });
-        };
         this.height = window.innerHeight - 200;
     }
 
@@ -37,7 +33,6 @@ export default class Gene extends Component {
             activeLoom,
             activeFeatures,
             activeCoordinates,
-            sidebar,
             activeMetadata,
             activeLegend,
         } = this.state;
@@ -45,13 +40,16 @@ export default class Gene extends Component {
         if (!activeLoom) return <div>Select the dataset to be analyzed</div>;
 
         return (
-            <Grid>
-                <FeatureSearch feature='all' />
+            <Grid columns='equal'>
+                <Search.FeatureSearchGroup
+                    filter='all'
+                    paddingColumn={true}
+                    identifier='gene-page' />
                 <Grid.Row columns='3' stretched className='viewerFlex'>
                     <Grid.Column width={1} className='viewerToolbar'>
-                        <ViewerToolbar />
+                        <ViewerToolbar location={this.props.location} />
                     </Grid.Column>
-                    <Grid.Column stretched>
+                    <Grid.Column>
                         <b>Expression levels</b>
                         <Viewer
                             name='expr'
@@ -64,6 +62,7 @@ export default class Gene extends Component {
                             customScale={true}
                             settings={true}
                             scale={true}
+                            location={this.props.location}
                         />
                     </Grid.Column>
                     <Grid.Column width={4}>
@@ -81,11 +80,9 @@ export default class Gene extends Component {
 
     UNSAFE_componentWillMount() {
         BackendAPI.onActiveLoomChange(this.activeLoomListener);
-        BackendAPI.onSidebarVisibleChange(this.sidebarVisibleListener);
     }
 
     componentWillUnmount() {
         BackendAPI.removeActiveLoomChange(this.activeLoomListener);
-        BackendAPI.removeSidebarVisibleChange(this.sidebarVisibleListener);
     }
 }

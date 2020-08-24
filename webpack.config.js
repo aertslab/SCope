@@ -5,6 +5,7 @@ const fs = require('fs');
 const pkg = require('./package.json');
 const TerserPlugin = require('terser-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 // Import config file
 let isAWS = process.env.NODE_TYPE == 'aws';
@@ -129,6 +130,7 @@ let config = {
             },
         }),
         new ForkTsCheckerWebpackPlugin(),
+        new BundleAnalyzerPlugin(),
     ],
 };
 
