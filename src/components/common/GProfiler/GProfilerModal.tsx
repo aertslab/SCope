@@ -1,6 +1,6 @@
-import { withRouter, RouteComponentProps } from 'react-router-dom';
 import R from 'ramda';
 import React, { Component } from 'react';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
     Button,
     Modal,
