@@ -1,4 +1,4 @@
-import R from 'ramda';
+import * as R from 'ramda';
 import React, { Component } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
