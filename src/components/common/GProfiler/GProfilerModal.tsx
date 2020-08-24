@@ -31,13 +31,13 @@ interface IGProfilerPopupProps {
 }
 
 const INITIAL_STATE = {
-    error: null,
+    error: '',
     showModal: false,
     topNumFeatures: [],
     availableOrganisms: [],
-    selectedOrganism: null,
-    selectedSortBy: null,
-    gProfilerToken: null,
+    selectedOrganism: '',
+    selectedSortBy: '',
+    gProfilerToken: '',
 };
 
 class GProfilerPopup extends Component<
@@ -116,14 +116,14 @@ class GProfilerPopup extends Component<
 
     handleChangeToken = (e, { value }) => {
         this.setState({
-            selectedOrganism: null,
+            selectedOrganism: '',
             gProfilerToken: value,
         });
     };
 
     handleClickGotoGProfilerURL = async () => {
         const gProfilerLink = await this.handleClickCreateGProfilerLink();
-        if (gProfilerLink === null || typeof gProfilerLink !== 'string') return;
+        if (gProfilerLink === '' || typeof gProfilerLink !== 'string') return;
         window.open(gProfilerLink);
     };
 
@@ -207,16 +207,13 @@ class GProfilerPopup extends Component<
             selectedOrganism,
             selectedSortBy,
         } = this.state;
-        if (selectedSortBy === null) {
+        if (selectedSortBy === '') {
             this.setState({
                 error: 'Please select a sort column',
             });
             return null;
         }
-        if (
-            (gProfilerToken === null || gProfilerToken === '') &&
-            selectedOrganism === null
-        ) {
+        if (gProfilerToken === '' && selectedOrganism === '') {
             this.setState({
                 error: 'Please select an organism',
             });
