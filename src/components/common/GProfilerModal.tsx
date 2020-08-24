@@ -13,6 +13,8 @@ import {
     Dropdown,
 } from 'semantic-ui-react';
 
+const GPROFILER_LINK_MAX_LENGTH = 8000;
+
 interface IGProfilerPopupState {
     error: string;
     showModal: boolean;
@@ -249,7 +251,7 @@ class GProfilerPopup extends Component<
             organism,
             topFeatureQuery
         );
-        if (gProfilerLink.length > 8000) {
+        if (gProfilerLink.length > GPROFILER_LINK_MAX_LENGTH) {
             this.setState({
                 error:
                     'Too many genes in total. Try to select a combination of gene lists with fewer genes.',
