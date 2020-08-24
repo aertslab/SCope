@@ -28,7 +28,7 @@ import { BackendAPI } from '../common/API';
 import Metadata from '../common/Metadata';
 import FileDownloader from '../../js/http';
 import CollaborativeAnnotation from './CollaborativeAnnotation';
-import GProfilerModal from './GProfilerModal';
+import GProfilerModal from './GProfiler/GProfilerModal';
 
 class ViewerSidebar extends Component {
     static propTypes = {
