@@ -55,7 +55,7 @@ export default class ViewerToolbar extends Component {
         } = this.state;
 
         let levels = false;
-        let sliders = [0, 1, 2].map( (i) => {
+        let sliders = [0, 1, 2].map((i) => {
             let val = customScale[i] ? customScale[i] : [0, featuresScale[i]];
             if (
                 activeFeatures[i] &&
@@ -156,7 +156,9 @@ export default class ViewerToolbar extends Component {
     }
 
     componentDidMount() {
-        const activePage = decodeURI(this.props.location.pathname).split('/').slice(-1)[0];
+        const activePage = decodeURI(this.props.location.pathname)
+            .split('/')
+            .slice(-1)[0];
         BackendAPI.onActiveFeaturesChange(
             activePage,
             this.activeFeaturesListener
@@ -166,7 +168,9 @@ export default class ViewerToolbar extends Component {
     }
 
     componentWillUnmount() {
-        const activePage = decodeURI(this.props.location.pathname).split('/').slice(-1)[0];
+        const activePage = decodeURI(this.props.location.pathname)
+            .split('/')
+            .slice(-1)[0];
         BackendAPI.removeActiveFeaturesChange(
             activePage,
             this.activeFeaturesListener

@@ -1,6 +1,6 @@
 .feature-search-input {
     display: inline-block;
-    width: 70%;
+    width: 100%;
 }
 
 .feature-search-input > .input {
@@ -9,10 +9,4 @@
 
 .feature-search-input > .input > input{
     border-radius: 3px !important;
-}
-
-.typeSelect {
-    display: inline-block;
-    width: 30% !important;
-    min-width: 85px !important;
 }

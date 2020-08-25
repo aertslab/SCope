@@ -18,7 +18,7 @@ export interface FeatureSearchSelection {
     readonly colour: string;
 }
 
-export const makeSelection = R.curry(
+const makeSelection = R.curry(
     (
         colour: string,
         category: string
@@ -35,6 +35,22 @@ export const makeSelection = R.curry(
         }) => FeatureSearchSelection
 );
 
+export const findResult = (
+    query: { title: string },
+    colour: string,
+    results: Array<Features>
+): FeatureSearchSelection | undefined => {
+    const searchSpace: FeatureSearchSelection[] = R.chain(
+        (r) => R.map(makeSelection(colour, r.category), r.results),
+        results
+    );
+
+    return R.filter(
+        R.propEq<keyof FeatureSearchSelection, any>('title', query.title),
+        searchSpace
+    )[0];
+};
+
 export type FeatureSearch = {
     field: string;
     filter: FeatureFilter;
@@ -42,6 +58,7 @@ export type FeatureSearch = {
     value: string;
     results: Array<Features>;
     selected?: FeatureSearchSelection;
+    error?: string;
 };
 
 export type State = { [field: string]: FeatureSearch };
@@ -66,16 +83,21 @@ export const init = (field: string): FeatureSearch => {
         filter: 'all',
         loading: false,
         value: '',
-        results: [{ category: '', results: [] }],
+        results: [],
         selected: undefined,
     };
 };
 
 export const featuresToResults = (
     features: Features
-): StrictSearchCategoryProps => {
-    return {
-        name: features.category,
-        results: (features.results as unknown) as typeof SearchResult[],
-    };
+): [string, StrictSearchCategoryProps] => {
+    return [
+        features.category,
+        {
+            name: features.category,
+            results: (features.results.map((result) => {
+                return { ...result, id: window.btoa(result.title) };
+            }) as unknown) as typeof SearchResult[],
+        },
+    ];
 };

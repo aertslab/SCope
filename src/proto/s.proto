@@ -95,6 +95,7 @@ message CellAUCValuesByFeaturesReply{
 message FeatureRequest {
   string loomFilePath=1;
   string query=2;
+  string filter=3;
 }
 
 message CellMetaDataRequest {
@@ -110,9 +111,15 @@ message CellMetaDataRequest {
 }
 
 message FeatureReply {
-  repeated string feature=1;
-  repeated string featureType=2;
-  repeated string featureDescription=3;
+  message Feature {
+    message Match {
+      string title=1;
+      string description=2;
+    }
+    string category=1;
+    repeated Match results=2;
+  }
+  repeated Feature features=1;
 }
 
 message CoordinatesRequest {

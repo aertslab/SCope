@@ -12,19 +12,17 @@ import { debounce } from 'lodash';
 import * as R from 'ramda';
 
 import { RootState } from '../../redux/reducers';
-import { Features } from '../../api';
-
-import { BackendAPI } from '../common/API';
+import { Features, LegacyAPI } from '../../api';
 
 import {
     FeatureFilter,
     FeatureSearchSelection,
     toFeatureFilter,
     featuresToResults,
-    makeSelection,
+    findResult,
 } from './model';
 import * as Action from './actions';
-import { searchResults, isLoading, isSelected } from './selectors';
+import * as Selector from './selectors';
 
 import './FeatureSearchBox.css';
 
@@ -35,17 +33,11 @@ type FeatureSearchBoxProps = {
     /** The feature type to search for */
     filter: FeatureFilter;
 
-    /** Restrict the dropdown to _only_ this initialised feature type */
-    singleFeature: boolean;
-
-    /** Used to en/dis-able the entire search box */
-    enabled: boolean;
-
-    /** True when a search result is selcted */
-    selected: boolean;
-
     /** Background colour */
     colour: string;
+
+    /** A search result has been selected */
+    selected?: boolean;
 
     /** Show a loading indication */
     loading?: boolean;
@@ -68,29 +60,15 @@ type FeatureSearchBoxProps = {
         field: string,
         selection: FeatureSearchSelection
     ) => Action.SearchResultSelect;
-
-    /** Filter search results given a filter */
-    filterResults?: (
-        field: string,
-        filter: FeatureFilter
-    ) => Action.SearchFilter;
 };
 
 /**
- * A text search input for (selectable categories) properties on the dataset.
+ * A text search input for items in a dataset.
  */
 const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
-    const { enabled, singleFeature, loading } = props;
-    const options = [
-        { key: 'all', text: 'all features', value: 'all' },
-        { key: 'gene', text: 'gene', value: 'gene' },
-        { key: 'regulon', text: 'regulon', value: 'regulon' },
-        { key: 'cluster', text: 'cluster', value: 'cluster' },
-    ];
-
     const onSearchChange = (_, { value }) => {
         if (value === '') {
-            BackendAPI.setActiveFeature(
+            LegacyAPI.setActiveFeature(
                 props.field.slice(-1), //TODO: This is a horrible hack
                 props.filter,
                 '',
@@ -106,34 +84,55 @@ const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
 
     const onResultSelect = (_, { result }) => {
         if (props.results) {
-            const searchSpace: FeatureSearchSelection[] = R.chain(
-                (r) =>
-                    R.map(makeSelection(props.colour, r.category), r.results),
-                props.results
-            );
+            const selected = findResult(result, props.colour, props.results);
 
-            const selected = R.filter(
-                R.propEq('title', result.title),
-                searchSpace
-            ) as FeatureSearchSelection[];
-
-            if (selected.length === 1) {
-                BackendAPI.updateFeature(
+            if (selected) {
+                LegacyAPI.updateFeature(
                     props.field.slice(-1), //TODO: This is a horrible hack
                     props.filter,
-                    selected[0]?.title,
-                    selected[0]?.category,
-                    selected[0]?.description
+                    selected.title,
+                    selected.category,
+                    selected.description
                 );
 
-                props.selectResult(props.field, selected[0]);
+                props.selectResult(props.field, selected);
             }
         }
     };
 
-    const onFilterChange = (_, { value }) => {
-        props.filterResults(props.field, value);
+    /**
+     * Icon in the Search box is either a 'search' icon, or,
+     * when a search result is selected, a clickable cross icon.
+     * Clicking the cross should clear the search field.
+     */
+    const icon = () => {
+        return {
+            ...(props.selected && {
+                onClick: () => onSearchChange(undefined, { value: '' }),
+            }),
+            icon: props.selected ? 'cancel' : 'search',
+            iconPosition: 'left',
+        };
     };
+
+    //TODO: A hack to ensure the old state managment knows something is selected
+    if (props.value && props.selected) {
+        const selected = findResult(
+            { title: props.value },
+            props.colour,
+            props.results
+        );
+
+        LegacyAPI.updateFeature(
+            props.field.slice(-1), //TODO: This is a horrible hack
+            props.filter,
+            selected.title,
+            selected.category,
+            selected.description
+        );
+    }
+
+    const displayResults = R.fromPairs(props.results?.map(featuresToResults));
 
     return (
         <Segment
@@ -143,24 +142,13 @@ const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
             <Search
                 category
                 className='feature-search-input'
-                input={{
-                    icon: props.selected ? '' : 'search',
-                    iconPosition: 'left',
-                }}
-                loading={loading}
+                input={icon()}
+                loading={props.loading}
                 placeholder='Search...'
                 onSearchChange={onSearchChange}
                 onResultSelect={onResultSelect}
-                results={props.results.map(featuresToResults)}
+                results={displayResults}
                 value={props.value}
-                disabled={!enabled}
-            />
-            <Select
-                className={'icon typeSelect'}
-                options={options}
-                defaultValue={props.filter}
-                disabled={!enabled || singleFeature}
-                onChange={onFilterChange}
             />
         </Segment>
     );
@@ -168,9 +156,10 @@ const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
 
 const mapStateToProps = (state: RootState, ownProps: FeatureSearchBoxProps) => {
     return {
-        results: searchResults(ownProps.field, state),
-        loading: isLoading(ownProps.field, state),
-        selected: isSelected(ownProps.field, state),
+        results: Selector.searchResults(ownProps.field, state),
+        loading: Selector.isLoading(ownProps.field, state),
+        value: Selector.value(ownProps.field, state),
+        selected: Selector.isSelected(ownProps.field, state),
     };
 };
 
@@ -178,11 +167,8 @@ const mapDispatchToProps = (dispatch) => {
     return {
         search: (field: string, filter: FeatureFilter, query: string) =>
             dispatch(
-                Action.search(field, BackendAPI.getActiveLoom(), filter, query)
+                Action.search(field, LegacyAPI.getActiveLoom(), filter, query)
             ),
-
-        filterResults: (field: string, filter: FeatureFilter) =>
-            dispatch(Action.filter(field, filter)),
 
         selectResult: (field: string, selection: FeatureSearchSelection) =>
             dispatch(Action.select(field, selection)),
