@@ -203,13 +203,14 @@ class AppHeader extends Component {
 
         return (
             <Menu stackable secondary attached='top' className='vib' inverted>
-                <Menu.Item>
+                <Menu.Item
+                    onClick={toggleSidebar}>
                     <Icon
                         name={this.props.sidebarIsVisible ? 'close' : 'sidebar'}
-                        onClick={toggleSidebar}
                         className='pointer'
                         title='Toggle sidebar'
                     />
+                    MENU
                 </Menu.Item>
 
                 {menu.map(
