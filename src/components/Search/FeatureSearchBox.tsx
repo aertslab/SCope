@@ -24,7 +24,7 @@ import {
     makeSelection,
 } from './model';
 import * as Action from './actions';
-import { searchResults, isLoading, isSelected } from './selectors';
+import * as Selector from './selectors';
 
 import './FeatureSearchBox.css';
 
@@ -144,7 +144,7 @@ const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
                 category
                 className='feature-search-input'
                 input={{
-                    icon: props.selected ? '' : 'search',
+                    icon: 'search',
                     iconPosition: 'left',
                 }}
                 loading={loading}
@@ -168,9 +168,10 @@ const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
 
 const mapStateToProps = (state: RootState, ownProps: FeatureSearchBoxProps) => {
     return {
-        results: searchResults(ownProps.field, state),
-        loading: isLoading(ownProps.field, state),
-        selected: isSelected(ownProps.field, state),
+        results: Selector.searchResults(ownProps.field, state),
+        loading: Selector.isLoading(ownProps.field, state),
+        selected: Selector.isSelected(ownProps.field, state),
+        filter: Selector.hasFilter(ownProps.field, state),
     };
 };
 
