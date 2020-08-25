@@ -72,19 +72,19 @@ class App extends Component {
 
     acceptCookies() {
         this.props.cookies.set('CookieConsent', 'true');
-        this.props.cookies.set(cookieName, this.props.match.params.uuid, {
-            path: '/',
-        });
+        this.setUUIDCookie();
         this.setState({ cookiesAllowed: true });
     }
 
+    setUUIDCookie() {
+        this.props.cookies.set(cookieName, this.props.match.params.uuid, {
+            path: '/',
+            sameSite: 'strict',
+        });
+    }
+
     render() {
-        const {
-            metadata,
-            error,
-            loaded,
-            sessionsLimitReached,
-        } = this.state;
+        const { metadata, error, loaded, sessionsLimitReached } = this.state;
 
         const {
             isAppLoading,
@@ -108,10 +108,15 @@ class App extends Component {
                                 <FullPageNotify
                                     starting={isAppLoading}
                                     connected={!error}
-                                    tooManyUsers={!isAppLoading && sessionsLimitReached}
-                                    timeout={!isAppLoading &&
-                                             this.timeout != null &&
-                                             this.timeout <= 0} />
+                                    tooManyUsers={
+                                        !isAppLoading && sessionsLimitReached
+                                    }
+                                    timeout={
+                                        !isAppLoading &&
+                                        this.timeout != null &&
+                                        this.timeout <= 0
+                                    }
+                                />
                             </Segment>
                         )}
                     />
@@ -135,8 +140,7 @@ class App extends Component {
                                         )}
                                         sessionMode={sessionMode}
                                     />
-                                    <Sidebar.Pusher
-                                        style={{ width: "100%" }}>
+                                    <Sidebar.Pusher style={{ width: '100%' }}>
                                         <Route
                                             path='/:uuid/:loom?/welcome'
                                             component={Welcome}
@@ -164,7 +168,12 @@ class App extends Component {
                                         <Route
                                             path='/:uuid/:loom?/compare'
                                             component={() => (
-                                                <Compare metadata={metadata} />
+                                                <Compare
+                                                    metadata={metadata}
+                                                    location={
+                                                        this.props.location
+                                                    }
+                                                />
                                             )}
                                         />
                                         <Route
@@ -180,10 +189,15 @@ class App extends Component {
                                 <FullPageNotify
                                     starting={isAppLoading}
                                     connected={!error}
-                                    tooManyUsers={!isAppLoading && sessionsLimitReached}
-                                    timeout={!isAppLoading &&
-                                             this.timeout != null &&
-                                             this.timeout <= 0} />
+                                    tooManyUsers={
+                                        !isAppLoading && sessionsLimitReached
+                                    }
+                                    timeout={
+                                        !isAppLoading &&
+                                        this.timeout != null &&
+                                        this.timeout <= 0
+                                    }
+                                />
                             </Segment>
                         )}
                     />
@@ -206,7 +220,6 @@ class App extends Component {
     }
 
     componentDidMount() {
-        if (DEBUG) console.log('App componentDidMount', this.props);
         this.parseURLParams(this.props);
         this.getUUIDFromIP(this.props);
 
@@ -298,7 +311,9 @@ class App extends Component {
 
         if (match.params.uuid) {
             if (match.params.uuid == 'permalink') {
-                if (DEBUG) console.log('Permalink detected');
+                if (DEBUG) {
+                    console.log('Permalink detected');
+                }
                 this.restoreSession(
                     ip,
                     cookies.get(cookieName),
@@ -311,18 +326,20 @@ class App extends Component {
                     match.params.loom
                 );
             } else {
-                if (DEBUG)
+                if (DEBUG) {
                     console.log('Params UUID detected:', match.params.uuid);
+                }
                 this.checkUUID(ip, match.params.uuid);
                 console.log(this.state.cookiesAllowed);
                 console.log(cookieName, match.params.uuid, { path: '/' });
                 if (this.state.cookiesAllowed) {
-                    cookies.set(cookieName, match.params.uuid, { path: '/' });
+                    this.setUUIDCookie();
                 }
             }
         } else if (cookies.get(cookieName)) {
-            if (DEBUG)
+            if (DEBUG) {
                 console.log('Cookie UUID detected:', cookies.get(cookieName));
+            }
             this.checkUUID(ip, cookies.get(cookieName));
         } else {
             if (DEBUG) console.log('No UUID detected');
@@ -363,13 +380,16 @@ class App extends Component {
                 gbc.ws.onclose = (err) => {
                     this.setState({ error: true });
                 };
-                if (DEBUG) console.log('request RemainingUUIDTime', query);
+                if (DEBUG) {
+                    console.log('request RemainingUUIDTime', query);
+                }
                 gbc.services.scope.Main.getRemainingUUIDTime(
                     query,
                     (err, response) => {
                         this.mouseClicks = 0;
-                        if (DEBUG)
+                        if (DEBUG) {
                             console.log('getRemainingUUIDTime', response);
+                        }
                         if (response.sessionsLimitReached) {
                             this.props.setAppLoading(false);
                             this.setState({
@@ -379,7 +399,7 @@ class App extends Component {
                             this.timeout = response
                                 ? parseInt(response.timeRemaining * 1000)
                                 : 0;
-                            // cookies.set(cookieName, uuid, { path: '/', maxAge: this.timeout });
+
                             if (!ping) {
                                 this.props.setAppLoading(false);
                                 this.props.setUUID(uuid);
@@ -390,8 +410,9 @@ class App extends Component {
                                 this.timer = setInterval(() => {
                                     this.timeout -= timer;
                                     if (this.timeout < 0) {
-                                        if (DEBUG)
+                                        if (DEBUG) {
                                             console.log('Session timed out');
+                                        }
                                         cookies.remove(cookieName);
                                         clearInterval(this.timer);
                                         this.timer = null;
@@ -400,11 +421,12 @@ class App extends Component {
                                         }
                                         this.forceUpdate();
                                     } else {
-                                        if (DEBUG)
+                                        if (DEBUG) {
                                             console.log(
                                                 'Session socket ping @ ',
                                                 this.timeout
                                             );
+                                        }
                                         this.checkUUID(ip, uuid, true);
                                     }
                                 }, timer);

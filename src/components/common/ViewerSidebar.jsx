@@ -55,7 +55,7 @@ class ViewerSidebar extends Component {
         };
         this.activeFeaturesListener = (features, id) => {
             this.props.onActiveFeaturesChange(features, id);
-            console.log("ViewerSidebar features changed:", features, id);
+            console.log('ViewerSidebar features changed:', features, id);
             this.setState({
                 activeFeatures: features,
                 activeTab: parseInt(id) + 1,
@@ -1424,7 +1424,12 @@ class ViewerSidebar extends Component {
         return (
             <div className='flexDisplay'>
                 <Tab
-                    menu={{ secondary: true, pointing: true }}
+                    menu={{
+                        secondary: true,
+                        pointing: true,
+                        stackable: true,
+                        widths: 4,
+                    }}
                     panes={panes}
                     renderActiveOnly={true}
                     activeIndex={activeTab}
@@ -1449,17 +1454,19 @@ class ViewerSidebar extends Component {
         let orcid_name = this.props.cookies.get('scope_orcid_name');
         let orcid_id = this.props.cookies.get('scope_orcid_id');
         let orcid_uuid = this.props.cookies.get('scope_orcid_uuid');
-        const activePage = decodeURI(this.props.location.pathname).split('/').slice(-1)[0];
+        const activePage = decodeURI(this.props.location.pathname)
+            .split('/')
+            .slice(-1)[0];
 
         this.setState({
             orcid_name: orcid_name,
             orcid_id: orcid_id,
             orcid_uuid: orcid_uuid,
-            activePage
+            activePage,
         });
         this.timer = null;
         BackendAPI.onViewerSelectionsChange(this.selectionsListener);
-        
+
         BackendAPI.onActiveFeaturesChange(
             activePage,
             this.activeFeaturesListener

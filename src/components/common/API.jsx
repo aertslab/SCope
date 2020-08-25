@@ -530,7 +530,10 @@ class API {
                 BackendAPI.queryLoomFiles(
                     this.uuid,
                     () => {
-                        callback(response);
+                        callback({feature: response.features[0].results[0].title,
+                                  featureType: response.features[0].category,
+                                  featureDescription: response.features[0].results[0].description
+                                 });
                     },
                     this.getActiveLoom()
                 );

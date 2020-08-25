@@ -715,6 +715,25 @@ _FEATUREREQUEST = _descriptor.Descriptor(
             file=DESCRIPTOR,
             create_key=_descriptor._internal_create_key,
         ),
+        _descriptor.FieldDescriptor(
+            name="filter",
+            full_name="scope.FeatureRequest.filter",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
     ],
     extensions=[],
     nested_types=[],
@@ -725,7 +744,7 @@ _FEATUREREQUEST = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[],
     serialized_start=742,
-    serialized_end=795,
+    serialized_end=811,
 )
 
 
@@ -898,29 +917,29 @@ _CELLMETADATAREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=798,
-    serialized_end=1003,
+    serialized_start=814,
+    serialized_end=1019,
 )
 
 
-_FEATUREREPLY = _descriptor.Descriptor(
-    name="FeatureReply",
-    full_name="scope.FeatureReply",
+_FEATUREREPLY_FEATURE_MATCH = _descriptor.Descriptor(
+    name="Match",
+    full_name="scope.FeatureReply.Feature.Match",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
-            name="feature",
-            full_name="scope.FeatureReply.feature",
+            name="title",
+            full_name="scope.FeatureReply.Feature.Match.title",
             index=0,
             number=1,
             type=9,
             cpp_type=9,
-            label=3,
+            label=1,
             has_default_value=False,
-            default_value=[],
+            default_value=b"".decode("utf-8"),
             message_type=None,
             enum_type=None,
             containing_type=None,
@@ -931,34 +950,15 @@ _FEATUREREPLY = _descriptor.Descriptor(
             create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
-            name="featureType",
-            full_name="scope.FeatureReply.featureType",
+            name="description",
+            full_name="scope.FeatureReply.Feature.Match.description",
             index=1,
             number=2,
             type=9,
             cpp_type=9,
-            label=3,
+            label=1,
             has_default_value=False,
-            default_value=[],
-            message_type=None,
-            enum_type=None,
-            containing_type=None,
-            is_extension=False,
-            extension_scope=None,
-            serialized_options=None,
-            file=DESCRIPTOR,
-            create_key=_descriptor._internal_create_key,
-        ),
-        _descriptor.FieldDescriptor(
-            name="featureDescription",
-            full_name="scope.FeatureReply.featureDescription",
-            index=2,
-            number=3,
-            type=9,
-            cpp_type=9,
-            label=3,
-            has_default_value=False,
-            default_value=[],
+            default_value=b"".decode("utf-8"),
             message_type=None,
             enum_type=None,
             containing_type=None,
@@ -977,8 +977,104 @@ _FEATUREREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1005,
-    serialized_end=1085,
+    serialized_start=1166,
+    serialized_end=1209,
+)
+
+_FEATUREREPLY_FEATURE = _descriptor.Descriptor(
+    name="Feature",
+    full_name="scope.FeatureReply.Feature",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="category",
+            full_name="scope.FeatureReply.Feature.category",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
+            name="results",
+            full_name="scope.FeatureReply.Feature.results",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[_FEATUREREPLY_FEATURE_MATCH,],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1085,
+    serialized_end=1209,
+)
+
+_FEATUREREPLY = _descriptor.Descriptor(
+    name="FeatureReply",
+    full_name="scope.FeatureReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="features",
+            full_name="scope.FeatureReply.features",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[_FEATUREREPLY_FEATURE,],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1022,
+    serialized_end=1209,
 )
 
 
@@ -1075,8 +1171,8 @@ _COORDINATESREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1087,
-    serialized_end=1206,
+    serialized_start=1211,
+    serialized_end=1330,
 )
 
 
@@ -1154,8 +1250,8 @@ _COORDINATESREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1208,
-    serialized_end=1269,
+    serialized_start=1332,
+    serialized_end=1393,
 )
 
 
@@ -1214,8 +1310,8 @@ _ANNOTATION = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1271,
-    serialized_end=1313,
+    serialized_start=1395,
+    serialized_end=1437,
 )
 
 
@@ -1274,8 +1370,8 @@ _COORDINATE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1315,
-    serialized_end=1349,
+    serialized_start=1439,
+    serialized_end=1473,
 )
 
 
@@ -1334,8 +1430,8 @@ _EDGE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1351,
-    serialized_end=1389,
+    serialized_start=1475,
+    serialized_end=1513,
 )
 
 
@@ -1413,8 +1509,8 @@ _TRAJECTORY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1391,
-    serialized_end=1486,
+    serialized_start=1515,
+    serialized_end=1610,
 )
 
 
@@ -1492,8 +1588,8 @@ _EMBEDDING = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1488,
-    serialized_end=1564,
+    serialized_start=1612,
+    serialized_end=1688,
 )
 
 
@@ -1571,8 +1667,8 @@ _CLUSTERMARKERMETRIC = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1566,
-    serialized_end=1640,
+    serialized_start=1690,
+    serialized_end=1764,
 )
 
 
@@ -1764,8 +1860,8 @@ _COLLABANNODATA = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1643,
-    serialized_end=1834,
+    serialized_start=1767,
+    serialized_end=1958,
 )
 
 
@@ -1843,8 +1939,8 @@ _COLLABANNOVOTER = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1836,
-    serialized_end=1911,
+    serialized_start=1960,
+    serialized_end=2035,
 )
 
 
@@ -1903,8 +1999,8 @@ _COLLABANNOVOTES = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1913,
-    serialized_end=1985,
+    serialized_start=2037,
+    serialized_end=2109,
 )
 
 
@@ -2001,8 +2097,8 @@ _CELLTYPEANNOTATION = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1988,
-    serialized_end=2158,
+    serialized_start=2112,
+    serialized_end=2282,
 )
 
 
@@ -2080,8 +2176,8 @@ _CLUSTERANNOTATION = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2160,
-    serialized_end=2269,
+    serialized_start=2284,
+    serialized_end=2393,
 )
 
 
@@ -2197,8 +2293,8 @@ _CLUSTERING = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2272,
-    serialized_end=2427,
+    serialized_start=2396,
+    serialized_end=2551,
 )
 
 
@@ -2276,8 +2372,8 @@ _CELLMETADATA = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2430,
-    serialized_end=2562,
+    serialized_start=2554,
+    serialized_end=2686,
 )
 
 
@@ -2336,8 +2432,8 @@ _AUCTHRESHOLD = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2564,
-    serialized_end=2611,
+    serialized_start=2688,
+    serialized_end=2735,
 )
 
 
@@ -2434,8 +2530,8 @@ _REGULONGENESMETRIC = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2613,
-    serialized_end=2702,
+    serialized_start=2737,
+    serialized_end=2826,
 )
 
 
@@ -2551,8 +2647,8 @@ _REGULON = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2705,
-    serialized_end=2863,
+    serialized_start=2829,
+    serialized_end=2987,
 )
 
 
@@ -2687,8 +2783,8 @@ _FILEMETADATA = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2866,
-    serialized_end=3017,
+    serialized_start=2990,
+    serialized_end=3141,
 )
 
 
@@ -2728,8 +2824,8 @@ _FEATUREVALUES = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3019,
-    serialized_end=3052,
+    serialized_start=3143,
+    serialized_end=3176,
 )
 
 
@@ -2769,8 +2865,8 @@ _CELLANNOTATIONS = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3054,
-    serialized_end=3092,
+    serialized_start=3178,
+    serialized_end=3216,
 )
 
 
@@ -2810,8 +2906,8 @@ _CELLCLUSTERS = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3094,
-    serialized_end=3126,
+    serialized_start=3218,
+    serialized_end=3250,
 )
 
 
@@ -2908,8 +3004,8 @@ _CELLMETADATAREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3129,
-    serialized_end=3321,
+    serialized_start=3253,
+    serialized_end=3445,
 )
 
 
@@ -2968,8 +3064,8 @@ _REGULONMETADATAREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3323,
-    serialized_end=3386,
+    serialized_start=3447,
+    serialized_end=3510,
 )
 
 
@@ -3009,8 +3105,8 @@ _REGULONMETADATAREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3388,
-    serialized_end=3447,
+    serialized_start=3512,
+    serialized_end=3571,
 )
 
 
@@ -3088,8 +3184,8 @@ _MARKERGENESREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3449,
-    serialized_end=3532,
+    serialized_start=3573,
+    serialized_end=3656,
 )
 
 
@@ -3186,8 +3282,8 @@ _MARKERGENESMETRIC = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3534,
-    serialized_end=3622,
+    serialized_start=3658,
+    serialized_end=3746,
 )
 
 
@@ -3246,8 +3342,8 @@ _MARKERGENESREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3624,
-    serialized_end=3700,
+    serialized_start=3748,
+    serialized_end=3824,
 )
 
 
@@ -3306,8 +3402,8 @@ _MYLOOMSREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3702,
-    serialized_end=3750,
+    serialized_start=3826,
+    serialized_end=3874,
 )
 
 
@@ -3385,8 +3481,8 @@ _LOOMHEIERARCHY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3752,
-    serialized_end=3804,
+    serialized_start=3876,
+    serialized_end=3928,
 )
 
 
@@ -3521,8 +3617,8 @@ _MYLOOM = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3807,
-    serialized_end=4013,
+    serialized_start=3931,
+    serialized_end=4137,
 )
 
 
@@ -3581,8 +3677,8 @@ _MYLOOMSREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4015,
-    serialized_end=4077,
+    serialized_start=4139,
+    serialized_end=4201,
 )
 
 
@@ -3660,8 +3756,8 @@ _TRANSLATELASSOSELECTIONREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4079,
-    serialized_end=4183,
+    serialized_start=4203,
+    serialized_end=4307,
 )
 
 
@@ -3701,8 +3797,8 @@ _TRANSLATELASSOSELECTIONREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4185,
-    serialized_end=4236,
+    serialized_start=4309,
+    serialized_end=4360,
 )
 
 
@@ -3761,8 +3857,8 @@ _CELLIDSREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4238,
-    serialized_end=4297,
+    serialized_start=4362,
+    serialized_end=4421,
 )
 
 
@@ -3802,8 +3898,8 @@ _CELLIDSREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4299,
-    serialized_end=4330,
+    serialized_start=4423,
+    serialized_end=4454,
 )
 
 
@@ -3881,8 +3977,8 @@ _GENESETENRICHMENTREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4332,
-    serialized_end=4421,
+    serialized_start=4456,
+    serialized_end=4545,
 )
 
 
@@ -3941,8 +4037,8 @@ _PROGRESS = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4423,
-    serialized_end=4464,
+    serialized_start=4547,
+    serialized_end=4588,
 )
 
 
@@ -4020,8 +4116,8 @@ _GENESETENRICHMENTREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4467,
-    serialized_end=4595,
+    serialized_start=4591,
+    serialized_end=4719,
 )
 
 
@@ -4137,8 +4233,8 @@ _VMAXREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4597,
-    serialized_end=4720,
+    serialized_start=4721,
+    serialized_end=4844,
 )
 
 
@@ -4197,8 +4293,8 @@ _VMAXREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4722,
-    serialized_end=4764,
+    serialized_start=4846,
+    serialized_end=4888,
 )
 
 
@@ -4238,8 +4334,8 @@ _UUIDREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4766,
-    serialized_end=4791,
+    serialized_start=4890,
+    serialized_end=4915,
 )
 
 
@@ -4279,8 +4375,8 @@ _UUIDREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4793,
-    serialized_end=4818,
+    serialized_start=4917,
+    serialized_end=4942,
 )
 
 
@@ -4358,8 +4454,8 @@ _REMAININGUUIDTIMEREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4820,
-    serialized_end=4893,
+    serialized_start=4944,
+    serialized_end=5017,
 )
 
 
@@ -4456,8 +4552,8 @@ _REMAININGUUIDTIMEREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4895,
-    serialized_end=5007,
+    serialized_start=5019,
+    serialized_end=5131,
 )
 
 
@@ -4516,8 +4612,8 @@ _LOOMUPLOADEDREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5009,
-    serialized_end=5062,
+    serialized_start=5133,
+    serialized_end=5186,
 )
 
 
@@ -4537,8 +4633,8 @@ _LOOMUPLOADEDREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5064,
-    serialized_end=5083,
+    serialized_start=5188,
+    serialized_end=5207,
 )
 
 
@@ -4597,8 +4693,8 @@ _MYGENESET = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5085,
-    serialized_end=5149,
+    serialized_start=5209,
+    serialized_end=5273,
 )
 
 
@@ -4638,8 +4734,8 @@ _MYGENESETSREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5151,
-    serialized_end=5184,
+    serialized_start=5275,
+    serialized_end=5308,
 )
 
 
@@ -4679,8 +4775,8 @@ _MYGENESETSREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5186,
-    serialized_end=5241,
+    serialized_start=5310,
+    serialized_end=5365,
 )
 
 
@@ -4758,8 +4854,8 @@ _DELETEUSERFILEREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5243,
-    serialized_end=5316,
+    serialized_start=5367,
+    serialized_end=5440,
 )
 
 
@@ -4799,8 +4895,8 @@ _DELETEUSERFILEREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5318,
-    serialized_end=5368,
+    serialized_start=5442,
+    serialized_end=5492,
 )
 
 
@@ -4935,8 +5031,8 @@ _DOWNLOADSUBLOOMREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5371,
-    serialized_end=5520,
+    serialized_start=5495,
+    serialized_end=5623,
 )
 
 
@@ -5052,8 +5148,8 @@ _DOWNLOADSUBLOOMREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5523,
-    serialized_end=5674,
+    serialized_start=5626,
+    serialized_end=5777,
 )
 
 
@@ -5150,8 +5246,8 @@ _SETANNOTATIONNAMEREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5676,
-    serialized_end=5786,
+    serialized_start=5779,
+    serialized_end=5889,
 )
 
 
@@ -5191,8 +5287,8 @@ _SETANNOTATIONNAMEREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5788,
-    serialized_end=5829,
+    serialized_start=5891,
+    serialized_end=5932,
 )
 
 
@@ -5289,8 +5385,8 @@ _SETLOOMHIERARCHYREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5831,
-    serialized_end=5953,
+    serialized_start=5934,
+    serialized_end=6056,
 )
 
 
@@ -5330,8 +5426,8 @@ _SETLOOMHIERARCHYREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5955,
-    serialized_end=5995,
+    serialized_start=6058,
+    serialized_end=6098,
 )
 
 
@@ -5371,8 +5467,8 @@ _GETORCIDREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=5997,
-    serialized_end=6033,
+    serialized_start=6100,
+    serialized_end=6136,
 )
 
 
@@ -5469,8 +5565,8 @@ _GETORCIDREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=6035,
-    serialized_end=6125,
+    serialized_start=6138,
+    serialized_end=6228,
 )
 
 
@@ -5490,8 +5586,8 @@ _GETORCIDSTATUSREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=6127,
-    serialized_end=6150,
+    serialized_start=6230,
+    serialized_end=6253,
 )
 
 
@@ -5531,8 +5627,8 @@ _GETORCIDSTATUSREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=6152,
-    serialized_end=6189,
+    serialized_start=6255,
+    serialized_end=6292,
 )
 
 
@@ -5610,8 +5706,8 @@ _ORCIDINFOMESSAGE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=6191,
-    serialized_end=6264,
+    serialized_start=6294,
+    serialized_end=6367,
 )
 
 
@@ -5727,8 +5823,8 @@ _SETCOLABANNOTATIONDATAREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=6267,
-    serialized_end=6446,
+    serialized_start=6370,
+    serialized_end=6549,
 )
 
 
@@ -5787,8 +5883,8 @@ _SETCOLABANNOTATIONDATAREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=6448,
-    serialized_end=6511,
+    serialized_start=6551,
+    serialized_end=6614,
 )
 
 
@@ -5923,8 +6019,8 @@ _VOTEANNOTATIONREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=6514,
-    serialized_end=6704,
+    serialized_start=6617,
+    serialized_end=6807,
 )
 
 
@@ -5983,8 +6079,8 @@ _VOTEANNOTATIONREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=6706,
-    serialized_end=6761,
+    serialized_start=6809,
+    serialized_end=6864,
 )
 
 
@@ -6081,8 +6177,8 @@ _GETNEXTCLUSTERREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=6763,
-    serialized_end=6868,
+    serialized_start=6866,
+    serialized_end=6971,
 )
 
 
@@ -6160,8 +6256,8 @@ _NEWCLUSTERINFO = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=6870,
-    serialized_end=6947,
+    serialized_start=6973,
+    serialized_end=7050,
 )
 
 
@@ -6239,8 +6335,8 @@ _ADDNEWCLUSTERINGREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=6950,
-    serialized_end=7085,
+    serialized_start=7053,
+    serialized_end=7188,
 )
 
 
@@ -6299,8 +6395,8 @@ _ADDNEWCLUSTERINGREPLY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=7087,
-    serialized_end=7144,
+    serialized_start=7190,
+    serialized_end=7247,
 )
 
 
@@ -6725,6 +6821,10 @@ _FEATURELABELREPLY = _descriptor.Descriptor(
 _CELLCOLORBYFEATURESREQUEST.fields_by_name["annotation"].message_type = _ANNOTATION
 _CELLCOLORBYFEATURESREPLY.fields_by_name["legend"].message_type = _COLORLEGEND
 _CELLCOLORBYFEATURESREPLY.fields_by_name["error"].message_type = _ERRORREPLY
+_FEATUREREPLY_FEATURE_MATCH.containing_type = _FEATUREREPLY_FEATURE
+_FEATUREREPLY_FEATURE.fields_by_name["results"].message_type = _FEATUREREPLY_FEATURE_MATCH
+_FEATUREREPLY_FEATURE.containing_type = _FEATUREREPLY
+_FEATUREREPLY.fields_by_name["features"].message_type = _FEATUREREPLY_FEATURE
 _COORDINATESREQUEST.fields_by_name["annotation"].message_type = _ANNOTATION
 _TRAJECTORY.fields_by_name["edges"].message_type = _EDGE
 _TRAJECTORY.fields_by_name["coordinates"].message_type = _COORDINATE
@@ -6945,12 +7045,32 @@ FeatureReply = _reflection.GeneratedProtocolMessageType(
     "FeatureReply",
     (_message.Message,),
     {
+        "Feature": _reflection.GeneratedProtocolMessageType(
+            "Feature",
+            (_message.Message,),
+            {
+                "Match": _reflection.GeneratedProtocolMessageType(
+                    "Match",
+                    (_message.Message,),
+                    {
+                        "DESCRIPTOR": _FEATUREREPLY_FEATURE_MATCH,
+                        "__module__": "s_pb2"
+                        # @@protoc_insertion_point(class_scope:scope.FeatureReply.Feature.Match)
+                    },
+                ),
+                "DESCRIPTOR": _FEATUREREPLY_FEATURE,
+                "__module__": "s_pb2"
+                # @@protoc_insertion_point(class_scope:scope.FeatureReply.Feature)
+            },
+        ),
         "DESCRIPTOR": _FEATUREREPLY,
         "__module__": "s_pb2"
         # @@protoc_insertion_point(class_scope:scope.FeatureReply)
     },
 )
 _sym_db.RegisterMessage(FeatureReply)
+_sym_db.RegisterMessage(FeatureReply.Feature)
+_sym_db.RegisterMessage(FeatureReply.Feature.Match)
 
 CoordinatesRequest = _reflection.GeneratedProtocolMessageType(
     "CoordinatesRequest",

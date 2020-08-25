@@ -1,1 +1,1 @@
-export * from './getFeatures';
+export * from '../../../components/Search/effects';
