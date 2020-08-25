@@ -6,7 +6,7 @@ import { MainState, MainAction } from '../types';
 const initialState: MainState = {
     isAppLoading: true,
     uuid: '',
-    sessionMode: 'rw',
+    sessionMode: 'r',
     sidebarIsVisible: true,
 };
 
