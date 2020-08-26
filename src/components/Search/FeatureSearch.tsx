@@ -32,9 +32,6 @@ export function FeatureSearchGroup(props: FeatureSearchProps) {
                         <FeatureSearchBox
                             field={`${props.identifier}-${i}`}
                             filter={props.filter}
-                            singleFeature={props.singleFeature}
-                            enabled={true}
-                            selected={false}
                             colour={
                                 props.colour
                                     ? props.colour(i)

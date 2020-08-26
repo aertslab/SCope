@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { Segment, Grid } from 'semantic-ui-react';
-import FeatureSearch from '../Search';
+import Search from '../Search';
 import { BackendAPI } from '../common/API';
 import Viewer from '../common/Viewer';
 import ViewerSidebar from '../common/ViewerSidebar';
@@ -49,14 +49,16 @@ export default class Regulon extends Component {
 
         return (
             <Grid className='flexDisplay'>
-                <FeatureSearch feature='regulon' singleFeature={true} />
+                <Search.FeatureSearchGroup
+                    feature='regulon'
+                    identifier='regulon-page' />
                 <Grid.Row columns='4' centered>
                     {featureThreshold}
                     <Grid.Column>&nbsp;</Grid.Column>
                 </Grid.Row>
                 <Grid.Row columns='4' stretched className='viewerFlex flexRow'>
                     <Grid.Column width={1}>
-                        <ViewerToolbar />
+                        <ViewerToolbar location={this.props.location} />
                     </Grid.Column>
                     <Grid.Column stretched className='flexDouble'>
                         <b className='noStretch'>Regulon AUC values</b>
@@ -66,6 +68,7 @@ export default class Regulon extends Component {
                             activeFeatures={activeFeatures}
                             activeCoordinates={activeCoordinates}
                             scale={true}
+                            location={this.props.location}
                         />
                     </Grid.Column>
                     <Grid.Column stretched>
@@ -79,6 +82,7 @@ export default class Regulon extends Component {
                                 activeFeatures={activeFeatures}
                                 activeCoordinates={activeCoordinates}
                                 thresholds={true}
+                                location={this.props.location}
                             />
                         </Segment>
                         <Segment vertical stretched className='flexDisplay'>
@@ -92,6 +96,7 @@ export default class Regulon extends Component {
                                 genes={true}
                                 settings={true}
                                 customScale={true}
+                                location={this.props.location}
                             />
                         </Segment>
                     </Grid.Column>

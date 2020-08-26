@@ -5,10 +5,15 @@ import {
     TOGGLE_SIDEBAR_VISIBLE,
 } from './actionTypes';
 
+export const SESSION_READ = 'r';
+export const SESSION_READWRITE = 'rw';
+
+export type SessionMode = 'r' | 'rw';
+
 export interface MainState {
     isAppLoading: boolean;
     uuid: string;
-    sessionMode: 'rw' | 'r';
+    sessionMode: SessionMode;
     sidebarIsVisible: boolean;
 }
 
@@ -24,7 +29,7 @@ export interface SetUUIDAction {
 
 export interface SetSessionModeAction {
     type: typeof SET_SESSION_MODE;
-    payload: 'rw' | 'r';
+    payload: SessionMode;
 }
 
 export interface ToggleSidebar {

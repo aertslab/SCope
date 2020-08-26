@@ -1,13 +1,13 @@
 import produce from 'immer';
 
 import * as Action from '../actionTypes';
-import { MainState, MainAction } from '../types';
+import { MainState, MainAction, SESSION_READ } from '../types';
 
 const initialState: MainState = {
     isAppLoading: true,
     uuid: '',
-    sessionMode: 'r',
-    sidebarIsVisible: true,
+    sessionMode: SESSION_READ,
+    sidebarIsVisible: false,
 };
 
 const main = produce((draft: MainState, action: MainAction) => {
