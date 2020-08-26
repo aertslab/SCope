@@ -19,7 +19,12 @@ interface IGProfilerPopupState {
     error: string;
     showModal: boolean;
     topNumFeatures: number[];
-    availableOrganisms: object[];
+    availableOrganisms: {
+        display_name: string;
+        id: string;
+        scientific_name: string;
+        version: string;
+    }[];
     selectedOrganism: string;
     selectedSortBy: string;
     gProfilerToken: string;
@@ -430,7 +435,7 @@ class GProfilerPopup extends Component<
                                     onChange={this.handleChangeToken}
                                 />
                             </Form.Group>
-                            {this.state.error !== null && (
+                            {this.state.error !== '' && (
                                 <Form.Group>
                                     <Label basic color='red'>
                                         {this.state.error}
