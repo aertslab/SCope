@@ -7,11 +7,13 @@ import HTML5Backend, { NativeTypes } from 'react-dnd-html5-backend';
 import { Accordion, Grid, Menu, Icon, Dropdown } from 'semantic-ui-react';
 import { BackendAPI } from '../common/API';
 import Annotation from '../common/Annotation';
-import FeatureSearch from '../Search';
+import Search from '../Search';
 import ViewerSidebar from '../common/ViewerSidebar';
 import ViewerToolbar from '../common/ViewerToolbar';
 import AnnotationDropContainer from '../common/AnnotationDropContainer';
 import ViewerDropContainer from '../common/ViewerDropContainer';
+
+import './compare.css';
 
 
 class Compare extends Component {
@@ -425,42 +427,46 @@ class Compare extends Component {
 
         return (
             <Grid>
-                <FeatureSearch feature='all' />
+                <Search.FeatureSearchGroup
+                    feature='all'
+                    identifier='compare-page' />
                 <Grid.Row columns={3} stretched className='viewerRow'>
-                    <Grid.Column width={2}>
-                        Number of displays: &nbsp;
-                        <Dropdown
-                            inline
-                            options={this.displayConf}
-                            disabled={configuration == 'one'}
-                            value={displays}
-                            onChange={this.displayNumberChanged.bind(this)}
-                        />
-                        <br />
-                        Superposition: &nbsp;
-                        <Dropdown
-                            inline
-                            disabled={
-                                configuration == 'one' && isSuperpositionLocked
-                            }
-                            options={this.superpositionConf}
-                            value={superposition}
-                            onChange={this.superpositionChanged.bind(this)}
-                        />
-                        <br />
-                        Configuration: &nbsp;
-                        <Dropdown
-                            inline
-                            options={this.configurationConf}
-                            disabled={isConfigurationLocked}
-                            defaultValue={configuration}
-                            onChange={this.configurationChanged.bind(this)}
-                        />
-                        <Accordion styled>{annotationTabs()}</Accordion>
-                        <br />
-                        <ViewerToolbar location={this.props.location} />
+                    <Grid.Column width={2} >
+                        <div className='compare-menu'>
+                            Number of displays: &nbsp;
+                            <Dropdown
+                                inline
+                                options={this.displayConf}
+                                disabled={configuration == 'one'}
+                                value={displays}
+                                onChange={this.displayNumberChanged.bind(this)}
+                            />
+                            <br />
+                            Superposition: &nbsp;
+                            <Dropdown
+                                inline
+                                disabled={
+                                    configuration == 'one' && isSuperpositionLocked
+                                }
+                                options={this.superpositionConf}
+                                value={superposition}
+                                onChange={this.superpositionChanged.bind(this)}
+                            />
+                            <br />
+                            Configuration: &nbsp;
+                            <Dropdown
+                                inline
+                                options={this.configurationConf}
+                                disabled={isConfigurationLocked}
+                                defaultValue={configuration}
+                                onChange={this.configurationChanged.bind(this)}
+                            />
+                            <Accordion styled>{annotationTabs()}</Accordion>
+                            <br />
+                            {/* <ViewerToolbar location={this.props.location} /> */}
+                        </div>
                     </Grid.Column>
-                    <Grid.Column width={11} className='viewerCell'>
+                    <Grid.Column stretched width={11} className='viewerCell'>
                         {viewers()}
                     </Grid.Column>
                     <Grid.Column width={3}>

@@ -35,17 +35,11 @@ type FeatureSearchBoxProps = {
     /** The feature type to search for */
     filter: FeatureFilter;
 
-    /** Restrict the dropdown to _only_ this initialised feature type */
-    singleFeature: boolean;
-
-    /** Used to en/dis-able the entire search box */
-    enabled: boolean;
-
-    /** True when a search result is selcted */
-    selected: boolean;
-
     /** Background colour */
     colour: string;
+
+    /** A search result has been selected */
+    selected?: boolean;
 
     /** Show a loading indication */
     loading?: boolean;
@@ -68,26 +62,12 @@ type FeatureSearchBoxProps = {
         field: string,
         selection: FeatureSearchSelection
     ) => Action.SearchResultSelect;
-
-    /** Filter search results given a filter */
-    filterResults?: (
-        field: string,
-        filter: FeatureFilter
-    ) => Action.SearchFilter;
 };
 
 /**
- * A text search input for (selectable categories) properties on the dataset.
+ * A text search input for items in a dataset.
  */
 const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
-    const { enabled, singleFeature, loading } = props;
-    const options = [
-        { key: 'all', text: 'all features', value: 'all' },
-        { key: 'gene', text: 'gene', value: 'gene' },
-        { key: 'regulon', text: 'regulon', value: 'regulon' },
-        { key: 'cluster', text: 'cluster', value: 'cluster' },
-    ];
-
     const onSearchChange = (_, { value }) => {
         if (value === '') {
             BackendAPI.setActiveFeature(
@@ -113,17 +93,20 @@ const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
             );
 
             const selected = R.filter(
-                R.propEq('title', result.title),
+                R.propEq<keyof FeatureSearchSelection, any>(
+                    'title',
+                    result.title
+                ),
                 searchSpace
-            ) as FeatureSearchSelection[];
+            );
 
             if (selected.length === 1) {
                 BackendAPI.updateFeature(
                     props.field.slice(-1), //TODO: This is a horrible hack
                     props.filter,
-                    selected[0]?.title,
-                    selected[0]?.category,
-                    selected[0]?.description
+                    selected[0].title,
+                    selected[0].category,
+                    selected[0].description
                 );
 
                 props.selectResult(props.field, selected[0]);
@@ -131,9 +114,10 @@ const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
         }
     };
 
-    const onFilterChange = (_, { value }) => {
-        props.filterResults(props.field, value);
-    };
+    if (props?.value && props?.selected) {
+        // A hack to ensure the old state managment knows something is selected
+        onResultSelect(undefined, { result: { title: props?.value } });
+    }
 
     return (
         <Segment
@@ -147,20 +131,12 @@ const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
                     icon: 'search',
                     iconPosition: 'left',
                 }}
-                loading={loading}
+                loading={props.loading}
                 placeholder='Search...'
                 onSearchChange={onSearchChange}
                 onResultSelect={onResultSelect}
-                results={props.results.map(featuresToResults)}
+                results={props.results?.map(featuresToResults)}
                 value={props.value}
-                disabled={!enabled}
-            />
-            <Select
-                className={'icon typeSelect'}
-                options={options}
-                defaultValue={props.filter}
-                disabled={!enabled || singleFeature}
-                onChange={onFilterChange}
             />
         </Segment>
     );
@@ -170,8 +146,8 @@ const mapStateToProps = (state: RootState, ownProps: FeatureSearchBoxProps) => {
     return {
         results: Selector.searchResults(ownProps.field, state),
         loading: Selector.isLoading(ownProps.field, state),
+        value: Selector.value(ownProps.field, state),
         selected: Selector.isSelected(ownProps.field, state),
-        filter: Selector.hasFilter(ownProps.field, state),
     };
 };
 
@@ -181,9 +157,6 @@ const mapDispatchToProps = (dispatch) => {
             dispatch(
                 Action.search(field, BackendAPI.getActiveLoom(), filter, query)
             ),
-
-        filterResults: (field: string, filter: FeatureFilter) =>
-            dispatch(Action.filter(field, filter)),
 
         selectResult: (field: string, selection: FeatureSearchSelection) =>
             dispatch(Action.select(field, selection)),

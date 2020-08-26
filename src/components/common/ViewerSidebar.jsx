@@ -1285,7 +1285,7 @@ class ViewerSidebar extends Component {
         return (
             <div className='flexDisplay'>
                 <Tab
-                    menu={{ secondary: true, pointing: true }}
+                    menu={{ secondary: true, pointing: true, stackable: true }}
                     panes={panes}
                     renderActiveOnly={true}
                     activeIndex={activeTab}

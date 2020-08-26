@@ -41,3 +41,11 @@ export const hasFilter = (field: string, state: RootState): FeatureFilter => {
 
     return 'all';
 };
+
+export const value = (field: string, state: RootState): string => {
+    if (has(field, state[NAME])) {
+        return state[NAME][field].value;
+    }
+
+    return '';
+};

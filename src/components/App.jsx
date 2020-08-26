@@ -169,7 +169,9 @@ class App extends Component {
                                         <Route
                                             path='/:uuid/:loom?/compare'
                                             component={() => (
-                                                <Compare metadata={metadata} />
+                                                <Compare
+                                                    metadata={metadata}
+                                                    location={this.props.location} />
                                             )}
                                         />
                                         <Route
@@ -211,7 +213,6 @@ class App extends Component {
     }
 
     componentDidMount() {
-        if (DEBUG) console.log('App componentDidMount', this.props);
         this.parseURLParams(this.props);
         this.getUUIDFromIP(this.props);
 
