@@ -38,6 +38,10 @@ interface IGProfilerPopupProps {
 const INITIAL_STATE = {
     error: '',
     showModal: false,
+    /**
+     * Array of number representing the top number of features to pick from the gene list
+     * in order to create topNumFeautres.length gene lists that will be send to g:Profiler
+     */
     topNumFeatures: [],
     availableOrganisms: [],
     selectedOrganism: '',
