@@ -76,9 +76,12 @@ class GProfilerPopup extends Component<
     }
 
     openModal = () => {
-        const { availableOrganisms, error, ...rest } = INITIAL_STATE;
         this.setState({
-            ...rest,
+            error: '',
+            topNumFeatures: [],
+            selectedOrganism: '',
+            selectedSortBy: '',
+            gProfilerToken: '',
             showModal: true,
         });
     };
