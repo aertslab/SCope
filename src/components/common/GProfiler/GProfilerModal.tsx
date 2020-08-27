@@ -67,8 +67,8 @@ class GProfilerPopup extends Component<
             }
         );
         this.featureMetricTable = this.buildMetricTable();
-        this.handleOpenModal.bind(this);
-        this.handleCloseModal.bind(this);
+        this.onOpenModal.bind(this);
+        this.onCloseModal.bind(this);
         this.handleSelectOrganism.bind(this);
         this.handleSelectSortBy.bind(this);
         this.handleChangeToken.bind(this);
@@ -90,11 +90,11 @@ class GProfilerPopup extends Component<
         this.setState({ showModal: false });
     };
 
-    handleOpenModal = () => {
+    onOpenModal = () => {
         this.openModal();
     };
 
-    handleCloseModal = () => {
+    onCloseModal = () => {
         this.closeModal();
     };
 
@@ -314,7 +314,7 @@ class GProfilerPopup extends Component<
                 trigger={
                     <Button
                         color='orange'
-                        onClick={this.handleOpenModal}
+                        onClick={this.onOpenModal}
                         style={{
                             marginTop: '10px',
                             marginBottom: '10px',
@@ -323,7 +323,7 @@ class GProfilerPopup extends Component<
                         Run g:Profiler Gene List Enrichment
                     </Button>
                 }
-                onClose={this.handleCloseModal}
+                onClose={this.onCloseModal}
                 open={showModal}>
                 <Modal.Header>Run g:Profiler Gene List Enrichment</Modal.Header>
                 <Modal.Content>
