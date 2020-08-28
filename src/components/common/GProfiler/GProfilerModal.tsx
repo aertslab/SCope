@@ -22,7 +22,7 @@ import {
 interface IGProfilerPopupState {
     error: string;
     showModal: boolean;
-    topNumFeatures: number[];
+    selectedTopGeneListsSizes: number[];
     availableOrganisms: {
         display_name: string;
         id: string;
@@ -46,11 +46,60 @@ const INITIAL_STATE = {
      * Array of number representing the top number of features to pick from the gene list
      * in order to create topNumFeautres.length gene lists that will be send to g:Profiler
      */
-    topNumFeatures: [],
+    selectedTopGeneListsSizes: [],
     availableOrganisms: [],
     selectedOrganism: '',
     selectedSortBy: '',
     gProfilerToken: '',
+};
+
+const TopGeneListsSelectionTable: React.FC<{
+    topGeneListsSizes: number[];
+    selectedTopGeneListsSizes: number[];
+    onSelectGeneList: (geneListSize: number) => () => void;
+}> = ({ topGeneListsSizes, selectedTopGeneListsSizes, onSelectGeneList }) => {
+    return (
+        <Table compact celled definition>
+            <Table.Header>
+                <Table.Row>
+                    <Table.HeaderCell />
+                    <Table.HeaderCell>
+                        Gene List with Number of Top Features to Use
+                    </Table.HeaderCell>
+                </Table.Row>
+            </Table.Header>
+            <Table.Body>
+                {topGeneListsSizes.map((topGeneListsSize) => {
+                    const handleOnChangeGeneList = onSelectGeneList(
+                        topGeneListsSize
+                    );
+
+                    const isSelected = selectedTopGeneListsSizes.includes(
+                        topGeneListsSize
+                    );
+
+                    return (
+                        <Table.Row key={`tgls-${topGeneListsSize}`}>
+                            <Table.Cell collapsing>
+                                <Checkbox onChange={handleOnChangeGeneList} />
+                            </Table.Cell>
+                            <Table.Cell>
+                                {isSelected ? (
+                                    <b>{`Top ${topGeneListsSize}`}</b>
+                                ) : (
+                                    <span
+                                        style={{
+                                            textDecorationLine: 'line-through',
+                                            textDecorationStyle: 'solid',
+                                        }}>{`Top ${topGeneListsSize}`}</span>
+                                )}
+                            </Table.Cell>
+                        </Table.Row>
+                    );
+                })}
+            </Table.Body>
+        </Table>
+    );
 };
 
 class GProfilerPopup extends Component<
@@ -86,7 +135,7 @@ class GProfilerPopup extends Component<
     openModal = () => {
         this.setState({
             error: '',
-            topNumFeatures: [],
+            selectedTopGeneListsSizes: [],
             selectedOrganism: '',
             selectedSortBy: '',
             gProfilerToken: '',
@@ -340,77 +389,13 @@ class GProfilerPopup extends Component<
                             {this.getNumFeatures()}
                         </h4>
                         <Form>
-                            <Table compact celled definition>
-                                <Table.Header>
-                                    <Table.Row>
-                                        <Table.HeaderCell />
-                                        <Table.HeaderCell>
-                                            Gene List with Number of Top
-                                            Features to Use
-                                        </Table.HeaderCell>
-                                    </Table.Row>
-                                </Table.Header>
-                                <Table.Body>
-                                    {this.getTopNumFeaturesArray().map(
-                                        (topNumFeaturesValue) => {
-                                            const handleToggleTopNumFeatures = () => {
-                                                if (
-                                                    this.state.topNumFeatures.includes(
-                                                        topNumFeaturesValue
-                                                    )
-                                                ) {
-                                                    this.setState({
-                                                        topNumFeatures: this.state.topNumFeatures.filter(
-                                                            (value) =>
-                                                                value !=
-                                                                topNumFeaturesValue
-                                                        ),
-                                                    });
-                                                } else {
-                                                    this.setState({
-                                                        topNumFeatures: [
-                                                            ...this.state
-                                                                .topNumFeatures,
-                                                            topNumFeaturesValue,
-                                                        ],
-                                                    });
-                                                }
-                                            };
-
-                                            const isSelected = this.state.topNumFeatures.includes(
-                                                topNumFeaturesValue
-                                            );
-
-                                            return (
-                                                <Table.Row>
-                                                    <Table.Cell collapsing>
-                                                        <Checkbox
-                                                            onChange={
-                                                                handleToggleTopNumFeatures
-                                                            }
-                                                        />
-                                                    </Table.Cell>
-                                                    <Table.Cell>
-                                                        {isSelected ? (
-                                                            <b>
-                                                                {`Top ${topNumFeaturesValue}`}
-                                                            </b>
-                                                        ) : (
-                                                            <span
-                                                                style={{
-                                                                    textDecorationLine:
-                                                                        'line-through',
-                                                                    textDecorationStyle:
-                                                                        'solid',
-                                                                }}>{`Top ${topNumFeaturesValue}`}</span>
-                                                        )}
-                                                    </Table.Cell>
-                                                </Table.Row>
-                                            );
-                                        }
-                                    )}
-                                </Table.Body>
-                            </Table>
+                            <TopGeneListsSelectionTable
+                                topGeneListsSizes={this.getAvailableTopGeneListsSizes()}
+                                selectedTopGeneListsSizes={
+                                    this.state.selectedTopGeneListsSizes
+                                }
+                                onSelectGeneList={this.onSelectGeneList}
+                            />
                             <Form.Group widths='equal'>
                                 <Form.Field
                                     control={Select}
