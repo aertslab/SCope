@@ -136,13 +136,9 @@ class SCope(s_pb2_grpc.MainServicer):
             orcid_scope_uuid=orcid_scope_uuid, name=orcid_data["name"], orcid_id=orcid_data["orcid"], success=success
         )
 
-    @lru_cache(maxsize=256)
     def get_features(self, loom: Loom, query: str, category: str) -> List[CategorisedMatches]:
         logger.debug(f"Searching for {query} filtered by type {category}")
-        start_time = time.time()
-
-        features = get_search_results(query, category, loom, self.config["dataHashSecret"])
-        return features
+        return get_search_results(query, category, loom, self.config["dataHashSecret"])
 
     def getVmax(self, request, context):
         v_max = np.zeros(3)
