@@ -66,16 +66,21 @@ export const init = (field: string): FeatureSearch => {
         filter: 'all',
         loading: false,
         value: '',
-        results: [{ category: '', results: [] }],
+        results: [],
         selected: undefined,
     };
 };
 
 export const featuresToResults = (
     features: Features
-): StrictSearchCategoryProps => {
-    return {
-        name: features.category,
-        results: (features.results as unknown) as typeof SearchResult[],
-    };
+): [string, StrictSearchCategoryProps] => {
+    return [
+        features.category,
+        {
+            name: features.category,
+            results: (features.results.map((result) => {
+                return { ...result, id: window.btoa(result.title) };
+            }) as unknown) as typeof SearchResult[],
+        },
+    ];
 };
