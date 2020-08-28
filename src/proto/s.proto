@@ -111,9 +111,12 @@ message CellMetaDataRequest {
 
 message FeatureReply {
   message Feature {
-    string feature=1;
-    string type=2;
-    string description=3;
+    message Match {
+      string title=1;
+      string description=2;
+    }
+    string category=1;
+    repeated Match results=2;
   }
   repeated Feature features=1;
 }

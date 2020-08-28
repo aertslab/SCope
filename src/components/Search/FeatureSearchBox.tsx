@@ -115,9 +115,11 @@ const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
     };
 
     if (props?.value && props?.selected) {
-        // A hack to ensure the old state managment knows something is selected
+        //TODO: A hack to ensure the old state managment knows something is selected
         onResultSelect(undefined, { result: { title: props?.value } });
     }
+
+    const displayResults = R.fromPairs(props.results?.map(featuresToResults));
 
     return (
         <Segment
@@ -135,7 +137,7 @@ const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
                 placeholder='Search...'
                 onSearchChange={onSearchChange}
                 onResultSelect={onResultSelect}
-                results={props.results?.map(featuresToResults)}
+                results={displayResults}
                 value={props.value}
             />
         </Segment>

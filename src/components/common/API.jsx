@@ -521,7 +521,10 @@ class API {
         this.getConnection().then((gbc) => {
             if (DEBUG) console.log('getNextCluster', query);
             gbc.services.scope.Main.getNextCluster(query, (err, response) => {
-                callback(response);
+                callback({feature: response.features[0].results[0].title,
+                          featureType: response.features[0].category,
+                          featureDescription: response.features[0].results[0].description
+                         });
             });
         });
     }

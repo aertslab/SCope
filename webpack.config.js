@@ -59,6 +59,7 @@ let config = {
                                 ],
                                 ['@babel/plugin-proposal-object-rest-spread'],
                                 ['@babel/transform-runtime'],
+                                ['babel-plugin-redux-saga'],
                             ],
                         },
                     },
