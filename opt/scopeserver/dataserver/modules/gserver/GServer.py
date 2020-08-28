@@ -133,10 +133,6 @@ class SCope(s_pb2_grpc.MainServicer):
             orcid_scope_uuid=orcid_scope_uuid, name=orcid_data["name"], orcid_id=orcid_data["orcid"], success=success
         )
 
-    def get_features(self, loom: Loom, query: str, category: str) -> List[CategorisedMatches]:
-        logger.debug(f"Searching for {query} filtered by type {category}")
-        return get_search_results(query, category, loom, self.config["dataHashSecret"])
-
     @staticmethod
     def get_vmax(vals: np.ndarray) -> Tuple[np.float, np.float]:
         maxVmax = max(vals)
@@ -254,7 +250,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 request.clusteringID, request.clusterID, secret=self.config["dataHashSecret"]
             )
 
-        f = self.get_features(loom=loom, query=cluster_metadata["description"])
+        f = get_search_results(cluster_metadata["description"], "all", loom, self.config["dataHashSecret"])
 
         for n, featureType in enumerate(f["featureType"]):
             if featureType == f"Clustering: {clustering_meta['name']}":
@@ -266,7 +262,9 @@ class SCope(s_pb2_grpc.MainServicer):
                 s_pb2.FeatureReply.Feature(
                     category=f["featureType"][clustering_index],
                     results=[
-                        s_pb2.FeatureReply.Feature.Match(title=f["feature"][clustering_index], description=f["featureDescription"][clustering_index])
+                        s_pb2.FeatureReply.Feature.Match(
+                            title=f["feature"][clustering_index], description=f["featureDescription"][clustering_index]
+                        )
                     ],
                 )
             ]
@@ -308,7 +306,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getFeatures(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
-        features = self.get_features(loom=loom, query=request.query, category=request.filter)
+        features = get_search_results(request.query, request.filter, loom, self.config["dataHashSecret"])
         return s_pb2.FeatureReply(
             features=[
                 s_pb2.FeatureReply.Feature(
