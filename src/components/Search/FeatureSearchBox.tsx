@@ -21,7 +21,7 @@ import {
     FeatureSearchSelection,
     toFeatureFilter,
     featuresToResults,
-    makeSelection,
+    findResult,
 } from './model';
 import * as Action from './actions';
 import * as Selector from './selectors';
@@ -86,37 +86,47 @@ const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
 
     const onResultSelect = (_, { result }) => {
         if (props.results) {
-            const searchSpace: FeatureSearchSelection[] = R.chain(
-                (r) =>
-                    R.map(makeSelection(props.colour, r.category), r.results),
-                props.results
-            );
+            const selected = findResult(result, props.colour, props.results);
 
-            const selected = R.filter(
-                R.propEq<keyof FeatureSearchSelection, any>(
-                    'title',
-                    result.title
-                ),
-                searchSpace
-            );
-
-            if (selected.length === 1) {
+            if (selected) {
                 BackendAPI.updateFeature(
                     props.field.slice(-1), //TODO: This is a horrible hack
                     props.filter,
-                    selected[0].title,
-                    selected[0].category,
-                    selected[0].description
+                    selected.title,
+                    selected.category,
+                    selected.description
                 );
 
-                props.selectResult(props.field, selected[0]);
+                props.selectResult(props.field, selected);
             }
         }
     };
 
+    const icon = () => {
+        return {
+            ...(props?.selected && {
+                onClick: () => onSearchChange(undefined, { value: '' }),
+            }),
+            icon: props?.selected ? 'cancel' : 'search',
+            iconPosition: 'left',
+        };
+    };
+
+    //TODO: A hack to ensure the old state managment knows something is selected
     if (props?.value && props?.selected) {
-        //TODO: A hack to ensure the old state managment knows something is selected
-        onResultSelect(undefined, { result: { title: props?.value } });
+        const selected = findResult(
+            { title: props?.value },
+            props.colour,
+            props?.results
+        );
+
+        BackendAPI.updateFeature(
+            props.field.slice(-1), //TODO: This is a horrible hack
+            props.filter,
+            selected.title,
+            selected.category,
+            selected.description
+        );
     }
 
     const displayResults = R.fromPairs(props.results?.map(featuresToResults));
@@ -129,10 +139,7 @@ const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
             <Search
                 category
                 className='feature-search-input'
-                input={{
-                    icon: 'search',
-                    iconPosition: 'left',
-                }}
+                input={icon()}
                 loading={props.loading}
                 placeholder='Search...'
                 onSearchChange={onSearchChange}

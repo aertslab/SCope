@@ -18,7 +18,7 @@ export interface FeatureSearchSelection {
     readonly colour: string;
 }
 
-export const makeSelection = R.curry(
+const makeSelection = R.curry(
     (
         colour: string,
         category: string
@@ -34,6 +34,22 @@ export const makeSelection = R.curry(
             description: string;
         }) => FeatureSearchSelection
 );
+
+export const findResult = (
+    query: { title: string },
+    colour: string,
+    results: Array<Features>
+): FeatureSearchSelection | undefined => {
+    const searchSpace: FeatureSearchSelection[] = R.chain(
+        (r) => R.map(makeSelection(colour, r.category), r.results),
+        results
+    );
+
+    return R.filter(
+        R.propEq<keyof FeatureSearchSelection, any>('title', query.title),
+        searchSpace
+    )[0];
+};
 
 export type FeatureSearch = {
     field: string;
