@@ -13,7 +13,11 @@ import {
     Dropdown,
 } from 'semantic-ui-react';
 
-const GPROFILER_LINK_MAX_LENGTH = 8000;
+import {
+    GPROFILER_API_ENDPOINT__AVAILABLE_ORGANISMS,
+    GPROFILER_API_ENDPOINT__GENE_LIST_FUNCTIONAL_ENRICHMENT,
+    GPROFILER_LINK_MAX_LENGTH,
+} from './constants';
 
 interface IGProfilerPopupState {
     error: string;
@@ -209,7 +213,7 @@ class GProfilerPopup extends Component<
             })
             .join('&');
 
-        return 'https://biit.cs.ut.ee/gprofiler/gost?' + gProfilerQueryString;
+        return `${GPROFILER_API_ENDPOINT__GENE_LIST_FUNCTIONAL_ENRICHMENT}?${gProfilerQueryString}`;
     };
 
     handleClickCreateGProfilerLink = async () => {
@@ -286,9 +290,7 @@ class GProfilerPopup extends Component<
     async fetchAvailableOrganisms() {
         let response = null;
         try {
-            response = await fetch(
-                'https://biit.cs.ut.ee/gprofiler/api/util/organisms_list/'
-            );
+            response = await fetch(GPROFILER_API_ENDPOINT__AVAILABLE_ORGANISMS);
             return response.json();
         } catch (err) {
             this.setState({
