@@ -41,8 +41,9 @@ const INITIAL_STATE = {
     error: '',
     showModal: false,
     /**
-     * Array of number representing the top number of features to pick from the gene list
-     * in order to create topNumFeautres.length gene lists that will be send to g:Profiler
+     * Array of number representing the selected gene list sizes. Theses sizes will be used to extract and c
+     * create selectedTopGeneListsSizes.length gene lists that will be send to g:Profilter to perform
+     * gene list functional enrichment
      */
     selectedTopGeneListsSizes: [],
     availableOrganisms: [],
@@ -100,20 +101,46 @@ const TopGeneListsSelectionTable: React.FC<{
     );
 };
 
+type FeatureMetadataMetric = {
+    accessor: string;
+    description: string;
+    name: string;
+    values: number[];
+};
+
+type FeatureMetadata = {
+    cellTypeAnno: unknown[];
+    clusterID: number;
+    clusteringGroup: string;
+    clusteringID: number;
+    genes: string[];
+    metrics: FeatureMetadataMetric[];
+};
+
+type FeatureMetricTable = {
+    gene: string;
+    avg_logFC?: number;
+    pval?: number;
+}[];
+
 class GProfilerPopup extends Component<
     IGProfilerPopupProps & RouteComponentProps,
     IGProfilerPopupState
 > {
-    featureMetadata: any;
-    featureMetricTable: any;
-    availableSortBy: object[];
+    private readonly featureMetadata: FeatureMetadata;
+    private readonly featureMetricTable: FeatureMetricTable;
+    private readonly availableSortBy: {
+        key: string;
+        text: string;
+        value: string;
+    }[];
 
     constructor(props: IGProfilerPopupProps & RouteComponentProps) {
         super(props);
         this.state = INITIAL_STATE;
         this.featureMetadata = props.featureMetadata;
         this.availableSortBy = props.featureMetadata.metrics.map(
-            (metric, idx) => {
+            (metric: FeatureMetadataMetric, idx: number) => {
                 return {
                     key: idx,
                     text: metric.name,
@@ -170,15 +197,15 @@ class GProfilerPopup extends Component<
         }
     };
 
-    onSelectOrganism = (e, { value }) => {
+    onSelectOrganism = (_: React.ChangeEvent<HTMLInputElement>, { value }) => {
         this.setState({ selectedOrganism: value });
     };
 
-    onSelectSortBy = (e, { value }) => {
+    onSelectSortBy = (_: React.ChangeEvent<HTMLInputElement>, { value }) => {
         this.setState({ selectedSortBy: value });
     };
 
-    onChangeToken = (e, { value }) => {
+    onChangeToken = (_: React.ChangeEvent<HTMLInputElement>, { value }) => {
         this.setState({
             selectedOrganism: '',
             gProfilerToken: value,
