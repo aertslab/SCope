@@ -51,6 +51,14 @@ const reducer = produce((draft: State, action: SearchAction) => {
             }
             draft[action.payload.field].selected = action.payload.selection;
             break;
+
+        case t.ERROR:
+            if (!has(action.payload.field, draft)) {
+                draft[action.payload.field] = init(action.payload.field);
+            }
+
+            draft[action.payload.field].error = action.payload.message;
+            break;
     }
 }, initialState);
 

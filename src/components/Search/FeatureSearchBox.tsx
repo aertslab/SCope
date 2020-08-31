@@ -104,20 +104,20 @@ const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
 
     const icon = () => {
         return {
-            ...(props?.selected && {
+            ...(props.selected && {
                 onClick: () => onSearchChange(undefined, { value: '' }),
             }),
-            icon: props?.selected ? 'cancel' : 'search',
+            icon: props.selected ? 'cancel' : 'search',
             iconPosition: 'left',
         };
     };
 
     //TODO: A hack to ensure the old state managment knows something is selected
-    if (props?.value && props?.selected) {
+    if (props.value && props.selected) {
         const selected = findResult(
-            { title: props?.value },
+            { title: props.value },
             props.colour,
-            props?.results
+            props.results
         );
 
         BackendAPI.updateFeature(

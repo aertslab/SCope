@@ -32,11 +32,10 @@ function queryFeatures(query: FeatureQuery): Promise<Array<Features>> {
                 gbc.services.scope.Main.getFeatures(
                     scopeQuery,
                     (err, response) => {
-                        console.log('[API::getFeatures]', response);
                         if (response) {
                             resolve(response.features);
                         } else {
-                            reject('No results');
+                            resolve([]);
                         }
                     }
                 );
