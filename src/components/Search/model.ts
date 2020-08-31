@@ -58,6 +58,7 @@ export type FeatureSearch = {
     value: string;
     results: Array<Features>;
     selected?: FeatureSearchSelection;
+    error?: string;
 };
 
 export type State = { [field: string]: FeatureSearch };
