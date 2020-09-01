@@ -12,9 +12,7 @@ import { debounce } from 'lodash';
 import * as R from 'ramda';
 
 import { RootState } from '../../redux/reducers';
-import { Features } from '../../api';
-
-import { BackendAPI } from '../common/API';
+import { Features, LegacyAPI } from '../../api';
 
 import {
     FeatureFilter,
@@ -70,7 +68,7 @@ type FeatureSearchBoxProps = {
 const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
     const onSearchChange = (_, { value }) => {
         if (value === '') {
-            BackendAPI.setActiveFeature(
+            LegacyAPI.setActiveFeature(
                 props.field.slice(-1), //TODO: This is a horrible hack
                 props.filter,
                 '',
@@ -89,7 +87,7 @@ const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
             const selected = findResult(result, props.colour, props.results);
 
             if (selected) {
-                BackendAPI.updateFeature(
+                LegacyAPI.updateFeature(
                     props.field.slice(-1), //TODO: This is a horrible hack
                     props.filter,
                     selected.title,
@@ -102,6 +100,11 @@ const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
         }
     };
 
+    /**
+     * Icon in the Search box is either a 'search' icon, or,
+     * when a search result is selected, a clickable cross icon.
+     * Clicking the cross should clear the search field.
+     */
     const icon = () => {
         return {
             ...(props.selected && {
@@ -120,7 +123,7 @@ const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
             props.results
         );
 
-        BackendAPI.updateFeature(
+        LegacyAPI.updateFeature(
             props.field.slice(-1), //TODO: This is a horrible hack
             props.filter,
             selected.title,
@@ -164,7 +167,7 @@ const mapDispatchToProps = (dispatch) => {
     return {
         search: (field: string, filter: FeatureFilter, query: string) =>
             dispatch(
-                Action.search(field, BackendAPI.getActiveLoom(), filter, query)
+                Action.search(field, LegacyAPI.getActiveLoom(), filter, query)
             ),
 
         selectResult: (field: string, selection: FeatureSearchSelection) =>
