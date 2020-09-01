@@ -1,5 +1,6 @@
 import * as R from 'ramda';
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
     Button,
@@ -13,44 +14,53 @@ import {
     Dropdown,
 } from 'semantic-ui-react';
 
-import { GPROFILER_API_ENDPOINT__AVAILABLE_ORGANISMS } from './constants';
+import * as Action from './actions';
+import * as Selector from './selectors';
 
 import { buildMetricTable, checkCreateGProfilerLink } from './utils';
 
-interface IGProfilerPopupState {
-    error: string;
-    showModal: boolean;
+type FeatureMetadataMetric = {
+    accessor: string;
+    description: string;
+    name: string;
+    values: number[];
+};
+
+type FeatureMetadata = {
+    cellTypeAnno: unknown[];
+    clusterID: number;
+    clusteringGroup: string;
+    clusteringID: number;
+    genes: string[];
+    metrics: FeatureMetadataMetric[];
+};
+
+interface GProfilerPopupProps {
+    featureMetadata: FeatureMetadata;
+    availableSortBy: object[];
+}
+
+interface GProfilerPopupReduxProps {
+    display: boolean;
+    displayModal: (display: boolean) => void;
+    selectedSortBy: string;
+    selectSortBy: (sortBy: string) => void;
+    selectedOrganism: string;
+    selectOrganism: (organism: string) => void;
+    gProfilerToken: string;
+    setGProfilerToken: (gProfilerToken: string) => void;
     selectedTopGeneListsSizes: number[];
+    setTopGeneListSizes: (topGeneListSizes: number[]) => void;
     availableOrganisms: {
         display_name: string;
         id: string;
         scientific_name: string;
         version: string;
     }[];
-    selectedOrganism: string;
-    selectedSortBy: string;
-    gProfilerToken: string;
+    fetchAvailableOrganisms: () => void;
+    error: string;
+    setError: (error: string) => void;
 }
-
-interface IGProfilerPopupProps {
-    featureMetadata: any;
-    availableSortBy: object[];
-}
-
-const INITIAL_STATE = {
-    error: '',
-    showModal: false,
-    /**
-     * Array of number representing the selected gene list sizes. Theses sizes will be used to extract and c
-     * create selectedTopGeneListsSizes.length gene lists that will be send to g:Profilter to perform
-     * gene list functional enrichment
-     */
-    selectedTopGeneListsSizes: [],
-    availableOrganisms: [],
-    selectedOrganism: '',
-    selectedSortBy: '',
-    gProfilerToken: '',
-};
 
 const TopGeneListsSelectionTable: React.FC<{
     topGeneListsSizes: number[];
@@ -101,272 +111,253 @@ const TopGeneListsSelectionTable: React.FC<{
     );
 };
 
-type FeatureMetadataMetric = {
-    accessor: string;
-    description: string;
-    name: string;
-    values: number[];
-};
-
-type FeatureMetadata = {
-    cellTypeAnno: unknown[];
-    clusterID: number;
-    clusteringGroup: string;
-    clusteringID: number;
-    genes: string[];
-    metrics: FeatureMetadataMetric[];
-};
-
 type FeatureMetricTable = {
     gene: string;
     avg_logFC?: number;
     pval?: number;
 }[];
 
-class GProfilerPopup extends Component<
-    IGProfilerPopupProps & RouteComponentProps,
-    IGProfilerPopupState
-> {
-    private readonly featureMetadata: FeatureMetadata;
-    private readonly featureMetricTable: FeatureMetricTable;
-    private readonly availableSortBy: {
-        key: string;
-        text: string;
-        value: string;
-    }[];
+const GProfilerPopup: React.FC<
+    GProfilerPopupProps & GProfilerPopupReduxProps & RouteComponentProps
+> = (props) => {
+    const {
+        featureMetadata,
+        display,
+        displayModal,
+        selectedSortBy,
+        selectSortBy,
+        selectedOrganism,
+        selectOrganism,
+        gProfilerToken,
+        setGProfilerToken,
+        selectedTopGeneListsSizes,
+        setTopGeneListSizes,
+        availableOrganisms,
+        fetchAvailableOrganisms,
+        error,
+        setError,
+    } = props;
 
-    constructor(props: IGProfilerPopupProps & RouteComponentProps) {
-        super(props);
-        this.state = INITIAL_STATE;
-        this.featureMetadata = props.featureMetadata;
-        this.availableSortBy = props.featureMetadata.metrics.map(
-            (metric: FeatureMetadataMetric, idx: number) => {
-                return {
-                    key: idx,
-                    text: metric.name,
-                    value: metric.accessor,
-                };
-            }
+    const [availableSortBy, setAvailableSortBy] = useState<
+        { key: number; text: string; value: string }[]
+    >([]);
+    const [featureMetricTable, setFeatureMetricTable] = useState<
+        FeatureMetricTable
+    >([]);
+
+    useEffect(() => {
+        setAvailableSortBy(
+            props.featureMetadata.metrics.map(
+                (metric: FeatureMetadataMetric, idx: number) => {
+                    return {
+                        key: idx,
+                        text: metric.name,
+                        value: metric.accessor,
+                    };
+                }
+            )
         );
-        this.featureMetricTable = buildMetricTable(this.featureMetadata);
-        this.onOpenModal.bind(this);
-        this.onCloseModal.bind(this);
-        this.onSelectOrganism.bind(this);
-        this.onSelectSortBy.bind(this);
-        this.onChangeToken.bind(this);
-        this.onClickGotoGProfilerURL.bind(this);
-    }
+        setFeatureMetricTable(buildMetricTable(featureMetadata));
+        fetchAvailableOrganisms();
+    }, []);
 
-    openModal = () => {
-        this.setState({
-            error: '',
-            selectedTopGeneListsSizes: [],
-            selectedOrganism: '',
-            selectedSortBy: '',
-            gProfilerToken: '',
-            showModal: true,
-        });
-    };
+    const onOpenModal = () => displayModal(true);
 
-    closeModal = () => {
-        this.setState({ showModal: false });
-    };
+    const onCloseModal = () => displayModal(false);
 
-    onOpenModal = () => {
-        this.openModal();
-    };
+    const onSelectSortBy = (
+        _: React.ChangeEvent<HTMLInputElement>,
+        { value }
+    ) => selectSortBy(value);
 
-    onCloseModal = () => {
-        this.closeModal();
-    };
+    const onSelectOrganism = (
+        _: React.ChangeEvent<HTMLInputElement>,
+        { value }
+    ) => selectOrganism(value);
 
-    onSelectGeneList = (geneListSize: number) => () => {
-        if (this.state.selectedTopGeneListsSizes.includes(geneListSize)) {
-            this.setState({
-                selectedTopGeneListsSizes: this.state.selectedTopGeneListsSizes.filter(
+    const onChangeToken = (_: React.ChangeEvent<HTMLInputElement>, { value }) =>
+        setGProfilerToken(value);
+
+    const onSelectGeneList = (geneListSize: number) => () => {
+        if (selectedTopGeneListsSizes.includes(geneListSize)) {
+            setTopGeneListSizes(
+                selectedTopGeneListsSizes.filter(
                     (value) => value != geneListSize
-                ),
-            });
+                )
+            );
         } else {
-            this.setState({
-                selectedTopGeneListsSizes: [
-                    ...this.state.selectedTopGeneListsSizes,
-                    geneListSize,
-                ],
-            });
+            setTopGeneListSizes([...selectedTopGeneListsSizes, geneListSize]);
         }
     };
 
-    onSelectOrganism = (_: React.ChangeEvent<HTMLInputElement>, { value }) => {
-        this.setState({ selectedOrganism: value });
-    };
-
-    onSelectSortBy = (_: React.ChangeEvent<HTMLInputElement>, { value }) => {
-        this.setState({ selectedSortBy: value });
-    };
-
-    onChangeToken = (_: React.ChangeEvent<HTMLInputElement>, { value }) => {
-        this.setState({
-            selectedOrganism: '',
-            gProfilerToken: value,
-        });
-    };
-
-    onClickGotoGProfilerURL = async () => {
+    const onClickGotoGProfilerURL = async () => {
         const result = await checkCreateGProfilerLink({
-            featureMetricTable: this.featureMetricTable,
-            ...this.state,
+            featureMetricTable,
+            ...props,
         });
-        if ('error' in result) this.setState({ error: result.error });
+        if ('error' in result) setError(result.error);
 
         if (result.link === '' || typeof result.link !== 'string') return;
         window.open(result.link);
     };
 
-    getNumFeatures = () => {
-        return this.featureMetadata.genes.length;
+    const getNumFeatures = () => {
+        return featureMetadata.genes.length;
     };
 
-    getAvailableTopGeneListsSizes = () => {
+    const getAvailableTopGeneListsSizes = () => {
         return [
-            this.getNumFeatures() < 100 ? this.getNumFeatures() : 100,
+            getNumFeatures() < 100 ? getNumFeatures() : 100,
             200,
             300,
             400,
             500,
         ].filter((topNumFeaturesValue) =>
-            topNumFeaturesValue <= this.getNumFeatures() ? true : false
+            topNumFeaturesValue <= getNumFeatures() ? true : false
         );
     };
 
-    setAvailableOrganisms(availableOrganisms) {
-        const _availableOrganisms = availableOrganisms
-            .map((availableOrganism, idx: number) => {
-                return {
-                    key: idx + 1,
-                    text: availableOrganism['display_name'],
-                    value: availableOrganism['id'],
-                };
-            })
-            .sort(R.comparator((a, b) => a['text'] < b['text']));
-        this.setState({ availableOrganisms: _availableOrganisms });
-    }
+    const isBlocked = availableOrganisms.length > 0 ? false : true;
 
-    async fetchAvailableOrganisms() {
-        let response = null;
-        try {
-            response = await fetch(GPROFILER_API_ENDPOINT__AVAILABLE_ORGANISMS);
-            return response.json();
-        } catch (err) {
-            this.setState({
-                error: `Unable to fetch list of organisms: ${err}`,
-            });
-        }
-        return response;
-    }
-
-    async componentDidMount() {
-        const availableOrganisms = await this.fetchAvailableOrganisms();
-        if (availableOrganisms !== null)
-            this.setAvailableOrganisms(availableOrganisms);
-    }
-
-    render() {
-        const {
-            showModal,
-            selectedOrganism,
-            selectedSortBy,
-            gProfilerToken,
-        } = this.state;
-
-        return (
-            <Modal
-                as={Form}
-                trigger={
-                    <Button
-                        color='orange'
-                        onClick={this.onOpenModal}
-                        style={{
-                            marginTop: '10px',
-                            marginBottom: '10px',
-                            width: '100%',
-                        }}>
-                        Run g:Profiler Gene List Enrichment
-                    </Button>
-                }
-                onClose={this.onCloseModal}
-                open={showModal}>
-                <Modal.Header>Run g:Profiler Gene List Enrichment</Modal.Header>
-                <Modal.Content>
-                    <Modal.Description>
-                        <h3>Run As Multi-query</h3>
-                        <h4>
-                            Total number of features:&nbsp;
-                            {this.getNumFeatures()}
-                        </h4>
-                        <Form>
-                            <TopGeneListsSelectionTable
-                                topGeneListsSizes={this.getAvailableTopGeneListsSizes()}
-                                selectedTopGeneListsSizes={
-                                    this.state.selectedTopGeneListsSizes
-                                }
-                                onSelectGeneList={this.onSelectGeneList}
-                            />
-                            <Form.Group widths='equal'>
-                                <Form.Field
-                                    control={Select}
-                                    label='Sort Features By'
-                                    options={this.availableSortBy}
-                                    placeholder='Sort By'
-                                    onChange={this.onSelectSortBy}
-                                    value={selectedSortBy}
-                                />
-                                <Form.Field
-                                    control={Dropdown}
-                                    search
-                                    selection
-                                    label='Organism'
-                                    options={this.state.availableOrganisms}
-                                    placeholder='Choose an organism'
-                                    onChange={this.onSelectOrganism}
-                                    disabled={
-                                        gProfilerToken !== null &&
-                                        gProfilerToken !== ''
-                                            ? true
-                                            : false
+    return (
+        <Modal
+            as={Form}
+            trigger={
+                <Button
+                    color='orange'
+                    onClick={onOpenModal}
+                    style={{
+                        marginTop: '10px',
+                        marginBottom: '10px',
+                        width: '100%',
+                    }}>
+                    Run g:Profiler Gene List Enrichment
+                </Button>
+            }
+            onClose={onCloseModal}
+            open={display}>
+            <Modal.Header>Run g:Profiler Gene List Enrichment</Modal.Header>
+            <Modal.Content>
+                {isBlocked ? (
+                    <>
+                        <div style={{ marginBottom: '10px' }}>
+                            <Label basic color='red'>
+                                {error}
+                            </Label>
+                        </div>
+                        <Button
+                            type='button'
+                            value='refetch-available-organisms'
+                            onClick={fetchAvailableOrganisms}
+                            primary>
+                            {'Try Again'}
+                        </Button>
+                    </>
+                ) : (
+                    <>
+                        <Modal.Description>
+                            <h3>Run As Multi-query</h3>
+                            <h4>
+                                Total number of features:&nbsp;
+                                {getNumFeatures()}
+                            </h4>
+                            <Form>
+                                <TopGeneListsSelectionTable
+                                    topGeneListsSizes={getAvailableTopGeneListsSizes()}
+                                    selectedTopGeneListsSizes={
+                                        selectedTopGeneListsSizes
                                     }
-                                    value={selectedOrganism}
+                                    onSelectGeneList={onSelectGeneList}
                                 />
-                                <Form.Field
-                                    control={Input}
-                                    label='g:Profiler Token (Optional)'
-                                    placeholder='Token'
-                                    value={this.state.gProfilerToken}
-                                    onChange={this.onChangeToken}
-                                />
-                            </Form.Group>
-                            {this.state.error !== '' && (
-                                <Form.Group>
-                                    <Label basic color='red'>
-                                        {this.state.error}
-                                    </Label>
+                                <Form.Group widths='equal'>
+                                    <Form.Field
+                                        control={Select}
+                                        label='Sort Features By'
+                                        options={availableSortBy}
+                                        placeholder='Sort By'
+                                        onChange={onSelectSortBy}
+                                        value={selectedSortBy}
+                                    />
+                                    <Form.Field
+                                        control={Dropdown}
+                                        search
+                                        selection
+                                        label='Organism'
+                                        options={availableOrganisms}
+                                        placeholder='Choose an organism'
+                                        onChange={onSelectOrganism}
+                                        disabled={
+                                            gProfilerToken !== null &&
+                                            gProfilerToken !== ''
+                                                ? true
+                                                : false
+                                        }
+                                        value={selectedOrganism}
+                                    />
+                                    <Form.Field
+                                        control={Input}
+                                        label='g:Profiler Token (Optional)'
+                                        placeholder='Token'
+                                        value={gProfilerToken}
+                                        onChange={onChangeToken}
+                                    />
                                 </Form.Group>
-                            )}
-                        </Form>
-                    </Modal.Description>
-                </Modal.Content>
-                <Modal.Actions>
-                    <Button
-                        type='button'
-                        value='goto-gprofiler'
-                        onClick={this.onClickGotoGProfilerURL}
-                        primary>
-                        {'Go to g:Profiler'}
-                    </Button>
-                </Modal.Actions>
-            </Modal>
-        );
-    }
-}
+                                {error !== '' && (
+                                    <Form.Group>
+                                        <Label basic color='red'>
+                                            {error}
+                                        </Label>
+                                    </Form.Group>
+                                )}
+                            </Form>
+                        </Modal.Description>
+                    </>
+                )}
+            </Modal.Content>
+            <Modal.Actions>
+                <Button
+                    type='button'
+                    value='goto-gprofiler'
+                    onClick={onClickGotoGProfilerURL}
+                    primary
+                    disabled={isBlocked}>
+                    {'Go to g:Profiler'}
+                </Button>
+            </Modal.Actions>
+        </Modal>
+    );
+};
 
-export default withRouter(GProfilerPopup);
+const mapStateToProps = (state) => {
+    return {
+        isDisplayed: Selector.isDisplayed(state),
+        selectedOrganism: Selector.getSelectedOrganism(state),
+        selectedSortBy: Selector.getSelectedSortBy(state),
+        gProfilerToken: Selector.getGProfilerToken(state),
+        availableOrganisms: Selector.getAvailableOrganisms(state),
+        selectedTopGeneListsSizes: Selector.getSelectedTopGeneListsSizes(state),
+        error: Selector.getError(state),
+    };
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        displayModal: (display: boolean) =>
+            dispatch(Action.displayModal(display)),
+        selectSortBy: (sortBy: string) => dispatch(Action.selectSortBy(sortBy)),
+        selectOrganism: (organism: string) =>
+            dispatch(Action.selectOrganism(organism)),
+        setGProfilerToken: (token: string) =>
+            dispatch(Action.setGProfilerToken(token)),
+        setTopGeneListSizes: (topGeneListSizes: number[]) =>
+            dispatch(Action.setTopGeneListSizes(topGeneListSizes)),
+        fetchAvailableOrganisms: () =>
+            dispatch(Action.fetchAvailableOrganisms()),
+        setError: (error: string) => dispatch(Action.setError(error)),
+    };
+};
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(withRouter(GProfilerPopup));

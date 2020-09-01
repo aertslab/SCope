@@ -1,3 +1,5 @@
+export const NAME = 'gprofiler';
+
 export const GPROFILER_API_ENDPOINT__AVAILABLE_ORGANISMS =
     'https://biit.cs.ut.ee/gprofiler/api/util/organisms_list/';
 
