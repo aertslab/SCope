@@ -1,4 +1,3 @@
-import * as R from 'ramda';
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
@@ -17,23 +16,12 @@ import {
 import * as Action from './actions';
 import * as Selector from './selectors';
 
-import { buildMetricTable, checkCreateGProfilerLink } from './utils';
-
-type FeatureMetadataMetric = {
-    accessor: string;
-    description: string;
-    name: string;
-    values: number[];
-};
-
-type FeatureMetadata = {
-    cellTypeAnno: unknown[];
-    clusterID: number;
-    clusteringGroup: string;
-    clusteringID: number;
-    genes: string[];
-    metrics: FeatureMetadataMetric[];
-};
+import {
+    getMetricTable,
+    getAvailableSortBy,
+    checkCreateGProfilerLink,
+} from './utils';
+import { FeatureMetadata } from './types';
 
 interface GProfilerPopupProps {
     featureMetadata: FeatureMetadata;

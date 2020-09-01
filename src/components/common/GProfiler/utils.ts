@@ -3,6 +3,8 @@ import {
     GPROFILER_LINK_MAX_LENGTH,
 } from './constants';
 
+import { FeatureMetadata } from './types';
+
 export const getMetricTable = (featureMetadata: FeatureMetadata) => {
     return featureMetadata.genes.map((gene: string, idx: number) => {
         return {
