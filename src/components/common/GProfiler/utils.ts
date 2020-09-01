@@ -3,7 +3,7 @@ import {
     GPROFILER_LINK_MAX_LENGTH,
 } from './constants';
 
-export const buildMetricTable = (featureMetadata) => {
+export const getMetricTable = (featureMetadata: FeatureMetadata) => {
     return featureMetadata.genes.map((gene: string, idx: number) => {
         return {
             gene: gene,
@@ -14,6 +14,16 @@ export const buildMetricTable = (featureMetadata) => {
                 }),
                 {}
             ),
+        };
+    });
+};
+
+export const getAvailableSortBy = (featureMetadata: FeatureMetadata) => {
+    return featureMetadata.metrics.map((metric, idx: number) => {
+        return {
+            key: idx,
+            text: metric.name,
+            value: metric.accessor,
         };
     });
 };

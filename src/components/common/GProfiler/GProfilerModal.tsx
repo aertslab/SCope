@@ -146,18 +146,8 @@ const GProfilerPopup: React.FC<
     >([]);
 
     useEffect(() => {
-        setAvailableSortBy(
-            props.featureMetadata.metrics.map(
-                (metric: FeatureMetadataMetric, idx: number) => {
-                    return {
-                        key: idx,
-                        text: metric.name,
-                        value: metric.accessor,
-                    };
-                }
-            )
-        );
-        setFeatureMetricTable(buildMetricTable(featureMetadata));
+        setAvailableSortBy(getAvailableSortBy(featureMetadata));
+        setFeatureMetricTable(getMetricTable(featureMetadata));
         fetchAvailableOrganisms();
     }, []);
 
