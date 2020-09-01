@@ -111,11 +111,6 @@ export const checkCreateGProfilerLink = async ({
             error: 'No gene list selected. At least one gene list is required.',
         };
     }
-    if (selectedTopGeneListsSizes.length == 0) {
-        return {
-            error: 'No gene list selected. At least one gene list is required.',
-        };
-    }
 
     const sortedFeatureMetricTable = featureMetricTable.sort(
         (a, b) => b[selectedSortBy] - a[selectedSortBy]
