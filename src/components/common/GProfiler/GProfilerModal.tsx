@@ -21,7 +21,11 @@ import {
     getAvailableSortBy,
     checkCreateGProfilerLink,
 } from './utils';
-import { FeatureMetadata } from './types';
+import {
+    GProfilerOrganism,
+    FeatureMetadata,
+    FeatureMetricTable,
+} from './types';
 
 interface GProfilerPopupProps {
     featureMetadata: FeatureMetadata;
@@ -39,12 +43,7 @@ interface GProfilerPopupReduxProps {
     setGProfilerToken: (gProfilerToken: string) => void;
     selectedTopGeneListsSizes: number[];
     setTopGeneListSizes: (topGeneListSizes: number[]) => void;
-    availableOrganisms: {
-        display_name: string;
-        id: string;
-        scientific_name: string;
-        version: string;
-    }[];
+    availableOrganisms: GProfilerOrganism[];
     fetchAvailableOrganisms: () => void;
     error: string;
     setError: (error: string) => void;
@@ -98,12 +97,6 @@ const TopGeneListsSelectionTable: React.FC<{
         </Table>
     );
 };
-
-type FeatureMetricTable = {
-    gene: string;
-    avg_logFC?: number;
-    pval?: number;
-}[];
 
 const GProfilerPopup: React.FC<
     GProfilerPopupProps & GProfilerPopupReduxProps & RouteComponentProps

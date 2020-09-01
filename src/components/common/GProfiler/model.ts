@@ -1,3 +1,5 @@
+import { GProfilerOrganism } from './types';
+
 export type State = {
     error: string;
     display: boolean;
@@ -7,7 +9,7 @@ export type State = {
      * gene list functional enrichment
      */
     selectedTopGeneListsSizes: number[];
-    availableOrganisms: unknown[];
+    availableOrganisms: GProfilerOrganism[];
     selectedOrganism: string;
     selectedSortBy: string;
     gProfilerToken: string;

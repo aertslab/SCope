@@ -1,4 +1,5 @@
 import * as Action from './actionTypes';
+import { GProfilerOrganism } from './types';
 
 export interface DisplayModal {
     type: typeof Action.DISPLAY_MODAL;
@@ -79,12 +80,12 @@ export const fetchAvailableOrganisms = (): FetchAvailableOrganisms => {
 export interface SetAvailableOrganisms {
     type: typeof Action.SET_AVAILABLE_ORGANISMS;
     payload: {
-        availableOrganisms: unknown[];
+        availableOrganisms: GProfilerOrganism[];
     };
 }
 
 export const setAvailableOrganisms = (
-    availableOrganisms: unknown[]
+    availableOrganisms: GProfilerOrganism[]
 ): SetAvailableOrganisms => {
     return {
         type: Action.SET_AVAILABLE_ORGANISMS,

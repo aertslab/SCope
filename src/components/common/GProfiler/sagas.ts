@@ -3,6 +3,7 @@ import * as R from 'ramda';
 
 import * as t from './actionTypes';
 import * as c from './constants';
+import { GProfilerOrganism } from './types';
 
 async function fetchJson(url: string) {
     let resp = null;
@@ -22,11 +23,11 @@ function* fetchAvailableOrganisms() {
     );
     if (!!data && !('message' in data)) {
         const organismsSorted = data
-            .map((organism, idx: number) => {
+            .map((organism: GProfilerOrganism, idx: number) => {
                 return {
                     key: idx + 1,
-                    text: organism['display_name'],
-                    value: organism['id'],
+                    text: organism.display_name,
+                    value: organism.id,
                 };
             })
             .sort(R.comparator((a, b) => a['text'] < b['text']));

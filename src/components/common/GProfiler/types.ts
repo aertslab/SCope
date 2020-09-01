@@ -13,3 +13,16 @@ export type FeatureMetadata = {
     genes: string[];
     metrics: FeatureMetadataMetric[];
 };
+
+export type FeatureMetricTable = {
+    gene: string;
+    avg_logFC?: number;
+    pval?: number;
+}[];
+
+export type GProfilerOrganism = {
+    display_name: string;
+    id: string;
+    scientific_name: string;
+    version: string;
+};
