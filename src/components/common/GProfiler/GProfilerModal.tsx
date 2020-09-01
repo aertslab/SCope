@@ -50,10 +50,14 @@ interface GProfilerPopupReduxProps {
 }
 
 const TopGeneListsSelectionTable: React.FC<{
-    topGeneListsSizes: number[];
+    availableTopGeneListsSizes: number[];
     selectedTopGeneListsSizes: number[];
     onSelectGeneList: (geneListSize: number) => () => void;
-}> = ({ topGeneListsSizes, selectedTopGeneListsSizes, onSelectGeneList }) => {
+}> = ({
+    availableTopGeneListsSizes,
+    selectedTopGeneListsSizes,
+    onSelectGeneList,
+}) => {
     return (
         <Table compact celled definition>
             <Table.Header>
@@ -65,7 +69,7 @@ const TopGeneListsSelectionTable: React.FC<{
                 </Table.Row>
             </Table.Header>
             <Table.Body>
-                {topGeneListsSizes.map((topGeneListsSize) => {
+                {availableTopGeneListsSizes.map((topGeneListsSize) => {
                     const handleOnChangeGeneList = onSelectGeneList(
                         topGeneListsSize
                     );
@@ -166,10 +170,13 @@ const GProfilerPopup: React.FC<
             featureMetricTable,
             ...props,
         });
-        if ('error' in result) setError(result.error);
-
-        if (result.link === '' || typeof result.link !== 'string') return;
-        window.open(result.link);
+        if ('error' in result) {
+            setError(result.error);
+        }
+        if ('link' in result && result.link !== '') {
+            setError('');
+            window.open(result.link);
+        }
     };
 
     const getNumFeatures = () => {
@@ -188,7 +195,7 @@ const GProfilerPopup: React.FC<
         );
     };
 
-    const isBlocked = availableOrganisms.length > 0 ? false : true;
+    const retryAgain = availableOrganisms.length > 0 ? false : true;
 
     return (
         <Modal
@@ -209,7 +216,7 @@ const GProfilerPopup: React.FC<
             open={display}>
             <Modal.Header>Run g:Profiler Gene List Enrichment</Modal.Header>
             <Modal.Content>
-                {isBlocked ? (
+                {retryAgain ? (
                     <>
                         <div style={{ marginBottom: '10px' }}>
                             <Label basic color='red'>
@@ -234,7 +241,7 @@ const GProfilerPopup: React.FC<
                             </h4>
                             <Form>
                                 <TopGeneListsSelectionTable
-                                    topGeneListsSizes={getAvailableTopGeneListsSizes()}
+                                    availableTopGeneListsSizes={getAvailableTopGeneListsSizes()}
                                     selectedTopGeneListsSizes={
                                         selectedTopGeneListsSizes
                                     }
@@ -290,8 +297,7 @@ const GProfilerPopup: React.FC<
                     type='button'
                     value='goto-gprofiler'
                     onClick={onClickGotoGProfilerURL}
-                    primary
-                    disabled={isBlocked}>
+                    primary>
                     {'Go to g:Profiler'}
                 </Button>
             </Modal.Actions>

@@ -25,6 +25,7 @@ const reducer: Reducer<State, GProfilerAction> = produce(
                     draft.selectedOrganism = '';
                     draft.selectedSortBy = '';
                     draft.gProfilerToken = '';
+                    if (draft.availableOrganisms.length > 0) draft.error = '';
                 }
                 break;
             case t.SET_TOP_GENE_LIST_SIZES:
