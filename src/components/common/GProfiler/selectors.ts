@@ -1,6 +1,7 @@
 import { RootState } from '../../../redux/reducers';
 
 import { NAME } from './constants';
+import { GProfilerOrganism } from './types';
 
 export const isDisplayed = (state: RootState): boolean => {
     return state[NAME].display;
@@ -18,7 +19,9 @@ export const getGProfilerToken = (state: RootState): string => {
     return state[NAME].gProfilerToken;
 };
 
-export const getAvailableOrganisms = (state: RootState): unknown[] => {
+export const getAvailableOrganisms = (
+    state: RootState
+): GProfilerOrganism[] => {
     return state[NAME].availableOrganisms;
 };
 

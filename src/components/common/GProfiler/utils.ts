@@ -3,12 +3,12 @@ import {
     GPROFILER_LINK_MAX_LENGTH,
 } from './constants';
 
-import { FeatureMetadata } from './types';
+import { FeatureMetadata, FeatureMetricTable } from './types';
 
 export const getMetricTable = (featureMetadata: FeatureMetadata) => {
     return featureMetadata.genes.map((gene: string, idx: number) => {
         return {
-            gene: gene,
+            gene,
             ...featureMetadata.metrics.reduce(
                 (metrics, metric) => ({
                     ...metrics,
@@ -30,7 +30,10 @@ export const getAvailableSortBy = (featureMetadata: FeatureMetadata) => {
     });
 };
 
-const createFeatureQuery = (topNumFeatures, sortedFeatureMetricTable) => {
+const createFeatureQuery = (
+    topNumFeatures: number[],
+    sortedFeatureMetricTable: FeatureMetricTable
+) => {
     return topNumFeatures
         .map((topNumFeaturesElement) => {
             return {
@@ -60,8 +63,8 @@ const createFeatureQuery = (topNumFeatures, sortedFeatureMetricTable) => {
 
 const createGProfilerLink = (organism: string, query: string) => {
     const gProfilerQueryData = {
-        organism: organism,
-        query: query,
+        organism,
+        query,
         ordered: 'true',
         all_results: 'false',
         no_iea: 'false',
@@ -94,6 +97,12 @@ export const checkCreateGProfilerLink = async ({
     gProfilerToken,
     selectedOrganism,
     selectedSortBy,
+}: {
+    featureMetricTable: FeatureMetricTable;
+    selectedTopGeneListsSizes: number[];
+    gProfilerToken: string;
+    selectedOrganism: string;
+    selectedSortBy: string;
 }): Promise<{ error?: string; link?: string }> => {
     if (selectedSortBy === '') {
         return {
