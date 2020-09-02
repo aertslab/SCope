@@ -10,6 +10,7 @@ export type State = {
      */
     selectedTopGeneListsSizes: number[];
     availableOrganisms: GProfilerOrganism[];
+    isFetchingAvailableOrganisms: boolean;
     selectedOrganism: string;
     selectedSortBy: string;
     gProfilerToken: string;

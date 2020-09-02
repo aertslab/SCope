@@ -9,6 +9,7 @@ const initialState: State = {
     error: '',
     display: false,
     selectedTopGeneListsSizes: [],
+    isFetchingAvailableOrganisms: false,
     availableOrganisms: [],
     selectedOrganism: '',
     selectedSortBy: '',
@@ -42,12 +43,18 @@ const reducer: Reducer<State, GProfilerAction> = produce(
                 draft.selectedOrganism = '';
                 draft.gProfilerToken = action.payload.gProfilerToken;
                 break;
+            case t.FETCHING_AVAILABLE_ORGANISMS:
+                draft.isFetchingAvailableOrganisms =
+                    action.payload.isFetchingAvailableOrganisms;
+                break;
             case t.SET_AVAILABLE_ORGANISMS:
                 draft.availableOrganisms = action.payload.availableOrganisms;
+                draft.isFetchingAvailableOrganisms = false;
                 if (draft.availableOrganisms.length > 0) draft.error = '';
                 break;
             case t.SET_ERROR:
                 draft.error = action.payload.error;
+                draft.isFetchingAvailableOrganisms = false;
                 break;
         }
     },

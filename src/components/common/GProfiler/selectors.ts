@@ -25,6 +25,10 @@ export const getAvailableOrganisms = (
     return state[NAME].availableOrganisms;
 };
 
+export const isFetchingAvailableOrganisms = (state: RootState): boolean => {
+    return state[NAME].isFetchingAvailableOrganisms;
+};
+
 export const getSelectedTopGeneListsSizes = (state: RootState): number[] => {
     return state[NAME].selectedTopGeneListsSizes;
 };

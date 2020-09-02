@@ -5,13 +5,13 @@ import {
     Button,
     Modal,
     Form,
-    Checkbox,
-    Table,
     Input,
     Select,
     Label,
     Dropdown,
 } from 'semantic-ui-react';
+
+import { TopGeneListsSelectionTable } from './TopGeneListsSelectionTable';
 
 import * as Action from './actions';
 import * as Selector from './selectors';
@@ -44,6 +44,7 @@ interface GProfilerPopupReduxProps {
     selectedTopGeneListsSizes: number[];
     setTopGeneListSizes: (topGeneListSizes: number[]) => void;
     availableOrganisms: GProfilerOrganism[];
+    isFetchingAvailableOrganisms: boolean;
     fetchAvailableOrganisms: () => void;
     error: string;
     setError: (error: string) => void;
@@ -64,6 +65,7 @@ const GProfilerPopup: React.FC<
         setGProfilerToken,
         selectedTopGeneListsSizes,
         setTopGeneListSizes,
+        isFetchingAvailableOrganisms,
         availableOrganisms,
         fetchAvailableOrganisms,
         error,
@@ -142,8 +144,6 @@ const GProfilerPopup: React.FC<
         );
     };
 
-    const retryAgain = availableOrganisms.length > 0 ? false : true;
-
     return (
         <Modal
             as={Form}
@@ -163,22 +163,31 @@ const GProfilerPopup: React.FC<
             open={display}>
             <Modal.Header>Run g:Profiler Gene List Enrichment</Modal.Header>
             <Modal.Content>
-                {retryAgain ? (
-                    <>
-                        <div style={{ marginBottom: '10px' }}>
-                            <Label basic color='red'>
-                                {error}
-                            </Label>
-                        </div>
-                        <Button
-                            type='button'
-                            value='refetch-available-organisms'
-                            onClick={fetchAvailableOrganisms}
-                            primary>
-                            {'Try Again'}
-                        </Button>
-                    </>
-                ) : (
+                {isFetchingAvailableOrganisms && (
+                    <div style={{ marginBottom: '10px' }}>
+                        <Label basic color='grey'>
+                            {'Fetching available g:Profiler organisms...'}
+                        </Label>
+                    </div>
+                )}
+                {!isFetchingAvailableOrganisms &&
+                    availableOrganisms.length == 0 && (
+                        <>
+                            <div style={{ marginBottom: '10px' }}>
+                                <Label basic color='red'>
+                                    {error}
+                                </Label>
+                            </div>
+                            <Button
+                                type='button'
+                                value='refetch-available-organisms'
+                                onClick={fetchAvailableOrganisms}
+                                primary>
+                                {'Try Again'}
+                            </Button>
+                        </>
+                    )}
+                {availableOrganisms.length > 0 && (
                     <>
                         <Modal.Description>
                             <h3>Run As Multi-query</h3>
@@ -258,6 +267,9 @@ const mapStateToProps = (state) => {
         selectedOrganism: Selector.getSelectedOrganism(state),
         selectedSortBy: Selector.getSelectedSortBy(state),
         gProfilerToken: Selector.getGProfilerToken(state),
+        isFetchingAvailableOrganisms: Selector.isFetchingAvailableOrganisms(
+            state
+        ),
         availableOrganisms: Selector.getAvailableOrganisms(state),
         selectedTopGeneListsSizes: Selector.getSelectedTopGeneListsSizes(state),
         error: Selector.getError(state),
