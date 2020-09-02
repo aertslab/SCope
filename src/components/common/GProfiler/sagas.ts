@@ -4,6 +4,7 @@ import * as R from 'ramda';
 import * as t from './actionTypes';
 import * as c from './constants';
 import { GProfilerOrganism } from './types';
+import * as Action from './actions';
 
 async function fetchJson(url: string) {
     let resp = null;
@@ -17,6 +18,7 @@ async function fetchJson(url: string) {
 }
 
 function* fetchAvailableOrganisms() {
+    yield put(Action.fetchingAvailableOrganisms(true));
     const { data } = yield call(
         fetchJson,
         c.GPROFILER_API_ENDPOINT__AVAILABLE_ORGANISMS
@@ -31,19 +33,9 @@ function* fetchAvailableOrganisms() {
                 };
             })
             .sort(R.comparator((a, b) => a['text'] < b['text']));
-        yield put({
-            type: t.SET_AVAILABLE_ORGANISMS,
-            payload: {
-                availableOrganisms: organismsSorted,
-            },
-        });
+        yield put(Action.setAvailableOrganisms(organismsSorted));
     } else {
-        yield put({
-            type: t.SET_ERROR,
-            payload: {
-                error: `Unable to fetch list of organisms`,
-            },
-        });
+        yield put(Action.setError('Unable to fetch list of organisms'));
     }
 }
 
