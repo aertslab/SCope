@@ -134,7 +134,7 @@ def create_feature_description(
     aggregated_matches: Dict[Tuple[str, str], List[str]],
     features: Dict[Tuple[str, str], str],
     feature_types: Dict[Tuple[str, str], str],
-) -> Dict[Tuple[str, str], str]:
+) -> Tuple[Dict[Tuple[str, str], str], Dict[Tuple[str, str], str], Dict[Tuple[str, str], str]]:
     """
     Generate descriptions for final results.
 
@@ -165,6 +165,8 @@ def create_feature_description(
                 category_name = features[k]
                 category_type = feature_types[k]
                 desc_key = (category_name, category_type)
+                features[desc_key] = features[k]
+                feature_types[desc_key] = feature_types[k]
             else:
                 is_cluster = False
                 category_name = k[0]
@@ -186,7 +188,7 @@ def create_feature_description(
 
     final_descriptions = {k: ", ".join(v) for (k, v) in descriptions.items()}
 
-    return final_descriptions
+    return final_descriptions, features, feature_types
 
 
 def get_final_feature_and_type(
@@ -247,7 +249,7 @@ def get_search_results(search_term: str, loom: Loom, data_hash_secret: str) -> D
     matches = find_matches(search_term, loom.ss.search_space_dict)
     aggregated_matches = aggregate_matches(matches)
     features, feature_types = get_final_feature_and_type(loom, aggregated_matches, data_hash_secret)
-    descriptions = create_feature_description(aggregated_matches, features, feature_types)
+    descriptions, features, feature_types = create_feature_description(aggregated_matches, features, feature_types)
 
     final_res = {
         "feature": [features[k] for k in descriptions],
