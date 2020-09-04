@@ -1,7 +1,7 @@
 import logging
 
 from typing import Dict, NamedTuple, Tuple, List, Optional, Type, Union
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from contextlib import suppress
 from scopeserver.dataserver.utils import data_file_handler
 from scopeserver.dataserver.utils.constant import Species
@@ -131,7 +131,9 @@ def aggregate_matches(matches: List[MatchResult]) -> Dict[Tuple[str, str], List[
 
 
 def create_feature_description(
-    aggregated_matches: Dict[Tuple[str, str], List[str]], features: Dict[Tuple[str, str], str],
+    aggregated_matches: Dict[Tuple[str, str], List[str]],
+    features: Dict[Tuple[str, str], str],
+    feature_types: Dict[Tuple[str, str], str],
 ) -> Dict[Tuple[str, str], str]:
     """
     Generate descriptions for final results.
@@ -148,18 +150,21 @@ def create_feature_description(
         Dict[Tuple[str, str], str]: The final descriptions to send to the user
     """
 
-    descriptions: Dict[Tuple[str, str], str] = {}
+    descriptions: Dict[Tuple[str, str], List[str]] = defaultdict(lambda: [])
 
     for k, v in aggregated_matches.items():
+        desc_key = k
         synonyms = v.copy()
         with suppress(ValueError):
             synonyms.remove(k[0])
         if k[1] == "gene" and len(synonyms) > 0:
-            descriptions[k] = f"Synonyms: {', '.join(synonyms)}"
+            descriptions[k].append(f"Synonyms: {', '.join(synonyms)}")
         elif k[1] in DEFINED_SEARCH_TYPES:
             if DEFINED_SEARCH_TYPES[k[1]]["final_category"] == "cluster_category":
                 is_cluster = True
                 category_name = features[k]
+                category_type = feature_types[k]
+                desc_key = (category_name, category_type)
             else:
                 is_cluster = False
                 category_name = k[0]
@@ -168,15 +173,20 @@ def create_feature_description(
                     category_name += "es"
                 elif not is_cluster:
                     category_name += "s"
-                descriptions[
-                    k
-                ] = f"{','.join(v[:-1])} and {v[-1]} {DEFINED_SEARCH_TYPES[k[1]]['join_text_multiple']} {category_name}"
+                descriptions[desc_key].append(
+                    f"{','.join(v[:-1])} and {v[-1]} {DEFINED_SEARCH_TYPES[k[1]]['join_text_multiple']} {category_name}"
+                )
             elif len(v) == 1:
-                descriptions[k] = f"{v[0]} {DEFINED_SEARCH_TYPES[k[1]]['join_text_single']} {category_name}"
+                descriptions[desc_key].append(
+                    f"{v[0]} {DEFINED_SEARCH_TYPES[k[1]]['join_text_single']} {category_name}"
+                )
         else:
-            descriptions[k] = ""
+            if len(descriptions[desc_key]) == 0:
+                descriptions[desc_key] = [""]
 
-    return descriptions
+    final_descriptions = {k: ", ".join(v) for (k, v) in descriptions.items()}
+
+    return final_descriptions
 
 
 def get_final_feature_and_type(
@@ -237,12 +247,12 @@ def get_search_results(search_term: str, loom: Loom, data_hash_secret: str) -> D
     matches = find_matches(search_term, loom.ss.search_space_dict)
     aggregated_matches = aggregate_matches(matches)
     features, feature_types = get_final_feature_and_type(loom, aggregated_matches, data_hash_secret)
-    descriptions = create_feature_description(aggregated_matches, features)
+    descriptions = create_feature_description(aggregated_matches, features, feature_types)
 
     final_res = {
-        "feature": [features[k] for k in aggregated_matches],
-        "featureType": [feature_types[k] for k in aggregated_matches],
-        "featureDescription": [descriptions[k] for k in aggregated_matches],
+        "feature": [features[k] for k in descriptions],
+        "featureType": [feature_types[k] for k in descriptions],
+        "featureDescription": [descriptions[k] for k in descriptions],
     }
 
     return final_res
