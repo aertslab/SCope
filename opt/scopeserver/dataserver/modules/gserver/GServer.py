@@ -324,6 +324,8 @@ class SCope(s_pb2_grpc.MainServicer):
     def setAnnotationName(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         success = loom.rename_annotation(request.clusteringID, request.clusterID, request.newAnnoName)
+        if success:
+            self.get_features.cache_clear()
         return s_pb2.SetAnnotationNameReply(success=success)
 
     def setLoomHierarchy(self, request, context):
@@ -336,6 +338,8 @@ class SCope(s_pb2_grpc.MainServicer):
         if not self.dfh.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
             return s_pb2.setColabAnnotationDataReply(success=False, message="Could not confirm user!")
         success, message = loom.add_collab_annotation(request, self.config["dataHashSecret"])
+        if success:
+            self.get_features.cache_clear()
         return s_pb2.setColabAnnotationDataReply(success=success, message=message)
 
     def addNewClustering(self, request, context):
@@ -343,6 +347,8 @@ class SCope(s_pb2_grpc.MainServicer):
         if not self.dfh.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
             return s_pb2.AddNewClusteringReply(success=False, message="Could not confirm user!")
         success, message = loom.add_user_clustering(request)
+        if success:
+            self.get_features.cache_clear()
         return s_pb2.AddNewClusteringReply(success=success, message=message)
 
     def voteAnnotation(self, request, context):
