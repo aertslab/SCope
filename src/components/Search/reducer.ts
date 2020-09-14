@@ -1,6 +1,6 @@
 import produce from 'immer';
 import { has } from 'ramda';
-import { Reducer } from 'react-redux';
+import { Reducer } from 'redux';
 
 import * as t from './actionTypes';
 import { State, init } from './model';
