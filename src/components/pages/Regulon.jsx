@@ -51,7 +51,8 @@ export default class Regulon extends Component {
             <Grid className='flexDisplay'>
                 <Search.FeatureSearchGroup
                     feature='regulon'
-                    identifier='regulon-page' />
+                    identifier='regulon-page'
+                />
                 <Grid.Row columns='4' centered>
                     {featureThreshold}
                     <Grid.Column>&nbsp;</Grid.Column>

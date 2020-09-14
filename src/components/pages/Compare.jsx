@@ -15,7 +15,6 @@ import ViewerDropContainer from '../common/ViewerDropContainer';
 
 import './compare.css';
 
-
 class Compare extends Component {
     constructor(props) {
         super(props);
@@ -429,9 +428,10 @@ class Compare extends Component {
             <Grid>
                 <Search.FeatureSearchGroup
                     feature='all'
-                    identifier='compare-page' />
+                    identifier='compare-page'
+                />
                 <Grid.Row columns={3} stretched className='viewerRow'>
-                    <Grid.Column width={2} >
+                    <Grid.Column width={2}>
                         <div className='compare-menu'>
                             Number of displays: &nbsp;
                             <Dropdown
@@ -446,7 +446,8 @@ class Compare extends Component {
                             <Dropdown
                                 inline
                                 disabled={
-                                    configuration == 'one' && isSuperpositionLocked
+                                    configuration == 'one' &&
+                                    isSuperpositionLocked
                                 }
                                 options={this.superpositionConf}
                                 value={superposition}

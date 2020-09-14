@@ -7,7 +7,6 @@ import Slider from 'rc-slider';
 
 import { BackendAPI } from './API';
 
-
 const Handle = Slider.Handle;
 
 export default class Histogram extends Component {
