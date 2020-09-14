@@ -34,14 +34,6 @@ export const isSelected = (field: string, state: RootState): boolean => {
     return false;
 };
 
-export const hasFilter = (field: string, state: RootState): FeatureFilter => {
-    if (has(field, state[NAME])) {
-        return state[NAME][field].filter;
-    }
-
-    return 'all';
-};
-
 export const value = (field: string, state: RootState): string => {
     if (has(field, state[NAME])) {
         return state[NAME][field].value;

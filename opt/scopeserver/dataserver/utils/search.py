@@ -278,12 +278,11 @@ def get_search_results(search_term: str, category: str, loom: Loom) -> List[Cate
     features, feature_types = get_final_feature_and_type(loom, aggregated_matches)
     descriptions, features, feature_types = create_feature_description(aggregated_matches, features, feature_types)
 
-    ftypes = groupby(sorted(feature_types.values()))
-
     aggregated = sorted(
         [
             {"feature": features[key], "category": feature_types[key], "description": descriptions[key]}
             for key in aggregated_matches
+            if all([key in features, key in feature_types, key in descriptions])
         ],
         key=category_key,
     )
@@ -295,9 +294,6 @@ def get_search_results(search_term: str, category: str, loom: Loom) -> List[Cate
 
     if category == "all":
         return [CategorisedMatches(category=key, matches=group) for key, group in grouped.items()]
-
-    elif category in grouped:
+    if category in grouped:
         return [CategorisedMatches(category=category, matches=grouped[category])]
-
-    else:
-        return []
+    return []

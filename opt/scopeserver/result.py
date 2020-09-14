@@ -189,8 +189,6 @@ def ok(val: T) -> Result[T, E]:
 
 
 # pylint: enable=invalid-name
-
-
 def err(error: E) -> Result[T, E]:
     """ Construct a failing `Result` containing `error`. """
     return Result(error=error)

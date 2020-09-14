@@ -11,29 +11,27 @@ export type FeatureFilter =
     | 'metric'
     | 'cluster';
 
-export interface FeatureSearchSelection {
+export type FeatureSearchSelection = {
     readonly title: string;
-    readonly category: FeatureFilter;
+    readonly category: string;
     readonly description: string;
     readonly colour: string;
-}
+};
 
-const makeSelection = R.curry(
-    (
-        colour: string,
-        category: string
-    ): ((partial: {
+const makeSelection = (
+    colour: string,
+    category: string
+): ((partial: {
+    title: string;
+    description: string;
+}) => FeatureSearchSelection) =>
+    R.compose(
+        R.assoc('colour', colour),
+        R.assoc('category', category)
+    ) as (partial: {
         title: string;
         description: string;
-    }) => FeatureSearchSelection) =>
-        R.compose(
-            R.assoc('colour', colour),
-            R.assoc('category', toFeatureFilter(category))
-        ) as (partial: {
-            title: string;
-            description: string;
-        }) => FeatureSearchSelection
-);
+    }) => FeatureSearchSelection;
 
 export const findResult = (
     query: { title: string },
@@ -53,7 +51,6 @@ export const findResult = (
 
 export type FeatureSearch = {
     field: string;
-    filter: FeatureFilter;
     loading: boolean;
     value: string;
     results: Array<Features>;
@@ -63,28 +60,14 @@ export type FeatureSearch = {
 
 export type State = { [field: string]: FeatureSearch };
 
-export const toFeatureFilter = (val: string): FeatureFilter | undefined => {
-    switch (val) {
-        case 'all':
-        case 'gene':
-        case 'regulon':
-        case 'annotation':
-        case 'metric':
-        case 'cluster':
-            return val as FeatureFilter;
-        default:
-            return undefined;
-    }
-};
-
 export const init = (field: string): FeatureSearch => {
     return {
         field,
-        filter: 'all',
         loading: false,
         value: '',
         results: [],
         selected: undefined,
+        error: undefined,
     };
 };
 
@@ -96,8 +79,22 @@ export const featuresToResults = (
         {
             name: features.category,
             results: (features.results.map((result) => {
-                return { ...result, id: window.btoa(result.title) };
+                return {
+                    ...result,
+                    id: window.btoa(result.title + result.description),
+                };
             }) as unknown) as typeof SearchResult[],
         },
     ];
+};
+
+export const orderCategories = (a: Features, b: Features): boolean => {
+    const order = ['gene', 'regulon', 'clustering', 'annotation', 'metric'];
+
+    const category = (feature: Features): string =>
+        feature.category.startsWith('Clustering')
+            ? 'clustering'
+            : feature.category;
+
+    return order.indexOf(category(a)) < order.indexOf(category(b));
 };

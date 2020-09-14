@@ -18,6 +18,8 @@ import {
     Icon,
 } from 'semantic-ui-react';
 
+import { SCOPE_COOKIE, ONE_MINUTE } from './constants';
+
 import AppHeader from './AppHeader';
 import AppSidebar from './AppSidebar';
 import { BackendAPI } from './common/API';
@@ -39,7 +41,6 @@ import { setAppLoading, setUUID, setSessionMode } from '../redux/actions';
 const pako = require('pako');
 const publicIp = require('public-ip');
 const timer = 60 * 1000;
-const cookieName = 'SCOPE_UUID';
 
 class App extends Component {
     constructor() {
@@ -67,7 +68,7 @@ class App extends Component {
         this.props.cookies.remove('scope_orcid_name');
         this.props.cookies.remove('scope_orcid_id');
         this.props.cookies.remove('scope_orcid_uuid');
-        this.props.cookies.remove(cookieName);
+        this.props.cookies.remove(SCOPE_COOKIE);
     }
 
     acceptCookies() {
@@ -77,7 +78,7 @@ class App extends Component {
     }
 
     setUUIDCookie() {
-        this.props.cookies.set(cookieName, this.props.match.params.uuid, {
+        this.props.cookies.set(SCOPE_COOKIE, this.props.match.params.uuid, {
             path: '/',
             sameSite: 'strict',
         });
@@ -275,7 +276,10 @@ class App extends Component {
     }
 
     componentWillUnmount() {
-        if (this.timer) clearInterval(this.timer);
+        if (this.timer) {
+            clearInterval(this.timer);
+        }
+
         document.removeEventListener('click', this.clickHandler);
         document.removeEventListener('keypress', this.clickHandler);
     }
@@ -316,7 +320,7 @@ class App extends Component {
                 }
                 this.restoreSession(
                     ip,
-                    cookies.get(cookieName),
+                    cookies.get(SCOPE_COOKIE),
                     match.params.loom
                 );
             } else if (match.params.uuid.startsWith('permalink')) {
@@ -331,16 +335,16 @@ class App extends Component {
                 }
                 this.checkUUID(ip, match.params.uuid);
                 console.log(this.state.cookiesAllowed);
-                console.log(cookieName, match.params.uuid, { path: '/' });
+                console.log(SCOPE_COOKIE, match.params.uuid, { path: '/' });
                 if (this.state.cookiesAllowed) {
                     this.setUUIDCookie();
                 }
             }
-        } else if (cookies.get(cookieName)) {
+        } else if (cookies.get(SCOPE_COOKIE)) {
             if (DEBUG) {
-                console.log('Cookie UUID detected:', cookies.get(cookieName));
+                console.log('Cookie UUID detected:', cookies.get(SCOPE_COOKIE));
             }
-            this.checkUUID(ip, cookies.get(cookieName));
+            this.checkUUID(ip, cookies.get(SCOPE_COOKIE));
         } else {
             if (DEBUG) console.log('No UUID detected');
             this.obtainNewUUID(ip, (uuid) => {
@@ -408,12 +412,12 @@ class App extends Component {
                             }
                             if (!this.timer) {
                                 this.timer = setInterval(() => {
-                                    this.timeout -= timer;
+                                    this.timeout -= 1 * ONE_MINUTE;
                                     if (this.timeout < 0) {
                                         if (DEBUG) {
                                             console.log('Session timed out');
                                         }
-                                        cookies.remove(cookieName);
+                                        cookies.remove(SCOPE_COOKIE);
                                         clearInterval(this.timer);
                                         this.timer = null;
                                         if (!BackendAPI.isConnected()) {
@@ -429,7 +433,7 @@ class App extends Component {
                                         }
                                         this.checkUUID(ip, uuid, true);
                                     }
-                                }, timer);
+                                }, 1 * ONE_MINUTE);
                             }
                             if (!ping) {
                                 let loom = match.params.loom

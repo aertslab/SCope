@@ -5,7 +5,8 @@ const fs = require('fs');
 const pkg = require('./package.json');
 const TerserPlugin = require('terser-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
+    .BundleAnalyzerPlugin;
 
 // Import config file
 let isAWS = process.env.NODE_TYPE == 'aws';
@@ -112,6 +113,7 @@ let config = {
                 orcidAPIClientID: _config.orcidAPIClientID,
                 orcidAPIRedirectURI: _config.orcidAPIRedirectURI,
             }),
+            __TEST_ONLY__: false,
         }),
         new WebpackGitHash({
             cleanup: true,
@@ -131,7 +133,7 @@ let config = {
             },
         }),
         new ForkTsCheckerWebpackPlugin(),
-        new BundleAnalyzerPlugin(),
+        new BundleAnalyzerPlugin({ openAnalyzer: false }),
     ],
 };
 
