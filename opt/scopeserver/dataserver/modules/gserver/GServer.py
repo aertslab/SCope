@@ -459,7 +459,8 @@ class SCope(s_pb2_grpc.MainServicer):
 
             def merge_cluster_marker_metrics(metrics):
                 return functools.reduce(
-                    lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how="outer"), metrics,
+                    lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how="outer"),
+                    metrics,
                 )
 
             cluster_marker_metrics = merge_cluster_marker_metrics(
