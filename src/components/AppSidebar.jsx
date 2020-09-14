@@ -335,7 +335,6 @@ class AppSidebar extends Component {
                 visible={this.props.visible}
                 vertical
                 className='clearfix'>
-
                 <Menu.Header>DATASETS</Menu.Header>
                 <Menu.Menu>
                     {this.props.sessionMode == 'rw' && (

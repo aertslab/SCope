@@ -165,8 +165,10 @@ export default class Viewer extends Component {
         BackendAPI.onViewerTransformChange(this.viewerTransformListener);
         BackendAPI.onCustomScaleChange(this.customScaleListener);
 
-        const activePage = decodeURI(this.props.location.pathname).split('/').slice(-1)[0];
-        console.log("Viewer active page is:", activePage);
+        const activePage = decodeURI(this.props.location.pathname)
+            .split('/')
+            .slice(-1)[0];
+        console.log('Viewer active page is:', activePage);
         BackendAPI.onActiveFeaturesChange(
             activePage,
             this.activeFeaturesListener
@@ -253,7 +255,9 @@ export default class Viewer extends Component {
         BackendAPI.removeViewerTransformChange(this.viewerTransformListener);
         BackendAPI.removeCustomScaleChange(this.customScaleListener);
 
-        const activePage = decodeURI(this.props.location.pathname).split('/').slice(-1)[0];
+        const activePage = decodeURI(this.props.location.pathname)
+            .split('/')
+            .slice(-1)[0];
         BackendAPI.removeActiveFeaturesChange(
             activePage,
             this.activeFeaturesListener
@@ -264,11 +268,11 @@ export default class Viewer extends Component {
 
     onResize() {
         const bbox = this.zoomSelection
-              .select(function () {
-                  return this.parentNode;
-              })
-              .node()
-              .getBoundingClientRect();
+            .select(function () {
+                return this.parentNode;
+            })
+            .node()
+            .getBoundingClientRect();
 
         let dw = bbox.width - this.w - VIEWER_MARGIN;
         let dh = bbox.height - this.h - VIEWER_MARGIN;

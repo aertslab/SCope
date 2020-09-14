@@ -11,7 +11,6 @@ import {
 
 import { BackendAPI } from './API';
 
-
 export default class CollabAnnoGeneSearch extends React.Component {
     constructor(props) {
         super(props);

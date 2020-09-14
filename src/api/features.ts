@@ -1,6 +1,6 @@
 import { Result, success, error } from '../result';
 
-import { BackendAPI } from '../components/common/API';
+import { LegacyAPI } from './';
 import { APIError, apiError } from './error';
 
 declare const DEBUG: boolean;
@@ -27,7 +27,7 @@ function queryFeatures(query: FeatureQuery): Promise<Array<Features>> {
     };
 
     return new Promise<Array<Features>>((resolve, reject) => {
-        BackendAPI.getConnection().then(
+        LegacyAPI.getConnection().then(
             (gbc) => {
                 gbc.services.scope.Main.getFeatures(
                     scopeQuery,

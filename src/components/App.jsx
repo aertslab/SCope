@@ -83,12 +83,7 @@ class App extends Component {
     }
 
     render() {
-        const {
-            metadata,
-            error,
-            loaded,
-            sessionsLimitReached,
-        } = this.state;
+        const { metadata, error, loaded, sessionsLimitReached } = this.state;
 
         const {
             isAppLoading,
@@ -112,10 +107,15 @@ class App extends Component {
                                 <FullPageNotify
                                     starting={isAppLoading}
                                     connected={!error}
-                                    tooManyUsers={!isAppLoading && sessionsLimitReached}
-                                    timeout={!isAppLoading &&
-                                             this.timeout != null &&
-                                             this.timeout <= 0} />
+                                    tooManyUsers={
+                                        !isAppLoading && sessionsLimitReached
+                                    }
+                                    timeout={
+                                        !isAppLoading &&
+                                        this.timeout != null &&
+                                        this.timeout <= 0
+                                    }
+                                />
                             </Segment>
                         )}
                     />
@@ -144,8 +144,7 @@ class App extends Component {
                                         )}
                                         sessionMode={sessionMode}
                                     />
-                                    <Sidebar.Pusher
-                                        style={{ width: "100%" }}>
+                                    <Sidebar.Pusher style={{ width: '100%' }}>
                                         <Route
                                             path='/:uuid/:loom?/welcome'
                                             component={Welcome}
@@ -171,7 +170,10 @@ class App extends Component {
                                             component={() => (
                                                 <Compare
                                                     metadata={metadata}
-                                                    location={this.props.location} />
+                                                    location={
+                                                        this.props.location
+                                                    }
+                                                />
                                             )}
                                         />
                                         <Route
@@ -187,10 +189,15 @@ class App extends Component {
                                 <FullPageNotify
                                     starting={isAppLoading}
                                     connected={!error}
-                                    tooManyUsers={!isAppLoading && sessionsLimitReached}
-                                    timeout={!isAppLoading &&
-                                             this.timeout != null &&
-                                             this.timeout <= 0} />
+                                    tooManyUsers={
+                                        !isAppLoading && sessionsLimitReached
+                                    }
+                                    timeout={
+                                        !isAppLoading &&
+                                        this.timeout != null &&
+                                        this.timeout <= 0
+                                    }
+                                />
                             </Segment>
                         )}
                     />

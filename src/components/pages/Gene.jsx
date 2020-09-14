@@ -43,7 +43,8 @@ export default class Gene extends Component {
             <Grid columns='equal'>
                 <Search.FeatureSearchGroup
                     filter='all'
-                    identifier='gene-page' />
+                    identifier='gene-page'
+                />
                 <Grid.Row columns='3' stretched className='viewerFlex'>
                     <Grid.Column width={1} className='viewerToolbar'>
                         <ViewerToolbar location={this.props.location} />
