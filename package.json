@@ -10,7 +10,7 @@
         "dev-aws": "cross-env NODE_ENV=development NODE_TYPE=aws webpack-dev-server --hot",
         "build": "cross-env NODE_ENV=production NODE_TYPE=local webpack",
         "build-aws": "cross-env NODE_ENV=production NODE_TYPE=aws webpack",
-        "test": "echo \"Error: no test specified\"",
+        "test": "jest",
         "lint-fix": "tsc --noEmit && eslint --fix 'src/**/*.{ts,jsx,tsx}' index.js webpack.config.js 'bin/*.js'",
         "lint": "tsc --noEmit && eslint 'src/**/*.{ts,jsx,tsx}' index.js webpack.config.js 'bin/*.js'",
         "bindle-size-analyse": "webpack --profile --json > stats.json",
@@ -107,11 +107,15 @@
         "@babel/preset-react": "^7.9.4",
         "@babel/preset-typescript": "^7.9.0",
         "@babel/runtime": "^7.10.3",
+        "@testing-library/jest-dom": "^5.11.4",
+        "@testing-library/react": "^10.4.9",
+        "@types/jest": "^26.0.12",
         "@types/react": "^16.9.48",
         "@types/react-dom": "^16.9.8",
         "@types/react-router-dom": "^5.1.5",
         "@typescript-eslint/eslint-plugin": "^3.10.1",
         "@typescript-eslint/parser": "^3.10.1",
+        "babel-jest": "^26.3.0",
         "babel-loader": "^8.1.0",
         "babel-plugin-redux-saga": "^1.1.2",
         "cross-env": "^5.1.4",
@@ -127,11 +131,14 @@
         "grpc": "^1.7.2",
         "grpc-loader": "^2.0.1",
         "immer": "^7.0.8",
+        "jest": "^26.4.2",
+        "jest-css-modules-transform": "^4.0.1",
         "prettier": "^2.1.1",
         "redux-devtools-extension": "^2.13.8",
         "script-loader": "^0.7.2",
         "style-loader": "^0.19.0",
         "terser-webpack-plugin": "^4.1.0",
+        "ts-jest": "^26.3.0",
         "typescript": "^4.0.2",
         "webpack": "^4.43.0",
         "webpack-bundle-analyzer": "^3.8.0",
@@ -197,5 +204,15 @@
     },
     "browserslist": [
         "last 1 version"
-    ]
+    ],
+    "jest": {
+        "preset": "ts-jest/presets/js-with-babel",
+        "testEnvironment": "jsdom",
+        "transform": {
+            ".+\\.css$": "jest-css-modules-transform"
+        },
+        "globals": {
+            "__TEST_ONLY__": true
+        }
+    }
 }

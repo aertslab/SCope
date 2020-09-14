@@ -44,21 +44,6 @@ export const results = (
     };
 };
 
-export interface SearchFilter {
-    type: typeof Action.FILTER;
-    payload: {
-        filter: FeatureFilter;
-        field: string;
-    };
-}
-
-export const filter = (field: string, filter: FeatureFilter): SearchFilter => {
-    return {
-        type: Action.FILTER,
-        payload: { filter, field },
-    };
-};
-
 export interface SearchResultSelect {
     type: typeof Action.SELECT;
     payload: {
@@ -95,6 +80,5 @@ export const error = (field: string, message: string): SearchError => {
 export type SearchAction =
     | SearchResults
     | SearchQuery
-    | SearchFilter
     | SearchResultSelect
     | SearchError;
