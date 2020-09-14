@@ -18,22 +18,20 @@ export interface FeatureSearchSelection {
     readonly colour: string;
 }
 
-const makeSelection = R.curry(
-    (
-        colour: string,
-        category: string
-    ): ((partial: {
+const makeSelection = (
+    colour: string,
+    category: string
+): ((partial: {
+    title: string;
+    description: string;
+}) => FeatureSearchSelection) =>
+    R.compose(
+        R.assoc('colour', colour),
+        R.assoc('category', toFeatureFilter(category))
+    ) as (partial: {
         title: string;
         description: string;
-    }) => FeatureSearchSelection) =>
-        R.compose(
-            R.assoc('colour', colour),
-            R.assoc('category', toFeatureFilter(category))
-        ) as (partial: {
-            title: string;
-            description: string;
-        }) => FeatureSearchSelection
-);
+    }) => FeatureSearchSelection;
 
 export const findResult = (
     query: { title: string },
@@ -53,7 +51,6 @@ export const findResult = (
 
 export type FeatureSearch = {
     field: string;
-    filter: FeatureFilter;
     loading: boolean;
     value: string;
     results: Array<Features>;
@@ -80,11 +77,11 @@ export const toFeatureFilter = (val: string): FeatureFilter | undefined => {
 export const init = (field: string): FeatureSearch => {
     return {
         field,
-        filter: 'all',
         loading: false,
         value: '',
         results: [],
         selected: undefined,
+        error: undefined,
     };
 };
 

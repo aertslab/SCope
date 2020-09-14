@@ -1,48 +1,57 @@
 class API {
     constructor() {
-        this.GBC = require('grpc-bus-websocket-client');
-        try {
-            this.WSport = document.head
-                .querySelector('[name=scope-wsport]')
-                .getAttribute('port');
-            console.log('Using meta WSport');
-        } catch (ex) {
-            console.log('Using config WSport');
-            this.WSport = BACKEND.WSport;
-        }
-        try {
-            this.RPCport = document.head
-                .querySelector('[name=scope-rpcport]')
-                .getAttribute('port');
-            console.log('Using meta RPCport');
-        } catch (ex) {
-            this.RPCport = BACKEND.RPCport;
-            console.log('Using config RPCport');
-        }
-        console.log(this.WSport, this.RPCport);
-
-        try {
-            if (REVERSEPROXYON) {
-                this.GBCConnection = new this.GBC(
-                    FRONTEND.wsProtocol + '://' + FRONTEND.host + '/protobuf/',
-                    'src/proto/s.proto',
-                    { scope: { Main: BACKEND.host + ':' + this.RPCport } }
-                ).connect();
-            } else {
-                this.GBCConnection = new this.GBC(
-                    BACKEND.wsProtocol +
-                        '://' +
-                        BACKEND.host +
-                        ':' +
-                        this.WSport +
-                        '/',
-                    'src/proto/s.proto',
-                    { scope: { Main: BACKEND.host + ':' + this.RPCport } }
-                ).connect();
+        if (!__TEST_ONLY__) {
+            this.GBC = require('grpc-bus-websocket-client');
+            try {
+                this.WSport = document.head
+                    .querySelector('[name=scope-wsport]')
+                    .getAttribute('port');
+                console.log('Using meta WSport');
+            } catch (ex) {
+                console.log('Using config WSport');
+                this.WSport = BACKEND.WSport;
             }
-            console.log(this.GBCConnection);
-            this.connected = true;
-        } catch (ex) {
+            try {
+                this.RPCport = document.head
+                    .querySelector('[name=scope-rpcport]')
+                    .getAttribute('port');
+                console.log('Using meta RPCport');
+            } catch (ex) {
+                this.RPCport = BACKEND.RPCport;
+                console.log('Using config RPCport');
+            }
+            console.log(this.WSport, this.RPCport);
+
+            try {
+                if (REVERSEPROXYON) {
+                    this.GBCConnection = new this.GBC(
+                        FRONTEND.wsProtocol +
+                            '://' +
+                            FRONTEND.host +
+                            '/protobuf/',
+                        'src/proto/s.proto',
+                        { scope: { Main: BACKEND.host + ':' + this.RPCport } }
+                    ).connect();
+                } else {
+                    this.GBCConnection = new this.GBC(
+                        BACKEND.wsProtocol +
+                            '://' +
+                            BACKEND.host +
+                            ':' +
+                            this.WSport +
+                            '/',
+                        'src/proto/s.proto',
+                        { scope: { Main: BACKEND.host + ':' + this.RPCport } }
+                    ).connect();
+                }
+                console.log(this.GBCConnection);
+                this.connected = true;
+            } catch (ex) {
+                this.GBCConnection = null;
+                this.connected = false;
+            }
+        } else {
+            // ONLY FOR TESTS
             this.GBCConnection = null;
             this.connected = false;
         }
@@ -521,10 +530,12 @@ class API {
         this.getConnection().then((gbc) => {
             if (DEBUG) console.log('getNextCluster', query);
             gbc.services.scope.Main.getNextCluster(query, (err, response) => {
-                callback({feature: response.features[0].results[0].title,
-                          featureType: response.features[0].category,
-                          featureDescription: response.features[0].results[0].description
-                         });
+                callback({
+                    feature: response.features[0].results[0].title,
+                    featureType: response.features[0].category,
+                    featureDescription:
+                        response.features[0].results[0].description,
+                });
             });
         });
     }
@@ -645,7 +656,7 @@ class API {
                 );
             }
         } else {
-            console.log("Viewer UpdateFeature", arguments);
+            console.log('Viewer UpdateFeature', arguments);
             this.setActiveFeature(
                 field,
                 type,

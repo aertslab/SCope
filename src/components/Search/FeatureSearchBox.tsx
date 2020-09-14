@@ -26,6 +26,9 @@ import * as Selector from './selectors';
 
 import './FeatureSearchBox.css';
 
+// TODO: Remove this when removing the LegacyAPI code
+declare const __TEST_ONLY__: boolean;
+
 type FeatureSearchBoxProps = {
     /** A unique identifier */
     field: string;
@@ -65,7 +68,7 @@ type FeatureSearchBoxProps = {
 /**
  * A text search input for items in a dataset.
  */
-const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
+export const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
     const onSearchChange = (_, { value }) => {
         if (value === '') {
             LegacyAPI.setActiveFeature(
@@ -87,13 +90,15 @@ const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
             const selected = findResult(result, props.colour, props.results);
 
             if (selected) {
-                LegacyAPI.updateFeature(
-                    props.field.slice(-1), //TODO: This is a horrible hack
-                    props.filter,
-                    selected.title,
-                    selected.category,
-                    selected.description
-                );
+                if (!__TEST_ONLY__) {
+                    LegacyAPI.updateFeature(
+                        props.field.slice(-1), //TODO: This is a horrible hack
+                        props.filter,
+                        selected.title,
+                        selected.category,
+                        selected.description
+                    );
+                }
 
                 props.selectResult(props.field, selected);
             }
@@ -132,7 +137,9 @@ const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
         );
     }
 
-    const displayResults = R.fromPairs(props.results?.map(featuresToResults));
+    const displayResults = R.fromPairs(
+        props.results ? props.results.map(featuresToResults) : []
+    );
 
     return (
         <Segment
