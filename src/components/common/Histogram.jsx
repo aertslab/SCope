@@ -53,19 +53,19 @@ export default class Histogram extends Component {
                     step={0.0001}
                     handle={handle}
                     onChange={this.handleThresholdChange.bind(this)}
-                    onAfterChange={() => this.handleUpdateTSNE()}
+                    onAfterChange={() => this.handleUpdateScatterPlot()}
                 />
             </div>
         );
     }
 
-    UNSAFE_componentWillReceiveProps(nextProps) {
+    componentDidUpdate(prevProps) {
         if (
-            JSON.stringify(this.props.feature) !=
-                JSON.stringify(nextProps.feature) ||
-            this.props.loomFile != nextProps.loomFile
+            JSON.stringify(prevProps.feature) !==
+                JSON.stringify(this.props.feature) ||
+            prevProps.loomFile !== this.props.loomFile
         ) {
-            this.getCellAUCValues(nextProps.feature, nextProps.loomFile);
+            this.getCellAUCValues(this.props.feature, this.props.loomFile);
         }
     }
 
@@ -73,13 +73,15 @@ export default class Histogram extends Component {
         this.getCellAUCValues(this.props.feature, this.props.loomFile);
     }
 
-    handleUpdateTSNE() {
+    handleUpdateScatterPlot() {
         this.props.onThresholdChange(this.props.field, this.state.selected);
     }
 
     handleThresholdChange(value) {
         value = value || 0;
-        if (DEBUG) console.log('handleThresholdChange', value);
+        if (DEBUG) {
+            console.log('handleThresholdChange', value);
+        }
         let x = d3
             .scaleLinear()
             .domain([0, this.state.max])
@@ -245,7 +247,7 @@ export default class Histogram extends Component {
                     .text(t.name)
                     .on('click', function () {
                         component.handleThresholdChange(t.threshold);
-                        component.handleUpdateTSNE();
+                        component.handleUpdateScatterPlot();
                     })
                     .append('title')
                     .text(t.name);

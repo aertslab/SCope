@@ -987,6 +987,7 @@ _FEATUREREPLY_FEATURE = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="category",
@@ -1005,6 +1006,7 @@ _FEATUREREPLY_FEATURE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="results",
@@ -1027,7 +1029,9 @@ _FEATUREREPLY_FEATURE = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[_FEATUREREPLY_FEATURE_MATCH,],
+    nested_types=[
+        _FEATUREREPLY_FEATURE_MATCH,
+    ],
     enum_types=[],
     serialized_options=None,
     is_extendable=False,
@@ -1044,6 +1048,7 @@ _FEATUREREPLY = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="features",
@@ -1066,7 +1071,9 @@ _FEATUREREPLY = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[_FEATUREREPLY_FEATURE,],
+    nested_types=[
+        _FEATUREREPLY_FEATURE,
+    ],
     enum_types=[],
     serialized_options=None,
     is_extendable=False,
@@ -6455,8 +6462,8 @@ _GETCLUSTEROVERLAPSREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=7146,
-    serialized_end=7216,
+    serialized_start=7249,
+    serialized_end=7319,
 )
 
 
@@ -6572,8 +6579,8 @@ _CLUSTEROVERLAPS_CLUSTEROVERLAP = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=7303,
-    serialized_end=7435,
+    serialized_start=7406,
+    serialized_end=7538,
 )
 
 _CLUSTEROVERLAPS = _descriptor.Descriptor(
@@ -6614,8 +6621,8 @@ _CLUSTEROVERLAPS = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=7219,
-    serialized_end=7435,
+    serialized_start=7322,
+    serialized_end=7538,
 )
 
 

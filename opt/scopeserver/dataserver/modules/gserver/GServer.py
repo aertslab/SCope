@@ -272,9 +272,9 @@ class SCope(s_pb2_grpc.MainServicer):
                 request.clusteringID, request.clusterID
             )
 
-        f = get_search_results(cluster_metadata["description"], "all", loom, self.config["dataHashSecret"])
+        search_results = get_search_results(cluster_metadata["description"], "all", loom, self.config["dataHashSecret"])
 
-        for n, featureType in enumerate(f["featureType"]):
+        for n, featureType in enumerate(search_results["featureType"]):
             if featureType == f"Clustering: {clustering_meta['name']}":
                 clustering_index = n
                 break
@@ -282,10 +282,11 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.FeatureReply(
             features=[
                 s_pb2.FeatureReply.Feature(
-                    category=f["featureType"][clustering_index],
+                    category=search_results["featureType"][clustering_index],
                     results=[
                         s_pb2.FeatureReply.Feature.Match(
-                            title=f["feature"][clustering_index], description=f["featureDescription"][clustering_index]
+                            title=search_results["feature"][clustering_index],
+                            description=search_results["featureDescription"][clustering_index],
                         )
                     ],
                 )

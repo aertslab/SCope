@@ -50,7 +50,7 @@ export default class Regulon extends Component {
         return (
             <Grid className='flexDisplay'>
                 <Search.FeatureSearchGroup
-                    feature='regulon'
+                    filter='regulon'
                     identifier='regulon-page'
                 />
                 <Grid.Row columns='4' centered>
