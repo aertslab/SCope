@@ -1,10 +1,9 @@
 import { call, put, throttle } from 'redux-saga/effects';
 
-import * as t from './actionTypes';
+import * as ActionType from './actionTypes';
 import * as Action from './actions';
+import { SEARCH_API_DELAY } from './constants';
 import { queryFeatures, FeatureQuery, Features } from '../../api';
-
-const DELAY: number = 750;
 
 function* getFeatures(action: Action.SearchQuery) {
     try {
@@ -20,7 +19,7 @@ function* getFeatures(action: Action.SearchQuery) {
 }
 
 function* getFeaturesSaga() {
-    yield throttle(DELAY, t.QUERY, getFeatures);
+    yield throttle(SEARCH_API_DELAY, ActionType.QUERY, getFeatures);
 }
 
-export { getFeaturesSaga };
+export { getFeaturesSaga, getFeatures };
