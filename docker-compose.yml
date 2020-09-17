@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+    scope:
+        restart: always
+        image: scope:1.0
+        expose:
+            - 55850
+            - 55851
+            - 55852
+            - 55853
+        volumes:
+            - static:/app
+        entrypoint: ["poetry", "run", "hypercorn", "--bind", "0.0.0.0", "main:scope_api"]
+    httpd:
+        restart: always
+        build: ./apache
+        ports:
+            - ${SCOPE_PORT:-80}:80
+        depends_on:
+            - scope
+        volumes:
+            - static:/usr/local/apache2/htdocs/
+
+volumes:
+    static:
