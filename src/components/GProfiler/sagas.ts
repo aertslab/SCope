@@ -9,7 +9,7 @@ import * as Action from './actions';
 async function fetchJson(url: string) {
     let resp = null;
     try {
-        let data = await fetch(url);
+        const data = await fetch(url);
         resp = { data: await data.json() };
     } catch (e) {
         resp = { err: e.message };

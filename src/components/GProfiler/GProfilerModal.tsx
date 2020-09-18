@@ -38,7 +38,7 @@ interface GProfilerPopupProps {
 
 interface GProfilerPopupReduxProps {
     display: boolean;
-    displayModal: (display: boolean) => void;
+    toggleModal: () => void;
     selectedSortBy: string;
     selectSortBy: (sortBy: string) => void;
     selectedOrganism: string;
@@ -60,7 +60,7 @@ const GProfilerPopup: React.FC<
     const {
         featureMetadata,
         display,
-        displayModal,
+        toggleModal,
         selectedSortBy,
         selectSortBy,
         selectedOrganism,
@@ -88,10 +88,6 @@ const GProfilerPopup: React.FC<
         setFeatureMetricTable(getMetricTable(featureMetadata));
         fetchAvailableOrganisms();
     }, []);
-
-    const onOpenModal = () => displayModal(true);
-
-    const onCloseModal = () => displayModal(false);
 
     const onSelectSortBy = (
         _: React.ChangeEvent<HTMLInputElement>,
@@ -138,12 +134,12 @@ const GProfilerPopup: React.FC<
             trigger={
                 <Button
                     color='orange'
-                    onClick={onOpenModal}
+                    onClick={toggleModal}
                     className='gprofiler-run-gle'>
                     Run g:Profiler Gene List Enrichment
                 </Button>
             }
-            onClose={onCloseModal}
+            onClose={toggleModal}
             open={display}>
             <Modal.Header>Run g:Profiler Gene List Enrichment</Modal.Header>
             <Modal.Content>
@@ -264,8 +260,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        displayModal: (display: boolean) =>
-            dispatch(Action.displayModal(display)),
+        toggleModal: (display: boolean) => dispatch(Action.toggleModal()),
         selectSortBy: (sortBy: string) => dispatch(Action.selectSortBy(sortBy)),
         selectOrganism: (organism: string) =>
             dispatch(Action.selectOrganism(organism)),

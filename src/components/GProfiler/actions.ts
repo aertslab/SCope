@@ -1,19 +1,13 @@
 import * as Action from './actionTypes';
 import { GProfilerOrganism } from './types';
 
-export interface DisplayModal {
-    type: typeof Action.DISPLAY_MODAL;
-    payload: {
-        display: boolean;
-    };
+export interface ToggleModal {
+    type: typeof Action.TOGGLE_MODAL;
 }
 
-export const displayModal = (display: boolean): DisplayModal => {
+export const toggleModal = (): ToggleModal => {
     return {
-        type: Action.DISPLAY_MODAL,
-        payload: {
-            display: display,
-        },
+        type: Action.TOGGLE_MODAL,
     };
 };
 
@@ -164,7 +158,7 @@ export const setError = (error: string): SetError => {
 };
 
 export type GProfilerAction =
-    | DisplayModal
+    | ToggleModal
     | SelectOrganism
     | SelectSortBy
     | SetTopGeneListSizes

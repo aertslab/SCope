@@ -1,4 +1,4 @@
-export const DISPLAY_MODAL = `gprofiler/DISPLAY_MODAL`;
+export const TOGGLE_MODAL = `gprofiler/TOGGLE_MODAL`;
 
 export const SELECT_ORGANISM = `gprofiler/SELECT_ORGANISM`;
 

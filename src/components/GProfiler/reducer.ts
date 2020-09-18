@@ -19,8 +19,8 @@ const initialState: State = {
 const reducer: Reducer<State, GProfilerAction> = produce(
     (draft: Draft<State>, action: GProfilerAction) => {
         switch (action.type) {
-            case t.DISPLAY_MODAL:
-                draft.display = action.payload.display;
+            case t.TOGGLE_MODAL:
+                draft.display = !draft.display;
                 if (draft.display) {
                     draft.selectedTopGeneListsSizes = [];
                     draft.selectedOrganism = '';
