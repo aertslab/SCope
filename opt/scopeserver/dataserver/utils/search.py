@@ -266,8 +266,6 @@ def get_search_results(search_term: str, category: str, loom: Loom, data_hash_se
     features, feature_types = get_final_feature_and_type(loom, aggregated_matches, data_hash_secret)
     descriptions, features, feature_types = create_feature_description(aggregated_matches, features, feature_types)
 
-    ftypes = groupby(sorted(feature_types.values()))
-
     aggregated = sorted(
         [
             {"feature": features[key], "category": feature_types[key], "description": descriptions[key]}
