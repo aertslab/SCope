@@ -17,6 +17,8 @@ import * as Action from './actions';
 import * as Selector from './selectors';
 
 import {
+    getNumFeatures,
+    getAvailableTopGeneListsSizes,
     getMetricTable,
     getAvailableSortBy,
     checkCreateGProfilerLink,
@@ -128,22 +130,6 @@ const GProfilerPopup: React.FC<
         }
     };
 
-    const getNumFeatures = () => {
-        return featureMetadata.genes.length;
-    };
-
-    const getAvailableTopGeneListsSizes = () => {
-        return [
-            getNumFeatures() < 100 ? getNumFeatures() : 100,
-            200,
-            300,
-            400,
-            500,
-        ].filter((topNumFeaturesValue) =>
-            topNumFeaturesValue <= getNumFeatures() ? true : false
-        );
-    };
-
     return (
         <Modal
             as={Form}
@@ -193,11 +179,13 @@ const GProfilerPopup: React.FC<
                             <h3>Run As Multi-query</h3>
                             <h4>
                                 Total number of features:&nbsp;
-                                {getNumFeatures()}
+                                {getNumFeatures(featureMetadata)}
                             </h4>
                             <Form>
                                 <TopGeneListsSelectionTable
-                                    availableTopGeneListsSizes={getAvailableTopGeneListsSizes()}
+                                    availableTopGeneListsSizes={getAvailableTopGeneListsSizes(
+                                        featureMetadata
+                                    )}
                                     selectedTopGeneListsSizes={
                                         selectedTopGeneListsSizes
                                     }

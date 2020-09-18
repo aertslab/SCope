@@ -5,6 +5,25 @@ import {
 
 import { FeatureMetadata, FeatureMetricTable } from './types';
 
+export const getNumFeatures = (featureMetadata) => {
+    return featureMetadata.genes.length;
+};
+
+export const getAvailableTopGeneListsSizes = (
+    featureMetadata: FeatureMetadata
+) => {
+    const numFeatures = getNumFeatures(featureMetadata);
+    return [
+        numFeatures < 100 ? numFeatures : 100,
+        200,
+        300,
+        400,
+        500,
+    ].filter((topNumFeaturesValue) =>
+        topNumFeaturesValue <= numFeatures ? true : false
+    );
+};
+
 export const getMetricTable = (featureMetadata: FeatureMetadata) => {
     return featureMetadata.genes.map((gene: string, idx: number) => {
         return {
