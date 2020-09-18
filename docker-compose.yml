@@ -3,7 +3,7 @@ version: '3'
 services:
     scope:
         restart: always
-        image: scope:1.0
+        image: bujesse/scope:1.0
         expose:
             - 55850
             - 55851
@@ -20,7 +20,7 @@ services:
         depends_on:
             - scope
         volumes:
-            - static:/usr/local/apache2/htdocs/
+            - ./:/usr/local/apache2/htdocs/
 
 volumes:
     static:

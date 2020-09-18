@@ -34,7 +34,7 @@ RUN conda install -c conda-forge poetry
 COPY . /app
 
 # put custom config into container
-COPY ${SCOPE_CONFIG:-config.json} /app
+COPY ${SCOPE_CONFIG:-config.json} /app/config.json
 
 # install the app
 RUN cd /app && npm install
