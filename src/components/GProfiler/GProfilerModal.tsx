@@ -13,6 +13,8 @@ import {
 
 import { TopGeneListsSelectionTable } from './TopGeneListsSelectionTable';
 
+import 'GProfilerModal.css';
+
 import * as Action from './actions';
 import * as Selector from './selectors';
 
@@ -137,11 +139,7 @@ const GProfilerPopup: React.FC<
                 <Button
                     color='orange'
                     onClick={onOpenModal}
-                    style={{
-                        marginTop: '10px',
-                        marginBottom: '10px',
-                        width: '100%',
-                    }}>
+                    className='gprofiler-run-gle'>
                     Run g:Profiler Gene List Enrichment
                 </Button>
             }
