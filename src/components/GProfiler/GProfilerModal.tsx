@@ -57,25 +57,6 @@ interface GProfilerPopupReduxProps {
 const GProfilerPopup: React.FC<
     GProfilerPopupProps & GProfilerPopupReduxProps & RouteComponentProps
 > = (props) => {
-    const {
-        featureMetadata,
-        display,
-        toggleModal,
-        selectedSortBy,
-        selectSortBy,
-        selectedOrganism,
-        selectOrganism,
-        gProfilerToken,
-        setGProfilerToken,
-        selectedTopGeneListsSizes,
-        setTopGeneListSizes,
-        isFetchingAvailableOrganisms,
-        availableOrganisms,
-        fetchAvailableOrganisms,
-        error,
-        setError,
-    } = props;
-
     const [availableSortBy, setAvailableSortBy] = useState<
         { key: number; text: string; value: string }[]
     >([]);
@@ -84,33 +65,36 @@ const GProfilerPopup: React.FC<
     >([]);
 
     useEffect(() => {
-        setAvailableSortBy(getAvailableSortBy(featureMetadata));
-        setFeatureMetricTable(getMetricTable(featureMetadata));
-        fetchAvailableOrganisms();
+        setAvailableSortBy(getAvailableSortBy(props.featureMetadata));
+        setFeatureMetricTable(getMetricTable(props.featureMetadata));
+        props.fetchAvailableOrganisms();
     }, []);
 
     const onSelectSortBy = (
         _: React.ChangeEvent<HTMLInputElement>,
         { value }
-    ) => selectSortBy(value);
+    ) => props.selectSortBy(value);
 
     const onSelectOrganism = (
         _: React.ChangeEvent<HTMLInputElement>,
         { value }
-    ) => selectOrganism(value);
+    ) => props.selectOrganism(value);
 
     const onChangeToken = (_: React.ChangeEvent<HTMLInputElement>, { value }) =>
-        setGProfilerToken(value);
+        props.setGProfilerToken(value);
 
     const onSelectGeneList = (geneListSize: number) => () => {
-        if (selectedTopGeneListsSizes.includes(geneListSize)) {
-            setTopGeneListSizes(
-                selectedTopGeneListsSizes.filter(
+        if (props.selectedTopGeneListsSizes.includes(geneListSize)) {
+            props.setTopGeneListSizes(
+                props.selectedTopGeneListsSizes.filter(
                     (value) => value != geneListSize
                 )
             );
         } else {
-            setTopGeneListSizes([...selectedTopGeneListsSizes, geneListSize]);
+            props.setTopGeneListSizes([
+                ...props.selectedTopGeneListsSizes,
+                geneListSize,
+            ]);
         }
     };
 
@@ -120,10 +104,10 @@ const GProfilerPopup: React.FC<
             ...props,
         });
         if ('error' in result) {
-            setError(result.error);
+            props.setError(result.error);
         }
         if ('link' in result && result.link !== '') {
-            setError('');
+            props.setError('');
             window.open(result.link);
         }
     };
@@ -134,54 +118,54 @@ const GProfilerPopup: React.FC<
             trigger={
                 <Button
                     color='orange'
-                    onClick={toggleModal}
+                    onClick={props.toggleModal}
                     className='gprofiler-run-gle'>
                     Run g:Profiler Gene List Enrichment
                 </Button>
             }
-            onClose={toggleModal}
-            open={display}>
+            onClose={props.toggleModal}
+            open={props.display}>
             <Modal.Header>Run g:Profiler Gene List Enrichment</Modal.Header>
             <Modal.Content>
-                {isFetchingAvailableOrganisms && (
+                {props.isFetchingAvailableOrganisms && (
                     <div style={{ marginBottom: '10px' }}>
                         <Label basic color='grey'>
                             {'Fetching available g:Profiler organisms...'}
                         </Label>
                     </div>
                 )}
-                {!isFetchingAvailableOrganisms &&
-                    availableOrganisms.length === 0 && (
+                {!props.isFetchingAvailableOrganisms &&
+                    props.availableOrganisms.length === 0 && (
                         <React.Fragment>
                             <div style={{ marginBottom: '10px' }}>
                                 <Label basic color='red'>
-                                    {error}
+                                    {props.error}
                                 </Label>
                             </div>
                             <Button
                                 type='button'
                                 value='refetch-available-organisms'
-                                onClick={fetchAvailableOrganisms}
+                                onClick={props.fetchAvailableOrganisms}
                                 primary>
                                 {'Try Again'}
                             </Button>
                         </React.Fragment>
                     )}
-                {availableOrganisms.length > 0 && (
+                {props.availableOrganisms.length > 0 && (
                     <React.Fragment>
                         <Modal.Description>
                             <h3>Run As Multi-query</h3>
                             <h4>
                                 Total number of features:&nbsp;
-                                {getNumFeatures(featureMetadata)}
+                                {getNumFeatures(props.featureMetadata)}
                             </h4>
                             <Form>
                                 <TopGeneListsSelectionTable
                                     availableTopGeneListsSizes={getAvailableTopGeneListsSizes(
-                                        featureMetadata
+                                        props.featureMetadata
                                     )}
                                     selectedTopGeneListsSizes={
-                                        selectedTopGeneListsSizes
+                                        props.selectedTopGeneListsSizes
                                     }
                                     onSelectGeneList={onSelectGeneList}
                                 />
@@ -192,36 +176,36 @@ const GProfilerPopup: React.FC<
                                         options={availableSortBy}
                                         placeholder='Sort By'
                                         onChange={onSelectSortBy}
-                                        value={selectedSortBy}
+                                        value={props.selectedSortBy}
                                     />
                                     <Form.Field
                                         control={Dropdown}
                                         search
                                         selection
                                         label='Organism'
-                                        options={availableOrganisms}
+                                        options={props.availableOrganisms}
                                         placeholder='Choose an organism'
                                         onChange={onSelectOrganism}
                                         disabled={
-                                            gProfilerToken !== null &&
-                                            gProfilerToken !== ''
+                                            props.gProfilerToken !== null &&
+                                            props.gProfilerToken !== ''
                                                 ? true
                                                 : false
                                         }
-                                        value={selectedOrganism}
+                                        value={props.selectedOrganism}
                                     />
                                     <Form.Field
                                         control={Input}
                                         label='g:Profiler Token (Optional)'
                                         placeholder='Token'
-                                        value={gProfilerToken}
+                                        value={props.gProfilerToken}
                                         onChange={onChangeToken}
                                     />
                                 </Form.Group>
-                                {error !== '' && (
+                                {props.error !== '' && (
                                     <Form.Group>
                                         <Label basic color='red'>
-                                            {error}
+                                            {props.error}
                                         </Label>
                                     </Form.Group>
                                 )}
