@@ -13,7 +13,7 @@ import {
 
 import { TopGeneListsSelectionTable } from './TopGeneListsSelectionTable';
 
-import 'GProfilerModal.css';
+import './GProfilerModal.css';
 
 import * as Action from './actions';
 import * as Selector from './selectors';
@@ -54,178 +54,179 @@ interface GProfilerPopupReduxProps {
     setError: (error: string) => void;
 }
 
-const GProfilerPopup: React.FC<
+class GProfilerPopup extends React.Component<
     GProfilerPopupProps & GProfilerPopupReduxProps & RouteComponentProps
-> = (props) => {
-    const [availableSortBy, setAvailableSortBy] = useState<
-        { key: number; text: string; value: string }[]
-    >([]);
-    const [featureMetricTable, setFeatureMetricTable] = useState<
-        FeatureMetricTable
-    >([]);
+> {
+    featureMetricTable: FeatureMetricTable;
+    availableSortBy: { key: number; text: string; value: string }[];
 
-    useEffect(() => {
-        setAvailableSortBy(getAvailableSortBy(props.featureMetadata));
-        setFeatureMetricTable(getMetricTable(props.featureMetadata));
-        props.fetchAvailableOrganisms();
-    }, []);
+    constructor(props) {
+        super(props);
+        this.availableSortBy = getAvailableSortBy(props.featureMetadata);
+        this.featureMetricTable = getMetricTable(props.featureMetadata);
+    }
 
-    const onSelectSortBy = (
-        _: React.ChangeEvent<HTMLInputElement>,
-        { value }
-    ) => props.selectSortBy(value);
+    componentDidMount() {
+        this.props.fetchAvailableOrganisms();
+    }
 
-    const onSelectOrganism = (
-        _: React.ChangeEvent<HTMLInputElement>,
-        { value }
-    ) => props.selectOrganism(value);
+    onSelectSortBy = (_: React.ChangeEvent<HTMLInputElement>, { value }) =>
+        this.props.selectSortBy(value);
 
-    const onChangeToken = (_: React.ChangeEvent<HTMLInputElement>, { value }) =>
-        props.setGProfilerToken(value);
+    onSelectOrganism = (_: React.ChangeEvent<HTMLInputElement>, { value }) =>
+        this.props.selectOrganism(value);
 
-    const onSelectGeneList = (geneListSize: number) => () => {
-        if (props.selectedTopGeneListsSizes.includes(geneListSize)) {
-            props.setTopGeneListSizes(
-                props.selectedTopGeneListsSizes.filter(
+    onChangeToken = (_: React.ChangeEvent<HTMLInputElement>, { value }) =>
+        this.props.setGProfilerToken(value);
+
+    onSelectGeneList = (geneListSize: number) => () => {
+        if (this.props.selectedTopGeneListsSizes.includes(geneListSize)) {
+            this.props.setTopGeneListSizes(
+                this.props.selectedTopGeneListsSizes.filter(
                     (value) => value != geneListSize
                 )
             );
         } else {
-            props.setTopGeneListSizes([
-                ...props.selectedTopGeneListsSizes,
+            this.props.setTopGeneListSizes([
+                ...this.props.selectedTopGeneListsSizes,
                 geneListSize,
             ]);
         }
     };
 
-    const onClickGotoGProfilerURL = async () => {
+    onClickGotoGProfilerURL = async () => {
         const result = await checkCreateGProfilerLink({
-            featureMetricTable,
-            ...props,
+            featureMetricTable: this.featureMetricTable,
+            ...this.props,
         });
         if ('error' in result) {
-            props.setError(result.error);
+            this.props.setError(result.error);
         }
         if ('link' in result && result.link !== '') {
-            props.setError('');
+            this.props.setError('');
             window.open(result.link);
         }
     };
 
-    return (
-        <Modal
-            as={Form}
-            trigger={
-                <Button
-                    color='orange'
-                    onClick={props.toggleModal}
-                    className='gprofiler-run-gle'>
-                    Run g:Profiler Gene List Enrichment
-                </Button>
-            }
-            onClose={props.toggleModal}
-            open={props.display}>
-            <Modal.Header>Run g:Profiler Gene List Enrichment</Modal.Header>
-            <Modal.Content>
-                {props.isFetchingAvailableOrganisms && (
-                    <div style={{ marginBottom: '10px' }}>
-                        <Label basic color='grey'>
-                            {'Fetching available g:Profiler organisms...'}
-                        </Label>
-                    </div>
-                )}
-                {!props.isFetchingAvailableOrganisms &&
-                    props.availableOrganisms.length === 0 && (
+    render() {
+        return (
+            <Modal
+                as={Form}
+                trigger={
+                    <Button
+                        color='orange'
+                        onClick={this.props.toggleModal}
+                        className='gprofiler-run-gle'>
+                        Run g:Profiler Gene List Enrichment
+                    </Button>
+                }
+                onClose={this.props.toggleModal}
+                open={this.props.display}>
+                <Modal.Header>Run g:Profiler Gene List Enrichment</Modal.Header>
+                <Modal.Content>
+                    {this.props.isFetchingAvailableOrganisms && (
+                        <div style={{ marginBottom: '10px' }}>
+                            <Label basic color='grey'>
+                                {'Fetching available g:Profiler organisms...'}
+                            </Label>
+                        </div>
+                    )}
+                    {!this.props.isFetchingAvailableOrganisms &&
+                        this.props.availableOrganisms.length === 0 && (
+                            <React.Fragment>
+                                <div style={{ marginBottom: '10px' }}>
+                                    <Label basic color='red'>
+                                        {this.props.error}
+                                    </Label>
+                                </div>
+                                <Button
+                                    type='button'
+                                    value='refetch-available-organisms'
+                                    onClick={this.props.fetchAvailableOrganisms}
+                                    primary>
+                                    {'Try Again'}
+                                </Button>
+                            </React.Fragment>
+                        )}
+                    {this.props.availableOrganisms.length > 0 && (
                         <React.Fragment>
-                            <div style={{ marginBottom: '10px' }}>
-                                <Label basic color='red'>
-                                    {props.error}
-                                </Label>
-                            </div>
-                            <Button
-                                type='button'
-                                value='refetch-available-organisms'
-                                onClick={props.fetchAvailableOrganisms}
-                                primary>
-                                {'Try Again'}
-                            </Button>
+                            <Modal.Description>
+                                <h3>Run As Multi-query</h3>
+                                <h4>
+                                    Total number of features:&nbsp;
+                                    {getNumFeatures(this.props.featureMetadata)}
+                                </h4>
+                                <Form>
+                                    <TopGeneListsSelectionTable
+                                        availableTopGeneListsSizes={getAvailableTopGeneListsSizes(
+                                            this.props.featureMetadata
+                                        )}
+                                        selectedTopGeneListsSizes={
+                                            this.props.selectedTopGeneListsSizes
+                                        }
+                                        onSelectGeneList={this.onSelectGeneList}
+                                    />
+                                    <Form.Group widths='equal'>
+                                        <Form.Field
+                                            control={Select}
+                                            label='Sort Features By'
+                                            options={this.availableSortBy}
+                                            placeholder='Sort By'
+                                            onChange={this.onSelectSortBy}
+                                            value={this.props.selectedSortBy}
+                                        />
+                                        <Form.Field
+                                            control={Dropdown}
+                                            search
+                                            selection
+                                            label='Organism'
+                                            options={
+                                                this.props.availableOrganisms
+                                            }
+                                            placeholder='Choose an organism'
+                                            onChange={this.onSelectOrganism}
+                                            disabled={
+                                                this.props.gProfilerToken !==
+                                                    null &&
+                                                this.props.gProfilerToken !== ''
+                                                    ? true
+                                                    : false
+                                            }
+                                            value={this.props.selectedOrganism}
+                                        />
+                                        <Form.Field
+                                            control={Input}
+                                            label='g:Profiler Token (Optional)'
+                                            placeholder='Token'
+                                            value={this.props.gProfilerToken}
+                                            onChange={this.onChangeToken}
+                                        />
+                                    </Form.Group>
+                                    {this.props.error !== '' && (
+                                        <Form.Group>
+                                            <Label basic color='red'>
+                                                {this.props.error}
+                                            </Label>
+                                        </Form.Group>
+                                    )}
+                                </Form>
+                            </Modal.Description>
                         </React.Fragment>
                     )}
-                {props.availableOrganisms.length > 0 && (
-                    <React.Fragment>
-                        <Modal.Description>
-                            <h3>Run As Multi-query</h3>
-                            <h4>
-                                Total number of features:&nbsp;
-                                {getNumFeatures(props.featureMetadata)}
-                            </h4>
-                            <Form>
-                                <TopGeneListsSelectionTable
-                                    availableTopGeneListsSizes={getAvailableTopGeneListsSizes(
-                                        props.featureMetadata
-                                    )}
-                                    selectedTopGeneListsSizes={
-                                        props.selectedTopGeneListsSizes
-                                    }
-                                    onSelectGeneList={onSelectGeneList}
-                                />
-                                <Form.Group widths='equal'>
-                                    <Form.Field
-                                        control={Select}
-                                        label='Sort Features By'
-                                        options={availableSortBy}
-                                        placeholder='Sort By'
-                                        onChange={onSelectSortBy}
-                                        value={props.selectedSortBy}
-                                    />
-                                    <Form.Field
-                                        control={Dropdown}
-                                        search
-                                        selection
-                                        label='Organism'
-                                        options={props.availableOrganisms}
-                                        placeholder='Choose an organism'
-                                        onChange={onSelectOrganism}
-                                        disabled={
-                                            props.gProfilerToken !== null &&
-                                            props.gProfilerToken !== ''
-                                                ? true
-                                                : false
-                                        }
-                                        value={props.selectedOrganism}
-                                    />
-                                    <Form.Field
-                                        control={Input}
-                                        label='g:Profiler Token (Optional)'
-                                        placeholder='Token'
-                                        value={props.gProfilerToken}
-                                        onChange={onChangeToken}
-                                    />
-                                </Form.Group>
-                                {props.error !== '' && (
-                                    <Form.Group>
-                                        <Label basic color='red'>
-                                            {props.error}
-                                        </Label>
-                                    </Form.Group>
-                                )}
-                            </Form>
-                        </Modal.Description>
-                    </React.Fragment>
-                )}
-            </Modal.Content>
-            <Modal.Actions>
-                <Button
-                    type='button'
-                    value='goto-gprofiler'
-                    onClick={onClickGotoGProfilerURL}
-                    primary>
-                    {'Go to g:Profiler'}
-                </Button>
-            </Modal.Actions>
-        </Modal>
-    );
-};
+                </Modal.Content>
+                <Modal.Actions>
+                    <Button
+                        type='button'
+                        value='goto-gprofiler'
+                        onClick={this.onClickGotoGProfilerURL}
+                        primary>
+                        {'Go to g:Profiler'}
+                    </Button>
+                </Modal.Actions>
+            </Modal>
+        );
+    }
+}
 
 const mapStateToProps = (state) => {
     return {
