@@ -1,4 +1,4 @@
-import { RootState } from '../../../redux/reducers';
+import { RootState } from '../../redux/reducers';
 
 import { NAME } from './constants';
 import { GProfilerOrganism } from './types';
