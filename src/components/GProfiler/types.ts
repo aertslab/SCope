@@ -27,10 +27,10 @@ export type GProfilerOrganism = {
     version: string;
 };
 
-export interface GProfilerLinkRequest {
+export type GProfilerLinkRequest = {
     featureMetricTable: FeatureMetricTable;
     selectedTopGeneListsSizes: number[];
     gProfilerToken: string;
     selectedOrganism: string;
     selectedSortBy: string;
-}
+};
