@@ -3,7 +3,7 @@ import produce, { Draft } from 'immer';
 import * as t from './actionTypes';
 import { State } from './model';
 import { GProfilerAction } from './actions';
-import { Reducer } from 'react';
+import { Reducer } from 'redux';
 
 const initialState: State = {
     error: '',
