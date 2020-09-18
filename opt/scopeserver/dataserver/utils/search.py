@@ -281,9 +281,6 @@ def get_search_results(search_term: str, category: str, loom: Loom, data_hash_se
 
     if category == "all":
         return [CategorisedMatches(category=key, matches=group) for key, group in grouped.items()]
-
-    elif category in grouped:
-        return [CategorisedMatches(category=category, matches=grouped[category])]
-
-    else:
-        return []
+if category in grouped:
+   return [CategorisedMatches(category=category, matches=grouped[category])]
+return []
