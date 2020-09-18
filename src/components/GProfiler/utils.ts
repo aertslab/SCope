@@ -3,9 +3,13 @@ import {
     GPROFILER_LINK_MAX_LENGTH,
 } from './constants';
 
-import { FeatureMetadata, FeatureMetricTable } from './types';
+import {
+    FeatureMetadata,
+    FeatureMetricTable,
+    GProfilerLinkRequest,
+} from './types';
 
-export const getNumFeatures = (featureMetadata) => {
+export const getNumFeatures = (featureMetadata: FeatureMetadata) => {
     return featureMetadata.genes.length;
 };
 
@@ -24,7 +28,9 @@ export const getAvailableTopGeneListsSizes = (
     );
 };
 
-export const getMetricTable = (featureMetadata: FeatureMetadata) => {
+export const getMetricTable = (
+    featureMetadata: FeatureMetadata
+): FeatureMetricTable => {
     return featureMetadata.genes.map((gene: string, idx: number) => {
         return {
             gene,
@@ -116,13 +122,7 @@ export const checkCreateGProfilerLink = async ({
     gProfilerToken,
     selectedOrganism,
     selectedSortBy,
-}: {
-    featureMetricTable: FeatureMetricTable;
-    selectedTopGeneListsSizes: number[];
-    gProfilerToken: string;
-    selectedOrganism: string;
-    selectedSortBy: string;
-}): Promise<{ error?: string; link?: string }> => {
+}: GProfilerLinkRequest): Promise<{ error?: string; link?: string }> => {
     if (selectedSortBy === '') {
         return {
             error: 'Please select a sort column',

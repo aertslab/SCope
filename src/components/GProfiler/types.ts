@@ -26,3 +26,11 @@ export type GProfilerOrganism = {
     scientific_name: string;
     version: string;
 };
+
+export interface GProfilerLinkRequest {
+    featureMetricTable: FeatureMetricTable;
+    selectedTopGeneListsSizes: number[];
+    gProfilerToken: string;
+    selectedOrganism: string;
+    selectedSortBy: string;
+}

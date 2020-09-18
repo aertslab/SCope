@@ -16,7 +16,7 @@ export const TopGeneListsSelectionTable: React.FC<{
                 <Table.Row>
                     <Table.HeaderCell />
                     <Table.HeaderCell>
-                        Gene List with Number of Top Features to Use
+                        Gene list with number of top features to use
                     </Table.HeaderCell>
                 </Table.Row>
             </Table.Header>
