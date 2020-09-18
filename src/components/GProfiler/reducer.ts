@@ -45,9 +45,8 @@ const reducer: Reducer<State, GProfilerAction> = produce(
                 draft.selectedOrganism = '';
                 draft.gProfilerToken = action.payload.gProfilerToken;
                 break;
-            case t.FETCHING_AVAILABLE_ORGANISMS:
-                draft.isFetchingAvailableOrganisms =
-                    action.payload.isFetchingAvailableOrganisms;
+            case t.FETCH_AVAILABLE_ORGANISMS:
+                draft.isFetchingAvailableOrganisms = true;
                 break;
             case t.SET_AVAILABLE_ORGANISMS:
                 draft.availableOrganisms = action.payload.availableOrganisms;

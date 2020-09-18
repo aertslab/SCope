@@ -71,24 +71,6 @@ export const fetchAvailableOrganisms = (): FetchAvailableOrganisms => {
     };
 };
 
-export interface FetchingAvailableOrganisms {
-    type: typeof Action.FETCHING_AVAILABLE_ORGANISMS;
-    payload: {
-        isFetchingAvailableOrganisms: boolean;
-    };
-}
-
-export const fetchingAvailableOrganisms = (
-    isFetchingAvailableOrganisms: boolean
-): FetchingAvailableOrganisms => {
-    return {
-        type: Action.FETCHING_AVAILABLE_ORGANISMS,
-        payload: {
-            isFetchingAvailableOrganisms,
-        },
-    };
-};
-
 export interface SetAvailableOrganisms {
     type: typeof Action.SET_AVAILABLE_ORGANISMS;
     payload: {
@@ -162,7 +144,7 @@ export type GProfilerAction =
     | SelectOrganism
     | SelectSortBy
     | SetTopGeneListSizes
-    | FetchingAvailableOrganisms
+    | FetchAvailableOrganisms
     | SetAvailableOrganisms
     | SetGProfilerToken
     | SetGProfilerLink

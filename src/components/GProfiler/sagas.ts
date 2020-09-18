@@ -8,7 +8,6 @@ import { GProfilerOrganism } from './types';
 import * as Action from './actions';
 
 function* fetchAvailableOrganisms() {
-    yield put(Action.fetchingAvailableOrganisms(true));
     const { data } = yield call(
         fetchJson,
         c.GPROFILER_API_ENDPOINT__AVAILABLE_ORGANISMS
