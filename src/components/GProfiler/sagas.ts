@@ -1,21 +1,11 @@
 import { put, takeLatest, call } from 'redux-saga/effects';
 import * as R from 'ramda';
 
+import { fetchJson } from '../../api/fetch';
 import * as t from './actionTypes';
 import * as c from './constants';
 import { GProfilerOrganism } from './types';
 import * as Action from './actions';
-
-async function fetchJson(url: string) {
-    let resp = null;
-    try {
-        const data = await fetch(url);
-        resp = { data: await data.json() };
-    } catch (e) {
-        resp = { err: e.message };
-    }
-    return resp;
-}
 
 function* fetchAvailableOrganisms() {
     yield put(Action.fetchingAvailableOrganisms(true));
