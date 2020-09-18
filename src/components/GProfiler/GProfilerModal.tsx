@@ -155,8 +155,8 @@ const GProfilerPopup: React.FC<
                     </div>
                 )}
                 {!isFetchingAvailableOrganisms &&
-                    availableOrganisms.length == 0 && (
-                        <>
+                    availableOrganisms.length === 0 && (
+                        <React.Fragment>
                             <div style={{ marginBottom: '10px' }}>
                                 <Label basic color='red'>
                                     {error}
@@ -169,10 +169,10 @@ const GProfilerPopup: React.FC<
                                 primary>
                                 {'Try Again'}
                             </Button>
-                        </>
+                        </React.Fragment>
                     )}
                 {availableOrganisms.length > 0 && (
-                    <>
+                    <React.Fragment>
                         <Modal.Description>
                             <h3>Run As Multi-query</h3>
                             <h4>
@@ -231,7 +231,7 @@ const GProfilerPopup: React.FC<
                                 )}
                             </Form>
                         </Modal.Description>
-                    </>
+                    </React.Fragment>
                 )}
             </Modal.Content>
             <Modal.Actions>
