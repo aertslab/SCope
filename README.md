@@ -148,9 +148,8 @@ Here is an example:
 1. Copy `config.json` and modify with `"reverseProxyOn": true,` and `publicHostAddress` set to your domain
 
 1. ```SCOPE_CONFIG=/path/to/config.json SCOPE_PORT=8080 npm run build```
-
+1. `docker-compose build`
 1. ```SCOPE_PORT=8080 docker-compose up -d```
 
 You should be able to visit `http://localhost:8080` and see the app!
-
 
