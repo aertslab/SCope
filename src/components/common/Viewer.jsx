@@ -457,7 +457,7 @@ export default class Viewer extends Component {
             this.closeLasso();
             this.setState({ mouse: { down: false } });
             const lassoPoints = this.getPointsInLasso();
-            if (lassoPoints.length >= 1) {
+            if (lassoPoints.length !== 0) {
                 this.clearLasso();
                 this.addLassoSelection(lassoPoints);
             }
@@ -485,7 +485,7 @@ export default class Viewer extends Component {
         this.lasso.lineStyle(2, '#000');
         this.lasso.beginFill(0x8bc5ff, 0.4);
         this.lasso.moveTo(lp[0].x, lp[0].y);
-        if (lp.length >= 1) {
+        if (lp.length !== 0) {
             this.lasso.drawPolygon(lp);
         }
         this.lasso.endFill();
