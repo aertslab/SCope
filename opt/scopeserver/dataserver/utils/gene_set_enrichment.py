@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class GeneSetEnrichment:
     def __init__(self, scope, method, loom, gene_set_file_path, annotation):
-        """ Constructor
+        """Constructor
         :type dgem: ndarray
         :param dgem: digital gene expression matrix with cells as columns and genes as rows
         :type gene_set_file_path: str
@@ -91,8 +91,7 @@ class GeneSetEnrichment:
         return os.path.exists(self.get_AUCell_ranking_filepath())
 
     def run_AUCell(self):
-        """
-        """
+        """"""
 
     def run(self):
         if self.method == "AUCell":

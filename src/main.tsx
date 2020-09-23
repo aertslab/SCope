@@ -8,14 +8,22 @@ import './css/viewer.css';
 import './css/features.css';
 import { HashRouter, Route } from 'react-router-dom';
 import { CookiesProvider } from 'react-cookie';
+import { Provider } from 'react-redux';
+
+import store from './redux/store';
 
 const renderApp = () => {
     render(
-        <CookiesProvider>
-            <HashRouter>
-                <Route path='/:uuid?/:loom?/:page?' component={App} />
-            </HashRouter>
-        </CookiesProvider>,
+        <Provider store={store}>
+            <CookiesProvider>
+                <HashRouter>
+                    <Route
+                        path='/:uuid?/:loom?/:page?'
+                        component={() => <App />}
+                    />
+                </HashRouter>
+            </CookiesProvider>
+        </Provider>,
         document.getElementById('scope')
     );
 };

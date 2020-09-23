@@ -44,7 +44,13 @@ class SCopeServer:
 
     def start_data_server(self) -> None:
         LOGGER.debug(f"Starting data server on port {self.config['gPort']}. app_mode: {self.config['app_mode']}")
-        self.gs_thread = threading.Thread(target=gs.serve, args=(self.run_event, self.config,))
+        self.gs_thread = threading.Thread(
+            target=gs.serve,
+            args=(
+                self.run_event,
+                self.config,
+            ),
+        )
         LOGGER.debug(f"Starting upload server on port {self.config['pPort']}")
         self.ps_thread = threading.Thread(target=ps.run, args=(self.run_event,), kwargs={"port": self.config["pPort"]})
         self.gs_thread.start()
