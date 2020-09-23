@@ -2526,58 +2526,58 @@ class GetClusterOverlapsRequest(google___protobuf___message___Message):
 
 global___GetClusterOverlapsRequest = GetClusterOverlapsRequest
 
-class ClusterOverlap(google___protobuf___message___Message):
-    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    clustering_name = ...  # type: typing___Text
-    cluster_name = ...  # type: typing___Text
-    n_cells = ...  # type: builtin___int
-    cells_in_cluster = ...  # type: builtin___float
-    cluster_in_cells = ...  # type: builtin___float
-    def __init__(
-        self,
-        *,
-        clustering_name: typing___Optional[typing___Text] = None,
-        cluster_name: typing___Optional[typing___Text] = None,
-        n_cells: typing___Optional[builtin___int] = None,
-        cells_in_cluster: typing___Optional[builtin___float] = None,
-        cluster_in_cells: typing___Optional[builtin___float] = None,
-    ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> ClusterOverlap: ...
-    else:
-        @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> ClusterOverlap: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing_extensions___Literal[
-            "cells_in_cluster",
-            b"cells_in_cluster",
-            "cluster_in_cells",
-            b"cluster_in_cells",
-            "cluster_name",
-            b"cluster_name",
-            "clustering_name",
-            b"clustering_name",
-            "n_cells",
-            b"n_cells",
-        ],
-    ) -> None: ...
-
-global___ClusterOverlap = ClusterOverlap
-
 class ClusterOverlaps(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+    class ClusterOverlap(google___protobuf___message___Message):
+        DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+        clustering_name = ...  # type: typing___Text
+        cluster_name = ...  # type: typing___Text
+        n_cells = ...  # type: builtin___int
+        cells_in_cluster = ...  # type: builtin___float
+        cluster_in_cells = ...  # type: builtin___float
+        def __init__(
+            self,
+            *,
+            clustering_name: typing___Optional[typing___Text] = None,
+            cluster_name: typing___Optional[typing___Text] = None,
+            n_cells: typing___Optional[builtin___int] = None,
+            cells_in_cluster: typing___Optional[builtin___float] = None,
+            cluster_in_cells: typing___Optional[builtin___float] = None,
+        ) -> None: ...
+        if sys.version_info >= (3,):
+            @classmethod
+            def FromString(cls, s: builtin___bytes) -> ClusterOverlaps.ClusterOverlap: ...
+        else:
+            @classmethod
+            def FromString(
+                cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
+            ) -> ClusterOverlaps.ClusterOverlap: ...
+        def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def ClearField(
+            self,
+            field_name: typing_extensions___Literal[
+                "cells_in_cluster",
+                b"cells_in_cluster",
+                "cluster_in_cells",
+                b"cluster_in_cells",
+                "cluster_name",
+                b"cluster_name",
+                "clustering_name",
+                b"clustering_name",
+                "n_cells",
+                b"n_cells",
+            ],
+        ) -> None: ...
+    global___ClusterOverlap = ClusterOverlap
     @property
     def clusterOverlaps(
         self,
-    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___ClusterOverlap]: ...
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[
+        global___ClusterOverlaps.ClusterOverlap
+    ]: ...
     def __init__(
-        self, *, clusterOverlaps: typing___Optional[typing___Iterable[global___ClusterOverlap]] = None,
+        self, *, clusterOverlaps: typing___Optional[typing___Iterable[global___ClusterOverlaps.ClusterOverlap]] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
