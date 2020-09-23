@@ -75,7 +75,7 @@ class Result(Generic[T, E]):
         it's `ok` then your function will operate on the value
         "inside". Otherwise, your function does not execute.
 
-        
+
         >>> ok(10).map(lambda x: x * x).with_default(0)
         100
 
