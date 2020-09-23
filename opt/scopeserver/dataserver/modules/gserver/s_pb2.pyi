@@ -31,7 +31,10 @@ class ErrorReply(google___protobuf___message___Message):
     type = ...  # type: typing___Text
     message = ...  # type: typing___Text
     def __init__(
-        self, *, type: typing___Optional[typing___Text] = None, message: typing___Optional[typing___Text] = None,
+        self,
+        *,
+        type: typing___Optional[typing___Text] = None,
+        message: typing___Optional[typing___Text] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -221,7 +224,11 @@ class CellAUCValuesByFeaturesRequest(google___protobuf___message___Message):
 class CellAUCValuesByFeaturesReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     value = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
-    def __init__(self, *, value: typing___Optional[typing___Iterable[builtin___float]] = None,) -> None: ...
+    def __init__(
+        self,
+        *,
+        value: typing___Optional[typing___Iterable[builtin___float]] = None,
+    ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> CellAUCValuesByFeaturesReply: ...
@@ -239,7 +246,10 @@ class FeatureRequest(google___protobuf___message___Message):
     loomFilePath = ...  # type: typing___Text
     query = ...  # type: typing___Text
     def __init__(
-        self, *, loomFilePath: typing___Optional[typing___Text] = None, query: typing___Optional[typing___Text] = None,
+        self,
+        *,
+        loomFilePath: typing___Optional[typing___Text] = None,
+        query: typing___Optional[typing___Text] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -432,7 +442,10 @@ class Coordinate(google___protobuf___message___Message):
     x = ...  # type: builtin___float
     y = ...  # type: builtin___float
     def __init__(
-        self, *, x: typing___Optional[builtin___float] = None, y: typing___Optional[builtin___float] = None,
+        self,
+        *,
+        x: typing___Optional[builtin___float] = None,
+        y: typing___Optional[builtin___float] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -449,7 +462,10 @@ class Edge(google___protobuf___message___Message):
     source = ...  # type: typing___Text
     target = ...  # type: typing___Text
     def __init__(
-        self, *, source: typing___Optional[typing___Text] = None, target: typing___Optional[typing___Text] = None,
+        self,
+        *,
+        source: typing___Optional[typing___Text] = None,
+        target: typing___Optional[typing___Text] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -823,7 +839,10 @@ class AUCThreshold(google___protobuf___message___Message):
     name = ...  # type: typing___Text
     threshold = ...  # type: builtin___float
     def __init__(
-        self, *, name: typing___Optional[typing___Text] = None, threshold: typing___Optional[builtin___float] = None,
+        self,
+        *,
+        name: typing___Optional[typing___Text] = None,
+        threshold: typing___Optional[builtin___float] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -965,7 +984,11 @@ class FileMetaData(google___protobuf___message___Message):
 class FeatureValues(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     features = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
-    def __init__(self, *, features: typing___Optional[typing___Iterable[builtin___float]] = None,) -> None: ...
+    def __init__(
+        self,
+        *,
+        features: typing___Optional[typing___Iterable[builtin___float]] = None,
+    ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> FeatureValues: ...
@@ -981,7 +1004,11 @@ class FeatureValues(google___protobuf___message___Message):
 class CellAnnotations(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     annotations = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
-    def __init__(self, *, annotations: typing___Optional[typing___Iterable[typing___Text]] = None,) -> None: ...
+    def __init__(
+        self,
+        *,
+        annotations: typing___Optional[typing___Iterable[typing___Text]] = None,
+    ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> CellAnnotations: ...
@@ -997,7 +1024,11 @@ class CellAnnotations(google___protobuf___message___Message):
 class CellClusters(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     clusters = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int]
-    def __init__(self, *, clusters: typing___Optional[typing___Iterable[builtin___int]] = None,) -> None: ...
+    def __init__(
+        self,
+        *,
+        clusters: typing___Optional[typing___Iterable[builtin___int]] = None,
+    ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> CellClusters: ...
@@ -1088,7 +1119,11 @@ class RegulonMetaDataReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     @property
     def regulonMeta(self) -> global___Regulon: ...
-    def __init__(self, *, regulonMeta: typing___Optional[global___Regulon] = None,) -> None: ...
+    def __init__(
+        self,
+        *,
+        regulonMeta: typing___Optional[global___Regulon] = None,
+    ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> RegulonMetaDataReply: ...
@@ -1192,7 +1227,10 @@ class MyLoomsRequest(google___protobuf___message___Message):
     UUID = ...  # type: typing___Text
     loomFile = ...  # type: typing___Text
     def __init__(
-        self, *, UUID: typing___Optional[typing___Text] = None, loomFile: typing___Optional[typing___Text] = None,
+        self,
+        *,
+        UUID: typing___Optional[typing___Text] = None,
+        loomFile: typing___Optional[typing___Text] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -1345,7 +1383,11 @@ class TranslateLassoSelectionRequest(google___protobuf___message___Message):
 class TranslateLassoSelectionReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     cellIndices = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int]
-    def __init__(self, *, cellIndices: typing___Optional[typing___Iterable[builtin___int]] = None,) -> None: ...
+    def __init__(
+        self,
+        *,
+        cellIndices: typing___Optional[typing___Iterable[builtin___int]] = None,
+    ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> TranslateLassoSelectionReply: ...
@@ -1385,7 +1427,11 @@ class CellIDsRequest(google___protobuf___message___Message):
 class CellIDsReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     cellIds = ...  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
-    def __init__(self, *, cellIds: typing___Optional[typing___Iterable[typing___Text]] = None,) -> None: ...
+    def __init__(
+        self,
+        *,
+        cellIds: typing___Optional[typing___Iterable[typing___Text]] = None,
+    ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> CellIDsReply: ...
@@ -1432,7 +1478,10 @@ class Progress(google___protobuf___message___Message):
     value = ...  # type: builtin___float
     status = ...  # type: typing___Text
     def __init__(
-        self, *, value: typing___Optional[builtin___float] = None, status: typing___Optional[typing___Text] = None,
+        self,
+        *,
+        value: typing___Optional[builtin___float] = None,
+        status: typing___Optional[typing___Text] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -1541,7 +1590,11 @@ class VmaxReply(google___protobuf___message___Message):
 class UUIDRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     ip = ...  # type: typing___Text
-    def __init__(self, *, ip: typing___Optional[typing___Text] = None,) -> None: ...
+    def __init__(
+        self,
+        *,
+        ip: typing___Optional[typing___Text] = None,
+    ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> UUIDRequest: ...
@@ -1555,7 +1608,11 @@ class UUIDRequest(google___protobuf___message___Message):
 class UUIDReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     UUID = ...  # type: typing___Text
-    def __init__(self, *, UUID: typing___Optional[typing___Text] = None,) -> None: ...
+    def __init__(
+        self,
+        *,
+        UUID: typing___Optional[typing___Text] = None,
+    ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> UUIDReply: ...
@@ -1635,7 +1692,10 @@ class LoomUploadedRequest(google___protobuf___message___Message):
     UUID = ...  # type: typing___Text
     filename = ...  # type: typing___Text
     def __init__(
-        self, *, UUID: typing___Optional[typing___Text] = None, filename: typing___Optional[typing___Text] = None,
+        self,
+        *,
+        UUID: typing___Optional[typing___Text] = None,
+        filename: typing___Optional[typing___Text] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -1651,7 +1711,9 @@ class LoomUploadedRequest(google___protobuf___message___Message):
 
 class LoomUploadedReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    def __init__(self,) -> None: ...
+    def __init__(
+        self,
+    ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> LoomUploadedReply: ...
@@ -1691,7 +1753,11 @@ class MyGeneSet(google___protobuf___message___Message):
 class MyGeneSetsRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     UUID = ...  # type: typing___Text
-    def __init__(self, *, UUID: typing___Optional[typing___Text] = None,) -> None: ...
+    def __init__(
+        self,
+        *,
+        UUID: typing___Optional[typing___Text] = None,
+    ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> MyGeneSetsRequest: ...
@@ -1710,7 +1776,11 @@ class MyGeneSetsReply(google___protobuf___message___Message):
     def myGeneSets(
         self,
     ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___MyGeneSet]: ...
-    def __init__(self, *, myGeneSets: typing___Optional[typing___Iterable[global___MyGeneSet]] = None,) -> None: ...
+    def __init__(
+        self,
+        *,
+        myGeneSets: typing___Optional[typing___Iterable[global___MyGeneSet]] = None,
+    ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> MyGeneSetsReply: ...
@@ -1752,7 +1822,11 @@ class DeleteUserFileRequest(google___protobuf___message___Message):
 class DeleteUserFileReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     deletedSuccessfully = ...  # type: builtin___bool
-    def __init__(self, *, deletedSuccessfully: typing___Optional[builtin___bool] = None,) -> None: ...
+    def __init__(
+        self,
+        *,
+        deletedSuccessfully: typing___Optional[builtin___bool] = None,
+    ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> DeleteUserFileReply: ...
@@ -1897,7 +1971,11 @@ class SetAnnotationNameRequest(google___protobuf___message___Message):
 class SetAnnotationNameReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     success = ...  # type: builtin___bool
-    def __init__(self, *, success: typing___Optional[builtin___bool] = None,) -> None: ...
+    def __init__(
+        self,
+        *,
+        success: typing___Optional[builtin___bool] = None,
+    ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> SetAnnotationNameReply: ...
@@ -1951,7 +2029,11 @@ class SetLoomHierarchyRequest(google___protobuf___message___Message):
 class SetLoomHierarchyReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     success = ...  # type: builtin___bool
-    def __init__(self, *, success: typing___Optional[builtin___bool] = None,) -> None: ...
+    def __init__(
+        self,
+        *,
+        success: typing___Optional[builtin___bool] = None,
+    ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> SetLoomHierarchyReply: ...
@@ -1967,7 +2049,11 @@ class SetLoomHierarchyReply(google___protobuf___message___Message):
 class getORCIDRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     auth_code = ...  # type: typing___Text
-    def __init__(self, *, auth_code: typing___Optional[typing___Text] = None,) -> None: ...
+    def __init__(
+        self,
+        *,
+        auth_code: typing___Optional[typing___Text] = None,
+    ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> getORCIDRequest: ...
@@ -2013,7 +2099,9 @@ class getORCIDReply(google___protobuf___message___Message):
 
 class getORCIDStatusRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    def __init__(self,) -> None: ...
+    def __init__(
+        self,
+    ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> getORCIDStatusRequest: ...
@@ -2028,7 +2116,11 @@ class getORCIDStatusRequest(google___protobuf___message___Message):
 class getORCIDStatusReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     active = ...  # type: builtin___bool
-    def __init__(self, *, active: typing___Optional[builtin___bool] = None,) -> None: ...
+    def __init__(
+        self,
+        *,
+        active: typing___Optional[builtin___bool] = None,
+    ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> getORCIDStatusReply: ...
@@ -2122,7 +2214,10 @@ class setColabAnnotationDataReply(google___protobuf___message___Message):
     success = ...  # type: builtin___bool
     message = ...  # type: typing___Text
     def __init__(
-        self, *, success: typing___Optional[builtin___bool] = None, message: typing___Optional[typing___Text] = None,
+        self,
+        *,
+        success: typing___Optional[builtin___bool] = None,
+        message: typing___Optional[typing___Text] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -2194,7 +2289,10 @@ class voteAnnotationReply(google___protobuf___message___Message):
     success = ...  # type: builtin___bool
     message = ...  # type: typing___Text
     def __init__(
-        self, *, success: typing___Optional[builtin___bool] = None, message: typing___Optional[typing___Text] = None,
+        self,
+        *,
+        success: typing___Optional[builtin___bool] = None,
+        message: typing___Optional[typing___Text] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -2316,7 +2414,10 @@ class AddNewClusteringReply(google___protobuf___message___Message):
     success = ...  # type: builtin___bool
     message = ...  # type: typing___Text
     def __init__(
-        self, *, success: typing___Optional[builtin___bool] = None, message: typing___Optional[typing___Text] = None,
+        self,
+        *,
+        success: typing___Optional[builtin___bool] = None,
+        message: typing___Optional[typing___Text] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod

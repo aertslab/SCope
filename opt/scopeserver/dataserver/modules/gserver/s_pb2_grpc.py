@@ -12,9 +12,9 @@ class MainStub(object):
     def __init__(self, channel):
         """Constructor.
 
-    Args:
-      channel: A grpc.Channel.
-    """
+        Args:
+          channel: A grpc.Channel.
+        """
         self.getCellColorByFeatures = channel.unary_unary(
             "/scope.Main/getCellColorByFeatures",
             request_serializer=s__pb2.CellColorByFeaturesRequest.SerializeToString,
