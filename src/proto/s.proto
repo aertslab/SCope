@@ -43,6 +43,7 @@ service Main {
   rpc voteAnnotation (voteAnnotationRequest) returns (voteAnnotationReply) {}
   rpc getNextCluster (getNextClusterRequest) returns (FeatureReply) {} 
   rpc addNewClustering (AddNewClusteringRequest) returns (AddNewClusteringReply) {}
+  rpc getClusterOverlaps (GetClusterOverlapsRequest) returns (ClusterOverlaps) {}
 }
 
 message ErrorReply {
@@ -528,4 +529,22 @@ message AddNewClusteringRequest {
 message AddNewClusteringReply {
   bool success=1;
   string message=2;
+}
+
+message GetClusterOverlapsRequest {
+  string loomFilePath=1;
+  repeated int32 cellIndices=2;
+}
+
+message ClusterOverlaps {
+  
+  message ClusterOverlap {
+    string clustering_name=1;
+    string cluster_name=2;
+    int32 n_cells=3;
+    float cells_in_cluster=4;
+    float cluster_in_cells=5;
+  }
+
+  repeated ClusterOverlap clusterOverlaps=1;
 }

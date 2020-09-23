@@ -29,6 +29,7 @@ import Metadata from '../common/Metadata';
 import FileDownloader from '../../js/http';
 import CollaborativeAnnotation from './CollaborativeAnnotation';
 import GProfilerModal from '../GProfiler/GProfilerModal';
+import ClusterOverlapsTable from './ClusterOverlapsTable';
 
 class ViewerSidebar extends Component {
     static propTypes = {
@@ -184,8 +185,10 @@ class ViewerSidebar extends Component {
                                 columns={3}
                                 key={i}
                                 className='selectionRow'>
-                                <Grid.Column>
-                                    {'Selection ' + (lS.id + 1)}
+                                <Grid.Column style={{ whiteSpace: 'unset' }}>
+                                    {`Selection ${lS.id + 1} (${
+                                        lS.points.length
+                                    } cells)`}
                                 </Grid.Column>
                                 <Grid.Column>
                                     <Input
@@ -240,6 +243,17 @@ class ViewerSidebar extends Component {
                                         }}
                                         className='pointer'
                                     />
+                                </Grid.Column>
+                            </Grid.Row>
+                            <Grid.Row>
+                                <Grid.Column>
+                                    {lS.clusterOverlaps ? (
+                                        <ClusterOverlapsTable
+                                            clusterOverlaps={lS.clusterOverlaps}
+                                        />
+                                    ) : (
+                                        ''
+                                    )}
                                 </Grid.Column>
                             </Grid.Row>
                         </Grid>

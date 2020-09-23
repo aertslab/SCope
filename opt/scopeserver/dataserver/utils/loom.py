@@ -7,6 +7,7 @@ import pandas as pd
 import time
 import hashlib
 import functools
+from collections import Counter
 from pathlib import Path
 from typing import Tuple, Dict, Any, Union, List, Set
 from loompy.loompy import LoomConnection
@@ -22,13 +23,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-Cluster = TypedDict(
-    "Cluster",
-    {
-        "id": int,
-        "description": str,
-    },
-)
+Cluster = TypedDict("Cluster", {"id": int, "description": str,},)
 
 Clusters = List[Cluster]
 
@@ -39,11 +34,7 @@ Clustering = TypedDict(
 
 class Loom:
     def __init__(
-        self,
-        file_path: Path,
-        abs_file_path: Path,
-        loom_connection: LoomConnection,
-        loom_file_handler,
+        self, file_path: Path, abs_file_path: Path, loom_connection: LoomConnection, loom_file_handler,
     ):
         self.lfh = loom_file_handler
         self.file_path = file_path
@@ -404,6 +395,43 @@ class Loom:
             logger.debug("Failure")
             return (False, "Updated clusterings do not exist in file. Write error.")
 
+    def get_cluster_overlaps(self, cell_idxs: List[int]) -> List[Dict[str, Union[int, float, str]]]:
+        """Calculate clusters overlapped by provided cell indices
+
+        Args:
+            cell_idxs (list[int]): A list of cell indices within the loom file
+
+        Returns:
+            list[dict]: A list containing a dict with the overlaps information
+        """
+
+        metadata = self.get_meta_data()
+        cluster_overlap_data = []
+        if not self.has_md_clusterings():
+            return []
+        for clustering_meta in metadata["clusterings"]:
+            clustering_name = clustering_meta["name"]
+            clustering_id = clustering_meta["id"]
+            clustering = self.get_clustering_by_id(clustering_id)
+            counts: Counter = Counter(clustering[cell_idxs])
+            all_counts: Counter = Counter(clustering)
+            for cluster_id in counts:
+                if cluster_id == -1:
+                    continue
+                cluster_name = self.get_meta_data_cluster_by_clustering_id_and_cluster_id(
+                    clustering_id, cluster_id, ""
+                )["description"]
+                cluster_overlap_data.append(
+                    {
+                        "clustering_name": clustering_name,
+                        "cluster_name": cluster_name,
+                        "n_cells": counts[cluster_id],
+                        "cells_in_cluster": (counts[cluster_id] / len(cell_idxs)) * 100,
+                        "cluster_in_cells": (counts[cluster_id] / all_counts[cluster_id]) * 100,
+                    }
+                )
+        return cluster_overlap_data
+
     def set_hierarchy(self, L1: str, L2: str, L3: str) -> bool:
         logger.info("Changing hierarchy name for {0}".format(self.get_abs_file_path()))
 
@@ -511,11 +539,7 @@ class Loom:
         attr_margins = [2, 2, 2, 2, 0]
         # Order matters
         attr_names = [
-            (
-                "RegulonsAUC",
-                "MotifRegulonsAUC",
-                "TrackRegulonsAUC",
-            ),
+            ("RegulonsAUC", "MotifRegulonsAUC", "TrackRegulonsAUC",),
             ("Clusterings",),
             ("Embeddings_X",),
             ("GeneSets",),
