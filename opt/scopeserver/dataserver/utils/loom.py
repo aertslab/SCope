@@ -424,8 +424,8 @@ class Loom:
             clustering_name = clustering_meta["name"]
             clustering_id = clustering_meta["id"]
             clustering = self.get_clustering_by_id(clustering_id)
-            counts = Counter(clustering[cell_idxs])
-            all_counts = Counter(clustering)
+            counts: Counter = Counter(clustering[cell_idxs])
+            all_counts: Counter = Counter(clustering)
             for cluster_id in counts:
                 if cluster_id == -1:
                     continue
