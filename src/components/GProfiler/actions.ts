@@ -1,5 +1,5 @@
 import * as Action from './actionTypes';
-import { GProfilerOrganism } from './types';
+import { GProfilerOrganism } from './model';
 
 export interface ToggleModal {
     type: typeof Action.TOGGLE_MODAL;

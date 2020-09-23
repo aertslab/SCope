@@ -118,7 +118,7 @@ class GProfilerPopup extends React.Component<
                     <Button
                         color='orange'
                         onClick={this.props.toggleModal}
-                        className='gprofiler-run-gle'>
+                        className='gprofilerRunGLE'>
                         Run g:Profiler Gene List Enrichment
                     </Button>
                 }

@@ -1,6 +1,8 @@
 import React from 'react';
 import { Checkbox, Table } from 'semantic-ui-react';
 
+import './GProfilerModal.css';
+
 export const TopGeneListsSelectionTable: React.FC<{
     availableTopGeneListsSizes: number[];
     selectedTopGeneListsSizes: number[];
@@ -37,13 +39,9 @@ export const TopGeneListsSelectionTable: React.FC<{
                             </Table.Cell>
                             <Table.Cell>
                                 {isSelected ? (
-                                    <b>{`Top ${topGeneListsSize}`}</b>
+                                    <span className='geneListSelected'>{`Top ${topGeneListsSize}`}</span>
                                 ) : (
-                                    <span
-                                        style={{
-                                            textDecorationLine: 'line-through',
-                                            textDecorationStyle: 'solid',
-                                        }}>{`Top ${topGeneListsSize}`}</span>
+                                    <span className='geneListUnselected'>{`Top ${topGeneListsSize}`}</span>
                                 )}
                             </Table.Cell>
                         </Table.Row>

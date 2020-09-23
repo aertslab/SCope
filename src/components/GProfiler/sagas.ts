@@ -4,7 +4,7 @@ import * as R from 'ramda';
 import { fetchJson } from '../../api/fetch';
 import * as t from './actionTypes';
 import * as c from './constants';
-import { GProfilerOrganism } from './types';
+import { GProfilerOrganism } from './model';
 import * as Action from './actions';
 
 function* fetchAvailableOrganisms() {

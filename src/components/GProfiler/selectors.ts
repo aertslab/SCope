@@ -1,7 +1,7 @@
 import { RootState } from '../../redux/reducers';
 
 import { NAME } from './constants';
-import { GProfilerOrganism } from './types';
+import { GProfilerOrganism } from './model';
 
 export const isDisplayed = (state: RootState): boolean => {
     return state[NAME].display;
