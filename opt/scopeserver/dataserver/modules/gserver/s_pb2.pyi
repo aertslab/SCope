@@ -2678,7 +2678,9 @@ class ClusterOverlaps(google___protobuf___message___Message):
         global___ClusterOverlaps.ClusterOverlap
     ]: ...
     def __init__(
-        self, *, clusterOverlaps: typing___Optional[typing___Iterable[global___ClusterOverlaps.ClusterOverlap]] = None,
+        self,
+        *,
+        clusterOverlaps: typing___Optional[typing___Iterable[global___ClusterOverlaps.ClusterOverlap]] = None,
     ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod

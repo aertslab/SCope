@@ -6161,7 +6161,9 @@ _CLUSTEROVERLAPS = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[_CLUSTEROVERLAPS_CLUSTEROVERLAP,],
+    nested_types=[
+        _CLUSTEROVERLAPS_CLUSTEROVERLAP,
+    ],
     enum_types=[],
     serialized_options=None,
     is_extendable=False,
