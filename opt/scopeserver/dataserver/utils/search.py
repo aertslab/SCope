@@ -1,7 +1,7 @@
 import logging
 
 from typing import Dict, NamedTuple, Tuple, List, Optional, Type, Union
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from contextlib import suppress
 from scopeserver.dataserver.utils import data_file_handler
 from scopeserver.dataserver.utils.constant import Species
@@ -22,6 +22,11 @@ class SearchMatch(NamedTuple):
 class MatchResult(NamedTuple):
     search_space_match: SSKey
     result: str
+
+
+class ResultTypePair(NamedTuple):
+    result: str
+    feature_type: str
 
 
 DEFINED_SEARCH_TYPES = {
@@ -103,7 +108,7 @@ def find_matches(search_term: str, search_space: SearchSpaceDict) -> List[MatchR
     return sort_results(search_term, match_results)
 
 
-def aggregate_matches(matches: List[MatchResult]) -> Dict[Tuple[str, str], List[str]]:
+def aggregate_matches(matches: List[MatchResult]) -> Dict[ResultTypePair, List[str]]:
     """
     Collapse matches based on returned element.
 
@@ -116,12 +121,12 @@ def aggregate_matches(matches: List[MatchResult]) -> Dict[Tuple[str, str], List[
         search_space (SearchSpace): The appropriate search space
 
     Returns:
-        Dict[Tuple[str, str], List[str]]: Search matches aggregated by feature and feature type
+        Dict[ResultTypePair, List[str]]: Search matches aggregated by feature and feature type
     """
 
-    aggregated_matches: Dict[Tuple[str, str], List[str]] = OrderedDict()
+    aggregated_matches: Dict[ResultTypePair, List[str]] = OrderedDict()
     for match in matches:
-        key = (match.result, match.search_space_match.element_type)
+        key = ResultTypePair(match.result, match.search_space_match.element_type)
         if key not in aggregated_matches.keys():
             aggregated_matches[key] = [match.search_space_match.element]
         else:
@@ -131,9 +136,10 @@ def aggregate_matches(matches: List[MatchResult]) -> Dict[Tuple[str, str], List[
 
 
 def create_feature_description(
-    aggregated_matches: Dict[Tuple[str, str], List[str]],
-    features: Dict[Tuple[str, str], str],
-) -> Dict[Tuple[str, str], str]:
+    aggregated_matches: Dict[ResultTypePair, List[str]],
+    features: Dict[ResultTypePair, str],
+    feature_types: Dict[ResultTypePair, str],
+) -> Tuple[Dict[ResultTypePair, str], Dict[ResultTypePair, str], Dict[ResultTypePair, str]]:
     """
     Generate descriptions for final results.
 
@@ -142,25 +148,32 @@ def create_feature_description(
     being translated into the name of the cluster that it is a marker of.
 
     Args:
-        aggregated_matches (Dict[Tuple[str, str], List[str]]): Results aggregated by final term
-        features (Dict[Tuple[str, str], str]): A list of features corresponding to the aggregated matches
+        aggregated_matches (Dict[ResultTypePair, List[str]]): Results aggregated by final term
+        features (Dict[ResultTypePair, str]): A list of features corresponding to the aggregated matches
 
     Returns:
-        Dict[Tuple[str, str], str]: The final descriptions to send to the user
+        final_descriptions: The final descriptions to send to the user
+        features: Updated features
+        feature_types: Updated feature types
     """
 
-    descriptions: Dict[Tuple[str, str], str] = {}
+    descriptions: Dict[ResultTypePair, List[str]] = defaultdict(lambda: [])
 
     for k, v in aggregated_matches.items():
+        desc_key = k
         synonyms = v.copy()
         with suppress(ValueError):
             synonyms.remove(k[0])
         if k[1] == "gene" and len(synonyms) > 0:
-            descriptions[k] = f"Synonyms: {', '.join(synonyms)}"
+            descriptions[k].append(f"Synonyms: {', '.join(synonyms)}")
         elif k[1] in DEFINED_SEARCH_TYPES:
             if DEFINED_SEARCH_TYPES[k[1]]["final_category"] == "cluster_category":
                 is_cluster = True
                 category_name = features[k]
+                category_type = feature_types[k]
+                desc_key = ResultTypePair(category_name, category_type)
+                features[desc_key] = features[k]
+                feature_types[desc_key] = feature_types[k]
             else:
                 is_cluster = False
                 category_name = k[0]
@@ -169,20 +182,25 @@ def create_feature_description(
                     category_name += "es"
                 elif not is_cluster:
                     category_name += "s"
-                descriptions[
-                    k
-                ] = f"{','.join(v[:-1])} and {v[-1]} {DEFINED_SEARCH_TYPES[k[1]]['join_text_multiple']} {category_name}"
+                descriptions[desc_key].append(
+                    f"{','.join(v[:-1])} and {v[-1]} {DEFINED_SEARCH_TYPES[k[1]]['join_text_multiple']} {category_name}"
+                )
             elif len(v) == 1:
-                descriptions[k] = f"{v[0]} {DEFINED_SEARCH_TYPES[k[1]]['join_text_single']} {category_name}"
+                descriptions[desc_key].append(
+                    f"{v[0]} {DEFINED_SEARCH_TYPES[k[1]]['join_text_single']} {category_name}"
+                )
         else:
-            descriptions[k] = ""
+            if len(descriptions[desc_key]) == 0:
+                descriptions[desc_key] = [""]
 
-    return descriptions
+    final_descriptions = {k: ", ".join(v) for (k, v) in descriptions.items()}
+
+    return final_descriptions, features, feature_types
 
 
 def get_final_feature_and_type(
-    loom: Loom, aggregated_matches: Dict[Tuple[str, str], List[str]], data_hash_secret: str
-) -> Tuple[Dict[Tuple[str, str], str], Dict[Tuple[str, str], str]]:
+    loom: Loom, aggregated_matches: Dict[ResultTypePair, List[str]], data_hash_secret: str
+) -> Tuple[Dict[ResultTypePair, str], Dict[ResultTypePair, str]]:
     """
     Determine final features and types.
 
@@ -190,15 +208,15 @@ def get_final_feature_and_type(
 
     Args:
         loom (Loom): Loom object
-        aggregated_matches (Dict[Tuple[str, str], List[str]]): Aggregated matches from aggregate_matches
+        aggregated_matches (Dict[ResultTypePair, List[str]]): Aggregated matches from aggregate_matches
         data_hash_secret (str): Secret used to hash annotations on clusters
 
     Returns:
-        Tuple[Dict[Tuple[str, str], str], Dict[Tuple[str, str], str]]: Features and Feature types
+        Tuple[Dict[ResultTypePair, str], Dict[ResultTypePair, str]]: Features and Feature types
     """
 
-    features: Dict[Tuple[str, str], str] = {}
-    feature_types: Dict[Tuple[str, str], str] = {}
+    features: Dict[ResultTypePair, str] = {}
+    feature_types: Dict[ResultTypePair, str] = {}
 
     for k in aggregated_matches:
         try:
@@ -238,12 +256,12 @@ def get_search_results(search_term: str, loom: Loom, data_hash_secret: str) -> D
     matches = find_matches(search_term, loom.ss.search_space_dict)
     aggregated_matches = aggregate_matches(matches)
     features, feature_types = get_final_feature_and_type(loom, aggregated_matches, data_hash_secret)
-    descriptions = create_feature_description(aggregated_matches, features)
+    descriptions, features, feature_types = create_feature_description(aggregated_matches, features, feature_types)
 
     final_res = {
-        "feature": [features[k] for k in aggregated_matches],
-        "featureType": [feature_types[k] for k in aggregated_matches],
-        "featureDescription": [descriptions[k] for k in aggregated_matches],
+        "feature": [features[k] for k in descriptions],
+        "featureType": [feature_types[k] for k in descriptions],
+        "featureDescription": [descriptions[k] for k in descriptions],
     }
 
     return final_res
