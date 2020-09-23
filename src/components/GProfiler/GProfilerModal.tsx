@@ -23,13 +23,15 @@ import {
     getAvailableTopGeneListsSizes,
     getMetricTable,
     getAvailableSortBy,
-    checkCreateGProfilerLink,
-} from './utils';
+} from './model';
+
+import { checkCreateGProfilerLink } from './link';
+
 import {
     GProfilerOrganism,
     FeatureMetadata,
     FeatureMetricTable,
-} from './types';
+} from './model';
 
 interface GProfilerPopupProps {
     featureMetadata: FeatureMetadata;
