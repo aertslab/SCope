@@ -1238,7 +1238,11 @@ class ViewerSidebar extends Component {
                             {markerTable}
                             {legendTable}
                             {downloadSubLoomButton()}
-                            <GProfilerModal featureMetadata={md} />
+                            {
+                                activeFeatures[i].featureType.startsWith(
+                                    'Clustering'
+                                ) && <GProfilerModal featureMetadata={md} />
+                            }
                             <br />
                         </Grid.Column>
                     </Grid.Row>
