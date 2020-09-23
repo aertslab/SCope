@@ -126,7 +126,7 @@ def aggregate_matches(matches: List[MatchResult]) -> Dict[ResultTypePair, List[s
 
     aggregated_matches: Dict[ResultTypePair, List[str]] = OrderedDict()
     for match in matches:
-        key = (match.result, match.search_space_match.element_type)
+        key = ResultTypePair(match.result, match.search_space_match.element_type)
         if key not in aggregated_matches.keys():
             aggregated_matches[key] = [match.search_space_match.element]
         else:
@@ -171,7 +171,7 @@ def create_feature_description(
                 is_cluster = True
                 category_name = features[k]
                 category_type = feature_types[k]
-                desc_key = (category_name, category_type)
+                desc_key = ResultTypePair(category_name, category_type)
                 features[desc_key] = features[k]
                 feature_types[desc_key] = feature_types[k]
             else:
