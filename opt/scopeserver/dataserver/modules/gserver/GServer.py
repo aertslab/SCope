@@ -358,6 +358,14 @@ class SCope(s_pb2_grpc.MainServicer):
         success, message = loom.annotation_vote(request, self.config["dataHashSecret"])
         return s_pb2.voteAnnotationReply(success=success, message=message)
 
+    def getClusterOverlaps(self, request, context):
+        """Get overlapping clusters of the requested cellIDs and return formatted protobuf object."""
+        loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
+        cluster_overlap_data = loom.get_cluster_overlaps(request.cellIndices)
+        return s_pb2.ClusterOverlaps(
+            clusterOverlaps=[s_pb2.ClusterOverlaps.ClusterOverlap(**x) for x in cluster_overlap_data]
+        )
+
     def getRegulonMetaData(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         regulon_genes = None
@@ -465,7 +473,8 @@ class SCope(s_pb2_grpc.MainServicer):
 
             def merge_cluster_marker_metrics(metrics):
                 return functools.reduce(
-                    lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how="outer"), metrics,
+                    lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how="outer"),
+                    metrics,
                 )
 
             cluster_marker_metrics = merge_cluster_marker_metrics(

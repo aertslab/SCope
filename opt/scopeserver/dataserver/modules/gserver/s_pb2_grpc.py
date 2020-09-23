@@ -144,6 +144,11 @@ class MainStub(object):
             request_serializer=s__pb2.AddNewClusteringRequest.SerializeToString,
             response_deserializer=s__pb2.AddNewClusteringReply.FromString,
         )
+        self.getClusterOverlaps = channel.unary_unary(
+            "/scope.Main/getClusterOverlaps",
+            request_serializer=s__pb2.GetClusterOverlapsRequest.SerializeToString,
+            response_deserializer=s__pb2.ClusterOverlaps.FromString,
+        )
 
 
 class MainServicer(object):
@@ -305,6 +310,12 @@ class MainServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def getClusterOverlaps(self, request, context):
+        """Missing associated documentation comment in .proto file"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
 
 def add_MainServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -437,6 +448,11 @@ def add_MainServicer_to_server(servicer, server):
             servicer.addNewClustering,
             request_deserializer=s__pb2.AddNewClusteringRequest.FromString,
             response_serializer=s__pb2.AddNewClusteringReply.SerializeToString,
+        ),
+        "getClusterOverlaps": grpc.unary_unary_rpc_method_handler(
+            servicer.getClusterOverlaps,
+            request_deserializer=s__pb2.GetClusterOverlapsRequest.FromString,
+            response_serializer=s__pb2.ClusterOverlaps.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler("scope.Main", rpc_method_handlers)
@@ -1140,6 +1156,33 @@ class Main(object):
             "/scope.Main/addNewClustering",
             s__pb2.AddNewClusteringRequest.SerializeToString,
             s__pb2.AddNewClusteringReply.FromString,
+            options,
+            channel_credentials,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def getClusterOverlaps(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/scope.Main/getClusterOverlaps",
+            s__pb2.GetClusterOverlapsRequest.SerializeToString,
+            s__pb2.ClusterOverlaps.FromString,
             options,
             channel_credentials,
             call_credentials,
