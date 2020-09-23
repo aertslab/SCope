@@ -115,7 +115,7 @@ export default class Regulon extends Component {
                             />
                         </Segment>
                     </Grid.Column>
-                    <Grid.Column width={3}>
+                    <Grid.Column width={4}>
                         <ViewerSidebar
                             onActiveFeaturesChange={(features, id) => {
                                 this.setState({ activeFeatures: features });

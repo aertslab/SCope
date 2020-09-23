@@ -1035,9 +1035,42 @@ class API {
     addViewerSelection(selection) {
         if (!this.viewerSelections[this.activePage])
             this.viewerSelections[this.activePage] = [];
-        this.viewerSelections[this.activePage].push(selection);
-        this.viewerSelectionsChangeListeners.forEach((listener) => {
-            listener(this.viewerSelections[this.activePage]);
+        BackendAPI.getConnection().then((gbc) => {
+            let query = {
+                loomFilePath: BackendAPI.getActiveLoom(),
+                cellIndices: selection.points,
+            };
+            if (DEBUG) {
+                console.debug('getClusterOverlaps', query);
+            }
+            gbc.services.scope.Main.getClusterOverlaps(
+                query,
+                (err, response) => {
+                    console.debug('getClusterOverlaps', response);
+                    if (response) {
+                        const clusterOverlaps = response.clusterOverlaps.map(
+                            (clusterOverlap) => {
+                                clusterOverlap[
+                                    'cells_in_cluster'
+                                ] = clusterOverlap['cells_in_cluster'].toFixed(
+                                    2
+                                );
+                                clusterOverlap[
+                                    'cluster_in_cells'
+                                ] = clusterOverlap['cluster_in_cells'].toFixed(
+                                    2
+                                );
+                                return clusterOverlap;
+                            }
+                        );
+                        selection['clusterOverlaps'] = clusterOverlaps;
+                    }
+                    this.viewerSelections[this.activePage].push(selection);
+                    this.viewerSelectionsChangeListeners.forEach((listener) => {
+                        listener(this.viewerSelections[this.activePage]);
+                    });
+                }
+            );
         });
     }
 
