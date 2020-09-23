@@ -417,7 +417,7 @@ class Loom:
             logger.debug("Failure")
             return (False, "Updated clusterings do not exist in file. Write error.")
 
-    def get_cluster_overlaps(self, cell_idxs: List[int]) -> List[dict]:
+    def get_cluster_overlaps(self, cell_idxs: List[int]) -> List[Dict[str, Union[int, float, str]]]:
         """Calculate clusters overlapped by provided cell indices
 
         Args:
