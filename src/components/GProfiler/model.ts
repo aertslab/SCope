@@ -70,19 +70,21 @@ export const getAvailableTopGeneListsSizes = (
     );
 };
 
+const reduceMetricsAtIndex = (idx: number) => (
+    metrics,
+    metric: FeatureMetadataMetric
+) => ({
+    ...metrics,
+    [metric.accessor]: metric.values[idx],
+});
+
 export const getMetricTable = (
     featureMetadata: FeatureMetadata
 ): FeatureMetricTable => {
     return featureMetadata.genes.map((gene: string, idx: number) => {
         return {
             gene,
-            ...featureMetadata.metrics.reduce(
-                (metrics, metric) => ({
-                    ...metrics,
-                    [metric.accessor]: metric.values[idx],
-                }),
-                {}
-            ),
+            ...featureMetadata.metrics.reduce(reduceMetricsAtIndex(idx), {}),
         };
     });
 };
