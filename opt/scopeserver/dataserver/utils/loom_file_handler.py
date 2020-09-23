@@ -21,7 +21,10 @@ class LoomFileHandler:
 
     def add_loom(self, file_path: Path, abs_file_path: Path, loom_connection) -> Loom:
         loom = Loom(
-            file_path=file_path, abs_file_path=abs_file_path, loom_connection=loom_connection, loom_file_handler=self,
+            file_path=file_path,
+            abs_file_path=abs_file_path,
+            loom_connection=loom_connection,
+            loom_file_handler=self,
         )
         self.active_looms[abs_file_path] = loom
         return loom
@@ -29,7 +32,11 @@ class LoomFileHandler:
     def load_loom_file(self, file_path: Path, abs_file_path: Path, mode: str = "r") -> Optional[Loom]:
         try:
             loom_connection = lp.connect(abs_file_path.as_posix(), mode=mode, validate=False)
-            return self.add_loom(file_path=file_path, abs_file_path=abs_file_path, loom_connection=loom_connection,)
+            return self.add_loom(
+                file_path=file_path,
+                abs_file_path=abs_file_path,
+                loom_connection=loom_connection,
+            )
         except KeyError as e:
             logger.error(e)
             os.remove(file_path)

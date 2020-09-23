@@ -131,7 +131,8 @@ def aggregate_matches(matches: List[MatchResult]) -> Dict[Tuple[str, str], List[
 
 
 def create_feature_description(
-    aggregated_matches: Dict[Tuple[str, str], List[str]], features: Dict[Tuple[str, str], str],
+    aggregated_matches: Dict[Tuple[str, str], List[str]],
+    features: Dict[Tuple[str, str], str],
 ) -> Dict[Tuple[str, str], str]:
     """
     Generate descriptions for final results.

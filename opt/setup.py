@@ -18,7 +18,9 @@ setup(
     data_files=[
         (
             "scopeserver/dataserver/data/gene_mappings",
-            ["scopeserver/dataserver/data/gene_mappings/terminal_mappings.pickle",],
+            [
+                "scopeserver/dataserver/data/gene_mappings/terminal_mappings.pickle",
+            ],
         )
     ]
     + get_bindserver_files(),
