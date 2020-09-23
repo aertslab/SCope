@@ -1,0 +1,14 @@
+.gprofilerRunGLE {
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+    width: 100%;
+}
+
+.geneListSelected {
+    font-weight: bold;
+}
+
+.geneListUnselected {
+    text-decoration-line: line-through;
+    text-decoration-style: solid;
+}

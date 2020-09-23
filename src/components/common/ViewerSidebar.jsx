@@ -21,8 +21,6 @@ import 'react-table/react-table.css';
 import { instanceOf } from 'prop-types';
 import { withCookies, Cookies } from 'react-cookie';
 
-import { delimiter } from 'path';
-import { min } from 'moment';
 import fileDownload from 'js-file-download';
 import { parse as json2csv } from 'json2csv';
 
@@ -30,6 +28,7 @@ import { BackendAPI } from '../common/API';
 import Metadata from '../common/Metadata';
 import FileDownloader from '../../js/http';
 import CollaborativeAnnotation from './CollaborativeAnnotation';
+import GProfilerModal from '../GProfiler/GProfilerModal';
 import ClusterOverlapsTable from './ClusterOverlapsTable';
 
 class ViewerSidebar extends Component {
@@ -1239,6 +1238,9 @@ class ViewerSidebar extends Component {
                             {markerTable}
                             {legendTable}
                             {downloadSubLoomButton()}
+                            {activeFeatures[i].featureType.startsWith(
+                                'Clustering'
+                            ) && <GProfilerModal featureMetadata={md} />}
                             <br />
                         </Grid.Column>
                     </Grid.Row>
