@@ -23,7 +23,13 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-Cluster = TypedDict("Cluster", {"id": int, "description": str,},)
+Cluster = TypedDict(
+    "Cluster",
+    {
+        "id": int,
+        "description": str,
+    },
+)
 
 Clusters = List[Cluster]
 
@@ -34,7 +40,11 @@ Clustering = TypedDict(
 
 class Loom:
     def __init__(
-        self, file_path: Path, abs_file_path: Path, loom_connection: LoomConnection, loom_file_handler,
+        self,
+        file_path: Path,
+        abs_file_path: Path,
+        loom_connection: LoomConnection,
+        loom_file_handler,
     ):
         self.lfh = loom_file_handler
         self.file_path = file_path
@@ -539,7 +549,11 @@ class Loom:
         attr_margins = [2, 2, 2, 2, 0]
         # Order matters
         attr_names = [
-            ("RegulonsAUC", "MotifRegulonsAUC", "TrackRegulonsAUC",),
+            (
+                "RegulonsAUC",
+                "MotifRegulonsAUC",
+                "TrackRegulonsAUC",
+            ),
             ("Clusterings",),
             ("Embeddings_X",),
             ("GeneSets",),
