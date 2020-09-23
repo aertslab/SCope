@@ -97,8 +97,7 @@ export const checkCreateGProfilerLink = async ({
         selectedTopGeneListsSizes,
         sortedFeatureMetricTable
     );
-    const organism =
-        gProfilerToken !== null ? gProfilerToken : selectedOrganism;
+    const organism = gProfilerToken !== '' ? gProfilerToken : selectedOrganism;
     const gProfilerLink = createGProfilerLink(organism, topFeatureQuery);
     if (gProfilerLink.length > GPROFILER_LINK_MAX_LENGTH) {
         return {
