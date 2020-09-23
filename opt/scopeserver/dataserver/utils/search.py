@@ -24,6 +24,11 @@ class MatchResult(NamedTuple):
     result: str
 
 
+class ResultTypePair(NamedTuple):
+    result: str
+    feature_type: str
+
+
 DEFINED_SEARCH_TYPES = {
     "region_gene_link": {
         "final_category": "gene",
@@ -103,7 +108,7 @@ def find_matches(search_term: str, search_space: SearchSpaceDict) -> List[MatchR
     return sort_results(search_term, match_results)
 
 
-def aggregate_matches(matches: List[MatchResult]) -> Dict[Tuple[str, str], List[str]]:
+def aggregate_matches(matches: List[MatchResult]) -> Dict[ResultTypePair, List[str]]:
     """
     Collapse matches based on returned element.
 
@@ -116,10 +121,10 @@ def aggregate_matches(matches: List[MatchResult]) -> Dict[Tuple[str, str], List[
         search_space (SearchSpace): The appropriate search space
 
     Returns:
-        Dict[Tuple[str, str], List[str]]: Search matches aggregated by feature and feature type
+        Dict[ResultTypePair, List[str]]: Search matches aggregated by feature and feature type
     """
 
-    aggregated_matches: Dict[Tuple[str, str], List[str]] = OrderedDict()
+    aggregated_matches: Dict[ResultTypePair, List[str]] = OrderedDict()
     for match in matches:
         key = (match.result, match.search_space_match.element_type)
         if key not in aggregated_matches.keys():
@@ -131,10 +136,10 @@ def aggregate_matches(matches: List[MatchResult]) -> Dict[Tuple[str, str], List[
 
 
 def create_feature_description(
-    aggregated_matches: Dict[Tuple[str, str], List[str]],
-    features: Dict[Tuple[str, str], str],
-    feature_types: Dict[Tuple[str, str], str],
-) -> Tuple[Dict[Tuple[str, str], str], Dict[Tuple[str, str], str], Dict[Tuple[str, str], str]]:
+    aggregated_matches: Dict[ResultTypePair, List[str]],
+    features: Dict[ResultTypePair, str],
+    feature_types: Dict[ResultTypePair, str],
+) -> Tuple[Dict[ResultTypePair, str], Dict[ResultTypePair, str], Dict[ResultTypePair, str]]:
     """
     Generate descriptions for final results.
 
@@ -143,14 +148,16 @@ def create_feature_description(
     being translated into the name of the cluster that it is a marker of.
 
     Args:
-        aggregated_matches (Dict[Tuple[str, str], List[str]]): Results aggregated by final term
-        features (Dict[Tuple[str, str], str]): A list of features corresponding to the aggregated matches
+        aggregated_matches (Dict[ResultTypePair, List[str]]): Results aggregated by final term
+        features (Dict[ResultTypePair, str]): A list of features corresponding to the aggregated matches
 
     Returns:
-        Dict[Tuple[str, str], str]: The final descriptions to send to the user
+        final_descriptions: The final descriptions to send to the user
+        features: Updated features
+        feature_types: Updated feature types
     """
 
-    descriptions: Dict[Tuple[str, str], List[str]] = defaultdict(lambda: [])
+    descriptions: Dict[ResultTypePair, List[str]] = defaultdict(lambda: [])
 
     for k, v in aggregated_matches.items():
         desc_key = k
@@ -192,8 +199,8 @@ def create_feature_description(
 
 
 def get_final_feature_and_type(
-    loom: Loom, aggregated_matches: Dict[Tuple[str, str], List[str]], data_hash_secret: str
-) -> Tuple[Dict[Tuple[str, str], str], Dict[Tuple[str, str], str]]:
+    loom: Loom, aggregated_matches: Dict[ResultTypePair, List[str]], data_hash_secret: str
+) -> Tuple[Dict[ResultTypePair, str], Dict[ResultTypePair, str]]:
     """
     Determine final features and types.
 
@@ -201,15 +208,15 @@ def get_final_feature_and_type(
 
     Args:
         loom (Loom): Loom object
-        aggregated_matches (Dict[Tuple[str, str], List[str]]): Aggregated matches from aggregate_matches
+        aggregated_matches (Dict[ResultTypePair, List[str]]): Aggregated matches from aggregate_matches
         data_hash_secret (str): Secret used to hash annotations on clusters
 
     Returns:
-        Tuple[Dict[Tuple[str, str], str], Dict[Tuple[str, str], str]]: Features and Feature types
+        Tuple[Dict[ResultTypePair, str], Dict[ResultTypePair, str]]: Features and Feature types
     """
 
-    features: Dict[Tuple[str, str], str] = {}
-    feature_types: Dict[Tuple[str, str], str] = {}
+    features: Dict[ResultTypePair, str] = {}
+    feature_types: Dict[ResultTypePair, str] = {}
 
     for k in aggregated_matches:
         try:
