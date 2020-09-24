@@ -38,7 +38,10 @@ COPY ${SCOPE_CONFIG:-config.json} /app/config.json
 
 # install the app
 RUN cd /app && npm install
-RUN cd /app && npm run build
+
+# No need to run the build when apache is serving assets from the host (see docker-compose.yml)
+# RUN cd /app && npm run build
+
 RUN cd /app/opt && poetry install
 
 # Frontend

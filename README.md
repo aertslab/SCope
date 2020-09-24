@@ -129,6 +129,10 @@ before running the docker-compose command. Apache will proxy requests through to
 Apache will serve assets from the host machine. The scope webpack assets will have to be built with the config: `"reverseProxyOn": true`.
 You can use environment variable: `SCOPE_CONFIG=path to your config` to specify a config file instead of changing the main one.
 
+You can configure where the dockerised SCope data directories should be located
+on the host machine by using the env var `SCOPE_DATA_DIR` before launching the docker-compose. 
+The default location is `./scope_data` which will be created if you do not specify one.
+
 **Note**: in this config, you do not need to specify the port in `publicHostAddress`. The env var `SCOPE_PORT` gets appended for you.
 
 If deploying the container on a specific port with another external apache reverse-proxy server, 
@@ -149,7 +153,7 @@ Here is an example:
 
 1. ```SCOPE_CONFIG=/path/to/config.json SCOPE_PORT=8080 npm run build```
 1. `docker-compose build`
-1. ```SCOPE_PORT=8080 docker-compose up -d```
+1. ```SCOPE_DATA_DIR=$HOME/scope_data SCOPE_PORT=8080 docker-compose up -d```
 
 You should be able to visit `http://localhost:8080` and see the app!
 

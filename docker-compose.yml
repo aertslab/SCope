@@ -3,14 +3,14 @@ version: '3'
 services:
     scope:
         restart: always
-        image: bujesse/scope:1.0
+        build: .
         expose:
             - 55850
             - 55851
             - 55852
             - 55853
         volumes:
-            - static:/app
+            - ${SCOPE_DATA_DIR:-./scope_data/}:/root/.local/share/SCope/
         entrypoint: ["poetry", "run", "hypercorn", "--bind", "0.0.0.0", "main:scope_api"]
     httpd:
         restart: always
@@ -21,6 +21,3 @@ services:
             - scope
         volumes:
             - ./:/usr/local/apache2/htdocs/
-
-volumes:
-    static:
