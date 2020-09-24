@@ -9,7 +9,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-CURRENT_SS_VERISON = 1
+CURRENT_SS_VERISON = 2
 
 
 class SSKey(NamedTuple):
@@ -109,7 +109,8 @@ class SearchSpace:
                 for annotation in annotations:
                     key = SSKey(annotation, element_type)
                     if (annotation, element_type) in self.search_space_dict.keys():
-                        self.search_space_dict[key].append(f"{clusteringID}_{clusterID}")
+                        if f"{clusteringID}_{clusterID}" not in self.search_space_dict[key]:
+                            self.search_space_dict[key].append(f"{clusteringID}_{clusterID}")
                     else:
                         self.search_space_dict[key] = [f"{clusteringID}_{clusterID}"]
 

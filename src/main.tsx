@@ -10,7 +10,9 @@ import { HashRouter, Route } from 'react-router-dom';
 import { CookiesProvider } from 'react-cookie';
 import { Provider } from 'react-redux';
 
-import store from './redux/store';
+import configureStore from './redux/store';
+
+const store = configureStore({});
 
 const renderApp = () => {
     render(

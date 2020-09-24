@@ -6,8 +6,7 @@ from methodtools import lru_cache
 import pandas as pd
 import time
 import hashlib
-import os
-import pickle
+import functools
 from collections import Counter
 from pathlib import Path
 from typing import Tuple, Dict, Any, Union, List, Set
@@ -1004,3 +1003,19 @@ class Loom:
             cluster_marker_metric, index=self.get_genes()[marker_mask], columns=[metric_accessor]
         )
         return cluster_marker_metric_df
+
+    def get_cluster_marker_table(self, clustering_id: int, cluster_id: int, secret: str) -> pd.DataFrame:
+        def create_cluster_marker_metric(metric):
+            return self.get_cluster_marker_metrics(
+                clustering_id=clustering_id, cluster_id=cluster_id, metric_accessor=metric["accessor"]
+            )
+
+        md_clustering = self.get_meta_data_clustering_by_id(id=clustering_id, secret=secret)
+        md_cmm = md_clustering["clusterMarkerMetrics"]
+        cluster_marker_table = functools.reduce(
+            lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how="outer"),
+            [create_cluster_marker_metric(x) for x in md_cmm],
+        )
+        # Keep only non-zeros elements
+        nonan_marker_mask = cluster_marker_table.apply(lambda x: functools.reduce(np.logical_and, ~np.isnan(x)), axis=1)
+        return cluster_marker_table[nonan_marker_mask]

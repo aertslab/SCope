@@ -61,6 +61,7 @@ let config = {
                                     { loose: true },
                                 ],
                                 ['@babel/plugin-proposal-object-rest-spread'],
+                                ['@babel/transform-runtime'],
                             ],
                         },
                     },
