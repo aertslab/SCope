@@ -270,6 +270,7 @@ def get_search_results(search_term: str, category: str, loom: Loom, data_hash_se
         [
             {"feature": features[key], "category": feature_types[key], "description": descriptions[key]}
             for key in aggregated_matches
+            if all([key in features, key in feature_types, key in descriptions])
         ],
         key=category_key,
     )
@@ -281,6 +282,6 @@ def get_search_results(search_term: str, category: str, loom: Loom, data_hash_se
 
     if category == "all":
         return [CategorisedMatches(category=key, matches=group) for key, group in grouped.items()]
-if category in grouped:
-   return [CategorisedMatches(category=category, matches=grouped[category])]
-return []
+    if category in grouped:
+        return [CategorisedMatches(category=category, matches=grouped[category])]
+    return []
