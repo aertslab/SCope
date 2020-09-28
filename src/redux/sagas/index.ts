@@ -4,6 +4,5 @@ import { fetchAvailableOrganismsSaga } from '../../components/GProfiler/sagas';
 import { getFeaturesSaga } from './scope';
 
 export default function* rootSaga() {
-    yield all([fetchAvailableOrganismsSaga(),
-               getFeaturesSaga()]);
+    yield all([fetchAvailableOrganismsSaga(), getFeaturesSaga()]);
 }
