@@ -1,5 +1,7 @@
 FROM debian:latest
 
+ARG SCOPE_PORT=80
+
 RUN apt-get update -y
 
 RUN apt-get install -y \
@@ -33,15 +35,16 @@ RUN conda install -c conda-forge poetry
 # Get sources into container
 COPY . /app
 
-# put custom config into container
-COPY ${SCOPE_CONFIG:-config.json} /app/config.json
-
 # install the app
 RUN cd /app && npm install
 
-# No need to run the build when apache is serving assets from the host (see docker-compose.yml)
-# RUN cd /app && npm run build
+# put custom config into container
+COPY ${SCOPE_CONFIG:-config.json} /app/config.json
 
+# build assets
+RUN cd /app && SCOPE_CONFIG=./config.json SCOPE_PORT=${SCOPE_PORT} npm run build
+
+# poetry install is required to run the backend
 RUN cd /app/opt && poetry install
 
 # Frontend

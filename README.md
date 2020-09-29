@@ -126,7 +126,13 @@ reverse proxy server.
 The SCope application will be available on port `80` by default. You can specify a port by using env variable: `SCOPE_PORT`
 before running the docker-compose command. Apache will proxy requests through to the appropriate port inside the container.
 
-Apache will serve assets from the host machine. The scope webpack assets will have to be built with the config: `"reverseProxyOn": true`.
+The `docker-compose.yml` will serve the assets from inside the scope container, and the `docker-compose.host.yml` will serve them from the host.
+This supports as many use cases as possible, because you can either build the assets on the host yourself using whatever configuration you need,
+or serve them from the container if your environment doesn't allow for that (e.g. you don't have npm installed on the host).
+
+Before running the compose build, you can specify a SCOPE_PORT with: `docker-compose build --build-arg SCOPE_PORT=8080`
+
+The scope webpack assets will have to be built with the config: `"reverseProxyOn": true`.
 You can use environment variable: `SCOPE_CONFIG=path to your config` to specify a config file instead of changing the main one.
 
 You can configure where the dockerised SCope data directories should be located
@@ -147,13 +153,15 @@ Here is an example:
     RewriteRule ^/?(.*) "ws://0.0.0.0:8080/$1" [P,L]
 ```
 
-##### Example
+##### Example serve from container
 
-1. Copy `config.json` and modify with `"reverseProxyOn": true,` and `publicHostAddress` set to your domain
-
-1. ```SCOPE_CONFIG=/path/to/config.json SCOPE_PORT=8080 npm run build```
-1. `docker-compose build`
+1. Copy `config.json` to a new file and modify with `"reverseProxyOn": true,` and `publicHostAddress` set to your domain
+1. `docker-compose build --build-arg SCOPE_PORT=8080`
 1. ```SCOPE_DATA_DIR=$HOME/scope_data SCOPE_PORT=8080 docker-compose up -d```
+
+##### OR Serve from host
+1. ```npm run build```
+1. ```SCOPE_DATA_DIR=$HOME/scope_data SCOPE_PORT=8080 docker-compose -f docker-compose.host.yml up -d```
 
 You should be able to visit `http://localhost:8080` and see the app!
 
