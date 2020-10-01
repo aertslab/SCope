@@ -11,12 +11,12 @@ export type FeatureFilter =
     | 'metric'
     | 'cluster';
 
-export interface FeatureSearchSelection {
+export type FeatureSearchSelection = {
     readonly title: string;
     readonly category: FeatureFilter;
     readonly description: string;
     readonly colour: string;
-}
+};
 
 const makeSelection = (
     colour: string,
@@ -50,12 +50,12 @@ export const findResult = (
 };
 
 export type FeatureSearch = {
-    field: string;
-    loading: boolean;
-    value: string;
-    results: Array<Features>;
-    selected?: FeatureSearchSelection;
-    error?: string;
+    readonly field: string;
+    readonly loading: boolean;
+    readonly value: string;
+    readonly results: Array<Features>;
+    readonly selected?: FeatureSearchSelection;
+    readonly error?: string;
 };
 
 export type State = { [field: string]: FeatureSearch };
