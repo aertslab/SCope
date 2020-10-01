@@ -5,19 +5,19 @@ import { APIError, apiError } from './error';
 
 declare const DEBUG: boolean;
 
-interface FeatureQuery {
-    dataset: string;
-    category: string;
-    query: string;
-}
+type FeatureQuery = {
+    readonly dataset: string;
+    readonly category: string;
+    readonly query: string;
+};
 
-interface Features {
+type Features = {
     readonly category: string;
     readonly results: readonly {
         readonly title: string;
         readonly description: string;
     }[];
-}
+};
 
 function queryFeatures(query: FeatureQuery): Promise<Array<Features>> {
     const scopeQuery = {
