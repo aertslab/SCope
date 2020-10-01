@@ -417,7 +417,7 @@ class App extends Component {
                             }
                             if (!this.timer) {
                                 this.timer = setInterval(() => {
-                                    this.timeout -= (1 * ONE_MINUTE);
+                                    this.timeout -= 1 * ONE_MINUTE;
                                     if (this.timeout < 0) {
                                         if (DEBUG) {
                                             console.log('Session timed out');
@@ -438,7 +438,7 @@ class App extends Component {
                                         }
                                         this.checkUUID(ip, uuid, true);
                                     }
-                                }, (1 * ONE_MINUTE));
+                                }, 1 * ONE_MINUTE);
                             }
                             if (!ping) {
                                 let loom = match.params.loom
