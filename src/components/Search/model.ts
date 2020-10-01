@@ -50,12 +50,12 @@ export const findResult = (
 };
 
 export type FeatureSearch = {
-    readonly field: string;
-    readonly loading: boolean;
-    readonly value: string;
-    readonly results: Array<Features>;
-    readonly selected?: FeatureSearchSelection;
-    readonly error?: string;
+    field: string;
+    loading: boolean;
+    value: string;
+    results: Array<Features>;
+    selected?: FeatureSearchSelection;
+    error?: string;
 };
 
 export type State = { [field: string]: FeatureSearch };
