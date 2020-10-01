@@ -133,7 +133,7 @@ let config = {
             },
         }),
         new ForkTsCheckerWebpackPlugin(),
-        new BundleAnalyzerPlugin(),
+        new BundleAnalyzerPlugin({openAnalyzer: false}),
     ],
 };
 
