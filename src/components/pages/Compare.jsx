@@ -427,7 +427,7 @@ class Compare extends Component {
         return (
             <Grid>
                 <Search.FeatureSearchGroup
-                    feature='all'
+                    filter='all'
                     identifier='compare-page'
                 />
                 <Grid.Row columns={3} stretched className='viewerRow'>
