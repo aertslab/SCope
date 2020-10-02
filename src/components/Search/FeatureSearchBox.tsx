@@ -18,6 +18,7 @@ import {
     FeatureSearchSelection,
     featuresToResults,
     findResult,
+    orderCategories
 } from './model';
 import * as Action from './actions';
 import * as Selector from './selectors';
@@ -136,7 +137,11 @@ export const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
     }
 
     const displayResults = R.fromPairs(
-        props.results ? props.results.map(featuresToResults) : []
+        props.results
+            ? R.sortWith([R.comparator(orderCategories)], props.results).map(
+                  featuresToResults
+              )
+            : []
     );
 
     return (
