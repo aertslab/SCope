@@ -1,5 +1,11 @@
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 
+# Holds scope data from within docker containers
+scope_data
+
+# jetbrains settings
+.idea
+
 # vscode settings
 /.vscode
 /.deprecated

@@ -116,3 +116,52 @@ Keys:
 -   `data`: This is a directory containing data files (e.g. the `motd.txt` message of the day).
     Can be an absolute path or a relative path from where you start SCope. By default it is
     `./data/`.
+
+
+### Deploying SCope with Docker
+
+`docker-compose.yml` is configured to spin up 2 containers: One to run the SCope backend and another to run an Apache
+reverse proxy server.
+
+The SCope application will be available on port `80` by default. You can specify a port by using env variable: `SCOPE_PORT`
+before running the docker-compose command. Apache will proxy requests through to the appropriate port inside the container.
+
+The `docker-compose.yml` will serve the assets from inside the scope container, and the `docker-compose.host.yml` will serve them from the host.
+This supports as many use cases as possible, because you can either build the assets on the host yourself using whatever configuration you need,
+or serve them from the container if your environment doesn't allow for that (e.g. you don't have npm installed on the host).
+
+Before running the compose build, you can specify a SCOPE_PORT with: `docker-compose build --build-arg SCOPE_PORT=8080`
+
+The scope webpack assets will have to be built with the config: `"reverseProxyOn": true`.
+You can use environment variable: `SCOPE_CONFIG=path to your config` to specify a config file instead of changing the main one.
+
+You can configure where the dockerised SCope data directories should be located
+on the host machine by using the env var `SCOPE_DATA_DIR` before launching the docker-compose. 
+The default location is `./scope_data` which will be created if you do not specify one.
+
+**Note**: in this config, you do not need to specify the port in `publicHostAddress`. The env var `SCOPE_PORT` gets appended for you.
+
+If deploying the container on a specific port with another external apache reverse-proxy server, 
+you may have to add a config to the external apache site config to allow http and websocket reverse-proxying.
+Here is an example:
+
+```
+    ProxyPass / http://0.0.0.0:8080/
+    RewriteEngine on
+    RewriteCond %{HTTP:Upgrade} websocket [NC]
+    RewriteCond %{HTTP:Connection} upgrade [NC]
+    RewriteRule ^/?(.*) "ws://0.0.0.0:8080/$1" [P,L]
+```
+
+##### Example serve from container
+
+1. Copy `config.json` to a new file and modify with `"reverseProxyOn": true,` and `publicHostAddress` set to your domain
+1. `docker-compose build --build-arg SCOPE_PORT=8080`
+1. ```SCOPE_DATA_DIR=$HOME/scope_data SCOPE_PORT=8080 docker-compose up -d```
+
+##### OR Serve from host
+1. ```npm run build```
+1. ```SCOPE_DATA_DIR=$HOME/scope_data SCOPE_PORT=8080 docker-compose -f docker-compose.host.yml up -d```
+
+You should be able to visit `http://localhost:8080` and see the app!
+

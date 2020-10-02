@@ -12,7 +12,11 @@ let _config = null;
 if (isAWS) {
     _config = require('./apache/config.json');
 } else {
-    _config = require('./config.json');
+    _config = require(process.env.SCOPE_CONFIG || './config.json');
+}
+if (process.env.SCOPE_PORT) {
+    _config.publicHostAddress += ':' + process.env.SCOPE_PORT;
+    console.log('Appending SCOPE_PORT to publicHostAddress');
 }
 console.log(_config);
 
