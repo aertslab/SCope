@@ -8,7 +8,6 @@ import {
     Select,
     SemanticCOLORS,
 } from 'semantic-ui-react';
-import { debounce } from 'lodash';
 import * as R from 'ramda';
 
 import { RootState } from '../../redux/reducers';

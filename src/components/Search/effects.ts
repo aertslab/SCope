@@ -1,4 +1,4 @@
-import { call, put, throttle } from 'redux-saga/effects';
+import { call, put, debounce } from 'redux-saga/effects';
 
 import * as ActionType from './actionTypes';
 import * as Action from './actions';
@@ -19,7 +19,7 @@ function* getFeatures(action: Action.SearchQuery) {
 }
 
 function* getFeaturesSaga() {
-    yield throttle(SEARCH_API_DELAY, ActionType.QUERY, getFeatures);
+    yield debounce(SEARCH_API_DELAY, ActionType.QUERY, getFeatures);
 }
 
 export { getFeaturesSaga, getFeatures };
