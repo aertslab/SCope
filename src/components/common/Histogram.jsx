@@ -79,7 +79,9 @@ export default class Histogram extends Component {
 
     handleThresholdChange(value) {
         value = value || 0;
-        if (DEBUG) console.log('handleThresholdChange', value);
+        if (DEBUG) {
+            console.log('handleThresholdChange', value);
+        }
         let x = d3
             .scaleLinear()
             .domain([0, this.state.max])
