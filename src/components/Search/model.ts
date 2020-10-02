@@ -87,3 +87,14 @@ export const featuresToResults = (
         },
     ];
 };
+
+export const orderCategories = (a: Features, b: Features): boolean => {
+    const order = ['gene', 'regulon', 'clustering', 'annotation', 'metric'];
+
+    const category = (feature: Features): string =>
+        feature.category.startsWith('Clustering')
+            ? 'clustering'
+            : feature.category;
+
+    return order.indexOf(category(a)) < order.indexOf(category(b));
+};

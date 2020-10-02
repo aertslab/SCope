@@ -34,15 +34,39 @@ const results = [
             },
         ],
     },
+    {
+        category: 'Clustering: Leiden resolution 0.4 (default, 397)',
+        results: [
+            {
+                title: 'All Clusters',
+                description: '',
+            },
+            {
+                title: 'Unannotated Cluster 1',
+                description: 'test description',
+            },
+        ],
+    },
 ];
 
 describe('Model.findResult', () => {
     it('Makes a selection from valid results', () => {
         expect(Model.findResult({ title: 'c' }, 'red', results)).toStrictEqual({
             title: 'c',
-            category: 'regulon' as Model.FeatureFilter,
+            category: 'regulon',
             description: '',
             colour: 'red',
+        });
+    });
+
+    it('Makes a selection from more valid results', () => {
+        expect(
+            Model.findResult({ title: 'All Clusters' }, 'green', results)
+        ).toStrictEqual({
+            title: 'All Clusters',
+            category: 'Clustering: Leiden resolution 0.4 (default, 397)',
+            description: '',
+            colour: 'green',
         });
     });
 
@@ -54,24 +78,6 @@ describe('Model.findResult', () => {
         expect(
             Model.findResult({ title: 'does not exist' }, 'blue', results)
         ).toBe(undefined);
-    });
-});
-
-describe('Model.toFeatureFilter', () => {
-    it('Responds with a valid filter on valid input', () => {
-        expect(Model.toFeatureFilter('all')).toBe('all');
-        expect(Model.toFeatureFilter('gene')).toBe('gene');
-        expect(Model.toFeatureFilter('regulon')).toBe('regulon');
-        expect(Model.toFeatureFilter('annotation')).toBe('annotation');
-        expect(Model.toFeatureFilter('metric')).toBe('metric');
-        expect(Model.toFeatureFilter('cluster')).toBe('cluster');
-    });
-
-    it('Responds with undefined for invalid input', () => {
-        expect(Model.toFeatureFilter('')).toBe(undefined);
-        expect(Model.toFeatureFilter('test')).toBe(undefined);
-        expect(Model.toFeatureFilter('ALL')).toBe(undefined);
-        expect(Model.toFeatureFilter('Gene')).toBe(undefined);
     });
 });
 
