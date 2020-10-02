@@ -13,7 +13,7 @@ export type FeatureFilter =
 
 export type FeatureSearchSelection = {
     readonly title: string;
-    readonly category: FeatureFilter;
+    readonly category: string;
     readonly description: string;
     readonly colour: string;
 };
@@ -27,7 +27,7 @@ const makeSelection = (
 }) => FeatureSearchSelection) =>
     R.compose(
         R.assoc('colour', colour),
-        R.assoc('category', toFeatureFilter(category))
+        R.assoc('category', category)
     ) as (partial: {
         title: string;
         description: string;
@@ -60,20 +60,6 @@ export type FeatureSearch = {
 
 export type State = { [field: string]: FeatureSearch };
 
-export const toFeatureFilter = (val: string): FeatureFilter | undefined => {
-    switch (val) {
-        case 'all':
-        case 'gene':
-        case 'regulon':
-        case 'annotation':
-        case 'metric':
-        case 'cluster':
-            return val as FeatureFilter;
-        default:
-            return undefined;
-    }
-};
-
 export const init = (field: string): FeatureSearch => {
     return {
         field,
@@ -93,7 +79,10 @@ export const featuresToResults = (
         {
             name: features.category,
             results: (features.results.map((result) => {
-                return { ...result, id: window.btoa(result.title) };
+                return {
+                    ...result,
+                    id: window.btoa(result.title + result.description),
+                };
             }) as unknown) as typeof SearchResult[],
         },
     ];

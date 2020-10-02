@@ -16,7 +16,6 @@ import { Features, LegacyAPI } from '../../api';
 import {
     FeatureFilter,
     FeatureSearchSelection,
-    toFeatureFilter,
     featuresToResults,
     findResult,
 } from './model';
