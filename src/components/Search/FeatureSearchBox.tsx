@@ -18,7 +18,7 @@ import {
     FeatureSearchSelection,
     featuresToResults,
     findResult,
-    orderCategories
+    orderCategories,
 } from './model';
 import * as Action from './actions';
 import * as Selector from './selectors';
