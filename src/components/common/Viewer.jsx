@@ -63,6 +63,11 @@ export default class Viewer extends Component {
                     customScale,
                     this.props.superposition
                 );
+                this.getFeatureLabels(
+                    this.props.loomFile,
+                    BackendAPI.getActiveCoordinates(),// embedding
+                    this.state.activeFeatures
+                );
             }
         };
         this.spriteSettingsListener = () => {
@@ -726,7 +731,7 @@ export default class Viewer extends Component {
             features.map((f) => {
                 if (f.feature.length) featuresActive = true;
             });
-            if (featuresActive)
+            if (featuresActive) {
                 this.getFeatureColors(
                     features,
                     this.props.loomFile,
@@ -735,7 +740,12 @@ export default class Viewer extends Component {
                     customScale,
                     this.props.superposition
                 );
-            else {
+                this.getFeatureLabels(
+                    this.props.loomFile,
+                    BackendAPI.getActiveCoordinates(),// embedding
+                    features
+                );
+            } else {
                 this.setState({
                     activeFeatures: JSON.parse(JSON.stringify(features)),
                     colors: [],
@@ -1149,6 +1159,28 @@ export default class Viewer extends Component {
                 BackendAPI.showError();
             }
         );
+    }
+
+    getFeatureLabels(
+        loomFile,
+        embedding,
+        features
+    ) {
+        const feature = features.map((f) => {
+            return this.props.genes ? f.feature.split('_')[0] : f.feature;
+        }).filter((f) => f.length > 0);
+        console.log(`getFeatureLabels(${loomFile}, ${embedding}, ${feature})`);
+        // BackendAPI.getConnection().then(
+        //     (gbc) => {
+        //         gbc.services.scope.Main.getCellColorByFeatures(
+        //             query,
+        //             (err, response) => {
+        //             });
+        //     },
+        //     () => {
+        //         BackendAPI.showError();
+        //     }
+        // );
     }
 
     hexToRgb(hex) {
