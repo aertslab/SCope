@@ -1,14 +1,14 @@
 name: Server CI
 on:
-  pull_request:
-    paths:
-    - 'opt/**'
+    pull_request:
+        paths:
+            - 'opt/**'
 
 jobs:
     quality-checks:
         runs-on: ubuntu-latest
         env:
-          working-directory: ./opt
+            working-directory: ./opt
         strategy:
             matrix:
                 python-version: [3.7, 3.8]
@@ -19,37 +19,37 @@ jobs:
             - name: Set up Python ${{ matrix.python-version }}
               uses: actions/setup-python@v1
               with:
-                python-version: ${{ matrix.python-version }}
+                  python-version: ${{ matrix.python-version }}
 
             - name: Install Poetry
               run: |
-                curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+                  curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
             - name: Install dependencies
               run: |
-                ${HOME}/.poetry/bin/poetry install
+                  ${HOME}/.poetry/bin/poetry install
               working-directory: ${{ env.working-directory }}
 
             - name: Run pylint
               run: |
-                ${HOME}/.poetry/bin/poetry run pylint-fail-under --fail_under "6.7" --rcfile pyproject.toml scopeserver main.py
+                  ${HOME}/.poetry/bin/poetry run pylint-fail-under --fail_under "6.7" --rcfile pyproject.toml scopeserver main.py
               working-directory: ${{ env.working-directory }}
 
             - name: Run black
               run: |
-                ${HOME}/.poetry/bin/poetry run black --check .
+                  ${HOME}/.poetry/bin/poetry run black --check .
               working-directory: ${{ env.working-directory }}
 
             - name: Run mypy
               run: |
-                ${HOME}/.poetry/bin/poetry run mypy --config-file pyproject.toml --ignore-missing-imports scopeserver main.py
+                  ${HOME}/.poetry/bin/poetry run mypy --config-file pyproject.toml --ignore-missing-imports scopeserver main.py
               working-directory: ${{ env.working-directory }}
 
             - name: Run pytest
               run: |
-                ${HOME}/.poetry/bin/poetry run pytest --cov=scopeserver --cov-branch --cov-fail-under=26.5 --doctest-modules
+                  ${HOME}/.poetry/bin/poetry run dotenv run pytest --cov=scopeserver --cov-branch --cov-fail-under=26.5 --doctest-modules --ignore-glob=**/alembic
               working-directory: ${{ env.working-directory }}
 
             - name: Run safety security checks
               run: |
-                ${HOME}/.poetry/bin/poetry run pip freeze | ${HOME}/.poetry/bin/poetry run safety check --stdin
+                  ${HOME}/.poetry/bin/poetry run pip freeze | ${HOME}/.poetry/bin/poetry run safety check --stdin
               working-directory: ${{ env.working-directory }}
