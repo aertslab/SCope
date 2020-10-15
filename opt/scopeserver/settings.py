@@ -8,7 +8,7 @@ load_dotenv(dotenv_path=env_path)
 
 
 def get(key: str):
-    env = os.environ.get(key=key)
+    env = os.environ[key]
     if not env:
         raise Exception(f"{key} environment variable not found.")
     return env
