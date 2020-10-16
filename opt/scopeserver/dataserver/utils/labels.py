@@ -21,6 +21,7 @@ class FeatureLabel(NamedTuple):
     colour: str
     coordinate: Coordinate
 
+
 def uniq(data: Iterable[str]) -> List[str]:
     seen = set()
     result = []
@@ -31,6 +32,7 @@ def uniq(data: Iterable[str]) -> List[str]:
             result.append(x)
 
     return result
+
 
 def label_annotation(loom: Loom, embedding: int, feature: str) -> List[FeatureLabel]:
     """
