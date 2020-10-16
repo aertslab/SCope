@@ -2,6 +2,8 @@
 Tests for the scopeserver.config module
 """
 
+import os
+
 from json.decoder import JSONDecodeError
 from pathlib import Path, PureWindowsPath
 
@@ -52,3 +54,7 @@ def test_load_from_nonexistant_file():
 def test_load_malformed_json():
     with pytest.raises(JSONDecodeError):
         config.from_file(Path("test") / Path("data") / Path("malformed_config.json"))
+
+
+def test_load_settings():
+    assert config.settings.DATABASE_URL == f"sqlite:///{os.environ.get('HOME')}/.scope/sqlite.db"
