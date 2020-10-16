@@ -703,9 +703,15 @@ export default class Viewer extends Component {
                 });
                 const text = new PIXI.Text(label.label, style);
                 text.anchor.set(0.5, 0.5);
-                const scaled = this.scalePoint({ x: label.coordinate.x, y: label.coordinate.y }, this.scalingFactor);
+                const scaled = this.scalePoint(
+                    { x: label.coordinate.x, y: label.coordinate.y },
+                    this.scalingFactor
+                );
                 text.position.set(scaled.x, scaled.y);
-                text._originalData = { x: label.coordinate.x, y: label.coordinate.y };
+                text._originalData = {
+                    x: label.coordinate.x,
+                    y: label.coordinate.y,
+                };
                 this.labelLayer.addChild(text);
             });
         }
@@ -1210,20 +1216,18 @@ export default class Viewer extends Component {
         );
     }
 
-    getFeatureLabels(
-        loomFile,
-        embedding,
-        features
-    ) {
+    getFeatureLabels(loomFile, embedding, features) {
         const feature = features
-              .map((f) => {
-                  return {
-                      name: this.props.genes ? f.feature.split('_')[0] : f.feature,
-                      type: this.props.genes ? 'gene' : f.featureType,
-                  };
-              })
-              .filter((f) => f.name.length > 0)
-              .filter((f) => f.type === 'annotation');
+            .map((f) => {
+                return {
+                    name: this.props.genes
+                        ? f.feature.split('_')[0]
+                        : f.feature,
+                    type: this.props.genes ? 'gene' : f.featureType,
+                };
+            })
+            .filter((f) => f.name.length > 0)
+            .filter((f) => f.type === 'annotation');
 
         if (feature.length === 0) {
             return;
@@ -1244,13 +1248,14 @@ export default class Viewer extends Component {
                             console.error(err);
                         } else {
                             this.setState({
-                                featureLabels: response.labels
+                                featureLabels: response.labels,
                             });
 
                             this.drawLabels(response.labels);
                             this.transformDataPoints();
                         }
-                    });
+                    }
+                );
             },
             () => {
                 BackendAPI.showError();
