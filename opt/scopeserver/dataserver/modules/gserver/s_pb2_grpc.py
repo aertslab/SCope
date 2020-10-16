@@ -150,6 +150,11 @@ class MainStub(object):
             request_serializer=s__pb2.GetClusterOverlapsRequest.SerializeToString,
             response_deserializer=s__pb2.ClusterOverlaps.FromString,
         )
+        self.getFeatureLabels = channel.unary_unary(
+            "/scope.Main/getFeatureLabels",
+            request_serializer=s__pb2.FeatureLabelRequest.SerializeToString,
+            response_deserializer=s__pb2.FeatureLabelReply.FromString,
+        )
 
 
 class MainServicer(object):
@@ -317,6 +322,12 @@ class MainServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def getFeatureLabels(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
 
 def add_MainServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -454,6 +465,11 @@ def add_MainServicer_to_server(servicer, server):
             servicer.getClusterOverlaps,
             request_deserializer=s__pb2.GetClusterOverlapsRequest.FromString,
             response_serializer=s__pb2.ClusterOverlaps.SerializeToString,
+        ),
+        "getFeatureLabels": grpc.unary_unary_rpc_method_handler(
+            servicer.getFeatureLabels,
+            request_deserializer=s__pb2.FeatureLabelRequest.FromString,
+            response_serializer=s__pb2.FeatureLabelReply.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler("scope.Main", rpc_method_handlers)
@@ -1237,6 +1253,35 @@ class Main(object):
             "/scope.Main/getClusterOverlaps",
             s__pb2.GetClusterOverlapsRequest.SerializeToString,
             s__pb2.ClusterOverlaps.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def getFeatureLabels(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/scope.Main/getFeatureLabels",
+            s__pb2.FeatureLabelRequest.SerializeToString,
+            s__pb2.FeatureLabelReply.FromString,
             options,
             channel_credentials,
             insecure,

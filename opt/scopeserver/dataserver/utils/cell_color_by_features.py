@@ -1,12 +1,15 @@
-import numpy as np
+from typing import List, Optional
 import re
 import itertools
 import time
-import zlib
 import sys
+
+import numpy as np
+import zlib
 
 from scopeserver.dataserver.modules.gserver import s_pb2
 from scopeserver.dataserver.utils import constant
+from scopeserver.dataserver.utils.annotation import Annotation
 import logging
 
 logger = logging.getLogger(__name__)
@@ -132,7 +135,7 @@ class CellColorByFeatures:
         else:
             self.features.append(np.zeros(self.n_cells))
 
-    def setAnnotationFeature(self, request, feature):
+    def setAnnotationFeature(self, feature: str, annotations: Optional[List[Annotation]] = None, logic: str = "OR"):
         md_annotation_values = self.loom.get_meta_data_annotation_by_name(name=feature)["values"]
         ca_annotation = self.loom.get_ca_attr_by_name(name=feature)
         ca_annotation_as_int = list(map(lambda x: md_annotation_values.index(str(x)), ca_annotation))
@@ -143,9 +146,10 @@ class CellColorByFeatures:
             raise ValueError("The annotation {0} has too many unique values.".format(feature))
         # Set the reply
 
-        if len(request.annotation) > 0:
-            cellIndices = self.loom.get_anno_cells(annotations=request.annotation, logic=request.logic)
+        if annotations is not None:
+            cellIndices = self.loom.get_anno_cells(annotations=annotations, logic=logic)
             self.hex_vec = np.array(self.hex_vec)[cellIndices]
+
         reply = s_pb2.CellColorByFeaturesReply(
             color=self.hex_vec,
             vmax=self.v_max,
@@ -195,9 +199,12 @@ class CellColorByFeatures:
                         legend.add((cluster_dict[i], colour))
                     values, colors = zip(*legend)
                     self.legend = s_pb2.ColorLegend(values=values, colors=colors)
+
                     if len(request.annotation) > 0:
-                        cellIndices = self.loom.get_anno_cells(annotations=request.annotation, logic=request.logic)
+                        annotations = [Annotation(name=ann.name, values=ann.values) for ann in request.annotation]
+                        cellIndices = self.loom.get_anno_cells(annotations=annotations, logic=request.logic)
                         self.hex_vec = np.array(self.hex_vec)[cellIndices]
+
                     # Set the reply and break the for loop
                     reply = s_pb2.CellColorByFeaturesReply(color=self.hex_vec, vmax=self.v_max, legend=self.legend)
                     self.setReply(reply=reply)
@@ -219,7 +226,8 @@ class CellColorByFeatures:
             clusterIndices = self.loom.get_clustering_by_id(clusteringID) == clusterID
             clusterCol = np.array([constant.UPPER_LIMIT_RGB if x else 0 for x in clusterIndices])
             if len(request.annotation) > 0:
-                cellIndices = self.loom.get_anno_cells(annotations=request.annotation, logic=request.logic)
+                annotations = [Annotation(name=ann.name, values=ann.values) for ann in request.annotation]
+                cellIndices = self.loom.get_anno_cells(annotations=annotations, logic=request.logic)
                 clusterCol = clusterCol[cellIndices]
             self.features.append(clusterCol)
 

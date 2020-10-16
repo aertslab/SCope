@@ -466,6 +466,32 @@ class AppSidebar extends Component {
                                 }}
                             />
                         </Menu.Item>
+                        <Menu.Item>Labels</Menu.Item>
+                        <Menu.Item>
+                            <Checkbox
+                                toggle
+                                checked={settings.showLabels}
+                                label='Show labels'
+                                onChange={() => this.toggleShowLabels()}
+                            />
+                        </Menu.Item>
+                        <Menu.Item>Label size</Menu.Item>
+                        <Menu.Item>
+                            <TooltipSlider
+                                style={{ margin: '5px' }}
+                                defaultValue={settings.labelSize}
+                                max={24}
+                                min={10}
+                                step={1}
+                                onAfterChange={(value) => {
+                                    const settings = BackendAPI.setSetting(
+                                        'labelSize',
+                                        value
+                                    );
+                                    this.setState({ settings });
+                                }}
+                            />
+                        </Menu.Item>
                         <Menu.Item>Mouse events</Menu.Item>
                         <Menu.Item>
                             <Checkbox
@@ -726,6 +752,15 @@ class AppSidebar extends Component {
     handleUpdateSprite(scale, alpha) {
         this.setState({ spriteScale: scale, spriteAlpha: alpha });
         BackendAPI.setSpriteSettings(scale, alpha);
+    }
+
+    toggleShowLabels() {
+        const settings = BackendAPI.setSetting(
+            'showLabels',
+            !this.state.settings.showLabels
+        );
+
+        this.setState({ settings });
     }
 }
 

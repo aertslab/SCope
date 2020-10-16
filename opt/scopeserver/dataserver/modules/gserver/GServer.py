@@ -34,6 +34,8 @@ from scopeserver.dataserver.utils import constant
 from scopeserver.dataserver.utils import search_space as ss
 from scopeserver.dataserver.utils.search import get_search_results
 from scopeserver.dataserver.utils.loom import Loom
+from scopeserver.dataserver.utils.labels import label_annotation
+from scopeserver.dataserver.utils.annotation import Annotation
 
 from pyscenic.genesig import GeneSignature
 from pyscenic.aucell import create_rankings, enrichment, enrichment4cells
@@ -197,13 +199,20 @@ class SCope(s_pb2_grpc.MainServicer):
 
         cell_color_by_features = ccbf.CellColorByFeatures(loom=loom)
 
+        if len(request.annotation) > 0:
+            annotations = [Annotation(name=ann.name, values=ann.values) for ann in request.annotation]
+        else:
+            annotations = None
+
         for n, feature in enumerate(request.feature):
             if request.featureType[n] == "gene":
                 cell_color_by_features.setGeneFeature(request=request, feature=feature, n=n)
             elif request.featureType[n] == "regulon":
                 cell_color_by_features.setRegulonFeature(request=request, feature=feature, n=n)
             elif request.featureType[n] == "annotation":
-                cell_color_by_features.setAnnotationFeature(request=request, feature=feature)
+                cell_color_by_features.setAnnotationFeature(
+                    feature=feature, annotations=annotations, logic=request.logic
+                )
                 return cell_color_by_features.getReply()
             elif request.featureType[n] == "metric":
                 cell_color_by_features.setMetricFeature(request=request, feature=feature, n=n)
@@ -225,6 +234,23 @@ class SCope(s_pb2_grpc.MainServicer):
             maxVmax=cell_color_by_features.get_max_v_max(),
             cellIndices=cell_color_by_features.get_cell_indices(),
         )
+
+    def getFeatureLabels(self, request, context):
+        try:
+            loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
+        except ValueError:
+            return
+
+        labels = [
+            s_pb2.FeatureLabelReply.FeatureLabel(
+                label=label.label,
+                colour=label.colour,
+                coordinate=s_pb2.Coordinate(x=label.coordinate.x, y=label.coordinate.y),
+            )
+            for label in label_annotation(loom, request.embedding, request.feature)
+        ]
+
+        return s_pb2.FeatureLabelReply(labels=labels)
 
     def getCellAUCValuesByFeatures(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
@@ -315,9 +341,13 @@ class SCope(s_pb2_grpc.MainServicer):
     def getCoordinates(self, request, context):
         # request content
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
-        c = loom.get_coordinates(
-            coordinatesID=request.coordinatesID, annotation=request.annotation, logic=request.logic
-        )
+
+        if len(request.annotation) > 0:
+            annotations = [Annotation(name=ann.name, values=ann.values) for ann in request.annotation]
+        else:
+            annotations = None
+
+        c = loom.get_coordinates(coordinatesID=request.coordinatesID, annotation=annotations, logic=request.logic)
         return s_pb2.CoordinatesReply(x=c["x"], y=c["y"], cellIndices=c["cellIndices"])
 
     def setAnnotationName(self, request, context):

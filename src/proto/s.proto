@@ -44,6 +44,7 @@ service Main {
   rpc getNextCluster (getNextClusterRequest) returns (FeatureReply) {} 
   rpc addNewClustering (AddNewClusteringRequest) returns (AddNewClusteringReply) {}
   rpc getClusterOverlaps (GetClusterOverlapsRequest) returns (ClusterOverlaps) {}
+  rpc getFeatureLabels (FeatureLabelRequest) returns (FeatureLabelReply) {}
 }
 
 message ErrorReply {
@@ -547,4 +548,20 @@ message ClusterOverlaps {
   }
 
   repeated ClusterOverlap clusterOverlaps=1;
+}
+
+message FeatureLabelRequest {
+  string loomFilePath=1;
+  sint32 embedding=2;
+  string feature=3;
+}
+
+message FeatureLabelReply {
+  message FeatureLabel {
+    string label=1;
+    string colour=2;
+    Coordinate coordinate=3;
+  }
+
+  repeated FeatureLabel labels=1;
 }

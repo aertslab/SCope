@@ -76,6 +76,8 @@ class API {
             hasLogTransform: true,
             hasCpmNormalization: false,
             dissociateViewers: true,
+            showLabels: true,
+            labelSize: 12,
         };
         this.settingsChangeListeners = [];
 
