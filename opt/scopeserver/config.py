@@ -56,8 +56,11 @@ def from_file(config_filename: Optional[Union[Path, str]]) -> Config:
 
 
 class Settings(BaseSettings):
+
+    DATABASE_URL: str
+
     class Config:
-        env_file = Path(".") / ".env"
+        env_file = Path("..") / ".env"
         env_file_encoding = "utf-8"
 
 

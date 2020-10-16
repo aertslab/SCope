@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.types import Date
-from scopedb.database import Base
+from scopeserver.database import Base
 
 
 class Test(Base):
