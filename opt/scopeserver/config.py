@@ -4,6 +4,7 @@
 from typing import Dict, Optional, Union
 from pathlib import Path
 from collections import defaultdict
+from pydantic import BaseSettings
 import json
 import secrets
 
@@ -52,3 +53,15 @@ def from_file(config_filename: Optional[Union[Path, str]]) -> Config:
             return from_string(config_file.read())
 
     return defaults()
+
+
+class Settings(BaseSettings):
+
+    DATABASE_URL: str
+
+    class Config:
+        env_file = Path("..") / ".env"
+        env_file_encoding = "utf-8"
+
+
+settings = Settings()

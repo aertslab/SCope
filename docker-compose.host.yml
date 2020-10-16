@@ -11,7 +11,7 @@ services:
             - 55853
         volumes:
             - ${SCOPE_DATA_DIR:-./scope_data/}:/root/.local/share/SCope/
-        entrypoint: ["poetry", "run", "hypercorn", "--bind", "0.0.0.0", "main:scope_api"]
+        entrypoint: ['bash /app/start.sh']
     httpd:
         restart: always
         build: ./apache
