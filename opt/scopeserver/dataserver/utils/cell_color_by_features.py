@@ -99,7 +99,10 @@ class CellColorByFeatures:
 
     def setGeneFeature(self, request, feature, n):
         if feature != "":
-            annotations = [Annotation(name=ann.name, values=ann.values) for ann in request.annotation]
+            if len(request.annotation) > 0:
+                annotations = [Annotation(name=ann.name, values=ann.values) for ann in request.annotation]
+            else:
+                annotations = None
 
             vals, self.cellIndices = self.loom.get_gene_expression(
                 gene_symbol=feature,
@@ -120,7 +123,10 @@ class CellColorByFeatures:
 
     def setRegulonFeature(self, request, feature, n):
         if feature != "":
-            annotations = [Annotation(name=ann.name, values=ann.values) for ann in request.annotation]
+            if len(request.annotation) > 0:
+                annotations = [Annotation(name=ann.name, values=ann.values) for ann in request.annotation]
+            else:
+                annotations = None
 
             vals, self.cellIndices = self.loom.get_auc_values(
                 regulon=feature, annotation=annotations, logic=request.logic
@@ -165,7 +171,10 @@ class CellColorByFeatures:
 
     def setMetricFeature(self, request, feature, n):
         if feature != "":
-            annotations = [Annotation(name=ann.name, values=ann.values) for ann in request.annotation]
+            if len(request.annotation) > 0:
+                annotations = [Annotation(name=ann.name, values=ann.values) for ann in request.annotation]
+            else:
+                annotations = None
 
             vals, self.cell_indices = self.loom.get_metric(
                 metric_name=feature,
