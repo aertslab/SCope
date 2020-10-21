@@ -22,12 +22,13 @@ type FeatureMetadataMetric = {
 };
 
 export type FeatureMetadata = {
-    cellTypeAnno: unknown[];
-    clusterID: number;
+    cellTypeAnno?: unknown[];
+    clusterID?: number;
     clusteringGroup: string;
-    clusteringID: number;
-    genes: string[];
-    metrics: FeatureMetadataMetric[];
+    clusteringID?: number;
+    genes?: string[];
+    metrics?: FeatureMetadataMetric[];
+    description: string;
 };
 
 export type FeatureMetricTable = {
@@ -81,20 +82,31 @@ const reduceMetricsAtIndex = (idx: number) => (
 export const getMetricTable = (
     featureMetadata: FeatureMetadata
 ): FeatureMetricTable => {
-    return featureMetadata.genes.map((gene: string, idx: number) => {
-        return {
-            gene,
-            ...featureMetadata.metrics.reduce(reduceMetricsAtIndex(idx), {}),
-        };
-    });
+    if (featureMetadata.genes) {
+        return featureMetadata.genes.map((gene: string, idx: number) => {
+            return {
+                gene,
+                ...featureMetadata.metrics.reduce(
+                    reduceMetricsAtIndex(idx),
+                    {}
+                ),
+            };
+        });
+    }
+
+    return [];
 };
 
 export const getAvailableSortBy = (featureMetadata: FeatureMetadata) => {
-    return featureMetadata.metrics.map((metric, idx: number) => {
-        return {
-            key: idx,
-            text: metric.name,
-            value: metric.accessor,
-        };
-    });
+    if (featureMetadata.metrics) {
+        return featureMetadata.metrics.map((metric, idx: number) => {
+            return {
+                key: idx,
+                text: metric.name,
+                value: metric.accessor,
+            };
+        });
+    }
+
+    return [];
 };
