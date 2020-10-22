@@ -27,7 +27,7 @@ import Metadata from '../common/Metadata';
 import FileDownloader from '../../js/http';
 import CollaborativeAnnotation from './CollaborativeAnnotation';
 import GProfilerModal from '../GProfiler/GProfilerModal';
-import ClusterOverlapsTable from './ClusterOverlapsTable';
+import { LassoTab } from '../LassoTool/LassoTab'
 
 class ViewerSidebar extends Component {
     static propTypes = {
@@ -159,103 +159,7 @@ class ViewerSidebar extends Component {
             activePage,
         } = this.state;
 
-        let lassoTab = () => {
-            if (lassoSelections.length == 0) {
-                return (
-                    <Tab.Pane attached={false} style={{ textAlign: 'center' }}>
-                        <br />
-                        <br />
-                        No user&apos;s lasso selections
-                        <br />
-                        <br />
-                        <br />
-                    </Tab.Pane>
-                );
-            }
-
-            return lassoSelections.map((lS, i) => {
-                return (
-                    <Tab.Pane
-                        attached={false}
-                        style={{ textAlign: 'center' }}
-                        key={i}>
-                        <Grid>
-                            <Grid.Row
-                                columns={3}
-                                key={i}
-                                className='selectionRow'>
-                                <Grid.Column style={{ whiteSpace: 'unset' }}>
-                                    {`Selection ${lS.id + 1} (${
-                                        lS.points.length
-                                    } cells)`}
-                                </Grid.Column>
-                                <Grid.Column>
-                                    <Input
-                                        size='mini'
-                                        style={{ width: 75, height: 15 }}
-                                        label={{
-                                            style: {
-                                                backgroundColor: '#' + lS.color,
-                                            },
-                                        }}
-                                        labelPosition='right'
-                                        placeholder={'#' + lS.color}
-                                        disabled
-                                    />
-                                </Grid.Column>
-                                <Grid.Column>
-                                    <Icon
-                                        name='eye'
-                                        title='toggle show/hide selection'
-                                        onClick={(e, d) =>
-                                            this.toggleLassoSelection(lS.id)
-                                        }
-                                        style={{
-                                            display: 'inline',
-                                            opacity: lS.selected ? 1 : 0.5,
-                                        }}
-                                        className='pointer'
-                                    />
-                                    &nbsp;
-                                    <Icon
-                                        name='trash'
-                                        title='remove this selection'
-                                        style={{ display: 'inline' }}
-                                        onClick={(e, d) =>
-                                            this.removeLassoSelection(i)
-                                        }
-                                        className='pointer'
-                                    />
-                                    &nbsp;
-                                    <Icon
-                                        name='search'
-                                        title='show metadata for this selection'
-                                        style={{ display: 'inline' }}
-                                        onClick={(e, d) => {
-                                            this.setState({ modalID: i });
-                                            this.forceUpdate();
-                                        }}
-                                        className='pointer'
-                                    />
-                                </Grid.Column>
-                            </Grid.Row>
-                            <Grid.Row>
-                                <Grid.Column>
-                                    {lS.clusterOverlaps ? (
-                                        <ClusterOverlapsTable
-                                            clusterOverlaps={lS.clusterOverlaps}
-                                        />
-                                    ) : (
-                                        ''
-                                    )}
-                                </Grid.Column>
-                            </Grid.Row>
-                        </Grid>
-                        <br />
-                    </Tab.Pane>
-                );
-            });
-        };
+        let lassoTab = () => <LassoTab selections={lassoSelections}/>
 
         let featureTab = (i) => {
             let colors = ['red', 'green', 'blue'];
@@ -1346,14 +1250,6 @@ class ViewerSidebar extends Component {
         if (this.props.match.params.loom != prevProps.match.params.loom) {
             this.updateMetadata();
         }
-    }
-
-    toggleLassoSelection(id) {
-        let selected = BackendAPI.toggleLassoSelection(id);
-    }
-
-    removeLassoSelection(id) {
-        BackendAPI.removeViewerSelection(id);
     }
 }
 export default withCookies(withRouter(ViewerSidebar));
