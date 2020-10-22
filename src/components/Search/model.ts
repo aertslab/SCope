@@ -44,7 +44,7 @@ export const findResult = (
     );
 
     return R.filter(
-        R.propEq<keyof FeatureSearchSelection, any>('title', query.title),
+        R.propEq<keyof FeatureSearchSelection>('title', query.title),
         searchSpace
     )[0];
 };
