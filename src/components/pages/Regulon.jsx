@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { Segment, Grid } from 'semantic-ui-react';
-import FeatureSearchBox from '../common/FeatureSearchBox';
+import Search from '../Search';
 import { BackendAPI } from '../common/API';
 import Viewer from '../common/Viewer';
 import ViewerSidebar from '../common/ViewerSidebar';
@@ -15,7 +15,6 @@ export default class Regulon extends Component {
             activeLoom: BackendAPI.getActiveLoom(),
             activeCoordinates: BackendAPI.getActiveCoordinates(),
             activeFeatures: BackendAPI.getActiveFeatures(),
-            sidebar: BackendAPI.getSidebarVisible(),
             colors: BackendAPI.getColors(),
         };
         this.activeLoomListener = (loom, metadata, coordinates) => {
@@ -23,10 +22,6 @@ export default class Regulon extends Component {
         };
         this.activeFeaturesListener = (features, featureID) => {
             this.setState({ activeFeatures: features });
-        };
-        this.sidebarVisibleListener = (state) => {
-            this.setState({ sidebar: state });
-            this.forceUpdate();
         };
     }
 
@@ -37,19 +32,7 @@ export default class Regulon extends Component {
             activeFeatures,
             colors,
             geneFeatures,
-            sidebar,
         } = this.state;
-        let featureSearch = _.times(3, (i) => (
-            <Grid.Column key={i}>
-                <FeatureSearchBox
-                    field={i}
-                    color={colors[i]}
-                    type='regulon'
-                    selectLocked={true}
-                    value={activeFeatures[i] ? activeFeatures[i].feature : ''}
-                />
-            </Grid.Column>
-        ));
         let featureThreshold = _.times(3, (i) => (
             <Grid.Column key={i} className='flexDisplay' stretched>
                 <Histogram
@@ -66,17 +49,17 @@ export default class Regulon extends Component {
 
         return (
             <Grid className='flexDisplay'>
-                <Grid.Row columns='4' centered>
-                    {featureSearch}
-                    <Grid.Column>&nbsp;</Grid.Column>
-                </Grid.Row>
+                <Search.FeatureSearchGroup
+                    filter='regulon'
+                    identifier='regulon-page'
+                />
                 <Grid.Row columns='4' centered>
                     {featureThreshold}
                     <Grid.Column>&nbsp;</Grid.Column>
                 </Grid.Row>
                 <Grid.Row columns='4' stretched className='viewerFlex flexRow'>
                     <Grid.Column width={1}>
-                        <ViewerToolbar />
+                        <ViewerToolbar location={this.props.location} />
                     </Grid.Column>
                     <Grid.Column stretched className='flexDouble'>
                         <b className='noStretch'>Regulon AUC values</b>
@@ -86,6 +69,7 @@ export default class Regulon extends Component {
                             activeFeatures={activeFeatures}
                             activeCoordinates={activeCoordinates}
                             scale={true}
+                            location={this.props.location}
                         />
                     </Grid.Column>
                     <Grid.Column stretched>
@@ -99,6 +83,7 @@ export default class Regulon extends Component {
                                 activeFeatures={activeFeatures}
                                 activeCoordinates={activeCoordinates}
                                 thresholds={true}
+                                location={this.props.location}
                             />
                         </Segment>
                         <Segment vertical stretched className='flexDisplay'>
@@ -112,6 +97,7 @@ export default class Regulon extends Component {
                                 genes={true}
                                 settings={true}
                                 customScale={true}
+                                location={this.props.location}
                             />
                         </Segment>
                     </Grid.Column>
@@ -133,7 +119,6 @@ export default class Regulon extends Component {
             'regulon',
             this.activeFeaturesListener
         );
-        BackendAPI.onSidebarVisibleChange(this.sidebarVisibleListener);
     }
 
     componentWillUnmount() {
@@ -142,7 +127,6 @@ export default class Regulon extends Component {
             'regulon',
             this.activeFeaturesListener
         );
-        BackendAPI.removeSidebarVisibleChange(this.sidebarVisibleListener);
     }
 
     onThresholdChange(idx, threshold) {

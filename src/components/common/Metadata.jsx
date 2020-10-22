@@ -8,7 +8,6 @@ import {
     Loader,
     Dropdown,
 } from 'semantic-ui-react';
-import ReactGA from 'react-ga';
 import fileDownload from 'js-file-download';
 import { parse as json2csv } from 'json2csv';
 
@@ -197,11 +196,6 @@ export default class Metadata extends Component {
                                                 loading: true,
                                             });
                                             this.getMetadata();
-                                            ReactGA.event({
-                                                category: 'metadata',
-                                                action: 'selected annotation',
-                                                label: s.text,
-                                            });
                                         }, 50);
                                     }}
                                 />
@@ -221,11 +215,6 @@ export default class Metadata extends Component {
                                                 loading: true,
                                             });
                                             this.getMetadata();
-                                            ReactGA.event({
-                                                category: 'metadata',
-                                                action: 'selected clustering',
-                                                label: s.text,
-                                            });
                                         }, 50);
                                     }}
                                 />
@@ -287,11 +276,6 @@ export default class Metadata extends Component {
                             });
 
                             fileDownload(json2csv(data), 'metadata.csv');
-                            ReactGA.event({
-                                category: 'metadata',
-                                action: 'downloaded csv file',
-                                value: selection.points.length,
-                            });
                         }}>
                         <Icon name='download' /> Download
                     </Button>

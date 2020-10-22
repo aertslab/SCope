@@ -6,7 +6,6 @@ import { withCookies, Cookies } from 'react-cookie';
 import CookieConsent from 'react-cookie-consent';
 
 import ReactResizeDetector from 'react-resize-detector';
-import ReactGA from 'react-ga';
 import Favicon from 'react-favicon';
 
 import {
@@ -19,6 +18,8 @@ import {
     Icon,
 } from 'semantic-ui-react';
 
+import { SCOPE_COOKIE, ONE_MINUTE } from './constants';
+
 import AppHeader from './AppHeader';
 import AppSidebar from './AppSidebar';
 import { BackendAPI } from './common/API';
@@ -30,16 +31,15 @@ import Regulon from './pages/Regulon';
 import Compare from './pages/Compare';
 import Tutorial from './pages/Tutorial';
 import About from './pages/About';
+import { FullPageNotify } from './pages/FullPageNotify';
 import Alert from 'react-popup';
 import 'react-popup/style.css';
 
-import { setAppLoading } from '../redux/actions';
+import { setAppLoading, setUUID, setSessionMode } from '../redux/actions';
 
 const pako = require('pako');
 const publicIp = require('public-ip');
 const timer = 60 * 1000;
-const cookieName = 'SCOPE_UUID';
-const sidebarCookieName = 'SCOPE_SIDEBAR';
 
 class App extends Component {
     constructor() {
@@ -48,9 +48,7 @@ class App extends Component {
             metadata: null,
             loaded: false,
             error: false,
-            isSidebarVisible: true,
             sessionsLimitReached: false,
-            sessionMode: 'rw',
             orcid_active: true,
             orcid_data: null,
             cookiesAllowed: false,
@@ -63,109 +61,37 @@ class App extends Component {
 
         this.timeout = null;
         this.mouseClicks = 0;
-        ReactGA.initialize('UA-61194136-10');
     }
 
-    removeAllCookies = () => {
+    removeAllCookies() {
         this.props.cookies.remove('scope_orcid_name');
         this.props.cookies.remove('scope_orcid_id');
         this.props.cookies.remove('scope_orcid_uuid');
-        this.props.cookies.remove(cookieName);
-        this.props.cookies.remove(sidebarCookieName);
-    };
+        this.props.cookies.remove(SCOPE_COOKIE);
+    }
 
-    acceptCookies = () => {
+    acceptCookies() {
         this.props.cookies.set('CookieConsent', 'true');
-        this.props.cookies.set(cookieName, this.props.match.params.uuid, {
-            path: '/',
-        });
+        this.setUUIDCookie();
         this.setState({ cookiesAllowed: true });
-    };
+    }
+
+    setUUIDCookie() {
+        this.props.cookies.set(SCOPE_COOKIE, this.props.match.params.uuid, {
+            path: '/',
+            sameSite: 'strict',
+        });
+    }
 
     render() {
+        const { metadata, error, loaded, sessionsLimitReached } = this.state;
+
         const {
-            metadata,
-            error,
-            loaded,
-            isSidebarVisible,
-            sessionsLimitReached,
-        } = this.state;
-
-        const { isAppLoading } = this.props;
-
-        let errorDimmer = (
-            <Dimmer active={error}>
-                <br />
-                <br />
-                <Icon name='warning circle' color='orange' size='big' />
-                <br />
-                <br />
-                <Header as='h2' inverted>
-                    An error occured when connecting to SCope back-end.
-                    <br />
-                    <br />
-                    Please check your Internet connection.
-                    <br />
-                    <br />
-                    If this error persists, please try a local install from our{' '}
-                    <a
-                        href='https://github.com/aertslab/SCope'
-                        target='_blank'
-                        rel='noopener noreferrer'>
-                        Github page
-                    </a>{' '}
-                    or try our{' '}
-                    <a
-                        href='http://scope-mirror.aertslab.org/'
-                        target='_blank'
-                        rel='noopener noreferrer'>
-                        SCope mirror
-                    </a>
-                    .<br />
-                    <br />
-                    <Button
-                        color='orange'
-                        onClick={() => {
-                            window.location.reload();
-                        }}>
-                        REFRESH
-                    </Button>
-                </Header>
-            </Dimmer>
-        );
-
-        let limitReachedDimmer = (
-            <Dimmer active={!isAppLoading && sessionsLimitReached}>
-                <br />
-                <br />
-                <Icon name='warning circle' color='orange' size='big' />
-                <br />
-                <br />
-                <Header as='h2' inverted>
-                    Currenlty Scope has reached it&apos;s capacity in number of
-                    concurrent users.
-                    <br />
-                    <br />
-                    Please try again later or try out our standalone SCope app.
-                    <br />
-                    <br />
-                    More details on our GitHub.
-                    <br />
-                    <br />
-                    <Button
-                        color='orange'
-                        href='https://github.com/aertslab/SCope'
-                        target='_blank'>
-                        AertsLab GitHub
-                    </Button>
-                </Header>
-            </Dimmer>
-        );
-
-        console.log('isSidebarVisible', isSidebarVisible);
-        let pusherWidth = isSidebarVisible
-            ? screen.width - 340
-            : screen.width - 75;
+            isAppLoading,
+            uuid,
+            sessionMode,
+            sidebarIsVisible,
+        } = this.props;
 
         return (
             <div>
@@ -179,8 +105,18 @@ class App extends Component {
                                 <Segment vertical>
                                     <Header as='h1'>SCope</Header>
                                 </Segment>
-                                {errorDimmer}
-                                {limitReachedDimmer}
+                                <FullPageNotify
+                                    starting={isAppLoading}
+                                    connected={!error}
+                                    tooManyUsers={
+                                        !isAppLoading && sessionsLimitReached
+                                    }
+                                    timeout={
+                                        !isAppLoading &&
+                                        this.timeout != null &&
+                                        this.timeout <= 0
+                                    }
+                                />
                             </Segment>
                         )}
                     />
@@ -194,9 +130,6 @@ class App extends Component {
                                     onResize={this.onResize.bind(this)}
                                 />
                                 <AppHeader
-                                    toggleSidebar={this.toggleSidebar.bind(
-                                        this
-                                    )}
                                     metadata={metadata}
                                     loaded={loaded}
                                     timeout={this.timeout}
@@ -206,14 +139,13 @@ class App extends Component {
                                 />
                                 <Sidebar.Pushable>
                                     <AppSidebar
-                                        visible={isSidebarVisible}
+                                        visible={sidebarIsVisible}
                                         onMetadataChange={this.onMetadataChange.bind(
                                             this
                                         )}
-                                        sessionMode={this.state.sessionMode}
+                                        sessionMode={sessionMode}
                                     />
-                                    <Sidebar.Pusher
-                                        style={{ width: pusherWidth }}>
+                                    <Sidebar.Pusher style={{ width: '100%' }}>
                                         <Route
                                             path='/:uuid/:loom?/welcome'
                                             component={Welcome}
@@ -237,7 +169,12 @@ class App extends Component {
                                         <Route
                                             path='/:uuid/:loom?/compare'
                                             component={() => (
-                                                <Compare metadata={metadata} />
+                                                <Compare
+                                                    metadata={metadata}
+                                                    location={
+                                                        this.props.location
+                                                    }
+                                                />
                                             )}
                                         />
                                         <Route
@@ -250,43 +187,18 @@ class App extends Component {
                                         />
                                     </Sidebar.Pusher>
                                 </Sidebar.Pushable>
-                                <Dimmer active={isAppLoading} inverted>
-                                    <Loader inverted>
-                                        Your SCope session is starting
-                                    </Loader>
-                                </Dimmer>
-                                <Dimmer
-                                    active={
+                                <FullPageNotify
+                                    starting={isAppLoading}
+                                    connected={!error}
+                                    tooManyUsers={
+                                        !isAppLoading && sessionsLimitReached
+                                    }
+                                    timeout={
                                         !isAppLoading &&
                                         this.timeout != null &&
                                         this.timeout <= 0
-                                    }>
-                                    <br />
-                                    <br />
-                                    <Icon
-                                        name='warning circle'
-                                        color='orange'
-                                        size='big'
-                                    />
-                                    <br />
-                                    <br />
-                                    <Header as='h2' inverted>
-                                        Your SCope session has ended
-                                        <br />
-                                        <br />
-                                        <Link to='/'>
-                                            <Button
-                                                color='orange'
-                                                onClick={() => {
-                                                    history.replace('/');
-                                                }}>
-                                                RESTART
-                                            </Button>
-                                        </Link>
-                                    </Header>
-                                </Dimmer>
-                                {errorDimmer}
-                                {limitReachedDimmer}
+                                    }
+                                />
                             </Segment>
                         )}
                     />
@@ -308,13 +220,10 @@ class App extends Component {
         );
     }
 
-    UNSAFE_componentWillMount() {
-        if (DEBUG) console.log('App componentWillMount', this.props);
+    componentDidMount() {
         this.parseURLParams(this.props);
         this.getUUIDFromIP(this.props);
-        let isSidebarVisible = this.props.cookies.get(sidebarCookieName);
-        if (isSidebarVisible == '1') this.setState({ isSidebarVisible: true });
-        if (isSidebarVisible == '0') this.setState({ isSidebarVisible: false });
+
         if (this.props.cookies.get('CookieConsent') == 'true') {
             this.setState({ cookiesAllowed: true }, () => {
                 if (
@@ -357,9 +266,6 @@ class App extends Component {
                 }
             });
         }
-    }
-
-    componentDidMount() {
         document.addEventListener('click', this.clickHandler.bind(this));
         document.addEventListener('keypress', this.clickHandler.bind(this));
     }
@@ -370,15 +276,19 @@ class App extends Component {
     }
 
     componentWillUnmount() {
-        if (this.timer) clearInterval(this.timer);
+        if (this.timer) {
+            clearInterval(this.timer);
+        }
+
         document.removeEventListener('click', this.clickHandler);
         document.removeEventListener('keypress', this.clickHandler);
     }
 
-    UNSAFE_componentWillReceiveProps(nextProps) {
-        this.parseURLParams(nextProps);
-        if (this.state.uuid != nextProps.match.params.uuid)
-            this.getUUIDFromIP(nextProps);
+    componentDidUpdate(prevProps) {
+        this.parseURLParams(this.props);
+        if (prevProps.match.params.uuid !== this.props.match.params.uuid) {
+            this.getUUIDFromIP(this.props);
+        }
     }
 
     parseURLParams(props) {
@@ -387,9 +297,6 @@ class App extends Component {
         if (DEBUG) console.log('Query params - loom: ', loom, ' page: ', page);
         BackendAPI.setActivePage(page ? page : 'welcome');
         BackendAPI.setActiveLoom(loom ? loom : '');
-        ReactGA.pageview(
-            '/' + encodeURIComponent(loom) + '/' + encodeURIComponent(page)
-        );
     }
 
     getUUIDFromIP(props) {
@@ -408,10 +315,12 @@ class App extends Component {
 
         if (match.params.uuid) {
             if (match.params.uuid == 'permalink') {
-                if (DEBUG) console.log('Permalink detected');
+                if (DEBUG) {
+                    console.log('Permalink detected');
+                }
                 this.restoreSession(
                     ip,
-                    cookies.get(cookieName),
+                    cookies.get(SCOPE_COOKIE),
                     match.params.loom
                 );
             } else if (match.params.uuid.startsWith('permalink')) {
@@ -421,19 +330,21 @@ class App extends Component {
                     match.params.loom
                 );
             } else {
-                if (DEBUG)
+                if (DEBUG) {
                     console.log('Params UUID detected:', match.params.uuid);
+                }
                 this.checkUUID(ip, match.params.uuid);
                 console.log(this.state.cookiesAllowed);
-                console.log(cookieName, match.params.uuid, { path: '/' });
+                console.log(SCOPE_COOKIE, match.params.uuid, { path: '/' });
                 if (this.state.cookiesAllowed) {
-                    cookies.set(cookieName, match.params.uuid, { path: '/' });
+                    this.setUUIDCookie();
                 }
             }
-        } else if (cookies.get(cookieName)) {
-            if (DEBUG)
-                console.log('Cookie UUID detected:', cookies.get(cookieName));
-            this.checkUUID(ip, cookies.get(cookieName));
+        } else if (cookies.get(SCOPE_COOKIE)) {
+            if (DEBUG) {
+                console.log('Cookie UUID detected:', cookies.get(SCOPE_COOKIE));
+            }
+            this.checkUUID(ip, cookies.get(SCOPE_COOKIE));
         } else {
             if (DEBUG) console.log('No UUID detected');
             this.obtainNewUUID(ip, (uuid) => {
@@ -471,19 +382,18 @@ class App extends Component {
                     mouseEvents: this.mouseClicks,
                 };
                 gbc.ws.onclose = (err) => {
-                    ReactGA.event({
-                        category: 'errors',
-                        action: 'socket closed',
-                    });
                     this.setState({ error: true });
                 };
-                if (DEBUG) console.log('getRemainingUUIDTime', query);
+                if (DEBUG) {
+                    console.log('request RemainingUUIDTime', query);
+                }
                 gbc.services.scope.Main.getRemainingUUIDTime(
                     query,
                     (err, response) => {
                         this.mouseClicks = 0;
-                        if (DEBUG)
+                        if (DEBUG) {
                             console.log('getRemainingUUIDTime', response);
+                        }
                         if (response.sessionsLimitReached) {
                             this.props.setAppLoading(false);
                             this.setState({
@@ -493,22 +403,21 @@ class App extends Component {
                             this.timeout = response
                                 ? parseInt(response.timeRemaining * 1000)
                                 : 0;
-                            // cookies.set(cookieName, uuid, { path: '/', maxAge: this.timeout });
+
                             if (!ping) {
                                 this.props.setAppLoading(false);
-                                this.setState({
-                                    uuid: uuid,
-                                    sessionMode: response.sessionMode,
-                                });
+                                this.props.setUUID(uuid);
+                                this.props.setSessionMode(response.sessionMode);
                                 BackendAPI.setSessionMode(response.sessionMode);
                             }
                             if (!this.timer) {
                                 this.timer = setInterval(() => {
-                                    this.timeout -= timer;
+                                    this.timeout -= 1 * ONE_MINUTE;
                                     if (this.timeout < 0) {
-                                        if (DEBUG)
+                                        if (DEBUG) {
                                             console.log('Session timed out');
-                                        cookies.remove(cookieName);
+                                        }
+                                        cookies.remove(SCOPE_COOKIE);
                                         clearInterval(this.timer);
                                         this.timer = null;
                                         if (!BackendAPI.isConnected()) {
@@ -516,17 +425,17 @@ class App extends Component {
                                         }
                                         this.forceUpdate();
                                     } else {
-                                        if (DEBUG)
+                                        if (DEBUG) {
                                             console.log(
                                                 'Session socket ping @ ',
                                                 this.timeout
                                             );
+                                        }
                                         this.checkUUID(ip, uuid, true);
                                     }
-                                }, timer);
+                                }, 1 * ONE_MINUTE);
                             }
                             if (!ping) {
-                                ReactGA.set({ userId: uuid });
                                 let loom = match.params.loom
                                     ? decodeURIComponent(match.params.loom)
                                     : '*';
@@ -554,21 +463,6 @@ class App extends Component {
 
     onMetadataChange(metadata) {
         this.setState({ metadata: metadata, loaded: true });
-    }
-
-    toggleSidebar() {
-        let state = !this.state.isSidebarVisible;
-        if (this.state.cookiesAllowed) {
-            this.props.cookies.set(sidebarCookieName, state ? 1 : 0, {
-                path: '/',
-            });
-        }
-        this.setState({ isSidebarVisible: state });
-        ReactGA.event({
-            category: 'settings',
-            action: 'toggle sidebar',
-            label: state ? 'on' : 'off',
-        });
     }
 
     onResize() {
@@ -627,18 +521,21 @@ class App extends Component {
 App.propTypes = {
     isAppLoading: PropTypes.bool.isRequired,
     cookies: instanceOf(Cookies).isRequired,
+    sessionMode: PropTypes.string.isRequired,
+    sidebarIsVisible: PropTypes.bool.isRequired,
 };
 
-let app = withRouter(withCookies(App));
+const app = withRouter(withCookies(App));
 
 const mapStateToProps = (state) => {
-    const { isAppLoading } = state.main;
-    return { isAppLoading };
+    return state['main'];
 };
 
 const mapDispatchToProps = (dispatch) => {
     return {
         setAppLoading: (isAppLoading) => dispatch(setAppLoading(isAppLoading)),
+        setUUID: (uuid) => dispatch(setUUID(uuid)),
+        setSessionMode: (mode) => dispatch(setSessionMode(mode)),
     };
 };
 

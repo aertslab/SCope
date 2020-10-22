@@ -39,7 +39,7 @@ class ViewerDropContainer extends Component {
                     <Viewer
                         loomFile={loomFile}
                         activeAnnotations={activeAnnotations}
-                        {...props}
+                        {...this.props}
                     />
                 );
             } else if (active) {

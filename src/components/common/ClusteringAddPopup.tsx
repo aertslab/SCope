@@ -102,7 +102,7 @@ export default class ClusteringAddPopup extends Component<
             return;
         }
         BackendAPI.getConnection().then((gbc) => {
-            let query = {
+            const query = {
                 loomFilePath: BackendAPI.getActiveLoom(),
                 orcidInfo: {
                     orcidName: this.props.orcid_name,
@@ -179,7 +179,7 @@ export default class ClusteringAddPopup extends Component<
             transitionDuration: '0.3s',
         };
 
-        let warningPopup = (trigger) => {
+        const warningPopup = (trigger) => {
             return (
                 <Popup
                     trigger={trigger}

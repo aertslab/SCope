@@ -7,12 +7,13 @@ import HTML5Backend, { NativeTypes } from 'react-dnd-html5-backend';
 import { Accordion, Grid, Menu, Icon, Dropdown } from 'semantic-ui-react';
 import { BackendAPI } from '../common/API';
 import Annotation from '../common/Annotation';
-import FeatureSearchBox from '../common/FeatureSearchBox';
+import Search from '../Search';
 import ViewerSidebar from '../common/ViewerSidebar';
 import ViewerToolbar from '../common/ViewerToolbar';
 import AnnotationDropContainer from '../common/AnnotationDropContainer';
 import ViewerDropContainer from '../common/ViewerDropContainer';
-import ReactGA from 'react-ga';
+
+import './compare.css';
 
 class Compare extends Component {
     constructor(props) {
@@ -311,13 +312,6 @@ class Compare extends Component {
                                                         this.setState({
                                                             multiCoordinates: mc,
                                                         });
-                                                        ReactGA.event({
-                                                            category: 'compare',
-                                                            action:
-                                                                'comparison coordinates selected',
-                                                            label: select.text,
-                                                            value: j,
-                                                        });
                                                     }}
                                                 />
                                             </span>
@@ -350,13 +344,6 @@ class Compare extends Component {
                                                     this.setState({
                                                         multiLoom: ml,
                                                         multiCoordinates: mc,
-                                                    });
-                                                    ReactGA.event({
-                                                        category: 'compare',
-                                                        action:
-                                                            'comparison dataset selected',
-                                                        label: select.value,
-                                                        value: j,
                                                     });
                                                 }}
                                             />
@@ -424,6 +411,7 @@ class Compare extends Component {
                                                     activeLegend: legend,
                                                 });
                                             }}
+                                            location={this.props.location}
                                         />
                                     </Grid.Column>
                                 );
@@ -434,62 +422,52 @@ class Compare extends Component {
             );
         };
 
-        let featureSearch = _.times(3, (i) => (
-            <Grid.Column key={i}>
-                <FeatureSearchBox
-                    field={i}
-                    color={colors[i]}
-                    type='all'
-                    value={activeFeatures[i] ? activeFeatures[i].feature : ''}
-                />
-            </Grid.Column>
-        ));
-
         if (!multiLoom[0]) return <div>Select the dataset to be analyzed</div>;
 
         return (
             <Grid>
-                <Grid.Row columns='5'>
-                    <Grid.Column width={2}>
-                        Number of displays: &nbsp;
-                        <Dropdown
-                            inline
-                            options={this.displayConf}
-                            disabled={configuration == 'one'}
-                            value={displays}
-                            onChange={this.displayNumberChanged.bind(this)}
-                        />
-                        <br />
-                        Superposition: &nbsp;
-                        <Dropdown
-                            inline
-                            disabled={
-                                configuration == 'one' && isSuperpositionLocked
-                            }
-                            options={this.superpositionConf}
-                            value={superposition}
-                            onChange={this.superpositionChanged.bind(this)}
-                        />
-                        <br />
-                        Configuration: &nbsp;
-                        <Dropdown
-                            inline
-                            options={this.configurationConf}
-                            disabled={isConfigurationLocked}
-                            defaultValue={configuration}
-                            onChange={this.configurationChanged.bind(this)}
-                        />
-                    </Grid.Column>
-                    {featureSearch}
-                    <Grid.Column>&nbsp;</Grid.Column>
-                </Grid.Row>
+                <Search.FeatureSearchGroup
+                    filter='all'
+                    identifier='compare-page'
+                />
                 <Grid.Row columns={3} stretched className='viewerRow'>
                     <Grid.Column width={2}>
-                        <Accordion styled>{annotationTabs()}</Accordion>
-                        <br />
-                        <ViewerToolbar />
+                        <div className='compare-menu'>
+                            Number of displays: &nbsp;
+                            <Dropdown
+                                inline
+                                options={this.displayConf}
+                                disabled={configuration == 'one'}
+                                value={displays}
+                                onChange={this.displayNumberChanged.bind(this)}
+                            />
+                            <br />
+                            Superposition: &nbsp;
+                            <Dropdown
+                                inline
+                                disabled={
+                                    configuration == 'one' &&
+                                    isSuperpositionLocked
+                                }
+                                options={this.superpositionConf}
+                                value={superposition}
+                                onChange={this.superpositionChanged.bind(this)}
+                            />
+                            <br />
+                            Configuration: &nbsp;
+                            <Dropdown
+                                inline
+                                options={this.configurationConf}
+                                disabled={isConfigurationLocked}
+                                defaultValue={configuration}
+                                onChange={this.configurationChanged.bind(this)}
+                            />
+                            <Accordion styled>{annotationTabs()}</Accordion>
+                            <br />
+                            {/* <ViewerToolbar location={this.props.location} /> */}
+                        </div>
                     </Grid.Column>
-                    <Grid.Column width={11} className='viewerCell'>
+                    <Grid.Column stretched width={11} className='viewerCell'>
                         {viewers()}
                     </Grid.Column>
                     <Grid.Column width={3}>
@@ -558,11 +536,6 @@ class Compare extends Component {
         annotations[orientation][position][item.name] = selectedAnnotations;
         this.setState({ crossAnnotations: annotations });
         this.getCellMetadata();
-        ReactGA.event({
-            category: 'compare',
-            action: 'annotation added',
-            label: item.name + ': ' + item.value,
-        });
         return true;
     }
 
@@ -592,11 +565,6 @@ class Compare extends Component {
             console.log('Annotation cannot be found', viewer, name, remove);
         }
         this.getCellMetadata();
-        ReactGA.event({
-            category: 'compare',
-            action: 'annotation removed',
-            label: name + ': ' + value,
-        });
     }
 
     displayNumberChanged(proxy, selection) {
@@ -612,11 +580,6 @@ class Compare extends Component {
             } else if (selection.value == 9) {
                 this.setState({ columns: 3, rows: 3, displays: 9 });
             }
-            ReactGA.event({
-                category: 'compare',
-                action: 'display number changed',
-                value: selection.value,
-            });
         }, 100);
     }
 
@@ -657,11 +620,6 @@ class Compare extends Component {
                 crossAnnotations: crossAnnotations,
             });
             this.getCellMetadata();
-            ReactGA.event({
-                category: 'compare',
-                action: 'configuration changed',
-                label: selection.value,
-            });
         }, 100);
     }
 
@@ -682,11 +640,6 @@ class Compare extends Component {
         crossAnnotations['one'] = annotationIDs;
         this.setState({ crossAnnotations: crossAnnotations });
         this.getCellMetadata();
-        ReactGA.event({
-            category: 'compare',
-            action: 'all annotations selected',
-            label: annotationGroup.name,
-        });
     }
 
     selectNoAnotations() {
@@ -697,11 +650,6 @@ class Compare extends Component {
         crossAnnotations['one'] = [];
         this.setState({ crossAnnotations: crossAnnotations });
         this.getCellMetadata();
-        ReactGA.event({
-            category: 'compare',
-            action: 'none annotations selected',
-            label: annotationGroup.name,
-        });
     }
 
     selectAnnotation(name, value, selected) {
@@ -730,11 +678,6 @@ class Compare extends Component {
                 return va > vb ? 1 : va < vb ? -1 : 0;
             });
             this.setState({ crossAnnotations: annotations });
-            ReactGA.event({
-                category: 'compare',
-                action: 'annotation toggled',
-                label: value,
-            });
         }
     }
 
@@ -748,11 +691,6 @@ class Compare extends Component {
             crossAnnotations: crossAnnotations,
         });
         let annotationGroup = multiMetadata[0].cellMetaData.annotations[index];
-        ReactGA.event({
-            category: 'compare',
-            action: 'toggle annotation group',
-            label: annotationGroup.name,
-        });
     }
 
     getCrossAnnotations(i, j) {

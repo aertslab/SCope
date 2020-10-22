@@ -11,7 +11,8 @@ import {
     Input,
     TextArea,
 } from 'semantic-ui-react';
-import FeatureSearchBox from '../common/FeatureSearchBox';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+
 import { BackendAPI } from '../common/API';
 import Viewer from '../common/Viewer';
 import ViewerSidebar from '../common/ViewerSidebar';
@@ -19,8 +20,6 @@ import ViewerToolbar from '../common/ViewerToolbar';
 import Histogram from '../common/Histogram';
 import UploadModal from '../common/UploadModal';
 import Uploader from '../common/Uploader';
-import ReactGA from 'react-ga';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 class Geneset extends Component {
     constructor() {
@@ -37,7 +36,6 @@ class Geneset extends Component {
             loadingMessage: 'Loading genesets',
             selectedGeneset: null,
             uploadModalOpened: false,
-            sidebar: BackendAPI.getSidebarVisible(),
             colors: [],
         };
         this.activeLoomListener = (loom, metadata, coordinates) => {
@@ -45,10 +43,6 @@ class Geneset extends Component {
         };
         this.activeFeaturesListener = (features, featureID) => {
             this.setState({ activeFeatures: features });
-        };
-        this.sidebarVisibleListener = (state) => {
-            this.setState({ sidebar: state });
-            this.forceUpdate();
         };
     }
 
@@ -60,7 +54,6 @@ class Geneset extends Component {
             activeFeatures,
             colors,
             geneFeatures,
-            sidebar,
             genesets,
             loading,
             uploadModalOpened,
@@ -165,13 +158,6 @@ class Geneset extends Component {
                         />
                     </Grid.Column>
                     <Grid.Column width='7'>
-                        {/*
-                        <FeatureSearchBox type='gene' size="huge" onResultSelect={(result) => {
-                            let geneset = this.state.geneset;
-                            geneset.push(result.title);
-                            this.setState({geneset});
-                        }} />
-                        */}
                         <TextArea
                             placeholder='Gene1&#10;Gene2&#10;Gene3&#10;...'
                             rows={4}
@@ -212,7 +198,7 @@ class Geneset extends Component {
                 </Grid.Row>*/}
                 <Grid.Row columns='4' stretched className='viewerFlex flexRow'>
                     <Grid.Column width={1}>
-                        <ViewerToolbar />
+                        <ViewerToolbar location={this.props.location} />
                     </Grid.Column>
                     <Grid.Column stretched className='flexDouble'>
                         <b className='noStretch'>Geneset AUC values</b>
@@ -224,6 +210,7 @@ class Geneset extends Component {
                             activeCoordinates={activeCoordinates}
                             scale={true}
                             colors={colors}
+                            location={this.props.location}
                         />
                     </Grid.Column>
                     <Grid.Column width={3}>
@@ -253,7 +240,6 @@ class Geneset extends Component {
             'regulon',
             this.activeFeaturesListener
         );
-        BackendAPI.onSidebarVisibleChange(this.sidebarVisibleListener);
     }
 
     componentWillUnmount() {
@@ -262,7 +248,6 @@ class Geneset extends Component {
             'regulon',
             this.activeFeaturesListener
         );
-        BackendAPI.removeSidebarVisibleChange(this.sidebarVisibleListener);
     }
 
     componentDidMount() {
@@ -271,18 +256,10 @@ class Geneset extends Component {
 
     showUploadModal(event) {
         this.setState({ uploadModalOpened: true });
-        ReactGA.event({
-            category: 'upload',
-            action: 'toggle geneset upload modal',
-        });
     }
 
     hideUploadModal(event) {
         this.setState({ uploadModalOpened: false });
-        ReactGA.event({
-            category: 'upload',
-            action: 'toggle geneset upload modal',
-        });
     }
 
     saveGeneset() {
@@ -332,10 +309,6 @@ class Geneset extends Component {
 
     deleteGeneSets(geneSetFilePath, geneSetDisplayName) {
         const { match } = this.props;
-        ReactGA.event({
-            category: 'geneset',
-            action: 'removed geneset file',
-        });
         let execute = confirm(
             'Are you sure that you want to remove the file: ' +
                 geneSetDisplayName +
@@ -386,21 +359,12 @@ class Geneset extends Component {
                 });
                 call.on('end', () => {
                     if (DEBUG) console.log('doGeneSetEnrichment end');
-                    ReactGA.event({
-                        category: 'geneset',
-                        action: 'enrichment finished',
-                        nonInteraction: true,
-                    });
                 });
             },
             () => {
                 BackendAPI.showError();
             }
         );
-        ReactGA.event({
-            category: 'geneset',
-            action: 'enrichment started',
-        });
     }
 
     onGenesetUploaded() {
@@ -409,11 +373,6 @@ class Geneset extends Component {
         this.setState({
             geneset: '',
             genesetName: '',
-        });
-        ReactGA.event({
-            category: 'upload',
-            action: 'uploaded geneset file',
-            nonInteraction: true,
         });
     }
 }

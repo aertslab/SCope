@@ -33,7 +33,7 @@ from scopeserver.dataserver.utils import cell_color_by_features as ccbf
 from scopeserver.dataserver.utils import constant
 from scopeserver.dataserver.utils import data
 from scopeserver.dataserver.utils import search_space as ss
-from scopeserver.dataserver.utils.search import get_search_results
+from scopeserver.dataserver.utils.search import get_search_results, CategorisedMatches
 from scopeserver.dataserver.utils.loom import Loom
 from scopeserver.dataserver.utils.labels import label_annotation
 from scopeserver.dataserver.utils.annotation import Annotation
@@ -275,17 +275,25 @@ class SCope(s_pb2_grpc.MainServicer):
                 request.clusteringID, request.clusterID, secret=self.config["dataHashSecret"]
             )
 
-        f = self.get_features(loom=loom, query=cluster_metadata["description"])
+        search_results = get_search_results(cluster_metadata["description"], "all", loom, self.config["dataHashSecret"])
 
-        for n, featureType in enumerate(f["featureType"]):
+        for n, featureType in enumerate(search_results["featureType"]):
             if featureType == f"Clustering: {clustering_meta['name']}":
                 clustering_index = n
                 break
 
         return s_pb2.FeatureReply(
-            feature=[f["feature"][clustering_index]],
-            featureType=[f["featureType"][clustering_index]],
-            featureDescription=[f["featureDescription"][clustering_index]],
+            features=[
+                s_pb2.FeatureReply.Feature(
+                    category=search_results["featureType"][clustering_index],
+                    results=[
+                        s_pb2.FeatureReply.Feature.Match(
+                            title=search_results["feature"][clustering_index],
+                            description=search_results["featureDescription"][clustering_index],
+                        )
+                    ],
+                )
+            ]
         )
 
     def getCellMetaData(self, request, context):
@@ -324,9 +332,18 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getFeatures(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
-        f = self.get_features(loom=loom, query=request.query)
+        features = get_search_results(request.query, request.filter, loom, self.config["dataHashSecret"])
         return s_pb2.FeatureReply(
-            feature=f["feature"], featureType=f["featureType"], featureDescription=f["featureDescription"]
+            features=[
+                s_pb2.FeatureReply.Feature(
+                    category=feature.category,
+                    results=[
+                        s_pb2.FeatureReply.Feature.Match(title=match.feature, description=match.description)
+                        for match in feature.matches
+                    ],
+                )
+                for feature in features
+            ]
         )
 
     def getCoordinates(self, request, context):
