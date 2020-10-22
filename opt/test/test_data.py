@@ -15,4 +15,6 @@ def test_vmax(values):
 
 @given(lists(integers()))
 def test_uniq(values):
-    assert set(values) == set(data.uniq(values))
+    unique_values = data.uniq(values)
+    assert set(values) == set(unique_values)
+    assert len(set(values)) == len(unique_values)
