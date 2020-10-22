@@ -54,7 +54,3 @@ def test_load_from_nonexistant_file():
 def test_load_malformed_json():
     with pytest.raises(JSONDecodeError):
         config.from_file(Path("test") / Path("data") / Path("malformed_config.json"))
-
-
-def test_load_settings():
-    assert config.settings.DATABASE_URL == f"sqlite:///{os.environ.get('HOME')}/.scope/sqlite.db"

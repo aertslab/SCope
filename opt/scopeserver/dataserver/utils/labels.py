@@ -11,6 +11,7 @@ import numpy as np
 from scopeserver.dataserver.utils import constant
 from scopeserver.dataserver.utils.loom import Loom
 from scopeserver.dataserver.utils.annotation import Annotation
+from scopeserver.dataserver.utils.data import uniq
 
 logger = logging.getLogger(__name__)
 
@@ -28,23 +29,6 @@ class FeatureLabel(NamedTuple):
     label: str
     colour: str
     coordinate: Coordinate
-
-
-def uniq(data: Iterable[str]) -> List[str]:
-    """
-    Extract unique values from a container while preserving
-    the order.
-    """
-
-    seen = set()
-    result = []
-
-    for x in data:
-        if x not in seen:
-            seen.add(x)
-            result.append(x)
-
-    return result
 
 
 def label_annotation(loom: Loom, embedding: int, feature: str) -> List[FeatureLabel]:
