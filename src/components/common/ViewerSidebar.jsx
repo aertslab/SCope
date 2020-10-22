@@ -1240,7 +1240,10 @@ class ViewerSidebar extends Component {
                             {downloadSubLoomButton()}
                             {activeFeatures[i].featureType.startsWith(
                                 'Clustering'
-                            ) && <GProfilerModal featureMetadata={md} />}
+                            ) &&
+                                md.genes && (
+                                    <GProfilerModal featureMetadata={md} />
+                                )}
                             <br />
                         </Grid.Column>
                     </Grid.Row>

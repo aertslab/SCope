@@ -1896,3 +1896,62 @@ class ClusterOverlaps(google___protobuf___message___Message):
     def ClearField(self, field_name: typing_extensions___Literal["clusterOverlaps", b"clusterOverlaps"]) -> None: ...
 
 type___ClusterOverlaps = ClusterOverlaps
+
+class FeatureLabelRequest(google___protobuf___message___Message):
+    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+    loomFilePath: typing___Text = ...
+    embedding: builtin___int = ...
+    feature: typing___Text = ...
+    def __init__(
+        self,
+        *,
+        loomFilePath: typing___Optional[typing___Text] = None,
+        embedding: typing___Optional[builtin___int] = None,
+        feature: typing___Optional[typing___Text] = None,
+    ) -> None: ...
+    def ClearField(
+        self,
+        field_name: typing_extensions___Literal[
+            "embedding", b"embedding", "feature", b"feature", "loomFilePath", b"loomFilePath"
+        ],
+    ) -> None: ...
+
+type___FeatureLabelRequest = FeatureLabelRequest
+
+class FeatureLabelReply(google___protobuf___message___Message):
+    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+    class FeatureLabel(google___protobuf___message___Message):
+        DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+        label: typing___Text = ...
+        colour: typing___Text = ...
+        @property
+        def coordinate(self) -> type___Coordinate: ...
+        def __init__(
+            self,
+            *,
+            label: typing___Optional[typing___Text] = None,
+            colour: typing___Optional[typing___Text] = None,
+            coordinate: typing___Optional[type___Coordinate] = None,
+        ) -> None: ...
+        def HasField(self, field_name: typing_extensions___Literal["coordinate", b"coordinate"]) -> builtin___bool: ...
+        def ClearField(
+            self,
+            field_name: typing_extensions___Literal[
+                "colour", b"colour", "coordinate", b"coordinate", "label", b"label"
+            ],
+        ) -> None: ...
+    type___FeatureLabel = FeatureLabel
+    @property
+    def labels(
+        self,
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[
+        type___FeatureLabelReply.FeatureLabel
+    ]: ...
+    def __init__(
+        self,
+        *,
+        labels: typing___Optional[typing___Iterable[type___FeatureLabelReply.FeatureLabel]] = None,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions___Literal["labels", b"labels"]) -> None: ...
+
+type___FeatureLabelReply = FeatureLabelReply

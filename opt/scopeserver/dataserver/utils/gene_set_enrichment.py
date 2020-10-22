@@ -4,7 +4,7 @@ import numpy as np
 from scopeserver.dataserver.utils import data_file_handler as dfh
 
 from scopeserver.dataserver.utils import constant
-from scopeserver.dataserver.modules.gserver import GServer as gs
+from scopeserver.dataserver.utils import data
 from scopeserver.dataserver.modules.gserver import s_pb2
 import logging
 
@@ -60,7 +60,7 @@ class GeneSetEnrichment:
             vmax = np.zeros(3)
             max_vmax = np.zeros(3)
             aucs = state.get_values()
-            _vmax = gs.SCope.get_vmax(vals=aucs)
+            _vmax = data.get_99_and_100_percentiles(values=aucs)
             vmax[0] = _vmax[0]
             max_vmax[0] = _vmax[1]
             vals = aucs / vmax[0]

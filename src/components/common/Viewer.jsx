@@ -40,6 +40,7 @@ export default class Viewer extends Component {
             customScale: BackendAPI.getCustomScale(),
             activePage: BackendAPI.getActivePage(),
             benchmark: {},
+            featureLabels: [],
         };
         this.zoomTransform = {
             x: 0,
@@ -62,6 +63,12 @@ export default class Viewer extends Component {
                     this.state.activeAnnotations,
                     customScale,
                     this.props.superposition
+                );
+
+                this.getFeatureLabels(
+                    this.props.loomFile,
+                    BackendAPI.getActiveCoordinates(),
+                    this.state.activeFeatures
                 );
             }
         };
@@ -110,19 +117,6 @@ export default class Viewer extends Component {
         );
     }
 
-    UNSAFE_componentWillMount() {
-        BackendAPI.onSettingsChange(this.settingsListener);
-        BackendAPI.onSpriteSettingsChange(this.spriteSettingsListener);
-        BackendAPI.onViewerToolChange(this.viewerToolListener);
-        BackendAPI.onViewerSelectionsChange(this.viewerSelectionListener);
-        BackendAPI.onViewerTransformChange(this.viewerTransformListener);
-        BackendAPI.onCustomScaleChange(this.customScaleListener);
-        BackendAPI.onActiveFeaturesChange(
-            this.state.activePage,
-            this.activeFeaturesListener
-        );
-    }
-
     componentDidMount() {
         let viewerId = 'viewer' + this.props.name;
         if (DEBUG)
@@ -145,9 +139,9 @@ export default class Viewer extends Component {
                 this.props.activeAnnotations,
                 this.props.superposition,
                 () => {
-                    if (this.props.colors)
+                    if (this.props.colors) {
                         this.updateDataPoints(this.props.colors);
-                    else
+                    } else {
                         this.getFeatureColors(
                             this.state.activeFeatures,
                             this.props.loomFile,
@@ -156,6 +150,13 @@ export default class Viewer extends Component {
                             this.state.customScale,
                             this.props.superposition
                         );
+
+                        this.getFeatureLabels(
+                            this.props.loomFile,
+                            BackendAPI.getActiveCoordinates(),
+                            this.state.activeFeatures
+                        );
+                    }
                     this.onViewerSelectionChange(this.state.lassoSelections);
                     let t = BackendAPI.getViewerTransform();
                     if (t) {
@@ -172,6 +173,17 @@ export default class Viewer extends Component {
                 }
             );
         }
+
+        BackendAPI.onSettingsChange(this.settingsListener);
+        BackendAPI.onSpriteSettingsChange(this.spriteSettingsListener);
+        BackendAPI.onViewerToolChange(this.viewerToolListener);
+        BackendAPI.onViewerSelectionsChange(this.viewerSelectionListener);
+        BackendAPI.onViewerTransformChange(this.viewerTransformListener);
+        BackendAPI.onCustomScaleChange(this.customScaleListener);
+        BackendAPI.onActiveFeaturesChange(
+            this.state.activePage,
+            this.activeFeaturesListener
+        );
     }
 
     UNSAFE_componentWillReceiveProps(nextProps) {
@@ -227,6 +239,12 @@ export default class Viewer extends Component {
                             this.state.customScale,
                             nextProps.superposition
                         );
+
+                        this.getFeatureLabels(
+                            nextProps.loomFile,
+                            BackendAPI.getActiveCoordinates(),
+                            this.state.activeAnnotations
+                        );
                     } else {
                         this.setState({ loading: false });
                     }
@@ -243,6 +261,8 @@ export default class Viewer extends Component {
             this.setState({ colors: nextProps.colors });
             this.updateDataPoints(nextProps.colors);
         }
+
+        this.drawLabels();
     }
 
     getJSONFeatures(features, field) {
@@ -322,6 +342,7 @@ export default class Viewer extends Component {
         this.stage.height = this.h;
         this.renderer.render(this.stage);
         this.addMainLayer();
+        this.addLabelLayer();
         this.addLassoLayer();
         this.addTrajectoryLayer();
         this.zoomBehaviour = d3
@@ -358,6 +379,13 @@ export default class Viewer extends Component {
         let pcIndex = this.stage.getChildIndex(this.mainLayer);
         this.mainLayer.destroy([true, true, true]);
         this.addMainLayer(maxn, pcIndex);
+    }
+
+    addLabelLayer() {
+        this.labelLayer = new PIXI.Container();
+        this.labelLayer.width = this.w;
+        this.labelLayer.height = this.h;
+        this.stage.addChild(this.labelLayer);
     }
 
     destroyGraphics() {
@@ -660,6 +688,35 @@ export default class Viewer extends Component {
         }
     }
 
+    drawLabels(labels) {
+        const settings = BackendAPI.getSettings();
+
+        this.labelLayer.removeChildren().forEach((label) => label.destroy());
+
+        if (labels && settings.showLabels) {
+            labels.forEach((label) => {
+                const style = new PIXI.TextStyle({
+                    fontSize: settings.labelSize,
+                    fill: `#${label.colour}`,
+                    stroke: 'white',
+                    strokeThickness: 4,
+                });
+                const text = new PIXI.Text(label.label, style);
+                text.anchor.set(0.5, 0.5);
+                const scaled = this.scalePoint(
+                    { x: label.coordinate.x, y: label.coordinate.y },
+                    this.scalingFactor
+                );
+                text.position.set(scaled.x, scaled.y);
+                text._originalData = {
+                    x: label.coordinate.x,
+                    y: label.coordinate.y,
+                };
+                this.labelLayer.addChild(text);
+            });
+        }
+    }
+
     zoom() {
         let settings = BackendAPI.getSettings();
         let transform = () => {
@@ -670,6 +727,7 @@ export default class Viewer extends Component {
 
             this.mainLayer.position.x = t1.x;
             this.mainLayer.position.y = t1.y;
+            this.labelLayer.position.set(t1.x, t1.y);
             this.selectionsLayer.position.x = t1.x;
             this.selectionsLayer.position.y = t1.y;
             this.trajectoryLayer.position.x = t1.x;
@@ -726,7 +784,7 @@ export default class Viewer extends Component {
             features.map((f) => {
                 if (f.feature.length) featuresActive = true;
             });
-            if (featuresActive)
+            if (featuresActive) {
                 this.getFeatureColors(
                     features,
                     this.props.loomFile,
@@ -735,10 +793,16 @@ export default class Viewer extends Component {
                     customScale,
                     this.props.superposition
                 );
-            else {
+                this.getFeatureLabels(
+                    this.props.loomFile,
+                    BackendAPI.getActiveCoordinates(),
+                    features
+                );
+            } else {
                 this.setState({
                     activeFeatures: JSON.parse(JSON.stringify(features)),
                     colors: [],
+                    featureLabels: [],
                 });
                 this.resetDataPoints();
             }
@@ -977,6 +1041,7 @@ export default class Viewer extends Component {
             console.log(this.props.name, 'transformDataPoints', stillLoading);
         this.transformPoints(this.mainLayer);
         this.transformPoints(this.selectionsLayer);
+        this.transformPoints(this.labelLayer);
         this.drawTrajectory();
         requestAnimationFrame(() => {
             this.renderer.render(this.stage);
@@ -1151,6 +1216,53 @@ export default class Viewer extends Component {
         );
     }
 
+    getFeatureLabels(loomFile, embedding, features) {
+        const feature = features
+            .map((f) => {
+                return {
+                    name: this.props.genes
+                        ? f.feature.split('_')[0]
+                        : f.feature,
+                    type: this.props.genes ? 'gene' : f.featureType,
+                };
+            })
+            .filter((f) => f.name.length > 0)
+            .filter((f) => f.type === 'annotation');
+
+        if (feature.length === 0) {
+            return;
+        }
+
+        const query = {
+            loomFilePath: loomFile,
+            embedding: embedding,
+            feature: feature[0].name,
+        };
+
+        BackendAPI.getConnection().then(
+            (gbc) => {
+                gbc.services.scope.Main.getFeatureLabels(
+                    query,
+                    (err, response) => {
+                        if (err) {
+                            console.error(err);
+                        } else {
+                            this.setState({
+                                featureLabels: response.labels,
+                            });
+
+                            this.drawLabels(response.labels);
+                            this.transformDataPoints();
+                        }
+                    }
+                );
+            },
+            () => {
+                BackendAPI.showError();
+            }
+        );
+    }
+
     hexToRgb(hex) {
         let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result
@@ -1226,6 +1338,7 @@ export default class Viewer extends Component {
         }
         // Remove the first old data points (firstly rendered)
         this.mainLayer.removeChildren(0, n);
+        this.labelLayer.removeChildren();
         this.endBenchmark('resetDataPoints');
         // Call for rendering
         this.transformDataPoints();

@@ -1,12 +1,16 @@
-import numpy as np
+from typing import List, Optional
 import re
 import itertools
 import time
-import zlib
 import sys
+
+import numpy as np
+import zlib
 
 from scopeserver.dataserver.modules.gserver import s_pb2
 from scopeserver.dataserver.utils import constant
+from scopeserver.dataserver.utils import data
+from scopeserver.dataserver.utils.annotation import Annotation
 import logging
 
 logger = logging.getLogger(__name__)
@@ -25,16 +29,6 @@ class CellColorByFeatures:
         self.max_v_max = np.zeros(3)
         self.cell_indices = list(range(self.n_cells))
         self.reply = None
-
-    @staticmethod  # TO GET FROM GServer SCOPE
-    def get_vmax(vals):
-        maxVmax = max(vals)
-        vmax = np.percentile(vals, 99)
-        if vmax == 0 and max(vals) != 0:
-            vmax = max(vals)
-        if vmax == 0:
-            vmax = 0.01
-        return vmax, maxVmax
 
     @staticmethod
     def compress_str_array(str_arr):
@@ -96,17 +90,22 @@ class CellColorByFeatures:
 
     def setGeneFeature(self, request, feature, n):
         if feature != "":
+            if len(request.annotation) > 0:
+                annotations = [Annotation(name=ann.name, values=ann.values) for ann in request.annotation]
+            else:
+                annotations = None
+
             vals, self.cellIndices = self.loom.get_gene_expression(
                 gene_symbol=feature,
                 log_transform=request.hasLogTransform,
                 cpm_normalise=request.hasCpmTransform,
-                annotation=request.annotation,
+                annotation=annotations,
                 logic=request.logic,
             )
             if request.vmax[n] != 0.0:
                 self.v_max[n] = request.vmax[n]
             else:
-                self.v_max[n], self.max_v_max[n] = CellColorByFeatures.get_vmax(vals)
+                self.v_max[n], self.max_v_max[n] = data.get_99_and_100_percentiles(vals)
 
             vals = CellColorByFeatures.normalise_vals(vals, self.v_max[n], request.vmin[n])
             self.features.append(vals)
@@ -115,13 +114,18 @@ class CellColorByFeatures:
 
     def setRegulonFeature(self, request, feature, n):
         if feature != "":
+            if len(request.annotation) > 0:
+                annotations = [Annotation(name=ann.name, values=ann.values) for ann in request.annotation]
+            else:
+                annotations = None
+
             vals, self.cellIndices = self.loom.get_auc_values(
-                regulon=feature, annotation=request.annotation, logic=request.logic
+                regulon=feature, annotation=annotations, logic=request.logic
             )
             if request.vmax[n] != 0.0:
                 self.v_max[n] = request.vmax[n]
             else:
-                self.v_max[n], self.max_v_max[n] = CellColorByFeatures.get_vmax(vals)
+                self.v_max[n], self.max_v_max[n] = data.get_99_and_100_percentiles(vals)
             if request.scaleThresholded:
                 vals = np.array([auc if auc >= request.threshold[n] else 0 for auc in vals])
 
@@ -132,7 +136,7 @@ class CellColorByFeatures:
         else:
             self.features.append(np.zeros(self.n_cells))
 
-    def setAnnotationFeature(self, request, feature):
+    def setAnnotationFeature(self, feature: str, annotations: Optional[List[Annotation]] = None, logic: str = "OR"):
         md_annotation_values = self.loom.get_meta_data_annotation_by_name(name=feature)["values"]
         ca_annotation = self.loom.get_ca_attr_by_name(name=feature)
         ca_annotation_as_int = list(map(lambda x: md_annotation_values.index(str(x)), ca_annotation))
@@ -143,9 +147,10 @@ class CellColorByFeatures:
             raise ValueError("The annotation {0} has too many unique values.".format(feature))
         # Set the reply
 
-        if len(request.annotation) > 0:
-            cellIndices = self.loom.get_anno_cells(annotations=request.annotation, logic=request.logic)
+        if annotations is not None:
+            cellIndices = self.loom.get_anno_cells(annotations=annotations, logic=logic)
             self.hex_vec = np.array(self.hex_vec)[cellIndices]
+
         reply = s_pb2.CellColorByFeaturesReply(
             color=self.hex_vec,
             vmax=self.v_max,
@@ -157,17 +162,22 @@ class CellColorByFeatures:
 
     def setMetricFeature(self, request, feature, n):
         if feature != "":
+            if len(request.annotation) > 0:
+                annotations = [Annotation(name=ann.name, values=ann.values) for ann in request.annotation]
+            else:
+                annotations = None
+
             vals, self.cell_indices = self.loom.get_metric(
                 metric_name=feature,
                 log_transform=request.hasLogTransform,
                 cpm_normalise=request.hasCpmTransform,
-                annotation=request.annotation,
+                annotation=annotations,
                 logic=request.logic,
             )
             if request.vmax[n] != 0.0:
                 self.v_max[n] = request.vmax[n]
             else:
-                self.v_max[n], self.max_v_max[n] = CellColorByFeatures.get_vmax(vals)
+                self.v_max[n], self.max_v_max[n] = data.get_99_and_100_percentiles(vals)
 
             vals = CellColorByFeatures.normalise_vals(vals, self.v_max[n], request.vmin[n])
             self.features.append(vals)
@@ -195,9 +205,12 @@ class CellColorByFeatures:
                         legend.add((cluster_dict[i], colour))
                     values, colors = zip(*legend)
                     self.legend = s_pb2.ColorLegend(values=values, colors=colors)
+
                     if len(request.annotation) > 0:
-                        cellIndices = self.loom.get_anno_cells(annotations=request.annotation, logic=request.logic)
+                        annotations = [Annotation(name=ann.name, values=ann.values) for ann in request.annotation]
+                        cellIndices = self.loom.get_anno_cells(annotations=annotations, logic=request.logic)
                         self.hex_vec = np.array(self.hex_vec)[cellIndices]
+
                     # Set the reply and break the for loop
                     reply = s_pb2.CellColorByFeaturesReply(color=self.hex_vec, vmax=self.v_max, legend=self.legend)
                     self.setReply(reply=reply)
@@ -219,7 +232,8 @@ class CellColorByFeatures:
             clusterIndices = self.loom.get_clustering_by_id(clusteringID) == clusterID
             clusterCol = np.array([constant.UPPER_LIMIT_RGB if x else 0 for x in clusterIndices])
             if len(request.annotation) > 0:
-                cellIndices = self.loom.get_anno_cells(annotations=request.annotation, logic=request.logic)
+                annotations = [Annotation(name=ann.name, values=ann.values) for ann in request.annotation]
+                cellIndices = self.loom.get_anno_cells(annotations=annotations, logic=request.logic)
                 clusterCol = clusterCol[cellIndices]
             self.features.append(clusterCol)
 

@@ -9,7 +9,7 @@ import hashlib
 import functools
 from collections import Counter
 from pathlib import Path
-from typing import Tuple, Dict, Any, Union, List, Set
+from typing import Tuple, Dict, Any, Union, List, Set, Optional
 from loompy.loompy import LoomConnection
 from typing_extensions import TypedDict
 from google.protobuf.internal.containers import RepeatedScalarFieldContainer
@@ -18,6 +18,7 @@ from scopeserver.dataserver.utils import data_file_handler as dfh
 from scopeserver.dataserver.utils import search_space as ss
 from scopeserver.dataserver.modules.gserver import s_pb2
 from scopeserver.dataserver.utils import constant
+from scopeserver.dataserver.utils.annotation import Annotation
 
 import logging
 
@@ -713,7 +714,7 @@ class Loom:
             return "Unknown", {}
         return maxSpecies, mappings[maxSpecies]
 
-    def get_anno_cells(self, annotations, logic: str = "OR"):
+    def get_anno_cells(self, annotations: List[Annotation], logic: str = "OR"):
         loom = self.loom_connection
         cell_indices = []
         for anno in annotations:
@@ -781,7 +782,7 @@ class Loom:
         gene_symbol: str,
         log_transform: bool = True,
         cpm_normalise: bool = False,
-        annotation="",
+        annotation: Optional[List[Annotation]] = None,
         logic: str = "OR",
     ) -> Tuple[np.ndarray, list]:
         if gene_symbol not in set(self.get_genes()):
@@ -801,7 +802,7 @@ class Loom:
         if log_transform:
             logger.debug("Debug: log-transforming gene expression...")
             gene_expr = np.log2(gene_expr + 1)
-        if len(annotation) > 0:
+        if annotation is not None:
             cell_indices = self.get_anno_cells(annotations=annotation, logic=logic)
             gene_expr = gene_expr[cell_indices]
         else:
@@ -850,7 +851,9 @@ class Loom:
         loom.ca.RegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
         return loom.ca.RegulonsAUC
 
-    def get_auc_values(self, regulon: str, annotation="", logic: str = "OR") -> Tuple[np.ndarray, list]:
+    def get_auc_values(
+        self, regulon: str, annotation: Optional[List[Annotation]] = None, logic: str = "OR"
+    ) -> Tuple[np.ndarray, list]:
         logger.debug("Getting AUC values for {0} ...".format(regulon))
         cellIndices = list(range(self.get_nb_cells()))
         # Get the regulon type
@@ -864,7 +867,7 @@ class Loom:
 
         if regulon in self.get_regulons_AUC(regulon_type=regulon_type).dtype.names:
             vals = self.get_regulons_AUC(regulon_type=regulon_type)[regulon]
-            if len(annotation) > 0:
+            if annotation is not None:
                 cellIndices = self.get_anno_cells(annotations=annotation, logic=logic)
                 vals = vals[cellIndices]
             return vals, cellIndices
@@ -891,7 +894,9 @@ class Loom:
     # Embeddings #
     ##############
 
-    def get_coordinates(self, coordinatesID: int = -1, annotation="", logic: str = "OR"):
+    def get_coordinates(
+        self, coordinatesID: int = -1, annotation: Optional[List[Annotation]] = None, logic: str = "OR"
+    ):
         loom = self.loom_connection
         if coordinatesID == -1:
             try:
@@ -916,7 +921,7 @@ class Loom:
         else:
             x = loom.ca.Embeddings_X[str(coordinatesID)]
             y = loom.ca.Embeddings_Y[str(coordinatesID)]
-        if len(annotation) > 0:
+        if annotation is not None:
             cellIndices = self.get_anno_cells(annotations=annotation, logic=logic)
             x = x[cellIndices]
             y = y[cellIndices]
@@ -948,7 +953,7 @@ class Loom:
         metric_name: str,
         log_transform: bool = True,
         cpm_normalise: bool = False,
-        annotation="",
+        annotation: Optional[List[Annotation]] = None,
         logic: str = "OR",
     ):
         if not self.has_ca_attr(name=metric_name):
@@ -961,7 +966,7 @@ class Loom:
         if log_transform:
             logger.debug("log-transforming gene expression...")
             metric_vals = np.log2(metric_vals + 1)
-        if len(annotation) > 0:
+        if annotation is not None:
             cell_indices = self.get_anno_cells(annotations=annotation, logic=logic)
             metric_vals = metric_vals[cell_indices]
         else:
