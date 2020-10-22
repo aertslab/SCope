@@ -31,6 +31,7 @@ from scopeserver.dataserver.utils import data_file_handler as dfh
 from scopeserver.dataserver.utils import gene_set_enrichment as _gse
 from scopeserver.dataserver.utils import cell_color_by_features as ccbf
 from scopeserver.dataserver.utils import constant
+from scopeserver.dataserver.utils import data
 from scopeserver.dataserver.utils import search_space as ss
 from scopeserver.dataserver.utils.search import get_search_results
 from scopeserver.dataserver.utils.loom import Loom
@@ -143,16 +144,6 @@ class SCope(s_pb2_grpc.MainServicer):
         features = get_search_results(query, loom, self.config["dataHashSecret"])
         return features
 
-    @staticmethod
-    def get_vmax(vals: np.ndarray) -> Tuple[np.float, np.float]:
-        maxVmax = max(vals)
-        vmax = np.percentile(vals, 99)
-        if vmax == 0 and max(vals) != 0:
-            vmax = max(vals)
-        if vmax == 0:
-            vmax = 0.01
-        return vmax, maxVmax
-
     def getVmax(self, request, context):
         v_max = np.zeros(3)
         max_v_max = np.zeros(3)
@@ -171,17 +162,17 @@ class SCope(s_pb2_grpc.MainServicer):
                             log_transform=request.hasLogTransform,
                             cpm_normalise=request.hasCpmTransform,
                         )
-                        l_v_max, l_max_v_max = SCope.get_vmax(vals)
+                        l_v_max, l_max_v_max = data.get_99_and_100_percentiles(vals)
                     if request.featureType[n] == "regulon":
                         vals, _ = loom.get_auc_values(regulon=feature)
-                        l_v_max, l_max_v_max = SCope.get_vmax(vals)
+                        l_v_max, l_max_v_max = data.get_99_and_100_percentiles(vals)
                     if request.featureType[n] == "metric":
                         vals, _ = loom.get_metric(
                             metric_name=feature,
                             log_transform=request.hasLogTransform,
                             cpm_normalise=request.hasCpmTransform,
                         )
-                        l_v_max, l_max_v_max = SCope.get_vmax(vals)
+                        l_v_max, l_max_v_max = data.get_99_and_100_percentiles(vals)
                     if l_v_max > f_v_max:
                         f_v_max = l_v_max
                 if l_max_v_max > f_max_v_max:

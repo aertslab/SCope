@@ -782,7 +782,7 @@ class Loom:
         gene_symbol: str,
         log_transform: bool = True,
         cpm_normalise: bool = False,
-        annotation=Optional[List[Annotation]],
+        annotation: Optional[List[Annotation]] = None,
         logic: str = "OR",
     ) -> Tuple[np.ndarray, list]:
         if gene_symbol not in set(self.get_genes()):

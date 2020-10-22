@@ -1,3 +1,7 @@
+"""
+Generate labels for feature queries.
+"""
+
 from typing import List, NamedTuple, Iterator, Tuple, Generator, Iterable
 import logging
 from itertools import groupby
@@ -12,17 +16,26 @@ logger = logging.getLogger(__name__)
 
 
 class Coordinate(NamedTuple):
+    """ A 2D coordinate. """
+
     x: float
     y: float
 
 
 class FeatureLabel(NamedTuple):
+    """ A label with a colour and position. """
+
     label: str
     colour: str
     coordinate: Coordinate
 
 
 def uniq(data: Iterable[str]) -> List[str]:
+    """
+    Extract unique values from a container while preserving
+    the order.
+    """
+
     seen = set()
     result = []
 

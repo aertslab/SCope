@@ -9,6 +9,7 @@ import zlib
 
 from scopeserver.dataserver.modules.gserver import s_pb2
 from scopeserver.dataserver.utils import constant
+from scopeserver.dataserver.utils import data
 from scopeserver.dataserver.utils.annotation import Annotation
 import logging
 
@@ -28,16 +29,6 @@ class CellColorByFeatures:
         self.max_v_max = np.zeros(3)
         self.cell_indices = list(range(self.n_cells))
         self.reply = None
-
-    @staticmethod  # TO GET FROM GServer SCOPE
-    def get_vmax(vals):
-        maxVmax = max(vals)
-        vmax = np.percentile(vals, 99)
-        if vmax == 0 and max(vals) != 0:
-            vmax = max(vals)
-        if vmax == 0:
-            vmax = 0.01
-        return vmax, maxVmax
 
     @staticmethod
     def compress_str_array(str_arr):
@@ -114,7 +105,7 @@ class CellColorByFeatures:
             if request.vmax[n] != 0.0:
                 self.v_max[n] = request.vmax[n]
             else:
-                self.v_max[n], self.max_v_max[n] = CellColorByFeatures.get_vmax(vals)
+                self.v_max[n], self.max_v_max[n] = data.get_99_and_100_percentiles(vals)
 
             vals = CellColorByFeatures.normalise_vals(vals, self.v_max[n], request.vmin[n])
             self.features.append(vals)
@@ -134,7 +125,7 @@ class CellColorByFeatures:
             if request.vmax[n] != 0.0:
                 self.v_max[n] = request.vmax[n]
             else:
-                self.v_max[n], self.max_v_max[n] = CellColorByFeatures.get_vmax(vals)
+                self.v_max[n], self.max_v_max[n] = data.get_99_and_100_percentiles(vals)
             if request.scaleThresholded:
                 vals = np.array([auc if auc >= request.threshold[n] else 0 for auc in vals])
 
@@ -186,7 +177,7 @@ class CellColorByFeatures:
             if request.vmax[n] != 0.0:
                 self.v_max[n] = request.vmax[n]
             else:
-                self.v_max[n], self.max_v_max[n] = CellColorByFeatures.get_vmax(vals)
+                self.v_max[n], self.max_v_max[n] = data.get_99_and_100_percentiles(vals)
 
             vals = CellColorByFeatures.normalise_vals(vals, self.v_max[n], request.vmin[n])
             self.features.append(vals)
