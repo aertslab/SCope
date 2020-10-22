@@ -35,4 +35,3 @@ def uniq(data: Iterable[T]) -> List[T]:
             result.append(x)
 
     return result
-
