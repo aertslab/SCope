@@ -1,22 +1,18 @@
-import React from "react"
-import {
-    Grid,
-    Input,
-    Icon,
-    Tab,
-} from 'semantic-ui-react';
+import React from 'react';
+import { Grid, Input, Icon, Tab } from 'semantic-ui-react';
 
-import { LassoSelection} from "./model";
+import { LassoSelection } from './model';
 
 import { BackendAPI } from '../common/API';
 import ClusterOverlapsTable from '../common/ClusterOverlapsTable';
 
 type LassoSelectionPaneProps = {
-    idx: number
-} & LassoSelection
+    idx: number;
+} & LassoSelection;
 
-export class LassoSelectionPane extends React.Component<LassoSelectionPaneProps> {
-
+export class LassoSelectionPane extends React.Component<
+    LassoSelectionPaneProps
+> {
     constructor(props: LassoSelectionPaneProps) {
         super(props);
     }
@@ -30,8 +26,14 @@ export class LassoSelectionPane extends React.Component<LassoSelectionPaneProps>
     }
 
     render() {
-
-        const { id, idx, points, color, selected, clusterOverlaps } = this.props;
+        const {
+            id,
+            idx,
+            points,
+            color,
+            selected,
+            clusterOverlaps,
+        } = this.props;
 
         return (
             <Tab.Pane
@@ -39,14 +41,9 @@ export class LassoSelectionPane extends React.Component<LassoSelectionPaneProps>
                 style={{ textAlign: 'center' }}
                 key={idx}>
                 <Grid>
-                    <Grid.Row
-                        columns={3}
-                        key={idx}
-                        className='selectionRow'>
+                    <Grid.Row columns={3} key={idx} className='selectionRow'>
                         <Grid.Column style={{ whiteSpace: 'unset' }}>
-                            {`Selection ${id + 1} (${
-                                points.length
-                            } cells)`}
+                            {`Selection ${id + 1} (${points.length} cells)`}
                         </Grid.Column>
                         <Grid.Column>
                             <Input
@@ -66,9 +63,7 @@ export class LassoSelectionPane extends React.Component<LassoSelectionPaneProps>
                             <Icon
                                 name='eye'
                                 title='toggle show/hide selection'
-                                onClick={() =>
-                                    this.toggleLassoSelection(id)
-                                }
+                                onClick={() => this.toggleLassoSelection(id)}
                                 style={{
                                     display: 'inline',
                                     opacity: selected ? 1 : 0.5,
@@ -80,9 +75,7 @@ export class LassoSelectionPane extends React.Component<LassoSelectionPaneProps>
                                 name='trash'
                                 title='remove this selection'
                                 style={{ display: 'inline' }}
-                                onClick={() =>
-                                    this.removeLassoSelection(idx)
-                                }
+                                onClick={() => this.removeLassoSelection(idx)}
                                 className='pointer'
                             />
                             &nbsp;
@@ -91,6 +84,7 @@ export class LassoSelectionPane extends React.Component<LassoSelectionPaneProps>
                                 title='show metadata for this selection'
                                 style={{ display: 'inline' }}
                                 onClick={() => {
+                                    // TODO: fire redux action
                                     this.setState({ modalID: idx });
                                     this.forceUpdate();
                                 }}
@@ -113,7 +107,5 @@ export class LassoSelectionPane extends React.Component<LassoSelectionPaneProps>
                 <br />
             </Tab.Pane>
         );
-
     }
-
 }
