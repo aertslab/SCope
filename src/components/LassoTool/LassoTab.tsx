@@ -1,20 +1,17 @@
-import React from "react"
+import React from 'react';
 
-import {
-    Tab,
-} from 'semantic-ui-react';
+import { Tab } from 'semantic-ui-react';
 
-import { LassoSelection } from "./model"
-import { LassoSelectionPane } from "./LassoSelectionPane"
+import { LassoSelection } from './model';
+import { LassoSelectionPane } from './LassoSelectionPane';
 
 type LassoTabProps = {
-    selections: LassoSelection[]
-}
+    selections: LassoSelection[];
+};
 
 export class LassoTab extends React.Component<LassoTabProps> {
-
     constructor(props: LassoTabProps) {
-        super(props)
+        super(props);
     }
 
     render() {
@@ -31,13 +28,11 @@ export class LassoTab extends React.Component<LassoTabProps> {
                 </Tab.Pane>
             );
         }
-        
-        return selections.map((lassoSelection: LassoSelection, index: number) => {
-            return (
-                <LassoSelectionPane idx={index} {...lassoSelection}/>
-            )
-        });
 
+        return selections.map(
+            (lassoSelection: LassoSelection, index: number) => {
+                return <LassoSelectionPane idx={index} {...lassoSelection} />;
+            }
+        );
     }
-
 }
