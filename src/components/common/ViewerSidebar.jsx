@@ -29,6 +29,8 @@ import FileDownloader from '../../js/http';
 import CollaborativeAnnotation from './CollaborativeAnnotation';
 import GProfilerModal from '../GProfiler/GProfilerModal';
 import { LassoTab } from '../LassoTool/LassoTab';
+import { EmptyFeatureDisplayMessage } from '../QueryFeatureTool/EmptyFeatureDisplayMessage';
+import { MotifLogo } from '../MotifLogo';
 
 class ViewerSidebar extends Component {
     static propTypes = {
@@ -42,13 +44,13 @@ class ViewerSidebar extends Component {
             activeLoom: BackendAPI.getActiveLoom(),
             activeFeatures: BackendAPI.getActiveFeatures(),
             lassoSelections: BackendAPI.getViewerSelections(),
+            // TODO: should be put in the Redux global state
             modalID: null,
             newAnnoName: '',
             newAnnoRef: createRef(),
             activeTab: 0,
             processSubLoomPercentage: null,
             downloadSubLoomPercentage: null,
-            imageErrored: false,
             status: 'ready',
         };
         this.selectionsListener = (selections) => {
@@ -166,51 +168,18 @@ class ViewerSidebar extends Component {
         let lassoTab = () => <LassoTab selections={lassoSelections} />;
 
         let featureTab = (i) => {
-            let colors = ['red', 'green', 'blue'];
-            let metadata =
-                activeFeatures[i] && activeFeatures[i].feature ? (
-                    ''
-                ) : (
-                    <div>
-                        No additional information shown for the feature queried
-                        in the <b style={{ color: colors[i] }}>{colors[i]}</b>{' '}
-                        query box because it is empty. Additional information
-                        (e.g.: cluster markers, regulon motif, regulon target
-                        genes, ...) can be displayed here when querying clusters
-                        or regulons.
-                        <br />
-                        <br />
-                    </div>
-                );
+            let metadata = activeFeatures[i]?.feature ? (
+                ''
+            ) : (
+                <EmptyFeatureDisplayMessage featureIndex={i} />
+            );
             if (activeFeatures[i] && activeFeatures[i].metadata) {
-                let image = '';
                 let md = activeFeatures[i].metadata;
-                if (md.motifName !== 'NA.png' && !this.state.imageErrored) {
-                    if (this.state.imageErrored) {
-                        image = md.motifName ? (
-                            <img
-                                src={
-                                    'http://motifcollections.aertslab.org/v8/logos/' +
-                                    md.motifName
-                                }
-                            />
-                        ) : (
-                            ''
-                        );
-                        this.setState({ imageErrored: true });
-                    } else {
-                        image = md.motifName ? (
-                            <img
-                                src={
-                                    'http://motifcollections.aertslab.org/v9/logos/' +
-                                    md.motifName
-                                }
-                            />
-                        ) : (
-                            ''
-                        );
-                    }
-                }
+                let image = (
+                    <MotifLogo
+                        motifName={activeFeatures[i].metadata.motifName}
+                    />
+                );
 
                 this.handleAnnoUpdate = (feature, i) => {
                     if (this.state.newAnnoName !== '') {
