@@ -1,10 +1,9 @@
-import React, { Component, createRef } from 'react';
+import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import {
     Header,
     Grid,
-    Input,
     Icon,
     Tab,
     Label,
@@ -13,7 +12,6 @@ import {
     Popup,
 } from 'semantic-ui-react';
 
-import Alert from 'react-popup';
 import * as R from 'ramda';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
@@ -26,9 +24,9 @@ import { parse as json2csv } from 'json2csv';
 import { BackendAPI } from '../common/API';
 import Metadata from '../common/Metadata';
 import FileDownloader from '../../js/http';
-import CollaborativeAnnotation from './CollaborativeAnnotation';
 import GProfilerModal from '../GProfiler/GProfilerModal';
 import LassoControls from '../LassoControls';
+import ClusterControls from '../ClusterControls';
 import { EmptyFeatureDisplayMessage } from '../QueryFeatureTool/EmptyFeatureDisplayMessage';
 import { MotifLogo } from '../MotifLogo';
 
@@ -46,8 +44,6 @@ class ViewerSidebar extends Component {
             lassoSelections: BackendAPI.getViewerSelections(),
             // TODO: should be put in the Redux global state
             modalID: null,
-            newAnnoName: '',
-            newAnnoRef: createRef(),
             activeTab: 0,
             processSubLoomPercentage: null,
             downloadSubLoomPercentage: null,
@@ -64,43 +60,7 @@ class ViewerSidebar extends Component {
                 activeTab: parseInt(id) + 1,
             });
         };
-        this.setNewAnnotationName.bind(this);
-        this.onNewAnnotationChange.bind(this);
     }
-
-    onNewAnnotationChange = (e) => {
-        this.setNewAnnotationName(e.target.value);
-    };
-
-    setNewAnnotationName = (newAnnoName) => {
-        this.setState({ newAnnoName: newAnnoName });
-    };
-
-    gotoNextCluster = (i, direction) => {
-        BackendAPI.getNextCluster(
-            this.state.activeFeatures[i].metadata['clusteringID'],
-            this.state.activeFeatures[i].metadata['clusterID'],
-            direction,
-            (response) => {
-                console.log('gotoNextCluster', response);
-                BackendAPI.updateFeature(
-                    i,
-                    response.featureType,
-                    response.feature,
-                    response.featureType,
-                    response.featureDescription,
-                    this.props.match.params.page,
-                    (e) => {}
-                );
-
-                this.props.updateSelection(`${this.props.identifier}-${i}`, {
-                    title: response.feature,
-                    category: response.featureType,
-                    description: response.featureDescription,
-                });
-            }
-        );
-    };
 
     updateMetadata = () => {
         BackendAPI.queryLoomFiles(
@@ -175,107 +135,13 @@ class ViewerSidebar extends Component {
             );
             if (activeFeatures[i] && activeFeatures[i].metadata) {
                 let md = activeFeatures[i].metadata;
-                let image = (
+                let image = activeFeatures[i].metadata?.motifName ? (
                     <MotifLogo
                         motifName={activeFeatures[i].metadata.motifName}
                     />
+                ) : (
+                    ''
                 );
-
-                this.handleAnnoUpdate = (feature, i) => {
-                    if (this.state.newAnnoName !== '') {
-                        Alert.create({
-                            title: 'BETA: Annotation Change!',
-                            content: (
-                                <p>
-                                    {[
-                                        'You are about to ',
-                                        <b>permanently</b>,
-                                        ' update the annotation of the existing cluster: ',
-                                        <br />,
-                                        <b>{feature.feature}</b>,
-                                        <br />,
-                                        'to the following: ',
-                                        <br />,
-                                        <b>{this.state.newAnnoName}</b>,
-                                        <br />,
-                                        <br />,
-                                        <b>
-                                            {' '}
-                                            BETA: Some SCope functionality may
-                                            be imparied until the loom is
-                                            reloaded
-                                        </b>,
-                                    ]}
-                                </p>
-                            ),
-                            buttons: {
-                                left: [
-                                    {
-                                        text: 'Cancel',
-                                        className: 'danger',
-                                        action: function () {
-                                            Alert.close();
-                                        },
-                                    },
-                                ],
-                                right: [
-                                    {
-                                        text: 'Save new annotation',
-                                        className: 'success',
-                                        action: () => {
-                                            BackendAPI.setAnnotationName(
-                                                feature,
-                                                this.state.newAnnoName,
-                                                i,
-                                                this.props.match.params.uuid
-                                            );
-                                            Alert.close();
-                                        },
-                                    },
-                                ],
-                            },
-                        });
-                    }
-                    if (this.state.newAnnoName === '') {
-                        Alert.alert('You must enter a new annotation');
-                    }
-                };
-
-                let annotationBox = () => {
-                    if (
-                        activeFeatures[i].featureType.startsWith('Cluster') &&
-                        activeFeatures[i].feature !== 'All Clusters' &&
-                        this.props.sessionIsRW &&
-                        this.state.activePage === 'gene'
-                    ) {
-                        return (
-                            <Input
-                                ref={this.state.newAnnoRef}
-                                style={{
-                                    marginBottom: '5px',
-                                    width: '100%',
-                                }}
-                                placeholder={activeFeatures[i].feature}
-                                onChange={this.onNewAnnotationChange}
-                                actionPosition='left'
-                                action={{
-                                    onClick: () => {
-                                        this.handleAnnoUpdate(
-                                            activeFeatures[i],
-                                            i
-                                        );
-                                    },
-                                    'data-tooltip':
-                                        'PERMANENT CHANGE and forces refresh!',
-                                    'data-variation': 'basic',
-                                    'data-position': 'left center',
-                                    content: 'Update Description',
-                                }}
-                                value={this.state.newAnnoName}
-                            />
-                        );
-                    }
-                };
 
                 let clusterControls = () => {
                     if (
@@ -285,40 +151,10 @@ class ViewerSidebar extends Component {
                         this.state.activePage === 'gene'
                     ) {
                         return (
-                            <Grid>
-                                <Grid.Row centered>
-                                    <Header as='h3' textAlign='center'>
-                                        Cluster Controls
-                                    </Header>
-                                </Grid.Row>
-                                <Grid.Row>{annotationBox()}</Grid.Row>
-                                <Grid.Row>
-                                    <Button
-                                        onClick={() =>
-                                            this.gotoNextCluster(i, 'previous')
-                                        }
-                                        className='change-cluster-button'>
-                                        {
-                                            <Icon name='long arrow alternate left' />
-                                        }
-                                        Previous
-                                    </Button>
-                                    <CollaborativeAnnotation
-                                        feature={activeFeatures[i]}
-                                        id={i}
-                                    />
-                                    <Button
-                                        onClick={() =>
-                                            this.gotoNextCluster(i, 'next')
-                                        }
-                                        className='change-cluster-button'>
-                                        Next
-                                        {
-                                            <Icon name='long arrow alternate right' />
-                                        }
-                                    </Button>
-                                </Grid.Row>
-                            </Grid>
+                            <ClusterControls
+                                featureIndex={i}
+                                feature={activeFeatures[i]}
+                            />
                         );
                     }
                 };
