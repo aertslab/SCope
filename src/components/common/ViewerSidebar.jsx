@@ -28,7 +28,7 @@ import Metadata from '../common/Metadata';
 import FileDownloader from '../../js/http';
 import CollaborativeAnnotation from './CollaborativeAnnotation';
 import GProfilerModal from '../GProfiler/GProfilerModal';
-import { LassoTab } from '../LassoTool/LassoTab';
+import LassoControls from '../LassoControls';
 import { EmptyFeatureDisplayMessage } from '../QueryFeatureTool/EmptyFeatureDisplayMessage';
 import { MotifLogo } from '../MotifLogo';
 
@@ -165,7 +165,7 @@ class ViewerSidebar extends Component {
         const { lassoSelections, activeFeatures, activeTab, activePage } =
             this.state;
 
-        let lassoTab = () => <LassoTab selections={lassoSelections} />;
+        let lassoTab = () => <LassoControls selections={lassoSelections} />;
 
         let featureTab = (i) => {
             let metadata = activeFeatures[i]?.feature ? (

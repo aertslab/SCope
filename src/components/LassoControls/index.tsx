@@ -5,12 +5,12 @@ import { Tab } from 'semantic-ui-react';
 import { LassoSelection } from './model';
 import { LassoSelectionPane } from './LassoSelectionPane';
 
-type LassoTabProps = {
+type LassoControlsProps = {
     selections: LassoSelection[];
 };
 
-export class LassoTab extends React.Component<LassoTabProps> {
-    constructor(props: LassoTabProps) {
+class LassoControls extends React.Component<LassoControlsProps> {
+    constructor(props: LassoControlsProps) {
         super(props);
     }
 
@@ -36,3 +36,5 @@ export class LassoTab extends React.Component<LassoTabProps> {
         );
     }
 }
+
+export default LassoControls;

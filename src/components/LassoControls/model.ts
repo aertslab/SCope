@@ -4,4 +4,4 @@ export type LassoSelection = {
     color: string;
     selected: boolean;
     clusterOverlaps?: any;
-}
+};
