@@ -1,5 +1,3 @@
-import { Result, success, error } from '../result';
-
 import { LegacyAPI } from './';
 import { APIError, apiError } from './error';
 

@@ -9,7 +9,10 @@ import {
     Select,
     Label,
     Dropdown,
+    FormFieldProps,
+    DropdownItemProps,
 } from 'semantic-ui-react';
+import * as R from 'ramda';
 
 import { TopGeneListsSelectionTable } from './TopGeneListsSelectionTable';
 
@@ -96,19 +99,33 @@ class GProfilerPopup extends React.Component<
         }
     };
 
-    onClickGotoGProfilerURL = async () => {
-        const result = await checkCreateGProfilerLink({
+    onClickGotoGProfilerURL = () => {
+        const result = checkCreateGProfilerLink({
             featureMetricTable: this.featureMetricTable,
             ...this.props,
         });
-        if ('error' in result) {
+        if (result.error) {
             this.props.setError(result.error);
         }
-        if ('link' in result && result.link !== '') {
+        if (result.link && result.link !== '') {
             this.props.setError('');
             window.open(result.link);
         }
     };
+
+    private organismsToFormField(
+        organisms: GProfilerOrganism[]
+    ): DropdownItemProps[] {
+        return organisms
+            .map((organism, key) => {
+                return {
+                    key,
+                    text: organism.display_name,
+                    value: organism.id,
+                };
+            })
+            .sort(R.comparator((a, b) => a.text < b.text));
+    }
 
     render() {
         return (
@@ -182,9 +199,9 @@ class GProfilerPopup extends React.Component<
                                             search
                                             selection
                                             label='Organism'
-                                            options={
+                                            options={this.organismsToFormField(
                                                 this.props.availableOrganisms
-                                            }
+                                            )}
                                             placeholder='Choose an organism'
                                             onChange={this.onSelectOrganism}
                                             disabled={
@@ -247,7 +264,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        toggleModal: (display: boolean) => dispatch(Action.toggleModal()),
+        toggleModal: (): void => dispatch(Action.toggleModal()),
         selectSortBy: (sortBy: string) => dispatch(Action.selectSortBy(sortBy)),
         selectOrganism: (organism: string) =>
             dispatch(Action.selectOrganism(organism)),
