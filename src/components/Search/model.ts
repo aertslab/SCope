@@ -36,17 +36,19 @@ const makeSelection = (
 export const findResult = (
     query: { title: string },
     colour: string,
-    results: Array<Features>
+    results: readonly Features[]
 ): FeatureSearchSelection | undefined => {
     const searchSpace: FeatureSearchSelection[] = R.chain(
         (r) => R.map(makeSelection(colour, r.category), r.results),
         results
     );
 
-    return R.filter(
-        R.propEq<keyof FeatureSearchSelection, any>('title', query.title),
-        searchSpace
-    )[0];
+    return R.head(
+        R.filter(
+            R.propEq<keyof FeatureSearchSelection>('title', query.title),
+            searchSpace
+        )
+    );
 };
 
 export type FeatureSearch = {

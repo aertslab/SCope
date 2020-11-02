@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { Icon, Popup, Button } from 'semantic-ui-react';
 import ClusteringAddPopup from './ClusteringAddPopup';
@@ -6,13 +7,15 @@ import ClusteringAddPopup from './ClusteringAddPopup';
 import { instanceOf } from 'prop-types';
 import { withCookies, Cookies } from 'react-cookie';
 
+import { RootState } from '../../redux/reducers';
+
 interface OptionsPopupProps extends RouteComponentProps {
     cookies: Cookies;
+    cookieConsent: boolean;
 }
 
 interface OptionsPopupState {
     optionsOpen: boolean;
-    cookiesAllowed: boolean;
     someModalOpen: boolean;
     orcid_name?: string;
     orcid_id?: string;
@@ -28,7 +31,6 @@ class OptionsPopup extends Component<OptionsPopupProps, OptionsPopupState> {
         super(props);
         this.state = {
             optionsOpen: false,
-            cookiesAllowed: false,
             someModalOpen: false,
         };
     }
@@ -52,7 +54,7 @@ class OptionsPopup extends Component<OptionsPopupProps, OptionsPopupState> {
     };
 
     render() {
-        const { orcid_name, orcid_id, orcid_uuid, cookiesAllowed } = this.state;
+        const { orcid_name, orcid_id, orcid_uuid } = this.state;
 
         const clusteringAdd = () => {
             if (
@@ -62,7 +64,7 @@ class OptionsPopup extends Component<OptionsPopupProps, OptionsPopupState> {
                 orcid_name !== '' &&
                 orcid_id !== '' &&
                 orcid_uuid !== '' &&
-                cookiesAllowed
+                this.props.cookieConsent
             ) {
                 return (
                     <ClusteringAddPopup
@@ -117,26 +119,25 @@ class OptionsPopup extends Component<OptionsPopupProps, OptionsPopupState> {
         );
     }
 
-    updateORCID = () => {
+    componentDidMount() {
         const orcid_name = this.props.cookies.get('scope_orcid_name');
         const orcid_id = this.props.cookies.get('scope_orcid_id');
         const orcid_uuid = this.props.cookies.get('scope_orcid_uuid');
-        let cookiesAllowed = false;
-        if (this.props.cookies.get('CookieConsent') == 'true') {
-            cookiesAllowed = true;
-        }
 
         this.setState({
             orcid_name: orcid_name,
             orcid_id: orcid_id,
             orcid_uuid: orcid_uuid,
-            cookiesAllowed: cookiesAllowed,
         });
-    };
-
-    componentDidMount() {
-        this.updateORCID();
     }
 }
 
-export default withRouter(withCookies(OptionsPopup));
+const optionsPopup = withRouter(withCookies(OptionsPopup));
+
+const mapStateToProps = (state: RootState) => {
+    return {
+        cookieConsent: state.main.cookieConsent,
+    };
+};
+
+export default connect(mapStateToProps)(optionsPopup);

@@ -36,7 +36,12 @@ import { FullPageNotify } from './pages/FullPageNotify';
 import Alert from 'react-popup';
 import 'react-popup/style.css';
 
-import { setAppLoading, setUUID, setSessionMode } from '../redux/actions';
+import {
+    setAppLoading,
+    setUUID,
+    setSessionMode,
+    consentToCookies,
+} from '../redux/actions';
 
 const pako = require('pako');
 const publicIp = require('public-ip');
@@ -52,7 +57,6 @@ class App extends Component {
             sessionsLimitReached: false,
             orcid_active: true,
             orcid_data: null,
-            cookiesAllowed: false,
             cookieBannerRef: React.createRef(),
         };
 
@@ -74,7 +78,7 @@ class App extends Component {
     acceptCookies() {
         this.props.cookies.set('CookieConsent', 'true');
         this.setUUIDCookie();
-        this.setState({ cookiesAllowed: true });
+        this.props.consentToCookies();
     }
 
     setUUIDCookie() {
@@ -130,7 +134,6 @@ class App extends Component {
                                     loaded={loaded}
                                     timeout={this.timeout}
                                     cookies={this.props.cookies}
-                                    cookiesAllowed={this.state.cookiesAllowed}
                                     cookieBannerRef={this.state.cookieBannerRef}
                                 />
                                 <Sidebar.Pushable>
@@ -209,7 +212,7 @@ class App extends Component {
                     onDecline={() => {
                         this.removeAllCookies();
                     }}
-                    onAccept={(scrolling) => this.acceptCookies(scrolling)}>
+                    onAccept={() => this.acceptCookies()}>
                     This website uses cookies to enhance the user experience and
                     to store user information for annotation and access
                     purposes.
@@ -225,46 +228,31 @@ class App extends Component {
         this.getUUIDFromIP(this.props);
 
         if (this.props.cookies.get('CookieConsent') == 'true') {
-            this.setState({ cookiesAllowed: true }, () => {
-                if (
-                    document.head.querySelector('[name=scope-orcid]') != null &&
-                    this.state.orcid_active
-                ) {
-                    let auth_code = document.head
-                        .querySelector('[name=scope-orcid]')
-                        .getAttribute('auth');
-                    if (this.state.cookiesAllowed) {
-                        BackendAPI.getORCID(
-                            auth_code,
-                            (orcid_scope_uuid, name, orcid_id) => {
-                                this.props.cookies.set(
-                                    'scope_orcid_uuid',
-                                    orcid_scope_uuid
-                                );
-                                this.props.cookies.set(
-                                    'scope_orcid_name',
-                                    name
-                                );
-                                this.props.cookies.set(
-                                    'scope_orcid_id',
-                                    orcid_id
-                                );
-                                // Possibly a bit hacky, but it works to remove the code from the URL
-                                location.href =
-                                    location.origin +
-                                    location.pathname +
-                                    location.hash;
-                            }
+            this.props.consentToCookies();
+
+            if (
+                document.head.querySelector('[name=scope-orcid]') !== null &&
+                this.state.orcid_active
+            ) {
+                const auth_code = document.head
+                    .querySelector('[name=scope-orcid]')
+                    .getAttribute('auth');
+
+                BackendAPI.getORCID(
+                    auth_code,
+                    (orcid_scope_uuid, name, orcid_id) => {
+                        this.props.cookies.set(
+                            'scope_orcid_uuid',
+                            orcid_scope_uuid
                         );
-                    } else {
-                        alert(
-                            'You must allow cookies before you are able to log in!'
-                        );
+                        this.props.cookies.set('scope_orcid_name', name);
+                        this.props.cookies.set('scope_orcid_id', orcid_id);
+                        // Possibly a bit hacky, but it works to remove the code from the URL
                         location.href =
                             location.origin + location.pathname + location.hash;
                     }
-                }
-            });
+                );
+            }
         }
         document.addEventListener('click', this.clickHandler.bind(this));
         document.addEventListener('keypress', this.clickHandler.bind(this));
@@ -332,11 +320,20 @@ class App extends Component {
             } else {
                 if (DEBUG) {
                     console.log('Params UUID detected:', match.params.uuid);
+                    console.log(
+                        'cookieConsent state:',
+                        this.props.cookieConsent
+                    );
+                    console.log(
+                        'SCOPE_COOKIE:',
+                        SCOPE_COOKIE,
+                        match.params.uuid,
+                        { path: '/' }
+                    );
                 }
                 this.checkUUID(ip, match.params.uuid);
-                console.log(this.state.cookiesAllowed);
-                console.log(SCOPE_COOKIE, match.params.uuid, { path: '/' });
-                if (this.state.cookiesAllowed) {
+
+                if (this.props.cookieConsent) {
                     this.setUUIDCookie();
                 }
             }
@@ -536,6 +533,7 @@ const mapDispatchToProps = (dispatch) => {
         setAppLoading: (isAppLoading) => dispatch(setAppLoading(isAppLoading)),
         setUUID: (uuid) => dispatch(setUUID(uuid)),
         setSessionMode: (mode) => dispatch(setSessionMode(mode)),
+        consentToCookies: () => dispatch(consentToCookies()),
     };
 };
 

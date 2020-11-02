@@ -4,7 +4,7 @@ import { Grid, SemanticCOLORS } from 'semantic-ui-react';
 import { FeatureFilter } from './model';
 import { FEATURE_COLOURS } from './constants';
 
-import FeatureSearchBox from './FeatureSearchBox';
+import { FeatureSearchBox } from './FeatureSearchBox';
 
 interface FeatureSearchProps {
     /** A unique identifier for these search boxes. */

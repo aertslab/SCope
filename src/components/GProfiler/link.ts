@@ -1,11 +1,17 @@
+import * as R from 'ramda';
+
 import {
     GPROFILER_API_ENDPOINT__GENE_LIST_FUNCTIONAL_ENRICHMENT,
     GPROFILER_LINK_MAX_LENGTH,
 } from './constants';
 
-import { FeatureMetricTable, GProfilerLinkRequest } from './model';
+import {
+    FeatureMetric,
+    FeatureMetricTable,
+    GProfilerLinkRequest,
+} from './model';
 
-const createFeatureQuery = (
+export const createFeatureQuery = (
     topNumFeatures: number[],
     sortedFeatureMetricTable: FeatureMetricTable
 ) => {
@@ -16,10 +22,8 @@ const createFeatureQuery = (
                 topSortedFeatures: sortedFeatureMetricTable
                     .slice(0, topNumFeaturesElement)
                     .reduce(
-                        (acc, sortedFeatureMetricTableRow) => [
-                            ...acc,
-                            sortedFeatureMetricTableRow['gene'],
-                        ],
+                        (acc: Array<string>, row: FeatureMetric) =>
+                            R.append(row.gene, acc),
                         []
                     )
                     .join('\n'),
@@ -66,13 +70,13 @@ const createGProfilerLink = (organism: string, query: string, ordered: string) =
     return `${GPROFILER_API_ENDPOINT__GENE_LIST_FUNCTIONAL_ENRICHMENT}?${gProfilerQueryString}`;
 };
 
-export const checkCreateGProfilerLink = async ({
+export const checkCreateGProfilerLink = ({
     featureMetricTable,
     selectedTopGeneListsSizes,
     gProfilerToken,
     selectedOrganism,
     selectedSortBy,
-}: GProfilerLinkRequest): Promise<{ error?: string; link?: string }> => {
+}: GProfilerLinkRequest): { error?: string; link?: string } => {
     if (selectedSortBy === '') {
         return {
             error: 'Please select a sort column',
@@ -84,7 +88,7 @@ export const checkCreateGProfilerLink = async ({
         };
     }
 
-    if (selectedTopGeneListsSizes.length == 0) {
+    if (selectedTopGeneListsSizes.length === 0) {
         return {
             error: 'No gene list selected. At least one gene list is required.',
         };

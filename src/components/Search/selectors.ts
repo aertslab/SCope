@@ -5,7 +5,7 @@ import { RootState } from '../../redux/reducers';
 import { Features } from '../../api';
 
 import { NAME } from './constants';
-import { FeatureFilter } from './model';
+import { FeatureFilter, FeatureSearchSelection } from './model';
 
 export const searchResults = (
     field: string,
@@ -26,12 +26,15 @@ export const isLoading = (field: string, state: RootState): boolean => {
     return false;
 };
 
-export const isSelected = (field: string, state: RootState): boolean => {
+export const selected = (
+    field: string,
+    state: RootState
+): FeatureSearchSelection | undefined => {
     if (has(field, state[NAME])) {
-        return state[NAME][field].selected !== undefined;
+        return state[NAME][field].selected;
     }
 
-    return false;
+    return undefined;
 };
 
 export const value = (field: string, state: RootState): string => {
