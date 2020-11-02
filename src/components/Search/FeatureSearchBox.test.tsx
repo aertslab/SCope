@@ -4,7 +4,7 @@
 
 import React from 'react';
 
-import { render, fireEvent, screen, waitFor } from '@testing-library/react';
+import { render, fireEvent, screen, waitFor } from '../../test/test-utils';
 
 import { FeatureSearchBox } from './FeatureSearchBox';
 
@@ -15,40 +15,52 @@ describe('FeatureSearchBox component', () => {
         field: 'test',
         filter: 'all' as FeatureFilter,
         colour: 'red',
-        search: jest.fn((field, filter, query) => query),
-        selectResult: jest.fn((field, selection) => selection.title),
     };
 
     it('Loads and displays a search box', () => {
         render(<FeatureSearchBox {...mockProps} />);
+
+        expect(
+            (screen.getByPlaceholderText('Search...') as HTMLInputElement).value
+        ).toEqual('');
     });
 
-    it('Fires a search when the user types', () => {
+    it('Changes the displayed text when the user types', () => {
         render(<FeatureSearchBox {...mockProps} />);
 
         fireEvent.change(screen.getByPlaceholderText('Search...'), {
             target: { value: 'a' },
         });
 
-        expect(mockProps.search.mock.results[0].value).toBe('a');
+        expect(
+            (screen.getByPlaceholderText('Search...') as HTMLInputElement).value
+        ).toEqual('a');
     });
 
-    it('Fires a select action when the user selects a result', async () => {
-        render(
-            <FeatureSearchBox
-                results={[
-                    {
-                        category: 'hello',
-                        results: [{ title: 'a', description: '' }],
-                    },
-                ]}
-                value='a'
-                {...mockProps}
-            />
-        );
+    it('Changes the displayed text when the user selects a result', async () => {
+        const initialState = {
+            search: {
+                test: {
+                    field: 'test',
+                    loading: false,
+                    value: 'a',
+                    results: [
+                        {
+                            category: 'hello',
+                            results: [{ title: 'abc', description: '' }],
+                        },
+                    ],
+                    selected: undefined,
+                    error: undefined,
+                },
+            },
+        };
+        render(<FeatureSearchBox {...mockProps} />, { initialState });
 
-        fireEvent.click(screen.getByText('a'));
+        fireEvent.click(screen.getByText('abc'));
 
-        expect(mockProps.selectResult.mock.results[0].value).toBe('a');
+        expect(
+            (screen.getByPlaceholderText('Search...') as HTMLInputElement).value
+        ).toEqual('abc');
     });
 });

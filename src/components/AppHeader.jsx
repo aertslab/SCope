@@ -19,7 +19,7 @@ const moment = require('moment');
 const pako = require('pako');
 let bitly = new Bitly(BITLY.token);
 
-import { toggleSidebar } from '../redux/actions';
+import { toggleSidebar, consentToCookies } from '../redux/actions';
 
 const timer = 60 * 1000;
 const cookieName = 'SCOPE_UUID';
@@ -37,7 +37,6 @@ class AppHeader extends Component {
             cookies: props.cookies,
             permalinkUUID: false,
             orcid_active: true,
-            cookiesAllowed: this.props.cookiesAllowed,
         };
 
         BackendAPI.getORCIDStatus((active) => {
@@ -51,7 +50,7 @@ class AppHeader extends Component {
         this.props.cookies.set(cookieName, this.props.match.params.uuid, {
             path: '/',
         });
-        this.setState({ cookiesAllowed: true });
+        this.props.consentToCookies();
     };
 
     openORCID = () => {
@@ -101,7 +100,7 @@ class AppHeader extends Component {
         let orcid_info = () => {
             let orcid_name = this.props.cookies.get('scope_orcid_name');
             let orcid_id = this.props.cookies.get('scope_orcid_id');
-            if (this.state.cookiesAllowed === false) {
+            if (!this.props.cookieConsent) {
                 return (
                     <Popup
                         content={
@@ -312,7 +311,7 @@ class AppHeader extends Component {
         const { history, cookies } = this.props;
         BackendAPI.getUUIDFromIP((uuid, timeRemaining) => {
             cookies.remove(cookieName);
-            if (this.props.cookiesAllowed) {
+            if (this.props.cookieConsent) {
                 cookies.set(cookieName, uuid, { path: '/' });
             }
             history.replace('/' + [uuid]);
@@ -454,12 +453,14 @@ const appHeader = withRouter(AppHeader);
 const mapStateToProps = (state) => {
     return {
         sidebarIsVisible: state['main'].sidebarIsVisible,
+        cookieConsent: state['main'].cookieConsent,
     };
 };
 
 const mapDispatchToProps = (dispatch) => {
     return {
         toggleSidebar: () => dispatch(toggleSidebar()),
+        consentToCookies: () => dispatch(consentToCookies()),
     };
 };
 

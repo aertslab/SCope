@@ -1,8 +1,5 @@
-import _ from 'lodash';
-import { BackendAPI } from '../common/API';
-import { withRouter } from 'react-router-dom';
-
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import {
     Button,
     Header,
@@ -17,10 +14,13 @@ import {
     Card,
     CardContent,
 } from 'semantic-ui-react';
+import { withRouter } from 'react-router-dom';
 import { instanceOf } from 'prop-types';
 import CollabAnnoGeneSearch from './CollabAnnoGeneSearch';
 import OLSAutocomplete from './OLSAutocomplete';
 import { withCookies, Cookies } from 'react-cookie';
+
+import { BackendAPI } from '../common/API';
 
 class CollaborativeAnnotation extends Component {
     static propTypes = {
@@ -40,7 +40,6 @@ class CollaborativeAnnotation extends Component {
             olsResult: '',
             status: 'ready',
             submitError: false,
-            cookiesAllowed: false,
         };
     }
 
@@ -168,7 +167,6 @@ class CollaborativeAnnotation extends Component {
             orcid_name,
             orcid_id,
             orcid_uuid,
-            cookiesAllowed,
         } = this.state;
 
         let cardStyle = {
@@ -452,7 +450,7 @@ class CollaborativeAnnotation extends Component {
             orcid_name != '' &&
             orcid_id != '' &&
             orcid_uuid != '' &&
-            cookiesAllowed
+            this.props.cookieConsent
         ) {
             return annotationModal(orcid_id, orcid_name);
         } else {
@@ -477,22 +475,27 @@ class CollaborativeAnnotation extends Component {
         }
     }
 
-    UNSAFE_componentWillMount() {
+    componentDidMount() {
         let orcid_name = this.props.cookies.get('scope_orcid_name');
         let orcid_id = this.props.cookies.get('scope_orcid_id');
         let orcid_uuid = this.props.cookies.get('scope_orcid_uuid');
-        let cookiesAllowed = false;
-        if (this.props.cookies.get('CookieConsent') == 'true') {
-            cookiesAllowed = true;
-        }
 
         this.setState({
             orcid_name: orcid_name,
             orcid_id: orcid_id,
             orcid_uuid: orcid_uuid,
-            cookiesAllowed: cookiesAllowed,
         });
     }
 }
 
-export default withCookies(withRouter(CollaborativeAnnotation));
+const collaborativeAnnotation = withCookies(
+    withRouter(CollaborativeAnnotation)
+);
+
+const mapStateToProps = (state) => {
+    return {
+        cookieConsent: state['main'].cookieConsent,
+    };
+};
+
+export default connect(mapStateToProps)(collaborativeAnnotation);

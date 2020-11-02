@@ -26,16 +26,18 @@ export type FeatureMetadata = {
     clusterID?: number;
     clusteringGroup: string;
     clusteringID?: number;
-    genes?: string[];
+    genes: string[];
     metrics?: FeatureMetadataMetric[];
     description: string;
 };
 
-export type FeatureMetricTable = {
+export type FeatureMetric = {
     gene: string;
     avg_logFC?: number;
     pval?: number;
-}[];
+};
+
+export type FeatureMetricTable = FeatureMetric[];
 
 export type GProfilerOrganism = {
     display_name: string;
@@ -52,14 +54,14 @@ export type GProfilerLinkRequest = {
     selectedSortBy: string;
 };
 
-export const getNumFeatures = (featureMetadata: FeatureMetadata) => {
+export const getNumFeatures = (featureMetadata: FeatureMetadata): number => {
     return featureMetadata.genes.length;
 };
 
 export const getAvailableTopGeneListsSizes = (
     featureMetadata: FeatureMetadata
 ) => {
-    const numFeatures = getNumFeatures(featureMetadata);
+    const numFeatures: number = getNumFeatures(featureMetadata);
     return [
         100,
         200,
@@ -82,12 +84,12 @@ const reduceMetricsAtIndex = (idx: number) => (
 
 export const getMetricTable = (
     featureMetadata: FeatureMetadata
-): FeatureMetricTable => {
+): FeatureMetric[] => {
     if (featureMetadata.genes) {
         return featureMetadata.genes.map((gene: string, idx: number) => {
             return {
                 gene,
-                ...featureMetadata.metrics.reduce(
+                ...featureMetadata.metrics?.reduce(
                     reduceMetricsAtIndex(idx),
                     {}
                 ),

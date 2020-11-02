@@ -8,6 +8,7 @@ const initialState: MainState = {
     uuid: '',
     sessionMode: SESSION_READ,
     sidebarIsVisible: false,
+    cookieConsent: false,
 };
 
 const main = produce((draft: MainState, action: MainAction) => {
@@ -23,6 +24,9 @@ const main = produce((draft: MainState, action: MainAction) => {
             break;
         case Action.TOGGLE_SIDEBAR_VISIBLE:
             draft.sidebarIsVisible = !draft.sidebarIsVisible;
+            break;
+        case Action.CONSENT_TO_COOKIES:
+            draft.cookieConsent = true;
             break;
     }
 }, initialState);

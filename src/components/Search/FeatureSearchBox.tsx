@@ -1,8 +1,9 @@
 import React, { Component, ComponentClass } from 'react';
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     Segment,
     Search,
+    SearchProps,
     SearchResultsProps,
     StrictSearchCategoryProps,
     Select,
@@ -14,14 +15,17 @@ import { RootState } from '../../redux/reducers';
 import { Features, LegacyAPI } from '../../api';
 
 import {
+    FeatureSearch,
     FeatureFilter,
     FeatureSearchSelection,
     featuresToResults,
     findResult,
+    init,
     orderCategories,
 } from './model';
 import * as Action from './actions';
 import * as Selector from './selectors';
+import { NAME } from './constants';
 
 import './FeatureSearchBox.css';
 
@@ -37,111 +41,127 @@ type FeatureSearchBoxProps = {
 
     /** Background colour */
     colour: string;
+};
 
+type FeatureSearchBoxState = {
     /** A search result has been selected */
-    selected?: boolean;
+    selected: FeatureSearchSelection | undefined;
 
     /** Show a loading indication */
-    loading?: boolean;
+    loading: boolean;
 
     /** Text to display in the input */
-    value?: string;
+    value: string;
 
     /** Search results */
-    results?: Features[];
-
-    /** Search for a given query */
-    search?: (
-        field: string,
-        filter: FeatureFilter,
-        query: string
-    ) => Action.SearchQuery;
-
-    /** "Select" a result from the search results */
-    selectResult?: (
-        field: string,
-        selection: FeatureSearchSelection
-    ) => Action.SearchResultSelect;
+    results: readonly Features[];
 };
 
 /**
  * A text search input for items in a dataset.
  */
 export const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
-    const onSearchChange = (_, { value }) => {
-        if (value === '') {
+    const legacyFeatureIndex = props.field.slice(-1); //TODO: This is a horrible hack
+    const dispatch = useDispatch();
+
+    const state: FeatureSearchBoxState = useSelector<
+        RootState,
+        FeatureSearchBoxState
+    >((root: RootState) => {
+        return {
+            selected: Selector.selected(props.field, root),
+            loading: Selector.isLoading(props.field, root),
+            value: Selector.value(props.field, root),
+            results: Selector.searchResults(props.field, root),
+        };
+    });
+
+    const onSearchChange = (query: string | undefined) => {
+        if (query === undefined || query === '') {
             LegacyAPI.setActiveFeature(
-                props.field.slice(-1), //TODO: This is a horrible hack
+                legacyFeatureIndex,
                 props.filter,
                 '',
                 '',
                 0,
                 null
             );
-            props.selectResult(props.field, undefined);
+
+            dispatch(Action.clear(props.field));
         } else {
-            props.search(props.field, props.filter, value);
+            dispatch(
+                Action.search(
+                    props.field,
+                    LegacyAPI.getActiveLoom(),
+                    props.filter,
+                    query
+                )
+            );
         }
     };
 
     const onResultSelect = (_, { result }) => {
-        if (props.results) {
-            const selected = findResult(result, props.colour, props.results);
+        const selection = findResult(result, props.colour, state.results);
 
-            if (selected) {
-                if (!__TEST_ONLY__) {
-                    LegacyAPI.updateFeature(
-                        props.field.slice(-1), //TODO: This is a horrible hack
-                        props.filter,
-                        selected.title,
-                        selected.category,
-                        selected.description
-                    );
-                }
-
-                props.selectResult(props.field, selected);
+        if (selection) {
+            if (!__TEST_ONLY__) {
+                LegacyAPI.updateFeature(
+                    legacyFeatureIndex,
+                    props.filter,
+                    selection.title,
+                    selection.category,
+                    selection.description
+                );
             }
+
+            dispatch(Action.select(props.field, selection));
         }
     };
 
     /**
-     * Icon in the Search box is either a 'search' icon, or,
+     * Input element for the Search box has an "action" button
+     * which either has a 'search' icon, or,
      * when a search result is selected, a clickable cross icon.
      * Clicking the cross should clear the search field.
      */
-    const icon = () => {
+    const input = () => {
         return {
-            ...(props.selected && {
-                onClick: () => onSearchChange(undefined, { value: '' }),
-            }),
-            icon: props.selected ? 'cancel' : 'search',
-            iconPosition: 'left',
+            action: {
+                ...(state.selected && {
+                    onClick: () => onSearchChange(''),
+                }),
+                icon: state.selected ? 'cancel' : 'search',
+            },
+            actionPosition: 'left',
+            icon: false,
         };
     };
 
     //TODO: A hack to ensure the old state managment knows something is selected
-    if (props.value && props.selected) {
-        const selected = findResult(
-            { title: props.value },
-            props.colour,
-            props.results
-        );
-
-        LegacyAPI.updateFeature(
-            props.field.slice(-1), //TODO: This is a horrible hack
-            props.filter,
-            selected.title,
-            selected.category,
-            selected.description
-        );
+    if (state.selected && !__TEST_ONLY__) {
+        const legacyFeature = LegacyAPI.getActiveFeatures()[legacyFeatureIndex];
+        const currentFeature = {
+            type: props.filter,
+            featureType: state.selected.category,
+            feature: state.selected.title,
+            threshold: 0,
+            metadata: { description: state.selected.description },
+        };
+        if (!R.equals(currentFeature, legacyFeature)) {
+            LegacyAPI.updateFeature(
+                legacyFeatureIndex,
+                props.filter,
+                state.selected.title,
+                state.selected.category,
+                state.selected.description
+            );
+        }
     }
 
     const displayResults = R.fromPairs(
-        props.results
-            ? R.sortWith([R.comparator(orderCategories)], props.results).map(
-                  featuresToResults
-              )
-            : []
+        R.sortWith([R.comparator(orderCategories)], state.results).map(
+            featuresToResults
+        )
     );
 
     return (
@@ -152,37 +172,14 @@ export const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
             <Search
                 category
                 className='feature-search-input'
-                input={icon()}
-                loading={props.loading}
+                input={input()}
+                loading={state.loading}
                 placeholder='Search...'
-                onSearchChange={onSearchChange}
+                onSearchChange={(_, data) => onSearchChange(data.value)}
                 onResultSelect={onResultSelect}
                 results={displayResults}
-                value={props.value}
+                value={state.value}
             />
         </Segment>
     );
 };
-
-const mapStateToProps = (state: RootState, ownProps: FeatureSearchBoxProps) => {
-    return {
-        results: Selector.searchResults(ownProps.field, state),
-        loading: Selector.isLoading(ownProps.field, state),
-        value: Selector.value(ownProps.field, state),
-        selected: Selector.isSelected(ownProps.field, state),
-    };
-};
-
-const mapDispatchToProps = (dispatch) => {
-    return {
-        search: (field: string, filter: FeatureFilter, query: string) =>
-            dispatch(
-                Action.search(field, LegacyAPI.getActiveLoom(), filter, query)
-            ),
-
-        selectResult: (field: string, selection: FeatureSearchSelection) =>
-            dispatch(Action.select(field, selection)),
-    };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(FeatureSearchBox);
