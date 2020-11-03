@@ -119,17 +119,21 @@ export const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
     };
 
     /**
-     * Icon in the Search box is either a 'search' icon, or,
+     * Input element for the Search box has an "action" button
+     * which either has a 'search' icon, or,
      * when a search result is selected, a clickable cross icon.
      * Clicking the cross should clear the search field.
      */
-    const icon = () => {
+    const input = () => {
         return {
-            ...(state.selected && {
-                onClick: () => onSearchChange(''),
-            }),
-            icon: state.selected ? 'cancel' : 'search',
-            iconPosition: 'left',
+            action: {
+                ...(state.selected && {
+                    onClick: () => onSearchChange(''),
+                }),
+                icon: state.selected ? 'cancel' : 'search',
+            },
+            actionPosition: 'left',
+            icon: false,
         };
     };
 
@@ -168,7 +172,7 @@ export const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
             <Search
                 category
                 className='feature-search-input'
-                input={icon()}
+                input={input()}
                 loading={state.loading}
                 placeholder='Search...'
                 onSearchChange={(_, data) => onSearchChange(data.value)}
