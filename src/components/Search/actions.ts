@@ -47,7 +47,7 @@ export const results = (
 export interface SearchResultSelect {
     type: typeof Action.SELECT;
     payload: {
-        selection: FeatureSearchSelection;
+        selection: FeatureSearchSelection | undefined;
         field: string;
     };
 }
@@ -59,6 +59,13 @@ export const select = (
     return {
         type: Action.SELECT,
         payload: { selection, field },
+    };
+};
+
+export const clear = (field: string): SearchResultSelect => {
+    return {
+        type: Action.SELECT,
+        payload: { selection: undefined, field },
     };
 };
 

@@ -42,6 +42,8 @@ const exampleResults = [
 describe('Query API side-effect', () => {
     const exampleField = '1';
     const exampleSearchQuery = 'query';
+
+    // @ts-ignore
     const generator = cloneableGenerator(getFeatures)(
         search(exampleField, '', 'all', exampleSearchQuery)
     );
