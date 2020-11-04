@@ -277,7 +277,14 @@ class AppSidebar extends Component {
                                 />
                             )}
                             {canRemove && <OptionsPopup />}
-                            {file.loomDisplayName}
+                            <span
+                                style={{
+                                    wordWrap: 'break-word',
+                                    display: 'inline-block',
+                                    width: '90%',
+                                }}>
+                                {file.loomDisplayName}
+                            </span>
                         </Menu.Item>
                     </Link>
                 );
