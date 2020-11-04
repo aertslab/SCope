@@ -7,7 +7,7 @@ const initialState: MainState = {
     isAppLoading: true,
     uuid: '',
     sessionMode: SESSION_READ,
-    sidebarIsVisible: false,
+    sidebarIsVisible: true,
     cookieConsent: false,
 };
 
