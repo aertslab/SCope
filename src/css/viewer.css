@@ -1,7 +1,3 @@
-.scopeLogo {
-        margin: 0px 0px 0px 150px !important;
-}
-
 .pusher {
 	display: flex;
 	flex-direction: column;
@@ -150,4 +146,9 @@ h2.ui.header {
 .ui.grid .row .column {
 	padding-left: 0.5rem;
 	padding-right: 0.5rem;
+}
+
+p.paragraph {
+    margin: 2em;
+    padding: 1em;
 }
