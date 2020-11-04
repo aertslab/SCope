@@ -488,8 +488,9 @@ class CollaborativeAnnotation extends Component {
     }
 }
 
-
-const collaborativeAnnotation = withCookies(withRouter(CollaborativeAnnotation));
+const collaborativeAnnotation = withCookies(
+    withRouter(CollaborativeAnnotation)
+);
 
 const mapStateToProps = (state) => {
     return {

@@ -11,6 +11,7 @@ import { RootState } from '../../redux/reducers';
 
 interface OptionsPopupProps extends RouteComponentProps {
     cookies: Cookies;
+    cookieConsent: boolean;
 }
 
 interface OptionsPopupState {

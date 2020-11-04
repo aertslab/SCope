@@ -36,7 +36,12 @@ import { FullPageNotify } from './pages/FullPageNotify';
 import Alert from 'react-popup';
 import 'react-popup/style.css';
 
-import { setAppLoading, setUUID, setSessionMode, consentToCookies } from '../redux/actions';
+import {
+    setAppLoading,
+    setUUID,
+    setSessionMode,
+    consentToCookies,
+} from '../redux/actions';
 
 const pako = require('pako');
 const publicIp = require('public-ip');
@@ -232,11 +237,11 @@ class App extends Component {
 
             if (
                 document.head.querySelector('[name=scope-orcid]') !== null &&
-                    this.state.orcid_active
+                this.state.orcid_active
             ) {
                 const auth_code = document.head
-                      .querySelector('[name=scope-orcid]')
-                      .getAttribute('auth');
+                    .querySelector('[name=scope-orcid]')
+                    .getAttribute('auth');
 
                 BackendAPI.getORCID(
                     auth_code,
@@ -245,19 +250,11 @@ class App extends Component {
                             'scope_orcid_uuid',
                             orcid_scope_uuid
                         );
-                        this.props.cookies.set(
-                            'scope_orcid_name',
-                            name
-                        );
-                        this.props.cookies.set(
-                            'scope_orcid_id',
-                            orcid_id
-                        );
+                        this.props.cookies.set('scope_orcid_name', name);
+                        this.props.cookies.set('scope_orcid_id', orcid_id);
                         // Possibly a bit hacky, but it works to remove the code from the URL
                         location.href =
-                            location.origin +
-                            location.pathname +
-                            location.hash;
+                            location.origin + location.pathname + location.hash;
                     }
                 );
             }
@@ -328,8 +325,16 @@ class App extends Component {
             } else {
                 if (DEBUG) {
                     console.log('Params UUID detected:', match.params.uuid);
-                    console.log('cookieConsent state:', this.props.cookieConsent);
-                    console.log('SCOPE_COOKIE:', SCOPE_COOKIE, match.params.uuid, { path: '/' });
+                    console.log(
+                        'cookieConsent state:',
+                        this.props.cookieConsent
+                    );
+                    console.log(
+                        'SCOPE_COOKIE:',
+                        SCOPE_COOKIE,
+                        match.params.uuid,
+                        { path: '/' }
+                    );
                 }
                 this.checkUUID(ip, match.params.uuid);
 
