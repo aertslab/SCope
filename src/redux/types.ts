@@ -3,6 +3,7 @@ import {
     SET_UUID,
     SET_SESSION_MODE,
     TOGGLE_SIDEBAR_VISIBLE,
+    CONSENT_TO_COOKIES,
 } from './actionTypes';
 
 export const SESSION_READ = 'r';
@@ -15,6 +16,7 @@ export interface MainState {
     uuid: string;
     sessionMode: SessionMode;
     sidebarIsVisible: boolean;
+    cookieConsent: boolean;
 }
 
 export interface SetLoadingAction {
@@ -36,8 +38,13 @@ export interface ToggleSidebar {
     type: typeof TOGGLE_SIDEBAR_VISIBLE;
 }
 
+export interface ConsentToCookies {
+    type: typeof CONSENT_TO_COOKIES;
+}
+
 export type MainAction =
     | SetLoadingAction
     | SetUUIDAction
     | SetSessionModeAction
-    | ToggleSidebar;
+    | ToggleSidebar
+    | ConsentToCookies;
