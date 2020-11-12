@@ -5,34 +5,12 @@ import { withRouter, Route, Link } from 'react-router-dom';
 import { withCookies, Cookies } from 'react-cookie';
 import CookieConsent from 'react-cookie-consent';
 
-import ReactResizeDetector from 'react-resize-detector';
 import Favicon from 'react-favicon';
-
-import {
-    Sidebar,
-    Header,
-    Segment,
-    Dimmer,
-    Loader,
-    Button,
-    Icon,
-} from 'semantic-ui-react';
 
 import { SCOPE_COOKIE, ONE_MINUTE } from './constants';
 
-import AppHeader from './AppHeader';
-import AppSidebar from './AppSidebar';
 import { BackendAPI } from './common/API';
-import Welcome from './pages/Welcome';
-import Dataset from './pages/Dataset';
-import Gene from './pages/Gene';
-import Annotations from './pages/Annotations';
-import Geneset from './pages/Geneset';
-import Regulon from './pages/Regulon';
-import Compare from './pages/Compare';
-import Tutorial from './pages/Tutorial';
-import About from './pages/About';
-import { FullPageNotify } from './pages/FullPageNotify';
+import { SessionLoading, Main } from './Main';
 import Alert from 'react-popup';
 import 'react-popup/style.css';
 
@@ -42,6 +20,9 @@ import {
     setSessionMode,
     consentToCookies,
 } from '../redux/actions';
+
+import { FullPageNotify } from './pages';
+import { millisecondsToDays } from './utils';
 
 const pako = require('pako');
 const publicIp = require('public-ip');
@@ -57,7 +38,6 @@ class App extends Component {
             sessionsLimitReached: false,
             orcid_active: true,
             orcid_data: null,
-            cookieBannerRef: React.createRef(),
         };
 
         BackendAPI.getORCIDStatus((active) => {
@@ -66,6 +46,7 @@ class App extends Component {
 
         this.timeout = null;
         this.mouseClicks = 0;
+        this.timeFormatter = new Intl.RelativeTimeFormat(navigator.language);
     }
 
     removeAllCookies() {
@@ -99,120 +80,32 @@ class App extends Component {
         } = this.props;
 
         return (
-            <div>
+            <React.Fragment>
                 <Favicon url='src/images/SCope_favicon.ico' />
-                <Segment className='parentView'>
-                    <Route
-                        exact
-                        path='/'
-                        render={() => (
-                            <Segment textAlign='center' className='parentView'>
-                                <Segment vertical>
-                                    <Header as='h1'>SCope</Header>
-                                </Segment>
-                                <FullPageNotify
-                                    starting={isAppLoading}
-                                    connected={!error}
-                                    tooManyUsers={
-                                        !isAppLoading && sessionsLimitReached
-                                    }
-                                    timeout={
-                                        !isAppLoading &&
-                                        this.timeout != null &&
-                                        this.timeout <= 0
-                                    }
-                                />
-                            </Segment>
+                <Route exact path='/'>
+                    <SessionLoading />
+                </Route>
+                <Route path='/:uuid/:loom?/:page?'>
+                    <Main
+                        loaded={loaded}
+                        timeout={this.timeFormatter.format(
+                            Math.round(millisecondsToDays(this.timeout)),
+                            'day'
                         )}
+                        cookies={this.props.cookies}
                     />
-                    <Route
-                        path='/:uuid/:loom?/:page?'
-                        render={({ history }) => (
-                            <Segment className='parentView'>
-                                <ReactResizeDetector
-                                    handleHeight
-                                    skipOnMount
-                                    onResize={this.onResize.bind(this)}
-                                />
-                                <AppHeader
-                                    metadata={metadata}
-                                    loaded={loaded}
-                                    timeout={this.timeout}
-                                    cookies={this.props.cookies}
-                                    cookieBannerRef={this.state.cookieBannerRef}
-                                />
-                                <Sidebar.Pushable>
-                                    <AppSidebar
-                                        visible={sidebarIsVisible}
-                                        onMetadataChange={this.onMetadataChange.bind(
-                                            this
-                                        )}
-                                        sessionMode={sessionMode}
-                                    />
-                                    <Sidebar.Pusher style={{ width: '100%' }}>
-                                        <Route
-                                            path='/:uuid/:loom?/welcome'
-                                            component={Welcome}
-                                        />
-                                        <Route
-                                            path='/:uuid/:loom?/dataset'
-                                            component={Dataset}
-                                        />
-                                        <Route
-                                            path='/:uuid/:loom?/gene'
-                                            component={Gene}
-                                        />
-                                        <Route
-                                            path='/:uuid/:loom?/geneset'
-                                            component={Geneset}
-                                        />
-                                        <Route
-                                            path='/:uuid/:loom?/annotations'
-                                            component={Annotations}
-                                        />
-                                        <Route
-                                            path='/:uuid/:loom?/regulon'
-                                            component={Regulon}
-                                        />
-                                        <Route
-                                            path='/:uuid/:loom?/compare'
-                                            component={() => (
-                                                <Compare
-                                                    metadata={metadata}
-                                                    location={
-                                                        this.props.location
-                                                    }
-                                                />
-                                            )}
-                                        />
-                                        <Route
-                                            path='/:uuid/:loom?/tutorial'
-                                            component={Tutorial}
-                                        />
-                                        <Route
-                                            path='/:uuid/:loom?/about'
-                                            component={About}
-                                        />
-                                    </Sidebar.Pusher>
-                                </Sidebar.Pushable>
-                                <FullPageNotify
-                                    starting={isAppLoading}
-                                    connected={!error}
-                                    tooManyUsers={
-                                        !isAppLoading && sessionsLimitReached
-                                    }
-                                    timeout={
-                                        !isAppLoading &&
-                                        this.timeout != null &&
-                                        this.timeout <= 0
-                                    }
-                                />
-                            </Segment>
-                        )}
-                    />
-                </Segment>
+                </Route>
+                <FullPageNotify
+                    starting={isAppLoading}
+                    connected={!error}
+                    tooManyUsers={!isAppLoading && sessionsLimitReached}
+                    timeout={
+                        !isAppLoading &&
+                        this.timeout != null &&
+                        this.timeout <= 0
+                    }
+                />
                 <CookieConsent
-                    ref={this.state.cookieBannerRef}
                     enableDeclineButton
                     onDecline={() => {
                         this.removeAllCookies();
@@ -224,7 +117,7 @@ class App extends Component {
                 </CookieConsent>
                 <Alert />{' '}
                 {/* Needed for react popup to function. Do not remove */}
-            </div>
+            </React.Fragment>
         );
     }
 
@@ -405,6 +298,7 @@ class App extends Component {
                             this.timeout = response
                                 ? parseInt(response.timeRemaining * 1000)
                                 : 0;
+                            console.log('Timeout:', this.timeout);
 
                             if (!ping) {
                                 this.props.setAppLoading(false);
@@ -465,10 +359,6 @@ class App extends Component {
 
     onMetadataChange(metadata) {
         this.setState({ metadata: metadata, loaded: true });
-    }
-
-    onResize() {
-        this.forceUpdate();
     }
 
     restoreSession(ip, uuid, permalink) {

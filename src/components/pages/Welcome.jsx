@@ -4,16 +4,19 @@ export default class Welcome extends Component {
     render() {
         return (
             <div
-                style={{width: '100%',
-                        display: 'flex',
-                        flexFlow: 'column nowrap',
-                        justifyContent: 'flex-start',
-                        alignItems: 'center',
-                        margin: '1em',
-                        paddingLeft: '220px',
-                        paddingRight: '220px'
-                       }}
-            >
+                style={{
+                    width: '100%',
+                    height: '100vh',
+                    display: 'flex',
+                    flexFlow: 'column nowrap',
+                    justifyContent: 'flex-start',
+                    alignItems: 'center',
+                    margin: '1em',
+                    paddingBottom: '60px',
+                    paddingLeft: '220px',
+                    paddingRight: '220px',
+                    overflowY: 'scroll',
+                }}>
                 <img
                     className='scopeLogo'
                     src='images/SCope_Logo.png'
@@ -25,16 +28,21 @@ export default class Welcome extends Component {
                     large-scale scRNA-seq datasets, published in Cell.
                     <br />
                     Datasets can be uploaded using the left sidebar.
-                    <br/>
-                    Files should be in the <a href='http://loompy.org/'
-                                              target='_blank'
-                                              rel='noopener noreferrer'>
-                                               loom file format</a> and
-                    will appear under the &quot;User Uploaded&quot;
+                    <br />
+                    Files should be in the{' '}
+                    <a
+                        href='http://loompy.org/'
+                        target='_blank'
+                        rel='noopener noreferrer'>
+                        loom file format
+                    </a>{' '}
+                    and will appear under the &quot;User Uploaded&quot;
                     category.
                     <br />
                     SCope compatible loom files can be generated using the
                     following packages:
+                </p>
+                <div>
                     <ul>
                         <li>
                             R:{' '}
@@ -55,7 +63,9 @@ export default class Welcome extends Component {
                             </a>
                         </li>
                     </ul>
-                    <br />
+                </div>
+
+                <p className='paragraph'>
                     Currently on{' '}
                     <a
                         href='http://scope.aertslab.org'
@@ -63,22 +73,22 @@ export default class Welcome extends Component {
                         rel='noopener noreferrer'>
                         scope.aertslab.org
                     </a>{' '}
-                    the following datasets can be found preloaded in the
-                    left sidebar.
+                    the following datasets can be found preloaded in the left
+                    sidebar.
                 </p>
 
-                <p className='paragraph'>
+                <div>
                     <ul>
                         <li>
                             Drosophila
                             <ul>
                                 <li>
                                     <b>
-                                        A single-cell transcriptome atlas of
-                                        the ageing Drosophila brain
+                                        A single-cell transcriptome atlas of the
+                                        ageing Drosophila brain
                                     </b>
-                                    , Davie, Jannssens and Koldere{' '}
-                                    <i>et al.</i>, 2018 (
+                                    , Davie, Jannssens and Koldere <i>et al.</i>
+                                    , 2018 (
                                     <a
                                         href='http://cell.com'
                                         target='_blank'
@@ -88,8 +98,8 @@ export default class Welcome extends Component {
                                     )
                                     <ul>
                                         <li>
-                                            Whole Adult Brain - Filtered
-                                            Dataset - 57k Cells
+                                            Whole Adult Brain - Filtered Dataset
+                                            - 57k Cells
                                         </li>
                                         <ul>
                                             <li>
@@ -185,16 +195,16 @@ export default class Welcome extends Component {
                                             Dataset - 157k Cells
                                         </li>
                                         <li>
-                                            Whole Adult Brain - Drop-seq
-                                            Dataset - 2k Cells
+                                            Whole Adult Brain - Drop-seq Dataset
+                                            - 2k Cells
                                         </li>
                                     </ul>
                                 </li>
                                 <li>
                                     <b>
                                         Phenotypic convergence: distinct
-                                        transcription factors regulate
-                                        common terminal features
+                                        transcription factors regulate common
+                                        terminal features
                                     </b>
                                     , Konstantinides <i>et al.</i>, 2018 (
                                     <a
@@ -206,8 +216,8 @@ export default class Welcome extends Component {
                                     )
                                     <ul>
                                         <li>
-                                            Adult Optic Lobe - Filtered
-                                            Dataset - 57k Cells
+                                            Adult Optic Lobe - Filtered Dataset
+                                            - 57k Cells
                                         </li>
                                     </ul>
                                 </li>
@@ -248,9 +258,9 @@ export default class Welcome extends Component {
                                     )
                                     <ul>
                                         <li>
-                                            Pupal and Adult Olfactory
-                                            Projection Neurons - Filtered
-                                            Dataset - 500 Cells
+                                            Pupal and Adult Olfactory Projection
+                                            Neurons - Filtered Dataset - 500
+                                            Cells
                                         </li>
                                     </ul>
                                 </li>
@@ -269,8 +279,8 @@ export default class Welcome extends Component {
                                     )
                                     <ul>
                                         <li>
-                                            Whole Embryo - Filtered Dataset
-                                            - 6k Cells
+                                            Whole Embryo - Filtered Dataset - 6k
+                                            Cells
                                         </li>
                                     </ul>
                                 </li>
@@ -281,9 +291,9 @@ export default class Welcome extends Component {
                             <ul>
                                 <li>
                                     <b>
-                                        Brain structure. Cell types in the
-                                        mouse cortex and hippocampus
-                                        revealed by single-cell RNA-seq
+                                        Brain structure. Cell types in the mouse
+                                        cortex and hippocampus revealed by
+                                        single-cell RNA-seq
                                     </b>
                                     , Zeisel <i>et al.</i>, 2015 (
                                     <a
@@ -295,16 +305,16 @@ export default class Welcome extends Component {
                                     )
                                     <ul>
                                         <li>
-                                            Somatosensory cortex and
-                                            hippocampal CA1 regions. -
-                                            Filtered Dataset - 3k Cells
+                                            Somatosensory cortex and hippocampal
+                                            CA1 regions. - Filtered Dataset - 3k
+                                            Cells
                                         </li>
                                     </ul>
                                 </li>
                                 <li>
                                     <b>
-                                        Single-Cell RNA-Seq Reveals
-                                        Hypothalamic Cell Diversity
+                                        Single-Cell RNA-Seq Reveals Hypothalamic
+                                        Cell Diversity
                                     </b>
                                     , Chen, Wu, Jiang and Zhang, 2017 (
                                     <a
@@ -316,8 +326,8 @@ export default class Welcome extends Component {
                                     )
                                     <ul>
                                         <li>
-                                            Hypothalamus - Filtered Dataset
-                                            - 3k Cells
+                                            Hypothalamus - Filtered Dataset - 3k
+                                            Cells
                                         </li>
                                     </ul>
                                 </li>
@@ -329,8 +339,8 @@ export default class Welcome extends Component {
                                 <li>
                                     <b>
                                         Integrative single-cell analysis of
-                                        transcriptional and epigenetic
-                                        states in the human adult brain
+                                        transcriptional and epigenetic states in
+                                        the human adult brain
                                     </b>
                                     , Lake <i>et al.</i>, 2018 (
                                     <a
@@ -342,16 +352,16 @@ export default class Welcome extends Component {
                                     )
                                     <ul>
                                         <li>
-                                            Adult visual cortex, frontal
-                                            cortex, and cerebellum -
-                                            Filtered Dataset - 60k Cells
+                                            Adult visual cortex, frontal cortex,
+                                            and cerebellum - Filtered Dataset -
+                                            60k Cells
                                         </li>
                                     </ul>
                                 </li>
                             </ul>
                         </li>
                     </ul>
-                </p>
+                </div>
             </div>
         );
     }

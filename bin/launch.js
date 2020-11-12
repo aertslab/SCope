@@ -8,7 +8,6 @@ const path = require('path');
 // Load custom dependencies
 const apache = require('../apache/apache.conf.js');
 const utils = require('../bin/utils.js');
-const figlet = require('figlet');
 
 // Declare variables
 const isWin = process.platform === 'win32';
@@ -21,11 +20,6 @@ class Launcher {
     constructor() {
         this._config = null;
         this.scopeServerActivated = false;
-    }
-
-    printSCope() {
-        console.log(figlet.textSync('SCope', 'Big Money-ne'));
-        console.log('');
     }
 
     loadConfig() {
@@ -307,7 +301,6 @@ class Launcher {
     }
 
     start() {
-        this.printSCope();
         this.loadConfig();
         this.printSettings();
         this.runSanityChecks()

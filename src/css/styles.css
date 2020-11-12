@@ -1,0 +1,17 @@
+.scope-row {
+    display: flex;
+    flex-direction: row;
+}
+
+div._react-file-reader-input {
+    width: 100%;
+}
+
+
+.ui.grid > .row {
+    padding: 1rem !important;
+}
+
+.ui.grid > .feature-search-bar {
+    padding-top: 2rem !important;
+}

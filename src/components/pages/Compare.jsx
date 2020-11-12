@@ -411,7 +411,6 @@ class Compare extends Component {
                                                     activeLegend: legend,
                                                 });
                                             }}
-                                            location={this.props.location}
                                         />
                                     </Grid.Column>
                                 );

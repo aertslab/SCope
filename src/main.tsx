@@ -7,6 +7,7 @@ import { CookiesProvider } from 'react-cookie';
 import { Provider } from 'react-redux';
 
 import configureStore from './redux/store';
+import './css/styles.css';
 import './css/header.css';
 import './css/sidebar.css';
 import './css/viewer.css';
