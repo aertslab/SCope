@@ -51,7 +51,9 @@ const reducer: Reducer<State, GProfilerAction> = produce(
             case t.SET_AVAILABLE_ORGANISMS:
                 draft.availableOrganisms = action.payload.availableOrganisms;
                 draft.isFetchingAvailableOrganisms = false;
-                if (draft.availableOrganisms.length > 0) draft.error = '';
+                if (draft.availableOrganisms.length > 0) {
+                    draft.error = '';
+                }
                 break;
             case t.SET_ERROR:
                 draft.error = action.payload.error;

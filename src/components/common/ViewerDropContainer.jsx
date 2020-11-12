@@ -33,7 +33,7 @@ class ViewerDropContainer extends Component {
             if (
                 loomFile &&
                 ((activeAnnotations && Object.keys(activeAnnotations).length) ||
-                    configuration == 'multi')
+                    configuration === 'multi')
             ) {
                 return (
                     <Viewer
@@ -66,8 +66,10 @@ class ViewerDropContainer extends Component {
                         </p>
                     </div>
                 );
-            } else if (orientation == 'one') {
-                if (this.props.position != 0) return <div></div>;
+            } else if (orientation === 'one') {
+                if (this.props.position !== 0) {
+                    return <div></div>;
+                }
                 return (
                     <div className='emptyDropContainer dropContainer'>
                         <p>

@@ -8,6 +8,8 @@ import 'rc-tooltip/assets/bootstrap.css';
 import Slider, { Range } from 'rc-slider';
 import { BackendAPI } from '../common/API';
 
+import { FEATURE_COLOURS } from '../constants';
+
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
 const TooltipRange = createSliderWithTooltip(Slider.Range);
 
@@ -20,7 +22,6 @@ export default class ViewerToolbar extends Component {
             activePage: BackendAPI.getActivePage(),
             featuresScale: BackendAPI.getFeatureScale(),
             customScale: BackendAPI.getCustomScale(),
-            colors: BackendAPI.getColors(),
         };
         this.activeFeaturesListener = (
             features,
@@ -49,7 +50,6 @@ export default class ViewerToolbar extends Component {
         const {
             activeTool,
             activeFeatures,
-            colors,
             featuresScale,
             customScale,
         } = this.state;
@@ -75,14 +75,16 @@ export default class ViewerToolbar extends Component {
                         }}
                         trackStyle={[
                             {
-                                background: `linear-gradient(${colors[i]}, black)`,
+                                background: `linear-gradient(${FEATURE_COLOURS[i]}, black)`,
                             },
                         ]}
-                        handleStyle={[{ border: '2px solid ' + colors[i] }]}
+                        handleStyle={[
+                            { border: '2px solid ' + FEATURE_COLOURS[i] },
+                        ]}
                         railStyle={{
-                            background: `linear-gradient(${colors[i]}, ${
-                                midScale * 100
-                            }%, black ${midScale * 100}%)`,
+                            background: `linear-gradient(${
+                                FEATURE_COLOURS[i]
+                            }, ${midScale * 100}%, black ${midScale * 100}%)`,
                         }}
                         max={featuresScale[i]}
                         defaultValue={val}
@@ -180,7 +182,9 @@ export default class ViewerToolbar extends Component {
     }
 
     handleItemClick(e, tool) {
-        if (DEBUG) console.log('handleItemClick', tool.name);
+        if (DEBUG) {
+            console.log('handleItemClick', tool.name);
+        }
         this.setState({ activeTool: tool.name });
         BackendAPI.setViewerTool(tool.name);
     }
@@ -188,7 +192,9 @@ export default class ViewerToolbar extends Component {
     handleUpdateScale(slider, value) {
         let scale = this.state.customScale;
         scale[slider] = value;
-        if (DEBUG) console.log('handleUpdateScale', slider, value, scale);
+        if (DEBUG) {
+            console.log('handleUpdateScale', slider, value, scale);
+        }
         BackendAPI.setCustomScale(scale, slider);
         this.setState({ customScale: scale });
     }

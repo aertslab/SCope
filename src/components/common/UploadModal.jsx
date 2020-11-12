@@ -22,65 +22,54 @@ export default class UploadModal extends Component {
                 className='upload'
                 closeIcon>
                 <Modal.Header>{this.props.title}</Modal.Header>
-                <Modal.Content image>
+                <Modal.Content>
                     <Modal.Description>
-                        <Grid>
-                            <Grid.Row>
-                                <Grid.Column width={13}>
-                                    <FileReaderInput
-                                        as='binary'
-                                        id='my-file-input'
-                                        onChange={this.selectLoomFile.bind(
-                                            this
-                                        )}>
-                                        <Input
-                                            label='File to be uploaded:'
-                                            labelPosition='left'
-                                            action={{
-                                                color: this.state.uploadLoomFile
-                                                    ? 'grey'
-                                                    : 'orange',
-                                                content: 'Select a file...',
-                                            }}
-                                            fluid
-                                            placeholder={
-                                                this.state.uploadLoomFileName
-                                            }
-                                            error={this.state.uploadError}
-                                        />
-                                    </FileReaderInput>
-                                </Grid.Column>
-                                <Grid.Column width={3}>
-                                    <Button
-                                        color={
-                                            this.state.uploadLoomFile
-                                                ? 'orange'
-                                                : 'grey'
-                                        }
-                                        onClick={this.uploadLoomFile.bind(this)}
-                                        disabled={
-                                            !this.state.uploadLoomFile ||
-                                            this.state.uploadLoomProgress > 0
-                                        }>
-                                        {' '}
-                                        Upload!
-                                    </Button>
-                                </Grid.Column>
-                            </Grid.Row>
-                            <Grid.Row>
-                                <Grid.Column width={3}>
-                                    Upload progress:
-                                </Grid.Column>
-                                <Grid.Column width={13}>
-                                    <Progress
-                                        percent={this.state.uploadLoomProgress}
-                                        error={this.state.uploadError}
-                                        indicating
-                                        progress
-                                        disabled></Progress>
-                                </Grid.Column>
-                            </Grid.Row>
-                        </Grid>
+                        <div className='scope-row'>
+                            <FileReaderInput
+                                as='binary'
+                                id='my-file-input'
+                                onChange={this.selectLoomFile.bind(this)}>
+                                <Input
+                                    label='File to be uploaded:'
+                                    labelPosition='left'
+                                    action={{
+                                        color: this.state.uploadLoomFile
+                                            ? 'grey'
+                                            : 'orange',
+                                        content: 'Select a file...',
+                                    }}
+                                    fluid
+                                    placeholder={this.state.uploadLoomFileName}
+                                    error={this.state.uploadError}
+                                />
+                            </FileReaderInput>
+                            <Button
+                                className='scope-row-element'
+                                color={
+                                    this.state.uploadLoomFile
+                                        ? 'orange'
+                                        : 'grey'
+                                }
+                                onClick={this.uploadLoomFile.bind(this)}
+                                disabled={
+                                    !this.state.uploadLoomFile ||
+                                    this.state.uploadLoomProgress > 0
+                                }>
+                                {' '}
+                                Upload!
+                            </Button>
+                        </div>
+                        <div>
+                            <span>Upload progress:</span>
+                            <span>
+                                <Progress
+                                    percent={this.state.uploadLoomProgress}
+                                    error={this.state.uploadError}
+                                    indicating
+                                    progress
+                                    disabled></Progress>
+                            </span>
+                        </div>
                     </Modal.Description>
                 </Modal.Content>
             </Modal>
@@ -109,13 +98,13 @@ export default class UploadModal extends Component {
                 this.setState({ uploadLoomProgress: progress });
             },
             (filename, status_code) => {
-                if (status_code == 200) {
+                if (status_code === 200) {
                     this.setState({
                         uploadLoomFile: null,
                         uploadLoomProgress: 0,
                     });
                     this.props.onUploaded(filename);
-                } else if (status_code == 415) {
+                } else if (status_code === 415) {
                     this.setState({
                         uploadLoomFile: null,
                         uploadLoomFileName:

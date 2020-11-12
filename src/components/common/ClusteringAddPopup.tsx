@@ -125,10 +125,10 @@ export default class ClusteringAddPopup extends Component<
                         if (DEBUG) {
                             console.debug('addNewClustering', response);
                         }
-                        if (response.success == true) {
+                        if (response.success === true) {
                             this.closeModal();
                             // Maybe we can auto load the new clustering
-                        } else if (response.success == false) {
+                        } else if (response.success === false) {
                             alert(response.message);
                         }
                     }

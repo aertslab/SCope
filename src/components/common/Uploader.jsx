@@ -1,6 +1,6 @@
 export default class Uploader {
     upload(uuid, type, file, onProgress, onUploaded) {
-        if (file == null) {
+        if (file === null) {
             alert('Please select a file first');
             return;
         }
@@ -38,20 +38,23 @@ export default class Uploader {
             );
         }
         xhr.upload.addEventListener('progress', (event) => {
-            if (DEBUG)
+            if (DEBUG) {
                 console.log(
                     'Data uploaded: ' + event.loaded + '/' + event.total
                 );
+            }
             let progress = ((event.loaded / event.total) * 100).toPrecision(1);
             onProgress(progress);
         });
 
         xhr.upload.addEventListener('load', (event) => {
-            if (DEBUG) console.log('file uploaded: ' + file.name);
+            if (DEBUG) {
+                console.log('file uploaded: ' + file.name);
+            }
         });
 
         xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4) {
+            if (xhr.readyState === 4) {
                 setTimeout(() => {
                     onUploaded(file.name, xhr.status);
                 }, 1000);

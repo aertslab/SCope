@@ -1,16 +1,18 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import * as PIXI from 'pixi.js';
 import * as d3 from 'd3';
 import * as R from 'ramda';
 import { BackendAPI } from './API';
 import { Dimmer, Loader } from 'semantic-ui-react';
-import ReactResizeDetector from 'react-resize-detector';
-import zlib from 'zlib';
+import pako from 'pako';
 import Alert from 'react-popup';
+import debounce from 'lodash/debounce';
+
+import { zipLists } from '../../util';
 
 const MIN_SCALING_FACTOR = 1;
 const DEFAULT_POINT_COLOR = 'A6A6A6';
-const VIEWER_MARGIN = 9; //5;
 
 const EMPTY_TRAJECTORY = {
     nodes: [],
@@ -48,8 +50,8 @@ export default class Viewer extends Component {
         this.bcr = null;
         this.w = parseInt(this.props.width);
         this.h = parseInt(this.props.height);
-        // Increase the maxSize if displaying more than 1500 (default) objects
-        this.maxn = 2000;
+        // Increase the maxSize if displaying more objects
+        this.maxn = 250000;
         this.texture = PIXI.Texture.from('src/images/dot.png');
         this.settingsListener = (settings, customScale) => {
             if (this.props.settings) {
@@ -72,8 +74,11 @@ export default class Viewer extends Component {
         };
         this.spriteSettingsListener = () => {
             this.setState({ loading: true });
-            if (this.state.colors) this.updateDataPoints(this.state.colors);
-            else this.resetDataPoints();
+            if (this.state.colors) {
+                this.updateDataPoints(this.state.colors);
+            } else {
+                this.resetDataPoints();
+            }
             this.repaintLassoSelections(this.state.lassoSelections);
         };
         this.viewerToolListener = (tool) => {
@@ -93,44 +98,55 @@ export default class Viewer extends Component {
         this.activeFeaturesListener = (features, featureID, customScale) => {
             this.onActiveFeaturesChange(features, featureID, customScale);
         };
+
+        this.activePage = decodeURI(this.props.location.pathname)
+            .split('/')
+            .slice(-1)[0];
+
+        this.container = React.createRef();
+        this.app = null;
+
+        this.resizeListener = debounce(() => {
+            const bbox = this.container.current.getBoundingClientRect();
+            this.onResize(bbox.width, bbox.height);
+        }, 500);
     }
 
     render() {
-        return (
-            <div className='stretched'>
-                <canvas id={'viewer' + this.props.name}></canvas>
-                <ReactResizeDetector
-                    skipOnMount
-                    handleWidth
-                    handleHeight
-                    onResize={() => this.onResize()}
-                />
-                <Dimmer
-                    active={this.state.loading}
-                    inverted
-                    style={{ zIndex: 0 }}>
-                    <Loader inverted>Loading</Loader>
-                </Dimmer>
-            </div>
-        );
+        return <div className='viewcontainer' ref={this.container}></div>;
     }
 
     componentDidMount() {
-        let viewerId = 'viewer' + this.props.name;
-        if (DEBUG)
-            console.log(this.props.name, 'componentDidMount', this.props);
-        this.zoomSelection = d3.select('#' + viewerId);
-        let bbox = this.zoomSelection
-            .select(function () {
-                return this.parentNode;
-            })
-            .node()
-            .getBoundingClientRect();
-        this.w = bbox.width - VIEWER_MARGIN;
-        this.h = bbox.height - VIEWER_MARGIN;
+        const bbox = this.container.current.getBoundingClientRect();
+        this.app = new PIXI.Application({
+            width: bbox.width,
+            height: bbox.height,
+            autoDensity: true,
+            antialias: true,
+            backgroundColor: 0xffffff,
+            sharedTicker: true,
+        });
+        this.app.view.id = 'viewer' + this.props.name;
+        this.w = bbox.width;
+        this.h = bbox.height;
+        this.container.current.appendChild(this.app.view);
+        this.zoomSelection = d3.select('#viewer' + this.props.name);
+        window.addEventListener('resize', this.resizeListener);
+        this.app.start();
+
+        BackendAPI.onSettingsChange(this.settingsListener);
+        BackendAPI.onSpriteSettingsChange(this.spriteSettingsListener);
+        BackendAPI.onViewerToolChange(this.viewerToolListener);
+        BackendAPI.onViewerSelectionsChange(this.viewerSelectionListener);
+        BackendAPI.onViewerTransformChange(this.viewerTransformListener);
+        BackendAPI.onCustomScaleChange(this.customScaleListener);
+        BackendAPI.onActiveFeaturesChange(
+            this.activePage,
+            this.activeFeaturesListener
+        );
 
         this.initGraphics();
-        if (this.props.loomFile != null) {
+        if (this.props.loomFile !== null && this.props.loomFile !== '*') {
             this.getPoints(
                 this.props.loomFile,
                 this.props.activeCoordinates,
@@ -171,91 +187,22 @@ export default class Viewer extends Component {
                 }
             );
         }
-
-        BackendAPI.onSettingsChange(this.settingsListener);
-        BackendAPI.onSpriteSettingsChange(this.spriteSettingsListener);
-        BackendAPI.onViewerToolChange(this.viewerToolListener);
-        BackendAPI.onViewerSelectionsChange(this.viewerSelectionListener);
-        BackendAPI.onViewerTransformChange(this.viewerTransformListener);
-        BackendAPI.onCustomScaleChange(this.customScaleListener);
-
-        const activePage = decodeURI(this.props.location.pathname)
-            .split('/')
-            .slice(-1)[0];
-        console.log('Viewer active page is:', activePage);
-        BackendAPI.onActiveFeaturesChange(
-            activePage,
-            this.activeFeaturesListener
-        );
     }
 
-    UNSAFE_componentWillReceiveProps(nextProps) {
-        if (DEBUG)
-            console.log(
-                this.props.name,
-                'componentWillReceiveProps',
-                nextProps
-            );
-
-        this.onResize();
-        if (
-            this.props.loomFile != nextProps.loomFile ||
-            this.props.activeCoordinates != nextProps.activeCoordinates ||
-            this.props.superposition != nextProps.superposition ||
-            JSON.stringify(nextProps.activeAnnotations) !=
-                JSON.stringify(this.state.activeAnnotations)
-        ) {
-            this.setState({ loading: true });
-            if (DEBUG) console.log(nextProps.name, 'changing points');
-            this.getPoints(
-                nextProps.loomFile,
-                nextProps.activeCoordinates,
-                nextProps.activeAnnotations,
-                nextProps.superposition,
-                () => {
-                    let featuresActive = false;
-                    this.state.activeFeatures.map((f) => {
-                        if (f.feature.length) featuresActive = true;
-                    });
-                    if (DEBUG)
-                        console.log(
-                            nextProps.name,
-                            'features active',
-                            featuresActive
-                        );
-                    if (featuresActive) {
-                        this.getFeatureColors(
-                            this.state.activeFeatures,
-                            nextProps.loomFile,
-                            this.props.thresholds,
-                            this.state.activeAnnotations,
-                            this.state.customScale,
-                            nextProps.superposition
-                        );
-
-                        this.getFeatureLabels(
-                            nextProps.loomFile,
-                            BackendAPI.getActiveCoordinates(),
-                            this.state.activeAnnotations
-                        );
-                    } else {
-                        this.setState({ loading: false });
-                    }
-                }
-            );
-        }
-
-        if (
-            nextProps.customColors &&
-            JSON.stringify(nextProps.colors) !=
-                JSON.stringify(this.state.colors)
-        ) {
-            if (DEBUG) console.log(nextProps.name, 'changing colors');
-            this.setState({ colors: nextProps.colors });
-            this.updateDataPoints(nextProps.colors);
-        }
-
-        this.drawLabels();
+    componentWillUnmount() {
+        BackendAPI.removeSettingsChange(this.settingsListener);
+        BackendAPI.removeViewerToolChange(this.viewerToolListener);
+        BackendAPI.removeViewerSelectionsChange(this.viewerSelectionListener);
+        BackendAPI.removeViewerTransformChange(this.viewerTransformListener);
+        BackendAPI.removeCustomScaleChange(this.customScaleListener);
+        BackendAPI.removeActiveFeaturesChange(
+            this.activePage,
+            this.activeFeaturesListener
+        );
+        BackendAPI.removeSpriteSettingsChange(this.spriteSettingsListener);
+        this.app.stop();
+        this.app.destroy();
+        window.removeEventListener('resize', this.resizeListener);
     }
 
     getJSONFeatures(features, field) {
@@ -270,60 +217,18 @@ export default class Viewer extends Component {
         }
     }
 
-    componentWillUnmount() {
-        BackendAPI.removeSettingsChange(this.settingsListener);
-        BackendAPI.removeViewerToolChange(this.viewerToolListener);
-        BackendAPI.removeViewerSelectionsChange(this.viewerSelectionListener);
-        BackendAPI.removeViewerTransformChange(this.viewerTransformListener);
-        BackendAPI.removeCustomScaleChange(this.customScaleListener);
+    onResize(width, height) {
+        this.w = width;
+        this.h = height;
 
-        const activePage = decodeURI(this.props.location.pathname)
-            .split('/')
-            .slice(-1)[0];
-        BackendAPI.removeActiveFeaturesChange(
-            activePage,
-            this.activeFeaturesListener
-        );
-        BackendAPI.removeSpriteSettingsChange(this.spriteSettingsListener);
-        this.destroyGraphics();
-    }
-
-    onResize() {
-        const bbox = this.zoomSelection
-            .select(function () {
-                return this.parentNode;
-            })
-            .node()
-            .getBoundingClientRect();
-
-        let dw = bbox.width - this.w - VIEWER_MARGIN;
-        let dh = bbox.height - this.h - VIEWER_MARGIN;
-
-        this.w = bbox.width - VIEWER_MARGIN;
-        this.h = bbox.height - VIEWER_MARGIN;
-        this.resizeContainer();
-    }
-
-    resizeContainer() {
-        this.renderer.resize(this.w, this.h);
-        this.updateDataPoints();
+        this.app.renderer.resize(this.w, this.h);
+        this.transformDataPoints();
     }
 
     initGraphics() {
-        if (DEBUG) console.log('Initializing Viewer ', this.props.name);
-        this.renderer = PIXI.autoDetectRenderer({
-            width: this.w,
-            height: this.h,
-            backgroundColor: 0xffffff,
-            antialias: true,
-            autoDensity: true,
-            view: this.zoomSelection.node(),
-        });
-        this.stage = new PIXI.Container();
-        //		this.stage.blendMode = PIXI.BLEND_MODES.ADD;
-        this.stage.width = this.w;
-        this.stage.height = this.h;
-        this.renderer.render(this.stage);
+        if (DEBUG) {
+            console.log('Initializing Viewer ', this.props.name);
+        }
         this.addMainLayer();
         this.addLabelLayer();
         this.addLassoLayer();
@@ -333,9 +238,6 @@ export default class Viewer extends Component {
             .scaleExtent([-1, 10])
             .on('zoom', this.zoom.bind(this));
         this.zoomSelection.call(this.zoomBehaviour);
-        let ticker = PIXI.Ticker.shared;
-        ticker.autoStart = false;
-        ticker.stop();
     }
 
     addMainLayer(maxn = this.maxn, index = null) {
@@ -346,20 +248,17 @@ export default class Viewer extends Component {
             false,
             true,
         ]);
-        //		this.mainLayer.blendMode = PIXI.BLEND_MODES.NORMAL;
         this.mainLayer.interactive = true;
-        this.bcr = document
-            .getElementById('viewer' + this.props.name)
-            .getBoundingClientRect();
-        if (index != null) {
-            this.stage.addChildAt(this.mainLayer, index);
+        this.bcr = this.container.current.getBoundingClientRect();
+        if (index !== null) {
+            this.app.stage.addChildAt(this.mainLayer, index);
         } else {
-            this.stage.addChild(this.mainLayer);
+            this.app.stage.addChild(this.mainLayer);
         }
     }
 
     updateMainLayerSize(maxn) {
-        let pcIndex = this.stage.getChildIndex(this.mainLayer);
+        let pcIndex = this.app.stage.getChildIndex(this.mainLayer);
         this.mainLayer.destroy([true, true, true]);
         this.addMainLayer(maxn, pcIndex);
     }
@@ -368,20 +267,7 @@ export default class Viewer extends Component {
         this.labelLayer = new PIXI.Container();
         this.labelLayer.width = this.w;
         this.labelLayer.height = this.h;
-        this.stage.addChild(this.labelLayer);
-    }
-
-    destroyGraphics() {
-        if (DEBUG) console.log('Destroying Viewer ', this.props.name);
-        this.mainLayer.destroy([true, true, true]);
-        this.lassoLayer.removeChildren();
-        this.lassoLayer.destroy();
-        this.selectionsLayer.removeChildren();
-        this.selectionsLayer.destroy();
-        this.trajectoryLayer.removeChildren();
-        this.trajectoryLayer.destroy();
-        this.renderer.destroy();
-        this.stage.destroy();
+        this.app.stage.addChild(this.labelLayer);
     }
 
     makePointSprite(c) {
@@ -391,7 +277,9 @@ export default class Viewer extends Component {
         s.scale.y = settings.scale / 50;
         s.alpha = settings.alpha;
         s.anchor = { x: 0.5, y: 0.5 };
-        if (c == 'XXXXXX') c = DEFAULT_POINT_COLOR;
+        if (c === 'XXXXXX') {
+            c = DEFAULT_POINT_COLOR;
+        }
         s.tint = '0x' + c;
         // Decompressing the color not working as without compression
         // tint request a full 6 hexadecimal digits format
@@ -406,8 +294,8 @@ export default class Viewer extends Component {
 
     scalePoint(point, scale) {
         return {
-            x: point.x * scale + this.renderer.width / 2,
-            y: point.y * scale + this.renderer.height / 2,
+            x: point.x * scale + this.w / 2,
+            y: point.y * scale + this.h / 2,
         };
     }
 
@@ -439,14 +327,15 @@ export default class Viewer extends Component {
         this.lassoLayer.width = this.w;
         this.lassoLayer.height = this.h;
         this.selectionsLayer = new PIXI.Container();
-        //		this.selectionsLayer.blendMode = PIXI.BLEND_MODES.ADD;
         this.selectionsLayer.width = this.w;
         this.selectionsLayer.height = this.h;
         this.lassoLayer.hitArea = new PIXI.Rectangle(0, 0, this.w, this.h);
         this.lassoLayer.interactive = true;
         this.lassoLayer.buttonMode = true;
         this.lassoLayer.on('mousedown', (e) => {
-            if (!this.isLassoActive()) return;
+            if (!this.isLassoActive()) {
+                return;
+            }
             this.zoomSelection.on('.zoom', null);
             this.setState({
                 lassoPoints: [
@@ -463,7 +352,9 @@ export default class Viewer extends Component {
             this.lassoLayer.addChild(this.lasso);
         });
         this.lassoLayer.on('mouseup', (e) => {
-            if (!this.isLassoActive()) return;
+            if (!this.isLassoActive()) {
+                return;
+            }
             this.zoomSelection.call(this.zoomBehaviour);
             this.closeLasso();
             this.setState({ mouse: { down: false } });
@@ -485,13 +376,15 @@ export default class Viewer extends Component {
                 this.drawLasso();
             }
         });
-        this.stage.addChild(this.selectionsLayer);
-        this.stage.addChild(this.lassoLayer);
+        this.app.stage.addChild(this.selectionsLayer);
+        this.app.stage.addChild(this.lassoLayer);
     }
 
     drawLasso() {
         let lp = this.state.lassoPoints;
-        if (lp.length < 2) return;
+        if (lp.length < 2) {
+            return;
+        }
         this.clearLasso();
         this.lasso.lineStyle(2, '#000');
         this.lasso.beginFill(0x8bc5ff, 0.4);
@@ -501,7 +394,7 @@ export default class Viewer extends Component {
         }
         this.lasso.endFill();
         requestAnimationFrame(() => {
-            this.renderer.render(this.stage);
+            this.app.renderer.render(this.app.stage);
         });
     }
 
@@ -514,13 +407,15 @@ export default class Viewer extends Component {
 
     clearLasso() {
         this.lasso.clear();
-        this.renderer.render(this.stage);
+        this.app.renderer.render(this.app.stage);
     }
 
     getPointsInLasso() {
         let pts = this.mainLayer.children,
             lassoPoints = [];
-        if (pts.length < 2) return;
+        if (pts.length < 2) {
+            return;
+        }
         for (let i = 0; i < pts.length; ++i) {
             // Calculate the position of the point in the lasso reference
             let pointPosRelToLassoRef = this.lassoLayer.toLocal(
@@ -534,18 +429,19 @@ export default class Viewer extends Component {
                 lassoPoints.push(idx);
             }
         }
-        if (DEBUG)
+        if (DEBUG) {
             console.log(this.props.name, 'getPointsInLasso', lassoPoints);
+        }
         return lassoPoints;
     }
 
     translatePointsInLasso(indices) {
         let ptsInLasso = [];
-        let idxInLasso = _.intersection(indices, this.state.coord.idx);
+        let idxInLasso = R.intersection(indices, this.state.coord.idx);
         ptsInLasso = idxInLasso.map((idx) => {
             return this.state.coord.idx.indexOf(idx);
         });
-        if (DEBUG)
+        if (DEBUG) {
             console.log(
                 this.props.name,
                 'translatePointsInLasso',
@@ -553,6 +449,7 @@ export default class Viewer extends Component {
                 '>',
                 ptsInLasso
             );
+        }
         return ptsInLasso;
     }
 
@@ -572,7 +469,9 @@ export default class Viewer extends Component {
     repaintLassoSelections(selections) {
         this.selectionsLayer.removeChildren();
         selections.forEach((lS) => {
-            if (lS.selected) this.highlightPointsInLasso(lS);
+            if (lS.selected) {
+                this.highlightPointsInLasso(lS);
+            }
         });
         this.transformLassoPoints();
     }
@@ -581,7 +480,9 @@ export default class Viewer extends Component {
         this.startBenchmark('highlightPointsInLasso');
         let pts = this.mainLayer.children;
         pts.map((p) => {
-            if (lS.points.indexOf(p._originalData.idx) == -1) return;
+            if (lS.points.indexOf(p._originalData.idx) === -1) {
+                return;
+            }
             let point = this.getTexturedColorPoint(
                 p._originalData.x,
                 p._originalData.y,
@@ -606,7 +507,7 @@ export default class Viewer extends Component {
         //		this.trajectoryLayer.blendMode = PIXI.BLEND_MODES.ADD;
         this.trajectoryLayer.width = this.w;
         this.trajectoryLayer.height = this.h;
-        this.stage.addChild(this.trajectoryLayer);
+        this.app.stage.addChild(this.trajectoryLayer);
     }
 
     drawTrajectory() {
@@ -699,8 +600,8 @@ export default class Viewer extends Component {
         let transform = () => {
             let t1 = d3.event.transform,
                 t0 = this.zoomTransform,
-                dx = (t1.x - t0.x) / (this.renderer.width / 2),
-                dy = (t1.y - t0.y) / (this.renderer.height / 2);
+                dx = (t1.x - t0.x) / (this.w / 2),
+                dy = (t1.y - t0.y) / (this.h / 2);
 
             this.mainLayer.position.x = t1.x;
             this.mainLayer.position.y = t1.y;
@@ -711,45 +612,48 @@ export default class Viewer extends Component {
             this.trajectoryLayer.position.y = t1.y;
             this.zoomTransform = { x: t1.x, y: t1.y, k: t1.k };
 
-            if (t0.k != t1.k) {
+            if (t0.k !== t1.k) {
                 // on zoom
                 // TODO: memory leak: increase in unnecessary listeners
                 this.transformDataPoints();
             } else {
                 // on move
                 requestAnimationFrame(() => {
-                    this.renderer.render(this.stage);
+                    this.app.renderer.render(this.app.stage);
                 });
             }
 
             // notify other viewers only for genuine zoom transforms
-            if (!t1.receivedFromListener)
+            if (!t1.receivedFromListener) {
                 BackendAPI.setViewerTransform({
                     k: t1.k,
                     dx: dx,
                     dy: dy,
                     src: this.props.name,
                 });
+            }
         };
 
         if (!settings.dissociateViewers) {
             transform();
         } else {
-            if (this.containsPointer()) transform();
+            if (this.containsPointer()) {
+                transform();
+            }
         }
     }
 
     onActiveFeaturesChange(features, featureID, customScale) {
         if (
-            this.getJSONFeatures(features, 'feature') !=
+            this.getJSONFeatures(features, 'feature') !==
                 this.getJSONFeatures(this.state.activeFeatures, 'feature') ||
-            this.getJSONFeatures(features, 'featureType') !=
+            this.getJSONFeatures(features, 'featureType') !==
                 this.getJSONFeatures(
                     this.state.activeFeatures,
                     'featureType'
                 ) ||
             (this.props.thresholds &&
-                this.getJSONFeatures(features, 'threshold') !=
+                this.getJSONFeatures(features, 'threshold') !==
                     this.getJSONFeatures(
                         this.state.activeFeatures,
                         'threshold'
@@ -759,7 +663,9 @@ export default class Viewer extends Component {
 
             let featuresActive = false;
             features.map((f) => {
-                if (f.feature.length) featuresActive = true;
+                if (f.feature.length) {
+                    featuresActive = true;
+                }
             });
             if (featuresActive) {
                 this.getFeatureColors(
@@ -787,14 +693,15 @@ export default class Viewer extends Component {
     }
 
     onCustomScaleChange(scale) {
-        if (DEBUG)
+        if (DEBUG) {
             console.log(
                 this.props.name,
                 'customScaleListener',
                 scale,
                 this.state.customScale
             );
-        if (JSON.stringify(scale) != JSON.stringify(this.state.customScale)) {
+        }
+        if (JSON.stringify(scale) !== JSON.stringify(this.state.customScale)) {
             this.setState({ loading: true, customScale: scale });
             this.getFeatureColors(
                 this.state.activeFeatures,
@@ -809,39 +716,42 @@ export default class Viewer extends Component {
 
     onViewerSelectionChange(selections) {
         let currentSelections = [];
-        if (DEBUG)
+        if (DEBUG) {
             console.log(this.props.name, 'onViewerSelectionChange', selections);
+        }
         if (this.props.translate) {
             selections.map((s, i) => {
                 let ns = Object.assign({}, s);
-                if (s.src != this.props.name) {
+                if (s.src !== this.props.name) {
                     if (s.translations[this.props.name]) {
                         ns.points = s.translations[this.props.name];
                     } else {
-                        if (s.loomFilePath != this.props.loomFile) {
+                        if (s.loomFilePath !== this.props.loomFile) {
                             ns.selected = false;
                             let query = {
                                 srcLoomFilePath: s.loomFilePath,
                                 destLoomFilePath: this.props.loomFile,
                                 cellIndices: s.points,
                             };
-                            if (DEBUG)
+                            if (DEBUG) {
                                 console.log(
                                     this.props.name,
                                     'translateLassoSelection',
                                     query
                                 );
+                            }
                             BackendAPI.getConnection().then(
                                 (gbc) => {
                                     gbc.services.scope.Main.translateLassoSelection(
                                         query,
                                         (err, response) => {
-                                            if (DEBUG)
+                                            if (DEBUG) {
                                                 console.log(
                                                     this.props.name,
                                                     'translateLassoSelection',
                                                     response
                                                 );
+                                            }
                                             ns.points = response.cellIndices;
                                             s.translations[
                                                 this.props.name
@@ -878,21 +788,26 @@ export default class Viewer extends Component {
         let settings = BackendAPI.getSettings();
         let transform = () => {
             let k = this.zoomTransform.t,
-                x = this.zoomTransform.x + t.dx * (this.renderer.width / 2),
-                y = this.zoomTransform.y + t.dy * (this.renderer.height / 2),
+                x = this.zoomTransform.x + t.dx * (this.app.renderer.width / 2),
+                y =
+                    this.zoomTransform.y +
+                    t.dy * (this.app.renderer.height / 2),
                 transform = d3.zoomIdentity.translate(x, y).scale(t.k);
             transform.receivedFromListener = true;
             this.zoomBehaviour.transform(this.zoomSelection, transform);
         };
         if (!settings.dissociateViewers) {
-            if (t.src != this.props.name && t.src != 'init') transform();
+            if (t.src !== this.props.name && t.src !== 'init') {
+                transform();
+            }
         } else {
             if (
-                t.src != this.props.name &&
-                t.src != 'init' &&
+                t.src !== this.props.name &&
+                t.src !== 'init' &&
                 this.containsPointer()
-            )
+            ) {
                 transform();
+            }
         }
     }
 
@@ -918,20 +833,23 @@ export default class Viewer extends Component {
         };
 
         this.startBenchmark('getCoordinates');
-        if (DEBUG) console.log(this.props.name, 'getCoordinates', query);
+        if (DEBUG) {
+            console.log(this.props.name, 'getCoordinates query', query);
+        }
         BackendAPI.getConnection().then(
             (gbc) => {
                 gbc.services.scope.Main.getCoordinates(
                     query,
                     (err, response) => {
                         // Update the coordinates and remove all previous data points
-                        if (DEBUG)
+                        if (DEBUG) {
                             console.log(
                                 this.props.name,
-                                'getCoordinates',
+                                'getCoordinates response',
                                 response
                             );
-                        this.mainLayer.removeChildren();
+                        }
+
                         if (response) {
                             let coord = {
                                 idx: response.cellIndices,
@@ -940,7 +858,7 @@ export default class Viewer extends Component {
                             };
                             // If current coordinates has a trajectory set it
                             let trajectory = BackendAPI.getActiveCoordinatesTrajectory();
-                            if (trajectory != null) {
+                            if (trajectory !== null) {
                                 if (DEBUG) {
                                     console.log(
                                         'Trajectory detected for current embedding.'
@@ -969,8 +887,6 @@ export default class Viewer extends Component {
 
                         this.endBenchmark('getCoordinates');
                         this.initializeDataPoints(callback ? true : false);
-                        this.drawTrajectory();
-                        callback();
                     }
                 );
             },
@@ -981,13 +897,10 @@ export default class Viewer extends Component {
     }
 
     setScalingFactor() {
-        if (!this.renderer) return;
         let horizontalScale =
-            this.renderer.width /
-            (d3.max(this.state.coord.x) - d3.min(this.state.coord.x));
+            this.w / (d3.max(this.state.coord.x) - d3.min(this.state.coord.x));
         let verticalScale =
-            this.renderer.height /
-            (d3.max(this.state.coord.y) - d3.min(this.state.coord.y));
+            this.h / (d3.max(this.state.coord.y) - d3.min(this.state.coord.y));
         this.scalingFactor = R.clamp(
             MIN_SCALING_FACTOR,
             Infinity,
@@ -998,10 +911,12 @@ export default class Viewer extends Component {
     initializeDataPoints(stillLoading) {
         this.startBenchmark('initializeDataPoints');
         let c = this.state.coord;
-        if (c.x.length !== c.y.length)
+        if (c.x.length !== c.y.length) {
             throw 'Coordinates does not have the same size.';
+        }
         let n = c.x.length;
         if (n > this.maxn) {
+            console.log('Have to update Main Layer size!!!!');
             this.updateMainLayerSize(n);
         }
         for (let i = 0; i < n; ++i) {
@@ -1014,32 +929,27 @@ export default class Viewer extends Component {
     }
 
     transformDataPoints(stillLoading) {
-        if (DEBUG)
+        if (DEBUG) {
             console.log(this.props.name, 'transformDataPoints', stillLoading);
+        }
         this.transformPoints(this.mainLayer);
         this.transformPoints(this.selectionsLayer);
         this.transformPoints(this.labelLayer);
         this.drawTrajectory();
-        requestAnimationFrame(() => {
-            this.renderer.render(this.stage);
-        });
-        if (!stillLoading) this.setState({ loading: false });
     }
 
     transformLassoPoints() {
         this.transformPoints(this.selectionsLayer);
         requestAnimationFrame(() => {
-            this.renderer.render(this.stage);
+            this.app.renderer.render(this.app.stage);
         });
     }
 
     transformPoints(container) {
-        let settings = BackendAPI.getSettings();
-        // if(DEBUG) console.log("Points transformed in viewer"+ this.props.name)
         this.startBenchmark('transformPoints');
         let k = this.zoomTransform.k;
-        let cx = this.renderer.width / 2;
-        let cy = this.renderer.height / 2;
+        let cx = this.w / 2;
+        let cy = this.h / 2;
         for (let i = 0, n = container.children.length; i < n; ++i) {
             let p = container.children[i];
             let x = p._originalData.x * this.scalingFactor + cx;
@@ -1053,15 +963,6 @@ export default class Viewer extends Component {
     chunkString(str, length) {
         return str.match(new RegExp('.{1,' + length + '}', 'g'));
     }
-
-    updateColors = (response, colors) => {
-        if (response !== null) {
-            this.setState({ colors: colors });
-            this.updateDataPoints();
-        } else {
-            this.resetDataPoints();
-        }
-    };
 
     getVmins(scale) {
         return scale.map((x) => x[0]);
@@ -1090,11 +991,12 @@ export default class Viewer extends Component {
             });
         }
 
-        if (!features || features.length == 0) {
+        if (!features || features.length === 0) {
             // prevent empty requests
-            return this.resetDataPoints();
+            //return this.resetDataPoints();
+            return;
         }
-        this.startBenchmark('getFeatureColors');
+
         let settings = BackendAPI.getSettings();
 
         let queryAnnotations = [];
@@ -1132,8 +1034,9 @@ export default class Viewer extends Component {
             query['vmax'] = this.getVmaxes(scale);
             query['vmin'] = this.getVmins(scale);
         }
-        if (DEBUG)
+        if (DEBUG) {
             console.log(this.props.name, 'getFeatureColors', query, scale);
+        }
         BackendAPI.getConnection().then(
             (gbc) => {
                 gbc.services.scope.Main.getCellColorByFeatures(
@@ -1145,40 +1048,27 @@ export default class Viewer extends Component {
                                 response.error.type
                             );
                         } else {
-                            if (DEBUG)
+                            if (DEBUG) {
                                 console.log(
                                     this.props.name,
                                     'getFeatureColors',
                                     response
                                 );
-                            // Convert object to ArrayBuffer
-                            let responseBuffered = new Buffer(
-                                response.compressedColor.toArrayBuffer()
-                            );
-                            // Uncompress
-                            if (response.hasAddCompressionLayer) {
-                                zlib.inflate(
-                                    responseBuffered,
-                                    (err, uncompressedMessage) => {
-                                        if (err) console.log(err);
-                                        else {
-                                            this.endBenchmark(
-                                                'getFeatureColors'
-                                            );
-                                            let colors = this.chunkString(
-                                                uncompressedMessage.toString(),
-                                                6
-                                            );
-                                            this.updateColors(response, colors);
-                                        }
-                                    }
-                                );
-                            } else {
-                                this.endBenchmark('getFeatureColors');
-                                this.updateColors(response, response.color);
                             }
 
-                            if (this.props.onActiveLegendChange != null) {
+                            const colors = response.hasAddCompressionLayer
+                                ? this.chunkString(
+                                      pako.inflate(
+                                          response.compressedColor.toArrayBuffer(),
+                                          { to: 'string' }
+                                      ),
+                                      6
+                                  )
+                                : response.color;
+                            this.setState({ colors });
+                            this.updateDataPoints(colors);
+
+                            if (this.props.onActiveLegendChange !== null) {
                                 this.props.onActiveLegendChange(
                                     response.legend
                                 );
@@ -1266,12 +1156,12 @@ export default class Viewer extends Component {
         });
         let settings = BackendAPI.getSettings();
         if (settings.sortCells) {
-            let pts = _.zip(
+            let pts = zipLists([
                 this.state.coord.idx,
                 this.state.coord.x,
                 this.state.coord.y,
-                colors ? colors : this.state.colors
-            );
+                colors,
+            ]);
             this.startBenchmark('sort');
             pts.sort((a, b) => {
                 let ca = this.hexToRgb(a[3]);
@@ -1283,7 +1173,7 @@ export default class Viewer extends Component {
             });
             this.endBenchmark('sort');
             this.startBenchmark('map');
-            pts.map((p, i) => {
+            pts.forEach((p, i) => {
                 let point = this.getTexturedColorPoint(p[1], p[2], p[3]);
                 point._originalData.idx = p[0];
                 this.mainLayer.addChildAt(point, i);
@@ -1338,7 +1228,7 @@ export default class Viewer extends Component {
         let t2 = performance.now();
         let benchmark = this.state.benchmark[msg];
         let et = t2 - benchmark.t1 || 0;
-        if (DEBUG)
+        if (DEBUG) {
             console.log(
                 this.props.name +
                     ': benchmark - ' +
@@ -1347,6 +1237,7 @@ export default class Viewer extends Component {
                     et.toFixed(3) +
                     ' milliseconds.'
             );
+        }
     }
 
     containsPointer() {

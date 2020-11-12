@@ -48,7 +48,9 @@ export default class CollabAnnoGeneSearch extends React.Component {
                 }}
                 onChange={this.updateValues.bind(this)}
                 stopRequest={() => {
-                    if (this.call != null) this.call.end();
+                    if (this.call !== null) {
+                        this.call.end();
+                    }
                 }}
                 options={options}
                 results={results}
@@ -73,29 +75,41 @@ export default class CollabAnnoGeneSearch extends React.Component {
     }
 
     stopRequest() {
-        if (this.call != null) this.call.end();
+        if (this.call !== null) {
+            this.call.end();
+        }
     }
 
     handleSearchChange(e, { value }) {
         this.setState({ isLoading: true, searchQuery: e.target.value });
 
-        if (this.call != null) this.call.end();
+        if (this.call !== null) {
+            this.call.end();
+        }
 
         console.log(e.target.value);
-        if (e.target.value.length < 1) return;
+        if (e.target.value.length < 1) {
+            return;
+        }
 
         let query = {
             loomFilePath: BackendAPI.getActiveLoom(),
             query: e.target.value,
         };
-        if (DEBUG) console.log('getFeatures', query);
+        if (DEBUG) {
+            console.log('getFeatures', query);
+        }
+
         BackendAPI.getConnection().then(
             (gbc) => {
                 this.call = gbc.services.scope.Main.getFeatures(
                     query,
                     (err, response) => {
-                        if (DEBUG) console.log('getFeatures', response);
-                        if (response != null) {
+                        if (DEBUG) {
+                            console.log('getFeatures', response);
+                        }
+
+                        if (response !== null) {
                             const genes = _.zip(
                                 response.feature,
                                 response.featureType,

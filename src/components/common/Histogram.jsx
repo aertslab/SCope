@@ -96,14 +96,17 @@ export default class Histogram extends Component {
             n = this.state.total;
         let matched = 0;
         for (let i = 0; i < n; i++) {
-            if (pts[i] >= value) matched++;
+            if (pts[i] >= value) {
+                matched++;
+            }
         }
         this.setState({ selected: value, matched: matched });
     }
 
     getCellAUCValues(feature, loomFile) {
-        if (!feature || feature.feature.length == 0)
+        if (!feature || feature.feature.length === 0) {
             return this.renderAUCGraph('', []);
+        }
         let query = {
             loomFilePath: loomFile,
             featureType: feature.featureType,
@@ -111,12 +114,15 @@ export default class Histogram extends Component {
         };
         BackendAPI.getConnection().then(
             (gbc) => {
-                if (DEBUG) console.log('getCellAUCValuesByFeatures', query);
+                if (DEBUG) {
+                    console.log('getCellAUCValuesByFeatures', query);
+                }
                 gbc.services.scope.Main.getCellAUCValuesByFeatures(
                     query,
                     (err, response) => {
-                        if (DEBUG)
+                        if (DEBUG) {
                             console.log('getCellAUCValuesByFeatures', response);
+                        }
                         if (response !== null) {
                             this.renderAUCGraph(feature, response.value);
                             this.handleThresholdChange(
@@ -161,7 +167,7 @@ export default class Histogram extends Component {
             selected: 0,
         });
 
-        if (points.length == 0) {
+        if (points.length === 0) {
             svg.append('text')
                 .text('Select a regulon to see AUC histogram')
                 .attr('text-anchor', 'middle')
