@@ -63,7 +63,7 @@ class AppSidebar extends Component {
             coordinates = [];
         Object.keys(loomFiles).forEach((key) => {
             let loom = loomFiles[key];
-            if (loom.loomFilePath == decodeURIComponent(match.params.loom)) {
+            if (loom.loomFilePath === decodeURIComponent(match.params.loom)) {
                 coordinates = loom.cellMetaData.embeddings.map((coords) => {
                     return {
                         text: coords.name,
@@ -177,7 +177,7 @@ class AppSidebar extends Component {
             metadata &&
             ['welcome', 'dataset', 'tutorial', 'about'].indexOf(
                 match.params.page
-            ) == -1
+            ) === -1
                 ? true
                 : false;
         let showCoordinatesSelection =
@@ -187,12 +187,14 @@ class AppSidebar extends Component {
                 ? true
                 : false;
         let renderLevel = (t, l, name, canRemove) => {
-            if (!t) return;
+            if (!t) {
+                return;
+            }
             let nodes = t.nodes.map((file, i) => {
                 let loomUri = encodeURIComponent(file.loomFilePath);
                 let active =
-                    match.params.loom == loomUri ||
-                    encodeURIComponent(match.params.loom) == loomUri;
+                    match.params.loom === loomUri ||
+                    encodeURIComponent(match.params.loom) === loomUri;
                 return (
                     <Link
                         key={l + '-node- ' + i}
@@ -201,7 +203,7 @@ class AppSidebar extends Component {
                             [
                                 match.params.uuid,
                                 loomUri,
-                                match.params.page == 'welcome'
+                                match.params.page === 'welcome'
                                     ? 'gene'
                                     : match.params.page,
                             ].join('/')
@@ -244,7 +246,7 @@ class AppSidebar extends Component {
                                 />
                             )}
                             {this.state.downloadPercentage >= 0 &&
-                                this.state.loomDownloading == loomUri && (
+                                this.state.loomDownloading === loomUri && (
                                     <Progress
                                         percent={this.state.downloadPercentage}
                                         indicating
@@ -255,13 +257,13 @@ class AppSidebar extends Component {
                                 <Icon
                                     name={
                                         this.state.downloading &&
-                                        this.state.loomDownloading == loomUri
+                                        this.state.loomDownloading === loomUri
                                             ? 'circle notched'
                                             : 'save'
                                     }
                                     loading={
                                         this.state.downloading &&
-                                        this.state.loomDownloading == loomUri
+                                        this.state.loomDownloading === loomUri
                                             ? true
                                             : false
                                     }
@@ -344,7 +346,7 @@ class AppSidebar extends Component {
                 className='clearfix'>
                 <Menu.Header>DATASETS</Menu.Header>
                 <Menu.Menu>
-                    {this.props.sessionMode == 'rw' && (
+                    {this.props.sessionMode === 'rw' && (
                         <Menu.Item
                             key='new'
                             onClick={this.toggleUploadModal.bind(this)}>
@@ -355,10 +357,10 @@ class AppSidebar extends Component {
                     {renderLevel(
                         userLoomTree,
                         1,
-                        this.props.sessionMode == 'rw'
+                        this.props.sessionMode === 'rw'
                             ? 'User uploaded'
                             : 'Session Looms',
-                        this.props.sessionMode == 'rw' ? true : false
+                        this.props.sessionMode === 'rw' ? true : false
                     )}
                     {renderLevel(generalLoomTree, 1, 'Publicly available')}
                     <Dimmer active={loading} inverted>
@@ -526,7 +528,9 @@ class AppSidebar extends Component {
     }
 
     onSettingsUpdate() {
-        if (DEBUG) console.log('onSettingsUpdate');
+        if (DEBUG) {
+            console.log('onSettingsUpdate');
+        }
         let sprite = BackendAPI.getSpriteSettings();
         this.setState({
             settings: BackendAPI.getSettings(),
@@ -539,8 +543,12 @@ class AppSidebar extends Component {
 
     getLoomFiles() {
         const { match } = this.props;
-        if (DEBUG) console.log('getLoomFiles', match);
-        if (match.params.uuid == 'permalink') return;
+        if (DEBUG) {
+            console.log('getLoomFiles', match);
+        }
+        if (match.params.uuid === 'permalink') {
+            return;
+        }
         BackendAPI.queryLoomFiles(match.params.uuid, (files) => {
             let userFiles = [],
                 generalFiles = [];
@@ -627,11 +635,15 @@ class AppSidebar extends Component {
                 fileType: 'Loom',
             };
             BackendAPI.getConnection().then((gbc) => {
-                if (DEBUG) console.log('deleteUserFile', query);
+                if (DEBUG) {
+                    console.log('deleteUserFile', query);
+                }
                 gbc.services.scope.Main.deleteUserFile(
                     query,
                     (error, response) => {
-                        if (DEBUG) console.log('deleteUserFile', response);
+                        if (DEBUG) {
+                            console.log('deleteUserFile', response);
+                        }
                         if (response !== null && response.deletedSuccessfully) {
                             BackendAPI.forceUpdate();
                             this.getLoomFiles();

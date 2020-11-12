@@ -47,15 +47,15 @@ class AnnotationDropContainer extends Component {
                     });
                 });
             } else if (
-                orientation == 'horizontal' ||
-                orientation == 'vertical'
+                orientation === 'horizontal' ||
+                orientation === 'vertical'
             ) {
                 return (
                     <div
                         className='dropRow dropContainer'
                         style={{
                             width:
-                                orientation == 'vertical'
+                                orientation === 'vertical'
                                     ? height + 'px'
                                     : 'auto',
                         }}>

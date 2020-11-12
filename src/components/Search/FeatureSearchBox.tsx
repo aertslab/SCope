@@ -33,10 +33,10 @@ import './FeatureSearchBox.css';
 declare const __TEST_ONLY__: boolean;
 
 type FeatureSearchBoxProps = {
-    /** A unique identifier */
+    /** A unique identifier for search data provided by this search box. */
     field: string;
 
-    /** The feature type to search for */
+    /** The feature type to search for. May be "all". */
     filter: FeatureFilter;
 
     /** Background colour */
@@ -138,14 +138,21 @@ export const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
     };
 
     //TODO: A hack to ensure the old state managment knows something is selected
+    //      when the page changes.
     if (state.selected && !__TEST_ONLY__) {
-        const legacyFeature = LegacyAPI.getActiveFeatures()[legacyFeatureIndex];
+        let legacyFeature = LegacyAPI.getActiveFeatures()[legacyFeatureIndex];
+        if (legacyFeature !== undefined) {
+            legacyFeature = R.pick(
+                ['type', 'featureType', 'feature', 'threshold'],
+                legacyFeature
+            );
+        }
+
         const currentFeature = {
             type: props.filter,
             featureType: state.selected.category,
             feature: state.selected.title,
             threshold: 0,
-            metadata: { description: state.selected.description },
         };
         if (!R.equals(currentFeature, legacyFeature)) {
             LegacyAPI.updateFeature(

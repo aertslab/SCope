@@ -1,154 +1,43 @@
+div#scope {
+    width: 100%;
+    min-height: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.pushable {
+    width: 100%;
+    min-height: 100%;
+    height: auto;
+    flex: 1;
+    display: flex;
+    flex-dirction: column;
+}
+
 .pusher {
-	display: flex;
-	flex-direction: column;
+    width: 100%;
+    min-height: 100%;
+    flex: 1;
 }
 
-.ui .grid {
-	margin: 0px !important;
-	display: flex;
-	flex: 1;
-	flex-direction: column;
-	min-height: 100%;
-	min-width: 100%;
-	align-content: stretch;
-	align-items: stretch;
-}
-
-.menu.toolbar {
-	max-width: 50px;
-}
-
-canvas {
-	border: 1px solid black;
-}
-
-.auc {
-	text-align: center;
-}
-
-.row {
-	padding-bottom: 0px !important;
-}
-
-.parentView {
-	padding: 0px !important;
-	height: 100vh;
-	display: flex;
-	flex-direction: column;
-	align-items: stretch;
-	align-content: stretch;
-  border: none !important;
-}
-
-.emptyDropContainer {
-	border: 1px solid black;
-}
-
-.fullDropContainer, .dropRow {
-	background: #eee;
-}
-
-.dropContainer {
-	text-align: center;
-	flex:1;
-	min-height: 30px;
-	padding-top: 5px;
-}
-
-.blockDisplay {
-	display: block !important;
-}
-
-.flexDisplay {
-	display: flex;
-	flex-direction: column;
-}
-
-.dropContainer p {
-	position: relative;
-	top: 38%;
-}
-
-.dropZone.vertical {
-	text-align: center;
-	transform: rotate(90deg);
-    transform-origin: top left;
-    position: absolute;
-}
-
-.viewerRow {
-	padding-top: 0px !important;
-
-}
-
-.pusher .segment {
-	padding-bottom:  0px !important;
-}
-
-.noStretch {
-	flex-grow: 0 !important;
-}
-
-.stretched {
-	flex: 1;
-	width: 100%;
+.ui.grid {
+    flex-direction: column !important;
+    height: 100%;
 }
 
 .viewerFlex {
-	flex: 1 0 500px !important;
+    flex-grow: 1;
 }
 
-.stretched > .column > b {
-	flex-grow: 0 !important;
+.viewcontainer {
+    height: 100%;
+    position: relative;
 }
 
-.flexDouble {
-	flex-grow: 2 !important;
-}
-
-.flexRow {
-	flex-direction: row !important;
-}
-
-.viewerCell {
-	padding: 2px !important;
-	word-break: break-all;
-}
-
-.marginBottom {
-	margin-bottom: 10px !important;
-}
-
-.clearfix::after {
-    content: "";
-    clear: both;
-    display: table;
-}
-
-h1.ui.header {
-	font-size: 1.5rem !important;
-}
-
-h2.ui.header {
-	font-size: 1.25rem !important;
-}
-
-.vertical.segment.flexDisplay {
-	padding: 0px !important;
-	border: none !important;
-	flex: 1 0 0;
-}
-
-.ui.grid .row {
-	padding-top: 0.5rem;
-}
-
-.ui.grid .row .column {
-	padding-left: 0.5rem;
-	padding-right: 0.5rem;
-}
-
-p.paragraph {
-    margin: 2em;
-    padding: 1em;
+.viewcontainer > canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 1px solid black;
 }

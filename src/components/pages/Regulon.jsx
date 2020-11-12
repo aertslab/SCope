@@ -1,6 +1,8 @@
-import _ from 'lodash';
 import React, { Component } from 'react';
 import { Segment, Grid } from 'semantic-ui-react';
+
+import { FEATURE_COLOURS } from '../constants';
+
 import Search from '../Search';
 import { BackendAPI } from '../common/API';
 import Viewer from '../common/Viewer';
@@ -15,7 +17,6 @@ export default class Regulon extends Component {
             activeLoom: BackendAPI.getActiveLoom(),
             activeCoordinates: BackendAPI.getActiveCoordinates(),
             activeFeatures: BackendAPI.getActiveFeatures(),
-            colors: BackendAPI.getColors(),
         };
         this.activeLoomListener = (loom, metadata, coordinates) => {
             this.setState({ activeLoom: loom, activeCoordinates: coordinates });
@@ -30,14 +31,13 @@ export default class Regulon extends Component {
             activeLoom,
             activeCoordinates,
             activeFeatures,
-            colors,
             geneFeatures,
         } = this.state;
-        let featureThreshold = _.times(3, (i) => (
+        let featureThreshold = [1, 2, 3].map((i) => (
             <Grid.Column key={i} className='flexDisplay' stretched>
                 <Histogram
                     field={i}
-                    color={colors[i]}
+                    color={FEATURE_COLOURS[i]}
                     loomFile={activeLoom}
                     feature={activeFeatures[i]}
                     onThresholdChange={this.onThresholdChange.bind(this)}
@@ -45,7 +45,9 @@ export default class Regulon extends Component {
             </Grid.Column>
         ));
 
-        if (!activeLoom) return <div>Select the dataset to be analyzed</div>;
+        if (!activeLoom) {
+            return <div>Select the dataset to be analyzed</div>;
+        }
 
         return (
             <Grid className='flexDisplay'>

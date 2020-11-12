@@ -17,15 +17,15 @@ export default class Gene extends Component {
             activeLegend: null,
         };
         this.activeLoomListener = (loom, metadata, coordinates) => {
-            if (DEBUG)
+            if (DEBUG) {
                 console.log('activeLoomListener', loom, metadata, coordinates);
+            }
             this.setState({
                 activeLoom: loom,
                 activeCoordinates: coordinates,
                 activeMetadata: metadata,
             });
         };
-        this.height = window.innerHeight - 200;
     }
 
     render() {
@@ -37,7 +37,9 @@ export default class Gene extends Component {
             activeLegend,
         } = this.state;
 
-        if (!activeLoom) return <div>Select the dataset to be analyzed</div>;
+        if (!activeLoom || activeLoom === '*') {
+            return <div>Select the dataset to be analyzed</div>;
+        }
 
         return (
             <Grid columns='equal'>
@@ -45,8 +47,8 @@ export default class Gene extends Component {
                     filter='all'
                     identifier='gene-page'
                 />
-                <Grid.Row columns='3' stretched className='viewerFlex'>
-                    <Grid.Column width={1} className='viewerToolbar'>
+                <Grid.Row columns='3' className='viewerFlex'>
+                    <Grid.Column width={3} className='viewerToolbar'>
                         <ViewerToolbar location={this.props.location} />
                     </Grid.Column>
                     <Grid.Column>

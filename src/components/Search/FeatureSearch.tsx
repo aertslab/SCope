@@ -1,9 +1,9 @@
 import React from 'react';
 import { Grid, SemanticCOLORS } from 'semantic-ui-react';
 
-import { FeatureFilter } from './model';
-import { FEATURE_COLOURS } from './constants';
+import { FEATURE_COLOURS } from '../constants';
 
+import { FeatureFilter } from './model';
 import { FeatureSearchBox } from './FeatureSearchBox';
 
 interface FeatureSearchProps {
@@ -26,7 +26,7 @@ interface FeatureSearchProps {
 export function FeatureSearchGroup(props: FeatureSearchProps) {
     return (
         <React.Fragment>
-            <Grid.Row columns='3' centered>
+            <Grid.Row columns='3' centered className='feature-search-bar'>
                 {[0, 1, 2].map((i) => (
                     <Grid.Column key={i}>
                         <FeatureSearchBox
