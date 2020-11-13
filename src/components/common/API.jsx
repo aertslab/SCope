@@ -523,7 +523,13 @@ class API {
         this.getConnection().then((gbc) => {
             if (DEBUG) console.log('getNextCluster', query);
             gbc.services.scope.Main.getNextCluster(query, (err, response) => {
-                callback(response);
+                BackendAPI.queryLoomFiles(
+                    this.uuid,
+                    () => {
+                        callback(response);
+                    },
+                    this.getActiveLoom()
+                );
             });
         });
     }
