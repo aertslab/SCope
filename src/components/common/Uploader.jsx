@@ -1,6 +1,6 @@
 export default class Uploader {
     upload(uuid, type, file, onProgress, onUploaded) {
-        if (file == null) {
+        if (file === null) {
             alert('Please select a file first');
             return;
         }
@@ -51,7 +51,7 @@ export default class Uploader {
         });
 
         xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4) {
+            if (xhr.readyState === 4) {
                 setTimeout(() => {
                     onUploaded(file.name, xhr.status);
                 }, 1000);

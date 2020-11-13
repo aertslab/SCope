@@ -39,7 +39,6 @@ class Compare extends Component {
             multiCoordinates: [BackendAPI.getActiveCoordinates()],
             multiMetadata: [BackendAPI.getActiveLoomMetadata()],
             activeFeatures: BackendAPI.getActiveFeatures(),
-            colors: BackendAPI.getColors(),
             activeAnnotation: -1,
             columns: 2,
             rows: nRows,
@@ -113,7 +112,6 @@ class Compare extends Component {
             crossAnnotations,
             activeAnnotation,
             annotationIDs,
-            colors,
             displays,
             configuration,
             superposition,
@@ -125,7 +123,7 @@ class Compare extends Component {
         } = this.state;
 
         let annotationLinks = () => {
-            if (configuration == 'one')
+            if (configuration === 'one')
                 return (
                     <span style={{ float: 'right' }}>
                         <a
@@ -161,7 +159,7 @@ class Compare extends Component {
                                 {annotation.name}
                             </Accordion.Title>
                             <Accordion.Content
-                                active={activeAnnotation == annotationID}>
+                                active={activeAnnotation === annotationID}>
                                 <Menu vertical secondary>
                                     {annotation.values.map((value, valueID) => {
                                         return (
@@ -190,7 +188,7 @@ class Compare extends Component {
 
         let columns = this.state.columns;
         let rows = this.state.rows;
-        if (configuration == 'one') {
+        if (configuration === 'one') {
             columns = 1;
             while (crossAnnotations['one'].length > columns * columns) {
                 columns++;
@@ -217,17 +215,17 @@ class Compare extends Component {
                                     annotationDropContainerVertical,
                                     datasetSelector;
                                 if (
-                                    configuration == 'simple' ||
-                                    configuration == 'one' ||
-                                    (configuration == 'cross' && i == 0)
+                                    configuration === 'simple' ||
+                                    configuration === 'one' ||
+                                    (configuration === 'cross' && i === 0)
                                 ) {
                                     let ca = crossAnnotations['horizontal'][j];
-                                    if (configuration == 'simple')
+                                    if (configuration === 'simple')
                                         ca =
                                             crossAnnotations['both'][
                                                 columns * i + j
                                             ];
-                                    if (configuration == 'one')
+                                    if (configuration === 'one')
                                         ca =
                                             crossAnnotations['one'][
                                                 columns * i + j
@@ -237,14 +235,14 @@ class Compare extends Component {
                                             activeAnnotations={ca}
                                             viewerName={name}
                                             orientation={
-                                                configuration == 'cross'
+                                                configuration === 'cross'
                                                     ? 'horizontal'
-                                                    : configuration == 'one'
+                                                    : configuration === 'one'
                                                     ? 'one'
                                                     : 'both'
                                             }
                                             position={
-                                                configuration == 'cross'
+                                                configuration === 'cross'
                                                     ? j
                                                     : columns * i + j
                                             }
@@ -256,9 +254,9 @@ class Compare extends Component {
                                     );
                                 }
                                 if (
-                                    (configuration == 'cross' ||
-                                        configuration == 'multi') &&
-                                    j == 0
+                                    (configuration === 'cross' ||
+                                        configuration === 'multi') &&
+                                    j === 0
                                 ) {
                                     annotationDropContainerVertical = (
                                         <AnnotationDropContainer
@@ -275,7 +273,7 @@ class Compare extends Component {
                                         />
                                     );
                                 }
-                                if (configuration == 'multi' && i == 0) {
+                                if (configuration === 'multi' && i === 0) {
                                     let coordOptions = [],
                                         coordinatesSelector;
                                     if (
@@ -300,7 +298,7 @@ class Compare extends Component {
                                                 <Dropdown
                                                     inline
                                                     options={coordOptions}
-                                                    disabled={j == 0}
+                                                    disabled={j === 0}
                                                     value={multiCoordinates[j]}
                                                     placeholder=' none selected '
                                                     onChange={(
@@ -323,7 +321,7 @@ class Compare extends Component {
                                             <Dropdown
                                                 inline
                                                 options={this.loomConf}
-                                                disabled={j == 0}
+                                                disabled={j === 0}
                                                 value={multiLoom[j]}
                                                 scrolling
                                                 placeholder=' none selected '
@@ -352,12 +350,12 @@ class Compare extends Component {
                                     );
                                 }
                                 let va;
-                                if (configuration == 'simple')
+                                if (configuration === 'simple')
                                     va =
                                         crossAnnotations['both'][
                                             columns * i + j
                                         ];
-                                else if (configuration == 'one')
+                                else if (configuration === 'one')
                                     va =
                                         crossAnnotations['one'][
                                             columns * i + j
@@ -370,7 +368,7 @@ class Compare extends Component {
                                         {annotationDropContainerVertical}
                                         <ViewerDropContainer
                                             active={
-                                                configuration == 'simple'
+                                                configuration === 'simple'
                                                     ? true
                                                     : false
                                             }
@@ -381,14 +379,14 @@ class Compare extends Component {
                                             )}
                                             name={name}
                                             loomFile={
-                                                configuration == 'multi'
+                                                configuration === 'multi'
                                                     ? multiLoom[j]
                                                     : multiLoom[0]
                                             }
                                             activeFeatures={activeFeatures}
                                             superposition={superposition}
                                             activeCoordinates={
-                                                configuration == 'multi'
+                                                configuration === 'multi'
                                                     ? multiCoordinates[j]
                                                         ? multiCoordinates[j]
                                                         : -1
@@ -396,7 +394,7 @@ class Compare extends Component {
                                             }
                                             activeAnnotations={va}
                                             orientation={
-                                                configuration == 'one'
+                                                configuration === 'one'
                                                     ? 'one'
                                                     : 'both'
                                             }
@@ -436,7 +434,7 @@ class Compare extends Component {
                             <Dropdown
                                 inline
                                 options={this.displayConf}
-                                disabled={configuration == 'one'}
+                                disabled={configuration === 'one'}
                                 value={displays}
                                 onChange={this.displayNumberChanged.bind(this)}
                             />
@@ -445,7 +443,7 @@ class Compare extends Component {
                             <Dropdown
                                 inline
                                 disabled={
-                                    configuration == 'one' &&
+                                    configuration === 'one' &&
                                     isSuperpositionLocked
                                 }
                                 options={this.superpositionConf}
@@ -512,7 +510,7 @@ class Compare extends Component {
         Object.keys(annotations).map((orientation) => {
             annotations[orientation].map((annotation) => {
                 let va = annotation[name];
-                if (va && va.indexOf(value) != -1) selected = true;
+                if (va && va.indexOf(value) !== -1) selected = true;
             });
         });
         return selected;
@@ -527,7 +525,7 @@ class Compare extends Component {
         let selectedAnnotations = (
             annotations[orientation][position][item.name] || []
         ).slice(0);
-        if (selectedAnnotations.indexOf(item.value) != -1) {
+        if (selectedAnnotations.indexOf(item.value) !== -1) {
             alert('This annotation is already shown in that viewer');
             return false;
         }
@@ -552,9 +550,9 @@ class Compare extends Component {
         let annotations = cross[orientation][position] || {};
         let selectedAnnotations = (annotations[name] || []).slice(0);
         let idx = selectedAnnotations.indexOf(value);
-        if (idx != -1) {
+        if (idx !== -1) {
             selectedAnnotations.splice(idx, 1);
-            if (selectedAnnotations.length == 0) {
+            if (selectedAnnotations.length === 0) {
                 delete cross[orientation][position][name];
             } else {
                 cross[orientation][position][name] = selectedAnnotations;
@@ -568,15 +566,15 @@ class Compare extends Component {
 
     displayNumberChanged(proxy, selection) {
         setTimeout(() => {
-            if (selection.value == 1) {
+            if (selection.value === 1) {
                 this.setState({ columns: 1, rows: 1, displays: 1 });
-            } else if (selection.value == 2) {
+            } else if (selection.value === 2) {
                 this.setState({ columns: 2, rows: 1, displays: 2 });
-            } else if (selection.value == 4) {
+            } else if (selection.value === 4) {
                 this.setState({ columns: 2, rows: 2, displays: 4 });
-            } else if (selection.value == 6) {
+            } else if (selection.value === 6) {
                 this.setState({ columns: 3, rows: 2, displays: 6 });
-            } else if (selection.value == 9) {
+            } else if (selection.value === 9) {
                 this.setState({ columns: 3, rows: 3, displays: 9 });
             }
         }, 100);
@@ -599,7 +597,7 @@ class Compare extends Component {
                 both: [],
                 one: [],
             };
-            if (conf == 'one') {
+            if (conf === 'one') {
                 displays = 0;
                 superposition = 'NA';
             } else {
@@ -607,7 +605,7 @@ class Compare extends Component {
                 superposition = 'OR';
             }
 
-            if (conf == 'multi') {
+            if (conf === 'multi') {
                 displays = 2;
                 this.setState({ columns: 2, rows: 1, displays: displays });
             }
@@ -652,7 +650,7 @@ class Compare extends Component {
     }
 
     selectAnnotation(name, value, selected) {
-        if (this.state.configuration == 'one') {
+        if (this.state.configuration === 'one') {
             let annotations = this.state.crossAnnotations;
             if (!selected) {
                 let a = {};
@@ -661,7 +659,7 @@ class Compare extends Component {
             } else {
                 let idx = -1;
                 annotations['one'].map((a, i) => {
-                    if (a[name][0] == value) {
+                    if (a[name][0] === value) {
                         idx = i;
                     }
                 });
@@ -686,7 +684,7 @@ class Compare extends Component {
         const { multiMetadata } = this.state;
         crossAnnotations['one'] = [];
         this.setState({
-            activeAnnotation: activeAnnotation == index ? -1 : index,
+            activeAnnotation: activeAnnotation === index ? -1 : index,
             crossAnnotations: crossAnnotations,
         });
         let annotationGroup = multiMetadata[0].cellMetaData.annotations[index];
@@ -699,7 +697,8 @@ class Compare extends Component {
             Object.keys(cross['horizontal'][j]).map((a) => {
                 annotations[a] = annotations[a] || [];
                 cross['horizontal'][j][a].map((v) => {
-                    if (annotations[a].indexOf(v) == -1) annotations[a].push(v);
+                    if (annotations[a].indexOf(v) === -1)
+                        annotations[a].push(v);
                 });
             });
         }
@@ -707,7 +706,8 @@ class Compare extends Component {
             Object.keys(cross['vertical'][i]).map((a) => {
                 annotations[a] = annotations[a] || [];
                 cross['vertical'][i][a].map((v) => {
-                    if (annotations[a].indexOf(v) == -1) annotations[a].push(v);
+                    if (annotations[a].indexOf(v) === -1)
+                        annotations[a].push(v);
                 });
             });
         }
@@ -722,7 +722,7 @@ class Compare extends Component {
                 Object.keys(annotation).map((a) => {
                     selectedAnnotations[a] = selectedAnnotations[a] || [];
                     annotation[a].map((v) => {
-                        if (selectedAnnotations[a].indexOf(v) == -1)
+                        if (selectedAnnotations[a].indexOf(v) === -1)
                             selectedAnnotations[a].push(v);
                     });
                 });
@@ -772,7 +772,9 @@ class Compare extends Component {
             selectedRegulons,
             selectedClusters,
         } = BackendAPI.getParsedFeatures();
-        if (selectedGenes.length + selectedRegulons.length == 0) return;
+        if (selectedGenes.length + selectedRegulons.length === 0) {
+            return;
+        }
         let selectedAnnotations = this.getSelectedAnnotations();
         d3.select('#chart-distro1').select('svg').remove();
         Object.keys(selectedAnnotations).map((annotation, ai) => {
@@ -842,13 +844,13 @@ class Compare extends Component {
                 features.forEach(function (f) {
                     let featureValues = [];
                     dataset.forEach(function (d) {
-                        if (d.annotation == a && d.feature == f) {
+                        if (d.annotation === a && d.feature === f) {
                             featureValues.push(d.value);
                         }
                     });
                     annotatedFeatures.push({ group: f, value: featureValues });
                 });
-                if (selectedAnnotations[annotation].indexOf(a) != -1)
+                if (selectedAnnotations[annotation].indexOf(a) !== -1)
                     graphData.push({ annotation: a, Data: annotatedFeatures });
             });
             min =

@@ -102,8 +102,6 @@ class API {
         this.sidebarVisible = true;
         this.sidebarListeners = [];
 
-        this.colors = ['red', 'green', 'blue'];
-
         this.maxValues = {};
         this.maxValuesChangeListeners = [];
         this.emptyColorScale = [
@@ -114,8 +112,6 @@ class API {
         this.customValues = {};
         this.customValuesChangeListeners = [];
 
-        this.uuid = null;
-        this.sessionMode = null;
         this.updateListeners = [];
     }
 
@@ -241,7 +237,7 @@ class API {
             if (DEBUG) console.log('getUUIDAPI', query);
             gbc.services.scope.Main.getUUID(query, (err, response) => {
                 if (DEBUG) console.log('getUUIDAPI', response);
-                if (response != null)
+                if (response !== null)
                     onSuccess(response.UUID, response.timeout);
             });
         });
@@ -265,8 +261,8 @@ class API {
     }
 
     setActiveLoom(loom, id) {
-        if (id == null) id = 0;
-        if (this.activeLooms[id] == loom) return;
+        if (id === null) id = 0;
+        if (this.activeLooms[id] === loom) return;
         this.activeLooms[id] = loom;
         this.viewerSelections = {};
         this.viewerSelections[this.activePage] = [];
@@ -313,7 +309,7 @@ class API {
 
     getActiveLoomMetaDataEmbedding() {
         return this.getActiveLoomMetadataEmbeddings().filter(
-            (x) => x.id == this.getActiveCoordinates()
+            (x) => x.id === this.getActiveCoordinates()
         )[0];
     }
 
@@ -333,10 +329,10 @@ class API {
     }
 
     hasActiveCoordinatesTrajectory() {
-        if (this.getActiveLoomMetaDataEmbedding() == undefined) return false;
+        if (this.getActiveLoomMetaDataEmbedding() === undefined) return false;
         if (!('trajectory' in this.getActiveLoomMetaDataEmbedding()))
             return false;
-        return this.getActiveLoomMetaDataEmbedding().trajectory != null;
+        return this.getActiveLoomMetaDataEmbedding().trajectory !== null;
     }
 
     getActiveCoordinatesTrajectory() {
@@ -443,7 +439,7 @@ class API {
         let clusterID = feature.metadata['clusterID'];
         let loomFilePath = this.getActiveLoom();
 
-        if (newAnnoName != '') {
+        if (newAnnoName !== '') {
             let setAnnotationNameQuery = {
                 loomFilePath: loomFilePath,
                 clusteringID: clusteringID,
@@ -469,8 +465,8 @@ class API {
                                                 if (
                                                     f.metadata[
                                                         'clusteringID'
-                                                    ] == clusteringID &&
-                                                    f.metadata['clusterID'] ==
+                                                    ] === clusteringID &&
+                                                    f.metadata['clusterID'] ===
                                                         clusterID
                                                 ) {
                                                     BackendAPI.updateFeature(
@@ -551,7 +547,7 @@ class API {
     }
 
     updateFeature(field, type, feature, featureType, featureDescription, page) {
-        if (featureType == 'regulon') {
+        if (featureType === 'regulon') {
             let regulonQuery = {
                 loomFilePath: this.getActiveLoom(),
                 regulon: feature,
@@ -573,7 +569,7 @@ class API {
                             let threshold = 0;
                             if (metadata.autoThresholds) {
                                 metadata.autoThresholds.map((t) => {
-                                    if (t.name == metadata.defaultThreshold)
+                                    if (t.name === metadata.defaultThreshold)
                                         threshold = t.threshold;
                                 });
                             }
@@ -594,23 +590,23 @@ class API {
                     this.showError();
                 }
             );
-        } else if (featureType.indexOf('Clustering:') == 0) {
+        } else if (featureType.indexOf('Clustering:') === 0) {
             let loomMetadata = this.getActiveLoomMetadata();
             let clusteringID, clusterID, cellTypeAnno, clusteringGroup;
             loomMetadata.cellMetaData.clusterings.map((clustering) => {
                 const clusteringName = featureType.replace('Clustering: ', '');
-                if (clusteringName == clustering.name) {
+                if (clusteringName === clustering.name) {
                     clusteringID = clustering.id;
                     clusteringGroup = clustering.group;
                     clustering.clusters.map((c) => {
-                        if (c.description == feature) {
+                        if (c.description === feature) {
                             clusterID = c.id;
                             cellTypeAnno = c.cell_type_annotation;
                         }
                     });
                 }
             });
-            if (clusterID != null) {
+            if (clusterID !== null) {
                 let markerQuery = {
                     loomFilePath: this.getActiveLoom(),
                     clusterID: clusterID,
@@ -832,7 +828,7 @@ class API {
                                     BackendAPI.getActiveFeatures().forEach(
                                         (f, n) => {
                                             // if (f.metadata['clusteringID'] == feature.metadata['clusteringID'] && f.metadata['clusterID'] == feature.metadata['clusterID']) {
-                                            if (f == feature) {
+                                            if (f === feature) {
                                                 BackendAPI.updateFeature(
                                                     n,
                                                     f.type,
@@ -869,10 +865,10 @@ class API {
         let query = {
             loomFilePath: this.getActiveLooms(),
             feature: selectedFeatures.map((f) => {
-                return page == 'regulon' ? f.feature.split('_')[0] : f.feature;
+                return page === 'regulon' ? f.feature.split('_')[0] : f.feature;
             }),
             featureType: selectedFeatures.map((f) => {
-                return page == 'regulon' ? 'gene' : f.featureType;
+                return page === 'regulon' ? 'gene' : f.featureType;
             }),
             hasLogTransform: settings.hasLogTransform,
             hasCpmTransform: settings.hasCpmNormalization,
@@ -882,7 +878,7 @@ class API {
             (gbc) => {
                 gbc.services.scope.Main.getVmax(query, (err, response) => {
                     if (DEBUG) console.log('getVmax', response);
-                    if (id != null)
+                    if (id !== null)
                         this.customValues[page][id][1] = response.vmax[id];
                     else
                         this.customValues[page] = response.vmax.map((x) => [
@@ -937,13 +933,13 @@ class API {
         let selectedRegulons = [];
         let selectedClusters = [];
         features.map((f) => {
-            if (f.featureType == 'gene') selectedGenes.push(f.feature);
-            if (f.featureType == 'regulon') selectedRegulons.push(f.feature);
-            if (f.featureType.indexOf('Clustering:') == 0) {
+            if (f.featureType === 'gene') selectedGenes.push(f.feature);
+            if (f.featureType === 'regulon') selectedRegulons.push(f.feature);
+            if (f.featureType.indexOf('Clustering:') === 0) {
                 metadata.cellMetaData.clusterings.map((clustering) => {
-                    if (f.featureType.indexOf(clustering.name) != -1) {
+                    if (f.featureType.indexOf(clustering.name) !== -1) {
                         clustering.clusters.map((c) => {
-                            if (c.description == f.feature) {
+                            if (c.description === f.feature) {
                                 selectedClusters.push({
                                     clusteringName: clustering.name,
                                     clusteringID: clustering.id,
@@ -1154,37 +1150,6 @@ class API {
         if (i > -1) {
             this.viewerTransformChangeListeners.splice(i, 1);
         }
-    }
-
-    setUUID(uuid) {
-        this.uuid = uuid;
-    }
-
-    getUUID() {
-        return this.uuid;
-    }
-
-    setSessionMode(sessionMode) {
-        this.sessionMode = sessionMode;
-    }
-
-    getSessionMode() {
-        return this.sessionMode;
-    }
-
-    getLoomRWStatus() {
-        if (
-            /.*\/.*loom$/.test(this.getActiveLoom()) &&
-            this.getSessionMode() == 'rw'
-        ) {
-            return 'rw';
-        } else {
-            return 'ro';
-        }
-    }
-
-    getColors() {
-        return this.colors;
     }
 }
 

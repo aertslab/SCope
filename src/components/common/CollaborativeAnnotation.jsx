@@ -54,7 +54,7 @@ class CollaborativeAnnotation extends Component {
     };
 
     closeErrorModal = (e) => {
-        if (e.target.value == 'submit' || e.target.value == 'submitNext') {
+        if (e.target.value === 'submit' || e.target.value === 'submitNext') {
             return;
         } else {
             this.setState({ submitError: false }, () => {});
@@ -115,17 +115,17 @@ class CollaborativeAnnotation extends Component {
                         this.setState({ status: 'ready', annoData: {} });
                         if (response.success) {
                             this.closeModal();
-                        } else if (response.success == false) {
+                        } else {
                             alert(response.message);
                         }
                         if (
-                            this.state.submitAction == 'submitNext' ||
-                            this.state.submitAction == 'submitPrevious'
+                            this.state.submitAction === 'submitNext' ||
+                            this.state.submitAction === 'submitPrevious'
                         ) {
                             BackendAPI.getNextCluster(
                                 this.props.feature.metadata['clusteringID'],
                                 this.props.feature.metadata['clusterID'],
-                                this.state.submitAction == 'submitNext'
+                                this.state.submitAction === 'submitNext'
                                     ? 'next'
                                     : 'previous',
                                 (response) => {
@@ -276,9 +276,9 @@ class CollaborativeAnnotation extends Component {
                         as={Form}
                         className='collab-anno'
                         onClose={() => this.closeModal()}
-                        closeIcon={'ready' == this.state.status}
-                        closeOnDimmerClick={'ready' == this.state.status}
-                        closeOnDocumentClick={'ready' == this.state.status}
+                        closeIcon={'ready' === this.state.status}
+                        closeOnDimmerClick={'ready' === this.state.status}
+                        closeOnDocumentClick={'ready' === this.state.status}
                         open={showModal}
                         trigger={
                             <Button
@@ -447,9 +447,9 @@ class CollaborativeAnnotation extends Component {
             orcid_name &&
             orcid_id &&
             orcid_uuid &&
-            orcid_name != '' &&
-            orcid_id != '' &&
-            orcid_uuid != '' &&
+            orcid_name !== '' &&
+            orcid_id !== '' &&
+            orcid_uuid !== '' &&
             this.props.cookieConsent
         ) {
             return annotationModal(orcid_id, orcid_name);

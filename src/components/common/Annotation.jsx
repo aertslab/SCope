@@ -4,7 +4,7 @@ import { DragSource } from 'react-dnd';
 
 const sourceBehaviour = {
     canDrag(props) {
-        return props.orientation != 'one';
+        return props.orientation !== 'one';
     },
     beginDrag(props) {
         return {
@@ -21,7 +21,7 @@ const sourceBehaviour = {
             dropResult &&
             dropResult.dropped &&
             item.src &&
-            dropResult.dropEffect == 'move'
+            dropResult.dropEffect === 'move'
         )
             props.handleRemove(item.src, item.name, item.value);
     },
@@ -42,7 +42,7 @@ class Annotation extends Component {
         const opacity = isDragging ? 0.4 : 1;
 
         let icon;
-        if (orientation != 'one') {
+        if (orientation !== 'one') {
             icon = (
                 <Icon
                     name='delete'

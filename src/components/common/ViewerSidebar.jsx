@@ -1,5 +1,6 @@
 import React, { Component, createRef } from 'react';
 import { withRouter } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import {
     Header,
     Grid,
@@ -63,6 +64,10 @@ class ViewerSidebar extends Component {
         };
         this.setNewAnnotationName.bind(this);
         this.onNewAnnotationChange.bind(this);
+
+        this.sessionIsRW = useSelector(
+            (rootState) => rootState.main.sessionMode === 'rw'
+        );
     }
 
     onNewAnnotationChange = (e) => {
@@ -160,7 +165,7 @@ class ViewerSidebar extends Component {
         } = this.state;
 
         let lassoTab = () => {
-            if (lassoSelections.length == 0) {
+            if (lassoSelections.length === 0) {
                 return (
                     <Tab.Pane attached={false} style={{ textAlign: 'center' }}>
                         <br />
@@ -277,7 +282,7 @@ class ViewerSidebar extends Component {
             if (activeFeatures[i] && activeFeatures[i].metadata) {
                 let image = '';
                 let md = activeFeatures[i].metadata;
-                if (md.motifName != 'NA.png' && !this.state.imageErrored) {
+                if (md.motifName !== 'NA.png' && !this.state.imageErrored) {
                     if (this.state.imageErrored) {
                         image = md.motifName ? (
                             <img
@@ -305,7 +310,7 @@ class ViewerSidebar extends Component {
                 }
 
                 this.handleAnnoUpdate = (feature, i) => {
-                    if (this.state.newAnnoName != '') {
+                    if (this.state.newAnnoName !== '') {
                         Alert.create({
                             title: 'BETA: Annotation Change!',
                             content: (
@@ -367,9 +372,9 @@ class ViewerSidebar extends Component {
                 let annotationBox = () => {
                     if (
                         activeFeatures[i].featureType.startsWith('Cluster') &&
-                        activeFeatures[i].feature != 'All Clusters' &&
-                        BackendAPI.getLoomRWStatus() == 'rw' &&
-                        this.state.activePage == 'gene'
+                        activeFeatures[i].feature !== 'All Clusters' &&
+                        this.sessionIsRW &&
+                        this.state.activePage === 'gene'
                     ) {
                         return (
                             <Input
@@ -403,9 +408,9 @@ class ViewerSidebar extends Component {
                 let clusterControls = () => {
                     if (
                         activeFeatures[i].featureType.startsWith('Cluster') &&
-                        activeFeatures[i].feature != 'All Clusters' &&
-                        BackendAPI.getLoomRWStatus() == 'rw' &&
-                        this.state.activePage == 'gene'
+                        activeFeatures[i].feature !== 'All Clusters' &&
+                        this.sessionIsRW &&
+                        this.state.activePage === 'gene'
                     ) {
                         return (
                             <Grid>
@@ -456,10 +461,10 @@ class ViewerSidebar extends Component {
                         Header: header,
                         id: id,
                     };
-                    if (accessor != null) {
+                    if (accessor !== null) {
                         column['accessor'] = (d) => d[accessor];
                     }
-                    if (cell != null) {
+                    if (cell !== null) {
                         column['Cell'] = (props) => cell(props);
                     }
                     return column;
@@ -477,11 +482,11 @@ class ViewerSidebar extends Component {
                         id: id,
                     };
 
-                    if (accessor != null) {
+                    if (accessor !== null) {
                         column['accessor'] = (d) => d[accessor];
                     }
 
-                    if (cell != null) {
+                    if (cell !== null) {
                         column['Cell'] = (props) => cell(props);
                     }
                     if (sortMethod !== null) {
@@ -494,7 +499,7 @@ class ViewerSidebar extends Component {
                     if (md.cellTypeAnno.length > 0) {
                         let newCellTypeAnnoTableOboCell = (props) => {
                             let iriLink =
-                                props.value.ols_iri == '' ? (
+                                props.value.ols_iri === '' ? (
                                     <React.Fragment>
                                         {props.value.annotation_label}
                                         <br />
@@ -666,7 +671,7 @@ class ViewerSidebar extends Component {
                                                 }
                                                 icon='thumbs up outline'
                                                 content={
-                                                    this.state.status ==
+                                                    this.state.status ===
                                                     'ready' ? (
                                                         props.value.votes_for
                                                             .total
@@ -717,7 +722,7 @@ class ViewerSidebar extends Component {
                                                 }
                                                 icon='thumbs down outline'
                                                 content={
-                                                    this.state.status ==
+                                                    this.state.status ===
                                                     'ready' ? (
                                                         props.value
                                                             .votes_against.total
@@ -843,7 +848,7 @@ class ViewerSidebar extends Component {
                                     align: 'center',
                                 }}>
                                 No annotations currently exist.{' '}
-                                {BackendAPI.getLoomRWStatus() == 'rw'
+                                {this.sessionIsRW
                                     ? 'Be the first to contribute!'
                                     : ''}
                             </div>
@@ -861,7 +866,7 @@ class ViewerSidebar extends Component {
                                         loomFilePath: BackendAPI.getActiveLoom(),
                                         query: props.value,
                                     };
-                                    if (activePage == 'regulon') {
+                                    if (activePage === 'regulon') {
                                         this.setState({ currentPage: 'gene' });
                                         BackendAPI.setActivePage('gene');
                                         history.push(
@@ -943,7 +948,7 @@ class ViewerSidebar extends Component {
                     let markerTableHeight = screen.availHeight / 2.5;
 
                     let markerTableHeaderName = () => {
-                            if (activeFeatures[i].featureType == 'regulon')
+                            if (activeFeatures[i].featureType === 'regulon')
                                 return 'Regulon Genes';
                             else if (
                                 activeFeatures[i].featureType.startsWith(
@@ -953,7 +958,7 @@ class ViewerSidebar extends Component {
                                 return 'Cluster Markers';
                         },
                         downloadButtonName = () => {
-                            if (activeFeatures[i].featureType == 'regulon')
+                            if (activeFeatures[i].featureType === 'regulon')
                                 return (
                                     'Download ' +
                                     activeFeatures[i].feature +
@@ -971,7 +976,7 @@ class ViewerSidebar extends Component {
                                 );
                         },
                         genesFileName = () => {
-                            if (activeFeatures[i].featureType == 'regulon')
+                            if (activeFeatures[i].featureType === 'regulon')
                                 return (
                                     activeFeatures[i].feature +
                                     '_regulon_genes.tsv'
@@ -1020,9 +1025,9 @@ class ViewerSidebar extends Component {
                 }
 
                 if (
-                    (this.props.activeLegend != null) &
-                    (activeFeatures[i].featureType == 'annotation' ||
-                        activeFeatures[i].feature == 'All Clusters')
+                    (this.props.activeLegend !== null) &
+                    (activeFeatures[i].featureType === 'annotation' ||
+                        activeFeatures[i].feature === 'All Clusters')
                 ) {
                     let aL = this.props.activeLegend;
                     let legendTableData = aL.values.map((v, j) => ({
@@ -1069,8 +1074,8 @@ class ViewerSidebar extends Component {
                 if (activeFeatures[i].featureType.startsWith('Clustering')) {
                     downloadSubLoomButton = () => {
                         if (
-                            this.state.downloadSubLoomPercentage == null &&
-                            this.state.processSubLoomPercentage == null
+                            this.state.downloadSubLoomPercentage === null &&
+                            this.state.processSubLoomPercentage === null
                         )
                             return (
                                 <Button
@@ -1103,7 +1108,7 @@ class ViewerSidebar extends Component {
                                                         console.log(
                                                             'downloadSubLoom data'
                                                         );
-                                                    if (dsl == null) {
+                                                    if (dsl === null) {
                                                         this.setState({
                                                             loomDownloading: null,
                                                             downloadSubLoomPercentage: null,
@@ -1343,7 +1348,7 @@ class ViewerSidebar extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (this.props.match.params.loom != prevProps.match.params.loom) {
+        if (this.props.match.params.loom !== prevProps.match.params.loom) {
             this.updateMetadata();
         }
     }

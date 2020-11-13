@@ -49,7 +49,9 @@ export default class Metadata extends Component {
             selectedClusteringName = '',
             tableMetadata;
 
-        if (selectionId == null) return <span>&nbsp;</span>;
+        if (selectionId === null) {
+            return <span>&nbsp;</span>;
+        }
 
         if (loading) {
             tableMetadata = (
@@ -59,7 +61,7 @@ export default class Metadata extends Component {
             );
         } else {
             loomMetadata.cellMetaData.clusterings.map((c) => {
-                if (c.id == this.state.clustering) {
+                if (c.id === this.state.clustering) {
                     selectedClusteringName = c.name;
                     c.clusters.map((s) => {
                         selectedClustering[s.id] = s.description;
@@ -119,7 +121,7 @@ export default class Metadata extends Component {
                             ) : (
                                 <Table.Cell>&nbsp;</Table.Cell>
                             )}
-                            {clustering != null ? (
+                            {clustering !== null ? (
                                 metadata.clusterIDs.map((c, k) => (
                                     <Table.Cell key={k}>
                                         {c
@@ -228,7 +230,7 @@ export default class Metadata extends Component {
 
         return (
             <Modal
-                open={selectionId != null ? true : false}
+                open={selectionId !== null ? true : false}
                 onMount={() => {
                     setTimeout(() => {
                         this.getMetadata();
@@ -317,9 +319,9 @@ export default class Metadata extends Component {
             selectedGenes: selectedGenes,
             selectedRegulons: selectedRegulons,
             clusterings:
-                this.state.clustering != null ? [this.state.clustering] : [],
+                this.state.clustering !== null ? [this.state.clustering] : [],
             annotations:
-                this.state.annotation != null ? this.state.annotation : [],
+                this.state.annotation !== null ? this.state.annotation : [],
         };
         let queryCells = {
             loomFilePath: loomFilePath,

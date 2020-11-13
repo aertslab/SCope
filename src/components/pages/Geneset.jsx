@@ -80,7 +80,7 @@ class Geneset extends Component {
                                 </Menu.Item>
                                 {genesets.map((set, i) => {
                                     let active =
-                                        selectedGeneset == set.geneSetFilePath
+                                        selectedGeneset === set.geneSetFilePath
                                             ? true
                                             : false;
                                     console.log(
@@ -173,8 +173,8 @@ class Geneset extends Component {
                             color=''
                             onClick={this.saveGeneset.bind(this)}
                             disabled={
-                                this.state.genesetName.length == 0 ||
-                                this.state.geneset.length == 0
+                                this.state.genesetName.length === 0 ||
+                                this.state.geneset.length === 0
                             }>
                             Save as geneset
                         </Button>

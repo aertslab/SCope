@@ -88,7 +88,7 @@ class GProfilerPopup extends React.Component<
         if (this.props.selectedTopGeneListsSizes.includes(geneListSize)) {
             this.props.setTopGeneListSizes(
                 this.props.selectedTopGeneListsSizes.filter(
-                    (value) => value != geneListSize
+                    (value) => value !== geneListSize
                 )
             );
         } else {

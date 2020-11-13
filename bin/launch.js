@@ -57,7 +57,7 @@ class Launcher {
     checkPublicHostAddress() {
         console.log('- Checking public host address...');
         return new Promise((resolve) => {
-            if (this._config.publicHostAddress == '') {
+            if (this._config.publicHostAddress === '') {
                 throw new Error(
                     'No public host address set in apache/config.json. Please set one.'
                 );

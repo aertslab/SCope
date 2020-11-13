@@ -58,7 +58,9 @@ export default class OLSAutocomplete extends Component {
     queryOLS = (query) => {
         let metadata = BackendAPI.getActiveLoomMetadata();
 
-        let ontology = metadata.fileMetaData.species == 'dmel' ? 'fbbt' : 'cl'; // cl for Human & Mouse
+        // cl for Human & Mouse
+        const ontology =
+            metadata.fileMetaData.species === 'dmel' ? 'fbbt' : 'cl';
         const request = new Request(
             'https://www.ebi.ac.uk/ols/api/select?q=' +
                 query +

@@ -94,7 +94,6 @@ export default class Viewer extends Component {
             this.onActiveFeaturesChange(features, featureID, customScale);
         };
 
-
         this.activePage = decodeURI(this.props.location.pathname)
             .split('/')
             .slice(-1)[0];
@@ -109,13 +108,7 @@ export default class Viewer extends Component {
     }
 
     render() {
-        return (
-            <div
-                className='viewcontainer'
-                ref={this.container}
-            >
-            </div>
-        );
+        return <div className='viewcontainer' ref={this.container}></div>;
     }
 
     componentDidMount() {
@@ -148,7 +141,7 @@ export default class Viewer extends Component {
         );
 
         this.initGraphics();
-        if (this.props.loomFile != null) {
+        if (this.props.loomFile !== null) {
             this.getPoints(
                 this.props.loomFile,
                 this.props.activeCoordinates,
@@ -250,7 +243,7 @@ export default class Viewer extends Component {
         ]);
         this.mainLayer.interactive = true;
         this.bcr = this.container.current.getBoundingClientRect();
-        if (index != null) {
+        if (index !== null) {
             this.app.stage.addChildAt(this.mainLayer, index);
         } else {
             this.app.stage.addChild(this.mainLayer);
@@ -277,7 +270,9 @@ export default class Viewer extends Component {
         s.scale.y = settings.scale / 50;
         s.alpha = settings.alpha;
         s.anchor = { x: 0.5, y: 0.5 };
-        if (c == 'XXXXXX') c = DEFAULT_POINT_COLOR;
+        if (c === 'XXXXXX') {
+            c = DEFAULT_POINT_COLOR;
+        }
         s.tint = '0x' + c;
         // Decompressing the color not working as without compression
         // tint request a full 6 hexadecimal digits format
@@ -466,7 +461,7 @@ export default class Viewer extends Component {
         this.startBenchmark('highlightPointsInLasso');
         let pts = this.mainLayer.children;
         pts.map((p) => {
-            if (lS.points.indexOf(p._originalData.idx) == -1) return;
+            if (lS.points.indexOf(p._originalData.idx) === -1) return;
             let point = this.getTexturedColorPoint(
                 p._originalData.x,
                 p._originalData.y,
@@ -596,7 +591,7 @@ export default class Viewer extends Component {
             this.trajectoryLayer.position.y = t1.y;
             this.zoomTransform = { x: t1.x, y: t1.y, k: t1.k };
 
-            if (t0.k != t1.k) {
+            if (t0.k !== t1.k) {
                 // on zoom
                 // TODO: memory leak: increase in unnecessary listeners
                 this.transformDataPoints();
@@ -626,15 +621,15 @@ export default class Viewer extends Component {
 
     onActiveFeaturesChange(features, featureID, customScale) {
         if (
-            this.getJSONFeatures(features, 'feature') !=
+            this.getJSONFeatures(features, 'feature') !==
                 this.getJSONFeatures(this.state.activeFeatures, 'feature') ||
-            this.getJSONFeatures(features, 'featureType') !=
+            this.getJSONFeatures(features, 'featureType') !==
                 this.getJSONFeatures(
                     this.state.activeFeatures,
                     'featureType'
                 ) ||
             (this.props.thresholds &&
-                this.getJSONFeatures(features, 'threshold') !=
+                this.getJSONFeatures(features, 'threshold') !==
                     this.getJSONFeatures(
                         this.state.activeFeatures,
                         'threshold'
@@ -679,7 +674,7 @@ export default class Viewer extends Component {
                 scale,
                 this.state.customScale
             );
-        if (JSON.stringify(scale) != JSON.stringify(this.state.customScale)) {
+        if (JSON.stringify(scale) !== JSON.stringify(this.state.customScale)) {
             this.setState({ loading: true, customScale: scale });
             this.getFeatureColors(
                 this.state.activeFeatures,
@@ -699,11 +694,11 @@ export default class Viewer extends Component {
         if (this.props.translate) {
             selections.map((s, i) => {
                 let ns = Object.assign({}, s);
-                if (s.src != this.props.name) {
+                if (s.src !== this.props.name) {
                     if (s.translations[this.props.name]) {
                         ns.points = s.translations[this.props.name];
                     } else {
-                        if (s.loomFilePath != this.props.loomFile) {
+                        if (s.loomFilePath !== this.props.loomFile) {
                             ns.selected = false;
                             let query = {
                                 srcLoomFilePath: s.loomFilePath,
@@ -764,17 +759,19 @@ export default class Viewer extends Component {
         let transform = () => {
             let k = this.zoomTransform.t,
                 x = this.zoomTransform.x + t.dx * (this.app.renderer.width / 2),
-                y = this.zoomTransform.y + t.dy * (this.app.renderer.height / 2),
+                y =
+                    this.zoomTransform.y +
+                    t.dy * (this.app.renderer.height / 2),
                 transform = d3.zoomIdentity.translate(x, y).scale(t.k);
             transform.receivedFromListener = true;
             this.zoomBehaviour.transform(this.zoomSelection, transform);
         };
         if (!settings.dissociateViewers) {
-            if (t.src != this.props.name && t.src != 'init') transform();
+            if (t.src !== this.props.name && t.src !== 'init') transform();
         } else {
             if (
-                t.src != this.props.name &&
-                t.src != 'init' &&
+                t.src !== this.props.name &&
+                t.src !== 'init' &&
                 this.containsPointer()
             )
                 transform();
@@ -867,11 +864,9 @@ export default class Viewer extends Component {
 
     setScalingFactor() {
         let horizontalScale =
-            this.w /
-            (d3.max(this.state.coord.x) - d3.min(this.state.coord.x));
+            this.w / (d3.max(this.state.coord.x) - d3.min(this.state.coord.x));
         let verticalScale =
-            this.h /
-            (d3.max(this.state.coord.y) - d3.min(this.state.coord.y));
+            this.h / (d3.max(this.state.coord.y) - d3.min(this.state.coord.y));
         this.scalingFactor = R.clamp(
             MIN_SCALING_FACTOR,
             Infinity,
@@ -886,7 +881,7 @@ export default class Viewer extends Component {
             throw 'Coordinates does not have the same size.';
         let n = c.x.length;
         if (n > this.maxn) {
-            console.log("Have to update Main Layer size!!!!");
+            console.log('Have to update Main Layer size!!!!');
             this.updateMainLayerSize(n);
         }
         for (let i = 0; i < n; ++i) {
@@ -973,7 +968,7 @@ export default class Viewer extends Component {
             });
         }
 
-        if (!features || features.length == 0) {
+        if (!features || features.length === 0) {
             // prevent empty requests
             //return this.resetDataPoints();
             return;
@@ -1062,7 +1057,7 @@ export default class Viewer extends Component {
                                 this.updateColors(response, response.color);
                             }
 
-                            if (this.props.onActiveLegendChange != null) {
+                            if (this.props.onActiveLegendChange !== null) {
                                 this.props.onActiveLegendChange(
                                     response.legend
                                 );
@@ -1255,4 +1250,3 @@ class Rect {
         );
     };
 }
-

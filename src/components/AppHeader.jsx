@@ -244,10 +244,10 @@ class AppHeader extends Component {
                                     }>
                                     <Button
                                         basic
-                                        active={match.params.page == item.path}>
+                                        active={match.params.page === item.path}>
                                         {item.icon && <Icon name={item.icon} />}
                                         {item.title} &nbsp;{' '}
-                                        {item.path == 'geneset' && (
+                                        {item.path  === 'geneset' && (
                                             <Label color='violet' size='mini'>
                                                 beta
                                             </Label>

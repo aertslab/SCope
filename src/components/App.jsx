@@ -101,7 +101,7 @@ class App extends Component {
                     tooManyUsers={!isAppLoading && sessionsLimitReached}
                     timeout={
                         !isAppLoading &&
-                        this.timeout != null &&
+                        this.timeout !== null &&
                         this.timeout <= 0
                     }
                 />
@@ -125,7 +125,7 @@ class App extends Component {
         this.parseURLParams(this.props);
         this.getUUIDFromIP(this.props);
 
-        if (this.props.cookies.get('CookieConsent') == 'true') {
+        if (this.props.cookies.get('CookieConsent') === 'true') {
             this.props.consentToCookies();
 
             if (
@@ -200,7 +200,7 @@ class App extends Component {
         const { cookies, match } = props;
 
         if (match.params.uuid) {
-            if (match.params.uuid == 'permalink') {
+            if (match.params.uuid === 'permalink') {
                 if (DEBUG) {
                     console.log('Permalink detected');
                 }
@@ -257,7 +257,7 @@ class App extends Component {
                 if (DEBUG) console.log('getUUID', query);
                 gbc.services.scope.Main.getUUID(query, (err, response) => {
                     if (DEBUG) console.log('getUUID', response);
-                    if (response != null) onSuccess(response.UUID);
+                    if (response !== null) onSuccess(response.UUID);
                 });
             },
             () => {
@@ -304,7 +304,6 @@ class App extends Component {
                                 this.props.setAppLoading(false);
                                 this.props.setUUID(uuid);
                                 this.props.setSessionMode(response.sessionMode);
-                                BackendAPI.setSessionMode(response.sessionMode);
                             }
                             if (!this.timer) {
                                 this.timer = setInterval(() => {

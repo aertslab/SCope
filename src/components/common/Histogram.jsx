@@ -102,7 +102,7 @@ export default class Histogram extends Component {
     }
 
     getCellAUCValues(feature, loomFile) {
-        if (!feature || feature.feature.length == 0)
+        if (!feature || feature.feature.length === 0)
             return this.renderAUCGraph('', []);
         let query = {
             loomFilePath: loomFile,
@@ -161,7 +161,7 @@ export default class Histogram extends Component {
             selected: 0,
         });
 
-        if (points.length == 0) {
+        if (points.length === 0) {
             svg.append('text')
                 .text('Select a regulon to see AUC histogram')
                 .attr('text-anchor', 'middle')

@@ -9,7 +9,7 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
     .BundleAnalyzerPlugin;
 
 // Import config file
-let isAWS = process.env.NODE_TYPE == 'aws';
+let isAWS = process.env.NODE_TYPE === 'aws';
 let _config = null;
 if (isAWS) {
     _config = require('./apache/config.json');

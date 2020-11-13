@@ -28,9 +28,7 @@ export default class UploadModal extends Component {
                             <FileReaderInput
                                 as='binary'
                                 id='my-file-input'
-                                onChange={this.selectLoomFile.bind(
-                                    this
-                                )}>
+                                onChange={this.selectLoomFile.bind(this)}>
                                 <Input
                                     label='File to be uploaded:'
                                     labelPosition='left'
@@ -41,9 +39,7 @@ export default class UploadModal extends Component {
                                         content: 'Select a file...',
                                     }}
                                     fluid
-                                    placeholder={
-                                        this.state.uploadLoomFileName
-                                    }
+                                    placeholder={this.state.uploadLoomFileName}
                                     error={this.state.uploadError}
                                 />
                             </FileReaderInput>
@@ -57,16 +53,14 @@ export default class UploadModal extends Component {
                                 onClick={this.uploadLoomFile.bind(this)}
                                 disabled={
                                     !this.state.uploadLoomFile ||
-                                        this.state.uploadLoomProgress > 0
+                                    this.state.uploadLoomProgress > 0
                                 }>
                                 {' '}
                                 Upload!
                             </Button>
                         </div>
                         <div>
-                            <span>
-                                Upload progress:
-                            </span>
+                            <span>Upload progress:</span>
                             <span>
                                 <Progress
                                     percent={this.state.uploadLoomProgress}
@@ -104,13 +98,13 @@ export default class UploadModal extends Component {
                 this.setState({ uploadLoomProgress: progress });
             },
             (filename, status_code) => {
-                if (status_code == 200) {
+                if (status_code === 200) {
                     this.setState({
                         uploadLoomFile: null,
                         uploadLoomProgress: 0,
                     });
                     this.props.onUploaded(filename);
-                } else if (status_code == 415) {
+                } else if (status_code === 415) {
                     this.setState({
                         uploadLoomFile: null,
                         uploadLoomFileName:
