@@ -266,7 +266,7 @@ class API {
     }
 
     setActiveLoom(loom, id) {
-        if (id === null) {
+        if (id === undefined) {
             id = 0;
         }
         if (this.activeLooms[id] === loom) {
@@ -281,8 +281,8 @@ class API {
         this.activeCoordinates = -1;
         this.activeLoomChangeListeners.forEach((listener) => {
             listener(
-                this.activeLooms[0],
-                this.loomFiles[this.activeLooms[0]],
+                this.activeLooms[id],
+                this.loomFiles[this.activeLooms[id]],
                 this.activeCoordinates
             );
         });

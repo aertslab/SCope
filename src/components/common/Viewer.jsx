@@ -1067,12 +1067,8 @@ export default class Viewer extends Component {
                                     response
                                 );
                             }
-                            // Convert object to ArrayBuffer
-                            let responseBuffered = new Buffer(
-                                response.compressedColor.toArrayBuffer()
-                            );
-                            // Uncompress
                             if (response.hasAddCompressionLayer) {
+                                // Uncompress
                                 console.error('Zlib compression is not supported');
                             } else {
                                 this.endBenchmark('getFeatureColors');

@@ -1,6 +1,6 @@
 import React, { Component, createRef } from 'react';
 import { withRouter } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { connect } from 'react-redux';
 import {
     Header,
     Grid,
@@ -64,10 +64,6 @@ class ViewerSidebar extends Component {
         };
         this.setNewAnnotationName.bind(this);
         this.onNewAnnotationChange.bind(this);
-
-        this.sessionIsRW = useSelector(
-            (rootState) => rootState.main.sessionMode === 'rw'
-        );
     }
 
     onNewAnnotationChange = (e) => {
@@ -373,7 +369,7 @@ class ViewerSidebar extends Component {
                     if (
                         activeFeatures[i].featureType.startsWith('Cluster') &&
                         activeFeatures[i].feature !== 'All Clusters' &&
-                        this.sessionIsRW &&
+                        this.props.sessionIsRW &&
                         this.state.activePage === 'gene'
                     ) {
                         return (
@@ -409,7 +405,7 @@ class ViewerSidebar extends Component {
                     if (
                         activeFeatures[i].featureType.startsWith('Cluster') &&
                         activeFeatures[i].feature !== 'All Clusters' &&
-                        this.sessionIsRW &&
+                        this.props.sessionIsRW &&
                         this.state.activePage === 'gene'
                     ) {
                         return (
@@ -848,7 +844,7 @@ class ViewerSidebar extends Component {
                                     align: 'center',
                                 }}>
                                 No annotations currently exist.{' '}
-                                {this.sessionIsRW
+                                {this.props.sessionIsRW
                                     ? 'Be the first to contribute!'
                                     : ''}
                             </div>
@@ -1373,4 +1369,13 @@ class ViewerSidebar extends Component {
         BackendAPI.removeViewerSelection(id);
     }
 }
-export default withCookies(withRouter(ViewerSidebar));
+
+const viewerSidebar = withCookies(withRouter(ViewerSidebar));
+
+const mapStateToProps = (rootState) => {
+    return {
+        sessionIsRW: rootState.main.sessionMode === 'rw'
+    };
+};
+
+export default connect()(viewerSidebar);
