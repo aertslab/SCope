@@ -158,7 +158,9 @@ class App extends Component {
 
     clickHandler() {
         this.mouseClicks += 1;
-        if (DEBUG) console.log('User click', this.mouseClicks);
+        if (DEBUG) {
+            console.log('User click', this.mouseClicks);
+        }
     }
 
     componentWillUnmount() {
@@ -180,7 +182,9 @@ class App extends Component {
     parseURLParams(props) {
         let loom = decodeURIComponent(props.match.params.loom);
         let page = decodeURIComponent(props.match.params.page);
-        if (DEBUG) console.log('Query params - loom: ', loom, ' page: ', page);
+        if (DEBUG) {
+            console.log('Query params - loom: ', loom, ' page: ', page);
+        }
         BackendAPI.setActivePage(page ? page : 'welcome');
         BackendAPI.setActiveLoom(loom ? loom : '');
     }
@@ -241,7 +245,9 @@ class App extends Component {
             }
             this.checkUUID(ip, cookies.get(SCOPE_COOKIE));
         } else {
-            if (DEBUG) console.log('No UUID detected');
+            if (DEBUG) {
+                console.log('No UUID detected');
+            }
             this.obtainNewUUID(ip, (uuid) => {
                 this.checkUUID(ip, uuid);
             });
@@ -254,10 +260,16 @@ class App extends Component {
                 let query = {
                     ip: ip,
                 };
-                if (DEBUG) console.log('getUUID', query);
+                if (DEBUG) {
+                    console.log('getUUID', query);
+                }
                 gbc.services.scope.Main.getUUID(query, (err, response) => {
-                    if (DEBUG) console.log('getUUID', response);
-                    if (response !== null) onSuccess(response.UUID);
+                    if (DEBUG) {
+                        console.log('getUUID', response);
+                    }
+                    if (response !== null) {
+                        onSuccess(response.UUID);
+                    }
                 });
             },
             () => {
@@ -268,7 +280,9 @@ class App extends Component {
 
     checkUUID(ip, uuid, ping) {
         const { cookies, history, match } = this.props;
-        if (!uuid) return;
+        if (!uuid) {
+            return;
+        }
         BackendAPI.getConnection().then(
             (gbc, ws) => {
                 let query = {

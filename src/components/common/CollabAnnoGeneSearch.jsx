@@ -88,7 +88,9 @@ export default class CollabAnnoGeneSearch extends React.Component {
         }
 
         console.log(e.target.value);
-        if (e.target.value.length < 1) return;
+        if (e.target.value.length < 1) {
+            return;
+        }
 
         let query = {
             loomFilePath: BackendAPI.getActiveLoom(),

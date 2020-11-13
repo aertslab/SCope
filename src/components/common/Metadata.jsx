@@ -261,18 +261,20 @@ export default class Metadata extends Component {
                                         cellData[g] =
                                             metadata.aucValues[j].features[i];
                                     });
-                                    if (metadata.annotations[0])
+                                    if (metadata.annotations[0]) {
                                         cellData[this.state.annotation] =
                                             metadata.annotations[0].annotations[
                                                 i
                                             ];
-                                    if (metadata.clusterIDs[0])
+                                    }
+                                    if (metadata.clusterIDs[0]) {
                                         cellData[selectedClusteringName] =
                                             selectedClustering[
                                                 metadata.clusterIDs[0].clusters[
                                                     i
                                                 ]
                                             ];
+                                    }
                                 }
                                 data.push(cellData);
                             });
@@ -329,17 +331,24 @@ export default class Metadata extends Component {
         };
         BackendAPI.getConnection().then(
             (gbc) => {
-                if (DEBUG) console.log('getCellIDs', queryCells);
+                if (DEBUG) {
+                    console.log('getCellIDs', queryCells);
+                }
                 gbc.services.scope.Main.getCellIDs(
                     queryCells,
                     (cellsErr, cellsResponse) => {
-                        if (DEBUG) console.log('getCellIDs', cellsResponse);
-                        if (DEBUG) console.log('getCellMetaData', query);
+                        if (DEBUG) {
+                            console.log('getCellIDs', cellsResponse);
+                        }
+                        if (DEBUG) {
+                            console.log('getCellMetaData', query);
+                        }
                         gbc.services.scope.Main.getCellMetaData(
                             query,
                             (err, response) => {
-                                if (DEBUG)
+                                if (DEBUG) {
                                     console.log('getCellMetaData', response);
+                                }
                                 this.setState({
                                     loading: false,
                                     metadata: response,

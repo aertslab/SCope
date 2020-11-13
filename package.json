@@ -183,7 +183,8 @@
             "eqeqeq": [
                 "error",
                 "always"
-            ]
+            ],
+            "curly": ["error", "all"]
         },
         "settings": {
             "react": {

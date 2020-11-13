@@ -46,7 +46,9 @@ export default class Regulon extends Component {
             </Grid.Column>
         ));
 
-        if (!activeLoom) return <div>Select the dataset to be analyzed</div>;
+        if (!activeLoom) {
+            return <div>Select the dataset to be analyzed</div>;
+        }
 
         return (
             <Grid className='flexDisplay'>

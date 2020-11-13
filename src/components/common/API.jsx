@@ -234,11 +234,16 @@ class API {
             let query = {
                 ip: ip,
             };
-            if (DEBUG) console.log('getUUIDAPI', query);
+            if (DEBUG) {
+                console.log('getUUIDAPI', query);
+            }
             gbc.services.scope.Main.getUUID(query, (err, response) => {
-                if (DEBUG) console.log('getUUIDAPI', response);
-                if (response !== null)
+                if (DEBUG) {
+                    console.log('getUUIDAPI', response);
+                }
+                if (response !== null) {
                     onSuccess(response.UUID, response.timeout);
+                }
             });
         });
     }
@@ -261,8 +266,12 @@ class API {
     }
 
     setActiveLoom(loom, id) {
-        if (id === null) id = 0;
-        if (this.activeLooms[id] === loom) return;
+        if (id === null) {
+            id = 0;
+        }
+        if (this.activeLooms[id] === loom) {
+            return;
+        }
         this.activeLooms[id] = loom;
         this.viewerSelections = {};
         this.viewerSelections[this.activePage] = [];
@@ -329,14 +338,19 @@ class API {
     }
 
     hasActiveCoordinatesTrajectory() {
-        if (this.getActiveLoomMetaDataEmbedding() === undefined) return false;
-        if (!('trajectory' in this.getActiveLoomMetaDataEmbedding()))
+        if (this.getActiveLoomMetaDataEmbedding() === undefined) {
             return false;
+        }
+        if (!('trajectory' in this.getActiveLoomMetaDataEmbedding())) {
+            return false;
+        }
         return this.getActiveLoomMetaDataEmbedding().trajectory !== null;
     }
 
     getActiveCoordinatesTrajectory() {
-        if (!this.hasActiveCoordinatesTrajectory()) return null;
+        if (!this.hasActiveCoordinatesTrajectory()) {
+            return null;
+        }
         return this.getActiveLoomMetaDataEmbedding().trajectory;
     }
 
@@ -352,10 +366,14 @@ class API {
 
         this.getConnection().then(
             (gbc) => {
-                if (DEBUG) console.log('getMyLooms', query);
+                if (DEBUG) {
+                    console.log('getMyLooms', query);
+                }
                 gbc.services.scope.Main.getMyLooms(query, (error, response) => {
                     if (response !== null) {
-                        if (DEBUG) console.log('getMyLooms', response);
+                        if (DEBUG) {
+                            console.log('getMyLooms', response);
+                        }
                         BackendAPI.setLoomFiles(
                             response.myLooms,
                             response.update
@@ -448,11 +466,12 @@ class API {
             };
             this.getConnection().then(
                 (gbc) => {
-                    if (DEBUG)
+                    if (DEBUG) {
                         console.log(
                             'setAnnotationName',
                             setAnnotationNameQuery
                         );
+                    }
                     gbc.services.scope.Main.setAnnotationName(
                         setAnnotationNameQuery,
                         (setAnnotationNameErr, setAnnotationNameResponse) => {
@@ -506,8 +525,9 @@ class API {
         };
         this.getConnection().then(
             (gbc) => {
-                if (DEBUG)
+                if (DEBUG) {
                     console.log('setLoomHierarchy', setLoomHierarchyQuery);
+                }
                 gbc.services.scope.Main.setLoomHierarchy(
                     setLoomHierarchyQuery,
                     (setLoomHierarchyErr, setLoomHierarchyResponse) => {
@@ -529,7 +549,9 @@ class API {
             direction: direction,
         };
         this.getConnection().then((gbc) => {
-            if (DEBUG) console.log('getNextCluster', query);
+            if (DEBUG) {
+                console.log('getNextCluster', query);
+            }
             gbc.services.scope.Main.getNextCluster(query, (err, response) => {
                 // TODO: Hacky implementation. To be refactored/reviewed properly
                 BackendAPI.queryLoomFiles(
@@ -554,23 +576,27 @@ class API {
             };
             this.getConnection().then(
                 (gbc) => {
-                    if (DEBUG) console.log('getRegulonMetaData', regulonQuery);
+                    if (DEBUG) {
+                        console.log('getRegulonMetaData', regulonQuery);
+                    }
                     gbc.services.scope.Main.getRegulonMetaData(
                         regulonQuery,
                         (regulonErr, regulonResponse) => {
-                            if (DEBUG)
+                            if (DEBUG) {
                                 console.log(
                                     'getRegulonMetaData',
                                     regulonResponse
                                 );
+                            }
                             let metadata = regulonResponse
                                 ? regulonResponse.regulonMeta
                                 : {};
                             let threshold = 0;
                             if (metadata.autoThresholds) {
                                 metadata.autoThresholds.map((t) => {
-                                    if (t.name === metadata.defaultThreshold)
+                                    if (t.name === metadata.defaultThreshold) {
                                         threshold = t.threshold;
+                                    }
                                 });
                             }
                             metadata.description = featureDescription;
@@ -614,16 +640,21 @@ class API {
                 };
                 this.getConnection().then(
                     (gbc) => {
-                        if (DEBUG) console.log('getMarkerGenes', markerQuery);
+                        if (DEBUG) {
+                            console.log('getMarkerGenes', markerQuery);
+                        }
                         gbc.services.scope.Main.getMarkerGenes(
                             markerQuery,
                             (markerErr, markerResponse) => {
-                                if (DEBUG)
+                                if (DEBUG) {
                                     console.log(
                                         'getMarkerGenes',
                                         markerResponse
                                     );
-                                if (!markerResponse) markerResponse = {};
+                                }
+                                if (!markerResponse) {
+                                    markerResponse = {};
+                                }
                                 markerResponse.description = featureDescription;
                                 this.setActiveFeature(
                                     field,
@@ -698,7 +729,9 @@ class API {
         BackendAPI.getConnection().then(
             (gbc) => {
                 gbc.services.scope.Main.getORCIDStatus({}, (err, response) => {
-                    if (DEBUG) console.log('getORCIDStatus', response);
+                    if (DEBUG) {
+                        console.log('getORCIDStatus', response);
+                    }
                     callback(response.active);
                 });
             },
@@ -709,13 +742,17 @@ class API {
     }
 
     getORCID(auth_code, callback) {
-        if (DEBUG) console.log('getORCID', auth_code);
+        if (DEBUG) {
+            console.log('getORCID', auth_code);
+        }
         BackendAPI.getConnection().then(
             (gbc) => {
                 gbc.services.scope.Main.getORCID(
                     { auth_code },
                     (err, response) => {
-                        if (DEBUG) console.log('getORCID', response);
+                        if (DEBUG) {
+                            console.log('getORCID', response);
+                        }
                         if (response.success) {
                             callback(
                                 response.orcid_scope_uuid,
@@ -735,13 +772,14 @@ class API {
     }
 
     setColabAnnotationData(feature, annotationData, orcidInfo, uuid, callback) {
-        if (DEBUG)
+        if (DEBUG) {
             console.log(
                 'setColabAnnotationData',
                 feature,
                 annotationData,
                 orcidInfo
             );
+        }
         let loomFilePath = this.getActiveLoom();
         let query = {
             loomFilePath: loomFilePath,
@@ -760,14 +798,17 @@ class API {
                 comment: annotationData['comment'],
             },
         };
-        if (DEBUG) console.log('setColabAnnotationData', query);
+        if (DEBUG) {
+            console.log('setColabAnnotationData', query);
+        }
         BackendAPI.getConnection().then(
             (gbc) => {
                 gbc.services.scope.Main.setColabAnnotationData(
                     query,
                     (err, response) => {
-                        if (DEBUG)
+                        if (DEBUG) {
                             console.log('setColabAnnotationData', response);
+                        }
                         if (response.success) {
                             BackendAPI.queryLoomFiles(
                                 uuid,
@@ -803,7 +844,9 @@ class API {
     }
 
     voteAnnotation(direction, data, feature, orcidInfo, uuid, callback) {
-        if (DEBUG) console.log('voteUpAnnotation');
+        if (DEBUG) {
+            console.log('voteUpAnnotation');
+        }
         let loomFilePath = this.getActiveLoom();
 
         let query = {
@@ -814,13 +857,17 @@ class API {
             annoData: data,
             direction: direction,
         };
-        if (DEBUG) console.log('voteAnnotation', query);
+        if (DEBUG) {
+            console.log('voteAnnotation', query);
+        }
         BackendAPI.getConnection().then(
             (gbc) => {
                 gbc.services.scope.Main.voteAnnotation(
                     query,
                     (err, response) => {
-                        if (DEBUG) console.log('voteAnnotation', response);
+                        if (DEBUG) {
+                            console.log('voteAnnotation', response);
+                        }
                         if (response.success) {
                             BackendAPI.queryLoomFiles(
                                 uuid,
@@ -860,8 +907,12 @@ class API {
         let settings = this.getSettings();
         let page = this.activePage;
         let selectedFeatures = this.features[page];
-        if (!selectedFeatures) return;
-        if (DEBUG) console.log('getMaxScale', id, page);
+        if (!selectedFeatures) {
+            return;
+        }
+        if (DEBUG) {
+            console.log('getMaxScale', id, page);
+        }
         let query = {
             loomFilePath: this.getActiveLooms(),
             feature: selectedFeatures.map((f) => {
@@ -873,18 +924,23 @@ class API {
             hasLogTransform: settings.hasLogTransform,
             hasCpmTransform: settings.hasCpmNormalization,
         };
-        if (DEBUG) console.log('getVmax', query);
+        if (DEBUG) {
+            console.log('getVmax', query);
+        }
         BackendAPI.getConnection().then(
             (gbc) => {
                 gbc.services.scope.Main.getVmax(query, (err, response) => {
-                    if (DEBUG) console.log('getVmax', response);
-                    if (id !== null)
+                    if (DEBUG) {
+                        console.log('getVmax', response);
+                    }
+                    if (id !== null) {
                         this.customValues[page][id][1] = response.vmax[id];
-                    else
+                    } else {
                         this.customValues[page] = response.vmax.map((x) => [
                             0,
                             x,
                         ]);
+                    }
                     this.maxValues[page] = response.maxVmax;
                     this.maxValuesChangeListeners.forEach((listener) => {
                         listener(this.maxValues[page]);
@@ -910,8 +966,9 @@ class API {
     }
 
     onActiveFeaturesChange(page, listener) {
-        if (!this.featureChangeListeners[page])
+        if (!this.featureChangeListeners[page]) {
             this.featureChangeListeners[page] = [];
+        }
         /*this.featureChangeListeners[page].push((a, b, c, d) => {
             console.log("FEATURE CHANGE LISTENER FIRED FOR", page);
             listener(a, b, c, d);
@@ -933,8 +990,12 @@ class API {
         let selectedRegulons = [];
         let selectedClusters = [];
         features.map((f) => {
-            if (f.featureType === 'gene') selectedGenes.push(f.feature);
-            if (f.featureType === 'regulon') selectedRegulons.push(f.feature);
+            if (f.featureType === 'gene') {
+                selectedGenes.push(f.feature);
+            }
+            if (f.featureType === 'regulon') {
+                selectedRegulons.push(f.feature);
+            }
             if (f.featureType.indexOf('Clustering:') === 0) {
                 metadata.cellMetaData.clusterings.map((clustering) => {
                     if (f.featureType.indexOf(clustering.name) !== -1) {
@@ -1058,8 +1119,9 @@ class API {
     }
 
     addViewerSelection(selection) {
-        if (!this.viewerSelections[this.activePage])
+        if (!this.viewerSelections[this.activePage]) {
             this.viewerSelections[this.activePage] = [];
+        }
         BackendAPI.getConnection().then((gbc) => {
             let query = {
                 loomFilePath: BackendAPI.getActiveLoom(),

@@ -68,8 +68,9 @@ class Launcher {
 
     checkApacheConf() {
         console.log('- Checking Apache configuration...');
-        if (isAWS)
+        if (isAWS) {
             return new apache.ApacheConf().setDevelopmentMode(isDev).init();
+        }
         return new Promise((resolve) => {
             resolve(true);
         });
@@ -103,8 +104,12 @@ class Launcher {
         console.log('- Checking SCope poetry environment...');
         return new Promise((resolve, reject) => {
             exec('cd opt; poetry env list', (error, stdout, stderr) => {
-                if (error) return resolve(false);
-                if (stderr) return resolve(false);
+                if (error) {
+                    return resolve(false);
+                }
+                if (stderr) {
+                    return resolve(false);
+                }
                 if (!this.scopeServerActivated) {
                     if (stdout.includes('scopeserver')) {
                         throw new Error(
@@ -212,8 +217,12 @@ class Launcher {
         );
         return new Promise((resolve, reject) => {
             exec(scopeClientStartCmd, (error, stdout, stderr) => {
-                if (error) return resolve(false);
-                if (stderr) return resolve(false);
+                if (error) {
+                    return resolve(false);
+                }
+                if (stderr) {
+                    return resolve(false);
+                }
             });
             resolve(true);
         });
@@ -231,8 +240,12 @@ class Launcher {
                 exec(
                     'cp -rf . ' + this._config.apacheHtmlDir,
                     (error, stdout, stderr) => {
-                        if (error) return resolve(false);
-                        if (stderr) return resolve(false);
+                        if (error) {
+                            return resolve(false);
+                        }
+                        if (stderr) {
+                            return resolve(false);
+                        }
                         resolve(true);
                     }
                 );
@@ -285,8 +298,12 @@ class Launcher {
         }
         return new Promise((resolve, reject) => {
             exec(scopeStartCmd, (error, stdout, stderr) => {
-                if (error) return resolve(false);
-                if (stderr) return resolve(false);
+                if (error) {
+                    return resolve(false);
+                }
+                if (stderr) {
+                    return resolve(false);
+                }
             });
             resolve(true);
         });

@@ -938,57 +938,63 @@ class ViewerSidebar extends Component {
 
                     let markerTableData = md.genes.map((g, j) => {
                         let markerTableRowData = { gene: g };
-                        if (!('metrics' in md)) return markerTableRowData;
-                        for (let metric of md.metrics)
+                        if (!('metrics' in md)) {
+                            return markerTableRowData;
+                        }
+                        for (let metric of md.metrics) {
                             markerTableRowData[metric.accessor] =
                                 metric.values[j];
+                        }
                         return markerTableRowData;
                     });
 
                     let markerTableHeight = screen.availHeight / 2.5;
 
                     let markerTableHeaderName = () => {
-                            if (activeFeatures[i].featureType === 'regulon')
+                            if (activeFeatures[i].featureType === 'regulon') {
                                 return 'Regulon Genes';
-                            else if (
+                            } else if (
                                 activeFeatures[i].featureType.startsWith(
                                     'Clustering'
                                 )
-                            )
+                            ) {
                                 return 'Cluster Markers';
+                            }
                         },
                         downloadButtonName = () => {
-                            if (activeFeatures[i].featureType === 'regulon')
+                            if (activeFeatures[i].featureType === 'regulon') {
                                 return (
                                     'Download ' +
                                     activeFeatures[i].feature +
                                     ' regulon genes'
                                 );
-                            else if (
+                            } else if (
                                 activeFeatures[i].featureType.startsWith(
                                     'Clustering'
                                 )
-                            )
+                            ) {
                                 return (
                                     'Download ' +
                                     activeFeatures[i].feature +
                                     ' markers'
                                 );
+                            }
                         },
                         genesFileName = () => {
-                            if (activeFeatures[i].featureType === 'regulon')
+                            if (activeFeatures[i].featureType === 'regulon') {
                                 return (
                                     activeFeatures[i].feature +
                                     '_regulon_genes.tsv'
                                 );
-                            else if (
+                            } else if (
                                 activeFeatures[i].featureType.startsWith(
                                     'Clustering'
                                 )
-                            )
+                            ) {
                                 return (
                                     activeFeatures[i].feature + '_markers.tsv'
                                 );
+                            }
                         };
 
                     markerTable = (
@@ -1076,7 +1082,7 @@ class ViewerSidebar extends Component {
                         if (
                             this.state.downloadSubLoomPercentage === null &&
                             this.state.processSubLoomPercentage === null
-                        )
+                        ) {
                             return (
                                 <Button
                                     color='green'
@@ -1096,18 +1102,20 @@ class ViewerSidebar extends Component {
                                         };
                                         BackendAPI.getConnection().then(
                                             (gbc) => {
-                                                if (DEBUG)
+                                                if (DEBUG) {
                                                     console.log(
                                                         'Download subset of active .loom'
                                                     );
+                                                }
                                                 let call = gbc.services.scope.Main.downloadSubLoom(
                                                     query
                                                 );
                                                 call.on('data', (dsl) => {
-                                                    if (DEBUG)
+                                                    if (DEBUG) {
                                                         console.log(
                                                             'downloadSubLoom data'
                                                         );
+                                                    }
                                                     if (dsl === null) {
                                                         this.setState({
                                                             loomDownloading: null,
@@ -1162,10 +1170,11 @@ class ViewerSidebar extends Component {
                                                 });
                                                 call.on('end', () => {
                                                     console.log();
-                                                    if (DEBUG)
+                                                    if (DEBUG) {
                                                         console.log(
                                                             'downloadSubLoom end'
                                                         );
+                                                    }
                                                 });
                                             },
                                             () => {
@@ -1187,7 +1196,8 @@ class ViewerSidebar extends Component {
                                         ' .loom file'}
                                 </Button>
                             );
-                        if (this.state.processSubLoomPercentage > 0)
+                        }
+                        if (this.state.processSubLoomPercentage > 0) {
                             return (
                                 <Progress
                                     percent={
@@ -1200,7 +1210,8 @@ class ViewerSidebar extends Component {
                                     Processing...
                                 </Progress>
                             );
-                        if (this.state.downloadSubLoomPercentage > 0)
+                        }
+                        if (this.state.downloadSubLoomPercentage > 0) {
                             return (
                                 <Progress
                                     percent={
@@ -1213,6 +1224,7 @@ class ViewerSidebar extends Component {
                                     Downloading...
                                 </Progress>
                             );
+                        }
                     };
                 }
                 metadata = (

@@ -67,7 +67,9 @@ class ViewerDropContainer extends Component {
                     </div>
                 );
             } else if (orientation === 'one') {
-                if (this.props.position !== 0) return <div></div>;
+                if (this.props.position !== 0) {
+                    return <div></div>;
+                }
                 return (
                     <div className='emptyDropContainer dropContainer'>
                         <p>

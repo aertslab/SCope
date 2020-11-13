@@ -17,8 +17,9 @@ export default class Gene extends Component {
             activeLegend: null,
         };
         this.activeLoomListener = (loom, metadata, coordinates) => {
-            if (DEBUG)
+            if (DEBUG) {
                 console.log('activeLoomListener', loom, metadata, coordinates);
+            }
             this.setState({
                 activeLoom: loom,
                 activeCoordinates: coordinates,
@@ -37,7 +38,9 @@ export default class Gene extends Component {
             activeLegend,
         } = this.state;
 
-        if (!activeLoom) return <div>Select the dataset to be analyzed</div>;
+        if (!activeLoom) {
+            return <div>Select the dataset to be analyzed</div>;
+        }
 
         return (
             <Grid columns='equal'>

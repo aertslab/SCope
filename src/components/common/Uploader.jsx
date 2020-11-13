@@ -38,16 +38,19 @@ export default class Uploader {
             );
         }
         xhr.upload.addEventListener('progress', (event) => {
-            if (DEBUG)
+            if (DEBUG) {
                 console.log(
                     'Data uploaded: ' + event.loaded + '/' + event.total
                 );
+            }
             let progress = ((event.loaded / event.total) * 100).toPrecision(1);
             onProgress(progress);
         });
 
         xhr.upload.addEventListener('load', (event) => {
-            if (DEBUG) console.log('file uploaded: ' + file.name);
+            if (DEBUG) {
+                console.log('file uploaded: ' + file.name);
+            }
         });
 
         xhr.onreadystatechange = function () {

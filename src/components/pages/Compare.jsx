@@ -123,7 +123,7 @@ class Compare extends Component {
         } = this.state;
 
         let annotationLinks = () => {
-            if (configuration === 'one')
+            if (configuration === 'one') {
                 return (
                     <span style={{ float: 'right' }}>
                         <a
@@ -139,6 +139,7 @@ class Compare extends Component {
                         </a>
                     </span>
                 );
+            }
         };
 
         let annotationTabs = () => {
@@ -197,7 +198,9 @@ class Compare extends Component {
             while (columns * (rows - 1) >= crossAnnotations['one'].length) {
                 rows--;
             }
-            if (rows < 1) rows = 1;
+            if (rows < 1) {
+                rows = 1;
+            }
         }
 
         let viewers = () => {
@@ -220,16 +223,18 @@ class Compare extends Component {
                                     (configuration === 'cross' && i === 0)
                                 ) {
                                     let ca = crossAnnotations['horizontal'][j];
-                                    if (configuration === 'simple')
+                                    if (configuration === 'simple') {
                                         ca =
                                             crossAnnotations['both'][
                                                 columns * i + j
                                             ];
-                                    if (configuration === 'one')
+                                    }
+                                    if (configuration === 'one') {
                                         ca =
                                             crossAnnotations['one'][
                                                 columns * i + j
                                             ];
+                                    }
                                     annotationDropContainerHorizontal = (
                                         <AnnotationDropContainer
                                             activeAnnotations={ca}
@@ -350,17 +355,19 @@ class Compare extends Component {
                                     );
                                 }
                                 let va;
-                                if (configuration === 'simple')
+                                if (configuration === 'simple') {
                                     va =
                                         crossAnnotations['both'][
                                             columns * i + j
                                         ];
-                                else if (configuration === 'one')
+                                } else if (configuration === 'one') {
                                     va =
                                         crossAnnotations['one'][
                                             columns * i + j
                                         ];
-                                else va = this.getCrossAnnotations(i, j);
+                                } else {
+                                    va = this.getCrossAnnotations(i, j);
+                                }
                                 return (
                                     <Grid.Column key={j} className='viewerCell'>
                                         {datasetSelector}
@@ -419,7 +426,9 @@ class Compare extends Component {
             );
         };
 
-        if (!multiLoom[0]) return <div>Select the dataset to be analyzed</div>;
+        if (!multiLoom[0]) {
+            return <div>Select the dataset to be analyzed</div>;
+        }
 
         return (
             <Grid>
@@ -510,18 +519,22 @@ class Compare extends Component {
         Object.keys(annotations).map((orientation) => {
             annotations[orientation].map((annotation) => {
                 let va = annotation[name];
-                if (va && va.indexOf(value) !== -1) selected = true;
+                if (va && va.indexOf(value) !== -1) {
+                    selected = true;
+                }
             });
         });
         return selected;
     }
 
     handleDrop(item, viewer, orientation, position) {
-        if (DEBUG)
+        if (DEBUG) {
             console.log('handleDrop', item, viewer, orientation, position);
+        }
         let annotations = this.state.crossAnnotations;
-        if (!annotations[orientation][position])
+        if (!annotations[orientation][position]) {
             annotations[orientation][position] = {};
+        }
         let selectedAnnotations = (
             annotations[orientation][position][item.name] || []
         ).slice(0);
@@ -537,7 +550,7 @@ class Compare extends Component {
     }
 
     handleRemove(viewer, name, value, orientation, position) {
-        if (DEBUG)
+        if (DEBUG) {
             console.log(
                 'handleRemove',
                 viewer,
@@ -546,6 +559,7 @@ class Compare extends Component {
                 orientation,
                 position
             );
+        }
         let cross = this.state.crossAnnotations;
         let annotations = cross[orientation][position] || {};
         let selectedAnnotations = (annotations[name] || []).slice(0);
@@ -670,8 +684,9 @@ class Compare extends Component {
                     vb = b[name][0];
                 let pa = parseInt(va),
                     pb = parseInt(vb);
-                if (!isNaN(pa) && !isNaN(pb))
+                if (!isNaN(pa) && !isNaN(pb)) {
                     return pa > pb ? 1 : pa < pb ? -1 : 0;
+                }
                 return va > vb ? 1 : va < vb ? -1 : 0;
             });
             this.setState({ crossAnnotations: annotations });
@@ -697,8 +712,9 @@ class Compare extends Component {
             Object.keys(cross['horizontal'][j]).map((a) => {
                 annotations[a] = annotations[a] || [];
                 cross['horizontal'][j][a].map((v) => {
-                    if (annotations[a].indexOf(v) === -1)
+                    if (annotations[a].indexOf(v) === -1) {
                         annotations[a].push(v);
+                    }
                 });
             });
         }
@@ -706,8 +722,9 @@ class Compare extends Component {
             Object.keys(cross['vertical'][i]).map((a) => {
                 annotations[a] = annotations[a] || [];
                 cross['vertical'][i][a].map((v) => {
-                    if (annotations[a].indexOf(v) === -1)
+                    if (annotations[a].indexOf(v) === -1) {
                         annotations[a].push(v);
+                    }
                 });
             });
         }
@@ -722,8 +739,9 @@ class Compare extends Component {
                 Object.keys(annotation).map((a) => {
                     selectedAnnotations[a] = selectedAnnotations[a] || [];
                     annotation[a].map((v) => {
-                        if (selectedAnnotations[a].indexOf(v) === -1)
+                        if (selectedAnnotations[a].indexOf(v) === -1) {
                             selectedAnnotations[a].push(v);
+                        }
                     });
                 });
             });
@@ -751,11 +769,15 @@ class Compare extends Component {
         };
         BackendAPI.getConnection().then(
             (gbc) => {
-                if (DEBUG) console.log('getCellMetaData', query);
+                if (DEBUG) {
+                    console.log('getCellMetaData', query);
+                }
                 gbc.services.scope.Main.getCellMetaData(
                     query,
                     (err, response) => {
-                        if (DEBUG) console.log('getCellMetaData', response);
+                        if (DEBUG) {
+                            console.log('getCellMetaData', response);
+                        }
                         this.renderExpressionGraph(response);
                     }
                 );
@@ -850,8 +872,9 @@ class Compare extends Component {
                     });
                     annotatedFeatures.push({ group: f, value: featureValues });
                 });
-                if (selectedAnnotations[annotation].indexOf(a) !== -1)
+                if (selectedAnnotations[annotation].indexOf(a) !== -1) {
                     graphData.push({ annotation: a, Data: annotatedFeatures });
+                }
             });
             min =
                 d3.min(dataset, function (d) {
@@ -931,8 +954,12 @@ class Compare extends Component {
                 iqr = (q3 - q1) * k,
                 i = -1,
                 j = d.length;
-            while (d[++i] < q1 - iqr);
-            while (d[--j] > q3 + iqr);
+            while (d[i] < q1 - iqr) {
+                ++i;
+            }
+            while (d[j] > q3 + iqr) {
+                --j;
+            }
             return [i, j];
         };
     }

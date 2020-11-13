@@ -63,8 +63,12 @@ function runCheckCommand(
 function runSimpleCommandAsPromise(command) {
     return new Promise((resolve, reject) => {
         exec(command, { stdio: [0, 1, 2] }, (error, stdout, stderr) => {
-            if (error) return resolve(false);
-            if (stderr) return resolve(false);
+            if (error) {
+                return resolve(false);
+            }
+            if (stderr) {
+                return resolve(false);
+            }
             console.log(stdout);
             if (stdout.length > 0) {
                 console.log('Done!');

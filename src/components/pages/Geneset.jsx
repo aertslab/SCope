@@ -61,7 +61,9 @@ class Geneset extends Component {
             loadingMessage,
         } = this.state;
 
-        if (!activeLoom) return <div>Select the dataset to be analyzed</div>;
+        if (!activeLoom) {
+            return <div>Select the dataset to be analyzed</div>;
+        }
 
         return (
             <Grid className='flexDisplay'>
@@ -284,12 +286,16 @@ class Geneset extends Component {
         };
         BackendAPI.getConnection().then(
             (gbc) => {
-                if (DEBUG) console.log('getMyGeneSets', query);
+                if (DEBUG) {
+                    console.log('getMyGeneSets', query);
+                }
                 gbc.services.scope.Main.getMyGeneSets(
                     query,
                     (error, response) => {
                         if (response !== null) {
-                            if (DEBUG) console.log('getMyGeneSets', response);
+                            if (DEBUG) {
+                                console.log('getMyGeneSets', response);
+                            }
                             this.setState({
                                 genesets: response.myGeneSets,
                                 loading: false,
@@ -321,12 +327,16 @@ class Geneset extends Component {
                 fileType: 'GeneSet',
             };
             BackendAPI.getConnection().then((gbc) => {
-                if (DEBUG) console.log('deleteUserFile', query);
+                if (DEBUG) {
+                    console.log('deleteUserFile', query);
+                }
                 gbc.services.scope.Main.deleteUserFile(
                     query,
                     (error, response) => {
                         if (response !== null && response.deletedSuccessfully) {
-                            if (DEBUG) console.log('deleteUserFile', response);
+                            if (DEBUG) {
+                                console.log('deleteUserFile', response);
+                            }
                             this.getGeneSets();
                         }
                     }
@@ -344,10 +354,14 @@ class Geneset extends Component {
         BackendAPI.getConnection().then(
             (gbc) => {
                 this.setState({ loading: true });
-                if (DEBUG) console.log('doGeneSetEnrichment', query);
+                if (DEBUG) {
+                    console.log('doGeneSetEnrichment', query);
+                }
                 let call = gbc.services.scope.Main.doGeneSetEnrichment(query);
                 call.on('data', (gse) => {
-                    if (DEBUG) console.log('doGeneSetEnrichment data', gse);
+                    if (DEBUG) {
+                        console.log('doGeneSetEnrichment data', gse);
+                    }
                     if (gse.isDone) {
                         this.setState({
                             loading: false,
@@ -358,7 +372,9 @@ class Geneset extends Component {
                     }
                 });
                 call.on('end', () => {
-                    if (DEBUG) console.log('doGeneSetEnrichment end');
+                    if (DEBUG) {
+                        console.log('doGeneSetEnrichment end');
+                    }
                 });
             },
             () => {

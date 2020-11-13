@@ -72,8 +72,11 @@ export default class Viewer extends Component {
         };
         this.spriteSettingsListener = () => {
             this.setState({ loading: true });
-            if (this.state.colors) this.updateDataPoints(this.state.colors);
-            else this.resetDataPoints();
+            if (this.state.colors) {
+                this.updateDataPoints(this.state.colors);
+            } else {
+                this.resetDataPoints();
+            }
             this.repaintLassoSelections(this.state.lassoSelections);
         };
         this.viewerToolListener = (tool) => {
@@ -221,7 +224,9 @@ export default class Viewer extends Component {
     }
 
     initGraphics() {
-        if (DEBUG) console.log('Initializing Viewer ', this.props.name);
+        if (DEBUG) {
+            console.log('Initializing Viewer ', this.props.name);
+        }
         this.addMainLayer();
         this.addLabelLayer();
         this.addLassoLayer();
@@ -326,7 +331,9 @@ export default class Viewer extends Component {
         this.lassoLayer.interactive = true;
         this.lassoLayer.buttonMode = true;
         this.lassoLayer.on('mousedown', (e) => {
-            if (!this.isLassoActive()) return;
+            if (!this.isLassoActive()) {
+                return;
+            }
             this.zoomSelection.on('.zoom', null);
             this.setState({
                 lassoPoints: [
@@ -343,7 +350,9 @@ export default class Viewer extends Component {
             this.lassoLayer.addChild(this.lasso);
         });
         this.lassoLayer.on('mouseup', (e) => {
-            if (!this.isLassoActive()) return;
+            if (!this.isLassoActive()) {
+                return;
+            }
             this.zoomSelection.call(this.zoomBehaviour);
             this.closeLasso();
             this.setState({ mouse: { down: false } });
@@ -371,7 +380,9 @@ export default class Viewer extends Component {
 
     drawLasso() {
         let lp = this.state.lassoPoints;
-        if (lp.length < 2) return;
+        if (lp.length < 2) {
+            return;
+        }
         this.clearLasso();
         this.lasso.lineStyle(2, '#000');
         this.lasso.beginFill(0x8bc5ff, 0.4);
@@ -400,7 +411,9 @@ export default class Viewer extends Component {
     getPointsInLasso() {
         let pts = this.mainLayer.children,
             lassoPoints = [];
-        if (pts.length < 2) return;
+        if (pts.length < 2) {
+            return;
+        }
         for (let i = 0; i < pts.length; ++i) {
             // Calculate the position of the point in the lasso reference
             let pointPosRelToLassoRef = this.lassoLayer.toLocal(
@@ -414,8 +427,9 @@ export default class Viewer extends Component {
                 lassoPoints.push(idx);
             }
         }
-        if (DEBUG)
+        if (DEBUG) {
             console.log(this.props.name, 'getPointsInLasso', lassoPoints);
+        }
         return lassoPoints;
     }
 
@@ -425,7 +439,7 @@ export default class Viewer extends Component {
         ptsInLasso = idxInLasso.map((idx) => {
             return this.state.coord.idx.indexOf(idx);
         });
-        if (DEBUG)
+        if (DEBUG) {
             console.log(
                 this.props.name,
                 'translatePointsInLasso',
@@ -433,6 +447,7 @@ export default class Viewer extends Component {
                 '>',
                 ptsInLasso
             );
+        }
         return ptsInLasso;
     }
 
@@ -452,7 +467,9 @@ export default class Viewer extends Component {
     repaintLassoSelections(selections) {
         this.selectionsLayer.removeChildren();
         selections.forEach((lS) => {
-            if (lS.selected) this.highlightPointsInLasso(lS);
+            if (lS.selected) {
+                this.highlightPointsInLasso(lS);
+            }
         });
         this.transformLassoPoints();
     }
@@ -461,7 +478,9 @@ export default class Viewer extends Component {
         this.startBenchmark('highlightPointsInLasso');
         let pts = this.mainLayer.children;
         pts.map((p) => {
-            if (lS.points.indexOf(p._originalData.idx) === -1) return;
+            if (lS.points.indexOf(p._originalData.idx) === -1) {
+                return;
+            }
             let point = this.getTexturedColorPoint(
                 p._originalData.x,
                 p._originalData.y,
@@ -603,19 +622,22 @@ export default class Viewer extends Component {
             }
 
             // notify other viewers only for genuine zoom transforms
-            if (!t1.receivedFromListener)
+            if (!t1.receivedFromListener) {
                 BackendAPI.setViewerTransform({
                     k: t1.k,
                     dx: dx,
                     dy: dy,
                     src: this.props.name,
                 });
+            }
         };
 
         if (!settings.dissociateViewers) {
             transform();
         } else {
-            if (this.containsPointer()) transform();
+            if (this.containsPointer()) {
+                transform();
+            }
         }
     }
 
@@ -639,7 +661,9 @@ export default class Viewer extends Component {
 
             let featuresActive = false;
             features.map((f) => {
-                if (f.feature.length) featuresActive = true;
+                if (f.feature.length) {
+                    featuresActive = true;
+                }
             });
             if (featuresActive) {
                 this.getFeatureColors(
@@ -667,13 +691,14 @@ export default class Viewer extends Component {
     }
 
     onCustomScaleChange(scale) {
-        if (DEBUG)
+        if (DEBUG) {
             console.log(
                 this.props.name,
                 'customScaleListener',
                 scale,
                 this.state.customScale
             );
+        }
         if (JSON.stringify(scale) !== JSON.stringify(this.state.customScale)) {
             this.setState({ loading: true, customScale: scale });
             this.getFeatureColors(
@@ -689,8 +714,9 @@ export default class Viewer extends Component {
 
     onViewerSelectionChange(selections) {
         let currentSelections = [];
-        if (DEBUG)
+        if (DEBUG) {
             console.log(this.props.name, 'onViewerSelectionChange', selections);
+        }
         if (this.props.translate) {
             selections.map((s, i) => {
                 let ns = Object.assign({}, s);
@@ -705,23 +731,25 @@ export default class Viewer extends Component {
                                 destLoomFilePath: this.props.loomFile,
                                 cellIndices: s.points,
                             };
-                            if (DEBUG)
+                            if (DEBUG) {
                                 console.log(
                                     this.props.name,
                                     'translateLassoSelection',
                                     query
                                 );
+                            }
                             BackendAPI.getConnection().then(
                                 (gbc) => {
                                     gbc.services.scope.Main.translateLassoSelection(
                                         query,
                                         (err, response) => {
-                                            if (DEBUG)
+                                            if (DEBUG) {
                                                 console.log(
                                                     this.props.name,
                                                     'translateLassoSelection',
                                                     response
                                                 );
+                                            }
                                             ns.points = response.cellIndices;
                                             s.translations[
                                                 this.props.name
@@ -767,14 +795,17 @@ export default class Viewer extends Component {
             this.zoomBehaviour.transform(this.zoomSelection, transform);
         };
         if (!settings.dissociateViewers) {
-            if (t.src !== this.props.name && t.src !== 'init') transform();
+            if (t.src !== this.props.name && t.src !== 'init') {
+                transform();
+            }
         } else {
             if (
                 t.src !== this.props.name &&
                 t.src !== 'init' &&
                 this.containsPointer()
-            )
+            ) {
                 transform();
+            }
         }
     }
 
@@ -800,19 +831,22 @@ export default class Viewer extends Component {
         };
 
         this.startBenchmark('getCoordinates');
-        if (DEBUG) console.log(this.props.name, 'getCoordinates', query);
+        if (DEBUG) {
+            console.log(this.props.name, 'getCoordinates', query);
+        }
         BackendAPI.getConnection().then(
             (gbc) => {
                 gbc.services.scope.Main.getCoordinates(
                     query,
                     (err, response) => {
                         // Update the coordinates and remove all previous data points
-                        if (DEBUG)
+                        if (DEBUG) {
                             console.log(
                                 this.props.name,
                                 'getCoordinates',
                                 response
                             );
+                        }
                         //this.mainLayer.removeChildren();
                         if (response) {
                             let coord = {
@@ -877,8 +911,9 @@ export default class Viewer extends Component {
     initializeDataPoints(stillLoading) {
         this.startBenchmark('initializeDataPoints');
         let c = this.state.coord;
-        if (c.x.length !== c.y.length)
+        if (c.x.length !== c.y.length) {
             throw 'Coordinates does not have the same size.';
+        }
         let n = c.x.length;
         if (n > this.maxn) {
             console.log('Have to update Main Layer size!!!!');
@@ -894,8 +929,9 @@ export default class Viewer extends Component {
     }
 
     transformDataPoints(stillLoading) {
-        if (DEBUG)
+        if (DEBUG) {
             console.log(this.props.name, 'transformDataPoints', stillLoading);
+        }
         this.transformPoints(this.mainLayer);
         this.transformPoints(this.selectionsLayer);
         this.transformPoints(this.labelLayer);
@@ -1011,8 +1047,9 @@ export default class Viewer extends Component {
             query['vmax'] = this.getVmaxes(scale);
             query['vmin'] = this.getVmins(scale);
         }
-        if (DEBUG)
+        if (DEBUG) {
             console.log(this.props.name, 'getFeatureColors', query, scale);
+        }
         BackendAPI.getConnection().then(
             (gbc) => {
                 gbc.services.scope.Main.getCellColorByFeatures(
@@ -1024,12 +1061,13 @@ export default class Viewer extends Component {
                                 response.error.type
                             );
                         } else {
-                            if (DEBUG)
+                            if (DEBUG) {
                                 console.log(
                                     this.props.name,
                                     'getFeatureColors',
                                     response
                                 );
+                            }
                             // Convert object to ArrayBuffer
                             let responseBuffered = new Buffer(
                                 response.compressedColor.toArrayBuffer()
@@ -1039,8 +1077,9 @@ export default class Viewer extends Component {
                                 zlib.inflate(
                                     responseBuffered,
                                     (err, uncompressedMessage) => {
-                                        if (err) console.log(err);
-                                        else {
+                                        if (err) {
+                                            console.log(err);
+                                        } else {
                                             this.endBenchmark(
                                                 'getFeatureColors'
                                             );
@@ -1210,7 +1249,7 @@ export default class Viewer extends Component {
         let t2 = performance.now();
         let benchmark = this.state.benchmark[msg];
         let et = t2 - benchmark.t1 || 0;
-        if (DEBUG)
+        if (DEBUG) {
             console.log(
                 this.props.name +
                     ': benchmark - ' +
@@ -1219,6 +1258,7 @@ export default class Viewer extends Component {
                     et.toFixed(3) +
                     ' milliseconds.'
             );
+        }
     }
 
     containsPointer() {

@@ -187,7 +187,9 @@ class AppSidebar extends Component {
                 ? true
                 : false;
         let renderLevel = (t, l, name, canRemove) => {
-            if (!t) return;
+            if (!t) {
+                return;
+            }
             let nodes = t.nodes.map((file, i) => {
                 let loomUri = encodeURIComponent(file.loomFilePath);
                 let active =
@@ -526,7 +528,9 @@ class AppSidebar extends Component {
     }
 
     onSettingsUpdate() {
-        if (DEBUG) console.log('onSettingsUpdate');
+        if (DEBUG) {
+            console.log('onSettingsUpdate');
+        }
         let sprite = BackendAPI.getSpriteSettings();
         this.setState({
             settings: BackendAPI.getSettings(),
@@ -539,8 +543,12 @@ class AppSidebar extends Component {
 
     getLoomFiles() {
         const { match } = this.props;
-        if (DEBUG) console.log('getLoomFiles', match);
-        if (match.params.uuid === 'permalink') return;
+        if (DEBUG) {
+            console.log('getLoomFiles', match);
+        }
+        if (match.params.uuid === 'permalink') {
+            return;
+        }
         BackendAPI.queryLoomFiles(match.params.uuid, (files) => {
             let userFiles = [],
                 generalFiles = [];
@@ -627,11 +635,15 @@ class AppSidebar extends Component {
                 fileType: 'Loom',
             };
             BackendAPI.getConnection().then((gbc) => {
-                if (DEBUG) console.log('deleteUserFile', query);
+                if (DEBUG) {
+                    console.log('deleteUserFile', query);
+                }
                 gbc.services.scope.Main.deleteUserFile(
                     query,
                     (error, response) => {
-                        if (DEBUG) console.log('deleteUserFile', response);
+                        if (DEBUG) {
+                            console.log('deleteUserFile', response);
+                        }
                         if (response !== null && response.deletedSuccessfully) {
                             BackendAPI.forceUpdate();
                             this.getLoomFiles();

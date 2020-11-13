@@ -182,7 +182,9 @@ export default class ViewerToolbar extends Component {
     }
 
     handleItemClick(e, tool) {
-        if (DEBUG) console.log('handleItemClick', tool.name);
+        if (DEBUG) {
+            console.log('handleItemClick', tool.name);
+        }
         this.setState({ activeTool: tool.name });
         BackendAPI.setViewerTool(tool.name);
     }
@@ -190,7 +192,9 @@ export default class ViewerToolbar extends Component {
     handleUpdateScale(slider, value) {
         let scale = this.state.customScale;
         scale[slider] = value;
-        if (DEBUG) console.log('handleUpdateScale', slider, value, scale);
+        if (DEBUG) {
+            console.log('handleUpdateScale', slider, value, scale);
+        }
         BackendAPI.setCustomScale(scale, slider);
         this.setState({ customScale: scale });
     }
