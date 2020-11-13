@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, SemanticCOLORS } from 'semantic-ui-react';
 
-import { FEATURE_COLOURS } from '../../constants';
+import { FEATURE_COLOURS } from '../constants';
 
 import { FeatureFilter } from './model';
 import { FeatureSearchBox } from './FeatureSearchBox';

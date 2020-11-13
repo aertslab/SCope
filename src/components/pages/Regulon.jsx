@@ -2,7 +2,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { Segment, Grid } from 'semantic-ui-react';
 
-import { FEATURE_COLOURS } from '../../constants';
+import { FEATURE_COLOURS } from '../constants';
 
 import Search from '../Search';
 import { BackendAPI } from '../common/API';

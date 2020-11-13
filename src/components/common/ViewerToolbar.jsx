@@ -8,7 +8,7 @@ import 'rc-tooltip/assets/bootstrap.css';
 import Slider, { Range } from 'rc-slider';
 import { BackendAPI } from '../common/API';
 
-import { FEATURE_COLOURS } from '../../constants';
+import { FEATURE_COLOURS } from '../constants';
 
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
 const TooltipRange = createSliderWithTooltip(Slider.Range);
