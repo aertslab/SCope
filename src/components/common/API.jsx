@@ -380,13 +380,15 @@ class API {
             let file = files[i];
             this.loomFiles[file.loomFilePath] = file;
         });
-        this.activeLoomChangeListeners.forEach((listener) => {
-            listener(
-                this.activeLooms[0],
-                this.loomFiles[this.activeLooms[0]],
-                this.activeCoordinates
-            );
-        });
+        if (!update) {
+            this.activeLoomChangeListeners.forEach((listener) => {
+                listener(
+                    this.activeLooms[0],
+                    this.loomFiles[this.activeLooms[0]],
+                    this.activeCoordinates
+                );
+            });
+        }
     }
 
     getActiveFeatures() {
