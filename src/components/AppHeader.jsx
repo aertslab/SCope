@@ -361,12 +361,12 @@ class AppHeader extends Component {
                 title: 'Gene',
                 icon: false,
             },
-            {
-                display: metadata ? true : false,
-                path: 'geneset',
-                title: 'Geneset',
-                icon: false,
-            },
+//             {
+//                 display: metadata ? true : false,
+//                 path: 'geneset',
+//                 title: 'Geneset',
+//                 icon: false,
+//             },
             {
                 display:
                     metadata && metadata.fileMetaData.hasRegulonsAUC
