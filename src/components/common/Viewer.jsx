@@ -5,7 +5,6 @@ import * as d3 from 'd3';
 import * as R from 'ramda';
 import { BackendAPI } from './API';
 import { Dimmer, Loader } from 'semantic-ui-react';
-import zlib from 'zlib';
 import Alert from 'react-popup';
 import { debounce } from 'lodash';
 
@@ -1074,23 +1073,7 @@ export default class Viewer extends Component {
                             );
                             // Uncompress
                             if (response.hasAddCompressionLayer) {
-                                zlib.inflate(
-                                    responseBuffered,
-                                    (err, uncompressedMessage) => {
-                                        if (err) {
-                                            console.log(err);
-                                        } else {
-                                            this.endBenchmark(
-                                                'getFeatureColors'
-                                            );
-                                            let colors = this.chunkString(
-                                                uncompressedMessage.toString(),
-                                                6
-                                            );
-                                            this.updateColors(response, colors);
-                                        }
-                                    }
-                                );
+                                console.error('Zlib compression is not supported');
                             } else {
                                 this.endBenchmark('getFeatureColors');
                                 this.updateColors(response, response.color);

@@ -1,6 +1,5 @@
 const path = require('path');
 const webpack = require('webpack');
-const WebpackGitHash = require('webpack-git-hash');
 const fs = require('fs');
 const pkg = require('./package.json');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -9,18 +8,12 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
     .BundleAnalyzerPlugin;
 
 // Import config file
-let isAWS = process.env.NODE_TYPE === 'aws';
-let _config = null;
-if (isAWS) {
-    _config = require('./apache/config.json');
-} else {
-    _config = require(process.env.SCOPE_CONFIG || './config.json');
-}
+let _config = require(process.env.SCOPE_CONFIG || './config.json');
+
 if (process.env.SCOPE_PORT) {
     _config.publicHostAddress += ':' + process.env.SCOPE_PORT;
     console.log('Appending SCOPE_PORT to publicHostAddress');
 }
-console.log(_config);
 
 let config = {
     mode: process.env.NODE_ENV,
@@ -29,14 +22,12 @@ let config = {
     devServer: {
         host: '0.0.0.0',
         port: _config.mPort,
-        disableHostCheck: true,
+      disableHostCheck: true,
+      publicPath: '/dist',
     },
     output: {
-        path: path.resolve('assets'),
-        // filename: 'main.js',
-        publicPath: '/assets/', // './assets/'
-        filename: pkg.name + '-' + pkg.version + '.[githash].js',
-        chunkFilename: pkg.name + '-chunk.[githash].js',
+        filename: pkg.name + '.js',
+        chunkFilename: pkg.name + '-chunk.js',
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.jsx', '.css'],
@@ -72,11 +63,18 @@ let config = {
             },
             {
                 test: /\.css$/,
-                loader: 'style-loader!css-loader',
+                use: ['style-loader', 'css-loader']
             },
             {
-                test: /\.(png|woff|woff2|eot|ttf|svg)$/,
-                loader: 'url-loader?limit=100000',
+              test: /\.(png|woff|woff2|eot|ttf|svg)$/,
+              use: [
+                {
+                  loader: 'url-loader',
+                  options: {
+                    limit: 100000,
+                  }
+                },
+              ]
             },
         ],
     },
@@ -115,38 +113,20 @@ let config = {
             }),
             __TEST_ONLY__: false,
         }),
-        new WebpackGitHash({
-            cleanup: true,
-            callback: function (versionHash) {
-                let indexHtml = fs.readFileSync('./index.html', 'utf8');
-                indexHtml = indexHtml.replace(
-                    /src="\.\/assets\/.*\.js"/,
-                    'src="./assets/' +
-                        pkg.name +
-                        '-' +
-                        pkg.version +
-                        '.' +
-                        versionHash +
-                        '.js"'
-                );
-                fs.writeFileSync('./index.html', indexHtml);
-            },
-        }),
         new ForkTsCheckerWebpackPlugin(),
         new BundleAnalyzerPlugin({ openAnalyzer: false }),
     ],
 };
 
 if (process.env.NODE_ENV === 'production') {
-    config.plugins.push(new webpack.optimize.OccurrenceOrderPlugin());
     config.optimization = {
         minimize: true,
         minimizer: [new TerserPlugin()],
     };
 } else {
-    config.plugins.push(new webpack.NamedModulesPlugin());
+  config.optimization = {
+    moduleIds: 'named'
+  }
 }
-
-// config.node = { fs: 'empty', child_process: 'empty' };
 
 module.exports = config;

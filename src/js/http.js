@@ -1,5 +1,4 @@
 const EventEmitter = require('events');
-const path = require('path');
 
 export default class FileDownloader extends EventEmitter {
     constructor(loomFilePath, uuid, loomFileSize) {
@@ -93,7 +92,7 @@ Would you like to continue downloading?
         document.body.appendChild(a);
         const url = window.URL.createObjectURL(blob);
         a.href = url;
-        a.download = path.basename(this.loomFilePath);
+      a.download = this.loomFilePath.split('/').slice(-1)[0];
         a.click();
         window.URL.revokeObjectURL(url);
         this.emit('finished', true);
