@@ -62,6 +62,24 @@ class AppHeader extends Component {
         );
     };
 
+    getAllAnnotations(metadata) {
+        let allAnnos = [];
+        for (const clustering of metadata['cellMetaData']['clusterings']) {
+            for (const cluster of clustering['clusters']) {
+                if (cluster['cell_type_annotation'].length > 0) {
+                    for (const anno of cluster['cell_type_annotation']) {
+                        allAnnos.push({
+                            clustering: clustering['name'],
+                            cluster: cluster['description'],
+                            anno: anno,
+                        });
+                    }
+                }
+            }
+        }
+        return allAnnos;
+    }
+
     render() {
         const { match, location } = this.props;
         const { timeout, shortUrl } = this.state;
@@ -374,6 +392,15 @@ class AppHeader extends Component {
                         : false,
                 path: 'regulon',
                 title: 'Regulon',
+                icon: false,
+            },
+            {
+                display:
+                    metadata && this.getAllAnnotations(metadata).length > 0
+                        ? true
+                        : false,
+                path: 'annotations',
+                title: 'All Annotations',
                 icon: false,
             },
             {
