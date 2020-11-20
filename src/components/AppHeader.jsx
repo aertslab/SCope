@@ -61,7 +61,7 @@ class AppHeader extends Component {
             'toolbar=no, scrollbars=yes, width=500, height=600, top=500, left=500'
         );
     };
-        
+
     // TODO: Hacky implementation. To be refactored/reviewed properly
     getAllAnnotations(metadata) {
         let allAnnos = [];
