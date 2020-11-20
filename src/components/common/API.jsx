@@ -380,6 +380,7 @@ class API {
             let file = files[i];
             this.loomFiles[file.loomFilePath] = file;
         });
+        // TODO: Hacky implementation. To be refactored/reviewed properly
         if (!update) {
             this.activeLoomChangeListeners.forEach((listener) => {
                 listener(
@@ -525,6 +526,7 @@ class API {
         this.getConnection().then((gbc) => {
             if (DEBUG) console.log('getNextCluster', query);
             gbc.services.scope.Main.getNextCluster(query, (err, response) => {
+                // TODO: Hacky implementation. To be refactored/reviewed properly
                 BackendAPI.queryLoomFiles(
                     this.uuid,
                     () => {

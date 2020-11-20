@@ -61,7 +61,8 @@ class AppHeader extends Component {
             'toolbar=no, scrollbars=yes, width=500, height=600, top=500, left=500'
         );
     };
-
+        
+    // TODO: Hacky implementation. To be refactored/reviewed properly
     getAllAnnotations(metadata) {
         let allAnnos = [];
         for (const clustering of metadata['cellMetaData']['clusterings']) {
@@ -379,12 +380,6 @@ class AppHeader extends Component {
                 title: 'Gene',
                 icon: false,
             },
-//             {
-//                 display: metadata ? true : false,
-//                 path: 'geneset',
-//                 title: 'Geneset',
-//                 icon: false,
-//             },
             {
                 display:
                     metadata && metadata.fileMetaData.hasRegulonsAUC

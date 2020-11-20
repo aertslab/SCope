@@ -5,6 +5,8 @@ import { Grid, Header, Popup, Button, Label, Icon } from 'semantic-ui-react';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 
+// TODO: Hacky implementation. To be refactored/implemented properly
+
 export default class Annotations extends Component {
     constructor() {
         super();
