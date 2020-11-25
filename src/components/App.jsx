@@ -505,6 +505,7 @@ class App extends Component {
                                     uuid: uuid,
                                     sessionMode: response.sessionMode,
                                 });
+                                BackendAPI.setUUID(uuid);
                                 BackendAPI.setSessionMode(response.sessionMode);
                             }
                             if (!this.timer) {
