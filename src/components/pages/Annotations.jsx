@@ -23,10 +23,10 @@ export default class Annotations extends Component {
         console.log('getAllAnno');
         console.log(metadata);
         let allAnnos = [];
-        for (var clustering of metadata['cellMetaData']['clusterings']) {
-            for (var cluster of clustering['clusters']) {
+        for (let clustering of metadata['cellMetaData']['clusterings']) {
+            for (let cluster of clustering['clusters']) {
                 if (cluster['cell_type_annotation'].length > 0) {
-                    for (var anno of cluster['cell_type_annotation']) {
+                    for (let anno of cluster['cell_type_annotation']) {
                         allAnnos.push({
                             clustering: clustering['name'],
                             cluster: cluster['description'],
