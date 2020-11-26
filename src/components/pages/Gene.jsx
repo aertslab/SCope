@@ -4,7 +4,7 @@ import { BackendAPI } from '../common/API';
 import Search from '../Search';
 import Viewer from '../common/Viewer';
 import ViewerToolbar from '../common/ViewerToolbar';
-import ViewerSidebar from '../common/ViewerSidebar';
+import RightSidebar from '../RightSidebar';
 
 export default class Gene extends Component {
     constructor() {
@@ -66,7 +66,7 @@ export default class Gene extends Component {
                         />
                     </Grid.Column>
                     <Grid.Column width={4}>
-                        <ViewerSidebar
+                        <RightSidebar
                             onActiveFeaturesChange={(features, id) => {
                                 this.setState({ activeFeatures: features });
                             }}

@@ -15,7 +15,7 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 import { BackendAPI } from '../common/API';
 import Viewer from '../common/Viewer';
-import ViewerSidebar from '../common/ViewerSidebar';
+import RightSidebar from '../RightSidebar';
 import ViewerToolbar from '../common/ViewerToolbar';
 import Histogram from '../common/Histogram';
 import UploadModal from '../common/UploadModal';
@@ -214,7 +214,7 @@ class Geneset extends Component {
                         />
                     </Grid.Column>
                     <Grid.Column width={3}>
-                        <ViewerSidebar
+                        <RightSidebar
                             hideFeatures={true}
                             onActiveFeaturesChange={(features, id) => {
                                 this.setState({ activeFeatures: features });

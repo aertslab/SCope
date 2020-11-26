@@ -4,7 +4,7 @@ import { Segment, Grid } from 'semantic-ui-react';
 import Search from '../Search';
 import { BackendAPI } from '../common/API';
 import Viewer from '../common/Viewer';
-import ViewerSidebar from '../common/ViewerSidebar';
+import RightSidebar from '../RightSidebar';
 import ViewerToolbar from '../common/ViewerToolbar';
 import Histogram from '../common/Histogram';
 
@@ -102,7 +102,7 @@ export default class Regulon extends Component {
                         </Segment>
                     </Grid.Column>
                     <Grid.Column width={4}>
-                        <ViewerSidebar
+                        <RightSidebar
                             onActiveFeaturesChange={(features, id) => {
                                 this.setState({ activeFeatures: features });
                             }}

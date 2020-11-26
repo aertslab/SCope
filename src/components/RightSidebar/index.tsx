@@ -1,23 +1,36 @@
 import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { Tab } from 'semantic-ui-react';
 
 import 'react-table/react-table.css';
-import { instanceOf } from 'prop-types';
-import { withCookies, Cookies } from 'react-cookie';
 
 import { BackendAPI } from '../common/API';
 import Metadata from '../common/Metadata';
 import LassoControls from '../LassoControls';
 import QueryFeatureTab from '../QueryFeatureTool/QueryFeatureTab';
 
-class ViewerSidebar extends Component {
-    static propTypes = {
-        cookies: instanceOf(Cookies).isRequired,
-    };
+type RightSidebarProps = {
+    hideFeatures: boolean;
+    activeLegend: any;
+    onActiveFeaturesChange: (features, id) => void;
+    getSelectedAnnotations: () => Object;
+} & RouteComponentProps<{ uuid: string; loom: string }>;
 
-    constructor() {
-        super();
+type RightSidebarState = {
+    activePage: string;
+    activeLoom: string;
+    activeTab: React.ReactText;
+    activeFeatures: any[];
+    lassoSelections: any[];
+    modalID: string;
+};
+
+class RightSidebar extends Component<RightSidebarProps, RightSidebarState> {
+    private selectionsListener: (selections: any) => void;
+    private activeFeaturesListener: (features, id) => void;
+
+    constructor(props: RightSidebarProps) {
+        super(props);
         this.state = {
             activePage: BackendAPI.getActivePage(),
             activeLoom: BackendAPI.getActiveLoom(),
@@ -32,7 +45,7 @@ class ViewerSidebar extends Component {
         };
         this.activeFeaturesListener = (features, id) => {
             this.props.onActiveFeaturesChange(features, id);
-            console.log('ViewerSidebar features changed:', features, id);
+            console.log('RightSidebar features changed:', features, id);
             this.setState({
                 activeFeatures: features,
                 activeTab: parseInt(id) + 1,
@@ -60,7 +73,12 @@ class ViewerSidebar extends Component {
     };
 
     render() {
-        const { history, hideFeatures } = this.props;
+        const {
+            history,
+            hideFeatures,
+            activeLegend,
+            getSelectedAnnotations,
+        } = this.props;
         const {
             lassoSelections,
             activeFeatures,
@@ -85,6 +103,7 @@ class ViewerSidebar extends Component {
                         <QueryFeatureTab
                             history={history}
                             activePage={activePage}
+                            activeLegend={activeLegend}
                             activeFeature={activeFeatures[i]}
                             activeFeatureIndex={i}
                         />
@@ -94,8 +113,8 @@ class ViewerSidebar extends Component {
         }
 
         let annotations = {};
-        if (this.props.getSelectedAnnotations) {
-            annotations = this.props.getSelectedAnnotations();
+        if (getSelectedAnnotations) {
+            annotations = getSelectedAnnotations();
         }
 
         return (
@@ -128,20 +147,9 @@ class ViewerSidebar extends Component {
     }
 
     componentDidMount() {
-        let orcid_name = this.props.cookies.get('scope_orcid_name');
-        let orcid_id = this.props.cookies.get('scope_orcid_id');
-        let orcid_uuid = this.props.cookies.get('scope_orcid_uuid');
         const activePage = decodeURI(this.props.location.pathname)
             .split('/')
             .slice(-1)[0];
-
-        this.setState({
-            orcid_name: orcid_name,
-            orcid_id: orcid_id,
-            orcid_uuid: orcid_uuid,
-            activePage,
-        });
-        this.timer = null;
         BackendAPI.onViewerSelectionsChange(this.selectionsListener);
 
         BackendAPI.onActiveFeaturesChange(
@@ -164,4 +172,4 @@ class ViewerSidebar extends Component {
         }
     }
 }
-export default withCookies(withRouter(ViewerSidebar));
+export default withRouter(RightSidebar);

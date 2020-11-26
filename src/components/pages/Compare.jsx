@@ -8,7 +8,7 @@ import { Accordion, Grid, Menu, Icon, Dropdown } from 'semantic-ui-react';
 import { BackendAPI } from '../common/API';
 import Annotation from '../common/Annotation';
 import Search from '../Search';
-import ViewerSidebar from '../common/ViewerSidebar';
+import RightSidebar from '../RightSidebar';
 import ViewerToolbar from '../common/ViewerToolbar';
 import AnnotationDropContainer from '../common/AnnotationDropContainer';
 import ViewerDropContainer from '../common/ViewerDropContainer';
@@ -476,7 +476,7 @@ class Compare extends Component {
                             id='chart-distro1'
                             style={{ width: '100%' }}
                             height='200px'></div>
-                        <ViewerSidebar
+                        <RightSidebar
                             getSelectedAnnotations={this.getSelectedAnnotations.bind(
                                 this
                             )}
