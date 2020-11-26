@@ -6,9 +6,7 @@ type EmptyFeatureDisplayMessageProps = {
     featureIndex: number;
 };
 
-export class EmptyFeatureDisplayMessage extends React.Component<
-    EmptyFeatureDisplayMessageProps
-> {
+export class EmptyFeatureDisplayMessage extends React.Component<EmptyFeatureDisplayMessageProps> {
     constructor(props: EmptyFeatureDisplayMessageProps) {
         super(props);
     }

@@ -6,16 +6,16 @@ export function makeTableData(activeLegend) {
 }
 
 export function makeTableColumnData({ header, id, accessor, cell }) {
-    let column = {
+    const column = {
         Header: header,
         id: id,
     };
 
-    if (accessor != null) {
+    if (accessor !== null) {
         column['accessor'] = (d) => d[accessor];
     }
 
-    if (cell != null) {
+    if (cell !== null) {
         column['Cell'] = (props) => cell(props);
     }
     return column;

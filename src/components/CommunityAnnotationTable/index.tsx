@@ -1,23 +1,18 @@
 import React from 'react';
-import * as R from 'ramda';
 import ReactTable from 'react-table';
-
-import { BackendAPI } from '../common/API';
 
 import { asReactTableOBOColumn } from './components/OBOTableCell';
 import { asReactTableCuratorColumn } from './components/CuratorTableCell';
 import { asReactTableVotesColumn } from './components/VotesTableCell';
-import { makeTableData, CommunityAnnotationTableRowData } from './model';
+import { makeTableData } from './model';
 
 type CommunityAnnotationTableProps = {
     communityAnnotations: any[];
     activeFeature: any;
+    sessionIsRW: boolean;
 };
 
-class CommunityAnnotationTable extends React.Component<
-    CommunityAnnotationTableProps
-> {
-    private readonly data: CommunityAnnotationTableRowData[];
+class CommunityAnnotationTable extends React.Component<CommunityAnnotationTableProps> {
     private readonly activeFeature: any;
 
     constructor(props: CommunityAnnotationTableProps) {
@@ -39,9 +34,9 @@ class CommunityAnnotationTable extends React.Component<
 
     render() {
         const { activeFeature, communityAnnotations } = this.props;
-        let data = makeTableData(communityAnnotations);
+        const data = makeTableData(communityAnnotations);
 
-        if (communityAnnotations.length == 0) {
+        if (communityAnnotations.length === 0) {
             return (
                 <div
                     style={{
@@ -49,7 +44,7 @@ class CommunityAnnotationTable extends React.Component<
                         textAlign: 'center',
                     }}>
                     No annotations currently exist.{' '}
-                    {BackendAPI.getLoomRWStatus() == 'rw'
+                    {this.props.sessionIsRW
                         ? 'Be the first to contribute!'
                         : ''}
                 </div>

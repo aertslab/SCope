@@ -1,6 +1,8 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { Header, Grid, Icon, Button } from 'semantic-ui-react';
+import { withCookies, ReactCookieProps } from 'react-cookie';
+import { Grid, Icon, Button } from 'semantic-ui-react';
 
 import { BackendAPI } from '../common/API';
 import CollaborativeAnnotation from '../common/CollaborativeAnnotation';
@@ -9,7 +11,8 @@ import UpdateClusterDescriptionInput from './UpdateClusterDescriptionInput';
 type ClusterControlsProps = {
     featureIndex: number;
     feature: any;
-} & RouteComponentProps<{ page: string }>;
+} & RouteComponentProps<{ page: string }> &
+    ReactCookieProps;
 
 class ClusterControls extends React.Component<ClusterControlsProps> {
     constructor(props: ClusterControlsProps) {
@@ -45,15 +48,10 @@ class ClusterControls extends React.Component<ClusterControlsProps> {
     };
 
     render() {
-        const { featureIndex, feature } = this.props;
+        const { featureIndex, feature, cookies, match } = this.props;
 
         return (
             <Grid>
-                <Grid.Row centered>
-                    <Header as='h3' textAlign='center'>
-                        Cluster Controls
-                    </Header>
-                </Grid.Row>
                 <Grid.Row>
                     <UpdateClusterDescriptionInput
                         featureIndex={featureIndex}
@@ -70,6 +68,8 @@ class ClusterControls extends React.Component<ClusterControlsProps> {
                     <CollaborativeAnnotation
                         feature={feature}
                         id={featureIndex}
+                        cookies={cookies} // FIXME: temporary hack until CollaborativeAnnotation is converted to .tsx
+                        match={match} // FIXME: temporary hack until CollaborativeAnnotation is converted to .tsx
                     />
                     <Button
                         onClick={() => this.gotoNextCluster('next')}
@@ -83,4 +83,12 @@ class ClusterControls extends React.Component<ClusterControlsProps> {
     }
 }
 
-export default withRouter(ClusterControls);
+const mapStateToProps = (state) => {
+    return {
+        cookieConsent: state['main'].cookieConsent,
+    };
+};
+
+export default connect(mapStateToProps)(
+    withCookies(withRouter(ClusterControls))
+);

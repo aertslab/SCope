@@ -21,11 +21,13 @@ export class MotifLogo extends React.Component<MotifLogoProps, MotifLogoState> {
     }
 
     isMotifNA() {
-        return this.props.motifName == 'NA.png';
+        return this.props.motifName === 'NA.png';
     }
 
     async componentDidMount() {
-        if (this.isMotifNA()) return;
+        if (this.isMotifNA()) {
+            return;
+        }
 
         const { motifName } = this.props;
         const motifLogoV9URL = getMotifLogoURL(motifName, 9);

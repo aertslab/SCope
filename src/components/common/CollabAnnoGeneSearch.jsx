@@ -1,13 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
-import {
-    Search,
-    Input,
-    Dropdown,
-    Select,
-    Icon,
-    Segment,
-} from 'semantic-ui-react';
+import { Dropdown } from 'semantic-ui-react';
 
 import { BackendAPI } from './API';
 

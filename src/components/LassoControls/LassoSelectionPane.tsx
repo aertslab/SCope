@@ -10,9 +10,7 @@ type LassoSelectionPaneProps = {
     idx: number;
 } & LassoSelection;
 
-export class LassoSelectionPane extends React.Component<
-    LassoSelectionPaneProps
-> {
+export class LassoSelectionPane extends React.Component<LassoSelectionPaneProps> {
     constructor(props: LassoSelectionPaneProps) {
         super(props);
     }
@@ -26,14 +24,8 @@ export class LassoSelectionPane extends React.Component<
     }
 
     render() {
-        const {
-            id,
-            idx,
-            points,
-            color,
-            selected,
-            clusterOverlaps,
-        } = this.props;
+        const { id, idx, points, color, selected, clusterOverlaps } =
+            this.props;
 
         return (
             <Tab.Pane

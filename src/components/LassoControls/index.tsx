@@ -16,7 +16,7 @@ class LassoControls extends React.Component<LassoControlsProps> {
 
     render() {
         const { selections } = this.props;
-        if (selections.length == 0) {
+        if (selections.length === 0) {
             return (
                 <Tab.Pane attached={false} style={{ textAlign: 'center' }}>
                     <br />

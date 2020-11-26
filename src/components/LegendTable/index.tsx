@@ -1,18 +1,14 @@
 import React from 'react';
 import ReactTable from 'react-table';
-import { parse as json2csv } from 'json2csv';
-import fileDownload from 'js-file-download';
-import { Button } from 'semantic-ui-react';
 
 import { makeTableData, makeTableColumnData } from './model';
-import { head } from 'ramda';
 
 type LegendTableProps = {
     activeLegend: any;
 };
 
 const LegendTableColorCell = (props) => {
-    let colorLegendStyle = {
+    const colorLegendStyle = {
         width: '25px',
         height: '25px',
         '-webkit-mask-box-image': "url('src/images/dot.png')",
@@ -49,7 +45,7 @@ class FeatureMarkerTable extends React.Component<LegendTableProps> {
 
     render() {
         const { activeLegend } = this.props;
-        let data = makeTableData(activeLegend);
+        const data = makeTableData(activeLegend);
 
         return (
             <div style={{ marginBottom: '15px' }}>

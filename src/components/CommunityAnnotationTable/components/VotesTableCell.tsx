@@ -52,7 +52,10 @@ class VotesTableCell extends React.Component<
                 params: { uuid },
             },
         } = this.props;
-        let orcidData = VotesTableCell.getORCIDData(cookies);
+        if (!cookies) {
+            return;
+        }
+        const orcidData = VotesTableCell.getORCIDData(cookies);
 
         this.setState({ status: 'processing' });
 
@@ -87,7 +90,7 @@ class VotesTableCell extends React.Component<
                             onClick={() => this.submitVote(data, 'for')}
                             icon='thumbs up outline'
                             content={
-                                status == 'ready' ? (
+                                status === 'ready' ? (
                                     votes_for.total
                                 ) : (
                                     <Icon loading name='spinner' />
@@ -114,7 +117,7 @@ class VotesTableCell extends React.Component<
                             onClick={() => this.submitVote(data, 'against')}
                             icon='thumbs down outline'
                             content={
-                                status == 'ready' ? (
+                                status === 'ready' ? (
                                     votes_against.total
                                 ) : (
                                     <Icon loading name='spinner' />

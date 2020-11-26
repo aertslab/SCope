@@ -1,5 +1,5 @@
 import React from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
     Button,
@@ -9,7 +9,6 @@ import {
     Select,
     Label,
     Dropdown,
-    FormFieldProps,
     DropdownItemProps,
 } from 'semantic-ui-react';
 import * as R from 'ramda';
@@ -38,29 +37,10 @@ import {
 
 interface GProfilerPopupProps {
     featureMetadata: FeatureMetadata;
-    availableSortBy: object[];
-}
-
-interface GProfilerPopupReduxProps {
-    display: boolean;
-    toggleModal: () => void;
-    selectedSortBy: string;
-    selectSortBy: (sortBy: string) => void;
-    selectedOrganism: string;
-    selectOrganism: (organism: string) => void;
-    gProfilerToken: string;
-    setGProfilerToken: (gProfilerToken: string) => void;
-    selectedTopGeneListsSizes: number[];
-    setTopGeneListSizes: (topGeneListSizes: number[]) => void;
-    availableOrganisms: GProfilerOrganism[];
-    isFetchingAvailableOrganisms: boolean;
-    fetchAvailableOrganisms: () => void;
-    error: string;
-    setError: (error: string) => void;
 }
 
 class GProfilerPopup extends React.Component<
-    GProfilerPopupProps & GProfilerPopupReduxProps & RouteComponentProps
+    GProfilerModalProps & RouteComponentProps
 > {
     featureMetricTable: FeatureMetricTable;
     availableSortBy: { key: number; text: string; value: string }[];
@@ -140,7 +120,7 @@ class GProfilerPopup extends React.Component<
                     </Button>
                 }
                 onClose={this.props.toggleModal}
-                open={this.props.display}>
+                open={this.props.isDisplayed}>
                 <Modal.Header>Run g:Profiler Gene List Enrichment</Modal.Header>
                 <Modal.Content>
                     {this.props.isFetchingAvailableOrganisms && (
@@ -276,6 +256,12 @@ const mapDispatchToProps = (dispatch) => {
         setError: (error: string) => dispatch(Action.setError(error)),
     };
 };
+
+const Container = connect(mapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof Container>;
+
+export type GProfilerModalProps = PropsFromRedux & GProfilerPopupProps;
 
 export default connect(
     mapStateToProps,

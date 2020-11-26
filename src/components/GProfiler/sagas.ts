@@ -1,5 +1,4 @@
 import { put, takeLatest, call } from 'redux-saga/effects';
-import * as R from 'ramda';
 
 import { fetchJson } from '../../api/fetch';
 import * as t from './actionTypes';

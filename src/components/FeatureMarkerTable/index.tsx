@@ -22,14 +22,16 @@ class FeatureMarkerTable extends React.Component<FeatureMarkerTableProps> {
 
     getHeader() {
         const { activeFeature } = this.props;
-        if (activeFeature.featureType == 'regulon') return 'Regulon Genes';
-        else if (activeFeature.featureType.startsWith('Clustering'))
+        if (activeFeature.featureType === 'regulon') {
+            return 'Regulon Genes';
+        } else if (activeFeature.featureType.startsWith('Clustering')) {
             return 'Cluster Markers';
+        }
     }
 
     getColumns() {
         const { metadata } = this.props;
-        let markerTableColumns = [asReactTableGeneColumn({ ...this.props })];
+        const markerTableColumns = [asReactTableGeneColumn({ ...this.props })];
         if ('metrics' in metadata) {
             // Add extra columns (metrics like logFC, p-value, ...)
             return [
@@ -48,28 +50,32 @@ class FeatureMarkerTable extends React.Component<FeatureMarkerTableProps> {
     }
 
     getHeight() {
-        return `${screen.availHeight / 2.5}px`;
+        return `${screen.availHeight / 4}px`;
     }
 
     getDownloadButtonName = () => {
         const { activeFeature } = this.props;
-        if (activeFeature.featureType == 'regulon')
+        if (activeFeature.featureType === 'regulon') {
             return 'Download ' + activeFeature.feature + ' regulon genes';
-        else if (activeFeature.featureType.startsWith('Clustering'))
+        } else if (activeFeature.featureType.startsWith('Clustering')) {
             return 'Download ' + activeFeature.feature + ' markers';
+        }
     };
 
     getGenesFileName = () => {
         const { activeFeature } = this.props;
-        if (activeFeature.featureType == 'regulon')
+        if (activeFeature.featureType === 'regulon') {
             return activeFeature.feature + '_regulon_genes.tsv';
-        else if (activeFeature.featureType.startsWith('Clustering'))
+        } else if (activeFeature.featureType.startsWith('Clustering')) {
             return activeFeature.feature + '_markers.tsv';
+        } else {
+            throw Error('Unknown active feature type');
+        }
     };
 
     render() {
         const { metadata } = this.props;
-        let data = makeTableData(metadata);
+        const data = makeTableData(metadata);
 
         return (
             <div style={{ marginBottom: '15px', textAlign: 'center' }}>

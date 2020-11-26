@@ -1,6 +1,5 @@
 import React from 'react';
 import { Grid, Tab } from 'semantic-ui-react';
-import { BackendAPI } from '../common/API';
 
 import GProfilerModal from '../GProfiler/GProfilerModal';
 import ClusterControls from '../ClusterControls';
@@ -17,6 +16,7 @@ type QueryFeatureTabProps = {
     activeFeatureIndex: number;
     activePage: any;
     activeLegend: any;
+    sessionIsRW: boolean;
 };
 
 export class QueryFeatureTab extends React.Component<QueryFeatureTabProps> {
@@ -33,9 +33,9 @@ export class QueryFeatureTab extends React.Component<QueryFeatureTabProps> {
         const { activePage, activeFeature } = this.props;
         return (
             activeFeature.featureType.startsWith('Cluster') &&
-            activeFeature.feature != 'All Clusters' &&
-            BackendAPI.getLoomRWStatus() == 'rw' &&
-            activePage == 'gene'
+            activeFeature.feature !== 'All Clusters' &&
+            this.props.sessionIsRW &&
+            activePage === 'gene'
         );
     }
 
@@ -52,9 +52,9 @@ export class QueryFeatureTab extends React.Component<QueryFeatureTabProps> {
     showLegendTable() {
         const { activeFeature } = this.props;
         return (
-            this.props.activeLegend != null &&
-            (activeFeature.featureType == 'annotation' ||
-                activeFeature.feature == 'All Clusters')
+            this.props.activeLegend !== null &&
+            (activeFeature.featureType === 'annotation' ||
+                activeFeature.feature === 'All Clusters')
         );
     }
 
@@ -69,19 +69,15 @@ export class QueryFeatureTab extends React.Component<QueryFeatureTabProps> {
     }
 
     render() {
-        const {
-            history,
-            activePage,
-            activeFeature,
-            activeFeatureIndex,
-        } = this.props;
+        const { history, activePage, activeFeature, activeFeatureIndex } =
+            this.props;
         let metadata = activeFeature?.feature ? (
             ''
         ) : (
             <EmptyFeatureDisplayMessage featureIndex={activeFeatureIndex} />
         );
         if (activeFeature && activeFeature.metadata) {
-            let md = activeFeature.metadata;
+            const md = activeFeature.metadata;
 
             metadata = (
                 <Grid.Row columns='1' centered className='viewerRow'>
@@ -106,6 +102,7 @@ export class QueryFeatureTab extends React.Component<QueryFeatureTabProps> {
                             <CommunityAnnotationTable
                                 communityAnnotations={md.cellTypeAnno}
                                 activeFeature={activeFeature}
+                                sessionIsRW={this.props.sessionIsRW}
                             />
                         )}
                         {this.showFeatureMarkerTable() && (
@@ -137,7 +134,7 @@ export class QueryFeatureTab extends React.Component<QueryFeatureTabProps> {
         return (
             <Tab.Pane
                 attached={false}
-                key={activeFeature.feature}
+                key={activeFeatureIndex}
                 className={
                     'feature' + activeFeatureIndex + ' stretched marginBottom'
                 }

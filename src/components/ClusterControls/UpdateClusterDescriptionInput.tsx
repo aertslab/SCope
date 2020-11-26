@@ -33,7 +33,7 @@ class UpdateClusterDescriptionInput extends React.Component<
         const { newClusterDescription } = this.state;
         const { uuid } = this.props.match.params;
 
-        if (newClusterDescription != '') {
+        if (newClusterDescription !== '') {
             Alert.create({
                 title: 'BETA: Annotation Change!',
                 content: (

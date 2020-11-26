@@ -24,9 +24,9 @@ class DownloadLoomButton extends React.Component<
     constructor(props: DownloadLoomButtonProps) {
         super(props);
         this.state = {
-            loomDownloading: null,
-            processLoomPercentage: null,
-            downloadLoomPercentage: null,
+            loomDownloading: '',
+            processLoomPercentage: -1,
+            downloadLoomPercentage: -1,
         };
     }
 
@@ -38,11 +38,13 @@ class DownloadLoomButton extends React.Component<
         } = this.props;
 
         call.on('data', (loomDownloader) => {
-            if (DEBUG) console.log('downloadSubLoom data');
-            if (loomDownloader == null) {
+            if (DEBUG) {
+                console.log('downloadSubLoom data');
+            }
+            if (loomDownloader === null) {
                 this.setState({
-                    loomDownloading: null,
-                    downloadLoomPercentage: null,
+                    loomDownloading: '',
+                    downloadLoomPercentage: -1,
                 });
                 return;
             }
@@ -54,14 +56,14 @@ class DownloadLoomButton extends React.Component<
                 });
             } else {
                 // Start downloading the subsetted loom file
-                let fd = new FileDownloader(
+                const fd = new FileDownloader(
                     loomDownloader.loomFilePath,
                     uuid,
                     loomDownloader.loomFileSize
                 );
                 fd.on('started', () => {
                     this.setState({
-                        processLoomPercentage: null,
+                        processLoomPercentage: 0,
                         loomDownloading: encodeURIComponent(
                             loomDownloader.loomFilePath
                         ),
@@ -74,8 +76,8 @@ class DownloadLoomButton extends React.Component<
                 });
                 fd.on('finished', () => {
                     this.setState({
-                        loomDownloading: null,
-                        downloadLoomPercentage: null,
+                        loomDownloading: '',
+                        downloadLoomPercentage: -1,
                     });
                 });
                 fd.start();
@@ -83,7 +85,9 @@ class DownloadLoomButton extends React.Component<
         });
         call.on('end', () => {
             console.log();
-            if (DEBUG) console.log('downloadSubLoom end');
+            if (DEBUG) {
+                console.log('downloadSubLoom end');
+            }
         });
     }
 
@@ -91,7 +95,7 @@ class DownloadLoomButton extends React.Component<
         const { activeFeature } = this.props;
         const { processLoomPercentage, downloadLoomPercentage } = this.state;
 
-        if (this.state.processLoomPercentage > 0)
+        if (this.state.processLoomPercentage > 0) {
             return (
                 <Progress
                     percent={processLoomPercentage}
@@ -102,7 +106,8 @@ class DownloadLoomButton extends React.Component<
                     Processing...
                 </Progress>
             );
-        if (processLoomPercentage > 0)
+        }
+        if (processLoomPercentage > 0) {
             return (
                 <Progress
                     percent={downloadLoomPercentage}
@@ -113,12 +118,13 @@ class DownloadLoomButton extends React.Component<
                     Downloading...
                 </Progress>
             );
-        if (downloadLoomPercentage == null && processLoomPercentage == null)
+        }
+        if (downloadLoomPercentage < 0 && processLoomPercentage < 0) {
             return (
                 <Button
                     color='green'
                     onClick={() => {
-                        let query = {
+                        const query = {
                             loomFilePath: BackendAPI.getActiveLoom(),
                             featureType: 'clusterings',
                             featureName: activeFeature.featureType.replace(
@@ -130,20 +136,22 @@ class DownloadLoomButton extends React.Component<
                         };
                         BackendAPI.getConnection().then(
                             (gbc) => {
-                                if (DEBUG)
+                                if (DEBUG) {
                                     console.log(
                                         'Download subset of active .loom'
                                     );
-                                let call = gbc.services.scope.Main.downloadSubLoom(
-                                    query
-                                );
+                                }
+                                const call =
+                                    gbc.services.scope.Main.downloadSubLoom(
+                                        query
+                                    );
                                 this.progressListener(call);
                             },
                             () => {
                                 this.setState({
-                                    loomDownloading: null,
-                                    downloadLoomPercentage: null,
-                                    processLoomPercentage: null,
+                                    loomDownloading: '',
+                                    downloadLoomPercentage: -1,
+                                    processLoomPercentage: -1,
                                 });
                                 BackendAPI.showError();
                             }
@@ -156,6 +164,7 @@ class DownloadLoomButton extends React.Component<
                     {'Download ' + activeFeature.feature + ' .loom file'}
                 </Button>
             );
+        }
     }
 }
 

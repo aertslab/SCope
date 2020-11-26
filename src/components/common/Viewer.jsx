@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 import * as PIXI from 'pixi.js';
 import * as d3 from 'd3';
 import * as R from 'ramda';
 import { BackendAPI } from './API';
-import { Dimmer, Loader } from 'semantic-ui-react';
 import pako from 'pako';
 import Alert from 'react-popup';
 import debounce from 'lodash/debounce';
