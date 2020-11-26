@@ -17,6 +17,7 @@ import { EmptyFeatureDisplayMessage } from '../QueryFeatureTool/EmptyFeatureDisp
 import { MotifLogo } from '../MotifLogo';
 import CommunityAnnotationTable from '../CommunityAnnotationTable';
 import FeatureMarkerTable from '../FeatureMarkerTable';
+import LegendTable from '../LegendTable';
 
 class ViewerSidebar extends Component {
     static propTypes = {
@@ -150,7 +151,7 @@ class ViewerSidebar extends Component {
                 let markerTable = '',
                     legendTable = '',
                     cellTypeAnnoTable = '',
-                    downloadSubLoomButton = '';
+                    downloadSubLoomButton = () => '';
 
                 if (md.cellTypeAnno) {
                     cellTypeAnnoTable = (
@@ -178,45 +179,8 @@ class ViewerSidebar extends Component {
                     (activeFeatures[i].featureType === 'annotation' ||
                         activeFeatures[i].feature === 'All Clusters')
                 ) {
-                    let aL = this.props.activeLegend;
-                    let legendTableData = aL.values.map((v, j) => ({
-                        value: v,
-                        color: aL.colors[j],
-                    }));
-                    let newLegendTableColorCell = (props) => {
-                        let colorLegendStyle = {
-                            width: '25px',
-                            height: '25px',
-                            '-webkit-mask-box-image':
-                                "url('src/images/dot.png')",
-                            backgroundColor: '#' + props.value,
-                        };
-                        return <div style={colorLegendStyle}></div>;
-                    };
-                    let legendTableColumns = [
-                        newMarkerTableColumn('Value', 'value', 'value', null),
-                        newMarkerTableColumn(
-                            'Color',
-                            'color',
-                            'color',
-                            newLegendTableColorCell
-                        ),
-                    ];
                     legendTable = (
-                        <div style={{ marginBottom: '15px' }}>
-                            <ReactTable
-                                data={legendTableData}
-                                columns={[
-                                    {
-                                        Header: 'Legend',
-                                        columns: legendTableColumns,
-                                    },
-                                ]}
-                                pageSizeOptions={[5, 10, 20]}
-                                defaultPageSize={10}
-                                className='-striped -highlight'
-                            />
-                        </div>
+                        <LegendTable activeLegend={this.props.activeLegend} />
                     );
                 }
 
