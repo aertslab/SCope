@@ -1,15 +1,13 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
-import { Grid, Icon, Tab, Button, Progress, Popup } from 'semantic-ui-react';
+import { Grid, Tab } from 'semantic-ui-react';
 
-import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import { instanceOf } from 'prop-types';
 import { withCookies, Cookies } from 'react-cookie';
 
 import { BackendAPI } from '../common/API';
 import Metadata from '../common/Metadata';
-import FileDownloader from '../../js/http';
 import GProfilerModal from '../GProfiler/GProfilerModal';
 import LassoControls from '../LassoControls';
 import ClusterControls from '../ClusterControls';
@@ -18,6 +16,7 @@ import { MotifLogo } from '../MotifLogo';
 import CommunityAnnotationTable from '../CommunityAnnotationTable';
 import FeatureMarkerTable from '../FeatureMarkerTable';
 import LegendTable from '../LegendTable';
+import DownloadLoomButton from '../buttons/DownloadLoomButton';
 
 class ViewerSidebar extends Component {
     static propTypes = {
@@ -34,9 +33,6 @@ class ViewerSidebar extends Component {
             // TODO: should be put in the Redux global state
             modalID: null,
             activeTab: 0,
-            processSubLoomPercentage: null,
-            downloadSubLoomPercentage: null,
-            status: 'ready',
         };
         this.selectionsListener = (selections) => {
             this.setState({ lassoSelections: selections, activeTab: 0 });
@@ -175,184 +171,7 @@ class ViewerSidebar extends Component {
                             activeFeature={activeFeatures[i]}
                             activeFeatureIndex={i}
                         />
-                    );
-                }
-
-                if (
-                    (this.props.activeLegend != null) &
-                    (activeFeatures[i].featureType == 'annotation' ||
-                        activeFeatures[i].feature == 'All Clusters')
-                ) {
-                    legendTable = (
-                        <LegendTable activeLegend={this.props.activeLegend} />
-                    );
-                }
-
-                if (activeFeatures[i].featureType.startsWith('Clustering')) {
-                    downloadSubLoomButton = () => {
-                        if (
-                            this.state.downloadSubLoomPercentage == null &&
-                            this.state.processSubLoomPercentage == null
-                        )
-                            return (
-                                <Button
-                                    color='green'
-                                    onClick={() => {
-                                        let query = {
-                                            loomFilePath: BackendAPI.getActiveLoom(),
-                                            featureType: 'clusterings',
-                                            featureName: activeFeatures[
-                                                i
-                                            ].featureType.replace(
-                                                /Clustering: /g,
-                                                ''
-                                            ),
-                                            featureValue:
-                                                activeFeatures[i].feature,
-                                            operator: '==',
-                                        };
-                                        BackendAPI.getConnection().then(
-                                            (gbc) => {
-                                                if (DEBUG)
-                                                    console.log(
-                                                        'Download subset of active .loom'
-                                                    );
-                                                let call = gbc.services.scope.Main.downloadSubLoom(
-                                                    query
-                                                );
-                                                call.on('data', (dsl) => {
-                                                    if (DEBUG)
-                                                        console.log(
-                                                            'downloadSubLoom data'
-                                                        );
-                                                    if (dsl == null) {
-                                                        this.setState({
-                                                            loomDownloading: null,
-                                                            downloadSubLoomPercentage: null,
-                                                        });
-                                                        return;
-                                                    }
-                                                    if (!dsl.isDone) {
-                                                        this.setState({
-                                                            processSubLoomPercentage: Math.round(
-                                                                dsl.progress
-                                                                    .value * 100
-                                                            ),
-                                                        });
-                                                    } else {
-                                                        // Start downloading the subsetted loom file
-                                                        let fd = new FileDownloader(
-                                                            dsl.loomFilePath,
-                                                            match.params.uuid,
-                                                            dsl.loomFileSize
-                                                        );
-                                                        fd.on(
-                                                            'started',
-                                                            (isStarted) => {
-                                                                this.setState({
-                                                                    processSubLoomPercentage: null,
-                                                                    loomDownloading: encodeURIComponent(
-                                                                        dsl.loomFilePath
-                                                                    ),
-                                                                });
-                                                            }
-                                                        );
-                                                        fd.on(
-                                                            'progress',
-                                                            (progress) => {
-                                                                this.setState({
-                                                                    downloadSubLoomPercentage: progress,
-                                                                });
-                                                            }
-                                                        );
-                                                        fd.on(
-                                                            'finished',
-                                                            (finished) => {
-                                                                this.setState({
-                                                                    loomDownloading: null,
-                                                                    downloadSubLoomPercentage: null,
-                                                                });
-                                                            }
-                                                        );
-                                                        fd.start();
-                                                    }
-                                                });
-                                                call.on('end', () => {
-                                                    console.log();
-                                                    if (DEBUG)
-                                                        console.log(
-                                                            'downloadSubLoom end'
-                                                        );
-                                                });
-                                            },
-                                            () => {
-                                                this.setState({
-                                                    loomDownloading: null,
-                                                    downloadSubLoomPercentage: null,
-                                                    processSubLoomPercentage: null,
-                                                });
-                                                BackendAPI.showError();
-                                            }
-                                        );
-                                    }}
-                                    style={{
-                                        marginTop: '10px',
-                                        width: '100%',
-                                    }}>
-                                    {'Download ' +
-                                        activeFeatures[i].feature +
-                                        ' .loom file'}
-                                </Button>
-                            );
-                        if (this.state.processSubLoomPercentage > 0)
-                            return (
-                                <Progress
-                                    percent={
-                                        this.state.processSubLoomPercentage
-                                    }
-                                    indicating
-                                    progress
-                                    disabled
-                                    size='large'>
-                                    Processing...
-                                </Progress>
-                            );
-                        if (this.state.downloadSubLoomPercentage > 0)
-                            return (
-                                <Progress
-                                    percent={
-                                        this.state.downloadSubLoomPercentage
-                                    }
-                                    indicating
-                                    progress
-                                    disabled
-                                    size='large'>
-                                    Downloading...
-                                </Progress>
-                            );
-                    };
-                }
-                metadata = (
-                    <Grid.Row columns='1' centered className='viewerRow'>
-                        <Grid.Column stretched className='viewerCell'>
-                            {md.featureType}{' '}
-                            {activeFeatures[i].featureType.startsWith(
-                                'Clustering'
-                            ) && `Group: ${md.clusteringGroup}`}{' '}
-                            {md.feature}
-                            <br />
-                            {image}
-                            {clusterControls()}
-                            {cellTypeAnnoTable}
-                            {markerTable}
-                            {legendTable}
-                            {downloadSubLoomButton()}
-                            {activeFeatures[i].featureType.startsWith(
-                                'Clustering'
-                            ) &&
-                                md.genes && (
-                                    <GProfilerModal featureMetadata={md} />
-                                )}
+                            )}
                             <br />
                         </Grid.Column>
                     </Grid.Row>
