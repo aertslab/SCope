@@ -2,14 +2,10 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { Grid, Icon, Tab, Button, Progress, Popup } from 'semantic-ui-react';
 
-import * as R from 'ramda';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import { instanceOf } from 'prop-types';
 import { withCookies, Cookies } from 'react-cookie';
-
-import fileDownload from 'js-file-download';
-import { parse as json2csv } from 'json2csv';
 
 import { BackendAPI } from '../common/API';
 import Metadata from '../common/Metadata';
@@ -20,6 +16,7 @@ import ClusterControls from '../ClusterControls';
 import { EmptyFeatureDisplayMessage } from '../QueryFeatureTool/EmptyFeatureDisplayMessage';
 import { MotifLogo } from '../MotifLogo';
 import CommunityAnnotationTable from '../CommunityAnnotationTable';
+import FeatureMarkerTable from '../FeatureMarkerTable';
 
 class ViewerSidebar extends Component {
     static propTypes = {
@@ -153,21 +150,7 @@ class ViewerSidebar extends Component {
                 let markerTable = '',
                     legendTable = '',
                     cellTypeAnnoTable = '',
-                    downloadSubLoomButton = () => '';
-
-                let newMarkerTableColumn = (header, id, accessor, cell) => {
-                    let column = {
-                        Header: header,
-                        id: id,
-                    };
-                    if (accessor !== null) {
-                        column['accessor'] = (d) => d[accessor];
-                    }
-                    if (cell !== null) {
-                        column['Cell'] = (props) => cell(props);
-                    }
-                    return column;
-                };
+                    downloadSubLoomButton = '';
 
                 if (md.cellTypeAnno) {
                     cellTypeAnnoTable = (
@@ -179,187 +162,15 @@ class ViewerSidebar extends Component {
                 }
 
                 if (md.genes) {
-                    let newMarkerTableGeneCell = (props) => {
-                        return (
-                            <a
-                                className='pointer'
-                                onClick={() => {
-                                    let query = {
-                                        loomFilePath:
-                                            BackendAPI.getActiveLoom(),
-                                        query: props.value,
-                                    };
-                                    if (activePage === 'regulon') {
-                                        this.setState({ currentPage: 'gene' });
-                                        BackendAPI.setActivePage('gene');
-                                        history.push(
-                                            '/' +
-                                                [
-                                                    match.params.uuid,
-                                                    match.params.loom
-                                                        ? match.params.loom
-                                                        : '*',
-                                                    'gene',
-                                                ].join('/')
-                                        );
-                                    }
-                                    BackendAPI.getConnection().then(
-                                        (gbc) => {
-                                            gbc.services.scope.Main.getFeatures(
-                                                query,
-                                                (err, response) => {
-                                                    BackendAPI.setActiveFeature(
-                                                        i,
-                                                        activeFeatures[i].type,
-                                                        'gene',
-                                                        props.value,
-                                                        0,
-                                                        {
-                                                            description:
-                                                                response
-                                                                    .featureDescription[0],
-                                                        }
-                                                    );
-                                                }
-                                            );
-                                        },
-                                        () => {
-                                            BackendAPI.showError();
-                                        }
-                                    );
-                                }}>
-                                {props.value}
-                            </a>
-                        );
-                    };
-
-                    // Define the marker table columns
-                    // Add at least the gene column
-                    let markerTableColumns = [
-                        newMarkerTableColumn(
-                            'Gene Symbol',
-                            'gene',
-                            'gene',
-                            newMarkerTableGeneCell
-                        ),
-                    ];
-
-                    if ('metrics' in md) {
-                        // Add extra columns (metrics like logFC, p-value, ...)
-                        for (let metric of md.metrics) {
-                            markerTableColumns = [
-                                ...markerTableColumns,
-                                newMarkerTableColumn(
-                                    metric.name,
-                                    metric.accessor,
-                                    metric.accessor,
-                                    null
-                                ),
-                            ];
-                        }
-                    }
-
-                    let markerTableData = md.genes.map((g, j) => {
-                        let markerTableRowData = { gene: g };
-                        if (!('metrics' in md)) {
-                            return markerTableRowData;
-                        }
-                        for (let metric of md.metrics) {
-                            markerTableRowData[metric.accessor] =
-                                metric.values[j];
-                        }
-                        return markerTableRowData;
-                    });
-
-                    let markerTableHeight = screen.availHeight / 2.5;
-
-                    let markerTableHeaderName = () => {
-                            if (activeFeatures[i].featureType === 'regulon') {
-                                return 'Regulon Genes';
-                            } else if (
-                                activeFeatures[i].featureType.startsWith(
-                                    'Clustering'
-                                )
-                            ) {
-                                return 'Cluster Markers';
-                            }
-                        },
-                        downloadButtonName = () => {
-                            if (activeFeatures[i].featureType === 'regulon') {
-                                return (
-                                    'Download ' +
-                                    activeFeatures[i].feature +
-                                    ' regulon genes'
-                                );
-                            } else if (
-                                activeFeatures[i].featureType.startsWith(
-                                    'Clustering'
-                                )
-                            ) {
-                                return (
-                                    'Download ' +
-                                    activeFeatures[i].feature +
-                                    ' markers'
-                                );
-                            }
-                        },
-                        genesFileName = () => {
-                            if (activeFeatures[i].featureType === 'regulon') {
-                                return (
-                                    activeFeatures[i].feature +
-                                    '_regulon_genes.tsv'
-                                );
-                            } else if (
-                                activeFeatures[i].featureType.startsWith(
-                                    'Clustering'
-                                )
-                            ) {
-                                return (
-                                    activeFeatures[i].feature + '_markers.tsv'
-                                );
-                            }
-                        };
-
-                    if (activeFeatures[i].feature !== 'All Clusters') {
-                        markerTable = (
-                            <div
-                                style={{
-                                    marginBottom: '15px',
-                                    align: 'center',
-                                }}>
-                                <ReactTable
-                                    data={markerTableData}
-                                    columns={[
-                                        {
-                                            Header: markerTableHeaderName(),
-                                            columns: markerTableColumns,
-                                        },
-                                    ]}
-                                    pageSizeOptions={[5, 10, 25, 50, 100]}
-                                    defaultPageSize={25}
-                                    style={{
-                                        height: markerTableHeight + 'px', // This will force the table body to overflow and scroll, since there is not enough room
-                                    }}
-                                    className='-striped -highlight'
-                                />
-                                <Button
-                                    primary
-                                    onClick={() => {
-                                        const tsv = json2csv(markerTableData, {
-                                            delimiter: '\t',
-                                            quote: '',
-                                        });
-                                        fileDownload(tsv, genesFileName());
-                                    }}
-                                    style={{
-                                        marginTop: '10px',
-                                        width: '100%',
-                                    }}>
-                                    {downloadButtonName()}
-                                </Button>
-                            </div>
-                        );
-                    }
+                    markerTable = (
+                        <FeatureMarkerTable
+                            history={history}
+                            activePage={activePage}
+                            metadata={md}
+                            activeFeature={activeFeatures[i]}
+                            activeFeatureIndex={i}
+                        />
+                    );
                 }
 
                 if (
