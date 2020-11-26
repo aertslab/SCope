@@ -66,47 +66,52 @@ class ViewerSidebar extends Component {
         );
     };
 
-    getButtonText = (text) => {
-        switch (this.state.status) {
-            case 'ready':
-                switch (button) {
-                    case 'submit':
-                        return (
-                            <React.Fragment>
-                                Submit Annotation <Icon name='right chevron' />
-                            </React.Fragment>
-                        );
-                    case 'submitNext':
-                        return (
-                            <React.Fragment>
-                                Submit and view next cluster{' '}
-                                <Icon name='right chevron' />
-                            </React.Fragment>
-                        );
-                    default:
-                        return (
-                            <React.Fragment>
-                                Submit Annotation <Icon name='right chevron' />
-                            </React.Fragment>
-                        );
-                }
-            case 'processing':
-                return (
-                    <React.Fragment>
-                        <Icon loading name='spinner' />
-                    </React.Fragment>
-                );
-            default:
-                return (
-                    <React.Fragment>
-                        Submit Annotation <Icon name='chevron right' />
-                    </React.Fragment>
-                );
-        }
-    };
+    showMotifLogo() {
+        const { activeFeatures } = this.state;
+        return activeFeatures[i].metadata?.motifName;
+    }
+
+    showClusterControls() {
+        const { activeFeatures, activePage } = this.state;
+        return (
+            activeFeatures[i].featureType.startsWith('Cluster') &&
+            activeFeatures[i].feature != 'All Clusters' &&
+            BackendAPI.getLoomRWStatus() == 'rw' &&
+            activePage == 'gene'
+        );
+    }
+
+    showCommunityAnnotationTable() {
+        const { activeFeatures } = this.state;
+        return activeFeatures.metadata?.cellTypeAnno;
+    }
+
+    showFeatureMarkerTable() {
+        const { activeFeatures } = this.state;
+        return activeFeatures.metadata?.genes;
+    }
+
+    showLegendTable() {
+        const { activeFeatures } = this.state;
+        return (
+            (this.props.activeLegend != null) &
+            (activeFeatures[i].featureType == 'annotation' ||
+                activeFeatures[i].feature == 'All Clusters')
+        );
+    }
+
+    showDownloadLoomButton() {
+        const { activeFeatures } = this.state;
+        return activeFeatures[i].featureType.startsWith('Clustering');
+    }
+
+    showGProfilerModal() {
+        const { activeFeatures } = this.state;
+        return activeFeatures[i].featureType.startsWith('Clustering');
+    }
 
     render() {
-        const { history, match, hideFeatures } = this.props;
+        const { history, hideFeatures } = this.props;
         const {
             lassoSelections,
             activeFeatures,
@@ -124,53 +129,56 @@ class ViewerSidebar extends Component {
             );
             if (activeFeatures[i] && activeFeatures[i].metadata) {
                 let md = activeFeatures[i].metadata;
-                let image = activeFeatures[i].metadata?.motifName ? (
-                    <MotifLogo
-                        motifName={activeFeatures[i].metadata.motifName}
-                    />
-                ) : (
-                    ''
-                );
 
-                let clusterControls = () => {
-                    if (
-                        activeFeatures[i].featureType.startsWith('Cluster') &&
-                        activeFeatures[i].feature != 'All Clusters' &&
-                        BackendAPI.getLoomRWStatus() == 'rw' &&
-                        this.state.activePage == 'gene'
-                    ) {
-                        return (
-                            <ClusterControls
-                                featureIndex={i}
-                                feature={activeFeatures[i]}
-                            />
-                        );
-                    }
-                };
-
-                let markerTable = '',
-                    legendTable = '',
-                    cellTypeAnnoTable = '',
-                    downloadSubLoomButton = () => '';
-
-                if (md.cellTypeAnno) {
-                    cellTypeAnnoTable = (
-                        <CommunityAnnotationTable
-                            communityAnnotations={md.cellTypeAnno}
-                            activeFeature={activeFeatures[i]}
-                        />
-                    );
-                }
-
-                if (md.genes) {
-                    markerTable = (
-                        <FeatureMarkerTable
-                            history={history}
-                            activePage={activePage}
-                            metadata={md}
-                            activeFeature={activeFeatures[i]}
-                            activeFeatureIndex={i}
-                        />
+                metadata = (
+                    <Grid.Row columns='1' centered className='viewerRow'>
+                        <Grid.Column stretched className='viewerCell'>
+                            {md.featureType}{' '}
+                            {activeFeatures[i].featureType.startsWith(
+                                'Clustering'
+                            ) && `Group: ${md.clusteringGroup}`}{' '}
+                            {md.feature}
+                            <br />
+                            {this.showMotifLogo() && (
+                                <MotifLogo
+                                    motifName={
+                                        activeFeatures[i].metadata.motifName
+                                    }
+                                />
+                            )}
+                            {this.showClusterControls() && (
+                                <ClusterControls
+                                    featureIndex={i}
+                                    feature={activeFeatures[i]}
+                                />
+                            )}
+                            {this.showCommunityAnnotationTable() && (
+                                <CommunityAnnotationTable
+                                    communityAnnotations={md.cellTypeAnno}
+                                    activeFeature={activeFeatures[i]}
+                                />
+                            )}
+                            {this.showFeatureMarkerTable() && (
+                                <FeatureMarkerTable
+                                    history={history}
+                                    activePage={activePage}
+                                    metadata={md}
+                                    activeFeature={activeFeatures[i]}
+                                    activeFeatureIndex={i}
+                                />
+                            )}
+                            {this.showLegendTable() && (
+                                <LegendTable
+                                    activeLegend={this.props.activeLegend}
+                                />
+                            )}
+                            {this.showDownloadLoomButton() && (
+                                <DownloadLoomButton
+                                    activeFeature={activeFeatures[i]}
+                                />
+                            )}
+                            {this.showGProfilerModal() && md.genes && (
+                                <GProfilerModal featureMetadata={md} />
                             )}
                             <br />
                         </Grid.Column>
