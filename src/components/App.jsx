@@ -25,6 +25,7 @@ import { BackendAPI } from './common/API';
 import Welcome from './pages/Welcome';
 import Dataset from './pages/Dataset';
 import Gene from './pages/Gene';
+import Annotations from './pages/Annotations';
 import Geneset from './pages/Geneset';
 import Regulon from './pages/Regulon';
 import Compare from './pages/Compare';
@@ -229,6 +230,10 @@ class App extends Component {
                                         <Route
                                             path='/:uuid/:loom?/geneset'
                                             component={Geneset}
+                                        />
+                                        <Route
+                                            path='/:uuid/:loom?/annotations'
+                                            component={Annotations}
                                         />
                                         <Route
                                             path='/:uuid/:loom?/regulon'
@@ -500,6 +505,7 @@ class App extends Component {
                                     uuid: uuid,
                                     sessionMode: response.sessionMode,
                                 });
+                                BackendAPI.setUUID(uuid);
                                 BackendAPI.setSessionMode(response.sessionMode);
                             }
                             if (!this.timer) {
