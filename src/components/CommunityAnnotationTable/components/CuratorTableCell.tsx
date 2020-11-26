@@ -66,7 +66,7 @@ class CuratorTableCell extends React.Component<CuratorTableCellProps> {
     }
 }
 
-function asReacTableCuratorColumn() {
+function asReactTableCuratorColumn() {
     return makeTableColumnData({
         header: 'Curator',
         id: 'orcid_info',
@@ -80,4 +80,4 @@ function asReacTableCuratorColumn() {
 
 export default CuratorTableCell;
 
-export { asReacTableCuratorColumn };
+export { asReactTableCuratorColumn };

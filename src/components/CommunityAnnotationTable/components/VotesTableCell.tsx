@@ -16,23 +16,17 @@ type VotesTableCellProps = {
         data: CommunityAnnotationData;
     } & CommunityVotes;
     activeFeature: any;
-};
+} & RouteComponentProps<{ uuid: string }>;
 
 type VotesTableCellState = {
     status: string;
 };
 
 class VotesTableCell extends React.Component<
-    VotesTableCellProps &
-        ReactCookieProps &
-        RouteComponentProps<{ uuid: string }>,
+    VotesTableCellProps & ReactCookieProps,
     VotesTableCellState
 > {
-    constructor(
-        props: VotesTableCellProps &
-            ReactCookieProps &
-            RouteComponentProps<{ uuid: string }>
-    ) {
+    constructor(props: VotesTableCellProps & ReactCookieProps) {
         super(props);
         this.state = {
             status: 'ready',
@@ -58,7 +52,6 @@ class VotesTableCell extends React.Component<
                 params: { uuid },
             },
         } = this.props;
-        const { status } = this.state;
         let orcidData = VotesTableCell.getORCIDData(cookies);
 
         this.setState({ status: 'processing' });
@@ -81,6 +74,8 @@ class VotesTableCell extends React.Component<
             value: { data, votes_for, votes_against },
         } = this.props;
         const { status } = this.state;
+        console.log('VOTES TABLE CELL');
+        console.log(this.props);
 
         return (
             <React.Fragment>
@@ -143,13 +138,18 @@ class VotesTableCell extends React.Component<
     }
 }
 
-function asReacTableVotesColumn(activeFeature) {
+const VotesTableCellWithCookiesRouter = withCookies(withRouter(VotesTableCell));
+
+function asReactTableVotesColumn(activeFeature) {
     return makeTableColumnData({
         header: 'Endorsements',
         id: 'votes',
         accessor: 'votes',
         cell: (props) => (
-            <VotesTableCell activeFeature={activeFeature} {...props} />
+            <VotesTableCellWithCookiesRouter
+                activeFeature={activeFeature}
+                {...props}
+            />
         ),
         sortMethod: R.comparator<any>(
             (a, b) => a.annotation_label < b.annotation_label
@@ -157,6 +157,6 @@ function asReacTableVotesColumn(activeFeature) {
     });
 }
 
-export { asReacTableVotesColumn };
+export { asReactTableVotesColumn };
 
 export default withCookies(withRouter(VotesTableCell));

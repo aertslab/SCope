@@ -31,8 +31,6 @@ class OBOTableCell extends React.Component<OBOTableCellProps> {
                 comment,
             },
         } = this.props;
-        console.log('OBO CELL');
-        console.log(this.props);
 
         let iriLink =
             ols_iri == '' ? (
@@ -86,7 +84,7 @@ class OBOTableCell extends React.Component<OBOTableCellProps> {
     }
 }
 
-function asReacTableOBOColumn() {
+function asReactTableOBOColumn() {
     return makeTableColumnData({
         header: (
             <div>
@@ -103,6 +101,6 @@ function asReacTableOBOColumn() {
     });
 }
 
-export { asReacTableOBOColumn };
+export { asReactTableOBOColumn };
 
 export default OBOTableCell;
