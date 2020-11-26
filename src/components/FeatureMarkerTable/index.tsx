@@ -8,7 +8,9 @@ import { asReactTableGeneColumn } from './components/MarkerTableGeneCell';
 import { makeTableData, makeTableColumnData } from './model';
 
 type FeatureMarkerTableProps = {
+    history: any;
     metadata: any;
+    activePage: any;
     activeFeature: any;
     activeFeatureIndex: number;
 };
@@ -27,7 +29,7 @@ class FeatureMarkerTable extends React.Component<FeatureMarkerTableProps> {
 
     getColumns() {
         const { metadata } = this.props;
-        let markerTableColumns = [asReactTableGeneColumn()];
+        let markerTableColumns = [asReactTableGeneColumn({ ...this.props })];
         if ('metrics' in metadata) {
             // Add extra columns (metrics like logFC, p-value, ...)
             return [

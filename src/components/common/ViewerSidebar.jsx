@@ -77,7 +77,14 @@ class ViewerSidebar extends Component {
                         activeFeatures[i] && activeFeatures[i].feature
                             ? 'F' + (i + 1) + ': ' + activeFeatures[i].feature
                             : 'F' + (i + 1),
-                    render: () => featureTab(i),
+                    render: () => (
+                        <QueryFeatureTab
+                            history={history}
+                            activePage={activePage}
+                            activeFeature={activeFeatures[i]}
+                            activeFeatureIndex={i}
+                        />
+                    ),
                 });
             });
         }
