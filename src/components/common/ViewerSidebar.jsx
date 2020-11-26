@@ -1,15 +1,13 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
-import { Grid, Icon, Tab, Button, Progress, Popup } from 'semantic-ui-react';
+import { Grid, Tab } from 'semantic-ui-react';
 
-import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import { instanceOf } from 'prop-types';
 import { withCookies, Cookies } from 'react-cookie';
 
 import { BackendAPI } from '../common/API';
 import Metadata from '../common/Metadata';
-import FileDownloader from '../../js/http';
 import GProfilerModal from '../GProfiler/GProfilerModal';
 import LassoControls from '../LassoControls';
 import ClusterControls from '../ClusterControls';
@@ -18,6 +16,7 @@ import { MotifLogo } from '../MotifLogo';
 import CommunityAnnotationTable from '../CommunityAnnotationTable';
 import FeatureMarkerTable from '../FeatureMarkerTable';
 import LegendTable from '../LegendTable';
+import DownloadLoomButton from '../buttons/DownloadLoomButton';
 
 class ViewerSidebar extends Component {
     static propTypes = {
@@ -34,9 +33,6 @@ class ViewerSidebar extends Component {
             // TODO: should be put in the Redux global state
             modalID: null,
             activeTab: 0,
-            processSubLoomPercentage: null,
-            downloadSubLoomPercentage: null,
-            status: 'ready',
         };
         this.selectionsListener = (selections) => {
             this.setState({ lassoSelections: selections, activeTab: 0 });
@@ -70,47 +66,52 @@ class ViewerSidebar extends Component {
         );
     };
 
-    getButtonText = (text) => {
-        switch (this.state.status) {
-            case 'ready':
-                switch (text) {
-                    case 'submit':
-                        return (
-                            <React.Fragment>
-                                Submit Annotation <Icon name='right chevron' />
-                            </React.Fragment>
-                        );
-                    case 'submitNext':
-                        return (
-                            <React.Fragment>
-                                Submit and view next cluster{' '}
-                                <Icon name='right chevron' />
-                            </React.Fragment>
-                        );
-                    default:
-                        return (
-                            <React.Fragment>
-                                Submit Annotation <Icon name='right chevron' />
-                            </React.Fragment>
-                        );
-                }
-            case 'processing':
-                return (
-                    <React.Fragment>
-                        <Icon loading name='spinner' />
-                    </React.Fragment>
-                );
-            default:
-                return (
-                    <React.Fragment>
-                        Submit Annotation <Icon name='chevron right' />
-                    </React.Fragment>
-                );
-        }
-    };
+    showMotifLogo() {
+        const { activeFeatures } = this.state;
+        return activeFeatures[i].metadata?.motifName;
+    }
+
+    showClusterControls() {
+        const { activeFeatures, activePage } = this.state;
+        return (
+            activeFeatures[i].featureType.startsWith('Cluster') &&
+            activeFeatures[i].feature != 'All Clusters' &&
+            BackendAPI.getLoomRWStatus() == 'rw' &&
+            activePage == 'gene'
+        );
+    }
+
+    showCommunityAnnotationTable() {
+        const { activeFeatures } = this.state;
+        return activeFeatures.metadata?.cellTypeAnno;
+    }
+
+    showFeatureMarkerTable() {
+        const { activeFeatures } = this.state;
+        return activeFeatures.metadata?.genes;
+    }
+
+    showLegendTable() {
+        const { activeFeatures } = this.state;
+        return (
+            (this.props.activeLegend != null) &
+            (activeFeatures[i].featureType == 'annotation' ||
+                activeFeatures[i].feature == 'All Clusters')
+        );
+    }
+
+    showDownloadLoomButton() {
+        const { activeFeatures } = this.state;
+        return activeFeatures[i].featureType.startsWith('Clustering');
+    }
+
+    showGProfilerModal() {
+        const { activeFeatures } = this.state;
+        return activeFeatures[i].featureType.startsWith('Clustering');
+    }
 
     render() {
-        const { history, match, hideFeatures } = this.props;
+        const { history, hideFeatures } = this.props;
         const { lassoSelections, activeFeatures, activeTab, activePage } =
             this.state;
 
@@ -124,230 +125,7 @@ class ViewerSidebar extends Component {
             );
             if (activeFeatures[i] && activeFeatures[i].metadata) {
                 let md = activeFeatures[i].metadata;
-                let image = activeFeatures[i].metadata?.motifName ? (
-                    <MotifLogo
-                        motifName={activeFeatures[i].metadata.motifName}
-                    />
-                ) : (
-                    ''
-                );
 
-                let clusterControls = () => {
-                    if (
-                        activeFeatures[i].featureType.startsWith('Cluster') &&
-                        activeFeatures[i].feature !== 'All Clusters' &&
-                        this.props.sessionIsRW &&
-                        this.state.activePage === 'gene'
-                    ) {
-                        return (
-                            <ClusterControls
-                                featureIndex={i}
-                                feature={activeFeatures[i]}
-                            />
-                        );
-                    }
-                };
-
-                let markerTable = '',
-                    legendTable = '',
-                    cellTypeAnnoTable = '',
-                    downloadSubLoomButton = () => '';
-
-                if (md.cellTypeAnno) {
-                    cellTypeAnnoTable = (
-                        <CommunityAnnotationTable
-                            communityAnnotations={md.cellTypeAnno}
-                            activeFeature={activeFeatures[i]}
-                        />
-                    );
-                }
-
-                if (md.genes) {
-                    markerTable = (
-                        <FeatureMarkerTable
-                            history={history}
-                            activePage={activePage}
-                            metadata={md}
-                            activeFeature={activeFeatures[i]}
-                            activeFeatureIndex={i}
-                        />
-                    );
-                }
-
-                if (
-                    (this.props.activeLegend !== null) &
-                    (activeFeatures[i].featureType === 'annotation' ||
-                        activeFeatures[i].feature === 'All Clusters')
-                ) {
-                    legendTable = (
-                        <LegendTable activeLegend={this.props.activeLegend} />
-                    );
-                }
-
-                if (activeFeatures[i].featureType.startsWith('Clustering')) {
-                    downloadSubLoomButton = () => {
-                        if (
-                            this.state.downloadSubLoomPercentage === null &&
-                            this.state.processSubLoomPercentage === null
-                        ) {
-                            return (
-                                <Button
-                                    color='green'
-                                    onClick={() => {
-                                        let query = {
-                                            loomFilePath:
-                                                BackendAPI.getActiveLoom(),
-                                            featureType: 'clusterings',
-                                            featureName: activeFeatures[
-                                                i
-                                            ].featureType.replace(
-                                                /Clustering: /g,
-                                                ''
-                                            ),
-                                            featureValue:
-                                                activeFeatures[i].feature,
-                                            operator: '==',
-                                        };
-                                        BackendAPI.getConnection().then(
-                                            (gbc) => {
-                                                if (DEBUG) {
-                                                    console.log(
-                                                        'Download subset of active .loom'
-                                                    );
-                                                }
-                                                let call =
-                                                    gbc.services.scope.Main.downloadSubLoom(
-                                                        query
-                                                    );
-                                                call.on('data', (dsl) => {
-                                                    if (DEBUG) {
-                                                        console.log(
-                                                            'downloadSubLoom data'
-                                                        );
-                                                    }
-                                                    if (dsl === null) {
-                                                        this.setState({
-                                                            loomDownloading:
-                                                                null,
-                                                            downloadSubLoomPercentage:
-                                                                null,
-                                                        });
-                                                        return;
-                                                    }
-                                                    if (!dsl.isDone) {
-                                                        this.setState({
-                                                            processSubLoomPercentage:
-                                                                Math.round(
-                                                                    dsl.progress
-                                                                        .value *
-                                                                        100
-                                                                ),
-                                                        });
-                                                    } else {
-                                                        // Start downloading the subsetted loom file
-                                                        let fd =
-                                                            new FileDownloader(
-                                                                dsl.loomFilePath,
-                                                                match.params.uuid,
-                                                                dsl.loomFileSize
-                                                            );
-                                                        fd.on(
-                                                            'started',
-                                                            (isStarted) => {
-                                                                this.setState({
-                                                                    processSubLoomPercentage:
-                                                                        null,
-                                                                    loomDownloading:
-                                                                        encodeURIComponent(
-                                                                            dsl.loomFilePath
-                                                                        ),
-                                                                });
-                                                            }
-                                                        );
-                                                        fd.on(
-                                                            'progress',
-                                                            (progress) => {
-                                                                this.setState({
-                                                                    downloadSubLoomPercentage:
-                                                                        progress,
-                                                                });
-                                                            }
-                                                        );
-                                                        fd.on(
-                                                            'finished',
-                                                            (finished) => {
-                                                                this.setState({
-                                                                    loomDownloading:
-                                                                        null,
-                                                                    downloadSubLoomPercentage:
-                                                                        null,
-                                                                });
-                                                            }
-                                                        );
-                                                        fd.start();
-                                                    }
-                                                });
-                                                call.on('end', () => {
-                                                    console.log();
-                                                    if (DEBUG) {
-                                                        console.log(
-                                                            'downloadSubLoom end'
-                                                        );
-                                                    }
-                                                });
-                                            },
-                                            () => {
-                                                this.setState({
-                                                    loomDownloading: null,
-                                                    downloadSubLoomPercentage:
-                                                        null,
-                                                    processSubLoomPercentage:
-                                                        null,
-                                                });
-                                                BackendAPI.showError();
-                                            }
-                                        );
-                                    }}
-                                    style={{
-                                        marginTop: '10px',
-                                        width: '100%',
-                                    }}>
-                                    {'Download ' +
-                                        activeFeatures[i].feature +
-                                        ' .loom file'}
-                                </Button>
-                            );
-                        }
-                        if (this.state.processSubLoomPercentage > 0) {
-                            return (
-                                <Progress
-                                    percent={
-                                        this.state.processSubLoomPercentage
-                                    }
-                                    indicating
-                                    progress
-                                    disabled
-                                    size='large'>
-                                    Processing...
-                                </Progress>
-                            );
-                        }
-                        if (this.state.downloadSubLoomPercentage > 0) {
-                            return (
-                                <Progress
-                                    percent={
-                                        this.state.downloadSubLoomPercentage
-                                    }
-                                    indicating
-                                    progress
-                                    disabled
-                                    size='large'>
-                                    Downloading...
-                                </Progress>
-                            );
-                        }
-                    };
-                }
                 metadata = (
                     <Grid.Row columns='1' centered className='viewerRow'>
                         <Grid.Column stretched className='viewerCell'>
@@ -357,19 +135,47 @@ class ViewerSidebar extends Component {
                             ) && `Group: ${md.clusteringGroup}`}{' '}
                             {md.feature}
                             <br />
-                            {image}
-                            {clusterControls()}
-                            {cellTypeAnnoTable}
-                            {markerTable}
-                            {legendTable}
-                            {downloadSubLoomButton()}
-                            {(activeFeatures[i].featureType.startsWith(
-                                'Clustering'
-                            ) ||
-                                activeFeatures[i].featureType === 'regulon') &&
-                                md.genes && (
-                                    <GProfilerModal featureMetadata={md} />
-                                )}
+                            {this.showMotifLogo() && (
+                                <MotifLogo
+                                    motifName={
+                                        activeFeatures[i].metadata.motifName
+                                    }
+                                />
+                            )}
+                            {this.showClusterControls() && (
+                                <ClusterControls
+                                    featureIndex={i}
+                                    feature={activeFeatures[i]}
+                                />
+                            )}
+                            {this.showCommunityAnnotationTable() && (
+                                <CommunityAnnotationTable
+                                    communityAnnotations={md.cellTypeAnno}
+                                    activeFeature={activeFeatures[i]}
+                                />
+                            )}
+                            {this.showFeatureMarkerTable() && (
+                                <FeatureMarkerTable
+                                    history={history}
+                                    activePage={activePage}
+                                    metadata={md}
+                                    activeFeature={activeFeatures[i]}
+                                    activeFeatureIndex={i}
+                                />
+                            )}
+                            {this.showLegendTable() && (
+                                <LegendTable
+                                    activeLegend={this.props.activeLegend}
+                                />
+                            )}
+                            {this.showDownloadLoomButton() && (
+                                <DownloadLoomButton
+                                    activeFeature={activeFeatures[i]}
+                                />
+                            )}
+                            {this.showGProfilerModal() && md.genes && (
+                                <GProfilerModal featureMetadata={md} />
+                            )}
                             <br />
                         </Grid.Column>
                     </Grid.Row>
