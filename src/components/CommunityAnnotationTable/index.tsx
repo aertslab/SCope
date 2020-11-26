@@ -4,9 +4,9 @@ import ReactTable from 'react-table';
 
 import { BackendAPI } from '../common/API';
 
-import { asReacTableOBOColumn } from './components/OBOTableCell';
-import { asReacTableCuratorColumn } from './components/CuratorTableCell';
-import { asReacTableVotesColumn } from './components/VotesTableCell';
+import { asReactTableOBOColumn } from './components/OBOTableCell';
+import { asReactTableCuratorColumn } from './components/CuratorTableCell';
+import { asReactTableVotesColumn } from './components/VotesTableCell';
 import { makeTableData, CommunityAnnotationTableRowData } from './model';
 
 type CommunityAnnotationTableProps = {
@@ -31,9 +31,9 @@ class CommunityAnnotationTable extends React.Component<
 
     getColumns(activeFeature) {
         return [
-            asReacTableOBOColumn(),
-            asReacTableCuratorColumn(),
-            asReacTableVotesColumn(activeFeature),
+            asReactTableOBOColumn(),
+            asReactTableCuratorColumn(),
+            asReactTableVotesColumn(activeFeature),
         ];
     }
 
