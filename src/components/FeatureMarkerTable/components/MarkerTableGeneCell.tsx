@@ -78,12 +78,25 @@ class GeneTableCell extends React.Component<GeneTableCellProps> {
 
 const GeneTableCellWithRouter = withRouter(GeneTableCell);
 
-function asReactTableGeneColumn() {
+function asReactTableGeneColumn({
+    history,
+    activePage,
+    activeFeature,
+    activeFeatureIndex,
+}) {
     return makeTableColumnData({
         header: 'Gene Symbol',
         id: 'gene',
         accessor: 'gene',
-        cell: (props) => <GeneTableCellWithRouter {...props} />,
+        cell: (value) => (
+            <GeneTableCellWithRouter
+                history={history}
+                activePage={activePage}
+                activeFeature={activeFeature}
+                activeFeatureIndex={activeFeatureIndex}
+                {...value}
+            />
+        ),
     });
 }
 
