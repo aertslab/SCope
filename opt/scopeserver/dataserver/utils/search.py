@@ -199,7 +199,7 @@ def create_feature_description(
 
 
 def get_final_feature_and_type(
-    loom: Loom, aggregated_matches: Dict[ResultTypePair, List[str]], data_hash_secret: str
+    loom: Loom, aggregated_matches: Dict[ResultTypePair, List[str]]
 ) -> Tuple[Dict[ResultTypePair, str], Dict[ResultTypePair, str]]:
     """
     Determine final features and types.
@@ -209,7 +209,6 @@ def get_final_feature_and_type(
     Args:
         loom (Loom): Loom object
         aggregated_matches (Dict[ResultTypePair, List[str]]): Aggregated matches from aggregate_matches
-        data_hash_secret (str): Secret used to hash annotations on clusters
 
     Returns:
         Tuple[Dict[ResultTypePair, str], Dict[ResultTypePair, str]]: Features and Feature types
@@ -227,10 +226,8 @@ def get_final_feature_and_type(
         if category == "cluster_category":
             clustering_id = int(k[0].split("_")[0])
             cluster_id = int(k[0].split("_")[1])
-            clustering_name = loom.get_meta_data_clustering_by_id(clustering_id, secret=data_hash_secret)["name"]
-            cluster = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(
-                clustering_id, cluster_id, secret=data_hash_secret
-            )
+            clustering_name = loom.get_meta_data_clustering_by_id(clustering_id)["name"]
+            cluster = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(clustering_id, cluster_id)
             features[k] = cluster["description"]
             feature_types[k] = f"Clustering: {clustering_name}"
         else:
@@ -240,13 +237,12 @@ def get_final_feature_and_type(
     return features, feature_types
 
 
-def get_search_results(search_term: str, loom: Loom, data_hash_secret: str) -> Dict[str, List[str]]:
+def get_search_results(search_term: str, loom: Loom) -> Dict[str, List[str]]:
     """Take a user search term and a loom file and extract the results to display to the user
 
     Args:
         search_term (str): Search term from the user
         loom (Loom): Loom file to be searched
-        data_hash_secret (str): Secret used to hash annotations
         data_file_handler (DataFileHandler): The data file handler object from the Gserver
 
     Returns:
@@ -255,7 +251,7 @@ def get_search_results(search_term: str, loom: Loom, data_hash_secret: str) -> D
 
     matches = find_matches(search_term, loom.ss.search_space_dict)
     aggregated_matches = aggregate_matches(matches)
-    features, feature_types = get_final_feature_and_type(loom, aggregated_matches, data_hash_secret)
+    features, feature_types = get_final_feature_and_type(loom, aggregated_matches)
     descriptions, features, feature_types = create_feature_description(aggregated_matches, features, feature_types)
 
     final_res = {
