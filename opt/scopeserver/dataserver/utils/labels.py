@@ -67,34 +67,14 @@ def label_all_clusters(loom: Loom, embedding: int, feature: str) -> List[Feature
     for clustering in meta_data["clusterings"]:
         if clustering["name"] == re.sub("^Clustering: ", "", feature):
             clusteringID = str(clustering["id"])
-            clustering_meta = loom.get_meta_data_clustering_by_id(int(clusteringID))
-            cluster_dict = {}
-            for cluster_meta in clustering_meta["clusters"]:
-                if "cell_type_annotation" in cluster_meta:
-                    top_voted = {}
-                    top_votes = 0
-                    for cta in cluster_meta["cell_type_annotation"]:
-                        total_votes = int(len(cta["votes"]["votes_for"]["voters"])) - int(
-                            len(cta["votes"]["votes_against"]["voters"])
-                        )
-                        if total_votes > top_votes:
-                            top_voted = cta
-                            top_votes = total_votes
-                    if top_voted != {}:
-                        cluster_dict[
-                            int(cluster_meta["id"])
-                        ] = f'{top_voted["data"]["annotation_label"]}\n({top_voted["data"]["obo_id"]})'
-                    else:
-                        cluster_dict[int(cluster_meta["id"])] = cluster_meta["description"]
-                else:
-                    cluster_dict[int(cluster_meta["id"])] = cluster_meta["description"]
+            cluster_names_dict = loom.get_cluster_names(int(clusteringID))
 
     label_set = set()
     for i in uniq(loom.get_clustering_by_id(clusteringID)):
         if i == -1:
             label_set.add((i, 'Unclustered', "XX" * 3))
             continue
-        label_set.add((i, cluster_dict[i], constant.BIG_COLOR_LIST[i % len(constant.BIG_COLOR_LIST)]))
+        label_set.add((i, cluster_names_dict[i], constant.BIG_COLOR_LIST[i % len(constant.BIG_COLOR_LIST)]))
 
     cluster_ids, clusters, colours = zip(*label_set)
 

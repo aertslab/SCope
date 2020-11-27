@@ -443,6 +443,30 @@ class Loom:
                 )
         return cluster_overlap_data
 
+    def get_cluster_names(self, clustering_id: int) -> Dict[int, str]:
+        clustering_meta = self.get_meta_data_clustering_by_id(clustering_id)
+        cluster_names_dict = {}
+        for cluster_meta in clustering_meta["clusters"]:
+            if "cell_type_annotation" in cluster_meta:
+                top_voted = {}
+                top_votes = 0
+                for cta in cluster_meta["cell_type_annotation"]:
+                    total_votes = int(len(cta["votes"]["votes_for"]["voters"])) - int(
+                        len(cta["votes"]["votes_against"]["voters"])
+                    )
+                    if total_votes > top_votes:
+                        top_voted = cta
+                        top_votes = total_votes
+                if top_voted != {}:
+                    cluster_names_dict[
+                        int(cluster_meta["id"])
+                    ] = f'{top_voted["data"]["annotation_label"]}\n({top_voted["data"]["obo_id"]})'
+                else:
+                    cluster_names_dict[int(cluster_meta["id"])] = cluster_meta["description"]
+            else:
+                cluster_names_dict[int(cluster_meta["id"])] = cluster_meta["description"]
+        return cluster_names_dict
+
     def set_hierarchy(self, L1: str, L2: str, L3: str) -> bool:
         logger.info("Changing hierarchy name for {0}".format(self.get_abs_file_path()))
 
