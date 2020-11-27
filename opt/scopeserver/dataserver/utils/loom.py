@@ -860,7 +860,7 @@ class Loom:
     ##############
 
     def get_coordinates(
-        self, coordinatesID: int = -1, annotation: Optional[List[Annotation]] = None, logic: str = "OR"
+        self, coordinatesID: int = -1, annotation: Optional[List[Annotation]] = None, clustering: Optional[int] = None, cluster: Optional[int] = None, logic: str = "OR"
     ):
         loom = self.loom_connection
         if coordinatesID == -1:
@@ -888,6 +888,13 @@ class Loom:
             y = loom.ca.Embeddings_Y[str(coordinatesID)]
         if annotation is not None:
             cellIndices = self.get_anno_cells(annotations=annotation, logic=logic)
+            x = x[cellIndices]
+            y = y[cellIndices]
+        if clustering is not None and cluster is not None:
+            cellIndices = set()
+            for c in np.where(loom.ca.Clusterings[clustering].astype(str) == str(cluster))[0]:
+                cellIndices.add(c)
+            cellIndices = list(cellIndices)
             x = x[cellIndices]
             y = y[cellIndices]
         else:
