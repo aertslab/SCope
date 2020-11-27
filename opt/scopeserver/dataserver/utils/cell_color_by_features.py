@@ -184,7 +184,7 @@ class CellColorByFeatures:
         else:
             self.features.append(np.zeros(self.n_cells))
 
-    def setClusteringFeature(self, request, feature, n, secret=None):
+    def setClusteringFeature(self, request, feature, n):
         clusteringID = None
         clusterID = None
         logger.debug("Getting clustering: {0}".format(request.feature[n]))
@@ -194,7 +194,7 @@ class CellColorByFeatures:
                 if request.feature[n] == "All Clusters":
                     numClusters = max(self.loom.get_clustering_by_id(clusteringID))
                     legend = set()
-                    clustering_meta = self.loom.get_meta_data_clustering_by_id(int(clusteringID), secret=secret)
+                    clustering_meta = self.loom.get_meta_data_clustering_by_id(int(clusteringID))
                     cluster_dict = {int(x["id"]): x["description"] for x in clustering_meta["clusters"]}
                     for i in self.loom.get_clustering_by_id(clusteringID):
                         if i == -1:
