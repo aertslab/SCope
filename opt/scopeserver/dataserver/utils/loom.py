@@ -430,8 +430,7 @@ class Loom:
                 if cluster_id == -1:
                     continue
                 cluster_name = self.get_meta_data_cluster_by_clustering_id_and_cluster_id(
-                    clustering_id, cluster_id, ""
-                )["description"]
+                    clustering_id, cluster_id)["description"]
                 cluster_overlap_data.append(
                     {
                         "clustering_name": clustering_name,
