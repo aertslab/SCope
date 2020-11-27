@@ -425,13 +425,13 @@ class Loom:
             clustering_name = clustering_meta["name"]
             clustering_id = clustering_meta["id"]
             clustering = self.get_clustering_by_id(clustering_id)
+            cluster_names_dict = self.get_cluster_names(int(clustering_id))
             counts: Counter = Counter(clustering[cell_idxs])
             all_counts: Counter = Counter(clustering)
             for cluster_id in counts:
                 if cluster_id == -1:
                     continue
-                cluster_name = self.get_meta_data_cluster_by_clustering_id_and_cluster_id(
-                    clustering_id, cluster_id)["description"]
+                cluster_name = cluster_names_dict[int(cluster_id)]
                 cluster_overlap_data.append(
                     {
                         "clustering_name": clustering_name,
