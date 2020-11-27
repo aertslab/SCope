@@ -211,7 +211,7 @@ class Loom:
             ]
 
         self.update_metadata(metaJson)
-
+        self.get_meta_data_clustering_by_id.cache_clear()
         self.ss = ss.update(self, update="cluster_annotations")
 
         if (
@@ -298,6 +298,7 @@ class Loom:
 
         try:
             self.update_metadata(metaJson)
+            self.get_meta_data_clustering_by_id.cache_clear()
         except OSError as e:
             logger.error(e)
             return (False, "Couldn't write metadata!")
