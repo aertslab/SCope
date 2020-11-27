@@ -203,7 +203,7 @@ def load_ss(loom) -> SearchSpace:
                     f"Cached search space version {ss.search_space_version} is not {CURRENT_SS_VERISON}. Rebuilding search space..."
                 )
                 ss = build(loom)
-    except (EOFError, FileNotFoundError):
+    except (EOFError, FileNotFoundError, TypeError):
         ss = build(loom)
     return ss
 
