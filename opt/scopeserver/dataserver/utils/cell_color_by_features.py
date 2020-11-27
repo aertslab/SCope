@@ -194,34 +194,14 @@ class CellColorByFeatures:
                 if request.feature[n] == "All Clusters":
                     numClusters = max(self.loom.get_clustering_by_id(clusteringID))
                     legend = set()
-                    clustering_meta = self.loom.get_meta_data_clustering_by_id(int(clusteringID))
-                    cluster_dict = {}
-                    for cluster_meta in clustering_meta["clusters"]:
-                        if "cell_type_annotation" in cluster_meta:
-                            top_voted = {}
-                            top_votes = 0
-                            for cta in cluster_meta["cell_type_annotation"]:
-                                total_votes = int(len(cta["votes"]["votes_for"]["voters"])) - int(
-                                    len(cta["votes"]["votes_against"]["voters"])
-                                )
-                                if total_votes > top_votes:
-                                    top_voted = cta
-                                    top_votes = total_votes
-                            if top_voted != {}:
-                                cluster_dict[
-                                    int(cluster_meta["id"])
-                                ] = f'{top_voted["data"]["annotation_label"]}\n({top_voted["data"]["obo_id"]})'
-                            else:
-                                cluster_dict[int(cluster_meta["id"])] = cluster_meta["description"]
-                        else:
-                            cluster_dict[int(cluster_meta["id"])] = cluster_meta["description"]
+                    cluster_names_dict = self.loom.get_cluster_names(int(clusteringID))
                     for i in self.loom.get_clustering_by_id(clusteringID):
                         if i == -1:
                             self.hex_vec.append("XX" * 3)
                             continue
                         colour = constant.BIG_COLOR_LIST[i % len(constant.BIG_COLOR_LIST)]
                         self.hex_vec.append(colour)
-                        legend.add((cluster_dict[i], colour))
+                        legend.add((cluster_names_dict[i], colour))
                     values, colors = zip(*legend)
                     self.legend = s_pb2.ColorLegend(values=values, colors=colors)
 
