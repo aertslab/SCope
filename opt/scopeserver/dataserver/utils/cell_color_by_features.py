@@ -195,7 +195,26 @@ class CellColorByFeatures:
                     numClusters = max(self.loom.get_clustering_by_id(clusteringID))
                     legend = set()
                     clustering_meta = self.loom.get_meta_data_clustering_by_id(int(clusteringID))
-                    cluster_dict = {int(x["id"]): x["description"] for x in clustering_meta["clusters"]}
+                    cluster_dict = {}
+                    for cluster_meta in clustering_meta["clusters"]:
+                        if "cell_type_annotation" in cluster_meta:
+                            top_voted = {}
+                            top_votes = 0
+                            for cta in cluster_meta["cell_type_annotation"]:
+                                total_votes = int(len(cta["votes"]["votes_for"]["voters"])) - int(
+                                    len(cta["votes"]["votes_against"]["voters"])
+                                )
+                                if total_votes > top_votes:
+                                    top_voted = cta
+                                    top_votes = total_votes
+                            if top_voted != {}:
+                                cluster_dict[
+                                    int(cluster_meta["id"])
+                                ] = f'{top_voted["data"]["annotation_label"]}\n({top_voted["data"]["obo_id"]})'
+                            else:
+                                cluster_dict[int(cluster_meta["id"])] = cluster_meta["description"]
+                        else:
+                            cluster_dict[int(cluster_meta["id"])] = cluster_meta["description"]
                     for i in self.loom.get_clustering_by_id(clusteringID):
                         if i == -1:
                             self.hex_vec.append("XX" * 3)

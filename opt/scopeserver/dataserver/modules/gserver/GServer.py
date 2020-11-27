@@ -36,7 +36,7 @@ from scopeserver.dataserver.utils import data
 from scopeserver.dataserver.utils import search_space as ss
 from scopeserver.dataserver.utils.search import get_search_results
 from scopeserver.dataserver.utils.loom import Loom
-from scopeserver.dataserver.utils.labels import label_annotation
+from scopeserver.dataserver.utils.labels import label_annotation, label_all_clusters
 from scopeserver.dataserver.utils.annotation import Annotation
 
 from pyscenic.genesig import GeneSignature
@@ -231,6 +231,16 @@ class SCope(s_pb2_grpc.MainServicer):
         except ValueError:
             return
 
+        if request.feature.startswith("Clustering:"):
+            labels = [
+                s_pb2.FeatureLabelReply.FeatureLabel(
+                    label=label.label,
+                    colour=label.colour,
+                    coordinate=s_pb2.Coordinate(x=label.coordinate.x, y=label.coordinate.y),
+                )
+                for label in label_all_clusters(loom, request.embedding, request.feature)
+            ]
+        else:
         labels = [
             s_pb2.FeatureLabelReply.FeatureLabel(
                 label=label.label,
