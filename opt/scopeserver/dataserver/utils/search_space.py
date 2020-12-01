@@ -141,8 +141,8 @@ class SearchSpace:
                 regulons = self.loom.get_regulons_AUC(regulon_type="legacy").dtype.names
             else:
                 if self.loom.has_motif_regulons():
-                   regulons += self.loom.get_regulons_AUC(regulon_type="motif").dtype.names
-                if self.loom.has_track_regulons():         
+                    regulons += self.loom.get_regulons_AUC(regulon_type="motif").dtype.names
+                if self.loom.has_track_regulons():
                     regulons += self.loom.get_regulons_AUC(regulon_type="track").dtype.names
 
             for regulon in regulons:
