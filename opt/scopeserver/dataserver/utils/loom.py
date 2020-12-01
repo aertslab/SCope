@@ -814,7 +814,7 @@ class Loom:
     ############
 
     def has_motif_and_track_regulons(self) -> bool:
-        return "MotifRegulons" in self.loom_connection.ra.keys() and "MotifRegulons" in self.loom_connection.ra.keys()
+        return "MotifRegulons" in self.loom_connection.ra.keys() and "TrackRegulons" in self.loom_connection.ra.keys()
 
     def get_regulon_genes(self, regulon: str) -> np.ndarray:
         try:
