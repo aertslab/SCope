@@ -816,8 +816,11 @@ class Loom:
     def has_motif_and_track_regulons(self) -> bool:
         return self.has_motif_regulons() and self.has_track_regulons()
 
+    def has_legacy_regulons(self) -> bool:
+        return "Regulons" in self.loom_connection.ra.keys()
+
     def has_motif_regulons(self) -> bool:
-        return "MotifRegulons" in self.loom_connection.ra.keys() or "Regulons" in self.loom_connection.ra.keys() 
+        return "MotifRegulons" in self.loom_connection.ra.keys()
 
     def has_track_regulons(self) -> bool:
         return "TrackRegulons" in self.loom_connection.ra.keys()
@@ -835,9 +838,9 @@ class Loom:
             return []
 
     def has_regulons_AUC(self) -> bool:
-        return self.has_motif_regulons() or self.has_track_regulons()
+        return self.has_legacy_regulons() or self.has_motif_regulons() or self.has_track_regulons() 
 
-    def get_regulons_AUC(self, regulon_type: str = None):
+    def get_regulons_AUC(self, regulon_type: str):
         loom = self.loom_connection
         if "MotifRegulonsAUC" in self.loom_connection.ca.keys() and regulon_type == "motif":
             regulon_names = loom.ca.MotifRegulonsAUC.dtype.names
@@ -847,7 +850,7 @@ class Loom:
             regulon_names = loom.ca.TrackRegulonsAUC.dtype.names
             loom.ca.TrackRegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
             return loom.ca.TrackRegulonsAUC
-        if "RegulonsAUC" in self.loom_connection.ca.keys():
+        if "RegulonsAUC" in self.loom_connection.ca.keys() and regulon_type == "legacy":
             regulon_names = loom.ca.RegulonsAUC.dtype.names
             loom.ca.RegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
             return loom.ca.RegulonsAUC
@@ -859,13 +862,14 @@ class Loom:
         logger.debug("Getting AUC values for {0} ...".format(regulon))
         cellIndices = list(range(self.get_nb_cells()))
         # Get the regulon type
-        regulon_type = None
-        if "motif" in regulon.lower():
+        if regulon in self.get_regulons_AUC(regulon_type="motif").dtype.names:
             regulon_type = "motif"
-        elif "track" in regulon.lower():
+        elif regulon in self.get_regulons_AUC(regulon_type="track").dtype.names:
             regulon_type = "track"
-        else:
-            regulon_type = None
+        elif regulon in self.get_regulons_AUC(regulon_type="legacy").dtype.names:
+            regulon_type = "legacy"
+        else: 
+            return [], cellIndices
 
         if regulon in self.get_regulons_AUC(regulon_type=regulon_type).dtype.names:
             vals = self.get_regulons_AUC(regulon_type=regulon_type)[regulon]
@@ -877,9 +881,9 @@ class Loom:
 
     def get_regulon_target_gene_metric(self, regulon: str, metric_accessor: str):
         regulon_type = ""
-        if "motif" in regulon.lower():
+        if regulon in self.get_regulons_AUC(regulon_type="motif").dtype.names:
             regulon_type = "motif"
-        elif "track" in regulon.lower():
+        elif regulon in self.get_regulons_AUC(regulon_type="track").dtype.names:
             regulon_type = "track"
         loom_attribute = self.loom_connection.row_attrs[f"{regulon_type.capitalize()}Regulon{metric_accessor}"]
         if str(regulon) in loom_attribute.dtype.names:

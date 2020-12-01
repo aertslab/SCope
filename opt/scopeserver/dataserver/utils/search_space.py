@@ -115,26 +115,35 @@ class SearchSpace:
                         self.search_space_dict[key] = [f"{clusteringID}_{clusterID}"]
 
     def add_regulons(self) -> None:
-        if self.loom.has_motif_regulons():
+        if self.loom.has_legacy_regulons():
             self.add_elements(
-                elements=self.loom.get_regulons_AUC(regulon_type="motif").dtype.names,
+                elements=self.loom.get_regulons_AUC(regulon_type="legacy").dtype.names,
                 element_type="regulon",
             )
-        if self.loom.has_track_regulons():
-            self.add_elements(
-                elements=self.loom.get_regulons_AUC(regulon_type="track").dtype.names,
-                element_type="regulon",
-            )
+        else:
+            if self.loom.has_motif_regulons():
+                self.add_elements(
+                    elements=self.loom.get_regulons_AUC(regulon_type="motif").dtype.names,
+                    element_type="regulon",
+                )
+            if self.loom.has_track_regulons():
+                self.add_elements(
+                    elements=self.loom.get_regulons_AUC(regulon_type="track").dtype.names,
+                    element_type="regulon",
+                )
         self.add_markers(element_type="regulon_target")
 
     def add_markers(self, element_type="regulon_target") -> None:
         loom = self.loom.loom_connection
         if element_type == "regulon_target":
             regulons = []
-            if self.loom.has_motif_regulons():
-                regulons += self.loom.get_regulons_AUC(regulon_type="motif").dtype.names
-            if self.loom.has_track_regulons():         
-                regulons += self.loom.get_regulons_AUC(regulon_type="track").dtype.names
+            if self.loom.has_legacy_regulons():
+                regulons = self.loom.get_regulons_AUC(regulon_type="legacy").dtype.names
+            else:
+                if self.loom.has_motif_regulons():
+                   regulons += self.loom.get_regulons_AUC(regulon_type="motif").dtype.names
+                if self.loom.has_track_regulons():         
+                    regulons += self.loom.get_regulons_AUC(regulon_type="track").dtype.names
 
             for regulon in regulons:
                 genes = self.loom.get_regulon_genes(regulon=regulon)
