@@ -851,9 +851,7 @@ class Loom:
             regulon_names = loom.ca.RegulonsAUC.dtype.names
             loom.ca.RegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
             return loom.ca.RegulonsAUC
-        regulon_names = loom.ca.RegulonsAUC.dtype.names
-        loom.ca.RegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
-        return loom.ca.RegulonsAUC
+        raise IndexError("AUC values were requested but not found.")
 
     def get_auc_values(
         self, regulon: str, annotation: Optional[List[Annotation]] = None, logic: str = "OR"
