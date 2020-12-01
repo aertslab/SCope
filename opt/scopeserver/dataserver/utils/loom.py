@@ -838,7 +838,7 @@ class Loom:
             return []
 
     def has_regulons_AUC(self) -> bool:
-        return self.has_legacy_regulons() or self.has_motif_regulons() or self.has_track_regulons() 
+        return self.has_legacy_regulons() or self.has_motif_regulons() or self.has_track_regulons()
 
     def get_regulons_AUC(self, regulon_type: str):
         loom = self.loom_connection
@@ -854,7 +854,9 @@ class Loom:
             regulon_names = loom.ca.RegulonsAUC.dtype.names
             loom.ca.RegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
             return loom.ca.RegulonsAUC
-        raise IndexError("AUC values were requested but not found.")
+        raise IndexError(
+            f"AUC values were requested but not found.\n\tLoom: {self.file_path}\n\tRegulon type requested: {regulon_type}\n\tColumn attributes present: {self.loom_connection.ca.keys()}"
+        )
 
     def get_auc_values(
         self, regulon: str, annotation: Optional[List[Annotation]] = None, logic: str = "OR"
@@ -868,7 +870,7 @@ class Loom:
             regulon_type = "track"
         elif regulon in self.get_regulons_AUC(regulon_type="legacy").dtype.names:
             regulon_type = "legacy"
-        else: 
+        else:
             return [], cellIndices
 
         if regulon in self.get_regulons_AUC(regulon_type=regulon_type).dtype.names:
