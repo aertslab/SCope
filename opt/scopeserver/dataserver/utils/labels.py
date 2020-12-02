@@ -70,7 +70,7 @@ def label_all_clusters(loom: Loom, embedding: int, feature: str) -> List[Feature
             cluster_names_dict = loom.get_cluster_names(int(clusteringID))
 
     label_set = set()
-    for i in uniq(loom.get_clustering_by_id(clusteringID)):
+    for i in uniq(loom.get_clustering_by_id(int(clusteringID))):
         if i == -1:
             label_set.add((i, "Unclustered", "XX" * 3))
             continue
@@ -80,7 +80,7 @@ def label_all_clusters(loom: Loom, embedding: int, feature: str) -> List[Feature
 
     def labels() -> Generator[FeatureLabel, None, None]:
         for i, cluster in enumerate(clusters):
-            coords = loom.get_coordinates(coordinatesID=embedding, clustering=clusteringID, cluster=cluster_ids[i])
+            coords = loom.get_coordinates(coordinatesID=embedding, clustering=int(clusteringID), cluster=cluster_ids[i])
 
             yield FeatureLabel(
                 label=cluster,
