@@ -448,19 +448,27 @@ class Loom:
         cluster_names_dict = {}
         for cluster_meta in clustering_meta["clusters"]:
             if "cell_type_annotation" in cluster_meta:
-                top_voted = {}
+                top_voted = []
                 top_votes = 0
                 for cta in cluster_meta["cell_type_annotation"]:
                     total_votes = int(len(cta["votes"]["votes_for"]["voters"])) - int(
                         len(cta["votes"]["votes_against"]["voters"])
                     )
-                    if total_votes > top_votes:
-                        top_voted = cta
+                    if total_votes <= 0:
+                        continue
+                    elif total_votes > top_votes:
+                        top_voted = [cta]
                         top_votes = total_votes
-                if top_voted != {}:
-                    cluster_names_dict[
-                        int(cluster_meta["id"])
-                    ] = f'{top_voted["data"]["annotation_label"]}\n({top_voted["data"]["obo_id"]})'
+                    elif total_votes == top_votes:
+                        top_voted.append(cta)
+                if len(top_voted) > 0:
+                    for n, cta in enumerate(top_voted):
+                        if n == 0:
+                            cluster_names_dict[
+                                int(cluster_meta["id"])
+                            ] = f'{top_voted[n]["data"]["annotation_label"]}\n({top_voted[n]["data"]["obo_id"]})'
+                        else:
+                           cluster_names_dict[int(cluster_meta["id"])] += f'\nOR\n{top_voted[n]["data"]["annotation_label"]}\n({top_voted[n]["data"]["obo_id"]})'
                 else:
                     cluster_names_dict[int(cluster_meta["id"])] = cluster_meta["description"]
             else:
