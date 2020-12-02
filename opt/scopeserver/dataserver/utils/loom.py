@@ -468,7 +468,9 @@ class Loom:
                                 int(cluster_meta["id"])
                             ] = f'{top_voted[n]["data"]["annotation_label"]}\n({top_voted[n]["data"]["obo_id"]})'
                         else:
-                           cluster_names_dict[int(cluster_meta["id"])] += f'\nOR\n{top_voted[n]["data"]["annotation_label"]}\n({top_voted[n]["data"]["obo_id"]})'
+                            cluster_names_dict[
+                                int(cluster_meta["id"])
+                            ] += f'\nOR\n{top_voted[n]["data"]["annotation_label"]}\n({top_voted[n]["data"]["obo_id"]})'
                 else:
                     cluster_names_dict[int(cluster_meta["id"])] = cluster_meta["description"]
             else:
@@ -900,7 +902,12 @@ class Loom:
     ##############
 
     def get_coordinates(
-        self, coordinatesID: int = -1, annotation: Optional[List[Annotation]] = None, clustering: Optional[int] = None, cluster: Optional[int] = None, logic: str = "OR"
+        self,
+        coordinatesID: int = -1,
+        annotation: Optional[List[Annotation]] = None,
+        clustering: Optional[int] = None,
+        cluster: Optional[int] = None,
+        logic: str = "OR",
     ):
         loom = self.loom_connection
         if coordinatesID == -1:
