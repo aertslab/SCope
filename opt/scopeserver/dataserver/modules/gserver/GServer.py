@@ -241,14 +241,14 @@ class SCope(s_pb2_grpc.MainServicer):
                 for label in label_all_clusters(loom, request.embedding, request.feature)
             ]
         else:
-        labels = [
-            s_pb2.FeatureLabelReply.FeatureLabel(
-                label=label.label,
-                colour=label.colour,
-                coordinate=s_pb2.Coordinate(x=label.coordinate.x, y=label.coordinate.y),
-            )
-            for label in label_annotation(loom, request.embedding, request.feature)
-        ]
+            labels = [
+                s_pb2.FeatureLabelReply.FeatureLabel(
+                    label=label.label,
+                    colour=label.colour,
+                    coordinate=s_pb2.Coordinate(x=label.coordinate.x, y=label.coordinate.y),
+                )
+                for label in label_annotation(loom, request.embedding, request.feature)
+            ]
 
         return s_pb2.FeatureLabelReply(labels=labels)
 
