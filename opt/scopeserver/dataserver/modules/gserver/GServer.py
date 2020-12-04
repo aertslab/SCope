@@ -7,7 +7,6 @@ from loompy import timestamp
 from loompy import _version
 import os
 import re
-import hashlib
 import numpy as np
 import pandas as pd
 import shutil
@@ -34,6 +33,7 @@ from scopeserver.dataserver.utils import cell_color_by_features as ccbf
 from scopeserver.dataserver.utils import constant
 from scopeserver.dataserver.utils import data
 from scopeserver.dataserver.utils import search_space as ss
+from scopeserver.dataserver.utils import proto
 from scopeserver.dataserver.utils.search import get_search_results
 from scopeserver.dataserver.utils.loom import Loom
 from scopeserver.dataserver.utils.labels import label_annotation, label_all_clusters
@@ -475,19 +475,11 @@ class SCope(s_pb2_grpc.MainServicer):
         if "clusterMarkerMetrics" in md_clustering.keys():
             md_cmm = md_clustering["clusterMarkerMetrics"]
 
-            def protoize_cluster_marker_metric(metric):
-                return s_pb2.MarkerGenesMetric(
-                    accessor=metric["accessor"],
-                    name=metric["name"],
-                    description=metric["description"],
-                    values=cluster_marker_metrics[metric["accessor"]],
-                )
-
             cluster_marker_metrics = loom.get_cluster_marker_table(
                 clustering_id=request.clusteringID, cluster_id=request.clusterID
             )
 
-        metrics = [protoize_cluster_marker_metric(x) for x in md_cmm]
+        metrics = [proto.protoize_cluster_marker_metric(x, cluster_marker_metrics) for x in md_cmm]
         return s_pb2.MarkerGenesReply(genes=cluster_marker_metrics.index, metrics=metrics)
 
     def getMyGeneSets(self, request, context):
@@ -504,41 +496,6 @@ class SCope(s_pb2_grpc.MainServicer):
             for f in geneSetsToProcess
         ]
         return s_pb2.MyGeneSetsReply(myGeneSets=gene_sets)
-
-    @staticmethod
-    def protoize_cell_type_annotation(md, secret: str):
-        for n, clustering in enumerate(md.copy()):
-            for m, cluster in enumerate(clustering["clusters"]):
-                if "cell_type_annotation" in cluster.keys():
-                    proto_cell_type_annotations = []
-                    ctas = cluster["cell_type_annotation"]
-                    for cta in ctas:
-                        hash_data = json.dumps(cta["data"]) + secret
-                        data_hash = hashlib.sha256(hash_data.encode()).hexdigest()
-
-                        votes: Dict[str, Any] = {
-                            "votes_for": {"total": 0, "voters": []},
-                            "votes_against": {"total": 0, "voters": []},
-                        }
-
-                        for i in votes.keys():
-                            for v in cta["votes"][i]["voters"]:
-                                hash_data = json.dumps(cta["data"]) + v["voter_id"] + secret
-                                user_hash = hashlib.sha256(hash_data.encode()).hexdigest()
-                                v["voter_hash"] = True if user_hash == v["voter_hash"] else False
-                                votes[i]["voters"].append(s_pb2.CollabAnnoVoter(**v))
-                                votes[i]["total"] += 1
-                            votes[i] = s_pb2.CollabAnnoVotes(**votes[i])
-
-                        cta_proto = s_pb2.CellTypeAnnotation(
-                            data=s_pb2.CollabAnnoData(**cta["data"]),
-                            validate_hash=True if data_hash == cta["validate_hash"] else False,
-                            votes_for=votes["votes_for"],
-                            votes_against=votes["votes_against"],
-                        )
-                        proto_cell_type_annotations.append(cta_proto)
-                    md[n]["clusters"][m]["cell_type_annotation"] = proto_cell_type_annotations
-        return md
 
     def getMyLooms(self, request, context):
         my_looms = []
@@ -593,7 +550,7 @@ class SCope(s_pb2_grpc.MainServicer):
                             cellMetaData=s_pb2.CellMetaData(
                                 annotations=loom.get_meta_data_by_key(key="annotations"),
                                 embeddings=loom.get_meta_data_by_key(key="embeddings"),
-                                clusterings=self.protoize_cell_type_annotation(
+                                clusterings=proto.protoize_cell_type_annotation(
                                     loom.get_meta_data_by_key(key="clusterings"), secret=self.config["dataHashSecret"]
                                 ),
                             ),
