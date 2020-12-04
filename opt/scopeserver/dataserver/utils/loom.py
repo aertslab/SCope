@@ -827,9 +827,9 @@ class Loom:
 
     def get_regulon_genes(self, regulon: str) -> np.ndarray:
         try:
-            if "MotifRegulons" in self.loom_connection.ra.keys() and "motif" in regulon.lower():
+            if "MotifRegulons" in self.loom_connection.ra and "motif" in regulon.lower():
                 return self.get_genes()[self.loom_connection.ra.MotifRegulons[regulon] == 1]
-            elif "TrackRegulons" in self.loom_connection.ra.keys() and "track" in regulon.lower():
+            elif "TrackRegulons" in self.loom_connection.ra and "track" in regulon.lower():
                 return self.get_genes()[self.loom_connection.ra.TrackRegulons[regulon] == 1]
             else:
                 return self.get_genes()[self.loom_connection.ra.Regulons[regulon] == 1]
@@ -842,15 +842,15 @@ class Loom:
 
     def get_regulons_AUC(self, regulon_type: str):
         loom = self.loom_connection
-        if "MotifRegulonsAUC" in self.loom_connection.ca.keys() and regulon_type == "motif":
+        if "MotifRegulonsAUC" in self.loom_connection.ca and regulon_type == "motif":
             regulon_names = loom.ca.MotifRegulonsAUC.dtype.names
             loom.ca.MotifRegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
             return loom.ca.MotifRegulonsAUC
-        if "TrackRegulonsAUC" in self.loom_connection.ca.keys() and regulon_type == "track":
+        if "TrackRegulonsAUC" in self.loom_connection.ca and regulon_type == "track":
             regulon_names = loom.ca.TrackRegulonsAUC.dtype.names
             loom.ca.TrackRegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
             return loom.ca.TrackRegulonsAUC
-        if "RegulonsAUC" in self.loom_connection.ca.keys() and regulon_type == "legacy":
+        if "RegulonsAUC" in self.loom_connection.ca and regulon_type == "legacy":
             regulon_names = loom.ca.RegulonsAUC.dtype.names
             loom.ca.RegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
             return loom.ca.RegulonsAUC
