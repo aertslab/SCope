@@ -231,24 +231,16 @@ class SCope(s_pb2_grpc.MainServicer):
         except ValueError:
             return
 
-        if request.feature.startswith("Clustering:"):
-            labels = [
-                s_pb2.FeatureLabelReply.FeatureLabel(
-                    label=label.label,
-                    colour=label.colour,
-                    coordinate=s_pb2.Coordinate(x=label.coordinate.x, y=label.coordinate.y),
-                )
-                for label in label_all_clusters(loom, request.embedding, request.feature)
-            ]
-        else:
-            labels = [
-                s_pb2.FeatureLabelReply.FeatureLabel(
-                    label=label.label,
-                    colour=label.colour,
-                    coordinate=s_pb2.Coordinate(x=label.coordinate.x, y=label.coordinate.y),
-                )
-                for label in label_annotation(loom, request.embedding, request.feature)
-            ]
+        label_extract = label_all_clusters if request.feature.startswith("Clustering:") else label_annotation
+
+        labels = [
+            s_pb2.FeatureLabelReply.FeatureLabel(
+                label=label.label,
+                colour=label.colour,
+                coordinate=s_pb2.Coordinate(x=label.coordinate.x, y=label.coordinate.y),
+            )
+            for label in label_extract(loom, request.embedding, request.feature)
+        ]
 
         return s_pb2.FeatureLabelReply(labels=labels)
 
