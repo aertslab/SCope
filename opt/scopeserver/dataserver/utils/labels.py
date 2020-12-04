@@ -80,7 +80,7 @@ def label_all_clusters(loom: Loom, embedding: int, feature: str) -> List[Feature
 
     def labels() -> Generator[FeatureLabel, None, None]:
         for i, cluster in enumerate(clusters):
-            coords = loom.get_coordinates(coordinatesID=embedding, clustering=int(clusteringID), cluster=cluster_ids[i])
+            coords = loom.get_coordinates(coordinatesID=embedding, cluster_info=(int(clusteringID), int(cluster_ids[i])))
 
             yield FeatureLabel(
                 label=cluster,

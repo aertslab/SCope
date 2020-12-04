@@ -905,8 +905,7 @@ class Loom:
         self,
         coordinatesID: int = -1,
         annotation: Optional[List[Annotation]] = None,
-        clustering: Optional[int] = None,
-        cluster: Optional[int] = None,
+        cluster_info: Optional[Tuple[int, int]] = None,
         logic: str = "OR",
     ):
         loom = self.loom_connection
@@ -937,9 +936,10 @@ class Loom:
             cellIndices = self.get_anno_cells(annotations=annotation, logic=logic)
             x = x[cellIndices]
             y = y[cellIndices]
-        if clustering is not None and cluster is not None:
+        if cluster_info is not None:
+            clustering_id, cluster_id = cluster_info
             cellIndices = set()
-            for c in np.where(loom.ca.Clusterings[clustering].astype(str) == str(cluster))[0]:
+            for c in np.where(loom.ca.Clusterings[str(clustering_id)].astype(str) == str(cluster_id))[0]:
                 cellIndices.add(c)
             cellIndices = list(cellIndices)
             x = x[cellIndices]
