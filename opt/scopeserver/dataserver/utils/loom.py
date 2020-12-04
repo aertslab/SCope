@@ -871,7 +871,7 @@ class Loom:
         elif regulon in self.get_regulons_AUC(regulon_type="legacy").dtype.names:
             regulon_type = "legacy"
         else:
-            return [], cellIndices
+            return np.empty((0, 0)), cellIndices
 
         if regulon in self.get_regulons_AUC(regulon_type=regulon_type).dtype.names:
             vals = self.get_regulons_AUC(regulon_type=regulon_type)[regulon]
@@ -879,7 +879,7 @@ class Loom:
                 cellIndices = self.get_anno_cells(annotations=annotation, logic=logic)
                 vals = vals[cellIndices]
             return vals, cellIndices
-        return [], cellIndices
+        return np.empty((0, 0)), cellIndices
 
     def get_regulon_target_gene_metric(self, regulon: str, metric_accessor: str):
         regulon_type = ""
