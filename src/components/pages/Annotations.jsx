@@ -57,19 +57,19 @@ export default class Annotations extends Component {
                 id: id,
             };
 
-            if (accessor != null) {
+            if (accessor !== null) {
                 column['accessor'] = (d) => d[accessor];
             }
 
-            if (cell != null) {
+            if (cell !== null) {
                 column['Cell'] = (props) => cell(props);
             }
 
-            if (sortMethod != null) {
+            if (sortMethod !== null) {
                 column['sortMethod'] = sortMethod;
             }
 
-            if (filterMethod != null) {
+            if (filterMethod !== null) {
                 column['filterMethod'] = filterMethod;
             }
 
@@ -78,7 +78,7 @@ export default class Annotations extends Component {
 
         let newCellTypeAnnoTableOboCell = (props) => {
             let iriLink =
-                props.value.ols_iri == '' ? (
+                props.value.ols_iri === '' ? (
                     <React.Fragment>
                         {props.value.annotation_label}
                         <br />
@@ -317,7 +317,7 @@ export default class Annotations extends Component {
         let cellTypeAnnoTableData;
         let cellTypeAnnoTable;
 
-        if (metadata != undefined) {
+        if (metadata !== undefined) {
             allAnnos = this.getAllAnnotations(metadata);
             cellTypeAnnoTableData = allAnnos.map((a, n) => {
                 let cellTypeAnnoTableRowData = {
