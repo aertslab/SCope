@@ -115,7 +115,7 @@ class ViewerSidebar extends Component {
     getButtonText = (text) => {
         switch (this.state.status) {
             case 'ready':
-                switch (button) {
+                switch (text) {
                     case 'submit':
                         return (
                             <React.Fragment>
@@ -1374,7 +1374,7 @@ const viewerSidebar = withCookies(withRouter(ViewerSidebar));
 
 const mapStateToProps = (rootState) => {
     return {
-        sessionIsRW: rootState.main.sessionMode === 'rw'
+        sessionIsRW: rootState.main.sessionMode === 'rw',
     };
 };
 

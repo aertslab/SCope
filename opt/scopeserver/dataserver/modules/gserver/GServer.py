@@ -215,8 +215,8 @@ class SCope(s_pb2_grpc.MainServicer):
         logger.debug("{0:.5f} seconds elapsed getting colours ---".format(time.time() - start_time))
         return s_pb2.CellColorByFeaturesReply(
             color=None,
-            compressedColor=cell_color_by_features.get_hex_vec(),
-            hasAddCompressionLayer=False,
+            compressedColor=cell_color_by_features.get_compressed_hex_vec(),
+            hasAddCompressionLayer=True,
             vmax=cell_color_by_features.get_v_max(),
             maxVmax=cell_color_by_features.get_max_v_max(),
             cellIndices=cell_color_by_features.get_cell_indices(),

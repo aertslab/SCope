@@ -5,8 +5,11 @@ import * as d3 from 'd3';
 import * as R from 'ramda';
 import { BackendAPI } from './API';
 import { Dimmer, Loader } from 'semantic-ui-react';
+import pako from 'pako';
 import Alert from 'react-popup';
 import { debounce } from 'lodash';
+
+import { zipLists } from '../../util';
 
 const MIN_SCALING_FACTOR = 1;
 const DEFAULT_POINT_COLOR = 'A6A6A6';
@@ -434,7 +437,7 @@ export default class Viewer extends Component {
 
     translatePointsInLasso(indices) {
         let ptsInLasso = [];
-        let idxInLasso = _.intersection(indices, this.state.coord.idx);
+        let idxInLasso = R.intersection(indices, this.state.coord.idx);
         ptsInLasso = idxInLasso.map((idx) => {
             return this.state.coord.idx.indexOf(idx);
         });
@@ -1067,9 +1070,29 @@ export default class Viewer extends Component {
                                     response
                                 );
                             }
+                            // Convert object to ArrayBuffer
+                            let responseBuffered =
+                                response.compressedColor.toArrayBuffer();
+
+                            // Uncompress
                             if (response.hasAddCompressionLayer) {
-                                // Uncompress
-                                console.error('Zlib compression is not supported');
+                                pako.inflate(
+                                    responseBuffered,
+                                    (err, uncompressedMessage) => {
+                                        if (err) {
+                                            console.log(err);
+                                        } else {
+                                            this.endBenchmark(
+                                                'getFeatureColors'
+                                            );
+                                            let colors = this.chunkString(
+                                                uncompressedMessage.toString(),
+                                                6
+                                            );
+                                            this.updateColors(response, colors);
+                                        }
+                                    }
+                                );
                             } else {
                                 this.endBenchmark('getFeatureColors');
                                 this.updateColors(response, response.color);
@@ -1156,7 +1179,7 @@ export default class Viewer extends Component {
         });
         let settings = BackendAPI.getSettings();
         if (settings.sortCells) {
-            let pts = _.zip(
+            let pts = zipLists(
                 this.state.coord.idx,
                 this.state.coord.x,
                 this.state.coord.y,
@@ -1173,7 +1196,7 @@ export default class Viewer extends Component {
             });
             this.endBenchmark('sort');
             this.startBenchmark('map');
-            pts.map((p, i) => {
+            pts.forEach((p, i) => {
                 let point = this.getTexturedColorPoint(p[1], p[2], p[3]);
                 point._originalData.idx = p[0];
                 this.mainLayer.addChildAt(point, i);

@@ -3,7 +3,6 @@ const webpack = require('webpack');
 const fs = require('fs');
 const pkg = require('./package.json');
 const TerserPlugin = require('terser-webpack-plugin');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
     .BundleAnalyzerPlugin;
 
@@ -22,8 +21,8 @@ let config = {
     devServer: {
         host: '0.0.0.0',
         port: _config.mPort,
-      disableHostCheck: true,
-      publicPath: '/dist',
+        disableHostCheck: true,
+        publicPath: '/dist',
     },
     output: {
         filename: pkg.name + '.js',
@@ -35,7 +34,7 @@ let config = {
     module: {
         rules: [
             {
-                test: /\.(t|j)s(x?)$/,
+                test: /\.js(x?)$/,
                 exclude: /node_modules/,
                 use: [
                     {
@@ -45,7 +44,6 @@ let config = {
                             babelrc: false,
                             presets: [
                                 '@babel/preset-env',
-                                '@babel/preset-typescript',
                                 '@babel/preset-react',
                             ],
                             plugins: [
@@ -55,26 +53,30 @@ let config = {
                                 ],
                                 ['@babel/plugin-proposal-object-rest-spread'],
                                 ['@babel/transform-runtime'],
-                                ['babel-plugin-redux-saga'],
                             ],
                         },
                     },
                 ],
             },
             {
-                test: /\.css$/,
-                use: ['style-loader', 'css-loader']
+                test: /\.tsx?$/,
+                use: 'ts-loader',
+                exclude: /node_modules/,
             },
             {
-              test: /\.(png|woff|woff2|eot|ttf|svg)$/,
-              use: [
-                {
-                  loader: 'url-loader',
-                  options: {
-                    limit: 100000,
-                  }
-                },
-              ]
+                test: /\.css$/,
+                use: ['style-loader', 'css-loader'],
+            },
+            {
+                test: /\.(png|woff|woff2|eot|ttf|svg)$/,
+                use: [
+                    {
+                        loader: 'url-loader',
+                        options: {
+                            limit: 100000,
+                        },
+                    },
+                ],
             },
         ],
     },
@@ -113,7 +115,6 @@ let config = {
             }),
             __TEST_ONLY__: false,
         }),
-        new ForkTsCheckerWebpackPlugin(),
         new BundleAnalyzerPlugin({ openAnalyzer: false }),
     ],
 };
@@ -124,9 +125,9 @@ if (process.env.NODE_ENV === 'production') {
         minimizer: [new TerserPlugin()],
     };
 } else {
-  config.optimization = {
-    moduleIds: 'named'
-  }
+    config.optimization = {
+        moduleIds: 'named',
+    };
 }
 
 module.exports = config;

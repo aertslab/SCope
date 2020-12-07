@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { withRouter, Route, Link } from 'react-router-dom';
 import { withCookies, Cookies } from 'react-cookie';
 import CookieConsent from 'react-cookie-consent';
-
+import pako from 'pako';
 import Favicon from 'react-favicon';
 
 import { SCOPE_COOKIE, ONE_MINUTE } from './constants';
@@ -24,7 +24,6 @@ import {
 import { FullPageNotify } from './pages';
 import { millisecondsToDays } from './utils';
 
-const pako = require('pako');
 const publicIp = require('public-ip');
 const timer = 60 * 1000;
 

@@ -15,8 +15,8 @@ import { BackendAPI } from './common/API';
 import PropTypes from 'prop-types';
 import { withCookies, Cookies } from 'react-cookie';
 import Bitly from 'bitly4api';
+import pako from 'pako';
 
-const pako = require('pako');
 let bitly = new Bitly(BITLY.token);
 
 import { toggleSidebar, consentToCookies } from '../redux/actions';

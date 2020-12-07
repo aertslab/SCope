@@ -573,7 +573,7 @@ class Compare extends Component {
             }
             this.setState({ crossAnnotations: cross });
         } else {
-            console.log('Annotation cannot be found', viewer, name, remove);
+            console.log('Annotation cannot be found', viewer, name);
         }
         this.getCellMetadata();
     }
