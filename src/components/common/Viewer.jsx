@@ -1071,8 +1071,7 @@ export default class Viewer extends Component {
                                 );
                             }
                             // Convert object to ArrayBuffer
-                            let responseBuffered =
-                                response.compressedColor.toArrayBuffer();
+                            let responseBuffered = response.compressedColor.toArrayBuffer();
 
                             // Uncompress
                             if (response.hasAddCompressionLayer) {
