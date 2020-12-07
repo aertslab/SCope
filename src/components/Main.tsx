@@ -15,7 +15,6 @@ import {
     Compare,
     Dataset,
     Gene,
-    Geneset,
     Regulon,
     Tutorial,
     Welcome,
@@ -69,7 +68,6 @@ export const Main: React.FC<MainProps> = (props: MainProps) => {
                     <Route path='/:uuid/:loom?/welcome' component={Welcome} />
                     <Route path='/:uuid/:loom?/dataset' component={Dataset} />
                     <Route path='/:uuid/:loom?/gene' component={Gene} />
-                    <Route path='/:uuid/:loom?/geneset' component={Geneset} />
                     <Route path='/:uuid/:loom?/regulon' component={Regulon} />
                     <Route path='/:uuid/:loom?/compare'>
                         <Compare metadata={metadata} />

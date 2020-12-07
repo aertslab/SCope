@@ -3,7 +3,6 @@ import Compare from './Compare';
 import Dataset from './Dataset';
 import { FullPageNotify } from './FullPageNotify';
 import Gene from './Gene';
-import Geneset from './Geneset';
 import Regulon from './Regulon';
 import Tutorial from './Tutorial';
 import Welcome from './Welcome';
@@ -14,7 +13,6 @@ export {
     Dataset,
     FullPageNotify,
     Gene,
-    Geneset,
     Regulon,
     Tutorial,
     Welcome,
