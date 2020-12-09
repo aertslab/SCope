@@ -970,15 +970,6 @@ export default class Viewer extends Component {
         return str.match(new RegExp('.{1,' + length + '}', 'g'));
     }
 
-    updateColors = (response, colors) => {
-        if (response !== null) {
-            this.setState({ colors: colors });
-            this.updateDataPoints();
-        } else {
-            this.resetDataPoints();
-        }
-    };
-
     getVmins(scale) {
         return scale.map((x) => x[0]);
     }
@@ -1011,7 +1002,7 @@ export default class Viewer extends Component {
             //return this.resetDataPoints();
             return;
         }
-        this.startBenchmark('getFeatureColors');
+
         let settings = BackendAPI.getSettings();
 
         let queryAnnotations = [];
@@ -1070,32 +1061,18 @@ export default class Viewer extends Component {
                                     response
                                 );
                             }
-                            // Convert object to ArrayBuffer
-                            let responseBuffered = response.compressedColor.toArrayBuffer();
 
-                            // Uncompress
-                            if (response.hasAddCompressionLayer) {
-                                pako.inflate(
-                                    responseBuffered,
-                                    (err, uncompressedMessage) => {
-                                        if (err) {
-                                            console.log(err);
-                                        } else {
-                                            this.endBenchmark(
-                                                'getFeatureColors'
-                                            );
-                                            let colors = this.chunkString(
-                                                uncompressedMessage.toString(),
-                                                6
-                                            );
-                                            this.updateColors(response, colors);
-                                        }
-                                    }
-                                );
-                            } else {
-                                this.endBenchmark('getFeatureColors');
-                                this.updateColors(response, response.color);
-                            }
+                            const colors = response.hasAddCompressionLayer
+                                  ? this.chunkString(
+                                      pako.inflate(
+                                          response.compressedColor.toArrayBuffer(),
+                                          { to: 'string' }
+                                      ),
+                                      6
+                                  )
+                                  : response.color;
+                            this.setState({ colors });
+                            this.updateDataPoints(colors);
 
                             if (this.props.onActiveLegendChange !== null) {
                                 this.props.onActiveLegendChange(
@@ -1178,12 +1155,12 @@ export default class Viewer extends Component {
         });
         let settings = BackendAPI.getSettings();
         if (settings.sortCells) {
-            let pts = zipLists(
+            let pts = zipLists([
                 this.state.coord.idx,
                 this.state.coord.x,
                 this.state.coord.y,
-                colors ? colors : this.state.colors
-            );
+                colors
+            ]);
             this.startBenchmark('sort');
             pts.sort((a, b) => {
                 let ca = this.hexToRgb(a[3]);

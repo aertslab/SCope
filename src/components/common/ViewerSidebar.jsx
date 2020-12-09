@@ -30,6 +30,8 @@ import CollaborativeAnnotation from './CollaborativeAnnotation';
 import GProfilerModal from '../GProfiler/GProfilerModal';
 import ClusterOverlapsTable from './ClusterOverlapsTable';
 
+import './ViewerSidebar.css';
+
 class ViewerSidebar extends Component {
     static propTypes = {
         cookies: instanceOf(Cookies).isRequired,
@@ -163,7 +165,7 @@ class ViewerSidebar extends Component {
         let lassoTab = () => {
             if (lassoSelections.length === 0) {
                 return (
-                    <Tab.Pane attached={false} style={{ textAlign: 'center' }}>
+                    <Tab.Pane attached={false} className='tabView'>
                         <br />
                         <br />
                         No user&apos;s lasso selections
@@ -178,7 +180,7 @@ class ViewerSidebar extends Component {
                 return (
                     <Tab.Pane
                         attached={false}
-                        style={{ textAlign: 'center' }}
+                        className='tabView'
                         key={i}>
                         <Grid>
                             <Grid.Row
@@ -653,12 +655,7 @@ class ViewerSidebar extends Component {
                                         className='vote-tooltip'
                                         trigger={
                                             <Button
-                                                disabled={
-                                                    !(
-                                                        this.state.status ===
-                                                        'ready'
-                                                    )
-                                                }
+                                                disabled={!(this.state.status === 'ready')}
                                                 onClick={() =>
                                                     submitVote(
                                                         props.value.data,
@@ -686,6 +683,7 @@ class ViewerSidebar extends Component {
                                                 ? props.value.votes_for.voters.map(
                                                       (v, i) => (
                                                           <font
+                                                              key={i}
                                                               color={
                                                                   v.voter_hash
                                                                       ? 'green'
@@ -1234,7 +1232,6 @@ class ViewerSidebar extends Component {
                             <br />
                             {image}
                             {clusterControls()}
-                            {/* {annotationBox()} */}
                             {cellTypeAnnoTable}
                             {markerTable}
                             {legendTable}
@@ -1255,8 +1252,7 @@ class ViewerSidebar extends Component {
                 <Tab.Pane
                     attached={false}
                     key={i}
-                    className={'feature' + i + ' stretched marginBottom'}
-                    style={{ textAlign: 'center' }}>
+                    className={'feature' + i + ' stretched marginBottom tabView'}>
                     <Grid>
                         <Grid.Row columns='1' centered className='viewerRow'>
                             <Grid.Column className='viewerCell'>
