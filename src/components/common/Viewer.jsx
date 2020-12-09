@@ -7,7 +7,7 @@ import { BackendAPI } from './API';
 import { Dimmer, Loader } from 'semantic-ui-react';
 import pako from 'pako';
 import Alert from 'react-popup';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 
 import { zipLists } from '../../util';
 
@@ -50,7 +50,7 @@ export default class Viewer extends Component {
         this.bcr = null;
         this.w = parseInt(this.props.width);
         this.h = parseInt(this.props.height);
-        // Increase the maxSize if displaying more than 1500 (default) objects
+        // Increase the maxSize if displaying more objects
         this.maxn = 250000;
         this.texture = PIXI.Texture.from('src/images/dot.png');
         this.settingsListener = (settings, customScale) => {

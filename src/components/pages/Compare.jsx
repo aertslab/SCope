@@ -1,10 +1,12 @@
-import _ from 'lodash';
-import * as d3 from 'd3';
-import box2 from '../../js/box2.js';
 import React, { Component } from 'react';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend, { NativeTypes } from 'react-dnd-html5-backend';
 import { Accordion, Grid, Menu, Icon, Dropdown } from 'semantic-ui-react';
+
+import * as R from 'ramda';
+import * as d3 from 'd3';
+
+import box2 from '../../js/box2.js';
 import { BackendAPI } from '../common/API';
 import Annotation from '../common/Annotation';
 import Search from '../Search';
@@ -206,13 +208,13 @@ class Compare extends Component {
         let viewers = () => {
             return (
                 <Grid>
-                    {_.times(rows, (i) => (
+                    {R.range(0, rows).map((i) => (
                         <Grid.Row
                             columns={columns}
                             key={i}
                             className='viewerRow'
                             stretched>
-                            {_.times(columns, (j) => {
+                            {R.range(0, columns).map((j) => {
                                 let name = 'comp' + (columns * i + j);
                                 let annotationDropContainerHorizontal,
                                     annotationDropContainerVertical,

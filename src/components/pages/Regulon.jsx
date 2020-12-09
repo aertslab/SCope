@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import React, { Component } from 'react';
 import { Segment, Grid } from 'semantic-ui-react';
 
@@ -34,7 +33,7 @@ export default class Regulon extends Component {
             activeFeatures,
             geneFeatures,
         } = this.state;
-        let featureThreshold = _.times(3, (i) => (
+        let featureThreshold = [1, 2, 3].map((i) => (
             <Grid.Column key={i} className='flexDisplay' stretched>
                 <Histogram
                     field={i}
