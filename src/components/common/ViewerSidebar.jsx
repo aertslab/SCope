@@ -178,10 +178,7 @@ class ViewerSidebar extends Component {
 
             return lassoSelections.map((lS, i) => {
                 return (
-                    <Tab.Pane
-                        attached={false}
-                        className='tabView'
-                        key={i}>
+                    <Tab.Pane attached={false} className='tabView' key={i}>
                         <Grid>
                             <Grid.Row
                                 columns={3}
@@ -655,7 +652,12 @@ class ViewerSidebar extends Component {
                                         className='vote-tooltip'
                                         trigger={
                                             <Button
-                                                disabled={!(this.state.status === 'ready')}
+                                                disabled={
+                                                    !(
+                                                        this.state.status ===
+                                                        'ready'
+                                                    )
+                                                }
                                                 onClick={() =>
                                                     submitVote(
                                                         props.value.data,
@@ -1252,7 +1254,9 @@ class ViewerSidebar extends Component {
                 <Tab.Pane
                     attached={false}
                     key={i}
-                    className={'feature' + i + ' stretched marginBottom tabView'}>
+                    className={
+                        'feature' + i + ' stretched marginBottom tabView'
+                    }>
                     <Grid>
                         <Grid.Row columns='1' centered className='viewerRow'>
                             <Grid.Column className='viewerCell'>
