@@ -6,20 +6,7 @@
 .header {
     padding-left: 0.5em;
 }
-/*
-.pushable {
-    flex-grow: 1;
-    overflow: auto;
-}
 
-.ui {
-    font-size: 0.75rem !important;
-}
-
-.push.sidebar {
-    overflow-y: visible !important;
-}
-*/
 .vertical .active.item {
     font-weight: bold !important;
     color: black !important;
@@ -101,27 +88,6 @@
 .viewerToolbar {
     flex-basis: 100px;
 }
-/*
-.ui.segment.basic {
-    padding: 0px;
-    padding-left: 10px;
-}
-
-.ui.accordion {
-    flex-grow: 0 !important;
-}
-
-.ui.pointing.secondary.menu {
-    margin: 0px;
-}
-
-.ui.modal.transition.visible.active {
-    margin-top: -15% !important;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: auto;
-}
-*/
 
 .rc-slider {
     margin: 0px !important;
