@@ -26,7 +26,6 @@ export default class Gene extends Component {
                 activeMetadata: metadata,
             });
         };
-        this.height = window.innerHeight - 200;
     }
 
     render() {
@@ -38,7 +37,7 @@ export default class Gene extends Component {
             activeLegend,
         } = this.state;
 
-        if (!activeLoom) {
+        if (!activeLoom || activeLoom === '*') {
             return <div>Select the dataset to be analyzed</div>;
         }
 
