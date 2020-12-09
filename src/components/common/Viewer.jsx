@@ -146,7 +146,7 @@ export default class Viewer extends Component {
         );
 
         this.initGraphics();
-        if (this.props.loomFile !== null) {
+        if (this.props.loomFile !== null && this.props.loomFile !== '*') {
             this.getPoints(
                 this.props.loomFile,
                 this.props.activeCoordinates,
@@ -834,7 +834,7 @@ export default class Viewer extends Component {
 
         this.startBenchmark('getCoordinates');
         if (DEBUG) {
-            console.log(this.props.name, 'getCoordinates', query);
+            console.log(this.props.name, 'getCoordinates query', query);
         }
         BackendAPI.getConnection().then(
             (gbc) => {
@@ -845,11 +845,11 @@ export default class Viewer extends Component {
                         if (DEBUG) {
                             console.log(
                                 this.props.name,
-                                'getCoordinates',
+                                'getCoordinates response',
                                 response
                             );
                         }
-                        //this.mainLayer.removeChildren();
+
                         if (response) {
                             let coord = {
                                 idx: response.cellIndices,
@@ -887,8 +887,6 @@ export default class Viewer extends Component {
 
                         this.endBenchmark('getCoordinates');
                         this.initializeDataPoints(callback ? true : false);
-                        //this.drawTrajectory();
-                        //callback();
                     }
                 );
             },
