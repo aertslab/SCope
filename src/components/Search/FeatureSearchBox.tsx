@@ -138,6 +138,7 @@ export const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
     };
 
     //TODO: A hack to ensure the old state managment knows something is selected
+    //      when the page changes.
     if (state.selected && !__TEST_ONLY__) {
         let legacyFeature = LegacyAPI.getActiveFeatures()[legacyFeatureIndex];
         if (legacyFeature !== undefined) {
