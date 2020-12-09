@@ -936,10 +936,6 @@ export default class Viewer extends Component {
         this.transformPoints(this.selectionsLayer);
         this.transformPoints(this.labelLayer);
         this.drawTrajectory();
-        // requestAnimationFrame(() => {
-        //     this.app.renderer.render(this.app.stage);
-        // });
-        //if (!stillLoading) this.setState({ loading: false });
     }
 
     transformLassoPoints() {
@@ -1061,14 +1057,14 @@ export default class Viewer extends Component {
                             }
 
                             const colors = response.hasAddCompressionLayer
-                                  ? this.chunkString(
+                                ? this.chunkString(
                                       pako.inflate(
                                           response.compressedColor.toArrayBuffer(),
                                           { to: 'string' }
                                       ),
                                       6
                                   )
-                                  : response.color;
+                                : response.color;
                             this.setState({ colors });
                             this.updateDataPoints(colors);
 
@@ -1157,7 +1153,7 @@ export default class Viewer extends Component {
                 this.state.coord.idx,
                 this.state.coord.x,
                 this.state.coord.y,
-                colors
+                colors,
             ]);
             this.startBenchmark('sort');
             pts.sort((a, b) => {
