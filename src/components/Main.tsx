@@ -1,3 +1,7 @@
+/**
+ * Happy path routing for the main application.
+ */
+
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { withRouter, Route } from 'react-router-dom';
