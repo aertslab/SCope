@@ -16,5 +16,6 @@ When contributing to this repository, please first discuss the change you wish t
 * All state should be stored in Redux _unless_ there is a good reason not to do so. This can be discussed in an issue or after a PR has been submitted..
 * All side-effects should be performed through redux sagas. Components should not access the network **under any circumstances**.
 * Each PR should be accompanied by tests and documentation (including a changelog entry if appropriate).
+* New code should never `default export`.
 
 ## Server Style Guide
