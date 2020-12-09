@@ -207,9 +207,6 @@
             }
         }
     },
-    "browserslist": [
-        "last 1 version"
-    ],
     "jest": {
         "preset": "ts-jest/presets/js-with-babel",
         "testEnvironment": "jsdom",
