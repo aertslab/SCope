@@ -971,10 +971,6 @@ class API {
         if (!this.featureChangeListeners[page]) {
             this.featureChangeListeners[page] = [];
         }
-        /*this.featureChangeListeners[page].push((a, b, c, d) => {
-            console.log("FEATURE CHANGE LISTENER FIRED FOR", page);
-            listener(a, b, c, d);
-            });*/
         this.featureChangeListeners[page].push(listener);
     }
 
