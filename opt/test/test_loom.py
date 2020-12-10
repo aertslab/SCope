@@ -1,12 +1,26 @@
 import loompy as lp
 import numpy as np
+
+from pathlib import Path
+from numpy.random import Generator, PCG64
+
 from scopeserver.dataserver.utils.loom import Loom
 from scopeserver.dataserver.utils.loom_file_handler import LoomFileHandler
-from pathlib import Path
 
 TEST_LOOM = Path("test") / Path("data") / Path("SCope_Test.loom")
 TEST_CONNECTION = lp.connect(TEST_LOOM, "r", validate=False)
 LOOM_FILE_HANDLER = LoomFileHandler()
+
+rg = Generator(PCG64(55850))
+
+num_genes = 100
+num_regulons = 4
+# Must be divisible by 4
+num_cells = 100
+
+genes = rg.poisson(lam=1, size=num_genes)
+genes = [x + 1 for x in genes]
+matrix = rg.poisson(lam=genes, size=(num_cells, num_genes))
 
 
 def test_get_connection():
@@ -55,3 +69,16 @@ def test_infer_species():
 def test_has_motif_and_track_regulons():
     test_loom = Loom(TEST_LOOM, TEST_LOOM, TEST_CONNECTION, LOOM_FILE_HANDLER)
     assert test_loom.has_motif_and_track_regulons() == True
+
+
+def test_get_coordinates():
+    test_loom = Loom(TEST_LOOM, TEST_LOOM, TEST_CONNECTION, LOOM_FILE_HANDLER)
+    _X = np.concatenate([rg.normal(n, 0.1, int(num_cells / 4)) for n in range(-2, 2)])
+    _Y = rg.normal(0, 0.1, num_cells)
+    np.testing.assert_equal(test_loom.get_coordinates(-1), {"x": _X, "y": -_Y, "cellIndices": list(range(num_cells))})
+
+
+def get_gene_expression():
+    test_loom = Loom(TEST_LOOM, TEST_LOOM, TEST_CONNECTION, LOOM_FILE_HANDLER)
+    np.testing.assert_equal(test_loom.get_gene_expression("Gene_1", True, False), np.log1p(matrix[0]))
+    np.testing.assert_equal(test_loom.get_gene_expression("Gene_100", False, False), matrix[99])
