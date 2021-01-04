@@ -77,7 +77,9 @@ def generate_regulons(legacy=False):
         motif_regulons_binary = (rg.integers(5, size=(num_genes, num_regulons)) > 3).astype(int)
         motif_regulons = pd.DataFrame(data=motif_regulons_binary, index=gene_ids, columns=motif_regulons_ids)
 
-        motif_regulons_gene_occurences_data = motif_regulons_auc_binary * rg.integers(100, size=(num_genes, num_regulons))
+        motif_regulons_gene_occurences_data = motif_regulons_auc_binary * rg.integers(
+            100, size=(num_genes, num_regulons)
+        )
         motif_regulons_gene_occurences = pd.DataFrame(
             data=motif_regulons_gene_occurences_data, index=gene_ids, columns=motif_regulons_ids
         )
@@ -89,7 +91,9 @@ def generate_regulons(legacy=False):
         track_regulons_binary = (rg.integers(5, size=(num_genes, num_regulons)) > 3).astype(int)
         track_regulons = pd.DataFrame(data=track_regulons_binary, index=gene_ids, columns=track_regulons_ids)
 
-        track_regulons_gene_occurences_data = track_regulons_auc_binary * rg.integers(100, size=(num_genes, num_regulons))
+        track_regulons_gene_occurences_data = track_regulons_auc_binary * rg.integers(
+            100, size=(num_genes, num_regulons)
+        )
         track_regulons_gene_occurences = pd.DataFrame(
             data=track_regulons_gene_occurences_data, index=gene_ids, columns=track_regulons_ids
         )
@@ -130,9 +134,9 @@ def generate_regulons(legacy=False):
         ]
 
         metadata["regulonSettings"] = {"min_genes_regulon": 5, "min_regulon_gene_occurrence": 5}
-            
-            
+
     return metadata, col_attrs, row_attrs
+
 
 def generate_embeddings():
     _X = np.concatenate([rg.normal(n, 0.1, int(num_cells / 4)) for n in range(-2, 2)])
@@ -150,15 +154,13 @@ def generate_embeddings():
     embeddings_X["1"] = _X2
     embeddings_Y["1"] = _Y2
 
-    metadata = {
-        "Embeddings": [{"id": -1, "name": f"Vertical Clusters"}, {"id": 1, "name": f"Horizontal Clusters"}]
-    }
+    metadata = {"Embeddings": [{"id": -1, "name": f"Vertical Clusters"}, {"id": 1, "name": f"Horizontal Clusters"}]}
 
     col_attrs = {
         "Embedding": dfToNamedMatrix(main_embedding),
         "Embeddings_X": dfToNamedMatrix(embeddings_X),
         "Embeddings_Y": dfToNamedMatrix(embeddings_Y),
-        }
+    }
     row_attrs = {}
 
     return metadata, col_attrs, row_attrs
@@ -174,7 +176,6 @@ def generate_clusterings():
     clusterings["0"] = [int(n / (num_cells / 4)) for n in range(num_cells)]
     clusterings["1"] = [n % 4 for n in range(num_cells)]
     col_attrs["ClusterID"] = clusterings["0"].values
-
 
     for n, clustering in enumerate(clusterings.columns):
         cluster_meta = {
@@ -217,7 +218,6 @@ def generate_test_loom_data():
     clusterings_meta, clusterings_cols, clusterings_rows = generate_clusterings()
     regulons_meta, regulons_cols, regulons_rows = generate_regulons()
 
-
     col_attrs = {
         "CellID": np.array(cell_ids),
         "nUMI": np.array(matrix.sum(axis=0)),
@@ -234,10 +234,11 @@ def generate_test_loom_data():
         **clusterings_rows,
         **regulons_rows,
     }
-    
+
     metaJson = {
         "metrics": [{"name": "nUMI"}, {"name": "nGene"}],
-        "name": "Half cells", "values": list(set(col_attrs["Half cells"])),
+        "name": "Half cells",
+        "values": list(set(col_attrs["Half cells"])),
         **embeddings_meta,
         **clusterings_meta,
         **regulons_meta,
@@ -253,4 +254,3 @@ def generate_test_loom_data():
     }
 
     return matrix, row_attrs, col_attrs, attrs
-
