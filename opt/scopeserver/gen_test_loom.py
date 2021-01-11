@@ -10,7 +10,7 @@ import datetime
 from pathlib import Path
 
 
-def dfToNamedMatrix(df):
+def df_to_named_matrix(df):
     arr_ip = [tuple(i) for i in df.values]
     dtyp = np.dtype(list(zip(df.dtypes.index, df.dtypes)))
     arr = np.array(arr_ip, dtype=dtyp)
@@ -50,8 +50,8 @@ def generate_regulons(legacy=False):
         regulons_binary = (rg.integers(5, size=(num_genes, num_regulons)) > 3).astype(int)
         regulons = pd.DataFrame(data=regulons_binary, index=gene_ids, columns=regulons_ids)
 
-        col_attrs["RegulonsAUC"] = dfToNamedMatrix(regulons_auc)
-        row_attrs["Regulons"] = dfToNamedMatrix(regulons)
+        col_attrs["RegulonsAUC"] = df_to_named_matrix(regulons_auc)
+        row_attrs["Regulons"] = df_to_named_matrix(regulons)
 
         metadata["regulonThresholds"] = [
             {
@@ -98,12 +98,12 @@ def generate_regulons(legacy=False):
             data=track_regulons_gene_occurences_data, index=gene_ids, columns=track_regulons_ids
         )
 
-        col_attrs["MotifRegulonsAUC"] = dfToNamedMatrix(motif_regulons_auc)
-        col_attrs["TrackRegulonsAUC"] = dfToNamedMatrix(track_regulons_auc)
-        row_attrs["MotifRegulons"] = dfToNamedMatrix(motif_regulons)
-        row_attrs["TrackRegulons"] = dfToNamedMatrix(track_regulons)
-        row_attrs["MotifRegulonGeneOccurrences"] = dfToNamedMatrix(motif_regulons_gene_occurences)
-        row_attrs["TrackRegulonGeneOccurrences"] = dfToNamedMatrix(track_regulons_gene_occurences)
+        col_attrs["MotifRegulonsAUC"] = df_to_named_matrix(motif_regulons_auc)
+        col_attrs["TrackRegulonsAUC"] = df_to_named_matrix(track_regulons_auc)
+        row_attrs["MotifRegulons"] = df_to_named_matrix(motif_regulons)
+        row_attrs["TrackRegulons"] = df_to_named_matrix(track_regulons)
+        row_attrs["MotifRegulonGeneOccurrences"] = df_to_named_matrix(motif_regulons_gene_occurences)
+        row_attrs["TrackRegulonGeneOccurrences"] = df_to_named_matrix(track_regulons_gene_occurences)
 
         metadata["regulonThresholds"] = [
             {
@@ -157,9 +157,9 @@ def generate_embeddings():
     metadata = {"Embeddings": [{"id": -1, "name": f"Vertical Clusters"}, {"id": 1, "name": f"Horizontal Clusters"}]}
 
     col_attrs = {
-        "Embedding": dfToNamedMatrix(main_embedding),
-        "Embeddings_X": dfToNamedMatrix(embeddings_X),
-        "Embeddings_Y": dfToNamedMatrix(embeddings_Y),
+        "Embedding": df_to_named_matrix(main_embedding),
+        "Embeddings_X": df_to_named_matrix(embeddings_X),
+        "Embeddings_Y": df_to_named_matrix(embeddings_Y),
     }
     row_attrs = {}
 
@@ -204,11 +204,11 @@ def generate_clusterings():
             clustDict["description"] = f"Unannotated Cluster {str(cluster+1)}"
             cluster_meta["clusters"].append(clustDict)
 
-        row_attrs[f"ClusterMarkers_{n}"] = dfToNamedMatrix(cluster_markers)
-        row_attrs[f"ClusterMarkers_{n}_Test_Metric"] = dfToNamedMatrix(cluster_markers_test_metric)
+        row_attrs[f"ClusterMarkers_{n}"] = df_to_named_matrix(cluster_markers)
+        row_attrs[f"ClusterMarkers_{n}_Test_Metric"] = df_to_named_matrix(cluster_markers_test_metric)
         metadata["clusterings"].append(cluster_meta)
 
-    col_attrs["Clusterings"] = dfToNamedMatrix(clusterings)
+    col_attrs["Clusterings"] = df_to_named_matrix(clusterings)
     return metadata, col_attrs, row_attrs
 
 
@@ -235,7 +235,7 @@ def generate_test_loom_data():
         **regulons_rows,
     }
 
-    metaJson = {
+    meta_json = {
         "metrics": [{"name": "nUMI"}, {"name": "nGene"}],
         "name": "Half cells",
         "values": list(set(col_attrs["Half cells"])),
@@ -246,7 +246,7 @@ def generate_test_loom_data():
 
     attrs = {
         "title": "Test Data",
-        "MetaData": json.dumps(metaJson),
+        "MetaData": json.dumps(meta_json),
         "Genome": "Nomen dubium",
         "SCopeTreeL1": "Test Loom",
         "SCopeTreeL2": "",
