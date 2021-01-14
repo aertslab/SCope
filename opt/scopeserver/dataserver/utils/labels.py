@@ -2,12 +2,12 @@
 Generate labels for feature queries.
 """
 
-from typing import List, NamedTuple, Iterator, Tuple, Generator, Iterable
+from typing import List, NamedTuple, Generator
 import logging
-from itertools import groupby
 
-import numpy as np
 import re
+import numpy as np
+
 
 from scopeserver.dataserver.utils import constant
 from scopeserver.dataserver.utils.loom import Loom
@@ -66,11 +66,11 @@ def label_all_clusters(loom: Loom, embedding: int, feature: str) -> List[Feature
     meta_data = loom.get_meta_data()
     for clustering in meta_data["clusterings"]:
         if clustering["name"] == re.sub("^Clustering: ", "", feature):
-            clusteringID = str(clustering["id"])
-            cluster_names_dict = loom.get_cluster_names(int(clusteringID))
+            clustering_id = str(clustering["id"])
+            cluster_names_dict = loom.get_cluster_names(int(clustering_id))
 
     label_set = set()
-    for i in uniq(loom.get_clustering_by_id(int(clusteringID))):
+    for i in uniq(loom.get_clustering_by_id(int(clustering_id))):
         if i == -1:
             label_set.add((i, "Unclustered", "XX" * 3))
             continue
@@ -80,7 +80,9 @@ def label_all_clusters(loom: Loom, embedding: int, feature: str) -> List[Feature
 
     def labels() -> Generator[FeatureLabel, None, None]:
         for i, cluster in enumerate(clusters):
-            coords = loom.get_coordinates(coordinatesID=embedding, cluster_info=(int(clusteringID), int(cluster_ids[i])))
+            coords = loom.get_coordinates(
+                coordinatesID=embedding, cluster_info=(int(clustering_id), int(cluster_ids[i]))
+            )
 
             yield FeatureLabel(
                 label=cluster,

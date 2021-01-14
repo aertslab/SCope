@@ -1,13 +1,8 @@
-import loompy as lp
 import numpy as np
 import pandas as pd
 from numpy.random import Generator, PCG64
 
-import zlib
 import json
-import base64
-import datetime
-from pathlib import Path
 
 
 def df_to_named_matrix(df):
@@ -20,19 +15,19 @@ def df_to_named_matrix(df):
 rg = Generator(PCG64(55850))
 
 
-num_genes = 100
-num_regulons = 4
+NUM_GENES = 100
+NUM_REGULONS = 4
 # Must be divisible by 4
-num_cells = 100
+NUM_CELLS = 100
 
-cell_ids = [f"Cell_{n}" for n in range(1, num_cells + 1)]
-gene_ids = [f"Gene_{n}" for n in range(1, num_genes + 1)]
+cell_ids = [f"Cell_{n}" for n in range(1, NUM_CELLS + 1)]
+gene_ids = [f"Gene_{n}" for n in range(1, NUM_GENES + 1)]
 
 
 def generate_matrix():
-    genes = rg.poisson(lam=1, size=num_genes)
+    genes = rg.poisson(lam=1, size=NUM_GENES)
     genes = [x + 1 for x in genes]
-    matrix = rg.poisson(lam=genes, size=(num_cells, num_genes))
+    matrix = rg.poisson(lam=genes, size=(NUM_CELLS, NUM_GENES))
     return matrix
 
 
@@ -42,12 +37,12 @@ def generate_regulons(legacy=False):
     metadata = {}
 
     if legacy:
-        regulons_ids = [f"Regulon_{n}" for n in range(1, num_regulons + 1)]
-        regulons_auc_binary = (rg.integers(10, size=(num_cells, num_regulons)) > 2).astype(int)
-        regulons_auc_data = regulons_auc_binary * rg.random(size=(num_genes, num_regulons))
+        regulons_ids = [f"Regulon_{n}" for n in range(1, NUM_REGULONS + 1)]
+        regulons_auc_binary = (rg.integers(10, size=(NUM_CELLS, NUM_REGULONS)) > 2).astype(int)
+        regulons_auc_data = regulons_auc_binary * rg.random(size=(NUM_GENES, NUM_REGULONS))
         regulons_auc = pd.DataFrame(data=regulons_auc_data, index=cell_ids, columns=regulons_ids)
 
-        regulons_binary = (rg.integers(5, size=(num_genes, num_regulons)) > 3).astype(int)
+        regulons_binary = (rg.integers(5, size=(NUM_GENES, NUM_REGULONS)) > 3).astype(int)
         regulons = pd.DataFrame(data=regulons_binary, index=gene_ids, columns=regulons_ids)
 
         col_attrs["RegulonsAUC"] = df_to_named_matrix(regulons_auc)
@@ -68,31 +63,31 @@ def generate_regulons(legacy=False):
         ]
 
     else:
-        motif_regulons_ids = [f"MotifRegulon_{n}" for n in range(1, num_regulons + 1)]
-        track_regulons_ids = [f"TrackRegulon_{n}" for n in range(1, num_regulons + 1)]
-        motif_regulons_auc_binary = (rg.integers(10, size=(num_cells, num_regulons)) > 2).astype(int)
-        motif_regulons_auc_data = motif_regulons_auc_binary * rg.random(size=(num_genes, num_regulons))
+        motif_regulons_ids = [f"MotifRegulon_{n}" for n in range(1, NUM_REGULONS + 1)]
+        track_regulons_ids = [f"TrackRegulon_{n}" for n in range(1, NUM_REGULONS + 1)]
+        motif_regulons_auc_binary = (rg.integers(10, size=(NUM_CELLS, NUM_REGULONS)) > 2).astype(int)
+        motif_regulons_auc_data = motif_regulons_auc_binary * rg.random(size=(NUM_GENES, NUM_REGULONS))
         motif_regulons_auc = pd.DataFrame(data=motif_regulons_auc_data, index=cell_ids, columns=motif_regulons_ids)
 
-        motif_regulons_binary = (rg.integers(5, size=(num_genes, num_regulons)) > 3).astype(int)
+        motif_regulons_binary = (rg.integers(5, size=(NUM_GENES, NUM_REGULONS)) > 3).astype(int)
         motif_regulons = pd.DataFrame(data=motif_regulons_binary, index=gene_ids, columns=motif_regulons_ids)
 
         motif_regulons_gene_occurences_data = motif_regulons_auc_binary * rg.integers(
-            100, size=(num_genes, num_regulons)
+            100, size=(NUM_GENES, NUM_REGULONS)
         )
         motif_regulons_gene_occurences = pd.DataFrame(
             data=motif_regulons_gene_occurences_data, index=gene_ids, columns=motif_regulons_ids
         )
 
-        track_regulons_auc_binary = (rg.integers(10, size=(num_cells, num_regulons)) > 2).astype(int)
-        track_regulons_auc_data = track_regulons_auc_binary * rg.random(size=(num_genes, num_regulons))
+        track_regulons_auc_binary = (rg.integers(10, size=(NUM_CELLS, NUM_REGULONS)) > 2).astype(int)
+        track_regulons_auc_data = track_regulons_auc_binary * rg.random(size=(NUM_GENES, NUM_REGULONS))
         track_regulons_auc = pd.DataFrame(data=track_regulons_auc_data, index=cell_ids, columns=track_regulons_ids)
 
-        track_regulons_binary = (rg.integers(5, size=(num_genes, num_regulons)) > 3).astype(int)
+        track_regulons_binary = (rg.integers(5, size=(NUM_GENES, NUM_REGULONS)) > 3).astype(int)
         track_regulons = pd.DataFrame(data=track_regulons_binary, index=gene_ids, columns=track_regulons_ids)
 
         track_regulons_gene_occurences_data = track_regulons_auc_binary * rg.integers(
-            100, size=(num_genes, num_regulons)
+            100, size=(NUM_GENES, NUM_REGULONS)
         )
         track_regulons_gene_occurences = pd.DataFrame(
             data=track_regulons_gene_occurences_data, index=gene_ids, columns=track_regulons_ids
@@ -139,10 +134,10 @@ def generate_regulons(legacy=False):
 
 
 def generate_embeddings():
-    _X = np.concatenate([rg.normal(n, 0.1, int(num_cells / 4)) for n in range(-2, 2)])
-    _Y = rg.normal(0, 0.1, num_cells)
-    _X2 = rg.normal(0, 0.1, num_cells)
-    _Y2 = np.array([rg.normal(cn % 4, 0.1) for cn in range(num_cells)])
+    _X = np.concatenate([rg.normal(n, 0.1, int(NUM_CELLS / 4)) for n in range(-2, 2)])
+    _Y = rg.normal(0, 0.1, NUM_CELLS)
+    _X2 = rg.normal(0, 0.1, NUM_CELLS)
+    _Y2 = np.array([rg.normal(cn % 4, 0.1) for cn in range(NUM_CELLS)])
 
     main_embedding = pd.DataFrame(columns=["_X", "_Y"])
     main_embedding["_X"] = _X
@@ -154,7 +149,7 @@ def generate_embeddings():
     embeddings_X["1"] = _X2
     embeddings_Y["1"] = _Y2
 
-    metadata = {"Embeddings": [{"id": -1, "name": f"Vertical Clusters"}, {"id": 1, "name": f"Horizontal Clusters"}]}
+    metadata = {"Embeddings": [{"id": -1, "name": "Vertical Clusters"}, {"id": 1, "name": "Horizontal Clusters"}]}
 
     col_attrs = {
         "Embedding": df_to_named_matrix(main_embedding),
@@ -173,8 +168,8 @@ def generate_clusterings():
     row_attrs = {}
 
     clusterings = pd.DataFrame()
-    clusterings["0"] = [int(n / (num_cells / 4)) for n in range(num_cells)]
-    clusterings["1"] = [n % 4 for n in range(num_cells)]
+    clusterings["0"] = [int(n / (NUM_CELLS / 4)) for n in range(NUM_CELLS)]
+    clusterings["1"] = [n % 4 for n in range(NUM_CELLS)]
     col_attrs["ClusterID"] = clusterings["0"].values
 
     for n, clustering in enumerate(clusterings.columns):
@@ -188,10 +183,10 @@ def generate_clusterings():
             ],
         }
         cluster_markers = pd.DataFrame(
-            index=gene_ids, columns=[str(x) for x in range(max(set([int(x) for x in clusterings[clustering]])) + 1)]
+            index=gene_ids, columns=[str(x) for x in range(max({int(x) for x in clusterings[clustering]}) + 1)]
         )
         cluster_markers_test_metric = pd.DataFrame(
-            index=gene_ids, columns=[str(x) for x in range(max(set([int(x) for x in clusterings[clustering]])) + 1)]
+            index=gene_ids, columns=[str(x) for x in range(max({int(x) for x in clusterings[clustering]}) + 1)]
         )
         cluster_markers.fillna(0, inplace=True)
         cluster_markers_test_metric.fillna(0, inplace=True)
@@ -199,10 +194,10 @@ def generate_clusterings():
             cluster_markers.iloc[cluster * 4 : (cluster + 1) * 4, cluster] = 1
             cluster_markers_test_metric.iloc[cluster * 4 : (cluster + 1) * 4, cluster] = cluster * 1 * n
 
-            clustDict = {}
-            clustDict["id"] = cluster
-            clustDict["description"] = f"Unannotated Cluster {str(cluster+1)}"
-            cluster_meta["clusters"].append(clustDict)
+            clust_dict = {}
+            clust_dict["id"] = cluster
+            clust_dict["description"] = f"Unannotated Cluster {str(cluster+1)}"
+            cluster_meta["clusters"].append(clust_dict)
 
         row_attrs[f"ClusterMarkers_{n}"] = df_to_named_matrix(cluster_markers)
         row_attrs[f"ClusterMarkers_{n}_Test_Metric"] = df_to_named_matrix(cluster_markers_test_metric)
@@ -222,7 +217,7 @@ def generate_test_loom_data():
         "CellID": np.array(cell_ids),
         "nUMI": np.array(matrix.sum(axis=0)),
         "nGene": np.array((matrix > 0).sum(axis=0)),
-        "Half cells": ["First half" if n % 2 == 0 else "Second half" for n in range(num_cells)],
+        "Half cells": ["First half" if n % 2 == 0 else "Second half" for n in range(NUM_CELLS)],
         **embeddings_cols,
         **clusterings_cols,
         **regulons_cols,
@@ -237,8 +232,7 @@ def generate_test_loom_data():
 
     meta_json = {
         "metrics": [{"name": "nUMI"}, {"name": "nGene"}],
-        "name": "Half cells",
-        "values": list(set(col_attrs["Half cells"])),
+        "annotations": [{"name": "Half cells", "values": list(set(col_attrs["Half cells"]))}],
         **embeddings_meta,
         **clusterings_meta,
         **regulons_meta,
