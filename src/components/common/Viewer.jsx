@@ -1227,7 +1227,11 @@ export default class Viewer extends Component {
                 };
             })
             .filter((f) => f.name.length > 0)
-            .filter((f) => f.type === 'annotation');
+            .filter(
+                (f) =>
+                    f.type === 'annotation' ||
+                    ('clustering' && f.name == 'All Clusters')
+            );
 
         if (feature.length === 0) {
             return;
@@ -1236,7 +1240,10 @@ export default class Viewer extends Component {
         const query = {
             loomFilePath: loomFile,
             embedding: embedding,
-            feature: feature[0].name,
+            feature:
+                feature[0].name == 'All Clusters'
+                    ? feature[0].type
+                    : feature[0].name,
         };
 
         BackendAPI.getConnection().then(

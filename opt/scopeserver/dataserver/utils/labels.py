@@ -2,11 +2,12 @@
 Generate labels for feature queries.
 """
 
-from typing import List, NamedTuple, Iterator, Tuple, Generator, Iterable
+from typing import List, NamedTuple, Generator
 import logging
-from itertools import groupby
 
+import re
 import numpy as np
+
 
 from scopeserver.dataserver.utils import constant
 from scopeserver.dataserver.utils.loom import Loom
@@ -50,6 +51,41 @@ def label_annotation(loom: Loom, embedding: int, feature: str) -> List[FeatureLa
 
             yield FeatureLabel(
                 label=annotation,
+                colour=colours[i],
+                coordinate=Coordinate(x=np.mean(coords["x"]), y=np.mean(coords["y"])),
+            )
+
+    return [label for label in labels()]
+
+
+def label_all_clusters(loom: Loom, embedding: int, feature: str) -> List[FeatureLabel]:
+    """
+    Extract and group cells based on clustering. Place labels for each cluster
+    at the barycentre of the cluster.
+    """
+    meta_data = loom.get_meta_data()
+    for clustering in meta_data["clusterings"]:
+        if clustering["name"] == re.sub("^Clustering: ", "", feature):
+            clustering_id = str(clustering["id"])
+            cluster_names_dict = loom.get_cluster_names(int(clustering_id))
+
+    label_set = set()
+    for i in uniq(loom.get_clustering_by_id(int(clustering_id))):
+        if i == -1:
+            label_set.add((i, "Unclustered", "XX" * 3))
+            continue
+        label_set.add((i, cluster_names_dict[i], constant.BIG_COLOR_LIST[i % len(constant.BIG_COLOR_LIST)]))
+
+    cluster_ids, clusters, colours = zip(*label_set)
+
+    def labels() -> Generator[FeatureLabel, None, None]:
+        for i, cluster in enumerate(clusters):
+            coords = loom.get_coordinates(
+                coordinatesID=embedding, cluster_info=(int(clustering_id), int(cluster_ids[i]))
+            )
+
+            yield FeatureLabel(
+                label=cluster,
                 colour=colours[i],
                 coordinate=Coordinate(x=np.mean(coords["x"]), y=np.mean(coords["y"])),
             )

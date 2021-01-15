@@ -33,9 +33,10 @@ from scopeserver.dataserver.utils import cell_color_by_features as ccbf
 from scopeserver.dataserver.utils import constant
 from scopeserver.dataserver.utils import data
 from scopeserver.dataserver.utils import search_space as ss
+from scopeserver.dataserver.utils import proto
 from scopeserver.dataserver.utils.search import get_search_results
 from scopeserver.dataserver.utils.loom import Loom
-from scopeserver.dataserver.utils.labels import label_annotation
+from scopeserver.dataserver.utils.labels import label_annotation, label_all_clusters
 from scopeserver.dataserver.utils.annotation import Annotation
 
 from pyscenic.genesig import GeneSignature
@@ -141,7 +142,7 @@ class SCope(s_pb2_grpc.MainServicer):
         logger.debug("Searching for {0}".format(query))
         start_time = time.time()
 
-        features = get_search_results(query, loom, self.config["dataHashSecret"])
+        features = get_search_results(query, loom)
         return features
 
     def getVmax(self, request, context):
@@ -208,9 +209,7 @@ class SCope(s_pb2_grpc.MainServicer):
             elif request.featureType[n] == "metric":
                 cell_color_by_features.setMetricFeature(request=request, feature=feature, n=n)
             elif request.featureType[n].startswith("Clustering: "):
-                cell_color_by_features.setClusteringFeature(
-                    request=request, feature=feature, n=n, secret=self.config["dataHashSecret"]
-                )
+                cell_color_by_features.setClusteringFeature(request=request, feature=feature, n=n)
                 if cell_color_by_features.hasReply():
                     return cell_color_by_features.getReply()
             else:
@@ -232,13 +231,15 @@ class SCope(s_pb2_grpc.MainServicer):
         except ValueError:
             return
 
+        label_extract = label_all_clusters if request.feature.startswith("Clustering:") else label_annotation
+
         labels = [
             s_pb2.FeatureLabelReply.FeatureLabel(
                 label=label.label,
                 colour=label.colour,
                 coordinate=s_pb2.Coordinate(x=label.coordinate.x, y=label.coordinate.y),
             )
-            for label in label_annotation(loom, request.embedding, request.feature)
+            for label in label_extract(loom, request.embedding, request.feature)
         ]
 
         return s_pb2.FeatureLabelReply(labels=labels)
@@ -250,9 +251,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getNextCluster(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
-        clustering_meta = loom.get_meta_data_clustering_by_id(
-            request.clusteringID, secret=self.config["dataHashSecret"]
-        )
+        clustering_meta = loom.get_meta_data_clustering_by_id(request.clusteringID)
         max_cluster = max([int(x["id"]) for x in clustering_meta["clusters"]])
         min_cluster = min([int(x["id"]) for x in clustering_meta["clusters"]])
 
@@ -268,11 +267,11 @@ class SCope(s_pb2_grpc.MainServicer):
 
         try:
             cluster_metadata = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(
-                request.clusteringID, next_clusterID, secret=self.config["dataHashSecret"]
+                request.clusteringID, next_clusterID
             )
         except ValueError:
             cluster_metadata = loom.get_meta_data_cluster_by_clustering_id_and_cluster_id(
-                request.clusteringID, request.clusterID, secret=self.config["dataHashSecret"]
+                request.clusteringID, request.clusterID
             )
 
         f = self.get_features(loom=loom, query=cluster_metadata["description"])
@@ -470,27 +469,17 @@ class SCope(s_pb2_grpc.MainServicer):
             return s_pb2.MarkerGenesReply(genes=[], metrics=[])
 
         # Filter the MD clusterings by ID
-        md_clustering = loom.get_meta_data_clustering_by_id(
-            id=request.clusteringID, secret=self.config["dataHashSecret"]
-        )
+        md_clustering = loom.get_meta_data_clustering_by_id(id=request.clusteringID)
         cluster_marker_metrics = None
 
         if "clusterMarkerMetrics" in md_clustering.keys():
             md_cmm = md_clustering["clusterMarkerMetrics"]
 
-            def protoize_cluster_marker_metric(metric):
-                return s_pb2.MarkerGenesMetric(
-                    accessor=metric["accessor"],
-                    name=metric["name"],
-                    description=metric["description"],
-                    values=cluster_marker_metrics[metric["accessor"]],
-                )
-
             cluster_marker_metrics = loom.get_cluster_marker_table(
-                clustering_id=request.clusteringID, cluster_id=request.clusterID, secret=self.config["dataHashSecret"]
+                clustering_id=request.clusteringID, cluster_id=request.clusterID
             )
 
-        metrics = [protoize_cluster_marker_metric(x) for x in md_cmm]
+        metrics = [proto.protoize_cluster_marker_metric(x, cluster_marker_metrics) for x in md_cmm]
         return s_pb2.MarkerGenesReply(genes=cluster_marker_metrics.index, metrics=metrics)
 
     def getMyGeneSets(self, request, context):
@@ -561,8 +550,8 @@ class SCope(s_pb2_grpc.MainServicer):
                             cellMetaData=s_pb2.CellMetaData(
                                 annotations=loom.get_meta_data_by_key(key="annotations"),
                                 embeddings=loom.get_meta_data_by_key(key="embeddings"),
-                                clusterings=loom.get_meta_data_by_key(
-                                    key="clusterings", secret=self.config["dataHashSecret"]
+                                clusterings=proto.protoize_cell_type_annotation(
+                                    loom.get_meta_data_by_key(key="clusterings"), secret=self.config["dataHashSecret"]
                                 ),
                             ),
                             fileMetaData=file_meta,

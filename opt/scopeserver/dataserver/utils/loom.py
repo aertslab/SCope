@@ -211,7 +211,7 @@ class Loom:
             ]
 
         self.update_metadata(metaJson)
-
+        self.get_meta_data_clustering_by_id.cache_clear()
         self.ss = ss.update(self, update="cluster_annotations")
 
         if (
@@ -298,6 +298,7 @@ class Loom:
 
         try:
             self.update_metadata(metaJson)
+            self.get_meta_data_clustering_by_id.cache_clear()
         except OSError as e:
             logger.error(e)
             return (False, "Couldn't write metadata!")
@@ -424,14 +425,13 @@ class Loom:
             clustering_name = clustering_meta["name"]
             clustering_id = clustering_meta["id"]
             clustering = self.get_clustering_by_id(clustering_id)
+            cluster_names_dict = self.get_cluster_names(int(clustering_id))
             counts: Counter = Counter(clustering[cell_idxs])
             all_counts: Counter = Counter(clustering)
             for cluster_id in counts:
                 if cluster_id == -1:
                     continue
-                cluster_name = self.get_meta_data_cluster_by_clustering_id_and_cluster_id(
-                    clustering_id, cluster_id, ""
-                )["description"]
+                cluster_name = cluster_names_dict[int(cluster_id)]
                 cluster_overlap_data.append(
                     {
                         "clustering_name": clustering_name,
@@ -442,6 +442,40 @@ class Loom:
                     }
                 )
         return cluster_overlap_data
+
+    def get_cluster_names(self, clustering_id: int) -> Dict[int, str]:
+        clustering_meta = self.get_meta_data_clustering_by_id(clustering_id)
+        cluster_names_dict = {}
+        for cluster_meta in clustering_meta["clusters"]:
+            if "cell_type_annotation" in cluster_meta:
+                top_voted = []
+                top_votes = 0
+                for cta in cluster_meta["cell_type_annotation"]:
+                    total_votes = int(len(cta["votes"]["votes_for"]["voters"])) - int(
+                        len(cta["votes"]["votes_against"]["voters"])
+                    )
+                    if total_votes <= 0:
+                        continue
+                    elif total_votes > top_votes:
+                        top_voted = [cta]
+                        top_votes = total_votes
+                    elif total_votes == top_votes:
+                        top_voted.append(cta)
+                if len(top_voted) > 0:
+                    for n, cta in enumerate(top_voted):
+                        if n == 0:
+                            cluster_names_dict[
+                                int(cluster_meta["id"])
+                            ] = f'{top_voted[n]["data"]["annotation_label"]}\n({top_voted[n]["data"]["obo_id"]})'
+                        else:
+                            cluster_names_dict[
+                                int(cluster_meta["id"])
+                            ] += f'\nOR\n{top_voted[n]["data"]["annotation_label"]}\n({top_voted[n]["data"]["obo_id"]})'
+                else:
+                    cluster_names_dict[int(cluster_meta["id"])] = cluster_meta["description"]
+            else:
+                cluster_names_dict[int(cluster_meta["id"])] = cluster_meta["description"]
+        return cluster_names_dict
 
     def set_hierarchy(self, L1: str, L2: str, L3: str) -> bool:
         logger.info("Changing hierarchy name for {0}".format(self.get_abs_file_path()))
@@ -588,10 +622,8 @@ class Loom:
             raise ValueError("Multiple annotations matches the given name: {0}".format(name))
         return md_annotation[0]
 
-    def get_meta_data_cluster_by_clustering_id_and_cluster_id(
-        self, clustering_id: int, cluster_id: int, secret: str = None
-    ):
-        md_clustering = self.get_meta_data_clustering_by_id(clustering_id, secret=secret)
+    def get_meta_data_cluster_by_clustering_id_and_cluster_id(self, clustering_id: int, cluster_id: int):
+        md_clustering = self.get_meta_data_clustering_by_id(clustering_id)
         md_cluster = list(filter(lambda x: x["id"] == cluster_id, md_clustering["clusters"]))
         if len(md_cluster) == 0:
             raise ValueError("The cluster with the given id {0} does not exist.".format(cluster_id))
@@ -600,56 +632,23 @@ class Loom:
         return md_cluster[0]
 
     @lru_cache(maxsize=1024)
-    def get_meta_data_clustering_by_id(self, id: int, secret: str = None):
-        md_clusterings = self.get_meta_data_by_key(key="clusterings", secret=secret)
+    def get_meta_data_clustering_by_id(
+        self,
+        id: int,
+    ):
+        md_clusterings = self.get_meta_data_by_key(key="clusterings")
         md_clustering = list(filter(lambda x: x["id"] == id, md_clusterings))
         if len(md_clustering) > 1:
             raise ValueError("Multiple clusterings matches the given id: {0}".format(id))
         return md_clustering[0]
 
-    @staticmethod
-    def protoize_cell_type_annotation(md, secret: str):
-        ctas = md["cell_type_annotation"]
-        md["cell_type_annotation"] = []
-        for cta in ctas:
-            hash_data = json.dumps(cta["data"]) + secret
-            data_hash = hashlib.sha256(hash_data.encode()).hexdigest()
-
-            votes: Dict[str, Any] = {
-                "votes_for": {"total": 0, "voters": []},
-                "votes_against": {"total": 0, "voters": []},
-            }
-
-            for i in votes.keys():
-                for v in cta["votes"][i]["voters"]:
-                    hash_data = json.dumps(cta["data"]) + v["voter_id"] + secret
-                    user_hash = hashlib.sha256(hash_data.encode()).hexdigest()
-                    v["voter_hash"] = True if user_hash == v["voter_hash"] else False
-                    votes[i]["voters"].append(s_pb2.CollabAnnoVoter(**v))
-                    votes[i]["total"] += 1
-                votes[i] = s_pb2.CollabAnnoVotes(**votes[i])
-
-            cta_proto = s_pb2.CellTypeAnnotation(
-                data=s_pb2.CollabAnnoData(**cta["data"]),
-                validate_hash=True if data_hash == cta["validate_hash"] else False,
-                votes_for=votes["votes_for"],
-                votes_against=votes["votes_against"],
-            )
-            md["cell_type_annotation"].append(cta_proto)
-        return md
-
-    def get_meta_data_by_key(self, key, secret=None):
+    def get_meta_data_by_key(self, key):
         meta_data = self.get_meta_data()
         if key in meta_data.keys():
             md = meta_data[key]
             if key == "embeddings":
                 for e in md:  # Fix for malformed embeddings json (R problem)
                     e["id"] = int(e["id"])
-            if key == "clusterings":
-                for n, clustering in enumerate(md.copy()):
-                    for m, cluster in enumerate(clustering["clusters"]):
-                        if "cell_type_annotation" in cluster.keys():
-                            md[n]["clusters"][m] = self.protoize_cell_type_annotation(cluster, secret=secret)
             return md
         return []
 
@@ -903,7 +902,11 @@ class Loom:
     ##############
 
     def get_coordinates(
-        self, coordinatesID: int = -1, annotation: Optional[List[Annotation]] = None, logic: str = "OR"
+        self,
+        coordinatesID: int = -1,
+        annotation: Optional[List[Annotation]] = None,
+        cluster_info: Optional[Tuple[int, int]] = None,
+        logic: str = "OR",
     ):
         loom = self.loom_connection
         if coordinatesID == -1:
@@ -931,6 +934,14 @@ class Loom:
             y = loom.ca.Embeddings_Y[str(coordinatesID)]
         if annotation is not None:
             cellIndices = self.get_anno_cells(annotations=annotation, logic=logic)
+            x = x[cellIndices]
+            y = y[cellIndices]
+        if cluster_info is not None:
+            clustering_id, cluster_id = cluster_info
+            cellIndices = set()
+            for c in np.where(loom.ca.Clusterings[str(clustering_id)].astype(str) == str(cluster_id))[0]:
+                cellIndices.add(c)
+            cellIndices = list(cellIndices)
             x = x[cellIndices]
             y = y[cellIndices]
         else:
@@ -1017,13 +1028,13 @@ class Loom:
         )
         return cluster_marker_metric_df
 
-    def get_cluster_marker_table(self, clustering_id: int, cluster_id: int, secret: str) -> pd.DataFrame:
+    def get_cluster_marker_table(self, clustering_id: int, cluster_id: int) -> pd.DataFrame:
         def create_cluster_marker_metric(metric):
             return self.get_cluster_marker_metrics(
                 clustering_id=clustering_id, cluster_id=cluster_id, metric_accessor=metric["accessor"]
             )
 
-        md_clustering = self.get_meta_data_clustering_by_id(id=clustering_id, secret=secret)
+        md_clustering = self.get_meta_data_clustering_by_id(id=clustering_id)
         md_cmm = md_clustering["clusterMarkerMetrics"]
         cluster_marker_table = functools.reduce(
             lambda left, right: pd.merge(left, right, left_index=True, right_index=True, how="outer"),
