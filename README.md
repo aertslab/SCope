@@ -11,7 +11,7 @@ View the [change log here](CHANGELOG.md).
 
 ## Demo
 
-Visit [http://scope.aertslab.org](http://scope.aertslab.org) to test out SCope on several published datasets! Personal loom file files can be uploaded but will only be kept for 5 days.
+Visit [https://scope.aertslab.org](https://scope.aertslab.org) to test out SCope on several published datasets! Personal loom file files can be uploaded but will only be kept for 5 days.
 
 ## Loom File Generation
 
