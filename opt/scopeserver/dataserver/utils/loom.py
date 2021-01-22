@@ -936,7 +936,7 @@ class Loom:
             cellIndices = self.get_anno_cells(annotations=annotation, logic=logic)
             x = x[cellIndices]
             y = y[cellIndices]
-        if cluster_info is not None:
+        elif cluster_info is not None:
             clustering_id, cluster_id = cluster_info
             cellIndices = set()
             for c in np.where(loom.ca.Clusterings[str(clustering_id)].astype(str) == str(cluster_id))[0]:
