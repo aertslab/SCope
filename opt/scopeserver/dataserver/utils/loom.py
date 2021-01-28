@@ -845,17 +845,16 @@ class Loom:
             regulon_names = loom.ca.MotifRegulonsAUC.dtype.names
             loom.ca.MotifRegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
             return loom.ca.MotifRegulonsAUC
-        if "TrackRegulonsAUC" in self.loom_connection.ca and regulon_type == "track":
+        elif "TrackRegulonsAUC" in self.loom_connection.ca and regulon_type == "track":
             regulon_names = loom.ca.TrackRegulonsAUC.dtype.names
             loom.ca.TrackRegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
             return loom.ca.TrackRegulonsAUC
-        if "RegulonsAUC" in self.loom_connection.ca and regulon_type == "legacy":
+        elif "RegulonsAUC" in self.loom_connection.ca and regulon_type == "legacy":
             regulon_names = loom.ca.RegulonsAUC.dtype.names
             loom.ca.RegulonsAUC.dtype.names = [regulon_name.replace(" ", "_") for regulon_name in regulon_names]
             return loom.ca.RegulonsAUC
-        raise IndexError(
-            f"AUC values were requested but not found.\n\tLoom: {self.file_path}\n\tRegulon type requested: {regulon_type}\n\tColumn attributes present: {self.loom_connection.ca.keys()}"
-        )
+        else:
+            return np.empty((0, 0), dtype=[("none", None)])
 
     def get_auc_values(
         self, regulon: str, annotation: Optional[List[Annotation]] = None, logic: str = "OR"
@@ -870,6 +869,9 @@ class Loom:
         elif regulon in self.get_regulons_AUC(regulon_type="legacy").dtype.names:
             regulon_type = "legacy"
         else:
+            logger.debug(
+                f"AUC values were requested but not found.\n\tLoom: {self.file_path}\n\tColumn attributes present: {self.loom_connection.ca.keys()}"
+            )
             return np.empty((0, 0)), cellIndices
 
         if regulon in self.get_regulons_AUC(regulon_type=regulon_type).dtype.names:
