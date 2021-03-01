@@ -54,9 +54,8 @@ DEFINED_SEARCH_TYPES = {
 }
 
 
-def match_result_cost(term: str, result: str, result_type: str) -> Optional[int]:
-    term_cost = 0
-    type_cost = 0
+def match_result_cost(term: str, result: str, result_type: str) -> Tuple[int, Optional[int]]:
+    term_cost: Optional[int]
 
     if term == result:
         term_cost = 0
