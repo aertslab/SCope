@@ -1,4 +1,6 @@
+import sys
 import logging
+import operator
 
 from typing import Dict, NamedTuple, Tuple, List, Optional, Type, Union
 from collections import OrderedDict, defaultdict
@@ -54,8 +56,11 @@ DEFINED_SEARCH_TYPES = {
 }
 
 
-def match_result_cost(term: str, result: str, result_type: str) -> Tuple[int, Optional[int]]:
-    term_cost: Optional[int]
+def match_result_cost(
+    term: str,
+    result: str,
+) -> int:
+    term_cost: int = sys.maxsize
 
     if term == result:
         term_cost = 0
@@ -69,24 +74,25 @@ def match_result_cost(term: str, result: str, result_type: str) -> Tuple[int, Op
         term_cost = 4
     elif term.casefold() in result.casefold():
         term_cost = 5
-    else:
-        term_cost = None
+    return term_cost
 
+
+def match_result_type_cost(result_type: str) -> int:
     if result_type in ["gene", "regulon"] or result_type.startswith("Clustering:"):
         type_cost = 0
     else:
         type_cost = 1
-
-    return (type_cost, term_cost)
+    return type_cost
 
 
 def sort_results(search_term: str, results: List[MatchResult]) -> List[MatchResult]:
     costs = [
-        (match_result_cost(search_term, match.element, match.element_type), match, result) for match, result in results
+        ((match_result_type_cost(match.element_type), match_result_cost(search_term, match.element)), match, result)
+        for match, result in results
     ]
     sorted_costs = sorted(
-        [(cost, match, result) for cost, match, result in costs if cost[1] is not None],
-        key=lambda cost: (cost[0][0], cost[0][1]),
+        [(cost, match, result) for cost, match, result in costs],
+        key=operator.itemgetter(0),
     )
     return [MatchResult(match, result) for _, match, result in sorted_costs]
 
@@ -185,10 +191,7 @@ def create_feature_description(
             desc_key = ResultTypePair(category_name, category_type)
             features[desc_key] = features[k]
             feature_types[desc_key] = feature_types[k]
-            if DEFINED_SEARCH_TYPES[k[1]]["final_category"] == "cluster_category":
-                is_cluster = True
-            else:
-                is_cluster = False
+            is_cluster = DEFINED_SEARCH_TYPES[k[1]]["final_category"] == "cluster_category"
             if len(v) > 1:
                 if k[0][-1] == "s" and not is_cluster:
                     category_name += "es"
