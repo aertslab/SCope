@@ -1,4 +1,6 @@
+import sys
 import logging
+import operator
 
 from typing import Dict, NamedTuple, Tuple, List, Optional, Type, Union
 from collections import OrderedDict, defaultdict
@@ -54,26 +56,43 @@ DEFINED_SEARCH_TYPES = {
 }
 
 
-def match_result_cost(term: str, result: str) -> Optional[int]:
+def match_result_cost(
+    term: str,
+    result: str,
+) -> int:
+    term_cost: int = sys.maxsize
+
     if term == result:
-        return 0
-    if term.casefold() == result.casefold():
-        return 1
-    if result.startswith(term) or result.endswith(term):
-        return 2
-    if result.casefold().startswith(term.casefold()) or result.casefold().endswith(term.casefold()):
-        return 3
-    if term in result:
-        return 4
-    if term.casefold() in result.casefold():
-        return 5
-    return None
+        term_cost = 0
+    elif term.casefold() == result.casefold():
+        term_cost = 1
+    elif result.startswith(term) or result.endswith(term):
+        term_cost = 2
+    elif result.casefold().startswith(term.casefold()) or result.casefold().endswith(term.casefold()):
+        term_cost = 3
+    elif term in result:
+        term_cost = 4
+    elif term.casefold() in result.casefold():
+        term_cost = 5
+    return term_cost
+
+
+def match_result_type_cost(result_type: str) -> int:
+    if result_type in ["gene", "regulon"] or result_type.startswith("Clustering:"):
+        type_cost = 0
+    else:
+        type_cost = 1
+    return type_cost
 
 
 def sort_results(search_term: str, results: List[MatchResult]) -> List[MatchResult]:
-    costs = [(match_result_cost(search_term, match.element), match, result) for match, result in results]
+    costs = [
+        ((match_result_type_cost(match.element_type), match_result_cost(search_term, match.element)), match, result)
+        for match, result in results
+    ]
     sorted_costs = sorted(
-        [(cost, match, result) for cost, match, result in costs if cost is not None], key=lambda cost: cost[0]
+        [(cost, match, result) for cost, match, result in costs],
+        key=operator.itemgetter(0),
     )
     return [MatchResult(match, result) for _, match, result in sorted_costs]
 
@@ -167,16 +186,12 @@ def create_feature_description(
         if k[1] == "gene" and len(synonyms) > 0:
             descriptions[k].append(f"Synonyms: {', '.join(synonyms)}")
         elif k[1] in DEFINED_SEARCH_TYPES:
-            if DEFINED_SEARCH_TYPES[k[1]]["final_category"] == "cluster_category":
-                is_cluster = True
-                category_name = features[k]
-                category_type = feature_types[k]
-                desc_key = ResultTypePair(category_name, category_type)
-                features[desc_key] = features[k]
-                feature_types[desc_key] = feature_types[k]
-            else:
-                is_cluster = False
-                category_name = k[0]
+            category_name = features[k]
+            category_type = feature_types[k]
+            desc_key = ResultTypePair(category_name, category_type)
+            features[desc_key] = features[k]
+            feature_types[desc_key] = feature_types[k]
+            is_cluster = DEFINED_SEARCH_TYPES[k[1]]["final_category"] == "cluster_category"
             if len(v) > 1:
                 if k[0][-1] == "s" and not is_cluster:
                     category_name += "es"
@@ -193,7 +208,7 @@ def create_feature_description(
             if len(descriptions[desc_key]) == 0:
                 descriptions[desc_key] = [""]
 
-    final_descriptions = {k: ", ".join(v) for (k, v) in descriptions.items()}
+    final_descriptions = {k: ", ".join([x for x in v if x != ""]) for (k, v) in descriptions.items()}
 
     return final_descriptions, features, feature_types
 
