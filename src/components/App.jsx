@@ -581,7 +581,7 @@ class App extends Component {
         this.forceUpdate();
     }
 
-    restoreSession(ip, uuid, permalink) {
+    async restoreSession(ip, uuid, permalink) {
         const { history } = this.props;
         try {
             permalink = decodeURIComponent(permalink);
@@ -590,40 +590,39 @@ class App extends Component {
             let settings = JSON.parse(pako.inflate(deflated, { to: 'string' }));
             BackendAPI.importObject(settings);
             console.log('Restoring session' + uuid + '...');
-            BackendAPI.queryLoomFiles(uuid, () => {
-                Object.keys(settings.features).map((page) => {
-                    settings.features[page].map((f, i) => {
-                        BackendAPI.updateFeature(
-                            i,
-                            f.type,
-                            f.feature,
-                            f.featureType,
-                            f.metadata ? f.metadata.description : null,
-                            page
-                        );
-                    });
+            const files = await BackendAPI.queryLoomFiles(uuid);
+            Object.keys(settings.features).map((page) => {
+                settings.features[page].map((f, i) => {
+                    BackendAPI.updateFeature(
+                        i,
+                        f.type,
+                        f.feature,
+                        f.featureType,
+                        f.metadata ? f.metadata.description : null,
+                        page
+                    );
                 });
-                if (settings.page && settings.loom) {
-                    let permalinkRedirect = (uuid) => {
-                        history.replace(
-                            '/' +
-                                [
-                                    uuid,
-                                    encodeURIComponent(settings.loom),
-                                    encodeURIComponent(settings.page),
-                                ].join('/')
-                        );
-                        BackendAPI.forceUpdate();
-                    };
-                    if (!uuid) {
-                        this.obtainNewUUID(ip, permalinkRedirect);
-                    } else {
-                        permalinkRedirect(uuid);
-                    }
-                } else {
-                    throw 'URL params are missing';
-                }
             });
+            if (settings.page && settings.loom) {
+                let permalinkRedirect = (uuid) => {
+                    history.replace(
+                        '/' +
+                            [
+                                uuid,
+                                encodeURIComponent(settings.loom),
+                                encodeURIComponent(settings.page),
+                            ].join('/')
+                    );
+                    BackendAPI.forceUpdate();
+                };
+                if (!uuid) {
+                    this.obtainNewUUID(ip, permalinkRedirect);
+                } else {
+                    permalinkRedirect(uuid);
+                }
+            } else {
+                throw 'URL params are missing';
+            }
         } catch (ex) {
             window.location.href = '/';
         }

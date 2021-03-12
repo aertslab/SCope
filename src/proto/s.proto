@@ -24,7 +24,6 @@ service Main {
   rpc getCoordinates (CoordinatesRequest) returns (CoordinatesReply) {}
   rpc getRegulonMetaData (RegulonMetaDataRequest) returns (RegulonMetaDataReply) {}
   rpc getMarkerGenes (MarkerGenesRequest) returns (MarkerGenesReply) {}
-  rpc getMyLooms (MyLoomsRequest) returns (MyLoomsReply) {}
   rpc translateLassoSelection (TranslateLassoSelectionRequest) returns (TranslateLassoSelectionReply) {}
   rpc getCellIDs (CellIDsRequest) returns (CellIDsReply) {}
   rpc doGeneSetEnrichment (GeneSetEnrichmentRequest) returns (stream GeneSetEnrichmentReply) {}

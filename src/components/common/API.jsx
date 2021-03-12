@@ -1,3 +1,5 @@
+import { fetchJson } from '../../api/fetch';
+
 class API {
     constructor() {
         this.GBC = require('grpc-bus-websocket-client');
@@ -335,37 +337,23 @@ class API {
         return this.getActiveLoomMetaDataEmbedding().trajectory;
     }
 
-    queryLoomFiles(uuid, callback, loomFile = null) {
-        let query = {
-            UUID: uuid,
-        };
-
-        console.log(loomFile);
-        if (loomFile) {
-            query['loomFile'] = loomFile;
-        }
-
-        this.getConnection().then(
-            (gbc) => {
-                if (DEBUG) console.log('getMyLooms', query);
-                gbc.services.scope.Main.getMyLooms(query, (error, response) => {
-                    if (response !== null) {
-                        if (DEBUG) console.log('getMyLooms', response);
-                        BackendAPI.setLoomFiles(
-                            response.myLooms,
-                            response.update
-                        );
-                        callback(response.myLooms);
-                    } else {
-                        console.log('No loom files detected');
-                        callback([]);
-                    }
-                });
-            },
-            () => {
-                this.showError();
+    async queryLoomFiles(uuid, loomFile = null) {
+        const queryParams = loomFile ? `?dataset_file_name=${loomFile}` : '';
+        const queryURL = `${BACKEND.httpProtocol}://${BACKEND.host}:8000/session/${uuid}/datasets/${queryParams}`;
+        console.log(queryURL);
+        const res = await fetchJson(queryURL);
+        if (res?.err || res.data.error) {
+            this.showError();
+        } else {
+            const { datasets, update } = res.data;
+            console.log('Datasets fetched:');
+            console.log(datasets);
+            if (datasets.length == 0) {
+                console.log('No loom files detected');
             }
-        );
+            BackendAPI.setLoomFiles(datasets, update);
+            return datasets;
+        }
     }
 
     getLoomFiles() {
@@ -450,36 +438,34 @@ class API {
                         );
                     gbc.services.scope.Main.setAnnotationName(
                         setAnnotationNameQuery,
-                        (setAnnotationNameErr, setAnnotationNameResponse) => {
+                        async (
+                            setAnnotationNameErr,
+                            setAnnotationNameResponse
+                        ) => {
                             if (setAnnotationNameResponse.success) {
-                                BackendAPI.queryLoomFiles(
+                                await BackendAPI.queryLoomFiles(
                                     uuid,
-                                    () => {
-                                        BackendAPI.getActiveFeatures().forEach(
-                                            (f, n) => {
-                                                if (
-                                                    f.metadata[
-                                                        'clusteringID'
-                                                    ] == clusteringID &&
-                                                    f.metadata['clusterID'] ==
-                                                        clusterID
-                                                ) {
-                                                    BackendAPI.updateFeature(
-                                                        n,
-                                                        f.type,
-                                                        newAnnoName,
-                                                        f.featureType,
-                                                        f.metadata
-                                                            ? f.metadata
-                                                                  .description
-                                                            : null,
-                                                        ''
-                                                    );
-                                                }
-                                            }
-                                        );
-                                    },
                                     loomFilePath
+                                );
+                                BackendAPI.getActiveFeatures().forEach(
+                                    (f, n) => {
+                                        if (
+                                            f.metadata['clusteringID'] ==
+                                                clusteringID &&
+                                            f.metadata['clusterID'] == clusterID
+                                        ) {
+                                            BackendAPI.updateFeature(
+                                                n,
+                                                f.type,
+                                                newAnnoName,
+                                                f.featureType,
+                                                f.metadata
+                                                    ? f.metadata.description
+                                                    : null,
+                                                ''
+                                            );
+                                        }
+                                    }
                                 );
                             }
                         }
@@ -525,16 +511,18 @@ class API {
         };
         this.getConnection().then((gbc) => {
             if (DEBUG) console.log('getNextCluster', query);
-            gbc.services.scope.Main.getNextCluster(query, (err, response) => {
-                // TODO: Hacky implementation. To be refactored/reviewed properly
-                BackendAPI.queryLoomFiles(
-                    this.uuid,
-                    () => {
-                        callback(response);
-                    },
-                    this.getActiveLoom()
-                );
-            });
+            gbc.services.scope.Main.getNextCluster(
+                query,
+                async (err, response) => {
+                    // TODO: Hacky implementation. To be refactored/reviewed properly
+                    // TODO: Check if feature is not broken here
+                    const res = await BackendAPI.queryLoomFiles(
+                        this.uuid,
+                        this.getActiveLoom()
+                    );
+                    callback(res.data);
+                }
+            );
         });
     }
 
@@ -756,32 +744,25 @@ class API {
             (gbc) => {
                 gbc.services.scope.Main.setColabAnnotationData(
                     query,
-                    (err, response) => {
+                    async (err, response) => {
                         if (DEBUG)
                             console.log('setColabAnnotationData', response);
                         if (response.success) {
-                            BackendAPI.queryLoomFiles(
-                                uuid,
-                                () => {
-                                    BackendAPI.getActiveFeatures().forEach(
-                                        (f, n) => {
-                                            if (f === feature) {
-                                                BackendAPI.updateFeature(
-                                                    n,
-                                                    f.type,
-                                                    f.feature,
-                                                    f.featureType,
-                                                    f.metadata
-                                                        ? f.metadata.description
-                                                        : null,
-                                                    ''
-                                                );
-                                            }
-                                        }
+                            await BackendAPI.queryLoomFiles(uuid, loomFilePath);
+                            BackendAPI.getActiveFeatures().forEach((f, n) => {
+                                if (f === feature) {
+                                    BackendAPI.updateFeature(
+                                        n,
+                                        f.type,
+                                        f.feature,
+                                        f.featureType,
+                                        f.metadata
+                                            ? f.metadata.description
+                                            : null,
+                                        ''
                                     );
-                                },
-                                loomFilePath
-                            );
+                                }
+                            });
                         }
                         callback(response);
                     }
@@ -810,32 +791,25 @@ class API {
             (gbc) => {
                 gbc.services.scope.Main.voteAnnotation(
                     query,
-                    (err, response) => {
+                    async (err, response) => {
                         if (DEBUG) console.log('voteAnnotation', response);
                         if (response.success) {
-                            BackendAPI.queryLoomFiles(
-                                uuid,
-                                () => {
-                                    BackendAPI.getActiveFeatures().forEach(
-                                        (f, n) => {
-                                            // if (f.metadata['clusteringID'] == feature.metadata['clusteringID'] && f.metadata['clusterID'] == feature.metadata['clusterID']) {
-                                            if (f == feature) {
-                                                BackendAPI.updateFeature(
-                                                    n,
-                                                    f.type,
-                                                    f.feature,
-                                                    f.featureType,
-                                                    f.metadata
-                                                        ? f.metadata.description
-                                                        : null,
-                                                    ''
-                                                );
-                                            }
-                                        }
+                            await BackendAPI.queryLoomFiles(uuid, loomFilePath);
+                            BackendAPI.getActiveFeatures().forEach((f, n) => {
+                                // if (f.metadata['clusteringID'] == feature.metadata['clusteringID'] && f.metadata['clusterID'] == feature.metadata['clusterID']) {
+                                if (f == feature) {
+                                    BackendAPI.updateFeature(
+                                        n,
+                                        f.type,
+                                        f.feature,
+                                        f.featureType,
+                                        f.metadata
+                                            ? f.metadata.description
+                                            : null,
+                                        ''
                                     );
-                                },
-                                loomFilePath
-                            );
+                                }
+                            });
                         }
                         callback(response);
                     }

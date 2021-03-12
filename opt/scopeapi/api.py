@@ -46,14 +46,15 @@ class SCopeAPI:
 
                     datasets.append(
                         {
-                            "loom_file_path": f,
-                            "loom_display_name": os.path.splitext(os.path.basename(f))[0],
-                            "loom_size": loom.get_file_size(),
-                            "cell_metadata": loom.get_filtered_metadata(
-                                keys=["annotations", "clusterings", "embeddings"]
+                            "loomFilePath": f,
+                            "loomDisplayName": os.path.splitext(os.path.basename(f))[0],
+                            "loomSize": loom.get_file_size(),
+                            "cellMetaData": loom.get_filtered_metadata(
+                                keys=["annotations", "clusterings", "embeddings"],
+                                secret=self.__server.config["dataHashSecret"],
                             ),
-                            "file_metadata": loom.get_file_metadata(),
-                            "loom_hierarchy": loom.get_hierarchy(),
+                            "fileMetaData": loom.get_file_metadata(),
+                            "loomHierarchy": loom.get_hierarchy(),
                         }
                     )
             except ValueError:

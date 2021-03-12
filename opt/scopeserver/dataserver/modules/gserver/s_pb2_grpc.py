@@ -50,11 +50,6 @@ class MainStub(object):
             request_serializer=s__pb2.MarkerGenesRequest.SerializeToString,
             response_deserializer=s__pb2.MarkerGenesReply.FromString,
         )
-        self.getMyLooms = channel.unary_unary(
-            "/scope.Main/getMyLooms",
-            request_serializer=s__pb2.MyLoomsRequest.SerializeToString,
-            response_deserializer=s__pb2.MyLoomsReply.FromString,
-        )
         self.translateLassoSelection = channel.unary_unary(
             "/scope.Main/translateLassoSelection",
             request_serializer=s__pb2.TranslateLassoSelectionRequest.SerializeToString,
@@ -197,12 +192,6 @@ class MainServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def getMarkerGenes(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
-    def getMyLooms(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -365,11 +354,6 @@ def add_MainServicer_to_server(servicer, server):
             servicer.getMarkerGenes,
             request_deserializer=s__pb2.MarkerGenesRequest.FromString,
             response_serializer=s__pb2.MarkerGenesReply.SerializeToString,
-        ),
-        "getMyLooms": grpc.unary_unary_rpc_method_handler(
-            servicer.getMyLooms,
-            request_deserializer=s__pb2.MyLoomsRequest.FromString,
-            response_serializer=s__pb2.MyLoomsReply.SerializeToString,
         ),
         "translateLassoSelection": grpc.unary_unary_rpc_method_handler(
             servicer.translateLassoSelection,
@@ -673,35 +657,6 @@ class Main(object):
             "/scope.Main/getMarkerGenes",
             s__pb2.MarkerGenesRequest.SerializeToString,
             s__pb2.MarkerGenesReply.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getMyLooms(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getMyLooms",
-            s__pb2.MyLoomsRequest.SerializeToString,
-            s__pb2.MyLoomsReply.FromString,
             options,
             channel_credentials,
             insecure,

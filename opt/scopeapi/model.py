@@ -20,12 +20,12 @@ class LoomXMetadata(BaseModel):
 
 
 class Dataset(BaseModel):
-    loom_file_path: str
-    loom_display_name: str
-    loom_size: int
-    cell_metadata: LoomXMetadata
-    file_metadata: Any
-    loom_hierarchy: LoomXHierarchy
+    loomFilePath: str
+    loomDisplayName: str
+    loomSize: int
+    cellMetaData: LoomXMetadata
+    fileMetaData: Any
+    loomHierarchy: LoomXHierarchy
 
 
 #############
@@ -34,6 +34,6 @@ class Dataset(BaseModel):
 
 
 class GetDatasets(BaseModel):
-    error: Optional[Error] = None
+    error: Optional[Error]
     datasets: List[Dataset]
     update: bool

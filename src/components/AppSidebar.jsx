@@ -77,12 +77,12 @@ class AppSidebar extends Component {
         this.setLoomHierarchy = (
             loomFilePath,
             loomDisplayName,
-            loomHeierarchy
+            loomHierarchy
         ) => {
             this.setState({
-                newHierarchy_L1: loomHeierarchy['L1'],
-                newHierarchy_L2: loomHeierarchy['L2'],
-                newHierarchy_L3: loomHeierarchy['L3'],
+                newHierarchy_L1: loomHierarchy['L1'],
+                newHierarchy_L2: loomHierarchy['L2'],
+                newHierarchy_L3: loomHierarchy['L3'],
             });
             Alert.create({
                 title: 'BETA: Hierarchy Change!',
@@ -102,7 +102,7 @@ class AppSidebar extends Component {
                             'Level 1: ',
                             <Input
                                 fluid
-                                defaultValue={loomHeierarchy['L1']}
+                                defaultValue={loomHierarchy['L1']}
                                 onChange={(e) =>
                                     this.setState({
                                         newHierarchy_L1: e.target.value,
@@ -113,7 +113,7 @@ class AppSidebar extends Component {
                             'Level 2: ',
                             <Input
                                 fluid
-                                defaultValue={loomHeierarchy['L2']}
+                                defaultValue={loomHierarchy['L2']}
                                 onChange={(e) =>
                                     this.setState({
                                         newHierarchy_L2: e.target.value,
@@ -124,7 +124,7 @@ class AppSidebar extends Component {
                             'Level 3: ',
                             <Input
                                 fluid
-                                defaultValue={loomHeierarchy['L3']}
+                                defaultValue={loomHierarchy['L3']}
                                 onChange={(e) =>
                                     this.setState({
                                         newHierarchy_L3: e.target.value,
@@ -183,8 +183,8 @@ class AppSidebar extends Component {
                 : false;
         let showCoordinatesSelection =
             showTransforms &&
-            metadata.fileMetaData &&
-            metadata.fileMetaData.hasExtraEmbeddings
+            metadata.fileMetadata &&
+            metadata.fileMetadata.hasExtraEmbeddings
                 ? true
                 : false;
         let renderLevel = (t, l, name, canRemove) => {
@@ -224,7 +224,7 @@ class AppSidebar extends Component {
                                         this.setLoomHierarchy(
                                             file.loomFilePath,
                                             file.loomDisplayName,
-                                            file.loomHeierarchy
+                                            file.loomHierarchy
                                         )
                                     }
                                     className='pointer'
@@ -545,50 +545,44 @@ class AppSidebar extends Component {
         this.getLoomFiles();
     }
 
-    getLoomFiles() {
+    async getLoomFiles() {
         const { match } = this.props;
         if (DEBUG) console.log('getLoomFiles', match);
         if (match.params.uuid == 'permalink') return;
-        BackendAPI.queryLoomFiles(match.params.uuid, (files) => {
-            let userFiles = [],
-                generalFiles = [];
-            files.forEach((file) => {
-                if (file.loomFilePath.match(/[\\/]/)) {
-                    userFiles.push(file);
-                } else {
-                    generalFiles.push(file);
-                }
-            });
-            let userLoomTree = this.getEmptyNode();
-            let generalLoomTree = this.getEmptyNode();
-            let addChildren = (t, l, f) => {
-                if (f.loomHeierarchy['L' + l]) {
-                    t.children[f.loomHeierarchy['L' + l]] =
-                        t.children[f.loomHeierarchy['L' + l]] ||
-                        this.getEmptyNode();
-                    addChildren(
-                        t.children[f.loomHeierarchy['L' + l]],
-                        l + 1,
-                        f
-                    );
-                } else {
-                    t.nodes.push(f);
-                }
-            };
-            userFiles.forEach((file, i) => {
-                addChildren(userLoomTree, 1, file);
-            });
-            generalFiles.forEach((file, i) => {
-                addChildren(generalLoomTree, 1, file);
-            });
-            this.setState({
-                loomFiles: files,
-                loading: false,
-                userLoomTree: userLoomTree,
-                generalLoomTree: generalLoomTree,
-            });
-            this.props.onMetadataChange(BackendAPI.getActiveLoomMetadata());
+        const files = await BackendAPI.queryLoomFiles(match.params.uuid);
+        let userFiles = [],
+            generalFiles = [];
+        files.forEach((file) => {
+            if (file.loomFilePath.match(/[\\/]/)) {
+                userFiles.push(file);
+            } else {
+                generalFiles.push(file);
+            }
         });
+        let userLoomTree = this.getEmptyNode();
+        let generalLoomTree = this.getEmptyNode();
+        let addChildren = (t, l, f) => {
+            if (f.loomHierarchy['L' + l]) {
+                t.children[f.loomHierarchy['L' + l]] =
+                    t.children[f.loomHierarchy['L' + l]] || this.getEmptyNode();
+                addChildren(t.children[f.loomHierarchy['L' + l]], l + 1, f);
+            } else {
+                t.nodes.push(f);
+            }
+        };
+        userFiles.forEach((file, i) => {
+            addChildren(userLoomTree, 1, file);
+        });
+        generalFiles.forEach((file, i) => {
+            addChildren(generalLoomTree, 1, file);
+        });
+        this.setState({
+            loomFiles: files,
+            loading: false,
+            userLoomTree: userLoomTree,
+            generalLoomTree: generalLoomTree,
+        });
+        this.props.onMetadataChange(BackendAPI.getActiveLoomMetadata());
     }
 
     getEmptyNode() {

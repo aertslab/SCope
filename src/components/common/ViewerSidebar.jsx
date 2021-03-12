@@ -93,24 +93,22 @@ class ViewerSidebar extends Component {
         );
     };
 
-    updateMetadata = () => {
-        BackendAPI.queryLoomFiles(
+    async updateMetadata() {
+        await BackendAPI.queryLoomFiles(
             this.props.match.params.uuid,
-            () => {
-                BackendAPI.getActiveFeatures().forEach((f, n) => {
-                    BackendAPI.updateFeature(
-                        n,
-                        f.type,
-                        f.feature,
-                        f.featureType,
-                        f.metadata ? f.metadata.description : null,
-                        ''
-                    );
-                });
-            },
             this.state.activeLoom
         );
-    };
+        BackendAPI.getActiveFeatures().forEach((f, n) => {
+            BackendAPI.updateFeature(
+                n,
+                f.type,
+                f.feature,
+                f.featureType,
+                f.metadata ? f.metadata.description : null,
+                ''
+            );
+        });
+    }
 
     getButtonText = (text) => {
         switch (this.state.status) {
@@ -791,6 +789,8 @@ class ViewerSidebar extends Component {
                             ),
                         ];
 
+                        console.log('MD CELL TYPE ANNO');
+                        console.log(md.cellTypeAnno);
                         let cellTypeAnnoTableData = md.cellTypeAnno.map(
                             (a, n) => {
                                 let cellTypeAnnoTableRowData = {
@@ -1349,9 +1349,9 @@ class ViewerSidebar extends Component {
         );
     }
 
-    componentDidUpdate(prevProps, prevState) {
+    async componentDidUpdate(prevProps, prevState) {
         if (this.props.match.params.loom != prevProps.match.params.loom) {
-            this.updateMetadata();
+            await this.updateMetadata();
         }
     }
 

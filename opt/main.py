@@ -6,6 +6,7 @@ import os
 from typing import Union
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from scopeserver.config import from_file
 from scopeserver import message_of_the_day, LegacySCopeServer, SCopeServer
@@ -14,6 +15,14 @@ from scopeapi.model import Error
 from scopeapi.model import GetDatasets
 
 scope_api = FastAPI()
+scope_api.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 CONFIG = from_file(os.environ.get("SCOPE_CONFIG"))
 
 __scope_server = SCopeServer(config=CONFIG)
