@@ -951,20 +951,6 @@ class MarkerGenesReply(google___protobuf___message___Message):
 
 type___MarkerGenesReply = MarkerGenesReply
 
-class MyLoomsRequest(google___protobuf___message___Message):
-    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    UUID: typing___Text = ...
-    loomFile: typing___Text = ...
-    def __init__(
-        self,
-        *,
-        UUID: typing___Optional[typing___Text] = None,
-        loomFile: typing___Optional[typing___Text] = None,
-    ) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["UUID", b"UUID", "loomFile", b"loomFile"]) -> None: ...
-
-type___MyLoomsRequest = MyLoomsRequest
-
 class LoomHeierarchy(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     L1: typing___Text = ...
@@ -1027,23 +1013,6 @@ class MyLoom(google___protobuf___message___Message):
     ) -> None: ...
 
 type___MyLoom = MyLoom
-
-class MyLoomsReply(google___protobuf___message___Message):
-    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    update: builtin___bool = ...
-    @property
-    def myLooms(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[type___MyLoom]: ...
-    def __init__(
-        self,
-        *,
-        myLooms: typing___Optional[typing___Iterable[type___MyLoom]] = None,
-        update: typing___Optional[builtin___bool] = None,
-    ) -> None: ...
-    def ClearField(
-        self, field_name: typing_extensions___Literal["myLooms", b"myLooms", "update", b"update"]
-    ) -> None: ...
-
-type___MyLoomsReply = MyLoomsReply
 
 class TranslateLassoSelectionRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -1219,78 +1188,6 @@ class VmaxReply(google___protobuf___message___Message):
     def ClearField(self, field_name: typing_extensions___Literal["maxVmax", b"maxVmax", "vmax", b"vmax"]) -> None: ...
 
 type___VmaxReply = VmaxReply
-
-class UUIDRequest(google___protobuf___message___Message):
-    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    ip: typing___Text = ...
-    def __init__(
-        self,
-        *,
-        ip: typing___Optional[typing___Text] = None,
-    ) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["ip", b"ip"]) -> None: ...
-
-type___UUIDRequest = UUIDRequest
-
-class UUIDReply(google___protobuf___message___Message):
-    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    UUID: typing___Text = ...
-    def __init__(
-        self,
-        *,
-        UUID: typing___Optional[typing___Text] = None,
-    ) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["UUID", b"UUID"]) -> None: ...
-
-type___UUIDReply = UUIDReply
-
-class RemainingUUIDTimeRequest(google___protobuf___message___Message):
-    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    ip: typing___Text = ...
-    UUID: typing___Text = ...
-    mouseEvents: builtin___int = ...
-    def __init__(
-        self,
-        *,
-        ip: typing___Optional[typing___Text] = None,
-        UUID: typing___Optional[typing___Text] = None,
-        mouseEvents: typing___Optional[builtin___int] = None,
-    ) -> None: ...
-    def ClearField(
-        self, field_name: typing_extensions___Literal["UUID", b"UUID", "ip", b"ip", "mouseEvents", b"mouseEvents"]
-    ) -> None: ...
-
-type___RemainingUUIDTimeRequest = RemainingUUIDTimeRequest
-
-class RemainingUUIDTimeReply(google___protobuf___message___Message):
-    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    UUID: typing___Text = ...
-    timeRemaining: builtin___int = ...
-    sessionsLimitReached: builtin___bool = ...
-    sessionMode: typing___Text = ...
-    def __init__(
-        self,
-        *,
-        UUID: typing___Optional[typing___Text] = None,
-        timeRemaining: typing___Optional[builtin___int] = None,
-        sessionsLimitReached: typing___Optional[builtin___bool] = None,
-        sessionMode: typing___Optional[typing___Text] = None,
-    ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing_extensions___Literal[
-            "UUID",
-            b"UUID",
-            "sessionMode",
-            b"sessionMode",
-            "sessionsLimitReached",
-            b"sessionsLimitReached",
-            "timeRemaining",
-            b"timeRemaining",
-        ],
-    ) -> None: ...
-
-type___RemainingUUIDTimeReply = RemainingUUIDTimeReply
 
 class LoomUploadedRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...

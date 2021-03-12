@@ -28,8 +28,6 @@ service Main {
   rpc getCellIDs (CellIDsRequest) returns (CellIDsReply) {}
   rpc doGeneSetEnrichment (GeneSetEnrichmentRequest) returns (stream GeneSetEnrichmentReply) {}
   rpc getVmax (VmaxRequest) returns (VmaxReply) {}
-  rpc getUUID (UUIDRequest) returns (UUIDReply) {}
-  rpc getRemainingUUIDTime (RemainingUUIDTimeRequest) returns (RemainingUUIDTimeReply) {}
   rpc loomUploaded (LoomUploadedRequest) returns (LoomUploadedReply) {}
   rpc getMyGeneSets (MyGeneSetsRequest) returns (MyGeneSetsReply) {}
   rpc deleteUserFile (DeleteUserFileRequest) returns (DeleteUserFileReply) {}
@@ -286,11 +284,6 @@ message MarkerGenesReply {
   repeated MarkerGenesMetric metrics=2;
 }
 
-message MyLoomsRequest {
-  string UUID=1;
-  string loomFile=2;
-}
-
 message LoomHeierarchy {
   string L1=1;
   string L2=2;
@@ -306,11 +299,6 @@ message MyLoom {
   FileMetaData fileMetaData=5;
   LoomHeierarchy loomHeierarchy=6;
 
-}
-
-message MyLoomsReply {
-  repeated MyLoom myLooms=1;
-  bool update=2;
 }
 
 message TranslateLassoSelectionRequest {
@@ -360,27 +348,6 @@ message VmaxRequest {
 message VmaxReply {
   repeated float vmax=1;
   repeated float maxVmax=2;
-}
-
-message UUIDRequest {
-  string ip=1;
-}
-
-message UUIDReply {
-  string UUID=1;
-}
-
-message RemainingUUIDTimeRequest {
-  string ip=1;
-  string UUID=2;
-  int64 mouseEvents=3;
-}
-
-message RemainingUUIDTimeReply {
-  string UUID=1;
-  int64 timeRemaining=2;
-  bool sessionsLimitReached=3;
-  string sessionMode=4;
 }
 
 message LoomUploadedRequest {
