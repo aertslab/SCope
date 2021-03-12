@@ -219,11 +219,25 @@ class API {
         }
     }
 
-    getUUIDFromIP(onSuccess) {
+    async getUUIDFromIP() {
         const publicIp = require('public-ip');
-        publicIp.v4().then((ip) => {
-            this.obtainNewUUID(ip, onSuccess);
-        });
+        const ip = await publicIp.v4();
+        return await obtainNewUUID(ip);
+    }
+
+    async obtainNewUUID(ip) {
+        const queryParams = `?ip=${ip}`;
+        const queryURL = `${BACKEND.httpProtocol}://${BACKEND.host}:8000/session/uuid/${queryParams}`;
+        if (DEBUG) console.log('getUUIDAPI', queryURL);
+        const res = await fetchJson(queryURL);
+        if (res?.err || res.data.error) {
+            this.showError();
+        } else {
+            const { UUID } = res.data;
+            if (DEBUG) console.log('getUUIDAPI', UUID);
+            return UUID;
+        }
+        // Previous callback used: onSuccess(response.UUID, response.timeout); I guess `response.timeout` was coming from gRPC
     }
 
     async getSessionInfo(uuid, ip, mouseClicks) {

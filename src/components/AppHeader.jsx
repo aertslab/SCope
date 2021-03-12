@@ -305,16 +305,16 @@ class AppHeader extends Component {
         );
     }
 
-    resetUUID() {
+    async resetUUID() {
         const { history, cookies } = this.props;
-        BackendAPI.getUUIDFromIP((uuid, timeRemaining) => {
-            cookies.remove(cookieName);
-            if (this.props.cookiesAllowed) {
-                cookies.set(cookieName, uuid, { path: '/' });
-            }
-            history.replace('/' + [uuid]);
-            BackendAPI.forceUpdate();
-        });
+        const uuid = await BackendAPI.getUUIDFromIP(); // Previously callback was used with unused timeRemaining argument: (uuid, timeRemaining) => {...}
+
+        cookies.remove(cookieName);
+        if (this.props.cookiesAllowed) {
+            cookies.set(cookieName, uuid, { path: '/' });
+        }
+        history.replace('/' + [uuid]);
+        BackendAPI.forceUpdate();
     }
 
     UNSAFE_componentWillMount() {

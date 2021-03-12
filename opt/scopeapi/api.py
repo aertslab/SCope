@@ -21,6 +21,26 @@ class SCopeAPI:
     def __init__(self, server: SCopeServer):
         self.__server = server
 
+    def get_uuid(self, ip) -> Union[GetUUID, Error]:
+        if self.__server.config["app_mode"]:
+            with open(
+                os.path.join(self.__server.data_handler.get_config_dir(), "Permanent_Session_IDs.txt"), "r"
+            ) as fh:
+                new_uuid = fh.readline().rstrip("\n")
+                logger.info(f"IP {ip} connected to SCope. Running in App mode. Passing UUID {new_uuid}.")
+        else:
+            new_uuid = str(uuid.uuid4())
+        if new_uuid not in self.__server.data_handler.get_current_UUIDs().keys():
+            logger.info(f"IP {ip} connected to SCope. Passing new UUID {new_uuid}.")
+            self.__server.data_handler.get_uuid_log().write(
+                "{0} :: {1} :: New UUID ({2}) assigned.\n".format(
+                    time.strftime("%Y-%m-%d__%H-%M-%S", time.localtime()), ip, new_uuid
+                )
+            )
+            self.__server.data_handler.get_uuid_log().flush()
+            self.__server.data_handler.get_current_UUIDs()[new_uuid] = [time.time(), "rw"]  # New sessions are rw
+        return {"UUID": new_uuid}
+
     def remove_all_expired_sessions(self):
         current_active_uuids = set(list(self.__server.data_handler.get_current_UUIDs().keys()))
         for uid in current_active_uuids:

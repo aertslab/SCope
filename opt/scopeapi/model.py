@@ -44,6 +44,11 @@ class GetDatasets(BaseModel):
     update: bool
 
 
+class GetUUID(BaseModel):
+    error: Optional[Error]
+    UUID: str
+
+
 class GetRemainingUUIDTime(BaseModel):
     error: Optional[Error]
     UUID: str
