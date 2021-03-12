@@ -57,23 +57,20 @@ class SCope(s_pb2_grpc.MainServicer):
 
     orcid_active = False
 
-    def __init__(self, config: Dict[str, str]):
+    def __init__(self, config: Dict[str, str], server=None):
 
         self.config = config
+        self.__server = server
         self.app_mode = False
 
-        self.dfh = dfh.DataFileHandler()
-        self.lfh = lfh.LoomFileHandler()
-
+        # TODO: SHOULD BE REMOVED WHEN MIGRATION IS DONE
+        self.dfh = self.__server.data_handler if self.__server is not None else dfh.DataFileHandler()
         self.dfh.set_global_data()
-        self.lfh.set_global_data()
         self.dfh.read_UUID_db()
         self.dfh.read_ORCID_db()
 
-        self.check_ORCID_connection()
-
-    def update_global_data(self) -> None:
-        self.dfh.set_global_data()
+        # TODO: SHOULD BE REMOVED WHEN MIGRATION IS DONE
+        self.lfh = self.__server.dataset_handler if self.__server is not None else lfh.LoomFileHandler()
         self.lfh.set_global_data()
 
     def check_ORCID_connection(self) -> None:
@@ -483,7 +480,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.MarkerGenesReply(genes=cluster_marker_metrics.index, metrics=metrics)
 
     def getMyGeneSets(self, request, context):
-        userDir = dfh.DataFileHandler.get_data_dir_path_by_file_type("GeneSet", UUID=request.UUID)
+        userDir = dfh.DataFileHandler.get_data_dir_path_by_file_type("GeneSet", session_uuid=request.UUID)
         if not os.path.isdir(userDir):
             for i in ["Loom", "GeneSet", "LoomAUCellRankings"]:
                 os.mkdir(os.path.join(self.dfh.get_data_dirs()[i]["path"], request.UUID))
@@ -500,7 +497,7 @@ class SCope(s_pb2_grpc.MainServicer):
     def getMyLooms(self, request, context):
         my_looms = []
         update = False
-        userDir = dfh.DataFileHandler.get_data_dir_path_by_file_type("Loom", UUID=request.UUID)
+        userDir = dfh.DataFileHandler.get_data_dir_path_by_file_type("Loom", session_uuid=request.UUID)
         if not os.path.isdir(userDir):
             for i in ["Loom", "GeneSet", "LoomAUCellRankings"]:
                 os.mkdir(os.path.join(self.dfh.get_data_dirs()[i]["path"], request.UUID))
@@ -833,13 +830,13 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.LoomUploadedReply()
 
 
-def serve(run_event, config: Dict[str, Any]) -> None:
+def serve(run_event, config: Dict[str, Any], new_server=None) -> None:
     SCope.app_mode = config["app_mode"]
     server = grpc.server(
         futures.ThreadPoolExecutor(max_workers=10),
         options=[("grpc.max_send_message_length", -1), ("grpc.max_receive_message_length", -1)],
     )
-    scope = SCope(config=config)
+    scope = SCope(config=config, server=new_server)
     s_pb2_grpc.add_MainServicer_to_server(scope, server)
     server.add_insecure_port("[::]:{0}".format(config["gPort"]))
     server.start()
