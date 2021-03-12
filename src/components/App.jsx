@@ -313,10 +313,10 @@ class App extends Component {
         );
     }
 
-    UNSAFE_componentWillMount() {
+    async UNSAFE_componentWillMount() {
         if (DEBUG) console.log('App componentWillMount', this.props);
         this.parseURLParams(this.props);
-        this.getUUIDFromIP(this.props);
+        await this.getUUIDFromIP(this.props);
         let isSidebarVisible = this.props.cookies.get(sidebarCookieName);
         if (isSidebarVisible == '1') this.setState({ isSidebarVisible: true });
         if (isSidebarVisible == '0') this.setState({ isSidebarVisible: false });
@@ -380,10 +380,11 @@ class App extends Component {
         document.removeEventListener('keypress', this.clickHandler);
     }
 
-    UNSAFE_componentWillReceiveProps(nextProps) {
+    async UNSAFE_componentWillReceiveProps(nextProps) {
         this.parseURLParams(nextProps);
-        if (this.state.uuid != nextProps.match.params.uuid)
-            this.getUUIDFromIP(nextProps);
+        if (this.state.uuid != nextProps.match.params.uuid) {
+            await this.getUUIDFromIP(nextProps);
+        }
     }
 
     parseURLParams(props) {
@@ -397,18 +398,18 @@ class App extends Component {
         );
     }
 
-    getUUIDFromIP(props) {
-        publicIp.v4().then(
-            (ip) => {
-                this.getUUID(props, ip);
-            },
-            () => {
-                this.getUUID(props);
-            }
-        );
+    async getUUIDFromIP(props) {
+        let ip = null;
+
+        try {
+            ip = await publicIp.v4();
+            await this.getUUID(props, ip);
+        } catch (err) {
+            await this.getUUID(props);
+        }
     }
 
-    getUUID(props, ip) {
+    async getUUID(props, ip) {
         const { cookies, match } = props;
 
         if (match.params.uuid) {
@@ -428,7 +429,7 @@ class App extends Component {
             } else {
                 if (DEBUG)
                     console.log('Params UUID detected:', match.params.uuid);
-                this.checkUUID(ip, match.params.uuid);
+                await this.checkUUID(ip, match.params.uuid);
                 console.log(this.state.cookiesAllowed);
                 console.log(cookieName, match.params.uuid, { path: '/' });
                 if (this.state.cookiesAllowed) {
@@ -438,124 +439,92 @@ class App extends Component {
         } else if (cookies.get(cookieName)) {
             if (DEBUG)
                 console.log('Cookie UUID detected:', cookies.get(cookieName));
-            this.checkUUID(ip, cookies.get(cookieName));
+            await this.checkUUID(ip, cookies.get(cookieName));
         } else {
             if (DEBUG) console.log('No UUID detected');
-            this.obtainNewUUID(ip, (uuid) => {
-                this.checkUUID(ip, uuid);
-            });
+            let uuid = null;
+            try {
+                uuid = await BackendAPI.obtainNewUUID(ip);
+            } catch (err) {
+                this.setState({ error: true });
+            }
+            await this.checkUUID(ip, uuid);
         }
     }
 
-    obtainNewUUID(ip, onSuccess) {
-        BackendAPI.getConnection().then(
-            (gbc) => {
-                let query = {
-                    ip: ip,
-                };
-                if (DEBUG) console.log('getUUID', query);
-                gbc.services.scope.Main.getUUID(query, (err, response) => {
-                    if (DEBUG) console.log('getUUID', response);
-                    if (response != null) onSuccess(response.UUID);
-                });
-            },
-            () => {
-                this.setState({ error: true });
-            }
-        );
-    }
-
-    checkUUID(ip, uuid, ping) {
+    async checkUUID(ip, uuid, ping) {
         const { cookies, history, match } = this.props;
         if (!uuid) return;
-        BackendAPI.getConnection().then(
-            (gbc, ws) => {
-                let query = {
-                    ip: ip,
-                    UUID: uuid,
-                    mouseEvents: this.mouseClicks,
-                };
-                gbc.ws.onclose = (err) => {
-                    ReactGA.event({
-                        category: 'errors',
-                        action: 'socket closed',
+
+        const res = await BackendAPI.getSessionInfo(uuid, ip, this.mouseClicks);
+        if (res?.err || res.data.error) {
+            ReactGA.event({
+                category: 'errors',
+                action: 'socket closed',
+            });
+            this.setState({ error: true });
+        } else {
+            this.mouseClicks = 0;
+            if (res.data.sessionsLimitReached) {
+                this.props.setAppLoading(false);
+                this.setState({
+                    sessionsLimitReached: true,
+                });
+            } else {
+                this.timeout = res
+                    ? parseInt(res.data.timeRemaining * 1000)
+                    : 0;
+                // cookies.set(cookieName, uuid, { path: '/', maxAge: this.timeout });
+                if (!ping) {
+                    this.props.setAppLoading(false);
+                    this.setState({
+                        uuid: res.data.UUID,
+                        sessionMode: res.data.sessionMode,
                     });
-                    this.setState({ error: true });
-                };
-                if (DEBUG) console.log('getRemainingUUIDTime', query);
-                gbc.services.scope.Main.getRemainingUUIDTime(
-                    query,
-                    (err, response) => {
-                        this.mouseClicks = 0;
-                        if (DEBUG)
-                            console.log('getRemainingUUIDTime', response);
-                        if (response.sessionsLimitReached) {
-                            this.props.setAppLoading(false);
-                            this.setState({
-                                sessionsLimitReached: true,
-                            });
+                    BackendAPI.setUUID(res.data.UUID);
+                    BackendAPI.setSessionMode(res.data.sessionMode);
+                }
+                if (!this.timer) {
+                    this.timer = setInterval(() => {
+                        this.timeout -= timer;
+                        if (this.timeout < 0) {
+                            if (DEBUG) console.log('Session timed out');
+                            cookies.remove(cookieName);
+                            clearInterval(this.timer);
+                            this.timer = null;
+                            if (!BackendAPI.isConnected()) {
+                                this.setState({ error: true });
+                            }
+                            this.forceUpdate();
                         } else {
-                            this.timeout = response
-                                ? parseInt(response.timeRemaining * 1000)
-                                : 0;
-                            // cookies.set(cookieName, uuid, { path: '/', maxAge: this.timeout });
-                            if (!ping) {
-                                this.props.setAppLoading(false);
-                                this.setState({
-                                    uuid: uuid,
-                                    sessionMode: response.sessionMode,
-                                });
-                                BackendAPI.setUUID(uuid);
-                                BackendAPI.setSessionMode(response.sessionMode);
-                            }
-                            if (!this.timer) {
-                                this.timer = setInterval(() => {
-                                    this.timeout -= timer;
-                                    if (this.timeout < 0) {
-                                        if (DEBUG)
-                                            console.log('Session timed out');
-                                        cookies.remove(cookieName);
-                                        clearInterval(this.timer);
-                                        this.timer = null;
-                                        if (!BackendAPI.isConnected()) {
-                                            this.setState({ error: true });
-                                        }
-                                        this.forceUpdate();
-                                    } else {
-                                        if (DEBUG)
-                                            console.log(
-                                                'Session socket ping @ ',
-                                                this.timeout
-                                            );
-                                        this.checkUUID(ip, uuid, true);
-                                    }
-                                }, timer);
-                            }
-                            if (!ping) {
-                                ReactGA.set({ userId: uuid });
-                                let loom = match.params.loom
-                                    ? decodeURIComponent(match.params.loom)
-                                    : '*';
-                                let page = match.params.page
-                                    ? decodeURIComponent(match.params.page)
-                                    : 'welcome';
-                                history.replace(
-                                    '/' +
-                                        [
-                                            uuid,
-                                            encodeURIComponent(loom),
-                                            encodeURIComponent(page),
-                                        ].join('/')
+                            if (DEBUG)
+                                console.log(
+                                    'Session socket ping @ ',
+                                    this.timeout
                                 );
-                            }
+                            this.checkUUID(ip, uuid, true);
                         }
-                    }
-                );
-            },
-            () => {
-                this.setState({ error: true });
+                    }, timer);
+                }
+                if (!ping) {
+                    ReactGA.set({ userId: uuid });
+                    let loom = match.params.loom
+                        ? decodeURIComponent(match.params.loom)
+                        : '*';
+                    let page = match.params.page
+                        ? decodeURIComponent(match.params.page)
+                        : 'welcome';
+                    history.replace(
+                        '/' +
+                            [
+                                uuid,
+                                encodeURIComponent(loom),
+                                encodeURIComponent(page),
+                            ].join('/')
+                    );
+                }
             }
-        );
+        }
     }
 
     onMetadataChange(metadata) {

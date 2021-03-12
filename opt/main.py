@@ -12,7 +12,7 @@ from scopeserver.config import from_file
 from scopeserver import message_of_the_day, LegacySCopeServer, SCopeServer
 from scopeapi import SCopeAPI
 from scopeapi.model import Error
-from scopeapi.model import GetDatasets
+from scopeapi.model import GetRemainingUUIDTime, GetDatasets
 
 scope_api = FastAPI()
 scope_api.add_middleware(
@@ -34,6 +34,16 @@ __scope_api = SCopeAPI(server=__scope_server)
 def echo(value):
     """ A testing HTTP API endpoint that echoes the request parameter. """
     return {"echo": value}
+
+
+
+@scope_api.get("/session/{session_id}/info/", response_model=Union[GetRemainingUUIDTime, Error])
+def get_session_info(session_id, ip: str, mouse_events: int):
+    get_remaining_uuid_time_reply = __scope_api.get_remaining_uuid_time(
+        session_uuid=session_id, ip=ip, mouse_events=mouse_events
+    )
+    """ A HTTP API endpoint to retrieve a new UUID. """
+    return get_remaining_uuid_time_reply
 
 
 @scope_api.get("/session/{session_id}/datasets/", response_model=Union[GetDatasets, Error])

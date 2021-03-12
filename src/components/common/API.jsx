@@ -226,19 +226,15 @@ class API {
         });
     }
 
-    obtainNewUUID(ip, onSuccess) {
-        BackendAPI.getConnection().then((gbc) => {
-            let query = {
-                ip: ip,
-            };
-            if (DEBUG) console.log('getUUIDAPI', query);
-            gbc.services.scope.Main.getUUID(query, (err, response) => {
-                if (DEBUG) console.log('getUUIDAPI', response);
-                if (response != null)
-                    onSuccess(response.UUID, response.timeout);
-            });
-        });
+    async getSessionInfo(uuid, ip, mouseClicks) {
+        const queryParams = `?ip=${ip}&mouse_events=${mouseClicks}`;
+        const queryURL = `${BACKEND.httpProtocol}://${BACKEND.host}:8000/session/${uuid}/info/${queryParams}`;
+        if (DEBUG) console.log('getRemainingUUIDTime', queryURL);
+        const res = await fetchJson(queryURL);
+        if (DEBUG) console.log('getRemainingUUIDTime', res);
+        return res;
     }
+
     getActiveLoom() {
         return this.activeLooms[0];
     }

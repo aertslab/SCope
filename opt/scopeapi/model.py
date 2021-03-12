@@ -2,6 +2,11 @@ from pydantic import BaseModel
 from typing import List, Any, Optional
 
 
+#############
+# Data      #
+#############
+
+
 class Error(BaseModel):
     code: int
     message: str
@@ -37,3 +42,11 @@ class GetDatasets(BaseModel):
     error: Optional[Error]
     datasets: List[Dataset]
     update: bool
+
+
+class GetRemainingUUIDTime(BaseModel):
+    error: Optional[Error]
+    UUID: str
+    timeRemaining: int
+    sessionsLimitReached: bool
+    sessionMode: str
