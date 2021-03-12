@@ -3,12 +3,14 @@ Main entry point to the SCope API implementation.
 """
 
 import os
+from typing import Union
 
 from fastapi import FastAPI
 
 from scopeserver.config import from_file
 from scopeserver import message_of_the_day, LegacySCopeServer, SCopeServer
 from scopeapi import SCopeAPI
+from scopeapi.model import Error
 from scopeapi.model import GetDatasets
 
 scope_api = FastAPI()
@@ -25,9 +27,9 @@ def echo(value):
     return {"echo": value}
 
 
-@scope_api.get("/session/{session_id}/datasets/", response_model=GetDatasets)
-def get_datasets(session_id):
-    get_datasets_reply = __scope_api.get_datasets(session_uuid=session_id)
+@scope_api.get("/session/{session_id}/datasets/", response_model=Union[GetDatasets, Error])
+def get_datasets(session_id, dataset_file_name: str = None):
+    get_datasets_reply = __scope_api.get_datasets(session_uuid=session_id, dataset_file_name=dataset_file_name)
     """ A HTTP API endpoint to retrieve a list of datasets. """
     return get_datasets_reply
 

@@ -1,11 +1,16 @@
 from pydantic import BaseModel
-from typing import List, Any
+from typing import List, Any, Optional
+
+
+class Error(BaseModel):
+    code: int
+    message: str
 
 
 class LoomXHierarchy(BaseModel):
-    l1: str
-    l2: str
-    l3: str
+    L1: str
+    L2: str
+    L3: str
 
 
 class LoomXMetadata(BaseModel):
@@ -29,5 +34,6 @@ class Dataset(BaseModel):
 
 
 class GetDatasets(BaseModel):
+    error: Optional[Error] = None
     datasets: List[Dataset]
     update: bool

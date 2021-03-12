@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import json
 import zlib
@@ -52,6 +53,14 @@ class Loom:
         self.abs_file_path = abs_file_path
         self.loom_connection = loom_connection
         self.dfh = dfh.DataFileHandler()
+        # Check if loom has MetaData global attribute, if not generate one
+        file_meta = self.get_file_metadata()
+        if not file_meta["hasGlobalMeta"]:
+            try:
+                self.generate_meta_data()
+            except Exception as e:
+                logger.error(f"Failed to make metadata for {self.file_path}")
+                logger.error(e)
 
         logger.info(f"New Loom object created for {file_path}")
         # Metrics
@@ -73,6 +82,11 @@ class Loom:
         if name not in self.loom_connection.attrs.keys():
             raise AttributeError("The global attribute {0} does not exist in the .loom file.".format(name))
         return self.loom_connection.attrs[name]
+
+    def get_file_size(self):
+        with open(self.get_abs_file_path(), "r") as fh:
+            loom_size = os.fstat(fh.fileno())[6]
+        return loom_size
 
     @staticmethod
     def clean_file_attr(file_attr):
@@ -477,6 +491,16 @@ class Loom:
                 cluster_names_dict[int(cluster_meta["id"])] = cluster_meta["description"]
         return cluster_names_dict
 
+    def get_hierarchy(self) -> Dict[str, str]:
+        try:
+            l1 = self.get_global_attribute_by_name(name="SCopeTreeL1")
+            l2 = self.get_global_attribute_by_name(name="SCopeTreeL2")
+            l3 = self.get_global_attribute_by_name(name="SCopeTreeL3")
+        except AttributeError:
+            l1 = "Uncategorized"
+            l2 = l3 = ""
+        return {"L1": l1, "L2": l2, "L3": l3}
+
     def set_hierarchy(self, L1: str, L2: str, L3: str) -> bool:
         logger.info("Changing hierarchy name for {0}".format(self.get_abs_file_path()))
 
@@ -681,6 +705,10 @@ class Loom:
 
     def has_meta_data(self) -> bool:
         return "MetaData" in self.loom_connection.attrs.keys()
+
+    def get_filtered_metadata(self, keys):
+        md = self.get_meta_data()
+        return {k: md[k] for k in keys}
 
     def get_meta_data(self):
         md = self.loom_connection.attrs.MetaData
