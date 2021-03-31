@@ -7,7 +7,6 @@ import {
     Button,
     Menu,
     Image,
-    Input,
     Popup,
     Checkbox,
 } from 'semantic-ui-react';
