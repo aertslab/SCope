@@ -81,7 +81,7 @@ class AppHeader extends Component {
     }
 
     render() {
-        const { match, location, timeout } = this.props;
+        const { match, timeout } = this.props;
         const { shortUrl } = this.state;
         let metadata = BackendAPI.getLoomMetadata(
             decodeURIComponent(match.params.loom)
