@@ -13,7 +13,7 @@ import {
 } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
 import PropTypes from 'prop-types';
-import { withCookies, Cookies } from 'react-cookie';
+import { Cookies } from 'react-cookie';
 import Bitly from 'bitly4api';
 import pako from 'pako';
 
