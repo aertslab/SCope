@@ -4,9 +4,9 @@
 
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { withRouter, Route } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 
-import { Segment, Header, Sidebar } from 'semantic-ui-react';
+import { Segment, Header, Grid } from 'semantic-ui-react';
 import { Cookies } from 'react-cookie';
 
 import { RootState } from '../redux/reducers';
@@ -39,7 +39,6 @@ type MainProps = {
 };
 
 type MainState = {
-    sidebarIsVisible: boolean;
     sessionMode: SessionMode;
 };
 
@@ -47,7 +46,6 @@ export const Main: React.FC<MainProps> = (props: MainProps) => {
     const state: MainState = useSelector<RootState, MainState>(
         (root: RootState) => {
             return {
-                sidebarIsVisible: root.main.sidebarIsVisible,
                 sessionMode: root.main.sessionMode,
             };
         }
@@ -62,13 +60,29 @@ export const Main: React.FC<MainProps> = (props: MainProps) => {
                 timeout={props.timeout}
                 cookies={props.cookies}
             />
-            <Sidebar.Pushable>
-                <AppSidebar
-                    visible={state.sidebarIsVisible}
-                    onMetadataChange={setMetadata}
-                    sessionMode={state.sessionMode}
-                />
-                <Sidebar.Pusher style={{ width: '100%' }}>
+            <Grid
+                stretched
+                columns={2}
+                style={{
+                    display: 'flex',
+                    height: '100vh',
+                }}>
+                <Grid.Column
+                    style={{
+                        width: 'max-content',
+                    }}
+                    stretched>
+                    <AppSidebar
+                        visible={true}
+                        onMetadataChange={setMetadata}
+                        sessionMode={state.sessionMode}
+                    />
+                </Grid.Column>
+                <Grid.Column
+                    style={{
+                        flexGrow: 100,
+                    }}
+                    stretched>
                     <Route path='/:uuid/:loom?/welcome' component={Welcome} />
                     <Route path='/:uuid/:loom?/dataset' component={Dataset} />
                     <Route path='/:uuid/:loom?/gene' component={Gene} />
@@ -78,8 +92,8 @@ export const Main: React.FC<MainProps> = (props: MainProps) => {
                     </Route>
                     <Route path='/:uuid/:loom?/tutorial' component={Tutorial} />
                     <Route path='/:uuid/:loom?/about' component={About} />
-                </Sidebar.Pusher>
-            </Sidebar.Pushable>
+                </Grid.Column>
+            </Grid>
         </React.Fragment>
     );
 };

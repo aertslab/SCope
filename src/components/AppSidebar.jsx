@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
 import {
     Segment,
-    Sidebar,
     Menu,
     Icon,
     Input,
@@ -338,12 +337,11 @@ class AppSidebar extends Component {
         };
 
         return (
-            <Sidebar
-                as={Menu}
-                animation='overlay'
-                visible={this.props.visible}
+            <Menu
                 vertical
-                className='clearfix'>
+                style={{
+                    border: 'none',
+                }}>
                 <Menu.Header>DATASETS</Menu.Header>
                 <Menu.Menu>
                     {this.props.sessionMode === 'rw' && (
@@ -500,12 +498,6 @@ class AppSidebar extends Component {
                     </Menu.Menu>
                 )}
                 <Divider />
-                <Menu.Menu className='logos'>
-                    {/*<Image src='src/images/kuleuven.png' size="small" centered href="http://kuleuven.be" />
-						<br /><br />
-						<Image src='src/images/vib.png' size="small" centered href="http://vib.be" />
-						<Image src='src/images/flycellatlas.png' size="small" centered href="http://flycellatlas.org/" />*/}
-                </Menu.Menu>
                 <UploadModal
                     title='Import a .loom file'
                     type='Loom'
@@ -514,7 +506,7 @@ class AppSidebar extends Component {
                     onClose={this.toggleUploadModal.bind(this)}
                     onUploaded={this.onLoomUploaded.bind(this)}
                 />
-            </Sidebar>
+            </Menu>
         );
     }
 
