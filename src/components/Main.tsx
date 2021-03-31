@@ -4,7 +4,7 @@
 
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { withRouter, Route } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 
 import { Segment, Header, Grid } from 'semantic-ui-react';
 import { Cookies } from 'react-cookie';
