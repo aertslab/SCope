@@ -71,12 +71,7 @@ class App extends Component {
     render() {
         const { error, loaded, sessionsLimitReached } = this.state;
 
-        const {
-            isAppLoading,
-            uuid,
-            sessionMode,
-            sidebarIsVisible,
-        } = this.props;
+        const { isAppLoading } = this.props;
 
         return (
             <React.Fragment>
