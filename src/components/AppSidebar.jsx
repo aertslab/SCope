@@ -340,7 +340,7 @@ class AppSidebar extends Component {
             <Menu
                 vertical
                 style={{
-                    border: 'none'
+                    border: 'none',
                 }}>
                 <Menu.Header>DATASETS</Menu.Header>
                 <Menu.Menu>
