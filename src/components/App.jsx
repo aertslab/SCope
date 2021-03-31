@@ -69,7 +69,7 @@ class App extends Component {
     }
 
     render() {
-        const { metadata, error, loaded, sessionsLimitReached } = this.state;
+        const { error, loaded, sessionsLimitReached } = this.state;
 
         const {
             isAppLoading,
