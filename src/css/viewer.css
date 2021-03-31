@@ -6,26 +6,6 @@ div#scope {
     flex-direction: column;
 }
 
-.pushable {
-    width: 100%;
-    min-height: 100%;
-    height: auto;
-    flex: 1;
-    display: flex;
-    flex-dirction: column;
-}
-
-.pusher {
-    width: 100%;
-    min-height: 100%;
-    flex: 1;
-}
-
-.ui.grid {
-    flex-direction: column !important;
-    height: 100%;
-}
-
 .viewerFlex {
     flex-grow: 1;
 }

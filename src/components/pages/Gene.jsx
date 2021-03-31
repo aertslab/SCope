@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 import { Grid } from 'semantic-ui-react';
+
+import './pages.css';
+
 import { BackendAPI } from '../common/API';
 import Search from '../Search';
 import Viewer from '../common/Viewer';
@@ -40,14 +43,14 @@ export default class Gene extends Component {
         if (!activeLoom || activeLoom === '*') {
             return <div>Select the dataset to be analyzed</div>;
         }
-
+        // <!--<div className='genePage'>-->
         return (
-            <Grid columns='equal'>
+            <div className='genePage'>
                 <Search.FeatureSearchGroup
                     filter='all'
                     identifier='gene-page'
                 />
-                <Grid.Row columns='3' className='viewerFlex'>
+                <Grid columns='equal' stretched className='viewControls'>
                     <Grid.Column width={3} className='viewerToolbar'>
                         <ViewerToolbar location={this.props.location} />
                     </Grid.Column>
@@ -75,8 +78,8 @@ export default class Gene extends Component {
                             activeLegend={activeLegend}
                         />
                     </Grid.Column>
-                </Grid.Row>
-            </Grid>
+                </Grid>
+            </div>
         );
     }
 

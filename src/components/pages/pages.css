@@ -1,0 +1,11 @@
+div.genePage {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+.viewControls {
+    flex-grow: 1;
+    margin-bottom: 2rem !important;
+}

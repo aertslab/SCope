@@ -25,7 +25,7 @@ interface FeatureSearchProps {
  */
 export function FeatureSearchGroup(props: FeatureSearchProps) {
     return (
-        <React.Fragment>
+        <Grid>
             <Grid.Row columns='3' centered className='feature-search-bar'>
                 {[0, 1, 2].map((i) => (
                     <Grid.Column key={i}>
@@ -41,6 +41,6 @@ export function FeatureSearchGroup(props: FeatureSearchProps) {
                     </Grid.Column>
                 ))}
             </Grid.Row>
-        </React.Fragment>
+        </Grid>
     );
 }

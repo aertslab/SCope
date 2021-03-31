@@ -16,10 +16,6 @@ export const setSessionMode = (sessionMode: MainState['sessionMode']) => ({
     payload: sessionMode,
 });
 
-export const toggleSidebar = () => ({
-    type: Action.TOGGLE_SIDEBAR_VISIBLE,
-});
-
 export const consentToCookies = () => ({
     type: Action.CONSENT_TO_COOKIES,
 });

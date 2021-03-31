@@ -13,7 +13,9 @@ const reducer: Reducer<State, SearchAction> = produce(
         switch (action.type) {
             case t.QUERY:
                 if (!has(action.payload.field, draft)) {
-                    draft[action.payload.field] = init(action.payload.field);
+                    (draft as State)[action.payload.field] = init(
+                        action.payload.field
+                    );
                 }
 
                 draft[action.payload.field].loading = true;
@@ -23,7 +25,9 @@ const reducer: Reducer<State, SearchAction> = produce(
 
             case t.RESULTS:
                 if (!has(action.payload.field, draft)) {
-                    draft[action.payload.field] = init(action.payload.field);
+                    (draft as State)[action.payload.field] = init(
+                        action.payload.field
+                    );
                 }
 
                 draft[action.payload.field].loading = false;
@@ -32,7 +36,9 @@ const reducer: Reducer<State, SearchAction> = produce(
 
             case t.SELECT:
                 if (!has(action.payload.field, draft)) {
-                    draft[action.payload.field] = init(action.payload.field);
+                    (draft as State)[action.payload.field] = init(
+                        action.payload.field
+                    );
                 }
 
                 draft[action.payload.field].loading = false;
@@ -48,7 +54,9 @@ const reducer: Reducer<State, SearchAction> = produce(
 
             case t.ERROR:
                 if (!has(action.payload.field, draft)) {
-                    draft[action.payload.field] = init(action.payload.field);
+                    (draft as State)[action.payload.field] = init(
+                        action.payload.field
+                    );
                 }
 
                 draft[action.payload.field].error = action.payload.message;
