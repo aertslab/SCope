@@ -7,21 +7,19 @@ import {
     Button,
     Menu,
     Image,
-    Input,
     Popup,
     Checkbox,
 } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
 import PropTypes from 'prop-types';
-import { withCookies, Cookies } from 'react-cookie';
+import { Cookies } from 'react-cookie';
 import Bitly from 'bitly4api';
 import pako from 'pako';
 
 let bitly = new Bitly(BITLY.token);
 
-import { toggleSidebar, consentToCookies } from '../redux/actions';
+import { consentToCookies } from '../redux/actions';
 
-const timer = 60 * 1000;
 const cookieName = 'SCOPE_UUID';
 
 class AppHeader extends Component {
@@ -83,7 +81,7 @@ class AppHeader extends Component {
     }
 
     render() {
-        const { match, location, toggleSidebar, timeout } = this.props;
+        const { match, timeout } = this.props;
         const { shortUrl } = this.state;
         let metadata = BackendAPI.getLoomMetadata(
             decodeURIComponent(match.params.loom)
@@ -220,15 +218,6 @@ class AppHeader extends Component {
 
         return (
             <Menu stackable secondary attached='top' className='vib' inverted>
-                <Menu.Item onClick={toggleSidebar}>
-                    <Icon
-                        name={this.props.sidebarIsVisible ? 'close' : 'sidebar'}
-                        className='pointer'
-                        title='Toggle sidebar'
-                    />
-                    MENU
-                </Menu.Item>
-
                 {menu.map(
                     (item, i) =>
                         item.display && (
@@ -416,14 +405,12 @@ const appHeader = withRouter(AppHeader);
 
 const mapStateToProps = (state) => {
     return {
-        sidebarIsVisible: state['main'].sidebarIsVisible,
         cookieConsent: state['main'].cookieConsent,
     };
 };
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        toggleSidebar: () => dispatch(toggleSidebar()),
         consentToCookies: () => dispatch(consentToCookies()),
     };
 };

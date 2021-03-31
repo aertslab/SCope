@@ -29,8 +29,8 @@ interface Column {
     Header: string;
     accessor: string;
     style: { whiteSpace: string };
-    sortMethod: ((x: number, y: number) => number) | undefined;
-    width: number | undefined;
+    sortMethod?: (x: number, y: number) => number;
+    width?: number;
 }
 
 export default class ClusterOverlapsTable extends Component<

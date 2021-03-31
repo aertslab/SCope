@@ -24,14 +24,6 @@ Eventually the functionality from pySCENIC will be expanded and put in its own p
 
 ## Run SCope
 
-### Standalone App
-
-Standalone apps for **macOS** and **Linux** can be downloaded from [the releases page.](https://github.com/aertslab/SCope/releases).
-
-:exclamation: SCope standalone app requires Node.js (> v9). To install it, go to https://nodejs.org/en/download/.
-
-A **Windows** app is under development, but currently has no ETA.
-
 ### Command Line
 
 You will need access to at least Python 3.7 do run this.
@@ -57,15 +49,15 @@ cd "${LOCAL_SCOPE_REPO}"
 SCOPE_CONFIG=config.json npm run scope
 ```
 
-## Deploy a Cloud-based Instance
+### Standalone App
 
-### Amazon Web Services
+For now, a standalone app is not available. One is planned for the future.
 
-#### Public AMI
+### Deploy a Cloud-based Instance
 
-No ETA.
+For now, there is no in-tree support for deployment.
 
-#### Source
+## Source
 
 To create a SCope AWS instance from scratch please read the tutorial [aws-deployment-source](https://github.com/aertslab/SCope/tree/master/tutorials/aws-deployment-source).
 

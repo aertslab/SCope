@@ -2,7 +2,6 @@ import {
     SET_APP_LOADING,
     SET_UUID,
     SET_SESSION_MODE,
-    TOGGLE_SIDEBAR_VISIBLE,
     CONSENT_TO_COOKIES,
 } from './actionTypes';
 
@@ -15,7 +14,6 @@ export interface MainState {
     isAppLoading: boolean;
     uuid: string;
     sessionMode: SessionMode;
-    sidebarIsVisible: boolean;
     cookieConsent: boolean;
 }
 
@@ -34,10 +32,6 @@ export interface SetSessionModeAction {
     payload: SessionMode;
 }
 
-export interface ToggleSidebar {
-    type: typeof TOGGLE_SIDEBAR_VISIBLE;
-}
-
 export interface ConsentToCookies {
     type: typeof CONSENT_TO_COOKIES;
 }
@@ -46,5 +40,4 @@ export type MainAction =
     | SetLoadingAction
     | SetUUIDAction
     | SetSessionModeAction
-    | ToggleSidebar
     | ConsentToCookies;

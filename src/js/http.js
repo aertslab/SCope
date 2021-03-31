@@ -92,7 +92,7 @@ Would you like to continue downloading?
         document.body.appendChild(a);
         const url = window.URL.createObjectURL(blob);
         a.href = url;
-      a.download = this.loomFilePath.split('/').slice(-1)[0];
+        a.download = this.loomFilePath.split('/').slice(-1)[0];
         a.click();
         window.URL.revokeObjectURL(url);
         this.emit('finished', true);

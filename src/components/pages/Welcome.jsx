@@ -13,8 +13,8 @@ export default class Welcome extends Component {
                     alignItems: 'center',
                     margin: '1em',
                     paddingBottom: '60px',
-                    paddingLeft: '220px',
-                    paddingRight: '220px',
+                    paddingLeft: '1em',
+                    paddingRight: '1em',
                     overflowY: 'scroll',
                 }}>
                 <img

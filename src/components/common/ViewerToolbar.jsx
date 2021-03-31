@@ -115,7 +115,12 @@ export default class ViewerToolbar extends Component {
             <Grid>
                 <Grid.Row>
                     <Menu
-                        style={{ position: 'relative', top: 0, left: 0 }}
+                        style={{
+                            position: 'relative',
+                            top: 0,
+                            left: 0,
+                            height: 'fit-content',
+                        }}
                         vertical
                         fluid
                         className='toolbar'>
