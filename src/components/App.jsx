@@ -421,7 +421,6 @@ App.propTypes = {
     isAppLoading: PropTypes.bool.isRequired,
     cookies: instanceOf(Cookies).isRequired,
     sessionMode: PropTypes.string.isRequired,
-    sidebarIsVisible: PropTypes.bool.isRequired,
 };
 
 const app = withRouter(withCookies(App));

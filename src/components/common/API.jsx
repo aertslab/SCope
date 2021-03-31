@@ -29,7 +29,7 @@ class API {
                             '://' +
                             FRONTEND.host +
                             '/protobuf/',
-                        'src/proto/s.proto',
+                        '/s.proto',
                         { scope: { Main: BACKEND.host + ':' + this.RPCport } }
                     ).connect();
                 } else {
@@ -40,7 +40,7 @@ class API {
                             ':' +
                             this.WSport +
                             '/',
-                        'src/proto/s.proto',
+                        '/s.proto',
                         { scope: { Main: BACKEND.host + ':' + this.RPCport } }
                     ).connect();
                 }
