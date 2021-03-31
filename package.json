@@ -10,7 +10,7 @@
         "test": "jest",
         "lint-fix": "eslint --fix 'src/**/*.{ts,jsx,tsx}' webpack.config.js 'bin/*.js'",
         "lint": "tsc --noEmit && eslint 'src/**/*.{ts,jsx,tsx}' webpack.config.js 'bin/*.js'",
-        "bindle-size-analyse": "webpack --profile --json > stats.json"
+        "bundle-size-analyse": "webpack --profile --json > stats.json"
     },
     "keywords": [
         "single-cell",
