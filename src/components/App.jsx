@@ -1,7 +1,7 @@
 import { PropTypes, instanceOf } from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { withRouter, Route, Link } from 'react-router-dom';
+import { withRouter, Route } from 'react-router-dom';
 import { withCookies, Cookies } from 'react-cookie';
 import CookieConsent from 'react-cookie-consent';
 import pako from 'pako';
