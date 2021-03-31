@@ -21,7 +21,6 @@ let bitly = new Bitly(BITLY.token);
 
 import { consentToCookies } from '../redux/actions';
 
-const timer = 60 * 1000;
 const cookieName = 'SCOPE_UUID';
 
 class AppHeader extends Component {
