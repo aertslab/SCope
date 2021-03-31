@@ -55,7 +55,7 @@ export default class Regulon extends Component {
                     filter='regulon'
                     identifier='regulon-page'
                 />
-                <Grid.Row columns='4' centered>
+                <Grid.Row columns='3' centered>
                     {featureThreshold}
                     <Grid.Column>&nbsp;</Grid.Column>
                 </Grid.Row>
