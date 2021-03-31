@@ -1,36 +1,24 @@
-const path = require('path');
 const webpack = require('webpack');
-const fs = require('fs');
-const pkg = require('./package.json');
-const TerserPlugin = require('terser-webpack-plugin');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
-    .BundleAnalyzerPlugin;
+const paths = require('./paths');
 
-// Import config file
-let _config = require(process.env.SCOPE_CONFIG || './config.json');
+const _config = require(process.env.SCOPE_CONFIG || '../config.json');
 
-if (process.env.SCOPE_PORT) {
-    _config.publicHostAddress += ':' + process.env.SCOPE_PORT;
-    console.log('Appending SCOPE_PORT to publicHostAddress');
-}
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 
-let config = {
-    mode: process.env.NODE_ENV,
-    devtool: 'inline-source-map',
-    entry: './src/main.tsx',
-    devServer: {
-        host: '0.0.0.0',
-        port: _config.mPort,
-        disableHostCheck: true,
-        publicPath: '/dist',
-    },
+module.exports = {
+    entry: paths.src + '/main.tsx',
+
     output: {
-        filename: pkg.name + '.js',
-        chunkFilename: pkg.name + '-chunk.js',
+        path: paths.build,
+        filename: '[name].js',
+        publicPath: '/',
     },
+
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.jsx', '.css'],
     },
+
     module: {
         rules: [
             {
@@ -87,18 +75,11 @@ let config = {
             },
         ],
     },
+
     plugins: [
-        new webpack.DefinePlugin({
-            'process.env': {
-                NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-                NODE_TYPE: JSON.stringify(process.env.NODE_TYPE),
-            },
-        }),
         new webpack.DefinePlugin({
             DEBUG: _config.debug,
             REVERSEPROXYON: _config.reverseProxyOn,
-        }),
-        new webpack.DefinePlugin({
             BITLY: JSON.stringify({
                 baseURL: 'http://scope.aertslab.org',
                 token: '8422dd882b60604d327939997448dd1b5c61f54e',
@@ -122,19 +103,18 @@ let config = {
             }),
             __TEST_ONLY__: false,
         }),
-        new BundleAnalyzerPlugin({ openAnalyzer: false }),
+
+        new HtmlWebpackPlugin({
+            template: paths.src + '/template.html',
+            filename: 'index.html',
+            inject: 'body',
+        }),
+        new CopyPlugin({
+            patterns: [
+                { from: paths.src + '/proto/s.proto' },
+                { from: paths.src + '/images/*' },
+                { from: paths.images + '/*.png' },
+            ],
+        }),
     ],
 };
-
-if (process.env.NODE_ENV === 'production') {
-    config.optimization = {
-        minimize: true,
-        minimizer: [new TerserPlugin()],
-    };
-} else {
-    config.optimization = {
-        moduleIds: 'named',
-    };
-}
-
-module.exports = config;

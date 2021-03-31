@@ -5,12 +5,12 @@
     "main": "index.js",
     "scripts": {
         "preinstall": "cd opt/scopeserver/bindserver && npm install",
-        "dev": "cross-env NODE_ENV=development webpack serve",
-        "build": "cross-env NODE_ENV=production webpack",
+        "dev": "cross-env NODE_ENV=development webpack serve --config config/webpack.dev.js",
+        "build": "cross-env NODE_ENV=production webpack --config config/webpack.prod.js",
         "test": "jest",
-        "lint-fix": "eslint --fix 'src/**/*.{ts,jsx,tsx}' webpack.config.js",
-        "lint": "tsc --noEmit && eslint 'src/**/*.{ts,jsx,tsx}' webpack.config.js",
-        "bundle-size-analyse": "webpack --profile --json > stats.json"
+        "lint-fix": "eslint --fix 'src/**/*.{ts,jsx,tsx}'",
+        "lint": "tsc --noEmit && eslint 'src/**/*.{ts,jsx,tsx}'",
+        "bundle-size-analyse": "webpack --config config/webpack.dev.js --profile --json > stats.json"
     },
     "keywords": [
         "single-cell",
@@ -100,6 +100,7 @@
         "@typescript-eslint/parser": "^4.9.1",
         "babel-jest": "^26.6.3",
         "babel-loader": "^8.2.2",
+        "copy-webpack-plugin": "^8.1.0",
         "cross-env": "^7.0.3",
         "css-loader": "^5.0.1",
         "eslint": "^7.15.0",
@@ -109,6 +110,7 @@
         "google-protobuf": "^3.14.0",
         "grpc": "^1.24.4",
         "grpc-loader": "^2.0.1",
+        "html-webpack-plugin": "^5.3.1",
         "jest": "^26.6.3",
         "jest-css-modules-transform": "4.0.1",
         "prettier": "^2.2.1",
@@ -122,9 +124,9 @@
         "webpack": "^5.10.0",
         "webpack-bundle-analyzer": "^4.2.0",
         "webpack-cli": "^4.2.0",
-        "webpack-dev-server": "^3.11.2"
+        "webpack-dev-server": "^3.11.2",
+        "webpack-merge": "^5.7.3"
     },
-    "optionalDependencies": {},
     "prettier": {
         "endOfLine": "lf",
         "tabWidth": 4,
