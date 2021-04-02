@@ -8,8 +8,8 @@
         "dev": "cross-env NODE_ENV=development webpack serve --config config/webpack.dev.js",
         "build": "cross-env NODE_ENV=production webpack --config config/webpack.prod.js",
         "test": "jest",
-        "lint-fix": "eslint --fix 'src/**/*.{ts,jsx,tsx}' webpack.config.js",
-        "lint": "tsc --noEmit && eslint 'src/**/*.{ts,jsx,tsx}' webpack.config.js",
+        "lint-fix": "eslint --fix 'src/**/*.{ts,jsx,tsx}'",
+        "lint": "tsc --noEmit && eslint 'src/**/*.{ts,jsx,tsx}'",
         "bundle-size-analyse": "webpack --config config/webpack.dev.js --profile --json > stats.json"
     },
     "keywords": [
