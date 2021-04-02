@@ -137,7 +137,11 @@ class SCopeAPI:
             else:
                 msg = "User requested a loom file wich is not available"
                 SCopeServer.logger.error(msg)
-                return {"error": {"code": 404, "message": msg}, "datasets": [], "update": False}
+                return GetDatasets(
+                    error=Error(code=404, message=msg),
+                    datasets=[],
+                    update=False,
+                )
 
         for f in datasets_to_process:
             try:
