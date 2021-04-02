@@ -21,7 +21,7 @@ class SCopeAPI:
     def __init__(self, server: SCopeServer):
         self.__server = server
 
-    def get_uuid(self, ip) -> Union[GetUUID, Error]:
+    def get_uuid(self, ip) -> GetUUID:
         if self.__server.config["app_mode"]:
             with open(
                 os.path.join(self.__server.data_handler.get_config_dir(), "Permanent_Session_IDs.txt"), "r"
@@ -39,7 +39,7 @@ class SCopeAPI:
             )
             self.__server.data_handler.get_uuid_log().flush()
             self.__server.data_handler.get_current_UUIDs()[new_uuid] = [time.time(), "rw"]  # New sessions are rw
-        return {"UUID": new_uuid}
+        return GetUUID(UUID=new_uuid)
 
     def remove_all_expired_sessions(self):
         current_active_uuids = set(list(self.__server.data_handler.get_current_UUIDs().keys()))
@@ -54,9 +54,7 @@ class SCopeAPI:
                     if os.path.exists(os.path.join(self.__server.data_handler.get_data_dirs()[i]["path"], uid)):
                         shutil.rmtree(os.path.join(self.__server.data_handler.get_data_dirs()[i]["path"], uid))
 
-    def get_remaining_uuid_time(
-        self, session_uuid: str, ip: str, mouse_events: int
-    ) -> Union[GetRemainingUUIDTime, Error]:
+    def get_remaining_uuid_time(self, session_uuid: str, ip: str, mouse_events: int) -> GetRemainingUUIDTime:
         self.remove_all_expired_sessions()
 
         __session_uuid = session_uuid
@@ -107,14 +105,14 @@ class SCopeAPI:
             self.__server.data_handler.reset_active_session_timeout(__session_uuid)
 
         session_mode = self.__server.data_handler.get_current_UUIDs()[__session_uuid][1]
-        return {
-            "UUID": __session_uuid,
-            "timeRemaining": time_remaining,
-            "sessionsLimitReached": sessions_limit_reached,
-            "sessionMode": session_mode,
-        }
+        return GetRemainingUUIDTime(
+            UUID=__session_uuid,
+            timeRemaining=time_remaining,
+            sessionsLimitReached=sessions_limit_reached,
+            sessionMode=session_mode,
+        )
 
-    def get_datasets(self, session_uuid: str, dataset_file_name: str = None) -> Union[GetDatasets, Error]:
+    def get_datasets(self, session_uuid: str, dataset_file_name: str = None) -> GetDatasets:
         datasets = []
         update = False
         user_data_dir = self.__server.data_handler.get_data_dir_path_by_file_type(
@@ -166,4 +164,7 @@ class SCopeAPI:
 
         self.__server.data_handler.update_UUID_db()
 
-        return {"datasets": datasets, "update": update}
+        return GetDatasets(
+            datasets=datasets,
+            update=update,
+        )

@@ -37,14 +37,14 @@ def echo(value):
     return {"echo": value}
 
 
-@scope_api.get("/session/uuid/", response_model=Union[GetUUID, Error])
+@scope_api.get("/session/uuid/", response_model=GetUUID)
 def get_uuid(ip: str):
     get_uuid_reply = __scope_api.get_uuid(ip=ip)
     """ A HTTP API endpoint to retrieve a new UUID. """
     return get_uuid_reply
 
 
-@scope_api.get("/session/{session_id}/info/", response_model=Union[GetRemainingUUIDTime, Error])
+@scope_api.get("/session/{session_id}/info/", response_model=GetRemainingUUIDTime)
 def get_session_info(session_id, ip: str, mouse_events: int):
     get_remaining_uuid_time_reply = __scope_api.get_remaining_uuid_time(
         session_uuid=session_id, ip=ip, mouse_events=mouse_events
@@ -53,7 +53,7 @@ def get_session_info(session_id, ip: str, mouse_events: int):
     return get_remaining_uuid_time_reply
 
 
-@scope_api.get("/session/{session_id}/datasets/", response_model=Union[GetDatasets, Error])
+@scope_api.get("/session/{session_id}/datasets/", response_model=GetDatasets)
 def get_datasets(session_id, dataset_file_name: str = None):
     get_datasets_reply = __scope_api.get_datasets(session_uuid=session_id, dataset_file_name=dataset_file_name)
     """ A HTTP API endpoint to retrieve a list of datasets. """
