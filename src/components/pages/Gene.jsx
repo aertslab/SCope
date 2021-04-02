@@ -76,6 +76,7 @@ export default class Gene extends Component {
                                 this.setState({ activeFeatures: features });
                             }}
                             activeLegend={activeLegend}
+                            identifier='gene-page'
                         />
                     </Grid.Column>
                 </Grid>
