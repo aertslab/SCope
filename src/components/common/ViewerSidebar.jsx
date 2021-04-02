@@ -29,6 +29,7 @@ import FileDownloader from '../../js/http';
 import CollaborativeAnnotation from './CollaborativeAnnotation';
 import GProfilerModal from '../GProfiler/GProfilerModal';
 import ClusterOverlapsTable from './ClusterOverlapsTable';
+import * as SearchAction from '../Search/actions';
 
 import './ViewerSidebar.css';
 
@@ -82,15 +83,22 @@ class ViewerSidebar extends Component {
             this.state.activeFeatures[i].metadata['clusterID'],
             direction,
             (response) => {
+                console.log('gotoNextCluster', response);
                 BackendAPI.updateFeature(
                     i,
-                    response.featureType[0],
-                    response.feature[0],
-                    response.featureType[0],
-                    response.featureDescription[0],
+                    response.featureType,
+                    response.feature,
+                    response.featureType,
+                    response.featureDescription,
                     this.props.match.params.page,
                     (e) => {}
                 );
+
+                this.props.updateSelection(`${this.props.identifier}-${i}`, {
+                    title: response.feature,
+                    category: response.featureType,
+                    description: response.featureDescription,
+                });
             }
         );
     };
@@ -1517,4 +1525,11 @@ const mapStateToProps = (rootState) => {
     };
 };
 
-export default connect()(viewerSidebar);
+const mapDispatchToProps = (dispatch) => {
+    return {
+        updateSelection: (field, selection) =>
+            dispatch(SearchAction.select(field, selection)),
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(viewerSidebar);

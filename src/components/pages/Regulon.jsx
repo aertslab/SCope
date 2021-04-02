@@ -108,6 +108,7 @@ export default class Regulon extends Component {
                             onActiveFeaturesChange={(features, id) => {
                                 this.setState({ activeFeatures: features });
                             }}
+                            identifier='regulon-page'
                         />
                     </Grid.Column>
                 </Grid.Row>

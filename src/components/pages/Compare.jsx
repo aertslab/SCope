@@ -493,6 +493,7 @@ class Compare extends Component {
                                 this.setState({ activeFeatures: features });
                             }}
                             activeLegend={activeLegend}
+                            identifier='regulon-page'
                         />
                     </Grid.Column>
                 </Grid.Row>
