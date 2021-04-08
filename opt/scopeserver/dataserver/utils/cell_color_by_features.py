@@ -79,12 +79,12 @@ class CellColorByFeatures:
             return vals
         clipped = np.clip(vals[vals != 0], v_min, v_max)
         vals_min = np.amin(clipped)
-        non_zeros_scaled = (constant.UPPER_LIMIT_RGB - constant.LOWER_LIMIT_RGB) * (
-            (clipped - vals_min) / (v_max - vals_min)
-        ) + (constant.LOWER_LIMIT_RGB + 1)
-
-        if np.isnan(np.dot(non_zeros_scaled, non_zeros_scaled)):
-            non_zeros_scaled = np.nan_to_num(non_zeros_scaled, 1)
+        if v_max == vals_min: # Avoid divide by zero
+            non_zeros_scaled = np.ones(shape=len(clipped), dtype=clipped.dtype)
+        else:
+            non_zeros_scaled = (constant.UPPER_LIMIT_RGB - constant.LOWER_LIMIT_RGB) * (
+                (clipped - vals_min) / (v_max - vals_min)
+            ) + (constant.LOWER_LIMIT_RGB + 1)
 
         vals[vals != 0] = np.clip(non_zeros_scaled, 0, constant.UPPER_LIMIT_RGB)
         return vals
