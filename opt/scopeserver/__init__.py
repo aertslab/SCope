@@ -10,7 +10,7 @@ import http
 import sys
 import logging
 from pathlib import Path
-from typing import Dict, Any, Union
+from typing import Dict, Any, Union, Optional
 
 from scopeserver.dataserver.modules.gserver import GServer as gs
 from scopeserver.dataserver.modules.pserver import PServer as ps
@@ -26,24 +26,26 @@ LOGGER = logging.getLogger(__name__)
 class SCopeServer:
     """ Legacy SCope server. """
 
-    def __init__(self, config):
+    def __init__(self, config: Dict[str, Any]):
         self.run_event = threading.Event()
         self.run_event.set()
         self.config = config
-        self.xs_thread = None
-        self.gs_thread = None
-        self.ps_thread = None
+        self.xs_thread: Optional[threading.Thread] = None
+        self.gs_thread: Optional[threading.Thread] = None
+        self.ps_thread: Optional[threading.Thread] = None
 
-        if self.config["debug"]:
+        if self.config["DEBUG"]:
             LOGGER.setLevel(logging.DEBUG)
 
     def start_bind_server(self) -> None:
-        LOGGER.debug(f"Starting bind server on port {self.config['xPort']}")
-        self.xs_thread = threading.Thread(target=xs.run, args=(self.run_event,), kwargs={"port": self.config["xPort"]})
+        LOGGER.debug(f"Starting bind server on port {self.config['BIND_PORT']}")
+        self.xs_thread = threading.Thread(
+            target=xs.run, args=(self.run_event,), kwargs={"port": self.config["BIND_PORT"]}
+        )
         self.xs_thread.start()
 
     def start_data_server(self) -> None:
-        LOGGER.debug(f"Starting data server on port {self.config['gPort']}. app_mode: {self.config['app_mode']}")
+        LOGGER.debug(f"Starting data server on port {self.config['DATA_PORT']}.")
         self.gs_thread = threading.Thread(
             target=gs.serve,
             args=(
@@ -51,28 +53,33 @@ class SCopeServer:
                 self.config,
             ),
         )
-        LOGGER.debug(f"Starting upload server on port {self.config['pPort']}")
-        self.ps_thread = threading.Thread(target=ps.run, args=(self.run_event,), kwargs={"port": self.config["pPort"]})
+        LOGGER.debug(f"Starting upload server on port {self.config['UPLOAD_PORT']}")
+        self.ps_thread = threading.Thread(
+            target=ps.run, args=(self.run_event,), kwargs={"port": self.config["UPLOAD_PORT"]}
+        )
         self.gs_thread.start()
         self.ps_thread.start()
 
     def start_scope_server(self) -> None:
         self.start_data_server()
-        if not self.config["app_mode"]:
-            self.start_bind_server()
+        self.start_bind_server()
 
     def stop_servers(self) -> None:
         """ Stop all running threads. """
         LOGGER.info("Terminating servers...")
         self.run_event.clear()
-        self.gs_thread.join()
+        if self.gs_thread:
+            self.gs_thread.join()
+
         try:
-            urlopen("http://127.0.0.1:{0}/".format(self.config["pPort"]))
+            urlopen("http://127.0.0.1:{0}/".format(self.config["UPLOAD_PORT"]))
         except http.client.RemoteDisconnected:
             pass
-        self.ps_thread.join()
 
-        if not self.config["app_mode"]:
+        if self.ps_thread:
+            self.ps_thread.join()
+
+        if self.xs_thread:
             self.xs_thread.join()
         LOGGER.info("Servers successfully terminated. Exiting.")
 
@@ -100,10 +107,10 @@ def message_of_the_day(data_path: Union[str, Path]) -> None:
         LOGGER.info("Welcome to SCope.")
 
 
-def generate_config(args: argparse.Namespace) -> configuration.Config:
+def generate_config(args: argparse.Namespace) -> configuration.Settings:
     """ Combine parsed command line arguments with configuration from a config file. """
-    argscfg = {"gPort": args.g_port, "pPort": args.p_port, "xPort": args.x_port, "app_mode": args.app_mode}
-    return {**configuration.from_file(args.config_file), **argscfg}
+    argscfg = {"DATA_PORT": args.g_port, "UPLOAD_PORT": args.p_port, "BIND_PORT": args.x_port}
+    return configuration.Settings(*argscfg)
 
 
 def run() -> None:
@@ -120,17 +127,17 @@ def run() -> None:
 
     config = generate_config(args)
 
-    message_of_the_day(str(config["data"]))
-    LOGGER.info(f"Running SCope in {'debug' if config['debug'] else 'production'} mode...")
+    message_of_the_day(config.DATA_PATH)
+    LOGGER.info(f"Running SCope in {'debug' if config.DEBUG else 'production'} mode...")
 
     LOGGER.info(
-        f"""This secret key will be used to hash annotation data: {config['dataHashSecret']}
+        f"""This secret key will be used to hash annotation data: {config.DATAHASHSECRET}
         Losing this key will mean all annotations will display as unvalidated.
         """
     )
 
     # Start an instance of SCope Server
-    scope_server = SCopeServer(config)
+    scope_server = SCopeServer(config.dict())
     scope_server.run()
 
 
