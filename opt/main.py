@@ -31,12 +31,6 @@ scope_server_legacy = LegacySCopeServer(config=CONFIG, new_server=scope_server)
 scope_api = SCopeAPI(server=scope_server)
 
 
-@scope_api.get("/echo/{value}/")
-def echo(value):
-    """ A testing HTTP API endpoint that echoes the request parameter. """
-    return {"echo": value}
-
-
 @scope_api.get("/session/uuid/", response_model=GetUUID)
 def get_uuid(ip: str):
     get_uuid_reply = scope_api.get_uuid(ip=ip)
