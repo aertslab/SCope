@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import json
 import zlib
@@ -52,6 +53,14 @@ class Loom:
         self.abs_file_path = abs_file_path
         self.loom_connection = loom_connection
         self.dfh = dfh.DataFileHandler()
+        # Check if loom has MetaData global attribute, if not generate one
+        file_meta = self.get_file_metadata()
+        if not file_meta["hasGlobalMeta"]:
+            try:
+                self.generate_meta_data()
+            except Exception as e:
+                logger.error(f"Failed to make metadata for {self.file_path}")
+                logger.error(e)
 
         logger.info(f"New Loom object created for {file_path}")
         # Metrics
@@ -73,6 +82,11 @@ class Loom:
         if name not in self.loom_connection.attrs.keys():
             raise AttributeError("The global attribute {0} does not exist in the .loom file.".format(name))
         return self.loom_connection.attrs[name]
+
+    def get_file_size(self):
+        with open(self.get_abs_file_path(), "r") as fh:
+            loom_size = os.fstat(fh.fileno())[6]
+        return loom_size
 
     @staticmethod
     def clean_file_attr(file_attr):
@@ -477,6 +491,16 @@ class Loom:
                 cluster_names_dict[int(cluster_meta["id"])] = cluster_meta["description"]
         return cluster_names_dict
 
+    def get_hierarchy(self) -> Dict[str, str]:
+        try:
+            l1 = self.get_global_attribute_by_name(name="SCopeTreeL1")
+            l2 = self.get_global_attribute_by_name(name="SCopeTreeL2")
+            l3 = self.get_global_attribute_by_name(name="SCopeTreeL3")
+        except AttributeError:
+            l1 = "Uncategorized"
+            l2 = l3 = ""
+        return {"L1": l1, "L2": l2, "L3": l3}
+
     def set_hierarchy(self, L1: str, L2: str, L3: str) -> bool:
         logger.info("Changing hierarchy name for {0}".format(self.get_abs_file_path()))
 
@@ -679,15 +703,67 @@ class Loom:
             return self.has_md_clusterings_(meta_data=self.get_meta_data())
         return False
 
+    @staticmethod
+    def normalize_md_clusterings(md_clusterings, secret):
+        """
+        Confirm hashes of, and convert cell type annotations in the provided clusterings metadata
+        dictionary.
+        """
+        for n, clustering in enumerate(md_clusterings.copy()):
+            for m, cluster in enumerate(clustering["clusters"]):
+                if "cell_type_annotation" in cluster:
+                    cell_type_annotations = []
+                    ctas = cluster["cell_type_annotation"]
+                    for cta in ctas:
+                        hash_data = json.dumps(cta["data"]) + secret
+                        data_hash = hashlib.sha256(hash_data.encode()).hexdigest()
+
+                        votes: Dict[str, Any] = {
+                            "votes_for": {"total": 0, "voters": []},
+                            "votes_against": {"total": 0, "voters": []},
+                        }
+
+                        for i in votes:
+                            for v in cta["votes"][i]["voters"]:
+                                hash_data = json.dumps(cta["data"]) + v["voter_id"] + secret
+                                user_hash = hashlib.sha256(hash_data.encode()).hexdigest()
+                                v["voter_hash"] = user_hash == v["voter_hash"]
+                                votes[i]["voters"].append(v)
+                                votes[i]["total"] += 1
+                        cell_type_annotations.append(
+                            {
+                                "data": cta["data"],
+                                "validate_hash": data_hash == cta["validate_hash"],
+                                "votes_for": votes["votes_for"],
+                                "votes_against": votes["votes_against"],
+                            }
+                        )
+                    md_clusterings[n]["clusters"][m]["cell_type_annotation"] = cell_type_annotations
+                else:
+                    # Proto gave this for free
+                    md_clusterings[n]["clusters"][m]["cell_type_annotation"] = []
+        return md_clusterings
+
     def has_meta_data(self) -> bool:
         return "MetaData" in self.loom_connection.attrs.keys()
 
-    def get_meta_data(self):
+    def get_filtered_metadata(self, keys, secret=None):
+        md = self.get_meta_data(secret=secret)
+        return {k: md[k] for k in keys}
+
+    def get_meta_data(self, secret=None):
         md = self.loom_connection.attrs.MetaData
         if type(md) is np.ndarray:
             md = self.loom_connection.attrs.MetaData[0]
         try:
-            return json.loads(md)
+            md_dict = json.loads(md)
+            if secret is None:
+                return md_dict
+            else:
+                md_dict["clusterings"] = Loom.normalize_md_clusterings(
+                    md_clusterings=md_dict["clusterings"], secret=secret
+                )
+                return md_dict
         except json.decoder.JSONDecodeError:
             return Loom.decompress_meta(meta=md)
 

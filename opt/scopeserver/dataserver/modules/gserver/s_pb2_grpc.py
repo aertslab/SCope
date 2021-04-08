@@ -50,11 +50,6 @@ class MainStub(object):
             request_serializer=s__pb2.MarkerGenesRequest.SerializeToString,
             response_deserializer=s__pb2.MarkerGenesReply.FromString,
         )
-        self.getMyLooms = channel.unary_unary(
-            "/scope.Main/getMyLooms",
-            request_serializer=s__pb2.MyLoomsRequest.SerializeToString,
-            response_deserializer=s__pb2.MyLoomsReply.FromString,
-        )
         self.translateLassoSelection = channel.unary_unary(
             "/scope.Main/translateLassoSelection",
             request_serializer=s__pb2.TranslateLassoSelectionRequest.SerializeToString,
@@ -74,16 +69,6 @@ class MainStub(object):
             "/scope.Main/getVmax",
             request_serializer=s__pb2.VmaxRequest.SerializeToString,
             response_deserializer=s__pb2.VmaxReply.FromString,
-        )
-        self.getUUID = channel.unary_unary(
-            "/scope.Main/getUUID",
-            request_serializer=s__pb2.UUIDRequest.SerializeToString,
-            response_deserializer=s__pb2.UUIDReply.FromString,
-        )
-        self.getRemainingUUIDTime = channel.unary_unary(
-            "/scope.Main/getRemainingUUIDTime",
-            request_serializer=s__pb2.RemainingUUIDTimeRequest.SerializeToString,
-            response_deserializer=s__pb2.RemainingUUIDTimeReply.FromString,
         )
         self.loomUploaded = channel.unary_unary(
             "/scope.Main/loomUploaded",
@@ -202,12 +187,6 @@ class MainServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def getMyLooms(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
     def translateLassoSelection(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -227,18 +206,6 @@ class MainServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def getVmax(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
-    def getUUID(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
-    def getRemainingUUIDTime(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -366,11 +333,6 @@ def add_MainServicer_to_server(servicer, server):
             request_deserializer=s__pb2.MarkerGenesRequest.FromString,
             response_serializer=s__pb2.MarkerGenesReply.SerializeToString,
         ),
-        "getMyLooms": grpc.unary_unary_rpc_method_handler(
-            servicer.getMyLooms,
-            request_deserializer=s__pb2.MyLoomsRequest.FromString,
-            response_serializer=s__pb2.MyLoomsReply.SerializeToString,
-        ),
         "translateLassoSelection": grpc.unary_unary_rpc_method_handler(
             servicer.translateLassoSelection,
             request_deserializer=s__pb2.TranslateLassoSelectionRequest.FromString,
@@ -390,16 +352,6 @@ def add_MainServicer_to_server(servicer, server):
             servicer.getVmax,
             request_deserializer=s__pb2.VmaxRequest.FromString,
             response_serializer=s__pb2.VmaxReply.SerializeToString,
-        ),
-        "getUUID": grpc.unary_unary_rpc_method_handler(
-            servicer.getUUID,
-            request_deserializer=s__pb2.UUIDRequest.FromString,
-            response_serializer=s__pb2.UUIDReply.SerializeToString,
-        ),
-        "getRemainingUUIDTime": grpc.unary_unary_rpc_method_handler(
-            servicer.getRemainingUUIDTime,
-            request_deserializer=s__pb2.RemainingUUIDTimeRequest.FromString,
-            response_serializer=s__pb2.RemainingUUIDTimeReply.SerializeToString,
         ),
         "loomUploaded": grpc.unary_unary_rpc_method_handler(
             servicer.loomUploaded,
@@ -684,35 +636,6 @@ class Main(object):
         )
 
     @staticmethod
-    def getMyLooms(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getMyLooms",
-            s__pb2.MyLoomsRequest.SerializeToString,
-            s__pb2.MyLoomsReply.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
     def translateLassoSelection(
         request,
         target,
@@ -818,64 +741,6 @@ class Main(object):
             "/scope.Main/getVmax",
             s__pb2.VmaxRequest.SerializeToString,
             s__pb2.VmaxReply.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getUUID(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getUUID",
-            s__pb2.UUIDRequest.SerializeToString,
-            s__pb2.UUIDReply.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getRemainingUUIDTime(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getRemainingUUIDTime",
-            s__pb2.RemainingUUIDTimeRequest.SerializeToString,
-            s__pb2.RemainingUUIDTimeReply.FromString,
             options,
             channel_credentials,
             insecure,

@@ -67,21 +67,19 @@ export default class FeatureSearch extends React.Component {
         );
     }
 
-    updateFeature(feature, featureType, featureDescription) {
+    async updateFeature(feature, featureType, featureDescription) {
         this.setState({ value: feature, selection: null });
         // TODO: Hacky implementation. To be refactored/reviewed properly
-        BackendAPI.queryLoomFiles(
+        await BackendAPI.queryLoomFiles(
             BackendAPI.getUUID(),
-            () => {
-                BackendAPI.updateFeature(
-                    this.props.field,
-                    this.state.type,
-                    feature,
-                    featureType,
-                    featureDescription
-                );
-            },
             BackendAPI.getActiveLoom()
+        );
+        BackendAPI.updateFeature(
+            this.props.field,
+            this.state.type,
+            feature,
+            featureType,
+            featureDescription
         );
         ReactGA.event({
             category: 'action',

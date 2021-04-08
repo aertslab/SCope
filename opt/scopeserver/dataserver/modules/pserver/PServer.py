@@ -279,7 +279,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
         else:
             if form.getvalue("file-type") in data_file_handler.get_data_dirs().keys():
                 self.directory = data_file_handler.get_data_dir_path_by_file_type(
-                    file_type=form.getvalue("file-type"), UUID=form.getvalue("UUID")
+                    file_type=form.getvalue("file-type"), session_uuid=form.getvalue("UUID")
                 )
             else:
                 self.send_error(415, "Unsupported file type")

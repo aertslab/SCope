@@ -57,23 +57,20 @@ class SCope(s_pb2_grpc.MainServicer):
 
     orcid_active = False
 
-    def __init__(self, config: Dict[str, str]):
+    def __init__(self, config: Dict[str, str], server=None):
 
         self.config = config
+        self.__server = server
         self.app_mode = False
 
-        self.dfh = dfh.DataFileHandler()
-        self.lfh = lfh.LoomFileHandler()
-
+        # TODO: SHOULD BE REMOVED WHEN MIGRATION IS DONE
+        self.dfh = self.__server.data_handler if self.__server is not None else dfh.DataFileHandler()
         self.dfh.set_global_data()
-        self.lfh.set_global_data()
         self.dfh.read_UUID_db()
         self.dfh.read_ORCID_db()
 
-        self.check_ORCID_connection()
-
-    def update_global_data(self) -> None:
-        self.dfh.set_global_data()
+        # TODO: SHOULD BE REMOVED WHEN MIGRATION IS DONE
+        self.lfh = self.__server.dataset_handler if self.__server is not None else lfh.LoomFileHandler()
         self.lfh.set_global_data()
 
     def check_ORCID_connection(self) -> None:
@@ -483,7 +480,7 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.MarkerGenesReply(genes=cluster_marker_metrics.index, metrics=metrics)
 
     def getMyGeneSets(self, request, context):
-        userDir = dfh.DataFileHandler.get_data_dir_path_by_file_type("GeneSet", UUID=request.UUID)
+        userDir = dfh.DataFileHandler.get_data_dir_path_by_file_type("GeneSet", session_uuid=request.UUID)
         if not os.path.isdir(userDir):
             for i in ["Loom", "GeneSet", "LoomAUCellRankings"]:
                 os.mkdir(os.path.join(self.dfh.get_data_dirs()[i]["path"], request.UUID))
@@ -496,155 +493,6 @@ class SCope(s_pb2_grpc.MainServicer):
             for f in geneSetsToProcess
         ]
         return s_pb2.MyGeneSetsReply(myGeneSets=gene_sets)
-
-    def getMyLooms(self, request, context):
-        my_looms = []
-        update = False
-        userDir = dfh.DataFileHandler.get_data_dir_path_by_file_type("Loom", UUID=request.UUID)
-        if not os.path.isdir(userDir):
-            for i in ["Loom", "GeneSet", "LoomAUCellRankings"]:
-                os.mkdir(os.path.join(self.dfh.get_data_dirs()[i]["path"], request.UUID))
-
-        self.update_global_data()
-
-        loomsToProcess = sorted(self.lfh.get_global_looms()) + sorted(
-            [os.path.join(request.UUID, x) for x in os.listdir(userDir)]
-        )
-
-        if request.loomFile:
-            if request.loomFile in loomsToProcess:
-                loomsToProcess = [request.loomFile]
-                update = True
-            else:
-                logger.error("User requested a loom file wich is not available")
-
-        for f in loomsToProcess:
-            try:
-                if f.endswith(".loom"):
-                    with open(self.lfh.get_loom_absolute_file_path(f), "r") as fh:
-                        loomSize = os.fstat(fh.fileno())[6]
-                    loom = self.lfh.get_loom(loom_file_path=Path(f))
-                    if loom is None:
-                        continue
-                    file_meta = loom.get_file_metadata()
-                    if not file_meta["hasGlobalMeta"]:
-                        try:
-                            loom.generate_meta_data()
-                            file_meta = loom.get_file_metadata()
-                        except Exception as e:
-                            logger.error("Failed to make metadata!")
-                            logger.error(e)
-
-                    try:
-                        L1 = loom.get_global_attribute_by_name(name="SCopeTreeL1")
-                        L2 = loom.get_global_attribute_by_name(name="SCopeTreeL2")
-                        L3 = loom.get_global_attribute_by_name(name="SCopeTreeL3")
-                    except AttributeError:
-                        L1 = "Uncategorized"
-                        L2 = L3 = ""
-                    my_looms.append(
-                        s_pb2.MyLoom(
-                            loomFilePath=f,
-                            loomDisplayName=os.path.splitext(os.path.basename(f))[0],
-                            loomSize=loomSize,
-                            cellMetaData=s_pb2.CellMetaData(
-                                annotations=loom.get_meta_data_by_key(key="annotations"),
-                                embeddings=loom.get_meta_data_by_key(key="embeddings"),
-                                clusterings=proto.protoize_cell_type_annotation(
-                                    loom.get_meta_data_by_key(key="clusterings"), secret=self.config["dataHashSecret"]
-                                ),
-                            ),
-                            fileMetaData=file_meta,
-                            loomHeierarchy=s_pb2.LoomHeierarchy(L1=L1, L2=L2, L3=L3),
-                        )
-                    )
-            except ValueError:
-                pass
-        self.dfh.update_UUID_db()
-
-        return s_pb2.MyLoomsReply(myLooms=my_looms, update=update)
-
-    def getUUID(self, request, context):
-        if SCope.app_mode:
-            with open(os.path.join(self.dfh.get_config_dir(), "Permanent_Session_IDs.txt"), "r") as fh:
-                newUUID = fh.readline().rstrip("\n")
-                logger.info(f"IP {request.ip} connected to SCope. Running in App mode. Passing UUID {newUUID}.")
-        else:
-            newUUID = str(uuid.uuid4())
-        if newUUID not in self.dfh.get_current_UUIDs().keys():
-            logger.info(f"IP {request.ip} connected to SCope. Passing new UUID {newUUID}.")
-            self.dfh.get_uuid_log().write(
-                "{0} :: {1} :: New UUID ({2}) assigned.\n".format(
-                    time.strftime("%Y-%m-%d__%H-%M-%S", time.localtime()), request.ip, newUUID
-                )
-            )
-            self.dfh.get_uuid_log().flush()
-            self.dfh.get_current_UUIDs()[newUUID] = [time.time(), "rw"]  # New sessions are rw
-        return s_pb2.UUIDReply(UUID=newUUID)
-
-    def getRemainingUUIDTime(
-        self, request, context
-    ):  # TODO: his function will be called a lot more often, we should reduce what it does.
-        curUUIDSet = set(list(self.dfh.get_current_UUIDs().keys()))
-        for uid in curUUIDSet:
-            timeRemaining = int(dfh._UUID_TIMEOUT - (time.time() - self.dfh.get_current_UUIDs()[uid][0]))
-            if timeRemaining < 0:
-                logger.info("Removing folders of expired UUID: {0}".format(uid))
-                del self.dfh.get_current_UUIDs()[uid]
-                for i in ["Loom", "GeneSet", "LoomAUCellRankings"]:
-                    if os.path.exists(os.path.join(self.dfh.get_data_dirs()[i]["path"], uid)):
-                        shutil.rmtree(os.path.join(self.dfh.get_data_dirs()[i]["path"], uid))
-        uid = request.UUID
-        if uid in self.dfh.get_current_UUIDs().keys():
-            logger.info(f"IP {request.ip} connected to SCope. Using UUID {uid} from frontend.")
-            startTime = self.dfh.get_current_UUIDs()[uid][0]
-            timeRemaining = int(dfh._UUID_TIMEOUT - (time.time() - startTime))
-            self.dfh.get_uuid_log().write(
-                "{0} :: {1} :: Old UUID ({2}) connected :: Time Remaining - {3}.\n".format(
-                    time.strftime("%Y-%m-%d__%H-%M-%S", time.localtime()), request.ip, uid, timeRemaining
-                )
-            )
-            self.dfh.get_uuid_log().flush()
-        else:
-            logger.info(f"IP {request.ip} connected to SCope. Using UUID {uid} from frontend.")
-            try:
-                uuid.UUID(uid)
-            except (KeyError, AttributeError):
-                old_uid = uid
-                uid = str(uuid.uuid4())
-                logger.error(f"UUID {old_uid} is malformed. Passing new UUID {uid}")
-            self.dfh.get_uuid_log().write(
-                "{0} :: {1} :: New UUID ({2}) assigned.\n".format(
-                    time.strftime("%Y-%m-%d__%H-%M-%S", time.localtime()), request.ip, uid
-                )
-            )
-            self.dfh.get_uuid_log().flush()
-            self.dfh.get_current_UUIDs()[uid] = [time.time(), "rw"]
-            timeRemaining = int(dfh._UUID_TIMEOUT)
-
-        self.dfh.active_session_check()
-        if request.mouseEvents >= constant.MOUSE_EVENTS_THRESHOLD:
-            self.dfh.reset_active_session_timeout(uid)
-
-        sessionsLimitReached = False
-
-        if (
-            len(self.dfh.get_active_sessions().keys()) >= constant.ACTIVE_SESSIONS_LIMIT
-            and uid not in self.dfh.get_permanent_UUIDs()
-            and uid not in self.dfh.get_active_sessions().keys()
-        ):
-            sessionsLimitReached = True
-            logger.warning(
-                f"Maximum number of concurrent active sessions ({constant.ACTIVE_SESSIONS_LIMIT}) reached. IP {request.ip} will not be able to access SCope."
-            )
-
-        if uid not in self.dfh.get_active_sessions().keys() and not sessionsLimitReached:
-            self.dfh.reset_active_session_timeout(uid)
-
-        sessionMode = self.dfh.get_current_UUIDs()[uid][1]
-        return s_pb2.RemainingUUIDTimeReply(
-            UUID=uid, timeRemaining=timeRemaining, sessionsLimitReached=sessionsLimitReached, sessionMode=sessionMode
-        )
 
     def translateLassoSelection(self, request, context):
         src_loom = self.lfh.get_loom(loom_file_path=Path(request.srcLoomFilePath))
@@ -833,13 +681,13 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.LoomUploadedReply()
 
 
-def serve(run_event, config: Dict[str, Any]) -> None:
+def serve(run_event, config: Dict[str, Any], new_server=None) -> None:
     SCope.app_mode = config["app_mode"]
     server = grpc.server(
         futures.ThreadPoolExecutor(max_workers=10),
         options=[("grpc.max_send_message_length", -1), ("grpc.max_receive_message_length", -1)],
     )
-    scope = SCope(config=config)
+    scope = SCope(config=config, server=new_server)
     s_pb2_grpc.add_MainServicer_to_server(scope, server)
     server.add_insecure_port("[::]:{0}".format(config["gPort"]))
     server.start()
