@@ -2,30 +2,34 @@
 Main entry point to the SCope API implementation.
 """
 
-import os
-
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-from scopeserver.config import from_file
+from scopeserver.api.v1 import api_v1_router
+from scopeserver.config import settings
 from scopeserver import message_of_the_day, SCopeServer
 
 scope_api = FastAPI()
-CONFIG = from_file(os.environ.get("SCOPE_CONFIG"))
+
+scope_api.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
-@scope_api.get("/echo/{value}")
-def echo(value):
-    """ A testing HTTP API endpoint that echoes the request parameter. """
-    return {"echo": value}
+# HTTP API
+scope_api.include_router(api_v1_router, prefix=settings.API_V1_STR)
 
-
-scope_legacy = SCopeServer(CONFIG)
+scope_legacy = SCopeServer(settings.dict())
 
 
 @scope_api.on_event("startup")
 def startup():
     """ Start the legacy server. """
-    message_of_the_day(str(CONFIG["data"]))
+    message_of_the_day(settings.DATA_PATH)
     scope_legacy.start_scope_server()
 
 

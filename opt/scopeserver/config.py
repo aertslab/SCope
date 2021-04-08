@@ -1,67 +1,116 @@
-# -*- coding: utf-8 -*-
 """ Server configuration handling. """
 
-from typing import Dict, Optional, Union
-from pathlib import Path
-from collections import defaultdict
-from pydantic import BaseSettings
+from typing import Any, Dict
+import os
 import json
-import secrets
+from pathlib import Path
 
-Config = Dict[str, Union[str, int, bool, Path]]
-
-
-def default_validator():
-    """ The default validator does not check its argument, assumes it is valid. """
-    return lambda arg: True
+from pydantic import BaseSettings, validator
 
 
-def validate(config: Config) -> Config:
-    """ Check a config has valid keys and values and strips invalid values. """
-
-    validators = defaultdict(default_validator, [("dataHashSecret", lambda secret: not secret.isspace())])
-
-    return {key: value for key, value in config.items() if validators[key](value)}
-
-
-def defaults() -> Config:
-    """ Default configuration values. """
-    return {
-        "app_mode": False,
-        "debug": True,
-        "pPort": 55851,
-        "xPort": 55852,
-        "gPort": 55853,
-        "dataHashSecret": secrets.token_hex(32),
-        "data": Path("data"),
+def translate_config_key(key: str) -> str:
+    " Translate 'old' style config names into 'new' style names. "
+    translate = {
+        "PPORT": "UPLOAD_PORT",
+        "XPORT": "BIND_PORT",
+        "GPORT": "DATA_PORT",
+        "MPORT": "HTTP_PORT",
     }
 
+    if key in translate:
+        return translate[key]
 
-def from_string(config: str) -> Config:
-    """ Read configuration from a string. """
-    return {**defaults(), **validate(json.loads(config))}
+    return key
 
 
-def from_file(config_filename: Optional[Union[Path, str]]) -> Config:
+def json_config_settings_source(_s: BaseSettings) -> Dict[str, Any]:
     """
     Read configuration from a provided file.
     If the configuration filename is not provided. Returns default values.
     """
 
-    if config_filename is not None:
-        with open(config_filename) as config_file:
-            return from_string(config_file.read())
+    json_config = {}
+    filename = os.environ.get("SCOPE_CONFIG")
+    if filename and Path(filename).is_file():
+        with open(filename) as config_file:
+            json_config = {translate_config_key(key.upper()): val for key, val in json.load(config_file).items()}
 
-    return defaults()
+    return json_config
 
 
 class Settings(BaseSettings):
+    """ Global settings for the SCope server application. """
 
-    DATABASE_URL: str
+    # pylint: disable=no-self-argument
+    # pylint: disable=no-self-use
+    # pylint: disable=missing-class-docstring
+    # pylint: disable=too-few-public-methods
+
+    DATABASE_URL: str = ""
+
+    @validator("DATABASE_URL", pre=True, allow_reuse=True)
+    def sqlite_conn(cls, value: str):  # pylint: disable=no-self-argument
+        " Validate that the connection string starts with sqlite and has the check_same_thread argument. "
+        if not value.startswith("sqlite:///"):
+            raise ValueError("Not connecting to a sqlite database")
+        if not value.endswith("?check_same_thread=false"):
+            raise ValueError("check_same_thread should be false")
+
+        return value
+
+    DEBUG: bool
+
+    DATA_PATH: Path = Path("data")
+
+    DATAHASHSECRET: str
+
+    @validator("DATAHASHSECRET", pre=True, allow_reuse=True)
+    def valid_secret(cls, value: str):
+        " Validate that the data hash secret string contains no spaces. "
+        if " " in value:
+            raise ValueError("Secret must not contain spaces")
+        if len(value) != 64:
+            raise ValueError(f"Secret {value} must be 64 characters long. This one is {len(value)}")
+        return value
+
+    HTTP_PORT: int = 55850  #  Was: mPort
+    UPLOAD_PORT: int = 55851  #  Was: pPort
+    BIND_PORT: int = 55852  #  Was: xPort
+    DATA_PORT: int = 55853  #  Was: gPort
+
+    API_V1_STR: str = "/api/v1"
+
+    # Other unused config
+
+    WSPROTOCOL: str
+    HTTPPROTOCOL: str
+    LOCALHOSTADDRESS: str
+    PUBLICHOSTADDRESS: str
+
+    ORCIDAPICLIENTID: str
+    ORCIDAPICLIENTSECRET: str
+    ORCIDAPIREDIRECTURI: str
+
+    REVERSEPROXYON: bool
 
     class Config:
         env_file = Path("..") / ".env"
         env_file_encoding = "utf-8"
+
+        @classmethod
+        def customise_sources(
+            cls,
+            init_settings,
+            env_settings,
+            file_secret_settings,
+        ):
+            " Add a JSON source for settings. "
+            return (
+                init_settings,
+                json_config_settings_source,
+                env_settings,
+                file_secret_settings,
+            )
 
 
 settings = Settings()
