@@ -6,7 +6,7 @@ from hypothesis.extra.numpy import arrays
 from scopeserver.dataserver.utils import data
 
 
-@given(arrays(np.float, shape=(1, 100), elements=floats(-1000, 1000)))
+@given(arrays(np.float64, shape=(1, 100), elements=floats(-1000, 1000)))
 def test_vmax(values):
     expected_100 = np.amax(values)
     expected_99 = np.clip(np.percentile(values, 99), 0.01, expected_100)

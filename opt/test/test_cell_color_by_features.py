@@ -27,6 +27,14 @@ def test_normalise_vals_low_vmax():
 
 @given(arrays(np.intc, shape=integers(1, 50), elements=integers(-1000, 1000)), integers(0, 1000), integers(0, 1000))
 def test_normalise_vals2(vals, v_min, v_max):
+    if v_min > v_max:
+        v_min, v_max = v_max, v_min
+
     normalised = CellColorByFeatures.normalise_vals(vals, v_max, v_min)
-    assert np.amin(normalised) >= LOWER_LIMIT_RGB
-    assert np.amax(normalised) <= UPPER_LIMIT_RGB
+
+    if len(normalised[normalised != 0]) == 0:
+        assert np.all(normalised == vals), "Vals were all 0"
+    else:
+        assert np.amin(normalised) >= LOWER_LIMIT_RGB
+        assert np.amax(normalised) <= UPPER_LIMIT_RGB
+
