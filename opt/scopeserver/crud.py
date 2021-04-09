@@ -72,18 +72,17 @@ def create_user(db: Session) -> models.User:
 
 
 def create_dataset(
-    db: Session, name: str, filename: str, project: models.Project, data: Union[bytes, str]
+        db: Session, name: str, filename: str, project: models.Project, size: int
 ) -> models.Dataset:
     " Create a new dataset. "
     new_dataset = models.Dataset(
         name=name,
         filename=filename,
-        data=data,
-        size=len(data),
+        size=size,
         project=project.id,
     )
     db.add(new_dataset)
-    project.size += len(data)
+    project.size += size
     db.commit()
     db.refresh(new_dataset)
     return new_dataset
