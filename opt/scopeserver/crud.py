@@ -1,13 +1,12 @@
 " Provides low-level Create, Read, Update, and Delete functions for API resources. "
 
-from typing import List, Optional, Union
+from typing import List, Optional
 from datetime import datetime
 from uuid import uuid4
 
 from sqlalchemy.orm import Session
 
 from scopeserver import models, schemas
-from scopeserver.config import settings
 
 # pylint: disable=invalid-name
 

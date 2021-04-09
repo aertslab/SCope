@@ -1,6 +1,6 @@
 """ Database model definitions. """
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, LargeBinary, String
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from scopeserver.database import Base
