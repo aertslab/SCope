@@ -48,7 +48,7 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str = ""
 
-    @validator("DATABASE_URL")
+    @validator("DATABASE_URL", pre=True, allow_reuse=True)
     def sqlite_conn(cls, value: str):  # pylint: disable=no-self-argument
         " Validate that the connection string starts with sqlite and has the check_same_thread argument. "
         if not value.startswith("sqlite:///"):
@@ -64,13 +64,13 @@ class Settings(BaseSettings):
 
     DATAHASHSECRET: str
 
-    @validator("DATAHASHSECRET")
+    @validator("DATAHASHSECRET", pre=True, allow_reuse=True)
     def valid_secret(cls, value: str):
         " Validate that the data hash secret string contains no spaces. "
         if " " in value:
             raise ValueError("Secret must not contain spaces")
         if len(value) != 64:
-            raise ValueError("Secret must be 64 characters long")
+            raise ValueError(f"Secret {value} must be 64 characters long. This one is {len(value)}")
         return value
 
     HTTP_PORT: int = 55850  #  Was: mPort
