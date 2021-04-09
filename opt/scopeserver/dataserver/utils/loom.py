@@ -55,7 +55,7 @@ class Loom:
 
         logger.info(f"New Loom object created for {file_path}")
         # Metrics
-        self.nUMI = None
+        self.nUMI: Optional[np.ndarray] = None
         self.species, self.gene_mappings = self.infer_species()
         self.ss_pickle_name = self.abs_file_path.with_suffix(".ss_pkl")
         self.ss = ss.load_ss(self)
@@ -769,9 +769,10 @@ class Loom:
         # Possibly faster fix totals = ds.map([np.sum], axis=1)[0]
 
         calc_nUMI_start_time = time.time()
-        self.nUMI = self.loom_connection.map([np.sum], axis=1)[0]
+        nUMI = self.loom_connection.map([np.sum], axis=1)[0]
+        self.nUMI = nUMI
         logger.debug("{0:.5f} seconds elapsed (calculating nUMI) ---".format(time.time() - calc_nUMI_start_time))
-        return self.nUMI
+        return nUMI
 
     def get_gene_expression_by_gene_symbol(self, gene_symbol: str) -> np.ndarray:
         return self.loom_connection[self.get_genes() == gene_symbol, :][0]
@@ -834,7 +835,7 @@ class Loom:
                 return self.get_genes()[self.loom_connection.ra.Regulons[regulon] == 1]
         except Exception as err:
             logger.error(err)
-            return []
+            return np.ndarray(shape=(0,))
 
     def has_regulons_AUC(self) -> bool:
         return self.has_legacy_regulons() or self.has_motif_regulons() or self.has_track_regulons()
