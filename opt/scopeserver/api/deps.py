@@ -31,10 +31,10 @@ def get_current_user(db: Session = Depends(get_db), user_id: Optional[int] = Coo
     )
 
     if user_id is not None:
-        user = schemas.User(id=user_id)
-        if not (db_user := crud.get_user(db, user=user)):
+        user = crud.get_user(db, user=schemas.User(id=user_id))
+        if not user:
             raise unknown_user
 
-        return db_user
+        return user
 
     raise no_user_id
