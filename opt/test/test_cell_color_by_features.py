@@ -37,4 +37,3 @@ def test_normalise_vals2(vals, v_min, v_max):
     else:
         assert np.amin(normalised) >= LOWER_LIMIT_RGB
         assert np.amax(normalised) <= UPPER_LIMIT_RGB
-

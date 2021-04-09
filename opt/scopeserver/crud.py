@@ -70,9 +70,7 @@ def create_user(db: Session) -> models.User:
 # Datasets
 
 
-def create_dataset(
-        db: Session, name: str, filename: str, project: models.Project, size: int
-) -> models.Dataset:
+def create_dataset(db: Session, name: str, filename: str, project: models.Project, size: int) -> models.Dataset:
     " Create a new dataset. "
     new_dataset = models.Dataset(
         name=name,

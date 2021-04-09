@@ -91,7 +91,7 @@ async def add_dataset(
     project = crud.get_project(db, project_id=project_id, user_id=current_user.id)
     if project:
         size = 0
-        with (settings.DATA_PATH / Path(project.uuid) / Path(uploadfile.filename)).open(mode='wb') as datafile:
+        with (settings.DATA_PATH / Path(project.uuid) / Path(uploadfile.filename)).open(mode="wb") as datafile:
             data = await uploadfile.read()
             size = len(data)
             datafile.write(data)
