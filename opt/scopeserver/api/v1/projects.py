@@ -93,6 +93,8 @@ async def add_dataset(
         size = 0
         with (settings.DATA_PATH / Path(project.uuid) / Path(uploadfile.filename)).open(mode="wb") as datafile:
             data = await uploadfile.read()
+            if isinstance(data, str):
+                data = data.encode("utf8")
             size = len(data)
             datafile.write(data)
 
