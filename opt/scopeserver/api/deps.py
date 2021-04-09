@@ -18,7 +18,7 @@ def get_db() -> Generator:
         database.close()
 
 
-def get_current_user(db: Session = Depends(get_db), user_id: Optional[int] = Cookie(None)) -> models.User:
+def get_current_user(database: Session = Depends(get_db), user_id: Optional[int] = Cookie(None)) -> models.User:
     " Provide access to the User currently accessing the API. "
     unknown_user = HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
@@ -31,7 +31,7 @@ def get_current_user(db: Session = Depends(get_db), user_id: Optional[int] = Coo
     )
 
     if user_id is not None:
-        user = crud.get_user(db, user=schemas.User(id=user_id))
+        user = crud.get_user(database, user=schemas.User(id=user_id))
         if not user:
             raise unknown_user
 
