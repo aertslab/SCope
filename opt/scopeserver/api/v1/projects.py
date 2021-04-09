@@ -1,12 +1,14 @@
 " API endpoints related to managing SCope projects. "
 
 from typing import List
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
 from sqlalchemy.orm import Session
 
 from scopeserver import crud, models, schemas
 from scopeserver.api import deps
+from scopeserver.config import settings
 
 router = APIRouter()
 
@@ -45,7 +47,9 @@ async def new_project(
     current_user: models.User = Depends(deps.get_current_user),
 ):
     """ Create a new project. """
-    return crud.create_project(db, current_user.id, name)
+    project = crud.create_project(db, current_user.id, name)
+    (settings.DATA_PATH / Path(project.uuid)).mkdir()
+    return project
 
 
 @router.post("/{project_id}/user")
@@ -74,7 +78,7 @@ async def add_user(
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User or project does not exist")
 
 
-@router.post("/{project_id}/dataset")
+@router.post("/{project_id}/dataset", summary="", response_model=schemas.Dataset)
 async def add_dataset(
     *,
     db: Session = Depends(deps.get_db),
@@ -86,8 +90,15 @@ async def add_dataset(
     """ Add a dataset to a project. """
     project = crud.get_project(db, project_id=project_id, user_id=current_user.id)
     if project:
-        crud.create_dataset(db, name=name, filename=uploadfile.filename, project=project, data=await uploadfile.read())
-        return Response(status_code=status.HTTP_200_OK)
+        size = 0
+        with (settings.DATA_PATH / Path(project.uuid) / Path(uploadfile.filename)).open(mode="wb") as datafile:
+            data = await uploadfile.read()
+            if isinstance(data, str):
+                data = data.encode("utf8")
+            size = len(data)
+            datafile.write(data)
+
+        return crud.create_dataset(db, name=name, filename=uploadfile.filename, project=project, size=size)
 
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not in this project")
 

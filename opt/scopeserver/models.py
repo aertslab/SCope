@@ -1,6 +1,6 @@
 """ Database model definitions. """
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, LargeBinary, String
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from scopeserver.database import Base
@@ -45,6 +45,5 @@ class Dataset(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
     filename = Column(String)
-    data = Column(LargeBinary, nullable=False)
     size = Column(Integer, nullable=False)
     project = Column(Integer, ForeignKey("projects.id"), nullable=False)

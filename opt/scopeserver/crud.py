@@ -1,13 +1,12 @@
 " Provides low-level Create, Read, Update, and Delete functions for API resources. "
 
-from typing import List, Optional, Union
+from typing import List, Optional
 from datetime import datetime
 from uuid import uuid4
 
 from sqlalchemy.orm import Session
 
 from scopeserver import models, schemas
-from scopeserver.config import settings
 
 # pylint: disable=invalid-name
 
@@ -71,19 +70,16 @@ def create_user(db: Session) -> models.User:
 # Datasets
 
 
-def create_dataset(
-    db: Session, name: str, filename: str, project: models.Project, data: Union[bytes, str]
-) -> models.Dataset:
+def create_dataset(db: Session, name: str, filename: str, project: models.Project, size: int) -> models.Dataset:
     " Create a new dataset. "
     new_dataset = models.Dataset(
         name=name,
         filename=filename,
-        data=data,
-        size=len(data),
+        size=size,
         project=project.id,
     )
     db.add(new_dataset)
-    project.size += len(data)
+    project.size += size
     db.commit()
     db.refresh(new_dataset)
     return new_dataset
