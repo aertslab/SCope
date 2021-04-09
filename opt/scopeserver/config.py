@@ -65,10 +65,12 @@ class Settings(BaseSettings):
     DATAHASHSECRET: str
 
     @validator("DATAHASHSECRET")
-    def no_spaces(cls, value: str):
+    def valid_secret(cls, value: str):
         " Validate that the data hash secret string contains no spaces. "
         if " " in value:
-            raise ValueError("SECRET must not contain spaces")
+            raise ValueError("Secret must not contain spaces")
+        if len(value) != 64:
+            raise ValueError("Secret must be 64 characters long")
         return value
 
     HTTP_PORT: int = 55850  #  Was: mPort
