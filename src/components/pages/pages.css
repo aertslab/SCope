@@ -1,4 +1,4 @@
-div.genePage {
+div.appPage {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -8,4 +8,12 @@ div.genePage {
 .viewControls {
     flex-grow: 1;
     margin-bottom: 2rem !important;
+}
+
+div.compare-menu {
+    position: fixed;
+    overflow-y: scroll;
+    height: 85vh;
+    bottom: 0;
+    width: 150px;
 }

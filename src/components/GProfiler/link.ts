@@ -40,7 +40,11 @@ export const createFeatureQuery = (
         }, '');
 };
 
-const createGProfilerLink = (organism: string, query: string, ordered: string) => {
+const createGProfilerLink = (
+    organism: string,
+    query: string,
+    ordered: string
+) => {
     const gProfilerQueryData = {
         organism,
         query,
@@ -102,11 +106,14 @@ export const checkCreateGProfilerLink = ({
         sortedFeatureMetricTable
     );
     const organism = gProfilerToken !== '' ? gProfilerToken : selectedOrganism;
-    const gProfilerLink = createGProfilerLink(organism, topFeatureQuery, selectedSortBy == 'gene' ? 'false' : 'true' );
+    const gProfilerLink = createGProfilerLink(
+        organism,
+        topFeatureQuery,
+        selectedSortBy === 'gene' ? 'false' : 'true'
+    );
     if (gProfilerLink.length > GPROFILER_LINK_MAX_LENGTH) {
         return {
-            error:
-                'Too many genes in total. Try to select a combination of gene lists with fewer genes.',
+            error: 'Too many genes in total. Try to select a combination of gene lists with fewer genes.',
         };
     }
     return { link: gProfilerLink };

@@ -1,4 +1,5 @@
 import About from './About';
+import Annotations from './Annotations';
 import Compare from './Compare';
 import Dataset from './Dataset';
 import { FullPageNotify } from './FullPageNotify';
@@ -9,6 +10,7 @@ import Welcome from './Welcome';
 
 export {
     About,
+    Annotations,
     Compare,
     Dataset,
     FullPageNotify,

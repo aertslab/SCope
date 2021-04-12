@@ -50,7 +50,7 @@ def label_annotation(loom: Loom, embedding: int, feature: str) -> List[FeatureLa
             yield FeatureLabel(
                 label=annotation,
                 colour=colours[i],
-                coordinate=Coordinate(x=np.mean(coords["x"]), y=np.mean(coords["y"])),
+                coordinate=Coordinate(x=float(np.mean(coords["x"])), y=float(np.mean(coords["y"]))),
             )
 
     return [label for label in labels()]
@@ -85,7 +85,7 @@ def label_all_clusters(loom: Loom, embedding: int, feature: str) -> List[Feature
             yield FeatureLabel(
                 label=cluster,
                 colour=colours[i],
-                coordinate=Coordinate(x=np.mean(coords["x"]), y=np.mean(coords["y"])),
+                coordinate=Coordinate(x=float(np.mean(coords["x"])), y=float(np.mean(coords["y"]))),
             )
 
     return [label for label in labels()]

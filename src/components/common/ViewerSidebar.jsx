@@ -163,12 +163,8 @@ class ViewerSidebar extends Component {
 
     render() {
         const { history, match, hideFeatures } = this.props;
-        const {
-            lassoSelections,
-            activeFeatures,
-            activeTab,
-            activePage,
-        } = this.state;
+        const { lassoSelections, activeFeatures, activeTab, activePage } =
+            this.state;
 
         let lassoTab = () => {
             if (lassoSelections.length === 0) {
@@ -187,15 +183,16 @@ class ViewerSidebar extends Component {
             return lassoSelections.map((lS, i) => {
                 let lassoDownloadSubLoomButton = () => {
                     if (
-                        this.state.downloadSubLoomPercentage == null &&
-                        this.state.processSubLoomPercentage == null
-                    )
+                        this.state.downloadSubLoomPercentage === null &&
+                        this.state.processSubLoomPercentage === null
+                    ) {
                         return (
                             <Button
                                 color='green'
                                 onClick={() => {
                                     let query = {
-                                        loomFilePath: BackendAPI.getActiveLoom(),
+                                        loomFilePath:
+                                            BackendAPI.getActiveLoom(),
                                         featureType: 'cellSelection',
                                         featureName: 'cellSelection',
                                         featureValue: (i + 1).toString(),
@@ -204,31 +201,36 @@ class ViewerSidebar extends Component {
                                     };
                                     BackendAPI.getConnection().then(
                                         (gbc) => {
-                                            if (DEBUG)
+                                            if (DEBUG) {
                                                 console.log(
                                                     'Download subset of active .loom'
                                                 );
-                                            let call = gbc.services.scope.Main.downloadSubLoom(
-                                                query
-                                            );
+                                            }
+                                            let call =
+                                                gbc.services.scope.Main.downloadSubLoom(
+                                                    query
+                                                );
                                             call.on('data', (dsl) => {
-                                                if (DEBUG)
+                                                if (DEBUG) {
                                                     console.log(
                                                         'downloadSubLoom data'
                                                     );
-                                                if (dsl == null) {
+                                                }
+                                                if (dsl === null) {
                                                     this.setState({
                                                         loomDownloading: null,
-                                                        downloadSubLoomPercentage: null,
+                                                        downloadSubLoomPercentage:
+                                                            null,
                                                     });
                                                     return;
                                                 }
                                                 if (!dsl.isDone) {
                                                     this.setState({
-                                                        processSubLoomPercentage: Math.round(
-                                                            dsl.progress.value *
-                                                                100
-                                                        ),
+                                                        processSubLoomPercentage:
+                                                            Math.round(
+                                                                dsl.progress
+                                                                    .value * 100
+                                                            ),
                                                     });
                                                 } else {
                                                     // Start downloading the subsetted loom file
@@ -241,10 +243,12 @@ class ViewerSidebar extends Component {
                                                         'started',
                                                         (isStarted) => {
                                                             this.setState({
-                                                                processSubLoomPercentage: null,
-                                                                loomDownloading: encodeURIComponent(
-                                                                    dsl.loomFilePath
-                                                                ),
+                                                                processSubLoomPercentage:
+                                                                    null,
+                                                                loomDownloading:
+                                                                    encodeURIComponent(
+                                                                        dsl.loomFilePath
+                                                                    ),
                                                             });
                                                         }
                                                     );
@@ -252,7 +256,8 @@ class ViewerSidebar extends Component {
                                                         'progress',
                                                         (progress) => {
                                                             this.setState({
-                                                                downloadSubLoomPercentage: progress,
+                                                                downloadSubLoomPercentage:
+                                                                    progress,
                                                             });
                                                         }
                                                     );
@@ -260,8 +265,10 @@ class ViewerSidebar extends Component {
                                                         'finished',
                                                         (finished) => {
                                                             this.setState({
-                                                                loomDownloading: null,
-                                                                downloadSubLoomPercentage: null,
+                                                                loomDownloading:
+                                                                    null,
+                                                                downloadSubLoomPercentage:
+                                                                    null,
                                                             });
                                                         }
                                                     );
@@ -270,10 +277,11 @@ class ViewerSidebar extends Component {
                                             });
                                             call.on('end', () => {
                                                 console.log();
-                                                if (DEBUG)
+                                                if (DEBUG) {
                                                     console.log(
                                                         'downloadSubLoom end'
                                                     );
+                                                }
                                             });
                                         },
                                         () => {
@@ -295,7 +303,8 @@ class ViewerSidebar extends Component {
                                     ' .loom file'}
                             </Button>
                         );
-                    if (this.state.processSubLoomPercentage > 0)
+                    }
+                    if (this.state.processSubLoomPercentage > 0) {
                         return (
                             <Progress
                                 percent={this.state.processSubLoomPercentage}
@@ -306,7 +315,8 @@ class ViewerSidebar extends Component {
                                 Processing...
                             </Progress>
                         );
-                    if (this.state.downloadSubLoomPercentage > 0)
+                    }
+                    if (this.state.downloadSubLoomPercentage > 0) {
                         return (
                             <Progress
                                 percent={this.state.downloadSubLoomPercentage}
@@ -317,6 +327,7 @@ class ViewerSidebar extends Component {
                                 Downloading...
                             </Progress>
                         );
+                    }
                 };
                 return (
                     <Tab.Pane attached={false} className='tabView' key={i}>
@@ -1005,7 +1016,8 @@ class ViewerSidebar extends Component {
                                 className='pointer'
                                 onClick={() => {
                                     let query = {
-                                        loomFilePath: BackendAPI.getActiveLoom(),
+                                        loomFilePath:
+                                            BackendAPI.getActiveLoom(),
                                         query: props.value,
                                     };
                                     if (activePage === 'regulon') {
@@ -1141,7 +1153,11 @@ class ViewerSidebar extends Component {
 
                     if (activeFeatures[i].feature !== 'All Clusters') {
                         markerTable = (
-                            <div style={{ marginBottom: '15px', align: 'center' }}>
+                            <div
+                                style={{
+                                    marginBottom: '15px',
+                                    align: 'center',
+                                }}>
                                 <ReactTable
                                     data={markerTableData}
                                     columns={[
@@ -1166,7 +1182,10 @@ class ViewerSidebar extends Component {
                                         });
                                         fileDownload(tsv, genesFileName());
                                     }}
-                                    style={{ marginTop: '10px', width: '100%' }}>
+                                    style={{
+                                        marginTop: '10px',
+                                        width: '100%',
+                                    }}>
                                     {downloadButtonName()}
                                 </Button>
                             </div>
@@ -1232,7 +1251,8 @@ class ViewerSidebar extends Component {
                                     color='green'
                                     onClick={() => {
                                         let query = {
-                                            loomFilePath: BackendAPI.getActiveLoom(),
+                                            loomFilePath:
+                                                BackendAPI.getActiveLoom(),
                                             featureType: 'clusterings',
                                             featureName: activeFeatures[
                                                 i
@@ -1251,9 +1271,10 @@ class ViewerSidebar extends Component {
                                                         'Download subset of active .loom'
                                                     );
                                                 }
-                                                let call = gbc.services.scope.Main.downloadSubLoom(
-                                                    query
-                                                );
+                                                let call =
+                                                    gbc.services.scope.Main.downloadSubLoom(
+                                                        query
+                                                    );
                                                 call.on('data', (dsl) => {
                                                     if (DEBUG) {
                                                         console.log(
@@ -1262,33 +1283,40 @@ class ViewerSidebar extends Component {
                                                     }
                                                     if (dsl === null) {
                                                         this.setState({
-                                                            loomDownloading: null,
-                                                            downloadSubLoomPercentage: null,
+                                                            loomDownloading:
+                                                                null,
+                                                            downloadSubLoomPercentage:
+                                                                null,
                                                         });
                                                         return;
                                                     }
                                                     if (!dsl.isDone) {
                                                         this.setState({
-                                                            processSubLoomPercentage: Math.round(
-                                                                dsl.progress
-                                                                    .value * 100
-                                                            ),
+                                                            processSubLoomPercentage:
+                                                                Math.round(
+                                                                    dsl.progress
+                                                                        .value *
+                                                                        100
+                                                                ),
                                                         });
                                                     } else {
                                                         // Start downloading the subsetted loom file
-                                                        let fd = new FileDownloader(
-                                                            dsl.loomFilePath,
-                                                            match.params.uuid,
-                                                            dsl.loomFileSize
-                                                        );
+                                                        let fd =
+                                                            new FileDownloader(
+                                                                dsl.loomFilePath,
+                                                                match.params.uuid,
+                                                                dsl.loomFileSize
+                                                            );
                                                         fd.on(
                                                             'started',
                                                             (isStarted) => {
                                                                 this.setState({
-                                                                    processSubLoomPercentage: null,
-                                                                    loomDownloading: encodeURIComponent(
-                                                                        dsl.loomFilePath
-                                                                    ),
+                                                                    processSubLoomPercentage:
+                                                                        null,
+                                                                    loomDownloading:
+                                                                        encodeURIComponent(
+                                                                            dsl.loomFilePath
+                                                                        ),
                                                                 });
                                                             }
                                                         );
@@ -1296,7 +1324,8 @@ class ViewerSidebar extends Component {
                                                             'progress',
                                                             (progress) => {
                                                                 this.setState({
-                                                                    downloadSubLoomPercentage: progress,
+                                                                    downloadSubLoomPercentage:
+                                                                        progress,
                                                                 });
                                                             }
                                                         );
@@ -1304,8 +1333,10 @@ class ViewerSidebar extends Component {
                                                             'finished',
                                                             (finished) => {
                                                                 this.setState({
-                                                                    loomDownloading: null,
-                                                                    downloadSubLoomPercentage: null,
+                                                                    loomDownloading:
+                                                                        null,
+                                                                    downloadSubLoomPercentage:
+                                                                        null,
                                                                 });
                                                             }
                                                         );
@@ -1324,8 +1355,10 @@ class ViewerSidebar extends Component {
                                             () => {
                                                 this.setState({
                                                     loomDownloading: null,
-                                                    downloadSubLoomPercentage: null,
-                                                    processSubLoomPercentage: null,
+                                                    downloadSubLoomPercentage:
+                                                        null,
+                                                    processSubLoomPercentage:
+                                                        null,
                                                 });
                                                 BackendAPI.showError();
                                             }
@@ -1389,7 +1422,7 @@ class ViewerSidebar extends Component {
                             {(activeFeatures[i].featureType.startsWith(
                                 'Clustering'
                             ) ||
-                                activeFeatures[i].featureType == 'regulon') &&
+                                activeFeatures[i].featureType === 'regulon') &&
                                 md.genes && (
                                     <GProfilerModal featureMetadata={md} />
                                 )}

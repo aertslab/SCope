@@ -24,13 +24,11 @@ export const TopGeneListsSelectionTable: React.FC<{
             </Table.Header>
             <Table.Body>
                 {availableTopGeneListsSizes.map((topGeneListsSize) => {
-                    const handleOnChangeGeneList = onSelectGeneList(
-                        topGeneListsSize
-                    );
+                    const handleOnChangeGeneList =
+                        onSelectGeneList(topGeneListsSize);
 
-                    const isSelected = selectedTopGeneListsSizes.includes(
-                        topGeneListsSize
-                    );
+                    const isSelected =
+                        selectedTopGeneListsSizes.includes(topGeneListsSize);
 
                     return (
                         <Table.Row key={`tgls-${topGeneListsSize}`}>

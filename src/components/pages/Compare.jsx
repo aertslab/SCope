@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import { DragDropContext } from 'react-dnd';
+import { withRouter } from 'react-router-dom';
 import HTML5Backend, { NativeTypes } from 'react-dnd-html5-backend';
 import { Accordion, Grid, Menu, Icon, Dropdown } from 'semantic-ui-react';
 
 import * as R from 'ramda';
 import * as d3 from 'd3';
+
+import './pages.css';
 
 import box2 from '../../js/box2.js';
 import { BackendAPI } from '../common/API';
@@ -14,8 +17,6 @@ import ViewerSidebar from '../common/ViewerSidebar';
 import ViewerToolbar from '../common/ViewerToolbar';
 import AnnotationDropContainer from '../common/AnnotationDropContainer';
 import ViewerDropContainer from '../common/ViewerDropContainer';
-
-import './compare.css';
 
 class Compare extends Component {
     constructor(props) {
@@ -281,22 +282,21 @@ class Compare extends Component {
                                     );
                                 }
                                 if (configuration === 'multi' && i === 0) {
-                                    let coordOptions = [],
-                                        coordinatesSelector;
+                                    let coordinatesSelector;
                                     if (
                                         multiMetadata[j] &&
                                         multiMetadata[j].cellMetaData &&
                                         multiMetadata[j].cellMetaData.embeddings
                                             .length
                                     ) {
-                                        multiMetadata[
+                                        const coordOptions = multiMetadata[
                                             j
                                         ].cellMetaData.embeddings.map(
                                             (coords) => {
-                                                coordOptions.push({
+                                                return {
                                                     text: coords.name,
                                                     value: coords.id,
-                                                });
+                                                };
                                             }
                                         );
                                         coordinatesSelector = (
@@ -312,10 +312,12 @@ class Compare extends Component {
                                                         proxy,
                                                         select
                                                     ) => {
-                                                        let mc = multiCoordinates;
+                                                        let mc =
+                                                            multiCoordinates;
                                                         mc[j] = select.value;
                                                         this.setState({
-                                                            multiCoordinates: mc,
+                                                            multiCoordinates:
+                                                                mc,
                                                         });
                                                     }}
                                                 />
@@ -338,11 +340,10 @@ class Compare extends Component {
                                                     let mm = multiMetadata;
                                                     ml[j] = select.value;
                                                     mc[j] = -1;
-                                                    mm[
-                                                        j
-                                                    ] = BackendAPI.getLoomMetadata(
-                                                        ml[j]
-                                                    );
+                                                    mm[j] =
+                                                        BackendAPI.getLoomMetadata(
+                                                            ml[j]
+                                                        );
                                                     BackendAPI.setActiveLooms(
                                                         ml
                                                     );
@@ -419,6 +420,7 @@ class Compare extends Component {
                                                     activeLegend: legend,
                                                 });
                                             }}
+                                            location={this.props.location}
                                         />
                                     </Grid.Column>
                                 );
@@ -434,70 +436,82 @@ class Compare extends Component {
         }
 
         return (
-            <Grid>
+            <div className='appPage'>
                 <Search.FeatureSearchGroup
                     filter='all'
                     identifier='compare-page'
                 />
-                <Grid.Row columns={3} stretched className='viewerRow'>
-                    <Grid.Column width={2}>
-                        <div className='compare-menu'>
-                            Number of displays: &nbsp;
-                            <Dropdown
-                                inline
-                                options={this.displayConf}
-                                disabled={configuration === 'one'}
-                                value={displays}
-                                onChange={this.displayNumberChanged.bind(this)}
+
+                <Grid
+                    style={{
+                        height: '100%',
+                        marginTop: '0',
+                        marginBottom: '2rem',
+                    }}>
+                    <Grid.Row columns={3} stretched className='viewerRow'>
+                        <Grid.Column width={2}>
+                            <div className='compare-menu'>
+                                Number of displays: &nbsp;
+                                <Dropdown
+                                    inline
+                                    options={this.displayConf}
+                                    disabled={configuration === 'one'}
+                                    value={displays}
+                                    onChange={this.displayNumberChanged.bind(
+                                        this
+                                    )}
+                                />
+                                <br />
+                                Superposition: &nbsp;
+                                <Dropdown
+                                    inline
+                                    disabled={
+                                        configuration === 'one' &&
+                                        isSuperpositionLocked
+                                    }
+                                    options={this.superpositionConf}
+                                    value={superposition}
+                                    onChange={this.superpositionChanged.bind(
+                                        this
+                                    )}
+                                />
+                                <br />
+                                Configuration: &nbsp;
+                                <Dropdown
+                                    inline
+                                    options={this.configurationConf}
+                                    disabled={isConfigurationLocked}
+                                    defaultValue={configuration}
+                                    onChange={this.configurationChanged.bind(
+                                        this
+                                    )}
+                                />
+                                <Accordion styled>{annotationTabs()}</Accordion>
+                            </div>
+                        </Grid.Column>
+                        <Grid.Column stretched width={11}>
+                            {viewers()}
+                        </Grid.Column>
+                        <Grid.Column width={3}>
+                            <div
+                                className='chart-wrapper noStretch'
+                                id='chart-distro1'
+                                style={{ width: '100%' }}
+                                height='200px'></div>
+                            <ViewerSidebar
+                                getSelectedAnnotations={this.getSelectedAnnotations.bind(
+                                    this
+                                )}
+                                onActiveFeaturesChange={(features, id) => {
+                                    this.setState({ activeFeatures: features });
+                                }}
+                                activeLegend={activeLegend}
+                                identifier='regulon-page'
                             />
-                            <br />
-                            Superposition: &nbsp;
-                            <Dropdown
-                                inline
-                                disabled={
-                                    configuration === 'one' &&
-                                    isSuperpositionLocked
-                                }
-                                options={this.superpositionConf}
-                                value={superposition}
-                                onChange={this.superpositionChanged.bind(this)}
-                            />
-                            <br />
-                            Configuration: &nbsp;
-                            <Dropdown
-                                inline
-                                options={this.configurationConf}
-                                disabled={isConfigurationLocked}
-                                defaultValue={configuration}
-                                onChange={this.configurationChanged.bind(this)}
-                            />
-                            <Accordion styled>{annotationTabs()}</Accordion>
-                            <br />
-                            {/* <ViewerToolbar location={this.props.location} /> */}
-                        </div>
-                    </Grid.Column>
-                    <Grid.Column stretched width={11} className='viewerCell'>
-                        {viewers()}
-                    </Grid.Column>
-                    <Grid.Column width={3}>
-                        <div
-                            className='chart-wrapper noStretch'
-                            id='chart-distro1'
-                            style={{ width: '100%' }}
-                            height='200px'></div>
-                        <ViewerSidebar
-                            getSelectedAnnotations={this.getSelectedAnnotations.bind(
-                                this
-                            )}
-                            onActiveFeaturesChange={(features, id) => {
-                                this.setState({ activeFeatures: features });
-                            }}
-                            activeLegend={activeLegend}
-                            identifier='regulon-page'
-                        />
-                    </Grid.Column>
-                </Grid.Row>
-            </Grid>
+                        </Grid.Column>
+                    </Grid.Row>
+                </Grid>
+            </div>
         );
     }
 
@@ -520,12 +534,10 @@ class Compare extends Component {
     isDropped(name, value) {
         let selected = false;
         let annotations = this.state.crossAnnotations;
-        Object.keys(annotations).map((orientation) => {
-            annotations[orientation].map((annotation) => {
+        Object.keys(annotations).forEach((orientation) => {
+            annotations[orientation].forEach((annotation) => {
                 let va = annotation[name];
-                if (va && va.indexOf(value) !== -1) {
-                    selected = true;
-                }
+                selected = va && va.indexOf(value) !== -1;
             });
         });
         return selected;
@@ -639,11 +651,8 @@ class Compare extends Component {
     }
 
     selectAllAnotations() {
-        const {
-            crossAnnotations,
-            activeAnnotation,
-            multiMetadata,
-        } = this.state;
+        const { crossAnnotations, activeAnnotation, multiMetadata } =
+            this.state;
         let annotationIDs = [];
         let annotationGroup =
             multiMetadata[0].cellMetaData.annotations[activeAnnotation];
@@ -756,11 +765,8 @@ class Compare extends Component {
     getCellMetadata() {
         let settings = BackendAPI.getSettings();
         let selectedAnnotations = this.getSelectedAnnotations();
-        const {
-            selectedGenes,
-            selectedRegulons,
-            selectedClusters,
-        } = BackendAPI.getParsedFeatures();
+        const { selectedGenes, selectedRegulons, selectedClusters } =
+            BackendAPI.getParsedFeatures();
         let query = {
             loomFilePath: this.state.multiLoom[0],
             cellIndices: [],
@@ -793,11 +799,8 @@ class Compare extends Component {
     }
 
     renderExpressionGraph(data) {
-        const {
-            selectedGenes,
-            selectedRegulons,
-            selectedClusters,
-        } = BackendAPI.getParsedFeatures();
+        const { selectedGenes, selectedRegulons, selectedClusters } =
+            BackendAPI.getParsedFeatures();
         if (selectedGenes.length + selectedRegulons.length === 0) {
             return;
         }
@@ -980,4 +983,4 @@ class Compare extends Component {
     }
 }
 
-export default DragDropContext(HTML5Backend)(Compare);
+export default DragDropContext(HTML5Backend)(withRouter(Compare));

@@ -274,9 +274,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
         search_results: List[CategorisedMatches] = [
             result
-            for result in get_search_results(
-                cluster_metadata["description"], "all", loom, self.config["dataHashSecret"]
-            )
+            for result in get_search_results(cluster_metadata["description"], "all", loom)
             if result.category == f"Clustering: {clustering_meta['name']}"
         ]
 
@@ -329,7 +327,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getFeatures(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
-        features = get_search_results(request.query, request.filter, loom, self.config["dataHashSecret"])
+        features = get_search_results(request.query, request.filter, loom)
         return s_pb2.FeatureReply(
             features=[
                 s_pb2.FeatureReply.Feature(

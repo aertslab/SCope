@@ -253,9 +253,8 @@ const mapStateToProps = (state) => {
         selectedOrganism: Selector.getSelectedOrganism(state),
         selectedSortBy: Selector.getSelectedSortBy(state),
         gProfilerToken: Selector.getGProfilerToken(state),
-        isFetchingAvailableOrganisms: Selector.isFetchingAvailableOrganisms(
-            state
-        ),
+        isFetchingAvailableOrganisms:
+            Selector.isFetchingAvailableOrganisms(state),
         availableOrganisms: Selector.getAvailableOrganisms(state),
         selectedTopGeneListsSizes: Selector.getSelectedTopGeneListsSizes(state),
         error: Selector.getError(state),

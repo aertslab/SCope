@@ -116,7 +116,11 @@ class ViewerDropContainer extends Component {
         };
 
         return connectDropTarget(
-            <div className='flexDisplay stretched'>{container()}</div>
+            <div
+                className='flexDisplay stretched'
+                style={{ height: '90%', backgroundColor: '#eee' }}>
+                {container()}
+            </div>
         );
     }
 

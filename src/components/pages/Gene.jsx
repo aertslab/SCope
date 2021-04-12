@@ -43,9 +43,9 @@ export default class Gene extends Component {
         if (!activeLoom || activeLoom === '*') {
             return <div>Select the dataset to be analyzed</div>;
         }
-        // <!--<div className='genePage'>-->
+
         return (
-            <div className='genePage'>
+            <div className='appPage'>
                 <Search.FeatureSearchGroup
                     filter='all'
                     identifier='gene-page'

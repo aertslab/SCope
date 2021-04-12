@@ -76,15 +76,12 @@ class CollaborativeAnnotation extends Component {
             this.OLSAutocomplete.current &&
             this.OLSAutocomplete.current.state.result
         ) {
-            (annoData['obo_id'] = this.OLSAutocomplete.current.state.result[
-                'obo_id'
-            ]),
-                (annoData['iri'] = this.OLSAutocomplete.current.state.result[
-                    'iri'
-                ]),
-                (annoData['label'] = this.OLSAutocomplete.current.state.result[
-                    'label'
-                ]);
+            (annoData['obo_id'] =
+                this.OLSAutocomplete.current.state.result['obo_id']),
+                (annoData['iri'] =
+                    this.OLSAutocomplete.current.state.result['iri']),
+                (annoData['label'] =
+                    this.OLSAutocomplete.current.state.result['label']);
         } else if (this.state.freeInput.length > 0) {
             annoData['obo_id'] = 'Manual Annotation';
             annoData['iri'] = '';
