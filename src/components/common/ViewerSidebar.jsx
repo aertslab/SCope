@@ -1139,37 +1139,39 @@ class ViewerSidebar extends Component {
                             }
                         };
 
-                    markerTable = (
-                        <div style={{ marginBottom: '15px', align: 'center' }}>
-                            <ReactTable
-                                data={markerTableData}
-                                columns={[
-                                    {
-                                        Header: markerTableHeaderName(),
-                                        columns: markerTableColumns,
-                                    },
-                                ]}
-                                pageSizeOptions={[5, 10, 25, 50, 100]}
-                                defaultPageSize={25}
-                                style={{
-                                    height: markerTableHeight + 'px', // This will force the table body to overflow and scroll, since there is not enough room
-                                }}
-                                className='-striped -highlight'
-                            />
-                            <Button
-                                primary
-                                onClick={() => {
-                                    const tsv = json2csv(markerTableData, {
-                                        delimiter: '\t',
-                                        quote: '',
-                                    });
-                                    fileDownload(tsv, genesFileName());
-                                }}
-                                style={{ marginTop: '10px', width: '100%' }}>
-                                {downloadButtonName()}
-                            </Button>
-                        </div>
-                    );
+                    if (activeFeatures[i].feature !== 'All Clusters') {
+                        markerTable = (
+                            <div style={{ marginBottom: '15px', align: 'center' }}>
+                                <ReactTable
+                                    data={markerTableData}
+                                    columns={[
+                                        {
+                                            Header: markerTableHeaderName(),
+                                            columns: markerTableColumns,
+                                        },
+                                    ]}
+                                    pageSizeOptions={[5, 10, 25, 50, 100]}
+                                    defaultPageSize={25}
+                                    style={{
+                                        height: markerTableHeight + 'px', // This will force the table body to overflow and scroll, since there is not enough room
+                                    }}
+                                    className='-striped -highlight'
+                                />
+                                <Button
+                                    primary
+                                    onClick={() => {
+                                        const tsv = json2csv(markerTableData, {
+                                            delimiter: '\t',
+                                            quote: '',
+                                        });
+                                        fileDownload(tsv, genesFileName());
+                                    }}
+                                    style={{ marginTop: '10px', width: '100%' }}>
+                                    {downloadButtonName()}
+                                </Button>
+                            </div>
+                        );
+                    }
                 }
 
                 if (
