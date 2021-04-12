@@ -194,9 +194,16 @@ export default class Viewer extends Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        console.log('Viewer component did update', prevProps.loomFile, this.props.loomFile, prevState.coord);
-        if (prevProps.loomFile !== this.props.loomFile
-            || prevProps.activeCoordinates !== this.props.activeCoordinates) {
+        console.log(
+            'Viewer component did update',
+            prevProps.loomFile,
+            this.props.loomFile,
+            prevState.coord
+        );
+        if (
+            prevProps.loomFile !== this.props.loomFile ||
+            prevProps.activeCoordinates !== this.props.activeCoordinates
+        ) {
             if (this.props.loomFile !== null && this.props.loomFile !== '*') {
                 this.mainLayer.removeChildren();
                 this.getDataToDisplay();
@@ -768,9 +775,8 @@ export default class Viewer extends Component {
                                                 );
                                             }
                                             ns.points = response.cellIndices;
-                                            s.translations[
-                                                this.props.name
-                                            ] = ns.points.slice(0);
+                                            s.translations[this.props.name] =
+                                                ns.points.slice(0);
                                             ns.selected = true;
                                             this.repaintLassoSelections(
                                                 currentSelections
@@ -783,9 +789,8 @@ export default class Viewer extends Component {
                                 }
                             );
                         } else {
-                            s.translations[this.props.name] = ns.points.slice(
-                                0
-                            );
+                            s.translations[this.props.name] =
+                                ns.points.slice(0);
                         }
                     }
                 }
@@ -872,7 +877,8 @@ export default class Viewer extends Component {
                                 y: response.y,
                             };
                             // If current coordinates has a trajectory set it
-                            let trajectory = BackendAPI.getActiveCoordinatesTrajectory();
+                            let trajectory =
+                                BackendAPI.getActiveCoordinatesTrajectory();
                             if (trajectory !== null) {
                                 if (DEBUG) {
                                     console.log(
@@ -1112,7 +1118,7 @@ export default class Viewer extends Component {
             .filter(
                 (f) =>
                     f.type === 'annotation' ||
-                    ('clustering' && f.name == 'All Clusters')
+                    ('clustering' && f.name === 'All Clusters')
             );
 
         if (feature.length === 0) {
@@ -1123,7 +1129,7 @@ export default class Viewer extends Component {
             loomFilePath: loomFile,
             embedding: embedding,
             feature:
-                feature[0].name == 'All Clusters'
+                feature[0].name === 'All Clusters'
                     ? feature[0].type
                     : feature[0].name,
         };

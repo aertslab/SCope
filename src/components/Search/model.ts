@@ -80,12 +80,12 @@ export const featuresToResults = (
         features.category,
         {
             name: features.category,
-            results: (features.results.map((result) => {
+            results: features.results.map((result) => {
                 return {
                     ...result,
                     id: window.btoa(result.title + result.description),
                 };
-            }) as unknown) as typeof SearchResult[],
+            }) as unknown as typeof SearchResult[],
         },
     ];
 };

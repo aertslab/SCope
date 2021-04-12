@@ -1135,16 +1135,14 @@ class API {
                     if (response) {
                         const clusterOverlaps = response.clusterOverlaps.map(
                             (clusterOverlap) => {
-                                clusterOverlap[
-                                    'cells_in_cluster'
-                                ] = clusterOverlap['cells_in_cluster'].toFixed(
-                                    2
-                                );
-                                clusterOverlap[
-                                    'cluster_in_cells'
-                                ] = clusterOverlap['cluster_in_cells'].toFixed(
-                                    2
-                                );
+                                clusterOverlap['cells_in_cluster'] =
+                                    clusterOverlap['cells_in_cluster'].toFixed(
+                                        2
+                                    );
+                                clusterOverlap['cluster_in_cells'] =
+                                    clusterOverlap['cluster_in_cells'].toFixed(
+                                        2
+                                    );
                                 return clusterOverlap;
                             }
                         );
@@ -1182,8 +1180,8 @@ class API {
     }
 
     toggleLassoSelection(index) {
-        this.viewerSelections[this.activePage][index].selected = !this
-            .viewerSelections[this.activePage][index].selected;
+        this.viewerSelections[this.activePage][index].selected =
+            !this.viewerSelections[this.activePage][index].selected;
         this.viewerSelectionsChangeListeners.forEach((listener) => {
             listener(this.viewerSelections[this.activePage]);
         });

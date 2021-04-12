@@ -16,6 +16,7 @@ import AppHeader from './AppHeader';
 import AppSidebar from './AppSidebar';
 import {
     About,
+    Annotations,
     Compare,
     Dataset,
     Gene,
@@ -87,6 +88,10 @@ export const Main: React.FC<MainProps> = (props: MainProps) => {
                     <Route path='/:uuid/:loom?/dataset' component={Dataset} />
                     <Route path='/:uuid/:loom?/gene' component={Gene} />
                     <Route path='/:uuid/:loom?/regulon' component={Regulon} />
+                    <Route
+                        path='/:uuid/:loom?/annotations'
+                        component={Annotations}
+                    />
                     <Route path='/:uuid/:loom?/compare'>
                         <Compare metadata={metadata} />
                     </Route>

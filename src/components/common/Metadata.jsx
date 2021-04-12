@@ -27,18 +27,10 @@ export default class Metadata extends Component {
     }
 
     render() {
-        const {
-            selectedGenes,
-            selectedRegulons,
-            selectedClusters,
-        } = BackendAPI.getParsedFeatures();
-        const {
-            metadata,
-            cellIDs,
-            loading,
-            annotation,
-            clustering,
-        } = this.state;
+        const { selectedGenes, selectedRegulons, selectedClusters } =
+            BackendAPI.getParsedFeatures();
+        const { metadata, cellIDs, loading, annotation, clustering } =
+            this.state;
         const { selectionId } = this.props;
         let selections = BackendAPI.getViewerSelections();
         let selection = selections[selectionId];
@@ -308,11 +300,8 @@ export default class Metadata extends Component {
         let settings = BackendAPI.getSettings();
         let loomFilePath = BackendAPI.getActiveLoom();
         let coordinates = BackendAPI.getActiveCoordinates();
-        const {
-            selectedGenes,
-            selectedRegulons,
-            selectedClusters,
-        } = BackendAPI.getParsedFeatures();
+        const { selectedGenes, selectedRegulons, selectedClusters } =
+            BackendAPI.getParsedFeatures();
         let query = {
             loomFilePath: loomFilePath,
             cellIndices: selections[this.props.selectionId].points,

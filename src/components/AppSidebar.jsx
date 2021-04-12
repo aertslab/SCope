@@ -302,9 +302,8 @@ class AppSidebar extends Component {
                                         : 'arrow circle down'
                                 }
                                 onClick={() => {
-                                    t.children[level].collapsed = !t.children[
-                                        level
-                                    ].collapsed;
+                                    t.children[level].collapsed =
+                                        !t.children[level].collapsed;
                                     this.forceUpdate();
                                 }}
                             />

@@ -47,12 +47,8 @@ export default class ViewerToolbar extends Component {
     }
 
     render() {
-        const {
-            activeTool,
-            activeFeatures,
-            featuresScale,
-            customScale,
-        } = this.state;
+        const { activeTool, activeFeatures, featuresScale, customScale } =
+            this.state;
 
         let levels = false;
         let sliders = [0, 1, 2].map((i) => {

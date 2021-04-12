@@ -62,25 +62,17 @@ export const getAvailableTopGeneListsSizes = (
     featureMetadata: FeatureMetadata
 ) => {
     const numFeatures: number = getNumFeatures(featureMetadata);
-    return [
-        100,
-        200,
-        300,
-        400,
-        500,
-        numFeatures,
-    ].filter((topNumFeaturesValue) =>
-        topNumFeaturesValue <= numFeatures ? true : false
+    return [100, 200, 300, 400, 500, numFeatures].filter(
+        (topNumFeaturesValue) =>
+            topNumFeaturesValue <= numFeatures ? true : false
     );
 };
 
-const reduceMetricsAtIndex = (idx: number) => (
-    metrics,
-    metric: FeatureMetadataMetric
-) => ({
-    ...metrics,
-    [metric.accessor]: metric.values[idx],
-});
+const reduceMetricsAtIndex =
+    (idx: number) => (metrics, metric: FeatureMetadataMetric) => ({
+        ...metrics,
+        [metric.accessor]: metric.values[idx],
+    });
 
 export const getMetricTable = (
     featureMetadata: FeatureMetadata
@@ -102,7 +94,7 @@ export const getMetricTable = (
 
 export const getAvailableSortBy = (featureMetadata: FeatureMetadata) => {
     if (featureMetadata.metrics) {
-        let metrics = featureMetadata.metrics.map((metric, idx: number) => {
+        const metrics = featureMetadata.metrics.map((metric, idx: number) => {
             return {
                 key: idx,
                 text: metric.name,
@@ -113,13 +105,15 @@ export const getAvailableSortBy = (featureMetadata: FeatureMetadata) => {
             key: metrics.length + 1,
             text: 'Gene Symbol',
             value: 'gene',
-        })
-        return metrics
+        });
+        return metrics;
     }
 
-    return [{
-        key: 1,
-        text: 'Gene Symbol',
-        value: 'gene',
-    }];
+    return [
+        {
+            key: 1,
+            text: 'Gene Symbol',
+            value: 'gene',
+        },
+    ];
 };

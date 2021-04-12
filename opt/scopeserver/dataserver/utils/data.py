@@ -10,7 +10,7 @@ import numpy as np
 T = TypeVar("T")
 
 
-def get_99_and_100_percentiles(values: np.ndarray) -> Tuple[np.float, np.float]:
+def get_99_and_100_percentiles(values: np.ndarray) -> Tuple[np.ndarray, np.number]:
     """
     Compute the 99th and 100th (maximum value) of an array of values
     and clamp the 99th percentil value between [0.01, max(values)]
