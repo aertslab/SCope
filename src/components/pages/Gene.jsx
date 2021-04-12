@@ -84,7 +84,7 @@ export default class Gene extends Component {
         );
     }
 
-    UNSAFE_componentWillMount() {
+    componentDidMount() {
         BackendAPI.onActiveLoomChange(this.activeLoomListener);
     }
 
