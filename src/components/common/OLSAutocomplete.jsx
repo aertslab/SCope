@@ -58,7 +58,9 @@ export default class OLSAutocomplete extends Component {
     queryOLS = (query) => {
         let metadata = BackendAPI.getActiveLoomMetadata();
 
-        let ontology = metadata.fileMetaData.species == 'dmel' ? 'fbbt' : 'cl'; // cl for Human & Mouse
+        // cl for Human & Mouse
+        const ontology =
+            metadata.fileMetaData.species === 'dmel' ? 'fbbt' : 'cl';
         const request = new Request(
             'https://www.ebi.ac.uk/ols/api/select?q=' +
                 query +
@@ -83,7 +85,9 @@ export default class OLSAutocomplete extends Component {
         this.setState({ isLoading: true, value });
         setTimeout(() => {
             this.queryOLS(value);
-            if (this.state.value.length < 1) return this.setState(initialState);
+            if (this.state.value.length < 1) {
+                return this.setState(initialState);
+            }
 
             const re = new RegExp(_.escapeRegExp(this.state.value), 'i');
             const isMatch = (result) => re.test(result.label);

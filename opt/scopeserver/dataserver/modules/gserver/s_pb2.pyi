@@ -208,14 +208,19 @@ class FeatureRequest(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     loomFilePath: typing___Text = ...
     query: typing___Text = ...
+    filter: typing___Text = ...
     def __init__(
         self,
         *,
         loomFilePath: typing___Optional[typing___Text] = None,
         query: typing___Optional[typing___Text] = None,
+        filter: typing___Optional[typing___Text] = None,
     ) -> None: ...
     def ClearField(
-        self, field_name: typing_extensions___Literal["loomFilePath", b"loomFilePath", "query", b"query"]
+        self,
+        field_name: typing_extensions___Literal[
+            "filter", b"filter", "loomFilePath", b"loomFilePath", "query", b"query"
+        ],
     ) -> None: ...
 
 type___FeatureRequest = FeatureRequest
@@ -268,22 +273,50 @@ type___CellMetaDataRequest = CellMetaDataRequest
 
 class FeatureReply(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    feature: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text] = ...
-    featureType: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text] = ...
-    featureDescription: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text] = ...
+    class Feature(google___protobuf___message___Message):
+        DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+        class Match(google___protobuf___message___Message):
+            DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+            title: typing___Text = ...
+            description: typing___Text = ...
+            def __init__(
+                self,
+                *,
+                title: typing___Optional[typing___Text] = None,
+                description: typing___Optional[typing___Text] = None,
+            ) -> None: ...
+            def ClearField(
+                self, field_name: typing_extensions___Literal["description", b"description", "title", b"title"]
+            ) -> None: ...
+        type___Match = Match
+
+        category: typing___Text = ...
+        @property
+        def results(
+            self,
+        ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[
+            type___FeatureReply.Feature.Match
+        ]: ...
+        def __init__(
+            self,
+            *,
+            category: typing___Optional[typing___Text] = None,
+            results: typing___Optional[typing___Iterable[type___FeatureReply.Feature.Match]] = None,
+        ) -> None: ...
+        def ClearField(
+            self, field_name: typing_extensions___Literal["category", b"category", "results", b"results"]
+        ) -> None: ...
+    type___Feature = Feature
+    @property
+    def features(
+        self,
+    ) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[type___FeatureReply.Feature]: ...
     def __init__(
         self,
         *,
-        feature: typing___Optional[typing___Iterable[typing___Text]] = None,
-        featureType: typing___Optional[typing___Iterable[typing___Text]] = None,
-        featureDescription: typing___Optional[typing___Iterable[typing___Text]] = None,
+        features: typing___Optional[typing___Iterable[type___FeatureReply.Feature]] = None,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing_extensions___Literal[
-            "feature", b"feature", "featureDescription", b"featureDescription", "featureType", b"featureType"
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions___Literal["features", b"features"]) -> None: ...
 
 type___FeatureReply = FeatureReply
 

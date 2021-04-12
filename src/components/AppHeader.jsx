@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { withRouter, Link } from 'react-router-dom';
 import {
     Icon,
@@ -6,35 +7,34 @@ import {
     Button,
     Menu,
     Image,
-    Input,
     Popup,
     Checkbox,
 } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
-import { instanceOf } from 'prop-types';
-import { withCookies, Cookies } from 'react-cookie';
+import PropTypes from 'prop-types';
+import { Cookies } from 'react-cookie';
 import Bitly from 'bitly4api';
-const moment = require('moment');
-const pako = require('pako');
+import pako from 'pako';
+
 let bitly = new Bitly(BITLY.token);
 
-const timer = 60 * 1000;
+import { consentToCookies } from '../redux/actions';
+
 const cookieName = 'SCOPE_UUID';
 
 class AppHeader extends Component {
     static propTypes = {
-        cookies: instanceOf(Cookies).isRequired,
+        cookies: PropTypes.instanceOf(Cookies).isRequired,
+        timeout: PropTypes.string.isRequired,
     };
 
     constructor(props) {
         super(props);
         this.state = {
-            timeout: props.timeout,
             shortUrl: null,
             cookies: props.cookies,
             permalinkUUID: false,
             orcid_active: true,
-            cookiesAllowed: this.props.cookiesAllowed,
         };
 
         BackendAPI.getORCIDStatus((active) => {
@@ -43,12 +43,11 @@ class AppHeader extends Component {
     }
 
     acceptCookies = () => {
-        this.props.cookieBannerRef.current.setState({ visible: false });
         this.props.cookies.set('CookieConsent', 'true');
         this.props.cookies.set(cookieName, this.props.match.params.uuid, {
             path: '/',
         });
-        this.setState({ cookiesAllowed: true });
+        this.props.consentToCookies();
     };
 
     openORCID = () => {
@@ -82,8 +81,8 @@ class AppHeader extends Component {
     }
 
     render() {
-        const { match, location } = this.props;
-        const { timeout, shortUrl } = this.state;
+        const { match, timeout } = this.props;
+        const { shortUrl } = this.state;
         let metadata = BackendAPI.getLoomMetadata(
             decodeURIComponent(match.params.loom)
         );
@@ -98,7 +97,7 @@ class AppHeader extends Component {
         let orcid_info = () => {
             let orcid_name = this.props.cookies.get('scope_orcid_name');
             let orcid_id = this.props.cookies.get('scope_orcid_id');
-            if (this.state.cookiesAllowed === false) {
+            if (!this.props.cookieConsent) {
                 return (
                     <Popup
                         content={
@@ -218,16 +217,7 @@ class AppHeader extends Component {
         };
 
         return (
-            <Menu secondary attached='top' className='vib' inverted>
-                <Menu.Item>
-                    <Icon
-                        name='sidebar'
-                        onClick={this.toggleSidebar.bind(this)}
-                        className='pointer'
-                        title='Toggle sidebar'
-                    />
-                </Menu.Item>
-
+            <Menu stackable secondary attached='top' className='vib' inverted>
                 {menu.map(
                     (item, i) =>
                         item.display && (
@@ -243,10 +233,12 @@ class AppHeader extends Component {
                                     }>
                                     <Button
                                         basic
-                                        active={match.params.page == item.path}>
+                                        active={
+                                            match.params.page === item.path
+                                        }>
                                         {item.icon && <Icon name={item.icon} />}
                                         {item.title} &nbsp;{' '}
-                                        {item.path == 'geneset' && (
+                                        {item.path === 'geneset' && (
                                             <Label color='violet' size='mini'>
                                                 beta
                                             </Label>
@@ -287,8 +279,7 @@ class AppHeader extends Component {
                 <Menu.Item className='orcidInfo'>{orcid_info()}</Menu.Item>
 
                 <Menu.Item className='sessionInfo'>
-                    Your session will be deleted in{' '}
-                    {moment.duration(timeout).humanize()} &nbsp;
+                    Your session will be deleted {timeout} &nbsp;
                     <Icon
                         name='info circle'
                         inverted
@@ -309,53 +300,12 @@ class AppHeader extends Component {
         const { history, cookies } = this.props;
         BackendAPI.getUUIDFromIP((uuid, timeRemaining) => {
             cookies.remove(cookieName);
-            if (this.props.cookiesAllowed) {
+            if (this.props.cookieConsent) {
                 cookies.set(cookieName, uuid, { path: '/' });
             }
             history.replace('/' + [uuid]);
             BackendAPI.forceUpdate();
         });
-    }
-
-    UNSAFE_componentWillMount() {
-        this.timer = setInterval(() => {
-            let timeout = this.state.timeout;
-            timeout -= timer;
-            this.setState({ timeout });
-            if (timeout <= 0) {
-                clearInterval(this.timer);
-                this.timer = null;
-            }
-        }, timer);
-    }
-
-    UNSAFE_componentWillReceiveProps(nextProps) {
-        if (DEBUG) console.log('componentWillReceiveProps', nextProps);
-        const { timeout, metadata, match, history, loaded } = nextProps;
-        this.setState({ timeout: timeout });
-        /*
-		if (loaded) {
-			let menu = this.menuList(metadata);
-			menu.map((item) => {
-				if ((item.path == match.params.page) && (!item.display))  {
-					if (metadata) {
-						history.replace('/'+ [match.params.uuid, match.params.loom, 'dataset' ].join('/'));
-					} else {
-						history.replace('/'+ [match.params.uuid, match.params.loom, 'welcome' ].join('/'));
-					}
-				}
-			});
-		}
-		*/
-    }
-
-    componentWillUnmount() {
-        if (this.timer) clearInterval(this.timer);
-    }
-
-    toggleSidebar() {
-        this.props.toggleSidebar();
-        BackendAPI.setSidebarVisible(!BackendAPI.getSidebarVisible());
     }
 
     menuList(metadata) {
@@ -451,4 +401,18 @@ class AppHeader extends Component {
     }
 }
 
-export default withRouter(AppHeader);
+const appHeader = withRouter(AppHeader);
+
+const mapStateToProps = (state) => {
+    return {
+        cookieConsent: state['main'].cookieConsent,
+    };
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        consentToCookies: () => dispatch(consentToCookies()),
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(appHeader);

@@ -8,7 +8,6 @@ import {
     Loader,
     Dropdown,
 } from 'semantic-ui-react';
-import ReactGA from 'react-ga';
 import fileDownload from 'js-file-download';
 import { parse as json2csv } from 'json2csv';
 
@@ -50,7 +49,9 @@ export default class Metadata extends Component {
             selectedClusteringName = '',
             tableMetadata;
 
-        if (selectionId == null) return <span>&nbsp;</span>;
+        if (selectionId === null) {
+            return <span>&nbsp;</span>;
+        }
 
         if (loading) {
             tableMetadata = (
@@ -60,7 +61,7 @@ export default class Metadata extends Component {
             );
         } else {
             loomMetadata.cellMetaData.clusterings.map((c) => {
-                if (c.id == this.state.clustering) {
+                if (c.id === this.state.clustering) {
                     selectedClusteringName = c.name;
                     c.clusters.map((s) => {
                         selectedClustering[s.id] = s.description;
@@ -120,7 +121,7 @@ export default class Metadata extends Component {
                             ) : (
                                 <Table.Cell>&nbsp;</Table.Cell>
                             )}
-                            {clustering != null ? (
+                            {clustering !== null ? (
                                 metadata.clusterIDs.map((c, k) => (
                                     <Table.Cell key={k}>
                                         {c
@@ -197,11 +198,6 @@ export default class Metadata extends Component {
                                                 loading: true,
                                             });
                                             this.getMetadata();
-                                            ReactGA.event({
-                                                category: 'metadata',
-                                                action: 'selected annotation',
-                                                label: s.text,
-                                            });
                                         }, 50);
                                     }}
                                 />
@@ -221,11 +217,6 @@ export default class Metadata extends Component {
                                                 loading: true,
                                             });
                                             this.getMetadata();
-                                            ReactGA.event({
-                                                category: 'metadata',
-                                                action: 'selected clustering',
-                                                label: s.text,
-                                            });
                                         }, 50);
                                     }}
                                 />
@@ -239,7 +230,7 @@ export default class Metadata extends Component {
 
         return (
             <Modal
-                open={selectionId != null ? true : false}
+                open={selectionId !== null ? true : false}
                 onMount={() => {
                     setTimeout(() => {
                         this.getMetadata();
@@ -270,28 +261,25 @@ export default class Metadata extends Component {
                                         cellData[g] =
                                             metadata.aucValues[j].features[i];
                                     });
-                                    if (metadata.annotations[0])
+                                    if (metadata.annotations[0]) {
                                         cellData[this.state.annotation] =
                                             metadata.annotations[0].annotations[
                                                 i
                                             ];
-                                    if (metadata.clusterIDs[0])
+                                    }
+                                    if (metadata.clusterIDs[0]) {
                                         cellData[selectedClusteringName] =
                                             selectedClustering[
                                                 metadata.clusterIDs[0].clusters[
                                                     i
                                                 ]
                                             ];
+                                    }
                                 }
                                 data.push(cellData);
                             });
 
                             fileDownload(json2csv(data), 'metadata.csv');
-                            ReactGA.event({
-                                category: 'metadata',
-                                action: 'downloaded csv file',
-                                value: selection.points.length,
-                            });
                         }}>
                         <Icon name='download' /> Download
                     </Button>
@@ -333,9 +321,9 @@ export default class Metadata extends Component {
             selectedGenes: selectedGenes,
             selectedRegulons: selectedRegulons,
             clusterings:
-                this.state.clustering != null ? [this.state.clustering] : [],
+                this.state.clustering !== null ? [this.state.clustering] : [],
             annotations:
-                this.state.annotation != null ? this.state.annotation : [],
+                this.state.annotation !== null ? this.state.annotation : [],
         };
         let queryCells = {
             loomFilePath: loomFilePath,
@@ -343,17 +331,24 @@ export default class Metadata extends Component {
         };
         BackendAPI.getConnection().then(
             (gbc) => {
-                if (DEBUG) console.log('getCellIDs', queryCells);
+                if (DEBUG) {
+                    console.log('getCellIDs', queryCells);
+                }
                 gbc.services.scope.Main.getCellIDs(
                     queryCells,
                     (cellsErr, cellsResponse) => {
-                        if (DEBUG) console.log('getCellIDs', cellsResponse);
-                        if (DEBUG) console.log('getCellMetaData', query);
+                        if (DEBUG) {
+                            console.log('getCellIDs', cellsResponse);
+                        }
+                        if (DEBUG) {
+                            console.log('getCellMetaData', query);
+                        }
                         gbc.services.scope.Main.getCellMetaData(
                             query,
                             (err, response) => {
-                                if (DEBUG)
+                                if (DEBUG) {
                                     console.log('getCellMetaData', response);
+                                }
                                 this.setState({
                                     loading: false,
                                     metadata: response,

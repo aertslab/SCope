@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
 import {
     Segment,
-    Sidebar,
     Menu,
     Icon,
     Input,
@@ -16,7 +15,6 @@ import {
 import { BackendAPI } from './common/API';
 import UploadModal from './common/UploadModal';
 import Slider, { Range } from 'rc-slider';
-import ReactGA from 'react-ga';
 import FileDownloader from '../js/http';
 import Alert from 'react-popup';
 import OptionsPopup from './common/OptionsPopup';
@@ -64,7 +62,7 @@ class AppSidebar extends Component {
             coordinates = [];
         Object.keys(loomFiles).forEach((key) => {
             let loom = loomFiles[key];
-            if (loom.loomFilePath == decodeURIComponent(match.params.loom)) {
+            if (loom.loomFilePath === decodeURIComponent(match.params.loom)) {
                 coordinates = loom.cellMetaData.embeddings.map((coords) => {
                     return {
                         text: coords.name,
@@ -178,7 +176,7 @@ class AppSidebar extends Component {
             metadata &&
             ['welcome', 'dataset', 'tutorial', 'about'].indexOf(
                 match.params.page
-            ) == -1
+            ) === -1
                 ? true
                 : false;
         let showCoordinatesSelection =
@@ -188,12 +186,14 @@ class AppSidebar extends Component {
                 ? true
                 : false;
         let renderLevel = (t, l, name, canRemove) => {
-            if (!t) return;
+            if (!t) {
+                return;
+            }
             let nodes = t.nodes.map((file, i) => {
                 let loomUri = encodeURIComponent(file.loomFilePath);
                 let active =
-                    match.params.loom == loomUri ||
-                    encodeURIComponent(match.params.loom) == loomUri;
+                    match.params.loom === loomUri ||
+                    encodeURIComponent(match.params.loom) === loomUri;
                 return (
                     <Link
                         key={l + '-node- ' + i}
@@ -202,7 +202,7 @@ class AppSidebar extends Component {
                             [
                                 match.params.uuid,
                                 loomUri,
-                                match.params.page == 'welcome'
+                                match.params.page === 'welcome'
                                     ? 'gene'
                                     : match.params.page,
                             ].join('/')
@@ -245,7 +245,7 @@ class AppSidebar extends Component {
                                 />
                             )}
                             {this.state.downloadPercentage >= 0 &&
-                                this.state.loomDownloading == loomUri && (
+                                this.state.loomDownloading === loomUri && (
                                     <Progress
                                         percent={this.state.downloadPercentage}
                                         indicating
@@ -256,13 +256,13 @@ class AppSidebar extends Component {
                                 <Icon
                                     name={
                                         this.state.downloading &&
-                                        this.state.loomDownloading == loomUri
+                                        this.state.loomDownloading === loomUri
                                             ? 'circle notched'
                                             : 'save'
                                     }
                                     loading={
                                         this.state.downloading &&
-                                        this.state.loomDownloading == loomUri
+                                        this.state.loomDownloading === loomUri
                                             ? true
                                             : false
                                     }
@@ -278,7 +278,14 @@ class AppSidebar extends Component {
                                 />
                             )}
                             {canRemove && <OptionsPopup />}
-                            {file.loomDisplayName}
+                            <span
+                                style={{
+                                    wordWrap: 'break-word',
+                                    display: 'inline-block',
+                                    width: '90%',
+                                }}>
+                                {file.loomDisplayName}
+                            </span>
                         </Menu.Item>
                     </Link>
                 );
@@ -330,19 +337,14 @@ class AppSidebar extends Component {
         };
 
         return (
-            <Sidebar
-                as={Menu}
-                animation='push'
-                visible={this.props.visible}
+            <Menu
                 vertical
-                className='clearfix'>
-                <Segment basic>
-                    <Icon name='arrow up' />
-                    <em>Hide me to get bigger workspace</em>
-                </Segment>
+                style={{
+                    border: 'none',
+                }}>
                 <Menu.Header>DATASETS</Menu.Header>
                 <Menu.Menu>
-                    {this.props.sessionMode == 'rw' && (
+                    {this.props.sessionMode === 'rw' && (
                         <Menu.Item
                             key='new'
                             onClick={this.toggleUploadModal.bind(this)}>
@@ -353,10 +355,10 @@ class AppSidebar extends Component {
                     {renderLevel(
                         userLoomTree,
                         1,
-                        this.props.sessionMode == 'rw'
+                        this.props.sessionMode === 'rw'
                             ? 'User uploaded'
                             : 'Session Looms',
-                        this.props.sessionMode == 'rw' ? true : false
+                        this.props.sessionMode === 'rw' ? true : false
                     )}
                     {renderLevel(generalLoomTree, 1, 'Publicly available')}
                     <Dimmer active={loading} inverted>
@@ -432,11 +434,6 @@ class AppSidebar extends Component {
                                 defaultValue={spriteScale}
                                 onAfterChange={(v) => {
                                     this.handleUpdateSprite(v, spriteAlpha);
-                                    ReactGA.event({
-                                        category: 'settings',
-                                        action: 'changed point size',
-                                        value: v,
-                                    });
                                 }}
                                 min={1}
                                 step={1}
@@ -453,11 +450,6 @@ class AppSidebar extends Component {
                                 defaultValue={spriteAlpha}
                                 onAfterChange={(v) => {
                                     this.handleUpdateSprite(spriteScale, v);
-                                    ReactGA.event({
-                                        category: 'settings',
-                                        action: 'changed point alpha',
-                                        value: v,
-                                    });
                                 }}
                                 min={0}
                                 step={0.1}
@@ -506,12 +498,6 @@ class AppSidebar extends Component {
                     </Menu.Menu>
                 )}
                 <Divider />
-                <Menu.Menu className='logos'>
-                    {/*<Image src='src/images/kuleuven.png' size="small" centered href="http://kuleuven.be" />
-						<br /><br />
-						<Image src='src/images/vib.png' size="small" centered href="http://vib.be" />
-						<Image src='src/images/flycellatlas.png' size="small" centered href="http://flycellatlas.org/" />*/}
-                </Menu.Menu>
                 <UploadModal
                     title='Import a .loom file'
                     type='Loom'
@@ -520,7 +506,7 @@ class AppSidebar extends Component {
                     onClose={this.toggleUploadModal.bind(this)}
                     onUploaded={this.onLoomUploaded.bind(this)}
                 />
-            </Sidebar>
+            </Menu>
         );
     }
 
@@ -534,7 +520,9 @@ class AppSidebar extends Component {
     }
 
     onSettingsUpdate() {
-        if (DEBUG) console.log('onSettingsUpdate');
+        if (DEBUG) {
+            console.log('onSettingsUpdate');
+        }
         let sprite = BackendAPI.getSpriteSettings();
         this.setState({
             settings: BackendAPI.getSettings(),
@@ -547,8 +535,12 @@ class AppSidebar extends Component {
 
     getLoomFiles() {
         const { match } = this.props;
-        if (DEBUG) console.log('getLoomFiles', match);
-        if (match.params.uuid == 'permalink') return;
+        if (DEBUG) {
+            console.log('getLoomFiles', match);
+        }
+        if (match.params.uuid === 'permalink') {
+            return;
+        }
         BackendAPI.queryLoomFiles(match.params.uuid, (files) => {
             let userFiles = [],
                 generalFiles = [];
@@ -623,10 +615,6 @@ class AppSidebar extends Component {
 
     deleteLoomFile(loomFilePath, loomDisplayName) {
         const { match } = this.props;
-        ReactGA.event({
-            category: 'upload',
-            action: 'removed loom file',
-        });
         let execute = confirm(
             'Are you sure that you want to remove the file: ' +
                 loomDisplayName +
@@ -639,11 +627,15 @@ class AppSidebar extends Component {
                 fileType: 'Loom',
             };
             BackendAPI.getConnection().then((gbc) => {
-                if (DEBUG) console.log('deleteUserFile', query);
+                if (DEBUG) {
+                    console.log('deleteUserFile', query);
+                }
                 gbc.services.scope.Main.deleteUserFile(
                     query,
                     (error, response) => {
-                        if (DEBUG) console.log('deleteUserFile', response);
+                        if (DEBUG) {
+                            console.log('deleteUserFile', response);
+                        }
                         if (response !== null && response.deletedSuccessfully) {
                             BackendAPI.forceUpdate();
                             this.getLoomFiles();
@@ -657,11 +649,6 @@ class AppSidebar extends Component {
     toggleUploadModal(event) {
         let state = !this.state.uploadModalOpened;
         this.setState({ uploadModalOpened: state });
-        ReactGA.event({
-            category: 'upload',
-            action: 'toggle loom upload modal',
-            label: state ? 'on' : 'off',
-        });
     }
 
     toggleSortCells() {
@@ -670,11 +657,6 @@ class AppSidebar extends Component {
             !this.state.settings.sortCells
         );
         this.setState({ settings: settings });
-        ReactGA.event({
-            category: 'settings',
-            action: 'toggle cell sorting',
-            label: settings.sortCells ? 'on' : 'off',
-        });
     }
 
     toggleCpmNormization() {
@@ -683,11 +665,6 @@ class AppSidebar extends Component {
             !this.state.settings.hasCpmNormalization
         );
         this.setState({ settings: settings });
-        ReactGA.event({
-            category: 'settings',
-            action: 'toggle cpm normalization',
-            label: settings.hasCpmNormalization ? 'on' : 'off',
-        });
     }
 
     toggleLogTransform() {
@@ -696,11 +673,6 @@ class AppSidebar extends Component {
             !this.state.settings.hasLogTransform
         );
         this.setState({ settings: settings });
-        ReactGA.event({
-            category: 'settings',
-            action: 'toggle log transform',
-            label: settings.hasCpmNormalization ? 'on' : 'off',
-        });
     }
 
     toggleDissociateViewers() {
@@ -709,11 +681,6 @@ class AppSidebar extends Component {
             !this.state.settings.dissociateViewers
         );
         this.setState({ settings: settings });
-        ReactGA.event({
-            category: 'settings',
-            action: 'toggle dissociate viewers',
-            label: settings.dissociateViewers ? 'on' : 'off',
-        });
     }
 
     toggleHideTrajectory() {
@@ -722,31 +689,16 @@ class AppSidebar extends Component {
             !this.state.settings.hideTrajectory
         );
         this.setState({ settings: settings });
-        ReactGA.event({
-            category: 'settings',
-            action: 'toggle hide trajectory',
-            label: settings.hideTrajectory ? 'on' : 'off',
-        });
     }
 
     setActiveCoordinates(evt, coords) {
         BackendAPI.setActiveCoordinates(coords.value);
         this.setState({ activeCoordinates: coords.value });
-        ReactGA.event({
-            category: 'settings',
-            action: 'changed active coordinates',
-            label: coords.text,
-        });
     }
 
     onLoomUploaded(filename) {
         this.getLoomFiles(filename, 'gene');
         this.toggleUploadModal();
-        ReactGA.event({
-            category: 'upload',
-            action: 'uploaded loom file',
-            nonInteraction: true,
-        });
     }
 
     handleUpdateSprite(scale, alpha) {

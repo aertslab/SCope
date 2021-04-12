@@ -1,0 +1,9 @@
+/**
+ * Styles for the ViewerSidebar
+ */
+
+.tabView {
+    text-align: 'center';
+    max-height: 65vh;
+    overflow-y: scroll;
+}

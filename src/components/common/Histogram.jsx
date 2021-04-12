@@ -1,10 +1,11 @@
+import React, { Component } from 'react';
+import * as d3 from 'd3';
+
 import 'rc-slider/assets/index.css';
 import 'rc-tooltip/assets/bootstrap.css';
-import * as d3 from 'd3';
-import React, { Component } from 'react';
 import Slider from 'rc-slider';
+
 import { BackendAPI } from './API';
-import ReactGA from 'react-ga';
 
 const Handle = Slider.Handle;
 
@@ -52,26 +53,19 @@ export default class Histogram extends Component {
                     step={0.0001}
                     handle={handle}
                     onChange={this.handleThresholdChange.bind(this)}
-                    onAfterChange={() => {
-                        ReactGA.event({
-                            category: 'regulon',
-                            action: 'threshold changed',
-                            value: field,
-                        });
-                        this.handleUpdateTSNE();
-                    }}
+                    onAfterChange={() => this.handleUpdateScatterPlot()}
                 />
             </div>
         );
     }
 
-    UNSAFE_componentWillReceiveProps(nextProps) {
+    componentDidUpdate(prevProps) {
         if (
-            JSON.stringify(this.props.feature) !=
-                JSON.stringify(nextProps.feature) ||
-            this.props.loomFile != nextProps.loomFile
+            JSON.stringify(prevProps.feature) !==
+                JSON.stringify(this.props.feature) ||
+            prevProps.loomFile !== this.props.loomFile
         ) {
-            this.getCellAUCValues(nextProps.feature, nextProps.loomFile);
+            this.getCellAUCValues(this.props.feature, this.props.loomFile);
         }
     }
 
@@ -79,13 +73,15 @@ export default class Histogram extends Component {
         this.getCellAUCValues(this.props.feature, this.props.loomFile);
     }
 
-    handleUpdateTSNE() {
+    handleUpdateScatterPlot() {
         this.props.onThresholdChange(this.props.field, this.state.selected);
     }
 
     handleThresholdChange(value) {
         value = value || 0;
-        if (DEBUG) console.log('handleThresholdChange', value);
+        if (DEBUG) {
+            console.log('handleThresholdChange', value);
+        }
         let x = d3
             .scaleLinear()
             .domain([0, this.state.max])
@@ -100,14 +96,17 @@ export default class Histogram extends Component {
             n = this.state.total;
         let matched = 0;
         for (let i = 0; i < n; i++) {
-            if (pts[i] >= value) matched++;
+            if (pts[i] >= value) {
+                matched++;
+            }
         }
         this.setState({ selected: value, matched: matched });
     }
 
     getCellAUCValues(feature, loomFile) {
-        if (!feature || feature.feature.length == 0)
+        if (!feature || feature.feature.length === 0) {
             return this.renderAUCGraph('', []);
+        }
         let query = {
             loomFilePath: loomFile,
             featureType: feature.featureType,
@@ -115,12 +114,15 @@ export default class Histogram extends Component {
         };
         BackendAPI.getConnection().then(
             (gbc) => {
-                if (DEBUG) console.log('getCellAUCValuesByFeatures', query);
+                if (DEBUG) {
+                    console.log('getCellAUCValuesByFeatures', query);
+                }
                 gbc.services.scope.Main.getCellAUCValuesByFeatures(
                     query,
                     (err, response) => {
-                        if (DEBUG)
+                        if (DEBUG) {
                             console.log('getCellAUCValuesByFeatures', response);
+                        }
                         if (response !== null) {
                             this.renderAUCGraph(feature, response.value);
                             this.handleThresholdChange(
@@ -165,7 +167,7 @@ export default class Histogram extends Component {
             selected: 0,
         });
 
-        if (points.length == 0) {
+        if (points.length === 0) {
             svg.append('text')
                 .text('Select a regulon to see AUC histogram')
                 .attr('text-anchor', 'middle')
@@ -251,13 +253,7 @@ export default class Histogram extends Component {
                     .text(t.name)
                     .on('click', function () {
                         component.handleThresholdChange(t.threshold);
-                        component.handleUpdateTSNE();
-                        ReactGA.event({
-                            category: 'regulon',
-                            action: 'threshold clicked',
-                            label: t.name,
-                            value: this.props.field,
-                        });
+                        component.handleUpdateScatterPlot();
                     })
                     .append('title')
                     .text(t.name);

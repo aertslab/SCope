@@ -44,12 +44,8 @@ VIB colours:
 	right: 0px;
 }
 
-.pusher .segment.noPadding {
+.segment.noPadding {
 	padding: 5px !important;
-}
-
-.typeSelect {
-	min-width: 115px !important;
 }
 
 .message.empty .header {

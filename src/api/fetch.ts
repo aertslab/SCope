@@ -1,10 +1,14 @@
-export async function fetchJson(url: string) {
-    let resp = null;
+import { Result, error, success } from '../result';
+
+export async function fetchJson<T>(url: string): Promise<Result<T, string>> {
     try {
-        const data = await fetch(url);
-        resp = { data: await data.json() };
+        const response = await fetch(url);
+        if (!response.ok) {
+            return error(response.statusText);
+        }
+        const data: T = await response.json();
+        return success(data);
     } catch (e) {
-        resp = { err: e.message };
+        return error(e.statusText);
     }
-    return resp;
 }

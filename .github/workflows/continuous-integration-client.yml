@@ -16,7 +16,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-      - run: npm install
+      - run: npm ci
       - run: npm outdated || exit 0
       - run: npm audit --audit-level=moderate
       - run: npm run lint

@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import { Grid } from 'semantic-ui-react';
+
+import './pages.css';
+
 import { BackendAPI } from '../common/API';
-import FeatureSearchBox from '../common/FeatureSearchBox';
+import Search from '../Search';
 import Viewer from '../common/Viewer';
 import ViewerToolbar from '../common/ViewerToolbar';
 import ViewerSidebar from '../common/ViewerSidebar';
@@ -15,22 +18,17 @@ export default class Gene extends Component {
             activeMetadata: BackendAPI.getActiveLoomMetadata(),
             activeFeatures: BackendAPI.getActiveFeatures(),
             activeLegend: null,
-            sidebar: BackendAPI.getSidebarVisible(),
-            colors: BackendAPI.getColors(),
         };
         this.activeLoomListener = (loom, metadata, coordinates) => {
-            if (DEBUG)
+            if (DEBUG) {
                 console.log('activeLoomListener', loom, metadata, coordinates);
+            }
             this.setState({
                 activeLoom: loom,
                 activeCoordinates: coordinates,
                 activeMetadata: metadata,
             });
         };
-        this.sidebarVisibleListener = (state) => {
-            this.setState({ sidebar: state });
-        };
-        this.height = window.innerHeight - 200;
     }
 
     render() {
@@ -38,60 +36,25 @@ export default class Gene extends Component {
             activeLoom,
             activeFeatures,
             activeCoordinates,
-            sidebar,
             activeMetadata,
-            colors,
             activeLegend,
         } = this.state;
-        const isQueryingAnnotation = activeFeatures.some((e) => {
-            return e.featureType == 'annotation';
-        });
 
-        const featureSearch = () =>
-            _.times(3, (i) => {
-                let featureSearchboxDisabled = false;
-                let color = colors[i];
-                if (activeFeatures.length == 3) {
-                    if (activeFeatures[i].featureType == 'annotation')
-                        color = '#1b2944';
-                    else {
-                        if (isQueryingAnnotation) {
-                            color = 'grey';
-                            featureSearchboxDisabled = true;
-                        }
-                    }
-                }
-                return (
-                    <Grid.Column key={i}>
-                        <FeatureSearchBox
-                            field={i}
-                            color={color}
-                            type='all'
-                            value={
-                                activeFeatures[i]
-                                    ? activeFeatures[i].feature
-                                    : ''
-                            }
-                            inputLocked={featureSearchboxDisabled}
-                            selectLocked={featureSearchboxDisabled}
-                        />
-                    </Grid.Column>
-                );
-            });
-
-        if (!activeLoom) return <div>Select the dataset to be analyzed</div>;
-
+        if (!activeLoom || activeLoom === '*') {
+            return <div>Select the dataset to be analyzed</div>;
+        }
+        // <!--<div className='genePage'>-->
         return (
-            <Grid>
-                <Grid.Row columns='4' centered>
-                    {featureSearch()}
-                    <Grid.Column>&nbsp;</Grid.Column>
-                </Grid.Row>
-                <Grid.Row columns='3' stretched className='viewerFlex'>
-                    <Grid.Column width={1} className='viewerToolbar'>
-                        <ViewerToolbar />
+            <div className='genePage'>
+                <Search.FeatureSearchGroup
+                    filter='all'
+                    identifier='gene-page'
+                />
+                <Grid columns='equal' stretched className='viewControls'>
+                    <Grid.Column width={3} className='viewerToolbar'>
+                        <ViewerToolbar location={this.props.location} />
                     </Grid.Column>
-                    <Grid.Column stretched>
+                    <Grid.Column>
                         <b>Expression levels</b>
                         <Viewer
                             name='expr'
@@ -104,6 +67,7 @@ export default class Gene extends Component {
                             customScale={true}
                             settings={true}
                             scale={true}
+                            location={this.props.location}
                         />
                     </Grid.Column>
                     <Grid.Column width={4}>
@@ -112,20 +76,19 @@ export default class Gene extends Component {
                                 this.setState({ activeFeatures: features });
                             }}
                             activeLegend={activeLegend}
+                            identifier='gene-page'
                         />
                     </Grid.Column>
-                </Grid.Row>
-            </Grid>
+                </Grid>
+            </div>
         );
     }
 
-    UNSAFE_componentWillMount() {
+    componentDidMount() {
         BackendAPI.onActiveLoomChange(this.activeLoomListener);
-        BackendAPI.onSidebarVisibleChange(this.sidebarVisibleListener);
     }
 
     componentWillUnmount() {
         BackendAPI.removeActiveLoomChange(this.activeLoomListener);
-        BackendAPI.removeSidebarVisibleChange(this.sidebarVisibleListener);
     }
 }
