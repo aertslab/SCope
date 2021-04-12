@@ -256,9 +256,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
         "Standard method to override in this Server object."
         # try:
         logger.info("Started file transfer")
-        form = DroopyFieldStorage(
-            fp=self.rfile, directory="", headers=self.headers, environ={"REQUEST_METHOD": self.command}
-        )
+        form = cgi.FieldStorage(fp=self.rfile, headers=self.headers, environ={"REQUEST_METHOD": self.command})
 
         data_file_handler = dfh.DataFileHandler()
 

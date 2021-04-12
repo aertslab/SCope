@@ -146,46 +146,53 @@ export default class Viewer extends Component {
         );
 
         this.initGraphics();
-        if (this.props.loomFile !== null && this.props.loomFile !== '*') {
-            this.getPoints(
-                this.props.loomFile,
-                this.props.activeCoordinates,
-                this.props.activeAnnotations,
-                this.props.superposition,
-                () => {
-                    if (this.props.colors) {
-                        this.updateDataPoints(this.props.colors);
-                    } else {
-                        this.getFeatureColors(
-                            this.state.activeFeatures,
-                            this.props.loomFile,
-                            this.props.thresholds,
-                            this.props.activeAnnotations,
-                            this.state.customScale,
-                            this.props.superposition
-                        );
+    }
 
-                        this.getFeatureLabels(
-                            this.props.loomFile,
-                            BackendAPI.getActiveCoordinates(),
-                            this.state.activeFeatures
-                        );
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.loomFile !== this.props.loomFile
+            || prevProps.activeCoordinates !== this.props.activeCoordinates) {
+            if (this.props.loomFile !== null && this.props.loomFile !== '*') {
+                this.mainLayer.removeChildren();
+                this.getPoints(
+                    this.props.loomFile,
+                    this.props.activeCoordinates,
+                    this.props.activeAnnotations,
+                    this.props.superposition,
+                    () => {
+                        if (this.props.colors) {
+                            this.updateDataPoints(this.props.colors);
+                        } else {
+                            this.getFeatureColors(
+                                this.state.activeFeatures,
+                                this.props.loomFile,
+                                this.props.thresholds,
+                                this.props.activeAnnotations,
+                                this.state.customScale,
+                                this.props.superposition
+                            );
+
+                            this.getFeatureLabels(
+                                this.props.loomFile,
+                                BackendAPI.getActiveCoordinates(),
+                                this.state.activeFeatures
+                            );
+                        }
+                        this.onViewerSelectionChange(this.state.lassoSelections);
+                        let t = BackendAPI.getViewerTransform();
+                        if (t) {
+                            let initialTransform = d3.zoomTransform(
+                                d3.select('#viewer' + t.src).node()
+                            );
+                            initialTransform.src = 'init';
+                            initialTransform.receivedFromListener = true;
+                            this.zoomBehaviour.transform(
+                                this.zoomSelection,
+                                initialTransform
+                            );
+                        }
                     }
-                    this.onViewerSelectionChange(this.state.lassoSelections);
-                    let t = BackendAPI.getViewerTransform();
-                    if (t) {
-                        let initialTransform = d3.zoomTransform(
-                            d3.select('#viewer' + t.src).node()
-                        );
-                        initialTransform.src = 'init';
-                        initialTransform.receivedFromListener = true;
-                        this.zoomBehaviour.transform(
-                            this.zoomSelection,
-                            initialTransform
-                        );
-                    }
-                }
-            );
+                );
+            }
         }
     }
 
