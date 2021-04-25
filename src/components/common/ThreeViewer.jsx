@@ -19,8 +19,8 @@ export default class ThreeViewer extends Component {
         this.bcr = null;
         this.w = parseInt(this.props.width);
         this.h = parseInt(this.props.height);
-        this.nearPlane = 0.1;
-        this.farPlane = 1000;
+        this.nearPlane = 0;
+        this.farPlane = 2000;
         this.texture = new THREE.TextureLoader().load('src/images/dot.png');
 
         this.settingsListener = (settings, customScale) => {
@@ -313,13 +313,13 @@ export default class ThreeViewer extends Component {
                             let coord = {
                                 idx: response.cellIndices,
                                 x: response.x,
-                                y: response.y,
+                                y: response.y.map((y) => -y),
                             };
 
                             // ------------------------------
                             // TESTING OVERLOAD OF CELLS
 
-                            const multiplyCells = 4;
+                            const multiplyCells = 1;
                             let col = 0;
                             const nRows = 2;
 
@@ -384,6 +384,24 @@ export default class ThreeViewer extends Component {
         }
 
         this.scene.clear();
+
+        const xMax = Math.max(...this.state.coord.x);
+        const yMax = Math.max(...this.state.coord.y);
+        const xMin = Math.min(...this.state.coord.x);
+        const yMin = Math.min(...this.state.coord.y);
+        const xCen = (xMax + xMin) / 2;
+        const yCen = (yMax + yMin) / 2;
+        const maxDiff =
+            Math.max(Math.abs(xMax - xCen), Math.abs(yMax - yCen)) * 1.5;
+
+        console.log(this.camera);
+        const aspectRatio = this.w / this.h;
+        this.camera.left = xCen - maxDiff;
+        this.camera.right = xCen + maxDiff;
+        this.camera.top = yCen + maxDiff / aspectRatio;
+        this.camera.bottom = yCen - maxDiff / aspectRatio;
+        this.camera.updateProjectionMatrix();
+
         this.geometry.setAttribute(
             'position',
             new THREE.Float32BufferAttribute(positions, 3)
@@ -396,7 +414,8 @@ export default class ThreeViewer extends Component {
             'origData',
             new THREE.Float32BufferAttribute(origData, 1)
         );
-        const points = new THREE.Points(this.geometry, this.material);
+        // const points = new THREE.Points(this.geometry, this.material);
+        const points = new THREE.Points(this.geometry);
         this.scene.add(points);
     }
 
@@ -594,6 +613,23 @@ export default class ThreeViewer extends Component {
                 origData.push(ci);
             });
         }
+        const xMax = Math.max(...this.state.coord.x);
+        const yMax = Math.max(...this.state.coord.y);
+        const xMin = Math.min(...this.state.coord.x);
+        const yMin = Math.min(...this.state.coord.y);
+        const xCen = (xMax + xMin) / 2;
+        const yCen = (yMax + yMin) / 2;
+        const maxDiff =
+            Math.max(Math.abs(xMax - xCen), Math.abs(yMax - yCen)) * 1.5;
+
+        console.log(this.camera);
+        const aspectRatio = this.w / this.h;
+        this.camera.left = xCen - maxDiff;
+        this.camera.right = xCen + maxDiff;
+        this.camera.top = yCen + maxDiff / aspectRatio;
+        this.camera.bottom = yCen - maxDiff / aspectRatio;
+        this.camera.updateProjectionMatrix();
+
         this.geometry.setAttribute(
             'position',
             new THREE.Float32BufferAttribute(positions, 3)
