@@ -3,7 +3,8 @@ import React, { Component } from 'react';
 import { Segment, Grid } from 'semantic-ui-react';
 import FeatureSearchBox from '../common/FeatureSearchBox';
 import { BackendAPI } from '../common/API';
-import Viewer from '../common/Viewer';
+import PIXIViewer from '../common/Viewer';
+import ThreeViewer from '../common/ThreeViewer';
 import ViewerSidebar from '../common/ViewerSidebar';
 import ViewerToolbar from '../common/ViewerToolbar';
 import Histogram from '../common/Histogram';
@@ -13,11 +14,20 @@ export default class Regulon extends Component {
         super();
         this.state = {
             activeLoom: BackendAPI.getActiveLoom(),
+            activeViewer: BackendAPI.getActiveViewer(),
             activeCoordinates: BackendAPI.getActiveCoordinates(),
             activeFeatures: BackendAPI.getActiveFeatures(),
             sidebar: BackendAPI.getSidebarVisible(),
             colors: BackendAPI.getColors(),
         };
+        this.activeViewerListener = (viewer) => {
+            this.setState({
+                activeViewer: viewer,
+            });
+        };
+
+        this.viewers = { PIXI: PIXIViewer, threejs: ThreeViewer };
+
         this.activeLoomListener = (loom, metadata, coordinates) => {
             this.setState({ activeLoom: loom, activeCoordinates: coordinates });
         };
@@ -38,7 +48,9 @@ export default class Regulon extends Component {
             colors,
             geneFeatures,
             sidebar,
+            activeViewer,
         } = this.state;
+        const Viewer = this.viewers[activeViewer];
         let featureSearch = _.times(3, (i) => (
             <Grid.Column key={i}>
                 <FeatureSearchBox
@@ -128,6 +140,7 @@ export default class Regulon extends Component {
     }
 
     UNSAFE_componentWillMount() {
+        BackendAPI.onActiveViewerChange(this.activeViewerListener);
         BackendAPI.onActiveLoomChange(this.activeLoomListener);
         BackendAPI.onActiveFeaturesChange(
             'regulon',
@@ -137,6 +150,7 @@ export default class Regulon extends Component {
     }
 
     componentWillUnmount() {
+        BackendAPI.removeActiveViewerChange(this.activeViewerListener);
         BackendAPI.removeActiveLoomChange(this.activeLoomListener);
         BackendAPI.removeActiveFeaturesChange(
             'regulon',

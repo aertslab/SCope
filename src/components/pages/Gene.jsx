@@ -2,21 +2,27 @@ import React, { Component } from 'react';
 import { Grid } from 'semantic-ui-react';
 import { BackendAPI } from '../common/API';
 import FeatureSearchBox from '../common/FeatureSearchBox';
-import Viewer from '../common/Viewer';
+import PIXIViewer from '../common/Viewer';
+import ThreeViewer from '../common/ThreeViewer';
 import ViewerToolbar from '../common/ViewerToolbar';
 import ViewerSidebar from '../common/ViewerSidebar';
-
 export default class Gene extends Component {
     constructor() {
         super();
         this.state = {
             activeLoom: BackendAPI.getActiveLoom(),
             activeCoordinates: BackendAPI.getActiveCoordinates(),
+            activeViewer: BackendAPI.getActiveViewer(),
             activeMetadata: BackendAPI.getActiveLoomMetadata(),
             activeFeatures: BackendAPI.getActiveFeatures(),
             activeLegend: null,
             sidebar: BackendAPI.getSidebarVisible(),
             colors: BackendAPI.getColors(),
+        };
+        this.activeViewerListener = (viewer) => {
+            this.setState({
+                activeViewer: viewer,
+            });
         };
         this.activeLoomListener = (loom, metadata, coordinates) => {
             if (DEBUG)
@@ -31,6 +37,7 @@ export default class Gene extends Component {
             this.setState({ sidebar: state });
         };
         this.height = window.innerHeight - 200;
+        this.viewers = { PIXI: PIXIViewer, threejs: ThreeViewer };
     }
 
     render() {
@@ -42,10 +49,13 @@ export default class Gene extends Component {
             activeMetadata,
             colors,
             activeLegend,
+            activeViewer,
         } = this.state;
         const isQueryingAnnotation = activeFeatures.some((e) => {
             return e.featureType == 'annotation';
         });
+
+        const Viewer = this.viewers[activeViewer];
 
         const featureSearch = () =>
             _.times(3, (i) => {
@@ -120,11 +130,13 @@ export default class Gene extends Component {
     }
 
     UNSAFE_componentWillMount() {
+        BackendAPI.onActiveViewerChange(this.activeViewerListener);
         BackendAPI.onActiveLoomChange(this.activeLoomListener);
         BackendAPI.onSidebarVisibleChange(this.sidebarVisibleListener);
     }
 
     componentWillUnmount() {
+        BackendAPI.removeActiveViewerChange(this.activeViewerListener);
         BackendAPI.removeActiveLoomChange(this.activeLoomListener);
         BackendAPI.removeSidebarVisibleChange(this.sidebarVisibleListener);
     }

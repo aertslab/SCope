@@ -58,6 +58,9 @@ class API {
         this.activePageListeners = [];
         this.activeLooms = [];
         this.activeCoordinates = -1;
+        this.activeViewer = 'PIXI';
+        this.activeViewerChangeListeners = [];
+
         this.activeLoomChangeListeners = [];
 
         this.features = {};
@@ -279,6 +282,13 @@ class API {
         });
     }
 
+    setActiveViewer(viewer) {
+        this.activeViewer = viewer;
+        this.activeViewerChangeListeners.forEach((listener) => {
+            listener(viewer);
+        });
+    }
+
     setActiveCoordinates(coords) {
         this.activeCoordinates = coords;
         this.activeLoomChangeListeners.forEach((listener) => {
@@ -308,6 +318,17 @@ class API {
         )[0];
     }
 
+    onActiveViewerChange(listener) {
+        this.activeViewerChangeListeners.push(listener);
+    }
+
+    removeActiveViewerChange(listener) {
+        let i = this.activeViewerChangeListeners.indexOf(listener);
+        if (i > -1) {
+            this.activeViewerChangeListeners.splice(i, 1);
+        }
+    }
+
     onActiveLoomChange(listener) {
         this.activeLoomChangeListeners.push(listener);
     }
@@ -321,6 +342,10 @@ class API {
 
     getActiveCoordinates() {
         return this.activeCoordinates;
+    }
+
+    getActiveViewer() {
+        return this.activeViewer;
     }
 
     hasActiveCoordinatesTrajectory() {

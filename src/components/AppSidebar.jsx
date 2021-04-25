@@ -43,7 +43,12 @@ class AppSidebar extends Component {
             newHierarchy_L1: '',
             newHierarchy_L2: '',
             newHierarchy_L3: '',
+            activeViewer: BackendAPI.getActiveViewer(),
         };
+        this.viewers = [
+            { text: 'pixi', value: 'PIXI' },
+            { text: 'three', value: 'threejs' },
+        ];
     }
 
     render() {
@@ -59,6 +64,7 @@ class AppSidebar extends Component {
             uploadModalOpened,
             spriteScale,
             spriteAlpha,
+            activeViewer,
         } = this.state;
         let metadata = BackendAPI.getActiveLoomMetadata(),
             coordinates = [];
@@ -503,6 +509,17 @@ class AppSidebar extends Component {
                                 )}
                             />
                         </Menu.Item>
+                        {<br />}
+                        <Menu.Header>EXPERIMIENTAL SETTINGS</Menu.Header>
+                        <Menu.Item>Viewer</Menu.Item>
+                        <Menu.Item>
+                            <Dropdown
+                                inline
+                                value={activeViewer}
+                                options={this.viewers}
+                                onChange={this.setActiveViewer.bind(this)}
+                            />
+                        </Menu.Item>
                     </Menu.Menu>
                 )}
                 <Divider />
@@ -737,6 +754,11 @@ class AppSidebar extends Component {
             action: 'changed active coordinates',
             label: coords.text,
         });
+    }
+
+    setActiveViewer(evt, viewer) {
+        BackendAPI.setActiveViewer(viewer.value);
+        this.setState({ activeViewer: viewer.value });
     }
 
     onLoomUploaded(filename) {

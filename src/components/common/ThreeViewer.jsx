@@ -7,7 +7,7 @@ import zlib from 'zlib';
 const DEFAULT_POINT_COLOR = 'A6A6A6';
 const VIEWER_MARGIN = 5;
 
-export default class Viewer extends Component {
+export default class ThreeViewer extends Component {
     constructor(props) {
         super(props);
         this.state = {

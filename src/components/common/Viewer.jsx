@@ -19,7 +19,7 @@ const EMPTY_TRAJECTORY = {
     coordinates: [],
 };
 
-export default class Viewer extends Component {
+export default class PIXIViewer extends Component {
     constructor(props) {
         super(props);
         this.state = {
