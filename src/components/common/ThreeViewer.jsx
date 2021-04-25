@@ -13,6 +13,7 @@ export default class Viewer extends Component {
         this.state = {
             activeFeatures: BackendAPI.getActiveFeatures(),
             activePage: BackendAPI.getActivePage(),
+            activeCoordinates: BackendAPI.getActiveCoordinates(),
         };
 
         this.bcr = null;
@@ -21,6 +22,25 @@ export default class Viewer extends Component {
         this.nearPlane = 0.1;
         this.farPlane = 1000;
         this.texture = new THREE.TextureLoader().load('src/images/dot.png');
+
+        this.settingsListener = (settings, customScale) => {
+            if (this.props.settings) {
+                this.setState({ loading: true });
+                this.getFeatureColors(
+                    this.state.activeFeatures,
+                    this.props.loomFile,
+                    this.props.thresholds,
+                    this.state.activeAnnotations,
+                    customScale,
+                    this.props.superposition
+                );
+                // this.getFeatureLabels(
+                //     this.props.loomFile,
+                //     BackendAPI.getActiveCoordinates(),
+                //     this.state.activeFeatures
+                // );
+            }
+        };
 
         this.activeFeaturesListener = (features, featureID, customScale) => {
             this.onActiveFeaturesChange(features, featureID, customScale);
@@ -95,6 +115,73 @@ export default class Viewer extends Component {
         );
     }
 
+    static getDerivedStateFromProps(props, state) {
+        let updates = {};
+        if (props.loomFile != state.loomFile) {
+            updates['loomFile'] = props.loomFile;
+        }
+        if (props.activeCoordinates != state.activeCoordinates) {
+            updates['activeCoordinates'] = props.activeCoordinates;
+        }
+        if (props.superposition != state.superposition) {
+            updates['superposition'] = props.superposition;
+        }
+        if (props.activeAnnotations != state.activeAnnotations) {
+            updates['activeAnnotations'] = props.activeAnnotations;
+        }
+        if (updates != {}) {
+            return updates;
+        } else {
+            return null;
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (
+            prevProps.loomFile != this.props.loomFile ||
+            prevProps.activeCoordinates != this.props.activeCoordinates ||
+            prevProps.activeAnnotations != this.props.activeAnnotations ||
+            prevProps.superposition != this.props.superposition
+        ) {
+            this.getPoints(
+                this.props.loomFile,
+                this.props.activeCoordinates,
+                this.props.activeAnnotations,
+                this.props.superposition,
+                () => {
+                    let featuresActive = false;
+                    this.state.activeFeatures.map((f) => {
+                        if (f.feature.length) featuresActive = true;
+                    });
+                    if (DEBUG)
+                        console.log(
+                            this.props.name,
+                            'features active',
+                            featuresActive
+                        );
+                    if (featuresActive) {
+                        this.getFeatureColors(
+                            this.state.activeFeatures,
+                            this.props.loomFile,
+                            this.props.thresholds,
+                            this.state.activeAnnotations,
+                            this.state.customScale,
+                            this.props.superposition
+                        );
+
+                        // this.getFeatureLabels(
+                        //     nextProps.loomFile,
+                        //     BackendAPI.getActiveCoordinates(),
+                        //     this.state.activeAnnotations
+                        // );
+                    } else {
+                        this.setState({ loading: false });
+                    }
+                }
+            );
+        }
+    }
+
     componentDidMount() {
         if (DEBUG)
             console.log(this.props.name, 'componentDidMount', this.props);
@@ -135,6 +222,7 @@ export default class Viewer extends Component {
             );
         }
 
+        BackendAPI.onSettingsChange(this.settingsListener);
         BackendAPI.onActiveFeaturesChange(
             this.state.activePage,
             this.activeFeaturesListener
@@ -143,6 +231,7 @@ export default class Viewer extends Component {
     }
 
     componentWillUnmount() {
+        BackendAPI.removeSettingsChange(this.settingsListener);
         BackendAPI.removeActiveFeaturesChange(
             this.state.activePage,
             this.activeFeaturesListener
@@ -220,7 +309,6 @@ export default class Viewer extends Component {
                                 'getCoordinates',
                                 response
                             );
-                        // this.mainLayer.removeChildren();
                         if (response) {
                             let coord = {
                                 idx: response.cellIndices,
@@ -259,8 +347,6 @@ export default class Viewer extends Component {
                             };
 
                             // ------------------------------
-
-                            // If current coordinates has a trajectory set it
                             this.setState({
                                 coord: coord,
                             });
