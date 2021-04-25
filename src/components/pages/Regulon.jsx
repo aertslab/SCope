@@ -88,7 +88,11 @@ export default class Regulon extends Component {
                 </Grid.Row>
                 <Grid.Row columns='4' stretched className='viewerFlex flexRow'>
                     <Grid.Column width={1}>
-                        <ViewerToolbar />
+                        {this.state.activeViewer == 'PIXI' ? (
+                            <ViewerToolbar />
+                        ) : (
+                            ''
+                        )}
                     </Grid.Column>
                     <Grid.Column stretched className='flexDouble'>
                         <b className='noStretch'>Regulon AUC values</b>

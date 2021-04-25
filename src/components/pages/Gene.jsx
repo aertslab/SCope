@@ -99,7 +99,11 @@ export default class Gene extends Component {
                 </Grid.Row>
                 <Grid.Row columns='3' stretched className='viewerFlex'>
                     <Grid.Column width={1} className='viewerToolbar'>
-                        <ViewerToolbar />
+                        {this.state.activeViewer == 'PIXI' ? (
+                            <ViewerToolbar />
+                        ) : (
+                            ''
+                        )}
                     </Grid.Column>
                     <Grid.Column stretched>
                         <b>Expression levels</b>
