@@ -85,20 +85,21 @@ export default class Viewer extends Component {
 
     render() {
         return (
-            <div
-                id={'viewer' + this.props.name}
-                ref={(ref) => (this.mount = ref)}
-                onPointerMove={this.onMove.bind(this)}
-            />
+            <div className='stretched' id={'viewerdiv' + this.props.name}>
+                <div
+                    id={'viewer' + this.props.name}
+                    ref={(ref) => (this.mount = ref)}
+                    onPointerMove={this.onMove.bind(this)}
+                />
+            </div>
         );
     }
 
     componentDidMount() {
         if (DEBUG)
             console.log(this.props.name, 'componentDidMount', this.props);
-
         this.bcr = document
-            .getElementById('viewer' + this.props.name)
+            .getElementById('viewerdiv' + this.props.name)
             .getBoundingClientRect();
         this.w = this.bcr.width - VIEWER_MARGIN;
         this.h = this.bcr.height - VIEWER_MARGIN;
