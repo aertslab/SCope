@@ -189,11 +189,6 @@ class App extends Component {
                         path='/:uuid/:loom?/:page?'
                         render={({ history }) => (
                             <Segment className='parentView'>
-                                <ReactResizeDetector
-                                    handleHeight
-                                    skipOnMount
-                                    onResize={this.onResize.bind(this)}
-                                />
                                 <AppHeader
                                     toggleSidebar={this.toggleSidebar.bind(
                                         this
@@ -575,10 +570,6 @@ class App extends Component {
             action: 'toggle sidebar',
             label: state ? 'on' : 'off',
         });
-    }
-
-    onResize() {
-        this.forceUpdate();
     }
 
     restoreSession(ip, uuid, permalink) {
