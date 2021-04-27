@@ -722,9 +722,12 @@ class SCope(s_pb2_grpc.MainServicer):
             sub_loom_file_attrs["title"] = sub_loom_file_name
             sub_loom_file_attrs["CreationDate"] = timestamp()
             sub_loom_file_attrs["LOOM_SPEC_VERSION"] = _version.__version__
-            sub_loom_file_attrs["note"] = "This loom is a subset of {0} loom file".format(
-                Loom.clean_file_attr(file_attr=loom_connection.attrs["title"])
-            )
+            if "title" in loom_connection.attrs:
+                sub_loom_file_attrs[
+                    "note"
+                ] = f"This loom is a subset of {Loom.clean_file_attr(file_attr=loom_connection.attrs['title'])} loom file"
+            else:
+                sub_loom_file_attrs["note"] = f"This loom is a subset of {request.loomFilePath} loom file"
             sub_loom_file_attrs["MetaData"] = Loom.clean_file_attr(file_attr=loom_connection.attrs["MetaData"])
             # - Use scan to subset cells (much faster than naive subsetting): avoid to load everything into memory
             # - Loompy bug: loompy.create_append works but generate a file much bigger than its parent
