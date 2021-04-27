@@ -1238,9 +1238,10 @@ class ViewerSidebar extends Component {
                             {markerTable}
                             {legendTable}
                             {downloadSubLoomButton()}
-                            {activeFeatures[i].featureType.startsWith(
+                            {(activeFeatures[i].featureType.startsWith(
                                 'Clustering'
-                            ) &&
+                            ) ||
+                                activeFeatures[i].featureType == 'regulon') &&
                                 md.genes && (
                                     <GProfilerModal featureMetadata={md} />
                                 )}
