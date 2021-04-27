@@ -17,6 +17,8 @@ import threading
 import pickle
 import requests
 import uuid
+import datetime
+
 from typing import DefaultDict, Set, List, Dict, Any, Tuple
 from collections import OrderedDict, defaultdict, deque
 from methodtools import lru_cache
@@ -700,8 +702,8 @@ class SCope(s_pb2_grpc.MainServicer):
         file_name = request.loomFilePath
         # Check if not a public loom file
         if "/" in request.loomFilePath:
-            loom = request.loomFilePath.split("/")
-            file_name = loom[1].split(".")[0]
+            loom_name = request.loomFilePath.split("/")
+            file_name = loom_name[1].split(".")[0]
 
         if request.featureType == "clusterings":
             a = list(filter(lambda x: x["name"] == request.featureName, meta_data["clusterings"]))
@@ -709,59 +711,70 @@ class SCope(s_pb2_grpc.MainServicer):
             cells = loom_connection.ca["Clusterings"][str(a[0]["id"])] == b["id"]
             logger.debug("Number of cells in {0}: {1}".format(request.featureValue, np.sum(cells)))
             sub_loom_file_name = file_name + "_Sub_" + request.featureValue.replace(" ", "_").replace("/", "_")
-            if not os.path.exists(os.path.join(self.dfh.get_data_dirs()["Loom"]["path"], "tmp")):
-                os.mkdir(os.path.join(self.dfh.get_data_dirs()["Loom"]["path"], "tmp"))
-            sub_loom_file_path = os.path.join(
-                self.dfh.get_data_dirs()["Loom"]["path"], "tmp", sub_loom_file_name + ".loom"
+        elif request.featureType == "cellSelection":
+            cells = np.full(loom.get_nb_cells(), False)
+            cells[request.cellIndices] = True
+            logger.debug(f"Number of cells in selection: {len(request.cellIndices)}")
+            sub_loom_file_name = (
+                f"{file_name}_CellSelection_{request.featureValue}_{datetime.datetime.now().strftime('%y%m%d_%H%M')}"
             )
-            # Check if the file already exists
-            if os.path.exists(path=sub_loom_file_path):
-                os.remove(path=sub_loom_file_path)
-            # Create new file attributes
-            sub_loom_file_attrs = dict()
-            sub_loom_file_attrs["title"] = sub_loom_file_name
-            sub_loom_file_attrs["CreationDate"] = timestamp()
-            sub_loom_file_attrs["LOOM_SPEC_VERSION"] = _version.__version__
-            sub_loom_file_attrs["note"] = "This loom is a subset of {0} loom file".format(
-                Loom.clean_file_attr(file_attr=loom_connection.attrs["title"])
-            )
-            sub_loom_file_attrs["MetaData"] = Loom.clean_file_attr(file_attr=loom_connection.attrs["MetaData"])
-            # - Use scan to subset cells (much faster than naive subsetting): avoid to load everything into memory
-            # - Loompy bug: loompy.create_append works but generate a file much bigger than its parent
-            #      So prepare all the data and create the loom afterwards
-            logger.debug("Subsetting {0} cluster from the active .loom...".format(request.featureValue))
-            sub_matrix = None
-            sub_selection = None
-            processed = 0
-            for (_, selection, _) in loom_connection.scan(items=cells, axis=1):
-                if sub_matrix is None:
-                    sub_matrix = loom_connection[:, selection]
-                    sub_selection = selection
-                else:
-                    sub_matrix = np.concatenate((sub_matrix, loom_connection[:, selection]), axis=1)
-                    sub_selection = np.concatenate((sub_selection, selection), axis=0)
-                # Send the progress
-                processed = len(sub_selection) / sum(cells)
-                yield s_pb2.DownloadSubLoomReply(
-                    loomFilePath="",
-                    loomFileSize=0,
-                    progress=s_pb2.Progress(value=processed, status="Sub Loom Created!"),
-                    isDone=False,
-                )
-            logger.debug("Creating {0} sub .loom...".format(request.featureValue))
-            lp.create(
-                sub_loom_file_path,
-                sub_matrix,
-                row_attrs=loom_connection.ra,
-                col_attrs=loom_connection.ca[sub_selection],
-                file_attrs=sub_loom_file_attrs,
-            )
-            with open(sub_loom_file_path, "r") as fh:
-                loom_file_size = os.fstat(fh.fileno())[6]
-            logger.debug("Done making loom!")
-            logger.debug("{0:.5f} seconds elapsed making loom ---".format(time.time() - start_time))
         else:
             logger.error("This feature is currently not implemented.")
+            return
+
+        if not os.path.exists(os.path.join(self.dfh.get_data_dirs()["Loom"]["path"], "tmp")):
+            os.mkdir(os.path.join(self.dfh.get_data_dirs()["Loom"]["path"], "tmp"))
+        sub_loom_file_path = os.path.join(self.dfh.get_data_dirs()["Loom"]["path"], "tmp", sub_loom_file_name + ".loom")
+        # Check if the file already exists
+        if os.path.exists(path=sub_loom_file_path):
+            os.remove(path=sub_loom_file_path)
+        # Create new file attributes
+        sub_loom_file_attrs = dict()
+        sub_loom_file_attrs["title"] = sub_loom_file_name
+        sub_loom_file_attrs["CreationDate"] = timestamp()
+        sub_loom_file_attrs["LOOM_SPEC_VERSION"] = _version.__version__
+        if "title" in loom_connection.attrs:
+            sub_loom_file_attrs[
+                "note"
+            ] = f"This loom is a subset of {Loom.clean_file_attr(file_attr=loom_connection.attrs['title'])} loom file"
+        else:
+            sub_loom_file_attrs["note"] = f"This loom is a subset of {request.loomFilePath} loom file"
+        sub_loom_file_attrs["MetaData"] = Loom.clean_file_attr(file_attr=loom_connection.attrs["MetaData"])
+        # - Use scan to subset cells (much faster than naive subsetting): avoid to load everything into memory
+        # - Loompy bug: loompy.create_append works but generate a file much bigger than its parent
+        #      So prepare all the data and create the loom afterwards
+        logger.debug("Subsetting {0} cluster from the active .loom...".format(request.featureValue))
+        sub_matrix = None
+        sub_selection = None
+        processed = 0
+        for (_, selection, _) in loom_connection.scan(items=cells, axis=1):
+            if sub_matrix is None:
+                sub_matrix = loom_connection[:, selection]
+                sub_selection = selection
+            else:
+                sub_matrix = np.concatenate((sub_matrix, loom_connection[:, selection]), axis=1)
+                sub_selection = np.concatenate((sub_selection, selection), axis=0)
+            # Send the progress
+            processed = len(sub_selection) / sum(cells)
+            yield s_pb2.DownloadSubLoomReply(
+                loomFilePath="",
+                loomFileSize=0,
+                progress=s_pb2.Progress(value=processed, status="Sub Loom Created!"),
+                isDone=False,
+            )
+        logger.debug("Creating {0} sub .loom...".format(request.featureValue))
+        lp.create(
+            sub_loom_file_path,
+            sub_matrix,
+            row_attrs=loom_connection.ra,
+            col_attrs=loom_connection.ca[sub_selection],
+            file_attrs=sub_loom_file_attrs,
+        )
+        with open(sub_loom_file_path, "r") as fh:
+            loom_file_size = os.fstat(fh.fileno())[6]
+        logger.debug("Done making loom!")
+        logger.debug("{0:.5f} seconds elapsed making loom ---".format(time.time() - start_time))
+
         yield s_pb2.DownloadSubLoomReply(
             loomFilePath=sub_loom_file_path,
             loomFileSize=loom_file_size,

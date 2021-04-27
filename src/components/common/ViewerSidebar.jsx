@@ -175,6 +175,139 @@ class ViewerSidebar extends Component {
             }
 
             return lassoSelections.map((lS, i) => {
+                let lassoDownloadSubLoomButton = () => {
+                    if (
+                        this.state.downloadSubLoomPercentage == null &&
+                        this.state.processSubLoomPercentage == null
+                    )
+                        return (
+                            <Button
+                                color='green'
+                                onClick={() => {
+                                    let query = {
+                                        loomFilePath: BackendAPI.getActiveLoom(),
+                                        featureType: 'cellSelection',
+                                        featureName: 'cellSelection',
+                                        featureValue: (i + 1).toString(),
+                                        operator: '==',
+                                        cellIndices: lS.points,
+                                    };
+                                    BackendAPI.getConnection().then(
+                                        (gbc) => {
+                                            if (DEBUG)
+                                                console.log(
+                                                    'Download subset of active .loom'
+                                                );
+                                            let call = gbc.services.scope.Main.downloadSubLoom(
+                                                query
+                                            );
+                                            call.on('data', (dsl) => {
+                                                if (DEBUG)
+                                                    console.log(
+                                                        'downloadSubLoom data'
+                                                    );
+                                                if (dsl == null) {
+                                                    this.setState({
+                                                        loomDownloading: null,
+                                                        downloadSubLoomPercentage: null,
+                                                    });
+                                                    return;
+                                                }
+                                                if (!dsl.isDone) {
+                                                    this.setState({
+                                                        processSubLoomPercentage: Math.round(
+                                                            dsl.progress.value *
+                                                                100
+                                                        ),
+                                                    });
+                                                } else {
+                                                    // Start downloading the subsetted loom file
+                                                    let fd = new FileDownloader(
+                                                        dsl.loomFilePath,
+                                                        match.params.uuid,
+                                                        dsl.loomFileSize
+                                                    );
+                                                    fd.on(
+                                                        'started',
+                                                        (isStarted) => {
+                                                            this.setState({
+                                                                processSubLoomPercentage: null,
+                                                                loomDownloading: encodeURIComponent(
+                                                                    dsl.loomFilePath
+                                                                ),
+                                                            });
+                                                        }
+                                                    );
+                                                    fd.on(
+                                                        'progress',
+                                                        (progress) => {
+                                                            this.setState({
+                                                                downloadSubLoomPercentage: progress,
+                                                            });
+                                                        }
+                                                    );
+                                                    fd.on(
+                                                        'finished',
+                                                        (finished) => {
+                                                            this.setState({
+                                                                loomDownloading: null,
+                                                                downloadSubLoomPercentage: null,
+                                                            });
+                                                        }
+                                                    );
+                                                    fd.start();
+                                                }
+                                            });
+                                            call.on('end', () => {
+                                                console.log();
+                                                if (DEBUG)
+                                                    console.log(
+                                                        'downloadSubLoom end'
+                                                    );
+                                            });
+                                        },
+                                        () => {
+                                            this.setState({
+                                                loomDownloading: null,
+                                                downloadSubLoomPercentage: null,
+                                                processSubLoomPercentage: null,
+                                            });
+                                            BackendAPI.showError();
+                                        }
+                                    );
+                                }}
+                                style={{
+                                    marginTop: '10px',
+                                    width: '100%',
+                                }}>
+                                {'Download Selection ' +
+                                    (i + 1) +
+                                    ' .loom file'}
+                            </Button>
+                        );
+                    if (this.state.processSubLoomPercentage > 0)
+                        return (
+                            <Progress
+                                percent={this.state.processSubLoomPercentage}
+                                indicating
+                                progress
+                                disabled
+                                size='large'>
+                                Processing...
+                            </Progress>
+                        );
+                    if (this.state.downloadSubLoomPercentage > 0)
+                        return (
+                            <Progress
+                                percent={this.state.downloadSubLoomPercentage}
+                                indicating
+                                progress
+                                disabled
+                                size='large'>
+                                Downloading...
+                            </Progress>
+                        );
+                };
                 return (
                     <Tab.Pane
                         attached={false}
@@ -248,9 +381,14 @@ class ViewerSidebar extends Component {
                             <Grid.Row>
                                 <Grid.Column>
                                     {lS.clusterOverlaps ? (
-                                        <ClusterOverlapsTable
-                                            clusterOverlaps={lS.clusterOverlaps}
-                                        />
+                                        <React.Fragment>
+                                            <ClusterOverlapsTable
+                                                clusterOverlaps={
+                                                    lS.clusterOverlaps
+                                                }
+                                            />
+                                            {lassoDownloadSubLoomButton()}
+                                        </React.Fragment>
                                     ) : (
                                         ''
                                     )}

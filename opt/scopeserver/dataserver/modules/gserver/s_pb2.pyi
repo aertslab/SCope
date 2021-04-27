@@ -1399,6 +1399,7 @@ class DownloadSubLoomRequest(google___protobuf___message___Message):
     featureName: typing___Text = ...
     featureValue: typing___Text = ...
     operator: typing___Text = ...
+    cellIndices: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int] = ...
     def __init__(
         self,
         *,
@@ -1407,10 +1408,13 @@ class DownloadSubLoomRequest(google___protobuf___message___Message):
         featureName: typing___Optional[typing___Text] = None,
         featureValue: typing___Optional[typing___Text] = None,
         operator: typing___Optional[typing___Text] = None,
+        cellIndices: typing___Optional[typing___Iterable[builtin___int]] = None,
     ) -> None: ...
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
+            "cellIndices",
+            b"cellIndices",
             "featureName",
             b"featureName",
             "featureType",
