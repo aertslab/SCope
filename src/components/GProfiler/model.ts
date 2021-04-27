@@ -61,11 +61,12 @@ export const getAvailableTopGeneListsSizes = (
 ) => {
     const numFeatures = getNumFeatures(featureMetadata);
     return [
-        numFeatures < 100 ? numFeatures : 100,
+        100,
         200,
         300,
         400,
         500,
+        numFeatures,
     ].filter((topNumFeaturesValue) =>
         topNumFeaturesValue <= numFeatures ? true : false
     );
@@ -99,14 +100,24 @@ export const getMetricTable = (
 
 export const getAvailableSortBy = (featureMetadata: FeatureMetadata) => {
     if (featureMetadata.metrics) {
-        return featureMetadata.metrics.map((metric, idx: number) => {
+        let metrics = featureMetadata.metrics.map((metric, idx: number) => {
             return {
                 key: idx,
                 text: metric.name,
                 value: metric.accessor,
             };
         });
+        metrics.push({
+            key: metrics.length + 1,
+            text: 'Gene Symbol',
+            value: 'gene',
+        })
+        return metrics
     }
 
-    return [];
+    return [{
+        key: 1,
+        text: 'Gene Symbol',
+        value: 'gene',
+    }];
 };

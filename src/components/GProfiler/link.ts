@@ -36,11 +36,11 @@ const createFeatureQuery = (
         }, '');
 };
 
-const createGProfilerLink = (organism: string, query: string) => {
+const createGProfilerLink = (organism: string, query: string, ordered: string) => {
     const gProfilerQueryData = {
         organism,
         query,
-        ordered: 'true',
+        ordered,
         all_results: 'false',
         no_iea: 'false',
         combined: 'true',
@@ -98,7 +98,7 @@ export const checkCreateGProfilerLink = async ({
         sortedFeatureMetricTable
     );
     const organism = gProfilerToken !== '' ? gProfilerToken : selectedOrganism;
-    const gProfilerLink = createGProfilerLink(organism, topFeatureQuery);
+    const gProfilerLink = createGProfilerLink(organism, topFeatureQuery, selectedSortBy == 'gene' ? 'false' : 'true' );
     if (gProfilerLink.length > GPROFILER_LINK_MAX_LENGTH) {
         return {
             error:
