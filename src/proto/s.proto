@@ -424,6 +424,7 @@ message DownloadSubLoomRequest {
   // }
   string operator=5;
   // Operator operator = 4 [default = EQ];
+  repeated int32 cellIndices=6;
 }
 
 message DownloadSubLoomReply {
