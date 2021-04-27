@@ -61,11 +61,12 @@ export const getAvailableTopGeneListsSizes = (
 ) => {
     const numFeatures = getNumFeatures(featureMetadata);
     return [
-        numFeatures < 100 ? numFeatures : 100,
+        100,
         200,
         300,
         400,
         500,
+        numFeatures,
     ].filter((topNumFeaturesValue) =>
         topNumFeaturesValue <= numFeatures ? true : false
     );
