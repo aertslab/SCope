@@ -81,6 +81,9 @@ This string will be used to salt all annotation data, allowing validation of dat
 
 ## Development
 
+HTTP API documentation can be found by running the server and navigating to `http://localhost:8000/docs`. Or by using
+[Postman](https://www.postman.com) to view the SCope collection found in `SCope.postman_collection.json` file.
+
 1. Clone the GitHub repository and install,
 
 ```bash

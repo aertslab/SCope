@@ -25,7 +25,6 @@ class Dataset(DatasetBase):
 
 # Projects
 class ProjectBase(BaseModel):
-    id: int
     name: str
     uuid: str
 

@@ -22,6 +22,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
+    created = Column(DateTime, nullable=False)
     projects = relationship("Project", secondary="project_user_mapping", back_populates="users")
 
 
@@ -44,6 +45,7 @@ class Dataset(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
+    created = Column(DateTime, nullable=False)
     filename = Column(String)
     size = Column(Integer, nullable=False)
     project = Column(Integer, ForeignKey("projects.id"), nullable=False)
