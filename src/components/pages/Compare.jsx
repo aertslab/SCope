@@ -402,7 +402,10 @@ class Compare extends Component {
                                             superposition={superposition}
                                             activeCoordinates={
                                                 configuration == 'multi'
-                                                    ? multiCoordinates[j]
+                                                    ? multiCoordinates[j] !=
+                                                          null &&
+                                                      multiCoordinates[j] !=
+                                                          undefined
                                                         ? multiCoordinates[j]
                                                         : -1
                                                     : multiCoordinates[0]
