@@ -19,17 +19,24 @@ def get_projects(db: Session, user_id: int) -> List[models.Project]:
     return user.projects if user else []
 
 
-def get_project(db: Session, project_id: int, user_id: int) -> Optional[models.Project]:
+def get_project(db: Session, project_uuid: str, user_id: int) -> Optional[models.Project]:
     " Get a specified project if it is accessible by a specified user. "
+    project = db.query(models.Project).filter(models.Project.uuid == project_uuid).first()
     mapping = (
         db.query(models.ProjectMapping)
-        .filter(models.ProjectMapping.project == project_id, models.ProjectMapping.user == user_id)
+        .filter(models.ProjectMapping.project == project.id, models.ProjectMapping.user == user_id)
         .first()
     )
     if mapping:
-        return db.query(models.Project).filter(models.Project.id == project_id).first()
+        return project
 
     return None
+
+
+def get_users_in_project(db: Session, project_uuid: str) -> List[models.User]:
+    " Get all users in a given project. "
+    project = db.query(models.Project).filter(models.Project.uuid == project_uuid).first()
+    return db.query(models.ProjectMapping).filter(models.ProjectMapping.project == project.id).all()
 
 
 def create_project(db: Session, user_id: int, name: str) -> models.Project:
@@ -60,7 +67,7 @@ def get_user(db: Session, user: schemas.User) -> Optional[models.User]:
 
 def create_user(db: Session) -> models.User:
     " Create a new user. "
-    new_user = models.User()
+    new_user = models.User(created=datetime.now())
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -74,6 +81,7 @@ def create_dataset(db: Session, name: str, filename: str, project: models.Projec
     " Create a new dataset. "
     new_dataset = models.Dataset(
         name=name,
+        created=datetime.now(),
         filename=filename,
         size=size,
         project=project.id,

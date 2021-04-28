@@ -1,0 +1,280 @@
+{
+	"info": {
+		"_postman_id": "f26a9e8e-b853-42cd-a11b-86cc2aaf5108",
+		"name": "SCope",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Create a new guest user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseData = JSON.parse(responseBody);",
+									"if (responseData.id) {",
+									"    pm.collectionVariables.set(\"user_id\", responseData.id);",
+									"    const cookieJar = pm.cookies.jar();",
+									"    cookieJar.set('localhost', 'user_id', ''+responseData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/user/new",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"new"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Projects and Datasets",
+			"item": [
+				{
+					"name": "Create a new project",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/project/new?name=My test project",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"project",
+								"new"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "My test project",
+									"description": "The human readable name of the project. This need not be unique as projects are identified by a UUID."
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List all accessible projects",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/project/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"project",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all datasets for a project",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/project/datasets?project=8fdb41f0-1b58-411d-96ac-6b7d8e433a73",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"project",
+								"datasets"
+							],
+							"query": [
+								{
+									"key": "project",
+									"value": "8fdb41f0-1b58-411d-96ac-6b7d8e433a73"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add a dataset to a project",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "uploadfile",
+									"type": "file",
+									"src": "/home/jacol/Downloads/20200729_FCA_BioHub_B3_Leg.HARMONY_SCENIC.loom"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/project/dataset?name=My test dataset&project=0b9d696e-c147-4eba-9d6d-53169428dba4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"project",
+								"dataset"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "My test dataset",
+									"description": "Human readable name for this dataset"
+								},
+								{
+									"key": "project",
+									"value": "0b9d696e-c147-4eba-9d6d-53169428dba4",
+									"description": "The UUID of the project to add this dataset to."
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add an existing user to an existing project",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/project/adduser?project=0b9d696e-c147-4eba-9d6d-53169428dba4&user_id=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"project",
+								"adduser"
+							],
+							"query": [
+								{
+									"key": "project",
+									"value": "0b9d696e-c147-4eba-9d6d-53169428dba4",
+									"description": "The UUID of the project to add this user to."
+								},
+								{
+									"key": "user_id",
+									"value": "1",
+									"description": "The id of the user to add to the project."
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List all users in a project",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/project/users?project=0b9d696e-c147-4eba-9d6d-53169428dba4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"project",
+								"users"
+							],
+							"query": [
+								{
+									"key": "project",
+									"value": "0b9d696e-c147-4eba-9d6d-53169428dba4"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "64e5bc9f-6cb3-43a0-ae8e-06ce29c360b3",
+			"key": "user_id",
+			"value": ""
+		}
+	]
+}

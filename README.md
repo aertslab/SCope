@@ -73,6 +73,9 @@ This string will be used to salt all annotation data, allowing validation of dat
 
 ## Development
 
+HTTP API documentation can be found by running the server and navigating to `http://localhost:8000/docs`. Or by using
+[Postman](https://www.postman.com) to view the SCope collection found in `SCope.postman_collection.json` file.
+
 1. Clone the GitHub repository and install,
 
 ```bash
@@ -94,12 +97,20 @@ cd "${LOCAL_SCOPE_REPO}"
 
 # Start SCope Server (terminal 1).
 cd opt
-poetry run hypercorn main:scope_api --reload
+./run-dev-env
 
 # Start SCope Client (terminal 2).
 cd ..
 npm run dev
 ```
+
+The `./run-dev-env.sh` script runs all migrations not applied to the database before starting
+the server. To create a new migration you should update `scopeserver/models.py` then run alembic like:
+```bash
+poetry run dotenv run alembic revision --autogenerate -m "Short summary of changes"
+```
+This will generate a migration script that you can then manually edit if necessary. See the
+[Alembic tutorial](https://alembic.sqlalchemy.org/en/latest/tutorial.html) for more information.
 
 ### Configuration file (`config.json`)
 

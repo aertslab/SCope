@@ -29,12 +29,18 @@ def upgrade():
     )
     op.create_index(op.f("ix_projects_id"), "projects", ["id"], unique=False)
     op.create_index(op.f("ix_projects_uuid"), "projects", ["uuid"], unique=False)
-    op.create_table("users", sa.Column("id", sa.Integer(), nullable=False), sa.PrimaryKeyConstraint("id"))
+    op.create_table(
+        "users",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("created", sa.DateTime(), nullable=False),
+        sa.PrimaryKeyConstraint("id"),
+    )
     op.create_index(op.f("ix_users_id"), "users", ["id"], unique=False)
     op.create_table(
         "datasets",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("name", sa.String(), nullable=True),
+        sa.Column("created", sa.DateTime(), nullable=False),
         sa.Column("filename", sa.String(), nullable=True),
         sa.Column("size", sa.Integer(), nullable=False),
         sa.Column("project", sa.Integer(), nullable=False),
