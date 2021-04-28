@@ -140,23 +140,18 @@ class CellColorByFeatures:
         md_annotation_values = self.loom.get_meta_data_annotation_by_name(name=feature)["values"]
         ca_annotation = self.loom.get_ca_attr_by_name(name=feature)
         ca_annotation_as_int = list(map(lambda x: md_annotation_values.index(str(x)), ca_annotation))
-        num_annotations = max(ca_annotation_as_int)
-        if num_annotations <= len(constant.BIG_COLOR_LIST):
-            self.hex_vec = list(map(lambda x: constant.BIG_COLOR_LIST[x], ca_annotation_as_int))
-        else:
-            raise ValueError("The annotation {0} has too many unique values.".format(feature))
-        # Set the reply
+        self.hex_vec = [constant.BIG_COLOR_LIST[i % len(constant.BIG_COLOR_LIST)] for i in ca_annotation_as_int]
+        colors = [constant.BIG_COLOR_LIST[i % len(constant.BIG_COLOR_LIST)] for i in range(len(md_annotation_values))]
 
         if annotations is not None:
             cellIndices = self.loom.get_anno_cells(annotations=annotations, logic=logic)
             self.hex_vec = np.array(self.hex_vec)[cellIndices]
+            colors = constant.BIG_COLOR_LIST[: len(md_annotation_values)]
 
         reply = s_pb2.CellColorByFeaturesReply(
             color=self.hex_vec,
             vmax=self.v_max,
-            legend=s_pb2.ColorLegend(
-                values=md_annotation_values, colors=constant.BIG_COLOR_LIST[: len(md_annotation_values)]
-            ),
+            legend=s_pb2.ColorLegend(values=md_annotation_values, colors=colors),
         )
         self.setReply(reply=reply)
 
