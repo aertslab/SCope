@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import * as d3 from 'd3';
+import * as R from 'ramda';
 import box2 from '../../js/box2.js';
 import React, { Component } from 'react';
 import { DragDropContext } from 'react-dnd';
@@ -401,10 +402,11 @@ class Compare extends Component {
                                             activeFeatures={activeFeatures}
                                             superposition={superposition}
                                             activeCoordinates={
-                                                configuration == 'multi'
-                                                    ? multiCoordinates[j]
-                                                        ? multiCoordinates[j]
-                                                        : -1
+                                                configuration === 'multi'
+                                                    ? R.defaultTo(
+                                                          -1,
+                                                          multiCoordinates[j]
+                                                      )
                                                     : multiCoordinates[0]
                                             }
                                             activeAnnotations={va}
