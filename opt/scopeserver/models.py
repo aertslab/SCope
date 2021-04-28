@@ -5,6 +5,9 @@ from sqlalchemy.orm import relationship
 
 from scopeserver.database import Base
 
+# PyLint "too-few-public-methods" is disabled here because this is how
+# SQLAlchemy works. Therefore it is really an invalid lint for this file.
+
 # pylint: disable=too-few-public-methods
 
 
@@ -22,11 +25,12 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
+    created = Column(DateTime, nullable=False)
     projects = relationship("Project", secondary="project_user_mapping", back_populates="users")
 
 
 class Project(Base):
-    " A SCope project containing datasets. "
+    " An ad-hoc collection of related datasets. "
     __tablename__ = "projects"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -44,6 +48,7 @@ class Dataset(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
+    created = Column(DateTime, nullable=False)
     filename = Column(String)
     size = Column(Integer, nullable=False)
     project = Column(Integer, ForeignKey("projects.id"), nullable=False)

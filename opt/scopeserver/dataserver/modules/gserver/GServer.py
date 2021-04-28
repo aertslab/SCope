@@ -369,7 +369,7 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         if not self.dfh.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
             return s_pb2.setColabAnnotationDataReply(success=False, message="Could not confirm user!")
-        success, message = loom.add_collab_annotation(request, self.config["dataHashSecret"])
+        success, message = loom.add_collab_annotation(request, self.config["DATAHASHSECRET"])
         if success:
             self.get_features.cache_clear()
         return s_pb2.setColabAnnotationDataReply(success=success, message=message)
@@ -387,7 +387,7 @@ class SCope(s_pb2_grpc.MainServicer):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         if not self.dfh.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
             return s_pb2.voteAnnotationReply(success=False, message="Could not confirm user!")
-        success, message = loom.annotation_vote(request, self.config["dataHashSecret"])
+        success, message = loom.annotation_vote(request, self.config["DATAHASHSECRET"])
         return s_pb2.voteAnnotationReply(success=success, message=message)
 
     def getClusterOverlaps(self, request, context):
@@ -564,7 +564,7 @@ class SCope(s_pb2_grpc.MainServicer):
                                 annotations=loom.get_meta_data_by_key(key="annotations"),
                                 embeddings=loom.get_meta_data_by_key(key="embeddings"),
                                 clusterings=proto.protoize_cell_type_annotation(
-                                    loom.get_meta_data_by_key(key="clusterings"), secret=self.config["dataHashSecret"]
+                                    loom.get_meta_data_by_key(key="clusterings"), secret=self.config["DATAHASHSECRET"]
                                 ),
                             ),
                             fileMetaData=file_meta,
