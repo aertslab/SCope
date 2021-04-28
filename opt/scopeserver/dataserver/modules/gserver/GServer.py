@@ -744,35 +744,43 @@ class SCope(s_pb2_grpc.MainServicer):
         # - Loompy bug: loompy.create_append works but generate a file much bigger than its parent
         #      So prepare all the data and create the loom afterwards
         logger.debug("Subsetting {0} cluster from the active .loom...".format(request.featureValue))
-        sub_matrix = None
-        sub_selection = None
         processed = 0
-        for (_, selection, _) in loom_connection.scan(items=cells, axis=1):
-            if sub_matrix is None:
-                sub_matrix = loom_connection[:, selection]
-                sub_selection = selection
-            else:
-                sub_matrix = np.concatenate((sub_matrix, loom_connection[:, selection]), axis=1)
-                sub_selection = np.concatenate((sub_selection, selection), axis=0)
+        tot_cells = loom.get_nb_cells()
+        yield s_pb2.DownloadSubLoomReply(
+            loomFilePath="",
+            loomFileSize=0,
+            progress=s_pb2.Progress(value=0.01, status="Sub Loom creation started!"),
+            isDone=False,
+        )
+        sub_matrices = []
+        for (idx, _, view) in loom_connection.scan(items=cells, axis=1, batch_size=5120):
+            sub_matrices.append(view[:, :])
             # Send the progress
-            processed = len(sub_selection) / sum(cells)
+            processed = idx / tot_cells
             yield s_pb2.DownloadSubLoomReply(
                 loomFilePath="",
                 loomFileSize=0,
                 progress=s_pb2.Progress(value=processed, status="Sub Loom Created!"),
                 isDone=False,
             )
+        yield s_pb2.DownloadSubLoomReply(
+            loomFilePath="",
+            loomFileSize=0,
+            progress=s_pb2.Progress(value=0.99, status="Sub Loom Created!"),
+            isDone=False,
+        )
+        sub_matrix = np.concatenate(sub_matrices, axis=1)
         logger.debug("Creating {0} sub .loom...".format(request.featureValue))
         lp.create(
             sub_loom_file_path,
             sub_matrix,
             row_attrs=loom_connection.ra,
-            col_attrs=loom_connection.ca[sub_selection],
+            col_attrs=loom_connection.ca[cells],
             file_attrs=sub_loom_file_attrs,
         )
+        del sub_matrix
         with open(sub_loom_file_path, "r") as fh:
             loom_file_size = os.fstat(fh.fileno())[6]
-        logger.debug("Done making loom!")
         logger.debug("{0:.5f} seconds elapsed making loom ---".format(time.time() - start_time))
 
         yield s_pb2.DownloadSubLoomReply(
