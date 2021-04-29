@@ -9,6 +9,7 @@ import zlib
 
 from scopeserver.dataserver.modules.gserver import s_pb2
 from scopeserver.dataserver.utils import constant
+from scopeserver.dataserver.utils.constant import to_colours
 from scopeserver.dataserver.utils import data
 from scopeserver.dataserver.utils.annotation import Annotation
 import logging
@@ -140,12 +141,7 @@ class CellColorByFeatures:
         md_annotation_values = self.loom.get_meta_data_annotation_by_name(name=feature)["values"]
         ca_annotation = self.loom.get_ca_attr_by_name(name=feature)
         ca_annotation_as_int = list(map(lambda x: md_annotation_values.index(str(x)), ca_annotation))
-        num_annotations = max(ca_annotation_as_int)
-        if num_annotations <= len(constant.BIG_COLOR_LIST):
-            self.hex_vec = list(map(lambda x: constant.BIG_COLOR_LIST[x], ca_annotation_as_int))
-        else:
-            raise ValueError("The annotation {0} has too many unique values.".format(feature))
-        # Set the reply
+        self.hex_vec = to_colours(ca_annotation_as_int)
 
         if annotations is not None:
             cellIndices = self.loom.get_anno_cells(annotations=annotations, logic=logic)
@@ -154,9 +150,7 @@ class CellColorByFeatures:
         reply = s_pb2.CellColorByFeaturesReply(
             color=self.hex_vec,
             vmax=self.v_max,
-            legend=s_pb2.ColorLegend(
-                values=md_annotation_values, colors=constant.BIG_COLOR_LIST[: len(md_annotation_values)]
-            ),
+            legend=s_pb2.ColorLegend(values=md_annotation_values, colors=to_colours(range(len(md_annotation_values)))),
         )
         self.setReply(reply=reply)
 

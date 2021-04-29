@@ -10,6 +10,7 @@ import numpy as np
 
 
 from scopeserver.dataserver.utils import constant
+from scopeserver.dataserver.utils.constant import to_colours
 from scopeserver.dataserver.utils.loom import Loom
 from scopeserver.dataserver.utils.annotation import Annotation
 from scopeserver.dataserver.utils.data import uniq
@@ -38,13 +39,10 @@ def label_annotation(loom: Loom, embedding: int, feature: str) -> List[FeatureLa
     at the barycentre of the cell cluster.
     """
     values = loom.get_meta_data_annotation_by_name(name=feature)["values"]
-    all_annotations = loom.get_ca_attr_by_name(name=feature)
-    colours = uniq((constant.BIG_COLOR_LIST[values.index(i)] for i in all_annotations))
-
-    annotations = uniq(loom.get_ca_attr_by_name(name=feature))
+    colours = to_colours(range(len(values)))
 
     def labels() -> Generator[FeatureLabel, None, None]:
-        for i, annotation in enumerate(annotations):
+        for i, annotation in enumerate(values):
             coords = loom.get_coordinates(
                 coordinatesID=embedding, annotation=[Annotation(name=feature, values=[annotation])]
             )

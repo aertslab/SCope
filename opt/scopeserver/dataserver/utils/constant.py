@@ -1,4 +1,5 @@
 from enum import Enum, auto, unique
+from typing import Iterable, List
 
 ACTIVE_SESSIONS_LIMIT = 25
 MOUSE_EVENTS_THRESHOLD = 1
@@ -270,3 +271,11 @@ BIG_COLOR_LIST = [
     "69238c",
     "bf606c",
 ]
+
+
+def to_colours(index: Iterable[int]) -> List[str]:
+    """Convert indexes (`index`) into pre-determined HTML hex colour values.
+    `index` can be a `range(some_number)` or any iterable collection of numbers.
+    """
+    num_colours = len(BIG_COLOR_LIST)
+    return [BIG_COLOR_LIST[i % num_colours] for i in index]
