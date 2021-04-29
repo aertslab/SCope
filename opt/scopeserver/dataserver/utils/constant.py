@@ -1,4 +1,5 @@
 from enum import Enum, auto, unique
+from typing import Iterable, List
 
 ACTIVE_SESSIONS_LIMIT = 25
 MOUSE_EVENTS_THRESHOLD = 1
@@ -270,3 +271,8 @@ BIG_COLOR_LIST = [
     "69238c",
     "bf606c",
 ]
+
+
+def to_colours(index: Iterable[int]) -> List[str]:
+    num_colours = len(BIG_COLOR_LIST)
+    return [BIG_COLOR_LIST[i % num_colours] for i in index]
