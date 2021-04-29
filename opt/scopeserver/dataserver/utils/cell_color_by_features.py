@@ -150,9 +150,7 @@ class CellColorByFeatures:
         reply = s_pb2.CellColorByFeaturesReply(
             color=self.hex_vec,
             vmax=self.v_max,
-            legend=s_pb2.ColorLegend(
-                values=md_annotation_values, colors=to_colours(range(len(md_annotation_values)))
-            ),
+            legend=s_pb2.ColorLegend(values=md_annotation_values, colors=to_colours(range(len(md_annotation_values)))),
         )
         self.setReply(reply=reply)
 
