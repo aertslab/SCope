@@ -274,5 +274,8 @@ BIG_COLOR_LIST = [
 
 
 def to_colours(index: Iterable[int]) -> List[str]:
+    """Convert indexes (`index`) into pre-determined HTML hex colour values.
+    `index` can be a `range(some_number)` or any iterable collection of numbers.
+    """
     num_colours = len(BIG_COLOR_LIST)
     return [BIG_COLOR_LIST[i % num_colours] for i in index]
