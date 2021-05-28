@@ -2,13 +2,16 @@ name: Client CI
 on:
   pull_request:
     paths-ignore:
-    - 'opt/**'
+    - 'server/**'
+    - 'grpc-proxy-server/**'
     - 'docs/**'
 
 jobs:
   client-quality-checks:
 
     runs-on: ubuntu-latest
+    env:
+      working-directory: ./client
 
     steps:
       - uses: actions/checkout@v2
@@ -16,8 +19,23 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-      - run: npm ci
-      - run: npm outdated || exit 0
-      - run: npm audit --audit-level=moderate
-      - run: npm run lint
-      - run: npm test
+      - name: Install
+        run: |
+          npm ci
+        working-directory: ${{ env.working-directory }}
+      - name: Check for outdated dependencies
+        run: |
+          npm outdated || exit 0
+        working-directory: ${{ env.working-directory }}
+      - name: Security audit
+        run: |
+          npm audit --audit-level=moderate
+        working-directory: ${{ env.working-directory }}
+      - name: Lint
+        run: |
+          npm run lint
+        working-directory: ${{ env.working-directory }}
+      - name: Test
+        run: |
+          npm test
+        working-directory: ${{ env.working-directory }}

@@ -19,14 +19,14 @@ logger = logging.getLogger(__name__)
 
 
 class Coordinate(NamedTuple):
-    """ A 2D coordinate. """
+    """A 2D coordinate."""
 
     x: float
     y: float
 
 
 class FeatureLabel(NamedTuple):
-    """ A label with a colour and position. """
+    """A label with a colour and position."""
 
     label: str
     colour: str

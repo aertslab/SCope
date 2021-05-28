@@ -6,7 +6,7 @@ from typing import List, NamedTuple
 
 
 class Annotation(NamedTuple):
-    """ An annotation. """
+    """An annotation."""
 
     name: str
     values: List[str]

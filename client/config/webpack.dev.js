@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const { merge } = require('webpack-merge');
 const paths = require('./paths');
 const common = require('./webpack.common');
-const _config = require(process.env.SCOPE_CONFIG || '../config.json');
+const _config = require(process.env.SCOPE_CONFIG || '../../config.json');
 
 const BundleAnalyzerPlugin =
     require('webpack-bundle-analyzer').BundleAnalyzerPlugin;

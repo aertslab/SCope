@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const paths = require('./paths');
 
-const _config = require(process.env.SCOPE_CONFIG || '../config.json');
+const _config = require(process.env.SCOPE_CONFIG || '../../config.json');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');

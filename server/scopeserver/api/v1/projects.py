@@ -20,7 +20,7 @@ async def my_projects(
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_user),
 ):
-    """ Retrieve all projects for the current user. """
+    """Retrieve all projects for the current user."""
     return crud.get_projects(db=db, user_id=current_user.id)
 
 
@@ -31,7 +31,7 @@ async def datasets(
     project: str,
     current_user: models.User = Depends(deps.get_current_user),
 ):
-    """ Retrieve all datasets in a given project. """
+    """Retrieve all datasets in a given project."""
     found_project = crud.get_project(db, user_id=current_user.id, project_uuid=project)
     if found_project:
         return found_project.datasets
@@ -48,7 +48,7 @@ async def users(
     project: str,
     current_user: models.User = Depends(deps.get_current_user),
 ):
-    """ Retrieve all users on a given project. """
+    """Retrieve all users on a given project."""
     all_users = crud.get_users_in_project(db, project_uuid=project)
     if current_user.id in (u.user for u in all_users):
         return all_users
@@ -63,7 +63,7 @@ async def new_project(
     name: str,
     current_user: models.User = Depends(deps.get_current_user),
 ):
-    """ Create a new project. """
+    """Create a new project."""
     project = crud.create_project(db, current_user.id, name)
     (settings.DATA_PATH / Path(project.uuid)).mkdir()
     return project
@@ -77,7 +77,7 @@ async def add_user(
     user_id: int,
     current_user: models.User = Depends(deps.get_current_user),
 ):
-    """ Add a new user to an existing project. """
+    """Add a new user to an existing project."""
     user = crud.get_user(db, schemas.User(id=user_id))
     found_project = crud.get_project(db, project_uuid=project, user_id=current_user.id)
 
@@ -104,7 +104,7 @@ async def add_dataset(
     uploadfile: UploadFile = File(...),
     current_user: models.User = Depends(deps.get_current_user),
 ):
-    """ Add a dataset to a project. """
+    """Add a dataset to a project."""
     found_project = crud.get_project(db, project_uuid=project, user_id=current_user.id)
     if found_project:
         size = 0
@@ -127,6 +127,6 @@ def delete_project(
     project: str,
     current_user: models.User = Depends(deps.get_current_user),
 ):
-    """ Unimplemented. """
+    """Unimplemented."""
     # TODO: Unimplemented
     return Response(status_code=status.HTTP_401_UNAUTHORIZED)
