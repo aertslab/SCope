@@ -55,6 +55,7 @@ sqlalchemy = "^1.4"
 alembic = "^1.4.3"
 python-dotenv = "^0.14.0"
 python-multipart = "^0.0.5"
+h5py = ">=2.10,<3"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
