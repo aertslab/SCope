@@ -184,11 +184,11 @@ class Result(Generic[T, E]):
 
 # pylint: disable=invalid-name
 def ok(val: T) -> Result[T, E]:
-    """ Construct a successful `Result` containing `val`. """
+    """Construct a successful `Result` containing `val`."""
     return Result(value=val)
 
 
 # pylint: enable=invalid-name
 def err(error: E) -> Result[T, E]:
-    """ Construct a failing `Result` containing `error`. """
+    """Construct a failing `Result` containing `error`."""
     return Result(error=error)

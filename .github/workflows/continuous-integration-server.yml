@@ -2,13 +2,13 @@ name: Server CI
 on:
     pull_request:
         paths:
-            - 'opt/**'
+            - 'server/**'
 
 jobs:
     quality-checks:
         runs-on: ubuntu-latest
         env:
-            working-directory: ./opt
+            working-directory: ./server
         strategy:
             matrix:
                 python-version: [3.7, 3.8]

@@ -14,7 +14,7 @@ from scopeserver.database import Base
 
 
 class ProjectMapping(Base):
-    " Many-to-many relationship between users and projects. "
+    "Many-to-many relationship between users and projects."
     __tablename__ = "project_user_mapping"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -23,7 +23,7 @@ class ProjectMapping(Base):
 
 
 class User(Base):
-    " A SCope user. "
+    "A SCope user."
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -32,7 +32,7 @@ class User(Base):
 
 
 class Project(Base):
-    " An ad-hoc collection of related datasets. "
+    "An ad-hoc collection of related datasets."
     __tablename__ = "projects"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -45,7 +45,7 @@ class Project(Base):
 
 
 class Dataset(Base):
-    " A single SCope dataset. "
+    "A single SCope dataset."
     __tablename__ = "datasets"
 
     id = Column(Integer, primary_key=True, index=True)

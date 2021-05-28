@@ -14,7 +14,6 @@ from typing import Dict, Any, Union, Optional
 
 from scopeserver.dataserver.modules.gserver import GServer as gs
 from scopeserver.dataserver.modules.pserver import PServer as ps
-from scopeserver.bindserver import XServer as xs
 from scopeserver.dataserver.utils import sys_utils as su
 import scopeserver.config as configuration
 
@@ -24,25 +23,17 @@ LOGGER = logging.getLogger(__name__)
 
 
 class SCopeServer:
-    """ Legacy SCope server. """
+    """Legacy SCope server."""
 
     def __init__(self, config: Dict[str, Any]):
         self.run_event = threading.Event()
         self.run_event.set()
         self.config = config
-        self.xs_thread: Optional[threading.Thread] = None
         self.gs_thread: Optional[threading.Thread] = None
         self.ps_thread: Optional[threading.Thread] = None
 
         if self.config["DEBUG"]:
             LOGGER.setLevel(logging.DEBUG)
-
-    def start_bind_server(self) -> None:
-        LOGGER.debug(f"Starting bind server on port {self.config['BIND_PORT']}")
-        self.xs_thread = threading.Thread(
-            target=xs.run, args=(self.run_event,), kwargs={"port": self.config["BIND_PORT"]}
-        )
-        self.xs_thread.start()
 
     def start_data_server(self) -> None:
         LOGGER.debug(f"Starting data server on port {self.config['DATA_PORT']}.")
@@ -62,10 +53,9 @@ class SCopeServer:
 
     def start_scope_server(self) -> None:
         self.start_data_server()
-        self.start_bind_server()
 
     def stop_servers(self) -> None:
-        """ Stop all running threads. """
+        """Stop all running threads."""
         LOGGER.info("Terminating servers...")
         self.run_event.clear()
         if self.gs_thread:
@@ -78,9 +68,6 @@ class SCopeServer:
 
         if self.ps_thread:
             self.ps_thread.join()
-
-        if self.xs_thread:
-            self.xs_thread.join()
         LOGGER.info("Servers successfully terminated. Exiting.")
 
     def wait(self) -> None:
@@ -98,7 +85,7 @@ class SCopeServer:
 
 
 def message_of_the_day(data_path: Union[str, Path]) -> None:
-    """ Log a server startup message. """
+    """Log a server startup message."""
     motd_path = data_path / Path("motd.txt")
     if motd_path.is_file():
         with open(motd_path) as motd:
@@ -108,13 +95,13 @@ def message_of_the_day(data_path: Union[str, Path]) -> None:
 
 
 def generate_config(args: argparse.Namespace) -> configuration.Settings:
-    """ Combine parsed command line arguments with configuration from a config file. """
+    """Combine parsed command line arguments with configuration from a config file."""
     argscfg = {"DATA_PORT": args.g_port, "UPLOAD_PORT": args.p_port, "BIND_PORT": args.x_port}
     return configuration.Settings(*argscfg)
 
 
 def run() -> None:
-    """ Top-level entry point. """
+    """Top-level entry point."""
 
     parser = argparse.ArgumentParser(description="Launch the scope server")
     parser.add_argument("--g_port", metavar="gPort", type=int, help="gPort", default=55853)

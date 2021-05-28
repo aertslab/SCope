@@ -10,7 +10,7 @@ from scopeserver.database import SessionLocal
 
 
 def get_db() -> Generator:
-    " Provide access to the database. "
+    "Provide access to the database."
     try:
         database = SessionLocal()
         yield database
@@ -19,7 +19,7 @@ def get_db() -> Generator:
 
 
 def get_current_user(database: Session = Depends(get_db), user_id: Optional[int] = Cookie(None)) -> models.User:
-    " Provide access to the User currently accessing the API. "
+    "Provide access to the User currently accessing the API."
     unknown_user = HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail="Unknown user ID",

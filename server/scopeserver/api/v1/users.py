@@ -13,5 +13,5 @@ router = APIRouter()
 
 @router.post("/new", summary="Create a new user.", response_model=schemas.UserResponse)
 async def new_user(db: Session = Depends(deps.get_db)):
-    """ Create a new user. """
+    """Create a new user."""
     return crud.create_user(db=db)

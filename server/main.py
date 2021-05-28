@@ -28,12 +28,12 @@ scope_legacy = SCopeServer(settings.dict())
 
 @scope_api.on_event("startup")
 def startup():
-    """ Start the legacy server. """
+    """Start the legacy server."""
     message_of_the_day(settings.DATA_PATH)
     scope_legacy.start_scope_server()
 
 
 @scope_api.on_event("shutdown")
 def shutdown():
-    """ Stop the legacy server. """
+    """Stop the legacy server."""
     scope_legacy.stop_servers()
