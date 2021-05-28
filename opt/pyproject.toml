@@ -31,7 +31,7 @@ classifiers = ["Development Status :: 5 - Production/Stable",
                "Topic :: Scientific/Engineering :: Bio-Informatics"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = ">=3.7,<3.10"
 
 grpcio = "^1.26.0"
 grpcio-tools = "^1.26.0"
@@ -56,6 +56,7 @@ alembic = "^1.4.3"
 python-dotenv = "^0.14.0"
 python-multipart = "^0.0.5"
 h5py = ">=2.10,<3"
+scipy = "^1.6.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
