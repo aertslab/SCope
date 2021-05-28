@@ -4,7 +4,6 @@
     "description": "Visualization tool for large-scale and high dimensional single-cell data",
     "main": "index.js",
     "scripts": {
-        "preinstall": "cd opt/scopeserver/bindserver && npm install",
         "dev": "cross-env NODE_ENV=development webpack serve --config config/webpack.dev.js",
         "build": "cross-env NODE_ENV=production webpack --config config/webpack.prod.js",
         "test": "jest",
@@ -39,7 +38,6 @@
         "fs-extra": "^5.0.0",
         "get-ports": "^1.0.3",
         "grpc-bus-websocket-client": "^0.3.1",
-        "grpc-bus-websocket-server": "file:opt/scopeserver/bindserver",
         "immer": "^8.0.1",
         "js-file-download": "^0.4.12",
         "json-schema": "^0.2.3",
