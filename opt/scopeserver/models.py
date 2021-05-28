@@ -1,5 +1,7 @@
 """ Database model definitions. """
 
+from datetime import datetime
+
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
@@ -25,7 +27,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    created = Column(DateTime, nullable=False)
+    created = Column(DateTime, nullable=False, default=datetime.now())
     projects = relationship("Project", secondary="project_user_mapping", back_populates="users")
 
 
@@ -36,7 +38,7 @@ class Project(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
     uuid = Column(String, index=True, nullable=False)
-    created = Column(DateTime, nullable=False)
+    created = Column(DateTime, nullable=False, default=datetime.now())
     size = Column(Integer, nullable=False)
     users = relationship("User", secondary="project_user_mapping", back_populates="projects")
     datasets = relationship("Dataset")
@@ -48,7 +50,7 @@ class Dataset(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
-    created = Column(DateTime, nullable=False)
+    created = Column(DateTime, nullable=False, default=datetime.now())
     filename = Column(String)
     size = Column(Integer, nullable=False)
     project = Column(Integer, ForeignKey("projects.id"), nullable=False)
