@@ -24,7 +24,7 @@
     "grpc-bus": "https://github.com/aertslab/grpc-bus/releases/download/v1.0.2/grpc-bus-1.0.2.tgz",
     "protobufjs": "^5.0.2",
     "rsvp": "^3.3.3",
-    "ws": "^7.0.0"
+    "ws": "^7.4.6"
   },
   "devDependencies": {}
 }
