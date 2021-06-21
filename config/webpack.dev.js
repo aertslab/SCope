@@ -15,7 +15,7 @@ module.exports = merge(common, {
     devServer: {
         host: '0.0.0.0',
         port: _config.mPort,
-        contentBase: paths.build,
+        static: [ paths.build ],
         compress: true,
         hot: true,
     },
