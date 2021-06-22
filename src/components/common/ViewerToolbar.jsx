@@ -110,16 +110,7 @@ export default class ViewerToolbar extends Component {
         return (
             <Grid>
                 <Grid.Row>
-                    <Menu
-                        style={{
-                            position: 'relative',
-                            top: 0,
-                            left: 0,
-                            height: 'fit-content',
-                        }}
-                        vertical
-                        fluid
-                        className='toolbar'>
+                    <Menu icon vertical className='toolbar'>
                         <Menu.Item
                             name='lasso'
                             active={activeTool === 'lasso'}
