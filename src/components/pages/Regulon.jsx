@@ -48,74 +48,110 @@ export default class Regulon extends Component {
         }
 
         return (
-            <div className='appPage'>
+            <div
+                className='appPage'
+                style={{
+                    height: '100%',
+                    width: '100%',
+                }}>
                 <Search.FeatureSearchGroup
                     filter='regulon'
                     identifier='regulon-page'
                 />
-
                 <Grid className='flexDisplay'>
                     <Grid.Row columns='3' centered>
                         {featureThreshold}
                         <Grid.Column>&nbsp;</Grid.Column>
                     </Grid.Row>
-                    <Grid.Row
-                        columns='4'
-                        stretched
-                        className='viewerFlex flexRow'>
-                        <Grid.Column width={1}>
-                            <ViewerToolbar location={this.props.location} />
-                        </Grid.Column>
-                        <Grid.Column stretched className='flexDouble'>
-                            <b className='noStretch'>Regulon AUC values</b>
-                            <Viewer
-                                name='reg'
-                                loomFile={activeLoom}
-                                activeFeatures={activeFeatures}
-                                activeCoordinates={activeCoordinates}
-                                scale={true}
-                                location={this.props.location}
-                            />
-                        </Grid.Column>
-                        <Grid.Column stretched>
-                            <Segment vertical stretched className='flexDisplay'>
-                                <b className='noStretch'>
-                                    Cells passing thresholds
-                                </b>
-                                <Viewer
-                                    name='auc'
-                                    loomFile={activeLoom}
-                                    activeFeatures={activeFeatures}
-                                    activeCoordinates={activeCoordinates}
-                                    thresholds={true}
-                                    location={this.props.location}
-                                />
-                            </Segment>
-                            <Segment vertical stretched className='flexDisplay'>
-                                <b className='noStretch'>Expression levels</b>
-                                <Viewer
-                                    name='expr'
-                                    loomFile={activeLoom}
-                                    activeFeatures={activeFeatures}
-                                    activeCoordinates={activeCoordinates}
-                                    scale={true}
-                                    genes={true}
-                                    settings={true}
-                                    customScale={true}
-                                    location={this.props.location}
-                                />
-                            </Segment>
-                        </Grid.Column>
-                        <Grid.Column width={4}>
-                            <ViewerSidebar
-                                onActiveFeaturesChange={(features, id) => {
-                                    this.setState({ activeFeatures: features });
-                                }}
-                                identifier='regulon-page'
-                            />
-                        </Grid.Column>
-                    </Grid.Row>
                 </Grid>
+                <div
+                    style={{
+                        flexGrow: '1',
+                        display: 'flex',
+                        flexDirection: 'row',
+                    }}>
+                    <div style={{ width: '78px', paddingTop: '20px' }}>
+                        <ViewerToolbar location={this.props.location} />
+                    </div>
+                    <div style={{ flexGrow: '1' }}>
+                        <Grid
+                            className='flexDisplay'
+                            style={{ height: '100%' }}>
+                            <Grid.Row
+                                columns='3'
+                                stretched
+                                className='viewerFlex flexRow'>
+                                <Grid.Column stretched className='flexDouble'>
+                                    <b className='noStretch'>
+                                        Regulon AUC values
+                                    </b>
+                                    <Viewer
+                                        name='reg'
+                                        loomFile={activeLoom}
+                                        activeFeatures={activeFeatures}
+                                        activeCoordinates={activeCoordinates}
+                                        scale={true}
+                                        location={this.props.location}
+                                    />
+                                </Grid.Column>
+                                <Grid.Column stretched>
+                                    <Segment
+                                        vertical
+                                        stretched
+                                        className='flexDisplay'>
+                                        <b className='noStretch'>
+                                            Cells passing thresholds
+                                        </b>
+                                        <Viewer
+                                            name='auc'
+                                            loomFile={activeLoom}
+                                            activeFeatures={activeFeatures}
+                                            activeCoordinates={
+                                                activeCoordinates
+                                            }
+                                            thresholds={true}
+                                            location={this.props.location}
+                                        />
+                                    </Segment>
+                                    <Segment
+                                        vertical
+                                        stretched
+                                        className='flexDisplay'>
+                                        <b className='noStretch'>
+                                            Expression levels
+                                        </b>
+                                        <Viewer
+                                            name='expr'
+                                            loomFile={activeLoom}
+                                            activeFeatures={activeFeatures}
+                                            activeCoordinates={
+                                                activeCoordinates
+                                            }
+                                            scale={true}
+                                            genes={true}
+                                            settings={true}
+                                            customScale={true}
+                                            location={this.props.location}
+                                        />
+                                    </Segment>
+                                </Grid.Column>
+                                <Grid.Column>
+                                    <ViewerSidebar
+                                        onActiveFeaturesChange={(
+                                            features,
+                                            id
+                                        ) => {
+                                            this.setState({
+                                                activeFeatures: features,
+                                            });
+                                        }}
+                                        identifier='regulon-page'
+                                    />
+                                </Grid.Column>
+                            </Grid.Row>
+                        </Grid>
+                    </div>
+                </div>
             </div>
         );
     }
