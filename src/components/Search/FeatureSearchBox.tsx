@@ -1,31 +1,20 @@
-import React, { Component, ComponentClass } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-    Segment,
-    Search,
-    SearchProps,
-    SearchResultsProps,
-    StrictSearchCategoryProps,
-    Select,
-    SemanticCOLORS,
-} from 'semantic-ui-react';
+import { Segment, Search, SemanticCOLORS } from 'semantic-ui-react';
 import * as R from 'ramda';
 
 import { RootState } from '../../redux/reducers';
 import { Features, LegacyAPI } from '../../api';
 
 import {
-    FeatureSearch,
     FeatureFilter,
     FeatureSearchSelection,
     featuresToResults,
     findResult,
-    init,
     orderCategories,
 } from './model';
 import * as Action from './actions';
 import * as Selector from './selectors';
-import { NAME } from './constants';
 
 import './FeatureSearchBox.css';
 

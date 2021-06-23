@@ -1,11 +1,10 @@
-import { StrictSearchCategoryProps } from 'semantic-ui-react';
 import { has } from 'ramda';
 
 import { RootState } from '../../redux/reducers';
 import { Features } from '../../api';
 
 import { NAME } from './constants';
-import { FeatureFilter, FeatureSearchSelection } from './model';
+import { FeatureSearchSelection } from './model';
 
 export const searchResults = (
     field: string,

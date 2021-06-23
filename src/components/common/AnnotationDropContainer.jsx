@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { DropTarget } from 'react-dnd';
 import Annotation from '../common/Annotation';
-import Viewer from '../common/Viewer';
 
 const targetBehaviour = {
     drop(props, monitor, component) {

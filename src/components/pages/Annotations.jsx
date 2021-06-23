@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { BackendAPI } from '../common/API';
-import ReactJson from 'react-json-view';
 import { Grid, Header, Popup, Button, Label, Icon } from 'semantic-ui-react';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';

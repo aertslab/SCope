@@ -5,7 +5,7 @@ import { Menu, Grid } from 'semantic-ui-react';
 import 'rc-slider/assets/index.css';
 import 'rc-tooltip/assets/bootstrap.css';
 
-import Slider, { Range } from 'rc-slider';
+import Slider from 'rc-slider';
 import { BackendAPI } from '../common/API';
 
 import { FEATURE_COLOURS } from '../constants';

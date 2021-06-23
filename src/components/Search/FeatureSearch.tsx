@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, SemanticCOLORS } from 'semantic-ui-react';
+import { Grid } from 'semantic-ui-react';
 
 import { FEATURE_COLOURS } from '../constants';
 

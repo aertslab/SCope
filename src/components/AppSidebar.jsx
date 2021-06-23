@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
 import {
-    Segment,
     Menu,
     Icon,
     Input,
@@ -14,7 +13,7 @@ import {
 } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
 import UploadModal from './common/UploadModal';
-import Slider, { Range } from 'rc-slider';
+import Slider from 'rc-slider';
 import FileDownloader from '../js/http';
 import Alert from 'react-popup';
 import OptionsPopup from './common/OptionsPopup';

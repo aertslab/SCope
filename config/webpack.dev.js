@@ -4,8 +4,8 @@ const paths = require('./paths');
 const common = require('./webpack.common');
 const _config = require(process.env.SCOPE_CONFIG || '../config.json');
 
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
-    .BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin =
+    require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = merge(common, {
     mode: 'development',
@@ -15,7 +15,7 @@ module.exports = merge(common, {
     devServer: {
         host: '0.0.0.0',
         port: _config.mPort,
-        static: [ paths.build ],
+        static: [paths.build],
         compress: true,
         hot: true,
     },

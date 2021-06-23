@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { Header, Search, Grid, Label } from 'semantic-ui-react';
+import { Search, Grid, Label } from 'semantic-ui-react';
 import { BackendAPI } from '../common/API';
 
 const resultRenderer = (entry) => {
