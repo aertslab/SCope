@@ -143,7 +143,7 @@ export const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
         let legacyFeature = LegacyAPI.getActiveFeatures()[legacyFeatureIndex];
         if (legacyFeature !== undefined) {
             legacyFeature = R.pick(
-                ['type', 'featureType', 'feature', 'threshold'],
+                ['type', 'featureType', 'feature'],
                 legacyFeature
             );
         }
@@ -152,7 +152,6 @@ export const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
             type: props.filter,
             featureType: state.selected.category,
             feature: state.selected.title,
-            threshold: 0,
         };
         if (!R.equals(currentFeature, legacyFeature)) {
             LegacyAPI.updateFeature(
