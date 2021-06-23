@@ -29,9 +29,8 @@ export default class Regulon extends Component {
     }
 
     render() {
-        const { activeLoom, activeCoordinates, activeFeatures, geneFeatures } =
-            this.state;
-        let featureThreshold = [1, 2, 3].map((i) => (
+        const { activeLoom, activeCoordinates, activeFeatures } = this.state;
+        let featureThreshold = [0, 1, 2].map((i) => (
             <Grid.Column key={i} className='flexDisplay' stretched>
                 <Histogram
                     field={i}
