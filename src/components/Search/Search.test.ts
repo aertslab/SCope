@@ -51,7 +51,13 @@ const results = [
 
 describe('Model.findResult', () => {
     it('Makes a selection from valid results', () => {
-        expect(Model.findResult({ title: 'c' }, 'red', results)).toStrictEqual({
+        expect(
+            Model.findResult(
+                { title: 'c', category: 'regulon' },
+                'red',
+                results
+            )
+        ).toStrictEqual({
             title: 'c',
             category: 'regulon',
             description: '',
@@ -61,7 +67,15 @@ describe('Model.findResult', () => {
 
     it('Makes a selection from more valid results', () => {
         expect(
-            Model.findResult({ title: 'All Clusters' }, 'green', results)
+            Model.findResult(
+                {
+                    title: 'All Clusters',
+                    category:
+                        'Clustering: Leiden resolution 0.4 (default, 397)',
+                },
+                'green',
+                results
+            )
         ).toStrictEqual({
             title: 'All Clusters',
             category: 'Clustering: Leiden resolution 0.4 (default, 397)',
@@ -71,12 +85,18 @@ describe('Model.findResult', () => {
     });
 
     it('Makes a selection from empty results', () => {
-        expect(Model.findResult({ title: 'c' }, 'red', [])).toBe(undefined);
+        expect(
+            Model.findResult({ title: 'c', category: 'gene' }, 'red', [])
+        ).toBe(undefined);
     });
 
     it('Makes a selection where no results match', () => {
         expect(
-            Model.findResult({ title: 'does not exist' }, 'blue', results)
+            Model.findResult(
+                { title: 'does not exist', category: 'gene' },
+                'blue',
+                results
+            )
         ).toBe(undefined);
     });
 });
