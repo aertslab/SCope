@@ -22,7 +22,7 @@ class CuratorTableCell extends React.Component<CuratorTableCellProps> {
             value: { validated, curator_id, curator_name },
         } = this.props;
 
-        let orcidIDRegex = /(?:\d{4}-){3}\d{3}[0-9,X]/;
+        const orcidIDRegex = /(?:\d{4}-){3}\d{3}[0-9,X]/;
 
         let iconName,
             iconColor,
@@ -66,12 +66,14 @@ class CuratorTableCell extends React.Component<CuratorTableCellProps> {
     }
 }
 
+const Cell = (props) => <CuratorTableCell {...props} />;
+
 function asReactTableCuratorColumn() {
     return makeTableColumnData({
         header: 'Curator',
         id: 'orcid_info',
         accessor: 'orcid_info',
-        cell: (value) => <CuratorTableCell {...value} />,
+        cell: Cell,
         sortMethod: R.comparator<any>(
             (a, b) => a.curator_name < b.curator_name
         ),

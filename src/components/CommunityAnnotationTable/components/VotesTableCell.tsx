@@ -77,8 +77,6 @@ class VotesTableCell extends React.Component<
             value: { data, votes_for, votes_against },
         } = this.props;
         const { status } = this.state;
-        console.log('VOTES TABLE CELL');
-        console.log(this.props);
 
         return (
             <React.Fragment>
@@ -148,12 +146,16 @@ function asReactTableVotesColumn(activeFeature) {
         header: 'Endorsements',
         id: 'votes',
         accessor: 'votes',
-        cell: (props) => (
-            <VotesTableCellWithCookiesRouter
-                activeFeature={activeFeature}
-                {...props}
-            />
-        ),
+        cell: (props) => {
+            const cell = (
+                <VotesTableCellWithCookiesRouter
+                    activeFeature={activeFeature}
+                    {...props}
+                />
+            );
+
+            return cell;
+        },
         sortMethod: R.comparator<any>(
             (a, b) => a.annotation_label < b.annotation_label
         ),

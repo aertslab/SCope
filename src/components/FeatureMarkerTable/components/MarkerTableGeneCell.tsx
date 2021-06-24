@@ -35,11 +35,11 @@ class GeneTableCell extends React.Component<GeneTableCellProps> {
             <a
                 className='pointer'
                 onClick={() => {
-                    let query = {
+                    const query = {
                         loomFilePath: BackendAPI.getActiveLoom(),
                         query: value,
                     };
-                    if (activePage == 'regulon') {
+                    if (activePage === 'regulon') {
                         this.setState({ currentPage: 'gene' });
                         BackendAPI.setActivePage('gene');
                         history.push(
@@ -88,15 +88,18 @@ function asReactTableGeneColumn({
         header: 'Gene Symbol',
         id: 'gene',
         accessor: 'gene',
-        cell: (value) => (
-            <GeneTableCellWithRouter
-                history={history}
-                activePage={activePage}
-                activeFeature={activeFeature}
-                activeFeatureIndex={activeFeatureIndex}
-                {...value}
-            />
-        ),
+        cell: (props) => {
+            const cell = (
+                <GeneTableCellWithRouter
+                    history={history}
+                    activePage={activePage}
+                    activeFeature={activeFeature}
+                    activeFeatureIndex={activeFeatureIndex}
+                    {...props}
+                />
+            );
+            return cell;
+        },
     });
 }
 

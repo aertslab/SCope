@@ -32,8 +32,8 @@ class OBOTableCell extends React.Component<OBOTableCellProps> {
             },
         } = this.props;
 
-        let iriLink =
-            ols_iri == '' ? (
+        const iriLink =
+            ols_iri === '' ? (
                 <React.Fragment>
                     {annotation_label}
                     <br />
@@ -47,7 +47,7 @@ class OBOTableCell extends React.Component<OBOTableCellProps> {
                 </a>
             );
 
-        let popupInfo = (
+        const popupInfo = (
             <div>
                 <Header as='h3'>Evidence provided for:&nbsp;{iriLink}</Header>
                 <Header as='h4'>Markers</Header>
@@ -84,6 +84,8 @@ class OBOTableCell extends React.Component<OBOTableCellProps> {
     }
 }
 
+const Cell = (props) => <OBOTableCell {...props} />;
+
 function asReactTableOBOColumn() {
     return makeTableColumnData({
         header: (
@@ -94,7 +96,7 @@ function asReactTableOBOColumn() {
         ),
         id: 'annotation',
         accessor: 'annotation',
-        cell: (value) => <OBOTableCell {...value} />,
+        cell: Cell,
         sortMethod: R.comparator<any>(
             (a, b) => a.annotation_label < b.annotation_label
         ),
