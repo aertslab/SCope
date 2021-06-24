@@ -67,16 +67,16 @@ export function makeTableColumnData({
     cell,
     sortMethod,
 }) {
-    let column = {
+    const column = {
         Header: header,
         id: id,
     };
 
-    if (accessor != null) {
+    if (accessor !== null) {
         column['accessor'] = (d) => d[accessor];
     }
 
-    if (cell != null) {
+    if (cell !== null) {
         column['Cell'] = (props) => cell(props);
     }
     if (sortMethod !== null) {
