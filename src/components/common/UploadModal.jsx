@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Modal, Grid, Input, Progress } from 'semantic-ui-react';
+import { Button, Modal, Input, Progress } from 'semantic-ui-react';
 import FileReaderInput from 'react-file-reader-input';
 import Uploader from '../common/Uploader';
 

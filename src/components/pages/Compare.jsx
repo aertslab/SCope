@@ -14,7 +14,6 @@ import { BackendAPI } from '../common/API';
 import Annotation from '../common/Annotation';
 import Search from '../Search';
 import ViewerSidebar from '../common/ViewerSidebar';
-import ViewerToolbar from '../common/ViewerToolbar';
 import AnnotationDropContainer from '../common/AnnotationDropContainer';
 import ViewerDropContainer from '../common/ViewerDropContainer';
 

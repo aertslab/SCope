@@ -25,7 +25,6 @@ import { FullPageNotify } from './pages';
 import { millisecondsToDays } from './utils';
 
 const publicIp = require('public-ip');
-const timer = 60 * 1000;
 
 class App extends Component {
     constructor() {

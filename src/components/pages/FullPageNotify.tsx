@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-    Button,
-    Dimmer,
-    Header,
-    Loader,
-    Icon,
-    Segment,
-} from 'semantic-ui-react';
+import { Button, Dimmer, Header, Loader, Icon } from 'semantic-ui-react';
 
 interface NotificationStatus {
     starting: boolean;

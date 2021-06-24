@@ -5,7 +5,7 @@ import { Menu, Grid } from 'semantic-ui-react';
 import 'rc-slider/assets/index.css';
 import 'rc-tooltip/assets/bootstrap.css';
 
-import Slider, { Range } from 'rc-slider';
+import Slider from 'rc-slider';
 import { BackendAPI } from '../common/API';
 
 import { FEATURE_COLOURS } from '../constants';
@@ -110,16 +110,7 @@ export default class ViewerToolbar extends Component {
         return (
             <Grid>
                 <Grid.Row>
-                    <Menu
-                        style={{
-                            position: 'relative',
-                            top: 0,
-                            left: 0,
-                            height: 'fit-content',
-                        }}
-                        vertical
-                        fluid
-                        className='toolbar'>
+                    <Menu icon vertical className='toolbar'>
                         <Menu.Item
                             name='lasso'
                             active={activeTool === 'lasso'}

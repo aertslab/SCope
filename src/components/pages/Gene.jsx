@@ -50,12 +50,12 @@ export default class Gene extends Component {
                     filter='all'
                     identifier='gene-page'
                 />
-                <Grid columns='equal' stretched className='viewControls'>
+                <Grid columns='equal' className='viewControls'>
                     <Grid.Column width={3} className='viewerToolbar'>
                         <ViewerToolbar location={this.props.location} />
                     </Grid.Column>
                     <Grid.Column>
-                        <b>Expression levels</b>
+                        <b className='viewerLabel'>Expression levels</b>
                         <Viewer
                             name='expr'
                             loomFile={activeLoom}

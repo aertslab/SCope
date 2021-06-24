@@ -309,10 +309,8 @@ export default class Metadata extends Component {
             hasCpmTransform: settings.hasCpmNormalization,
             selectedGenes: selectedGenes,
             selectedRegulons: selectedRegulons,
-            clusterings:
-                this.state.clustering !== null ? [this.state.clustering] : [],
-            annotations:
-                this.state.annotation !== null ? this.state.annotation : [],
+            clusterings: this.state.clustering ? [this.state.clustering] : [],
+            annotations: this.state.annotation ? this.state.annotation : [],
         };
         let queryCells = {
             loomFilePath: loomFilePath,
