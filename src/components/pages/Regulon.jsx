@@ -78,12 +78,11 @@ export default class Regulon extends Component {
                             style={{ height: '100%' }}>
                             <Grid.Row
                                 columns='3'
-                                stretched
                                 className='viewerFlex flexRow'>
-                                <Grid.Column stretched className='flexDouble'>
-                                    <b className='noStretch'>
-                                        Regulon AUC values
-                                    </b>
+                                <b className='viewerLabel'>
+                                  Regulon AUC values
+                                </b>
+                                <Grid.Column className='flexDouble'>
                                     <Viewer
                                         name='reg'
                                         loomFile={activeLoom}
@@ -98,7 +97,7 @@ export default class Regulon extends Component {
                                         vertical
                                         stretched
                                         className='flexDisplay'>
-                                        <b className='noStretch'>
+                                        <b className='viewerLabel'>
                                             Cells passing thresholds
                                         </b>
                                         <Viewer
@@ -116,7 +115,7 @@ export default class Regulon extends Component {
                                         vertical
                                         stretched
                                         className='flexDisplay'>
-                                        <b className='noStretch'>
+                                        <b className='viewerLabel'>
                                             Expression levels
                                         </b>
                                         <Viewer

@@ -55,7 +55,7 @@ export default class Gene extends Component {
                         <ViewerToolbar location={this.props.location} />
                     </Grid.Column>
                     <Grid.Column>
-                        <b>Expression levels</b>
+                        <b className='viewerLabel'>Expression levels</b>
                         <Viewer
                             name='expr'
                             loomFile={activeLoom}

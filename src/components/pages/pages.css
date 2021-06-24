@@ -17,3 +17,8 @@ div.compare-menu {
     bottom: 0;
     width: 150px;
 }
+
+b.viewerLabel {
+    position: absolute;
+    top: -0.5em;
+}
