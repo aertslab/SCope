@@ -80,7 +80,7 @@ export default class Regulon extends Component {
                                 columns='3'
                                 className='viewerFlex flexRow'>
                                 <b className='viewerLabel'>
-                                  Regulon AUC values
+                                    Regulon AUC values
                                 </b>
                                 <Grid.Column className='flexDouble'>
                                     <Viewer
