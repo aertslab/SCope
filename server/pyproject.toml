@@ -67,6 +67,8 @@ black = { version = "*", allow-prereleases = true }
 mypy = "*"
 mypy-protobuf = "^1.19"
 hypothesis = {extras = ["numpy"], version = "*"}
+types-protobuf = "^0.1.13"
+types-requests = "^2.25.0"
 
 [tool.poetry.scripts]
 dev-script = 'scopeserver:run'
