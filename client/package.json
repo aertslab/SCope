@@ -4,8 +4,9 @@
     "description": "Visualization tool for large-scale and high dimensional single-cell data",
     "main": "index.js",
     "scripts": {
-        "dev": "cross-env NODE_ENV=development webpack serve --config config/webpack.dev.js",
-        "build": "cross-env NODE_ENV=production webpack --config config/webpack.prod.js",
+        "dev": "webpack serve --config config/webpack.dev.js",
+        "build": "webpack --config config/webpack.prod.js",
+        "start": "npm run dev",
         "test": "jest",
         "lint-fix": "eslint --fix 'src/**/*.{ts,jsx,tsx}'",
         "lint": "tsc --noEmit && eslint 'src/**/*.{ts,jsx,tsx}'",
