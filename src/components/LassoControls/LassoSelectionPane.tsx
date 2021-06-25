@@ -8,6 +8,7 @@ import ClusterOverlapsTable from '../common/ClusterOverlapsTable';
 
 type LassoSelectionPaneProps = {
     idx: number;
+    setModalID: (modalID: string) => void;
 } & LassoSelection;
 
 export class LassoSelectionPane extends React.Component<LassoSelectionPaneProps> {
@@ -77,8 +78,7 @@ export class LassoSelectionPane extends React.Component<LassoSelectionPaneProps>
                                 style={{ display: 'inline' }}
                                 onClick={() => {
                                     // TODO: fire redux action
-                                    this.setState({ modalID: idx });
-                                    this.forceUpdate();
+                                    this.props.setModalID(idx.toString());
                                 }}
                                 className='pointer'
                             />

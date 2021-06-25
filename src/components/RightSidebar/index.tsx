@@ -74,6 +74,12 @@ class RightSidebar extends Component<RightSidebarProps, RightSidebarState> {
         );
     };
 
+    setModalID(idx: string) {
+        // TODO: fire redux action
+        this.setState({ modalID: idx });
+        this.forceUpdate();
+    }
+
     render() {
         const { history, hideFeatures, activeLegend, getSelectedAnnotations } =
             this.props;
@@ -83,7 +89,12 @@ class RightSidebar extends Component<RightSidebarProps, RightSidebarState> {
         const panes = [
             {
                 menuItem: 'Cell selections',
-                render: () => <LassoControls selections={lassoSelections} />,
+                render: () => (
+                    <LassoControls
+                        selections={lassoSelections}
+                        setModalID={this.setModalID.bind(this)}
+                    />
+                ),
             },
         ];
         if (!hideFeatures) {
