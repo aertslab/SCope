@@ -1,8 +1,8 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/aertslab/scope/badge)](https://www.codefactor.io/repository/github/aertslab/scope)
 
-# SCope v1.8.2: Visualization of large-scale and high dimensional single cell data
+# SCope: Visualization of large-scale and high dimensional single cell data
 
-<img src="images/SCope_Logo.png" width="640">
+<img src="client/images/SCope_Logo.png" width="640">
 
 SCope is a fast visualization tool for large-scale and high dimensional scRNA-seq datasets.
 Currently the data format supported by SCope is `.loom`. This file format for very large omics datasets is maintained by the Linnarsson Lab through the `loompy` Python package (https://github.com/linnarsson-lab/loompy).
@@ -73,10 +73,15 @@ This string will be used to salt all annotation data, allowing validation of dat
 
 ## Development
 
+SCope consists of 3 major modules:
+- Client (displays the interface in the web-browser)
+- Server (provides all services to the client)
+- GRPC-Proxy (Proxies GRPC requests between the Server the the Client)
+
 HTTP API documentation can be found by running the server and navigating to `http://localhost:8000/docs`. Or by using
 [Postman](https://www.postman.com) to view the SCope collection found in `SCope.postman_collection.json` file.
 
-1. Clone the GitHub repository and install,
+### Clone the Repo
 
 ```bash
 # Define where you want to clone the SCope repository.
@@ -84,25 +89,43 @@ LOCAL_SCOPE_REPO="${HOME}/repos/SCope"
 # Clone SCope git repository.
 git clone https://github.com/aertslab/SCope "${LOCAL_SCOPE_REPO}"
 # Go to your local cloned SCope repository.
-cd "${LOCAL_SCOPE_REPO}"
-# Install SCope.
-npm install
+cd "${LOCAL_SCOPE_REPO}/"
 ```
-
-2. Run,
+### Run the GRPC-Proxy
 
 ```bash
-# Go to your local cloned SCope repository.
-cd "${LOCAL_SCOPE_REPO}"
-
-# Start SCope Server (terminal 1).
-cd opt
-./run-dev-env
-
-# Start SCope Client (terminal 2).
-cd ..
-npm run dev
+# Go to the GRPC-Proxy directory
+cd "${LOCAL_SCOPE_REPO}/grpc-proxy-server/"
+# Install dependencies
+npm install
+# Start the proxy server
+node server.js
 ```
+
+### Run the Server in development mode
+
+```bash
+# Go to the GRPC-Proxy directory
+cd "${LOCAL_SCOPE_REPO}/server/"
+# Install dependencies
+poetry install
+# Start the Server
+./run-dev-env.sh
+```
+
+### Run the client in development mode
+
+```bash
+# Go to the Client directory
+cd "${LOCAL_SCOPE_REPO}/client/"
+# Install dependencies
+npm install
+# Start SCope Client
+npm start
+```
+
+You can now open a web-broswer and point it to the URL logged by the client development server. This is generally
+[http://localhost:55853](http://localhost:55853).
 
 The `./run-dev-env.sh` script runs all migrations not applied to the database before starting
 the server. To create a new migration you should update `scopeserver/models.py` then run alembic like:
