@@ -14,67 +14,60 @@ type GeneTableCellProps = {
     value: string;
 } & RouteComponentProps<{ uuid: string; loom: string }>;
 
-class GeneTableCell extends React.Component<GeneTableCellProps> {
-    constructor(props: GeneTableCellProps) {
-        super(props);
-    }
+const GeneTableCell: React.FC<GeneTableCellProps> = (props) => {
+    const {
+        match: {
+            params: { uuid, loom },
+        },
+        history,
+        activePage,
+        activeFeature,
+        activeFeatureIndex,
+        value,
+    } = props;
 
-    render() {
-        const {
-            match: {
-                params: { uuid, loom },
-            },
-            history,
-            activePage,
-            activeFeature,
-            activeFeatureIndex,
-            value,
-        } = this.props;
-
-        return (
-            <a
-                className='pointer'
-                onClick={() => {
-                    const query = {
-                        loomFilePath: BackendAPI.getActiveLoom(),
-                        query: value,
-                    };
-                    if (activePage === 'regulon') {
-                        this.setState({ currentPage: 'gene' });
-                        BackendAPI.setActivePage('gene');
-                        history.push(
-                            '/' + [uuid, loom ? loom : '*', 'gene'].join('/')
-                        );
-                    }
-                    BackendAPI.getConnection().then(
-                        (gbc) => {
-                            gbc.services.scope.Main.getFeatures(
-                                query,
-                                (err, response) => {
-                                    BackendAPI.setActiveFeature(
-                                        activeFeatureIndex,
-                                        activeFeature.type,
-                                        'gene',
-                                        value,
-                                        0,
-                                        {
-                                            description:
-                                                response.featureDescription[0],
-                                        }
-                                    );
-                                }
-                            );
-                        },
-                        () => {
-                            BackendAPI.showError();
-                        }
+    return (
+        <a
+            className='pointer'
+            onClick={() => {
+                const query = {
+                    loomFilePath: BackendAPI.getActiveLoom(),
+                    query: value,
+                };
+                if (activePage === 'regulon') {
+                    BackendAPI.setActivePage('gene');
+                    history.push(
+                        '/' + [uuid, loom ? loom : '*', 'gene'].join('/')
                     );
-                }}>
-                {value}
-            </a>
-        );
-    }
-}
+                }
+                BackendAPI.getConnection().then(
+                    (gbc) => {
+                        gbc.services.scope.Main.getFeatures(
+                            query,
+                            (err, response) => {
+                                BackendAPI.setActiveFeature(
+                                    activeFeatureIndex,
+                                    activeFeature.type,
+                                    'gene',
+                                    value,
+                                    0,
+                                    {
+                                        description:
+                                            response.featureDescription[0],
+                                    }
+                                );
+                            }
+                        );
+                    },
+                    () => {
+                        BackendAPI.showError();
+                    }
+                );
+            }}>
+            {value}
+        </a>
+    );
+};
 
 const GeneTableCellWithRouter = withRouter(GeneTableCell);
 
