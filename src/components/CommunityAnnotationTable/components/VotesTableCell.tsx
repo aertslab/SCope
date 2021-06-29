@@ -3,12 +3,13 @@ import * as R from 'ramda';
 import { BackendAPI } from '../../common/API';
 import { Icon, Button, Popup } from 'semantic-ui-react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { withCookies, ReactCookieProps, Cookies } from 'react-cookie';
+import { withCookies, ReactCookieProps } from 'react-cookie';
 
 import {
     CommunityAnnotationData,
     CommunityVotes,
     makeTableColumnData,
+    getORCIDDataFromCookies,
 } from '../model';
 
 type VotesTableCellProps = {
@@ -33,14 +34,6 @@ class VotesTableCell extends React.Component<
         };
     }
 
-    static getORCIDData(cookies: Cookies) {
-        return {
-            orcidName: cookies.get('scope_orcid_name'),
-            orcidID: cookies.get('scope_orcid_id'),
-            orcidUUID: cookies.get('scope_orcid_uuid'),
-        };
-    }
-
     submitVote(
         communityAnnotationData: CommunityAnnotationData,
         direction: 'for' | 'against'
@@ -55,7 +48,7 @@ class VotesTableCell extends React.Component<
         if (!cookies) {
             return;
         }
-        const orcidData = VotesTableCell.getORCIDData(cookies);
+        const orcidData = getORCIDDataFromCookies(cookies);
 
         this.setState({ status: 'processing' });
 

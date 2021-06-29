@@ -1,3 +1,5 @@
+import { Cookies } from 'react-cookie';
+
 export type State = {
     orcid_name: string;
     orcid_id: string;
@@ -106,4 +108,12 @@ export function makeTableData(
             },
         };
     });
+}
+
+export function getORCIDDataFromCookies(cookies: Cookies) {
+    return {
+        orcidName: cookies.get('scope_orcid_name'),
+        orcidID: cookies.get('scope_orcid_id'),
+        orcidUUID: cookies.get('scope_orcid_uuid'),
+    };
 }
