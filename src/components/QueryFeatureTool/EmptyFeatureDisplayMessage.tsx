@@ -6,15 +6,9 @@ type EmptyFeatureDisplayMessageProps = {
     featureIndex: number;
 };
 
-export class EmptyFeatureDisplayMessage extends React.Component<EmptyFeatureDisplayMessageProps> {
-    constructor(props: EmptyFeatureDisplayMessageProps) {
-        super(props);
-    }
-
-    render() {
-        const { featureIndex } = this.props;
-
-        const channel = getChannelFromFeatureIndex(featureIndex);
+export const EmptyFeatureDisplayMessage: React.FC<EmptyFeatureDisplayMessageProps> =
+    (props) => {
+        const channel = getChannelFromFeatureIndex(props.featureIndex);
 
         return (
             <div>
@@ -27,5 +21,4 @@ export class EmptyFeatureDisplayMessage extends React.Component<EmptyFeatureDisp
                 <br />
             </div>
         );
-    }
-}
+    };

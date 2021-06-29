@@ -15,74 +15,68 @@ type OBOTableCellProps = {
     };
 };
 
-class OBOTableCell extends React.Component<OBOTableCellProps> {
-    constructor(props: OBOTableCellProps) {
-        super(props);
-    }
+const OBOTableCell: React.FC<OBOTableCellProps> = (props) => {
+    const {
+        value: {
+            ols_iri,
+            annotation_label,
+            obo_id,
+            markers,
+            publication,
+            comment,
+        },
+    } = props;
 
-    render() {
-        const {
-            value: {
-                ols_iri,
-                annotation_label,
-                obo_id,
-                markers,
-                publication,
-                comment,
-            },
-        } = this.props;
-
-        const iriLink =
-            ols_iri === '' ? (
-                <React.Fragment>
-                    {annotation_label}
-                    <br />
-                    {obo_id ? '(' + obo_id + ')' : ''}
-                </React.Fragment>
-            ) : (
-                <a href={ols_iri} target='_blank' rel='noopener noreferrer'>
-                    {annotation_label}
-                    <br />
-                    {obo_id ? '(' + obo_id + ')' : ''}
-                </a>
-            );
-
-        const popupInfo = (
-            <div>
-                <Header as='h3'>Evidence provided for:&nbsp;{iriLink}</Header>
-                <Header as='h4'>Markers</Header>
-                {markers.length > 0
-                    ? markers.map((m) => m).join(', ')
-                    : 'None provided'}
-                <Header as='h4'>Publication</Header>
-                {publication ? (
-                    <a href={publication}>{publication}</a>
-                ) : (
-                    'None provided'
-                )}
-                <Header as='h4'>Comment</Header>
-                {comment ? comment : 'None provided'}
-            </div>
-        );
-
-        return (
-            <div style={{ textAlign: 'center' }}>
-                {iriLink}
+    const iriLink =
+        ols_iri === '' ? (
+            <React.Fragment>
+                {annotation_label}
                 <br />
-                <Popup
-                    trigger={
-                        <Label>
-                            <Icon name='question circle' />
-                            More Info
-                        </Label>
-                    }
-                    content={popupInfo}
-                    on='click'
-                />
-            </div>
+                {obo_id ? '(' + obo_id + ')' : ''}
+            </React.Fragment>
+        ) : (
+            <a href={ols_iri} target='_blank' rel='noopener noreferrer'>
+                {annotation_label}
+                <br />
+                {obo_id ? '(' + obo_id + ')' : ''}
+            </a>
         );
-    }
-}
+
+    const popupInfo = (
+        <div>
+            <Header as='h3'>Evidence provided for:&nbsp;{iriLink}</Header>
+            <Header as='h4'>Markers</Header>
+            {markers.length > 0
+                ? markers.map((m) => m).join(', ')
+                : 'None provided'}
+            <Header as='h4'>Publication</Header>
+            {publication ? (
+                <a href={publication}>{publication}</a>
+            ) : (
+                'None provided'
+            )}
+            <Header as='h4'>Comment</Header>
+            {comment ? comment : 'None provided'}
+        </div>
+    );
+
+    return (
+        <div style={{ textAlign: 'center' }}>
+            {iriLink}
+            <br />
+            <Popup
+                trigger={
+                    <Label>
+                        <Icon name='question circle' />
+                        More Info
+                    </Label>
+                }
+                content={popupInfo}
+                on='click'
+            />
+        </div>
+    );
+};
 
 const Cell = (props) => <OBOTableCell {...props} />;
 

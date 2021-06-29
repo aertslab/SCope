@@ -12,19 +12,13 @@ type CommunityAnnotationTableProps = {
     sessionIsRW: boolean;
 };
 
-class CommunityAnnotationTable extends React.Component<CommunityAnnotationTableProps> {
-    private readonly activeFeature: any;
+const CommunityAnnotationTable: React.FC<CommunityAnnotationTableProps> = (props) => {
 
-    constructor(props: CommunityAnnotationTableProps) {
-        super(props);
-        this.activeFeature = props.activeFeature;
-    }
-
-    getHeader() {
+    const header = () => {
         return 'Community Annotations';
     }
 
-    getColumns(activeFeature) {
+    const columns = (activeFeature)  => {
         return [
             asReactTableOBOColumn(),
             asReactTableCuratorColumn(),
@@ -32,11 +26,9 @@ class CommunityAnnotationTable extends React.Component<CommunityAnnotationTableP
         ];
     }
 
-    render() {
-        const { activeFeature, communityAnnotations } = this.props;
-        const data = makeTableData(communityAnnotations);
+        const data = makeTableData(props.communityAnnotations);
 
-        if (communityAnnotations.length === 0) {
+        if (props.communityAnnotations.length === 0) {
             return (
                 <div
                     style={{
@@ -44,7 +36,7 @@ class CommunityAnnotationTable extends React.Component<CommunityAnnotationTableP
                         textAlign: 'center',
                     }}>
                     No annotations currently exist.{' '}
-                    {this.props.sessionIsRW
+                    {props.sessionIsRW
                         ? 'Be the first to contribute!'
                         : ''}
                 </div>
@@ -60,8 +52,8 @@ class CommunityAnnotationTable extends React.Component<CommunityAnnotationTableP
                     data={data}
                     columns={[
                         {
-                            Header: this.getHeader(),
-                            columns: this.getColumns(activeFeature),
+                            Header: header(),
+                            columns: columns(props.activeFeature),
                         },
                     ]}
                     pageSizeOptions={[3]}

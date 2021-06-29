@@ -15,28 +15,22 @@ type FeatureMarkerTableProps = {
     activeFeatureIndex: number;
 };
 
-class FeatureMarkerTable extends React.Component<FeatureMarkerTableProps> {
-    constructor(props: FeatureMarkerTableProps) {
-        super(props);
-    }
-
-    getHeader() {
-        const { activeFeature } = this.props;
-        if (activeFeature.featureType === 'regulon') {
+const FeatureMarkerTable: React.FC<FeatureMarkerTableProps> = (props) => {
+    const header = () => {
+        if (props.activeFeature.featureType === 'regulon') {
             return 'Regulon Genes';
-        } else if (activeFeature.featureType.startsWith('Clustering')) {
+        } else if (props.activeFeature.featureType.startsWith('Clustering')) {
             return 'Cluster Markers';
         }
-    }
+    };
 
-    getColumns() {
-        const { metadata } = this.props;
-        const markerTableColumns = [asReactTableGeneColumn({ ...this.props })];
-        if ('metrics' in metadata) {
+    const columns = () => {
+        const markerTableColumns = [asReactTableGeneColumn({ ...props })];
+        if ('metrics' in props.metadata) {
             // Add extra columns (metrics like logFC, p-value, ...)
             return [
                 ...markerTableColumns,
-                ...metadata.metrics.map((metric) =>
+                ...props.metadata.metrics.map((metric) =>
                     makeTableColumnData({
                         header: metric.name,
                         id: metric.accessor,
@@ -47,68 +41,63 @@ class FeatureMarkerTable extends React.Component<FeatureMarkerTableProps> {
             ];
         }
         return markerTableColumns;
-    }
+    };
 
-    getHeight() {
+    const getHeight = () => {
         return `${screen.availHeight / 4}px`;
-    }
+    };
 
-    getDownloadButtonName = () => {
-        const { activeFeature } = this.props;
-        if (activeFeature.featureType === 'regulon') {
-            return 'Download ' + activeFeature.feature + ' regulon genes';
-        } else if (activeFeature.featureType.startsWith('Clustering')) {
-            return 'Download ' + activeFeature.feature + ' markers';
+    const getDownloadButtonName = () => {
+        if (props.activeFeature.featureType === 'regulon') {
+            return 'Download ' + props.activeFeature.feature + ' regulon genes';
+        } else if (props.activeFeature.featureType.startsWith('Clustering')) {
+            return 'Download ' + props.activeFeature.feature + ' markers';
         }
     };
 
-    getGenesFileName = () => {
-        const { activeFeature } = this.props;
-        if (activeFeature.featureType === 'regulon') {
-            return activeFeature.feature + '_regulon_genes.tsv';
-        } else if (activeFeature.featureType.startsWith('Clustering')) {
-            return activeFeature.feature + '_markers.tsv';
+    const getGenesFileName = () => {
+        if (props.activeFeature.featureType === 'regulon') {
+            return props.activeFeature.feature + '_regulon_genes.tsv';
+        } else if (props.activeFeature.featureType.startsWith('Clustering')) {
+            return props.activeFeature.feature + '_markers.tsv';
         } else {
             throw Error('Unknown active feature type');
         }
     };
 
-    render() {
-        const { metadata } = this.props;
-        const data = makeTableData(metadata);
+    const data = makeTableData(props.metadata);
 
-        return (
-            <div style={{ marginBottom: '15px', textAlign: 'center' }}>
-                <ReactTable
-                    data={data}
-                    columns={[
-                        {
-                            Header: this.getHeader(),
-                            columns: this.getColumns(),
-                        },
-                    ]}
-                    pageSizeOptions={[5, 10, 25, 50, 100]}
-                    defaultPageSize={25}
-                    style={{
-                        height: this.getHeight(), // This will force the table body to overflow and scroll, since there is not enough room
-                    }}
-                    className='-striped -highlight'
-                />
-                <Button
-                    primary
-                    onClick={() => {
-                        const tsv = json2csv(data, {
-                            delimiter: '\t',
-                            quote: '',
-                        });
-                        fileDownload(tsv, this.getGenesFileName());
-                    }}
-                    style={{ marginTop: '10px', width: '100%' }}>
-                    {this.getDownloadButtonName()}
-                </Button>
-            </div>
-        );
-    }
-}
+    return (
+        <div style={{ marginBottom: '15px', textAlign: 'center' }}>
+            <ReactTable
+                data={data}
+                columns={[
+                    {
+                        Header: header(),
+                        columns: columns(),
+                    },
+                ]}
+                pageSizeOptions={[5, 10, 25, 50, 100]}
+                defaultPageSize={25}
+                style={{
+                    height: getHeight(), // This will force the table body to overflow and scroll, since there is not enough room
+                }}
+                className='-striped -highlight'
+            />
+            <Button
+                primary
+                onClick={() => {
+                    const tsv = json2csv(data, {
+                        delimiter: '\t',
+                        quote: '',
+                    });
+                    fileDownload(tsv, getGenesFileName());
+                }}
+                style={{ marginTop: '10px', width: '100%' }}>
+                {getDownloadButtonName()}
+            </Button>
+        </div>
+    );
+};
 
 export default FeatureMarkerTable;

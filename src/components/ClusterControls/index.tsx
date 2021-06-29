@@ -14,20 +14,15 @@ type ClusterControlsProps = {
 } & RouteComponentProps<{ page: string }> &
     ReactCookieProps;
 
-class ClusterControls extends React.Component<ClusterControlsProps> {
-    constructor(props: ClusterControlsProps) {
-        super(props);
-    }
-
-    gotoNextCluster = (direction: string) => {
+const ClusterControls: React.FC<ClusterControlsProps> = (props) => {
+    const gotoNextCluster = (direction: string) => {
         const {
             featureIndex,
             feature,
             match: {
                 params: { page },
             },
-        } = this.props;
-        console.log(feature);
+        } = props;
 
         BackendAPI.getNextCluster(
             feature.metadata['clusteringID'],
@@ -47,41 +42,39 @@ class ClusterControls extends React.Component<ClusterControlsProps> {
         );
     };
 
-    render() {
-        const { featureIndex, feature, cookies, match } = this.props;
+    const { featureIndex, feature, cookies, match } = props;
 
-        return (
-            <Grid>
-                <Grid.Row>
-                    <UpdateClusterDescriptionInput
-                        featureIndex={featureIndex}
-                        feature={feature}
-                    />
-                </Grid.Row>
-                <Grid.Row>
-                    <Button
-                        onClick={() => this.gotoNextCluster('previous')}
-                        className='change-cluster-button'>
-                        {<Icon name='long arrow alternate left' />}
-                        Previous
-                    </Button>
-                    <CollaborativeAnnotation
-                        feature={feature}
-                        id={featureIndex}
-                        cookies={cookies} // FIXME: temporary hack until CollaborativeAnnotation is converted to .tsx
-                        match={match} // FIXME: temporary hack until CollaborativeAnnotation is converted to .tsx
-                    />
-                    <Button
-                        onClick={() => this.gotoNextCluster('next')}
-                        className='change-cluster-button'>
-                        Next
-                        {<Icon name='long arrow alternate right' />}
-                    </Button>
-                </Grid.Row>
-            </Grid>
-        );
-    }
-}
+    return (
+        <Grid>
+            <Grid.Row>
+                <UpdateClusterDescriptionInput
+                    featureIndex={featureIndex}
+                    feature={feature}
+                />
+            </Grid.Row>
+            <Grid.Row>
+                <Button
+                    onClick={() => gotoNextCluster('previous')}
+                    className='change-cluster-button'>
+                    {<Icon name='long arrow alternate left' />}
+                    Previous
+                </Button>
+                <CollaborativeAnnotation
+                    feature={feature}
+                    id={featureIndex}
+                    cookies={cookies} // FIXME: temporary hack until CollaborativeAnnotation is converted to .tsx
+                    match={match} // FIXME: temporary hack until CollaborativeAnnotation is converted to .tsx
+                />
+                <Button
+                    onClick={() => gotoNextCluster('next')}
+                    className='change-cluster-button'>
+                    Next
+                    {<Icon name='long arrow alternate right' />}
+                </Button>
+            </Grid.Row>
+        </Grid>
+    );
+};
 
 const mapStateToProps = (state) => {
     return {
