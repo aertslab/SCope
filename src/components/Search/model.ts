@@ -34,7 +34,7 @@ const makeSelection = (
     }) => FeatureSearchSelection;
 
 export const findResult = (
-    query: { title: string },
+    query: { title: string; category: string },
     colour: string,
     results: readonly Features[]
 ): FeatureSearchSelection | undefined => {
@@ -43,6 +43,17 @@ export const findResult = (
         results
     );
 
+    if (query.category.startsWith('Clustering:')) {
+        return R.head(
+            R.filter(
+                R.propEq<keyof FeatureSearchSelection>(
+                    'category',
+                    query.category
+                ),
+                searchSpace
+            )
+        );
+    }
     return R.head(
         R.filter(
             R.propEq<keyof FeatureSearchSelection>('title', query.title),
@@ -83,6 +94,7 @@ export const featuresToResults = (
             results: features.results.map((result) => {
                 return {
                     ...result,
+                    category: features.category,
                     id: window.btoa(result.title + result.description),
                 };
             }) as unknown as typeof SearchResult[],
