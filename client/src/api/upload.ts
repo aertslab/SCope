@@ -28,12 +28,7 @@ export function upload(uuid, type, file, onProgress, onUploaded) {
     } else {
         xhr.open(
             'POST',
-            BACKEND.httpProtocol +
-                '://' +
-                BACKEND.host +
-                ':' +
-                XHRport +
-                '/'
+            BACKEND.httpProtocol + '://' + BACKEND.host + ':' + XHRport + '/'
         );
     }
     xhr.upload.addEventListener('progress', (event) => {
