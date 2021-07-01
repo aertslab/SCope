@@ -500,7 +500,7 @@ class AppSidebar extends Component {
                     title='Import a .loom file'
                     type='Loom'
                     uuid={match.params.uuid}
-                    opened={uploadModalOpened}
+                    open={uploadModalOpened}
                     onClose={this.toggleUploadModal.bind(this)}
                     onUploaded={this.onLoomUploaded.bind(this)}
                 />
