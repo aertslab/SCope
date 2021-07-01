@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
 import {
     Button,
     Header,
@@ -14,11 +13,10 @@ import {
     Card,
     CardContent,
 } from 'semantic-ui-react';
-import { withRouter } from 'react-router-dom';
 import { instanceOf } from 'prop-types';
 import CollabAnnoGeneSearch from './CollabAnnoGeneSearch';
 import OLSAutocomplete from './OLSAutocomplete';
-import { withCookies, Cookies } from 'react-cookie';
+import { Cookies } from 'react-cookie';
 
 import { BackendAPI } from '../common/API';
 
@@ -485,14 +483,4 @@ class CollaborativeAnnotation extends Component {
     }
 }
 
-const collaborativeAnnotation = withCookies(
-    withRouter(CollaborativeAnnotation)
-);
-
-const mapStateToProps = (state) => {
-    return {
-        cookieConsent: state['main'].cookieConsent,
-    };
-};
-
-export default connect(mapStateToProps)(collaborativeAnnotation);
+export default CollaborativeAnnotation;

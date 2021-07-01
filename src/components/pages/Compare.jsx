@@ -13,7 +13,7 @@ import box2 from '../../js/box2.js';
 import { BackendAPI } from '../common/API';
 import Annotation from '../common/Annotation';
 import Search from '../Search';
-import ViewerSidebar from '../common/ViewerSidebar';
+import RightSidebar from '../RightSidebar';
 import AnnotationDropContainer from '../common/AnnotationDropContainer';
 import ViewerDropContainer from '../common/ViewerDropContainer';
 
@@ -497,7 +497,7 @@ class Compare extends Component {
                                 id='chart-distro1'
                                 style={{ width: '100%' }}
                                 height='200px'></div>
-                            <ViewerSidebar
+                            <RightSidebar
                                 getSelectedAnnotations={this.getSelectedAnnotations.bind(
                                     this
                                 )}
@@ -505,7 +505,6 @@ class Compare extends Component {
                                     this.setState({ activeFeatures: features });
                                 }}
                                 activeLegend={activeLegend}
-                                identifier='regulon-page'
                             />
                         </Grid.Column>
                     </Grid.Row>

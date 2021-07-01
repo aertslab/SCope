@@ -8,7 +8,7 @@ import { FEATURE_COLOURS } from '../constants';
 import Search from '../Search';
 import { BackendAPI } from '../common/API';
 import Viewer from '../common/Viewer';
-import ViewerSidebar from '../common/ViewerSidebar';
+import RightSidebar from '../RightSidebar';
 import ViewerToolbar from '../common/ViewerToolbar';
 import Histogram from '../common/Histogram';
 
@@ -134,7 +134,7 @@ export default class Regulon extends Component {
                                     </Segment>
                                 </Grid.Column>
                                 <Grid.Column>
-                                    <ViewerSidebar
+                                    <RightSidebar
                                         onActiveFeaturesChange={(
                                             features,
                                             id
@@ -143,7 +143,6 @@ export default class Regulon extends Component {
                                                 activeFeatures: features,
                                             });
                                         }}
-                                        identifier='regulon-page'
                                     />
                                 </Grid.Column>
                             </Grid.Row>
