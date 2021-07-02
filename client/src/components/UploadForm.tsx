@@ -5,7 +5,6 @@ import * as R from 'ramda';
 import { getReasonPhrase } from 'http-status-codes';
 
 import { upload } from '../api/upload';
-import { Result, success } from '../result';
 
 type UploadFormProps = {
     title: string;
