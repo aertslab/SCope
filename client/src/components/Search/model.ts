@@ -21,14 +21,14 @@ export type FeatureSearchSelection = {
 const makeSelection = (
     colour: string,
     category: string
-): ((partial: {
+): ((_partial: {
     title: string;
     description: string;
 }) => FeatureSearchSelection) =>
     R.compose(
         R.assoc('colour', colour),
         R.assoc('category', category)
-    ) as (partial: {
+    ) as (_partial: {
         title: string;
         description: string;
     }) => FeatureSearchSelection;

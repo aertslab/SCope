@@ -17,7 +17,7 @@ interface FeatureSearchProps {
     singleFeature: boolean;
 
     /** Determine the background colour */
-    colour?: (which: number) => string;
+    colour?: (_which: number) => string;
 }
 
 /**

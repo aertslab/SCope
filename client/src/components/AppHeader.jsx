@@ -298,7 +298,7 @@ class AppHeader extends Component {
 
     resetUUID() {
         const { history, cookies } = this.props;
-        BackendAPI.getUUIDFromIP((uuid, timeRemaining) => {
+        BackendAPI.getUUIDFromIP((uuid) => {
             cookies.remove(cookieName);
             if (this.props.cookieConsent) {
                 cookies.set(cookieName, uuid, { path: '/' });

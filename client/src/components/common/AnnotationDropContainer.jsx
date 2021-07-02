@@ -3,7 +3,7 @@ import { DropTarget } from 'react-dnd';
 import Annotation from '../common/Annotation';
 
 const targetBehaviour = {
-    drop(props, monitor, component) {
+    drop(props, monitor) {
         let item = monitor.getItem();
         let dropped = props.onDrop(
             item,
@@ -18,19 +18,15 @@ const targetBehaviour = {
 class AnnotationDropContainer extends Component {
     render() {
         const {
-            isOver,
-            canDrop,
             connectDropTarget,
             height,
             activeAnnotations,
             viewerName,
             orientation,
         } = this.props;
-        const isActive = isOver && canDrop;
-
         let container = () => {
             if (activeAnnotations && Object.keys(activeAnnotations).length) {
-                return Object.keys(activeAnnotations).map((name, i) => {
+                return Object.keys(activeAnnotations).map((name) => {
                     return activeAnnotations[name].map((value, j) => {
                         return (
                             <Annotation
@@ -76,7 +72,7 @@ class AnnotationDropContainer extends Component {
         );
     }
 
-    UNSAFE_componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps() {
         this.forceUpdate();
     }
 

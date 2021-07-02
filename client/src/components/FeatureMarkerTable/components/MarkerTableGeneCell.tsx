@@ -1,5 +1,4 @@
 import React from 'react';
-import * as R from 'ramda';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { BackendAPI } from '../../common/API';

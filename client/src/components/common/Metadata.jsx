@@ -27,7 +27,7 @@ export default class Metadata extends Component {
     }
 
     render() {
-        const { selectedGenes, selectedRegulons, selectedClusters } =
+        const { selectedGenes, selectedRegulons } =
             BackendAPI.getParsedFeatures();
         const { metadata, cellIDs, loading, annotation, clustering } =
             this.state;
@@ -67,7 +67,6 @@ export default class Metadata extends Component {
             });
 
             let cellMetadata = selection.points.map((p, j) => {
-                let cells;
                 if (metadata) {
                     return (
                         <Table.Row key={j} textAlign='center'>
@@ -299,9 +298,9 @@ export default class Metadata extends Component {
         let selections = BackendAPI.getViewerSelections();
         let settings = BackendAPI.getSettings();
         let loomFilePath = BackendAPI.getActiveLoom();
-        let coordinates = BackendAPI.getActiveCoordinates();
-        const { selectedGenes, selectedRegulons, selectedClusters } =
+        const { selectedGenes, selectedRegulons } =
             BackendAPI.getParsedFeatures();
+
         let query = {
             loomFilePath: loomFilePath,
             cellIndices: selections[this.props.selectionId].points,

@@ -36,7 +36,7 @@ const ClusterControls: React.FC<ClusterControlsProps> = (props) => {
                     response.featureType[0],
                     response.featureDescription[0],
                     page,
-                    (e) => {}
+                    () => {}
                 );
             }
         );

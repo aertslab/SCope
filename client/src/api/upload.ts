@@ -39,7 +39,7 @@ export function upload(uuid, type, file, onProgress, onUploaded) {
         onProgress(progress);
     });
 
-    xhr.upload.addEventListener('load', (event) => {
+    xhr.upload.addEventListener('load', () => {
         if (DEBUG) {
             console.log('file uploaded: ' + file.name);
         }

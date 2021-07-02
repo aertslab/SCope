@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { DragDropContext } from 'react-dnd';
 import { withRouter } from 'react-router-dom';
-import HTML5Backend, { NativeTypes } from 'react-dnd-html5-backend';
+import HTML5Backend from 'react-dnd-html5-backend';
 import { Accordion, Grid, Menu, Icon, Dropdown } from 'semantic-ui-react';
 
 import * as R from 'ramda';
@@ -108,12 +108,10 @@ class Compare extends Component {
 
     render() {
         const {
-            activeThresholds,
             activeFeatures,
             activeLegend,
             crossAnnotations,
             activeAnnotation,
-            annotationIDs,
             displays,
             configuration,
             superposition,
@@ -501,7 +499,7 @@ class Compare extends Component {
                                 getSelectedAnnotations={this.getSelectedAnnotations.bind(
                                     this
                                 )}
-                                onActiveFeaturesChange={(features, id) => {
+                                onActiveFeaturesChange={(features) => {
                                     this.setState({ activeFeatures: features });
                                 }}
                                 activeLegend={activeLegend}
@@ -662,11 +660,7 @@ class Compare extends Component {
 
     selectNoAnotations() {
         let { crossAnnotations } = this.state;
-        const { activeAnnotation, multiMetadata } = this.state;
-        let annotationGroup =
-            multiMetadata[0].cellMetaData.annotations[activeAnnotation];
-        crossAnnotations['one'] = [];
-        this.setState({ crossAnnotations: crossAnnotations });
+        this.setState({ crossAnnotations: { ...crossAnnotations, one: [] } });
         this.getCellMetadata();
     }
 
@@ -702,14 +696,11 @@ class Compare extends Component {
 
     selectAnnotationGroup(e, props) {
         const { index } = props;
-        let { activeAnnotation, crossAnnotations } = this.state;
-        const { multiMetadata } = this.state;
-        crossAnnotations['one'] = [];
+        const { activeAnnotation, crossAnnotations } = this.state;
         this.setState({
             activeAnnotation: activeAnnotation === index ? -1 : index,
-            crossAnnotations: crossAnnotations,
+            crossAnnotations: { ...crossAnnotations, one: [] },
         });
-        let annotationGroup = multiMetadata[0].cellMetaData.annotations[index];
     }
 
     getCrossAnnotations(i, j) {
@@ -759,7 +750,7 @@ class Compare extends Component {
     getCellMetadata() {
         let settings = BackendAPI.getSettings();
         let selectedAnnotations = this.getSelectedAnnotations();
-        const { selectedGenes, selectedRegulons, selectedClusters } =
+        const { selectedGenes, selectedRegulons } =
             BackendAPI.getParsedFeatures();
         let query = {
             loomFilePath: this.state.multiLoom[0],
@@ -793,7 +784,7 @@ class Compare extends Component {
     }
 
     renderExpressionGraph(data) {
-        const { selectedGenes, selectedRegulons, selectedClusters } =
+        const { selectedGenes, selectedRegulons } =
             BackendAPI.getParsedFeatures();
         if (selectedGenes.length + selectedRegulons.length === 0) {
             return;
@@ -861,7 +852,6 @@ class Compare extends Component {
                 })
                 .keys();
             let graphData = [];
-            let tmp = [];
             annotations.forEach(function (a) {
                 let annotatedFeatures = [];
                 features.forEach(function (f) {

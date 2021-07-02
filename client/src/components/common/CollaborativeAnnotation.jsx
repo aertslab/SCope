@@ -131,7 +131,7 @@ class CollaborativeAnnotation extends Component {
                                         response.featureType[0],
                                         response.featureDescription[0],
                                         this.props.match.params.page,
-                                        (e) => {}
+                                        () => {}
                                     );
                                 }
                             );
@@ -154,15 +154,8 @@ class CollaborativeAnnotation extends Component {
     };
 
     render() {
-        const {
-            annoData,
-            selected,
-            showModal,
-            submitError,
-            orcid_name,
-            orcid_id,
-            orcid_uuid,
-        } = this.state;
+        const { showModal, submitError, orcid_name, orcid_id, orcid_uuid } =
+            this.state;
 
         let cardStyle = {
             display: 'block',

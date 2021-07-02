@@ -91,7 +91,7 @@ class VotesTableCell extends React.Component<
                     }
                     content={
                         votes_for.voters.length > 0
-                            ? votes_for.voters.map((v, i) => (
+                            ? votes_for.voters.map((v) => (
                                   <span color={v.voter_hash ? 'green' : 'red'}>
                                       {'' + v.voter_name}
                                       &nbsp;&nbsp;

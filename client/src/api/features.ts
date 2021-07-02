@@ -1,7 +1,4 @@
 import { LegacyAPI } from './';
-import { APIError, apiError } from './error';
-
-declare const DEBUG: boolean;
 
 type FeatureQuery = {
     readonly dataset: string;

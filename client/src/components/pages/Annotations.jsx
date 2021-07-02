@@ -13,7 +13,7 @@ export default class Annotations extends Component {
             activeLoom: BackendAPI.getActiveLoom(),
             metadata: BackendAPI.getActiveLoomMetadata(),
         };
-        this.activeLoomListener = (loom, metadata, coordinates) => {
+        this.activeLoomListener = (loom, metadata) => {
             this.setState({ activeLoom: loom, metadata: metadata });
         };
     }
@@ -203,7 +203,7 @@ export default class Annotations extends Component {
                         }
                         content={
                             props.value.votes_for.voters.length > 0
-                                ? props.value.votes_for.voters.map((v, i) => (
+                                ? props.value.votes_for.voters.map((v) => (
                                       <font
                                           color={
                                               v.voter_hash ? 'green' : 'red'
@@ -318,7 +318,7 @@ export default class Annotations extends Component {
 
         if (metadata !== undefined) {
             allAnnos = this.getAllAnnotations(metadata);
-            cellTypeAnnoTableData = allAnnos.map((a, n) => {
+            cellTypeAnnoTableData = allAnnos.map((a) => {
                 let cellTypeAnnoTableRowData = {
                     clustering: a.clustering,
                     cluster: a.cluster,
@@ -339,8 +339,6 @@ export default class Annotations extends Component {
                 return cellTypeAnnoTableRowData;
             });
         }
-
-        let cellTypeAnnoTableHeight = screen.availHeight / 4;
 
         let cellTypeAnnoTableHeaderName = 'Community Annotations';
 

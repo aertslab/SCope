@@ -3,7 +3,7 @@ import { DropTarget } from 'react-dnd';
 import Viewer from '../common/Viewer';
 
 const targetBehaviour = {
-    drop(props, monitor, component) {
+    drop(props, monitor) {
         let item = monitor.getItem();
         let dropped = props.onDrop(
             item,
@@ -18,15 +18,12 @@ const targetBehaviour = {
 class ViewerDropContainer extends Component {
     render() {
         const {
-            isOver,
-            canDrop,
             orientation,
             loomFile,
             connectDropTarget,
             active,
             activeAnnotations,
             configuration,
-            ...props
         } = this.props;
         console.log('loom', loomFile);
         let container = () => {
@@ -124,7 +121,7 @@ class ViewerDropContainer extends Component {
         );
     }
 
-    UNSAFE_componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps() {
         this.forceUpdate();
     }
 

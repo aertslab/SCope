@@ -11,13 +11,8 @@ type UploadFormProps = {
     type: string;
     uuid: string;
     open: boolean;
-    onClose: (event: SyntheticEvent, data: object) => void;
-    onUploaded: (filename: string) => void;
-};
-
-type UploadState = {
-    files: File[];
-    progress: number;
+    onClose: (_event: SyntheticEvent, _data: object) => void;
+    onUploaded: (__filename: string) => void;
 };
 
 type UploadFormState =
