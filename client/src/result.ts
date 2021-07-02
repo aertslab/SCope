@@ -24,16 +24,16 @@ export function error<T>(err: T): ErrorT<T> {
     };
 }
 
-export function is_success<S, E>(result: Result<S, E>): result is SuccessT<S> {
+export function isSuccess<S, E>(result: Result<S, E>): result is SuccessT<S> {
     return result.kind === 'Success';
 }
 
-export function is_error<S, E>(result: Result<S, E>): result is ErrorT<E> {
+export function isError<S, E>(result: Result<S, E>): result is ErrorT<E> {
     return result.kind === 'Error';
 }
 
-export function with_default<S, E>(defaultval: S, result: Result<S, E>): S {
-    if (is_success(result)) {
+export function withDefault<S, E>(defaultval: S, result: Result<S, E>): S {
+    if (isSuccess(result)) {
         return result.value;
     }
 
@@ -41,11 +41,11 @@ export function with_default<S, E>(defaultval: S, result: Result<S, E>): S {
 }
 
 export function match<S, E, V>(
-    ok: (val: S) => V,
-    err: (val: E) => V,
+    ok: (_val: S) => V,
+    err: (_val: E) => V,
     result: Result<S, E>
 ): V {
-    if (is_success(result)) {
+    if (isSuccess(result)) {
         return ok(result.value);
     } else {
         return err(result.error);
@@ -53,20 +53,20 @@ export function match<S, E, V>(
 }
 
 export function map<S, T, E>(
-    fn: (val: S) => T,
+    fn: (_val: S) => T,
     result: Result<S, E>
 ): Result<T, E> {
-    if (is_success(result)) {
+    if (isSuccess(result)) {
         return success(fn(result.value));
     }
     return result;
 }
 
-export function map_error<S, E, F>(
-    fn: (val: E) => F,
+export function mapError<S, E, F>(
+    fn: (_val: E) => F,
     result: Result<S, E>
 ): Result<S, F> {
-    if (is_error(result)) {
+    if (isError(result)) {
         return error(fn(result.error));
     }
 
