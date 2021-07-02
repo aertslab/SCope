@@ -1,22 +1,23 @@
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { Search, Grid, Label } from 'semantic-ui-react';
+import { Search, Grid, Label, SearchResultProps } from 'semantic-ui-react';
 import { BackendAPI } from '../common/API';
 
-const resultRenderer = (entry) => {
+const resultRenderer = (props: SearchResultProps) => {
+    // FIXME: SearchResultProps type not optimal
     return (
         <div>
             <Grid>
                 <Grid.Row>
                     <Grid.Column width={10}>
-                        <Label content={entry.label} color='white' />
+                        <Label content={props.label} color='grey' />
                     </Grid.Column>
                     <Grid.Column width={2}>
-                        <Label content={entry.ontology_prefix} color='blue' />
+                        <Label content={props.ontology_prefix} color='blue' />
                     </Grid.Column>
                     <Grid.Column width={4}>
-                        <Label content={entry.obo_id} color='orange' />
+                        <Label content={props.obo_id} color='orange' />
                     </Grid.Column>
                 </Grid.Row>
             </Grid>
@@ -35,28 +36,60 @@ resultRenderer.propTypes = {
     type: PropTypes.string,
 };
 
-const initialState = {
+const INITIAL_STATE = {
     isLoading: false,
-    results: [],
     value: '',
-    term_name: '',
-    term_id: '',
+    termName: '',
+    termId: '',
+    results: [],
+    result: null,
 };
 
-export default class OLSAutocomplete extends Component {
-    state = initialState;
+type OLSResult = {
+    // id: string; // e.g.: fbbt:class:http://purl.obolibrary.org/obo/FBbt_00048467
+    iri: string; // e.g.: http://purl.obolibrary.org/obo/FBbt_00048467
+    label: string; // e.g.: adult dopaminergic mesothoracic neuron a
+    obo_id: string; // e.g.: FBbt:00048467
+    ontology_name: string; // e.g.: fbbt
+    ontology_prefix: string;
+    short_form: string; // e.g.: FBbt_00048467
+    type: string; // e.g.: class
+};
 
-    handleResultSelect = (e, { result }) => {
+type OLSAutocompleteProps = {
+    updateParent: (result: any) => void;
+};
+
+type OLSAutocompleteState = {
+    isLoading: boolean;
+    value: string;
+    termId: string;
+    termName: string;
+    results: OLSResult[];
+    result: OLSResult | null;
+};
+
+export default class OLSAutocomplete extends Component<
+    OLSAutocompleteProps,
+    OLSAutocompleteState
+> {
+    constructor(props) {
+        super(props);
+        this.state = INITIAL_STATE;
+    }
+
+    handleResultSelect = (e: React.SyntheticEvent, { result }) => {
+        console.log(result);
         this.props.updateParent(result);
         this.setState({
             value: result.label + ' (' + result.obo_id + ')',
-            term_id: result.id,
+            termId: result.id,
             result: result,
         });
     };
 
-    queryOLS = (query) => {
-        let metadata = BackendAPI.getActiveLoomMetadata();
+    queryOLS = async (query: string): Promise<OLSResult[]> => {
+        const metadata = BackendAPI.getActiveLoomMetadata();
 
         // cl for Human & Mouse
         const ontology =
@@ -67,40 +100,37 @@ export default class OLSAutocomplete extends Component {
                 '&ontology=' +
                 ontology
         );
-        fetch(request)
-            .then((response) => {
-                response.json().then((data) => {
-                    this.setState({
-                        results: data.response.docs,
-                    });
-                });
-            })
-            .catch(function (error) {
-                console.log(error);
-            })
-            .finally(function () {});
+        try {
+            const response = await fetch(request);
+            const data = await response.json();
+            return data.response.docs;
+        } catch (error) {
+            console.error(error);
+        }
+        return Promise.resolve([]);
     };
 
-    handleSearchChange = (e, { value }) => {
+    handleSearchChange = (e: React.SyntheticEvent, { value }) => {
         this.setState({ isLoading: true, value });
-        setTimeout(() => {
-            this.queryOLS(value);
+        setTimeout(async () => {
+            const results = await this.queryOLS(value);
+
             if (this.state.value.length < 1) {
-                return this.setState(initialState);
+                return this.setState(INITIAL_STATE);
             }
 
             const re = new RegExp(_.escapeRegExp(this.state.value), 'i');
-            const isMatch = (result) => re.test(result.label);
+            const isMatch = (result: OLSResult) => re.test(result.label);
 
             this.setState({
                 isLoading: false,
-                results: _.filter(this.state.results, isMatch),
+                results: _.filter(results, isMatch),
             });
         }, 300);
     };
 
     render() {
-        const { isLoading, value, results } = this.state;
+        const { isLoading, results } = this.state;
 
         return (
             <div key='ols-autocomplete'>
@@ -114,7 +144,7 @@ export default class OLSAutocomplete extends Component {
                     value={this.state.value}
                     resultRenderer={resultRenderer}
                     input={{ fluid: true }}
-                    className={{ fluid: true }}
+                    fluid={true}
                     placeholder='Search for an ontology term...'
                     {...this.props}
                 />
