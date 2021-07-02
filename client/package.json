@@ -7,7 +7,7 @@
         "dev": "webpack serve --config config/webpack.dev.js",
         "build": "webpack --config config/webpack.prod.js",
         "start": "npm run dev",
-        "test": "jest",
+        "test": "jest --coverage",
         "lint-fix": "eslint --fix 'src/**/*.{ts,jsx,tsx}'",
         "lint": "tsc --noEmit && eslint 'src/**/*.{ts,jsx,tsx}'",
         "bundle-size-analyse": "webpack --config config/webpack.dev.js --profile --json > stats.json"
@@ -198,6 +198,14 @@
         },
         "globals": {
             "__TEST_ONLY__": true
+        },
+        "coverageThreshold": {
+            "global": {
+                "branches": 18,
+                "functions": 21,
+                "lines": 36,
+                "statements": 38
+            }
         }
     }
 }

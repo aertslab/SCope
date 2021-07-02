@@ -1,7 +1,7 @@
 import 'jest';
 
 import { fetchJson } from './fetch';
-import { Result, is_success, with_default, is_error, match } from '../result';
+import { Result, withDefault, isError, match } from '../result';
 
 type Post = {
     id: number;
@@ -44,7 +44,7 @@ describe('Fetches JSON', () => {
             'https://a.test.com/posts/1'
         );
 
-        const post: Post = with_default(defaultPost(), result);
+        const post: Post = withDefault(defaultPost(), result);
 
         expect(post.id).toBe(1);
         expect(post.title).toBe('A test');
@@ -65,10 +65,10 @@ describe('Fetches JSON', () => {
             'https://a.test.com/posts/1'
         );
 
-        expect(is_error(result)).toBe(true);
+        expect(isError(result)).toBe(true);
 
         match(
-            (post: Post): void => fail('Should not get here'),
+            (_post: Post): void => fail('Should not get here'),
             (msg: string): void => expect(msg).toBe('API is down'),
             result
         );
