@@ -651,15 +651,11 @@ class Compare extends Component {
     selectAllAnotations() {
         const { crossAnnotations, activeAnnotation, multiMetadata } =
             this.state;
-        let annotationIDs = [];
         let annotationGroup =
             multiMetadata[0].cellMetaData.annotations[activeAnnotation];
-        annotationGroup.values.map((value, valueID) => {
-            let a = {};
-            a[annotationGroup.name] = [value];
-            annotationIDs.push(a);
+        crossAnnotations['one'] = annotationGroup.values.map((value) => {
+            return { [annotationGroup.name]: [value] };
         });
-        crossAnnotations['one'] = annotationIDs;
         this.setState({ crossAnnotations: crossAnnotations });
         this.getCellMetadata();
     }
