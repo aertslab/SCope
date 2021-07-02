@@ -258,7 +258,7 @@ class API {
     setActiveLooms(looms) {
         this.activeLooms = looms.slice(0);
         this.activeCoordinates = -1;
-        this.getMaxScale(null, (customValues, maxValues) => {
+        this.getMaxScale(null, (customValues) => {
             this.customValuesChangeListeners.forEach((listener) => {
                 listener(customValues);
             });
@@ -286,7 +286,7 @@ class API {
                 this.activeCoordinates
             );
         });
-        this.getMaxScale(null, (customValues, maxValues) => {
+        this.getMaxScale(null, (customValues) => {
             this.customValuesChangeListeners.forEach((listener) => {
                 listener(customValues);
             });

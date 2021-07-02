@@ -13,7 +13,7 @@ import QueryFeatureTab from '../QueryFeatureTool/QueryFeatureTab';
 type RightSidebarProps = {
     hideFeatures: boolean;
     activeLegend: any;
-    onActiveFeaturesChange: (features, id) => void;
+    onActiveFeaturesChange: (_features, _id) => void;
     getSelectedAnnotations: () => Object;
     sessionIsRW: boolean;
 } & RouteComponentProps<{ uuid: string; loom: string }>;
@@ -28,8 +28,8 @@ type RightSidebarState = {
 };
 
 class RightSidebar extends Component<RightSidebarProps, RightSidebarState> {
-    private selectionsListener: (selections: any) => void;
-    private activeFeaturesListener: (features, id) => void;
+    private selectionsListener: (_selections: any) => void;
+    private activeFeaturesListener: (_features, _id) => void;
 
     constructor(props: RightSidebarProps) {
         super(props);
@@ -172,7 +172,7 @@ class RightSidebar extends Component<RightSidebarProps, RightSidebarState> {
         );
     }
 
-    componentDidUpdate(prevProps, prevState) {
+    componentDidUpdate(prevProps) {
         if (this.props.match.params.loom !== prevProps.match.params.loom) {
             this.updateMetadata();
         }

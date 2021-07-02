@@ -37,13 +37,10 @@ class Annotation extends Component {
             name,
             value,
             isDropped,
-            isDragging,
             connectDragSource,
             label,
             orientation,
         } = this.props;
-        const opacity = isDragging ? 0.4 : 1;
-
         let icon;
         if (orientation !== 'one') {
             icon = (

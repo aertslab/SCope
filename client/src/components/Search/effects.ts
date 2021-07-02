@@ -3,7 +3,7 @@ import { call, put, debounce } from 'redux-saga/effects';
 import * as ActionType from './actionTypes';
 import * as Action from './actions';
 import { SEARCH_API_DELAY } from './constants';
-import { queryFeatures, FeatureQuery, Features } from '../../api';
+import { queryFeatures, Features } from '../../api';
 
 function* getFeatures(action: Action.SearchQuery) {
     try {

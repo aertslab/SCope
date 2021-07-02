@@ -90,7 +90,7 @@ export default class ClusteringAddPopup extends Component<
         }
     };
 
-    sendData = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    sendData = () => {
         if (this.state.clusteringName === '') {
             alert('You must enter a name for your clustering!');
             return;
@@ -171,7 +171,7 @@ export default class ClusteringAddPopup extends Component<
     };
 
     render() {
-        const { showModal, status } = this.state;
+        const { showModal } = this.state;
 
         const cardStyle = {
             display: 'block',
@@ -258,8 +258,7 @@ export default class ClusteringAddPopup extends Component<
                                         skipEmptyLines: true,
                                     }}
                                     onFileLoaded={(
-                                        data: Array<Array<string>>,
-                                        fileInfo
+                                        data: Array<Array<string>>
                                     ) => this.validateClusterData(data)}
                                 />
                             </CardContent>
@@ -271,7 +270,7 @@ export default class ClusteringAddPopup extends Component<
                                 form='annoForm'
                                 type='submit'
                                 value='submit'
-                                onClick={(e) => this.sendData(e)}
+                                onClick={() => this.sendData()}
                                 disabled={this.getButtonDisabledStatus()}
                                 primary>
                                 {this.getButtonText()}

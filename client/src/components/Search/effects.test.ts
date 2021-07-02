@@ -1,12 +1,10 @@
 /**
  * This module tests the Sagas for Search
  */
-import { call, put, throttle } from 'redux-saga/effects';
+import { call, put } from 'redux-saga/effects';
 import { cloneableGenerator } from '@redux-saga/testing-utils';
 
-import { SEARCH_API_DELAY } from './constants';
-import { getFeatures, getFeaturesSaga } from './effects';
-import { QUERY } from './actionTypes';
+import { getFeatures } from './effects';
 import { search, results, error } from './actions';
 import { queryFeatures } from '../../api';
 

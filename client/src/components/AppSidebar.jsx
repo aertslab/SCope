@@ -52,7 +52,6 @@ class AppSidebar extends Component {
             loomFiles,
             userLoomTree,
             generalLoomTree,
-            uncategorizedLoomFiles,
             uploadModalOpened,
             spriteScale,
             spriteAlpha,
@@ -219,7 +218,7 @@ class AppSidebar extends Component {
                                     name='sitemap'
                                     title='Change loom file hierarchy'
                                     style={{ display: 'inline' }}
-                                    onClick={(e, d) =>
+                                    onClick={() =>
                                         this.setLoomHierarchy(
                                             file.loomFilePath,
                                             file.loomDisplayName,
@@ -234,7 +233,7 @@ class AppSidebar extends Component {
                                     name='trash'
                                     title='delete this loom file'
                                     style={{ display: 'inline' }}
-                                    onClick={(e, d) =>
+                                    onClick={() =>
                                         this.deleteLoomFile(
                                             file.loomFilePath,
                                             file.loomDisplayName
@@ -267,7 +266,7 @@ class AppSidebar extends Component {
                                     }
                                     title='download this loom file'
                                     style={{ display: 'inline' }}
-                                    onClick={(e, d) =>
+                                    onClick={() =>
                                         this.downloadLoomFile(
                                             file.loomFilePath,
                                             file.loomSize
@@ -565,10 +564,10 @@ class AppSidebar extends Component {
                     t.nodes.push(f);
                 }
             };
-            userFiles.forEach((file, i) => {
+            userFiles.forEach((file) => {
                 addChildren(userLoomTree, 1, file);
             });
-            generalFiles.forEach((file, i) => {
+            generalFiles.forEach((file) => {
                 addChildren(generalLoomTree, 1, file);
             });
             this.setState({
@@ -592,7 +591,7 @@ class AppSidebar extends Component {
     downloadLoomFile(loomFilePath, loomSize) {
         const { match } = this.props;
         let fd = new FileDownloader(loomFilePath, match.params.uuid, loomSize);
-        fd.on('started', (isStarted) => {
+        fd.on('started', () => {
             this.setState({
                 downloading: true,
                 loomDownloading: encodeURIComponent(loomFilePath),
@@ -601,7 +600,7 @@ class AppSidebar extends Component {
         fd.on('progress', (progress) => {
             this.setState({ downloadPercentage: progress });
         });
-        fd.on('finished', (finished) => {
+        fd.on('finished', () => {
             this.setState({
                 downloading: false,
                 loomDownloading: null,
@@ -644,7 +643,7 @@ class AppSidebar extends Component {
         }
     }
 
-    toggleUploadModal(event) {
+    toggleUploadModal() {
         let state = !this.state.uploadModalOpened;
         this.setState({ uploadModalOpened: state });
     }

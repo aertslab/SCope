@@ -8,7 +8,7 @@ import ClusterOverlapsTable from '../common/ClusterOverlapsTable';
 
 type LassoSelectionPaneProps = {
     idx: number;
-    setModalID: (modalID: string) => void;
+    setModalID: (_modalID: string) => void;
 } & LassoSelection;
 
 export const LassoSelectionPane: React.FC<LassoSelectionPaneProps> = (

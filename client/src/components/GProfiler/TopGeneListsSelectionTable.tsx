@@ -6,7 +6,7 @@ import './GProfilerModal.css';
 export const TopGeneListsSelectionTable: React.FC<{
     availableTopGeneListsSizes: number[];
     selectedTopGeneListsSizes: number[];
-    onSelectGeneList: (geneListSize: number) => () => void;
+    onSelectGeneList: (_geneListSize: number) => () => void;
 }> = ({
     availableTopGeneListsSizes,
     selectedTopGeneListsSizes,

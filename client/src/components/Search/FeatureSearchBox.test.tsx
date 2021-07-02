@@ -4,7 +4,7 @@
 
 import React from 'react';
 
-import { render, fireEvent, screen, waitFor } from '../../test/test-utils';
+import { render, fireEvent, screen } from '../../test/test-utils';
 
 import { FeatureSearchBox } from './FeatureSearchBox';
 

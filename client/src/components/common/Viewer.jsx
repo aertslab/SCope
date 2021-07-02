@@ -191,7 +191,7 @@ export default class Viewer extends Component {
         );
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
+    componentDidUpdate(prevProps, prevState) {
         console.log(
             'Viewer component did update',
             prevProps.loomFile,
@@ -371,7 +371,7 @@ export default class Viewer extends Component {
             this.lasso = new PIXI.Graphics();
             this.lassoLayer.addChild(this.lasso);
         });
-        this.lassoLayer.on('mouseup', (e) => {
+        this.lassoLayer.on('mouseup', () => {
             if (!this.isLassoActive()) {
                 return;
             }
@@ -473,7 +473,7 @@ export default class Viewer extends Component {
         return ptsInLasso;
     }
 
-    addLassoSelection(lassoPoints, lassoIndices) {
+    addLassoSelection(lassoPoints) {
         let lassoSelection = {
             id: this.state.lassoSelections.length,
             selected: true,
@@ -740,7 +740,7 @@ export default class Viewer extends Component {
             console.log(this.props.name, 'onViewerSelectionChange', selections);
         }
         if (this.props.translate) {
-            selections.map((s, i) => {
+            selections.map((s) => {
                 let ns = Object.assign({}, s);
                 if (s.src !== this.props.name) {
                     if (s.translations[this.props.name]) {
@@ -805,8 +805,7 @@ export default class Viewer extends Component {
         // only for all zoom events of other components
         let settings = BackendAPI.getSettings();
         let transform = () => {
-            let k = this.zoomTransform.t,
-                x = this.zoomTransform.x + t.dx * (this.app.renderer.width / 2),
+            let x = this.zoomTransform.x + t.dx * (this.app.renderer.width / 2),
                 y =
                     this.zoomTransform.y +
                     t.dy * (this.app.renderer.height / 2),

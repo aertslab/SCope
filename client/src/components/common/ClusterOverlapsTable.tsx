@@ -3,8 +3,6 @@ import ReactTable from 'react-table';
 import * as R from 'ramda';
 import { Icon, Popup } from 'semantic-ui-react';
 
-declare const DEBUG: boolean;
-
 interface ClusterOverlaps {
     clustering_name: string;
     cluster_name: string;
@@ -29,7 +27,7 @@ interface Column {
     Header: string;
     accessor: string;
     style: { whiteSpace: string };
-    sortMethod?: (x: number, y: number) => number;
+    sortMethod?: (_x: number, _y: number) => number;
     width?: number;
 }
 

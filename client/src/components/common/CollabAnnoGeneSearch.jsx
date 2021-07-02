@@ -73,7 +73,7 @@ export default class CollabAnnoGeneSearch extends React.Component {
         }
     }
 
-    handleSearchChange(e, { value }) {
+    handleSearchChange(e) {
         this.setState({ isLoading: true, searchQuery: e.target.value });
 
         if (this.call !== null) {

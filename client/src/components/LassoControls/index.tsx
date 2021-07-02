@@ -7,7 +7,7 @@ import { LassoSelectionPane } from './LassoSelectionPane';
 
 type LassoControlsProps = {
     selections: LassoSelection[];
-    setModalID: (modalID: string) => void;
+    setModalID: (_modalID: string) => void;
 };
 
 class LassoControls extends React.Component<LassoControlsProps> {

@@ -142,7 +142,7 @@ export default class Histogram extends Component {
 
     renderAUCGraph(feature, points) {
         console.log('renderAUCGraph', feature, points);
-        let formatCount = d3.format(',.0f');
+
         let svg = d3.select('#thresholdSVG' + this.props.field);
         let bbox = svg.node().getBoundingClientRect();
         svg.selectAll('*').remove();

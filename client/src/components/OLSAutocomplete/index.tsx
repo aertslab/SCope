@@ -57,7 +57,7 @@ type OLSResult = {
 };
 
 type OLSAutocompleteProps = {
-    updateParent: (result: any) => void;
+    updateParent: (_result: any) => void;
 };
 
 type OLSAutocompleteState = {

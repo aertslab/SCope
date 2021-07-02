@@ -32,13 +32,8 @@ export default class Gene extends Component {
     }
 
     render() {
-        const {
-            activeLoom,
-            activeFeatures,
-            activeCoordinates,
-            activeMetadata,
-            activeLegend,
-        } = this.state;
+        const { activeLoom, activeFeatures, activeCoordinates, activeLegend } =
+            this.state;
 
         if (!activeLoom || activeLoom === '*') {
             return <div>Select the dataset to be analyzed</div>;
@@ -72,7 +67,7 @@ export default class Gene extends Component {
                     </Grid.Column>
                     <Grid.Column width={4}>
                         <RightSidebar
-                            onActiveFeaturesChange={(features, id) => {
+                            onActiveFeaturesChange={(features) => {
                                 this.setState({ activeFeatures: features });
                             }}
                             activeLegend={activeLegend}

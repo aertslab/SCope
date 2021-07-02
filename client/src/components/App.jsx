@@ -277,13 +277,13 @@ class App extends Component {
             return;
         }
         BackendAPI.getConnection().then(
-            (gbc, ws) => {
+            (gbc) => {
                 let query = {
                     ip: ip,
                     UUID: uuid,
                     mouseEvents: this.mouseClicks,
                 };
-                gbc.ws.onclose = (err) => {
+                gbc.ws.onclose = () => {
                     this.setState({ error: true });
                 };
                 if (DEBUG) {
