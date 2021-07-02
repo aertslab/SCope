@@ -12,7 +12,7 @@ import {
     Progress,
 } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
-import UploadModal from './common/UploadModal';
+import { UploadForm } from './UploadForm';
 import Slider from 'rc-slider';
 import FileDownloader from '../js/http';
 import Alert from 'react-popup';
@@ -496,11 +496,11 @@ class AppSidebar extends Component {
                     </Menu.Menu>
                 )}
                 <Divider />
-                <UploadModal
+                <UploadForm
                     title='Import a .loom file'
                     type='Loom'
                     uuid={match.params.uuid}
-                    opened={uploadModalOpened}
+                    open={uploadModalOpened}
                     onClose={this.toggleUploadModal.bind(this)}
                     onUploaded={this.onLoomUploaded.bind(this)}
                 />
