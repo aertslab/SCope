@@ -15,7 +15,7 @@ import {
 } from 'semantic-ui-react';
 import { instanceOf } from 'prop-types';
 import CollabAnnoGeneSearch from './CollabAnnoGeneSearch';
-import OLSAutocomplete from './OLSAutocomplete';
+import OLSAutocomplete from './../OLSAutocomplete';
 import { Cookies } from 'react-cookie';
 
 import { BackendAPI } from '../common/API';
