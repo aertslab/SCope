@@ -57,11 +57,7 @@ export const About: React.FC<{}> = () => {
             </p>
             <p style={{ display: 'flex', justifyContent: 'center' }}>
                 <a href='http://vib.be'>
-                    <img
-                        src='src/images/vib.png'
-                        height='50'
-                        alt='VIB logo'
-                    />
+                    <img src='src/images/vib.png' height='50' alt='VIB logo' />
                 </a>
             </p>
             <p style={{ display: 'flex', justifyContent: 'center' }}>
