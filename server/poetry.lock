@@ -327,7 +327,7 @@ pipenv = ["pipenv"]
 
 [[package]]
 name = "fastapi"
-version = "0.65.3"
+version = "0.66.0"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
 category = "main"
 optional = false
@@ -1499,7 +1499,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7,<3.10"
-content-hash = "733a24b333571697d0e862f5ef255812a4f6b20c49a1c17f0062beef68be7073"
+content-hash = "f54fba6f797071eebfb4c76b6784cae8f521aa423982f22a0d3cf6b316ecf823"
 
 [metadata.files]
 aiohttp = [
@@ -1681,8 +1681,8 @@ dparse = [
     {file = "dparse-0.5.1.tar.gz", hash = "sha256:a1b5f169102e1c894f9a7d5ccf6f9402a836a5d24be80a986c7ce9eaed78f367"},
 ]
 fastapi = [
-    {file = "fastapi-0.65.3-py3-none-any.whl", hash = "sha256:d3e3c0ac35110efb22ee3ed28201cf32f9d11a9a0e52d7dd676cad25f5219523"},
-    {file = "fastapi-0.65.3.tar.gz", hash = "sha256:6ea2286e439c4ced7cce2b2862c25859601bf327a515c12dd6e431ef5d49d12f"},
+    {file = "fastapi-0.66.0-py3-none-any.whl", hash = "sha256:85d8aee8c3c46171f4cb7bb3651425a42c07cb9183345d100ef55d88ca2ce15f"},
+    {file = "fastapi-0.66.0.tar.gz", hash = "sha256:6ea4225448786f3d6fae737713789f87631a7455f65580de0a4a2e50471060d9"},
 ]
 frozendict = [
     {file = "frozendict-2.0.3-py3-none-any.whl", hash = "sha256:58143e2d3d11699bc295d9e7e05f10dde99a727e2295d7f43542ecdc42c5ec70"},
