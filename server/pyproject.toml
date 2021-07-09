@@ -48,7 +48,7 @@ pyscenic = "^0.11"
 multiprocessing_on_dill = { version = "*", allow-prereleases = true }
 safety = "^1.8.5"
 requests = "^2.22.0"
-fastapi = "^0.65"
+fastapi = "^0.66.0"
 hypercorn = "^0.11"
 methodtools = "^0.1.2"
 sqlalchemy = "^1.4"
