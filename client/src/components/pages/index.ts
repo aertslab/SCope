@@ -1,4 +1,4 @@
-import About from './About';
+import { About } from './About';
 import Annotations from './Annotations';
 import Compare from './Compare';
 import Dataset from './Dataset';
