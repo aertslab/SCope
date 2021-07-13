@@ -5,12 +5,37 @@ import 'rc-slider/assets/index.css';
 import 'rc-tooltip/assets/bootstrap.css';
 import Slider from 'rc-slider';
 
-import { BackendAPI } from './API';
+import { FEATURE_COLOURS } from '../constants';
+import { BackendAPI } from './../common/API';
+
+declare const DEBUG: boolean;
 
 const Handle = Slider.Handle;
 
-export default class Histogram extends Component {
-    constructor(props) {
+type HistogramProps = {
+    field: number;
+    color: typeof FEATURE_COLOURS[number];
+    feature: any;
+    loomFile: string;
+    onThresholdChange: (_idx: number, _threshold: number) => void;
+};
+
+type HistogramState = {
+    min: number;
+    max: number;
+    selected: number;
+    matched: number;
+    total: number;
+    points: number[];
+    width: number;
+    height: number;
+};
+
+export default class Histogram extends Component<
+    HistogramProps,
+    HistogramState
+> {
+    constructor(props: HistogramProps) {
         super(props);
         this.state = {
             min: 0,
@@ -19,16 +44,16 @@ export default class Histogram extends Component {
             matched: 0,
             total: 0,
             points: [],
+            width: 0,
+            height: 0,
         };
-        this.w = 0;
-        this.h = 0;
     }
 
     render() {
         const { field, feature } = this.props;
         const { min, max, selected, matched, total } = this.state;
-        let enabled = feature && feature.feature.length;
-        let handle = (props) => {
+        const enabled = feature && feature.feature.length;
+        const handle = (props) => {
             // TODO: memory leak!?
             const { value, ...restProps } = props;
             return (
@@ -82,17 +107,17 @@ export default class Histogram extends Component {
         if (DEBUG) {
             console.log('handleThresholdChange', value);
         }
-        let x = d3
+        const x = d3
             .scaleLinear()
             .domain([0, this.state.max])
             .rangeRound([0, this.state.width]);
-        let svg = d3.select('#thresholdSVG' + this.props.field);
+        const svg = d3.select('#thresholdSVG' + this.props.field);
         svg.select('.threshold').attr('transform', function () {
-            let cx = x(value);
-            let cy = 0;
+            const cx = x(value);
+            const cy = 0;
             return 'translate(' + cx + ',' + cy + ')';
         });
-        let pts = this.state.points,
+        const pts = this.state.points,
             n = this.state.total;
         let matched = 0;
         for (let i = 0; i < n; i++) {
@@ -107,7 +132,7 @@ export default class Histogram extends Component {
         if (!feature || feature.feature.length === 0) {
             return this.renderAUCGraph('', []);
         }
-        let query = {
+        const query = {
             loomFilePath: loomFile,
             featureType: feature.featureType,
             feature: feature.feature,
@@ -143,10 +168,10 @@ export default class Histogram extends Component {
     renderAUCGraph(feature, points) {
         console.log('renderAUCGraph', feature, points);
 
-        let svg = d3.select('#thresholdSVG' + this.props.field);
-        let bbox = svg.node().getBoundingClientRect();
+        const svg = d3.select('#thresholdSVG' + this.props.field);
+        const bbox = svg.node().getBoundingClientRect();
         svg.selectAll('*').remove();
-        let margin = { top: 10, right: 10, bottom: 30, left: 40 },
+        const margin = { top: 10, right: 10, bottom: 30, left: 40 },
             width = bbox.width - margin.left - margin.right,
             height = bbox.height - margin.top - margin.bottom,
             max = d3.max(points),
@@ -185,13 +210,13 @@ export default class Histogram extends Component {
             return;
         }
 
-        let x = d3.scaleLinear().domain([0, max]).rangeRound([0, width]);
+        const x = d3.scaleLinear().domain([0, max]).rangeRound([0, width]);
 
-        let bins = d3.histogram().domain(x.domain()).thresholds(x.ticks(100))(
+        const bins = d3.histogram().domain(x.domain()).thresholds(x.ticks(100))(
             points
         );
 
-        let y = d3
+        const y = d3
             .scaleLinear()
             .domain([
                 0,
@@ -201,7 +226,7 @@ export default class Histogram extends Component {
             ])
             .range([height, 0]);
 
-        let bar = g
+        const bar = g
             .selectAll('.bar')
             .data(bins)
             .enter()
@@ -241,11 +266,11 @@ export default class Histogram extends Component {
             .attr('transform', 'translate(0, 0)')
             .call(d3.axisLeft(y));
 
-        let component = this;
+        const component = this;
         if (feature.metadata && feature.metadata.autoThresholds) {
-            let gt = g.append('g').attr('class', 'autoThresholds');
+            const gt = g.append('g').attr('class', 'autoThresholds');
             feature.metadata.autoThresholds.map((t) => {
-                let tx = x(t.threshold);
+                const tx = x(t.threshold);
                 gt.append('text')
                     .style('cursor', 'pointer')
                     .attr('text-anchor', 'middle')

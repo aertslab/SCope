@@ -1,7 +1,8 @@
 import * as Action from './actionTypes';
 
 import { FeatureQuery, Features } from '../../api';
-import { FeatureFilter, FeatureSearchSelection } from './model';
+import { FeatureCategory } from '../../model';
+import { FeatureSearchSelection } from './model';
 
 export interface SearchQuery {
     type: typeof Action.QUERY;
@@ -14,7 +15,7 @@ export interface SearchQuery {
 export const search = (
     field: string,
     dataset: string,
-    category: FeatureFilter,
+    category: FeatureCategory,
     query: string
 ): SearchQuery => {
     return {
