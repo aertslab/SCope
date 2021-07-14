@@ -3,14 +3,6 @@ import { StrictSearchCategoryProps, SearchResult } from 'semantic-ui-react';
 
 import { Features } from '../../api';
 
-export type FeatureFilter =
-    | 'all'
-    | 'gene'
-    | 'regulon'
-    | 'annotation'
-    | 'metric'
-    | 'cluster';
-
 export type FeatureSearchSelection = {
     readonly title: string;
     readonly category: string;

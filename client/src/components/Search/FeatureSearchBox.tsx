@@ -6,8 +6,9 @@ import * as R from 'ramda';
 import { RootState } from '../../redux/reducers';
 import { Features, LegacyAPI } from '../../api';
 
+import { FeatureCategory } from '../../model';
+
 import {
-    FeatureFilter,
     FeatureSearchSelection,
     featuresToResults,
     findResult,
@@ -26,7 +27,7 @@ type FeatureSearchBoxProps = {
     field: string;
 
     /** The feature type to search for. May be "all". */
-    filter: FeatureFilter;
+    filter: FeatureCategory;
 
     /** Background colour */
     colour: string;

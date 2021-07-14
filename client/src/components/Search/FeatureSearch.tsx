@@ -3,7 +3,7 @@ import { Grid } from 'semantic-ui-react';
 
 import { FEATURE_COLOURS } from '../constants';
 
-import { FeatureFilter } from './model';
+import { FeatureCategory } from '../../model';
 import { FeatureSearchBox } from './FeatureSearchBox';
 
 interface FeatureSearchProps {
@@ -11,7 +11,7 @@ interface FeatureSearchProps {
     identifier: string;
 
     /** Use this to initialise the feature types dropdown. */
-    filter: FeatureFilter;
+    filter: FeatureCategory;
 
     /** Use this to restrict selectable feature types (to only `feature`). */
     singleFeature: boolean;

@@ -8,12 +8,12 @@ import { render, fireEvent, screen } from '../../test/test-utils';
 
 import { FeatureSearchBox } from './FeatureSearchBox';
 
-import { FeatureFilter } from './model';
+import { FeatureCategory } from '../../model';
 
 describe('FeatureSearchBox component', () => {
     const mockProps = {
         field: 'test',
-        filter: 'all' as FeatureFilter,
+        filter: 'all' as FeatureCategory,
         colour: 'red',
     };
 

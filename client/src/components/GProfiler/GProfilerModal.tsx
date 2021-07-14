@@ -29,11 +29,9 @@ import {
 
 import { checkCreateGProfilerLink } from './link';
 
-import {
-    GProfilerOrganism,
-    FeatureMetadata,
-    FeatureMetricTable,
-} from './model';
+import { FeatureMetadata } from '../../model';
+
+import { GProfilerOrganism, FeatureMetricTable } from './model';
 
 interface GProfilerPopupProps {
     featureMetadata: FeatureMetadata;

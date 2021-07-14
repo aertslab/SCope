@@ -10,7 +10,7 @@ import { BackendAPI } from '../common/API';
 import Viewer from '../common/Viewer';
 import RightSidebar from '../RightSidebar';
 import ViewerToolbar from '../common/ViewerToolbar';
-import Histogram from '../common/Histogram';
+import Histogram from '../Histogram';
 
 export default class Regulon extends Component {
     constructor() {
@@ -30,6 +30,7 @@ export default class Regulon extends Component {
 
     render() {
         const { activeLoom, activeCoordinates, activeFeatures } = this.state;
+
         let featureThreshold = [0, 1, 2].map((i) => (
             <Grid.Column key={i} className='flexDisplay' stretched>
                 <Histogram
