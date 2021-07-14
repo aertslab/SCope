@@ -13,9 +13,6 @@ interface FeatureSearchProps {
     /** Use this to initialise the feature types dropdown. */
     filter: FeatureCategory;
 
-    /** Use this to restrict selectable feature types (to only `feature`). */
-    singleFeature: boolean;
-
     /** Determine the background colour */
     colour?: (_which: number) => string;
 }
