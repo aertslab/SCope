@@ -213,7 +213,7 @@ class Clustering:
         )
 
     def __repr__(self):
-        return f"Clustering({self.identifier=}, {self.clusters=}, {self.assignment=})"
+        return f"Clustering(self.identifier={self.identifier}, self.clusters={self.clusters}, self.assignment={self.assignment})"
 
 
 def assign_cells_to_clusters(clusters: List[int], num_cells: int) -> List[int]:
@@ -360,7 +360,7 @@ class LoomData(object):
         self.clusterings = clusterings
 
     def __repr__(self):
-        return f"LoomData({self.name=}, {self.n_genes}, {self.n_cells}, {self.matrix=})"
+        return f"LoomData(self.name={self.name}, {self.n_genes}, {self.n_cells}, self.matrix={self.matrix})"
 
 
 @st.composite
