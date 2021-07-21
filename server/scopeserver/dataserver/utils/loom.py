@@ -777,15 +777,13 @@ class Loom:
         cpm_normalise: bool = False,
         annotation: Optional[List[Annotation]] = None,
         logic: str = "OR",
-    ) -> Tuple[np.ndarray, list]:
+    ) -> np.ndarray:
         if gene_symbol not in set(self.get_genes()):
             try:
                 gene_symbol = self.get_gene_names()[gene_symbol]
             except KeyError:
                 # No gene is present, likely ATAC data, return 0's
-                cell_indices = list(range(self.get_nb_cells()))
-                gene_expr = np.zeros(self.get_nb_cells())
-                return gene_expr, cell_indices
+                return np.zeros(self.get_nb_cells())
 
         logger.debug("Debug: getting expression of {0} ...".format(gene_symbol))
         gene_expr = self.get_gene_expression_by_gene_symbol(gene_symbol=gene_symbol)
@@ -798,9 +796,8 @@ class Loom:
         if annotation is not None:
             cell_indices = self.get_anno_cells(annotations=annotation, logic=logic)
             gene_expr = gene_expr[cell_indices]
-        else:
-            cell_indices = list(range(self.get_nb_cells()))
-        return gene_expr, cell_indices
+
+        return gene_expr
 
     ############
     # Regulons #

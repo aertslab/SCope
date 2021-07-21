@@ -154,14 +154,9 @@ class SearchSpace:
                     else:
                         self.search_space_dict[key] = [regulon]
         if element_type == "marker_gene":
-            searchable_clustering_ids = [
-                x.split("_")[-1] for x in loom.ra.keys() if bool(re.search("ClusterMarkers_[0-9]+$", x))
-            ]
-            for clustering in searchable_clustering_ids:
-                clustering = int(clustering)
-                for cluster in range(len(self.meta_data["clusterings"][clustering]["clusters"])):
-                    genes = self.loom.get_cluster_marker_genes(clustering, cluster)
-                    for gene in genes:
+            for clustering in self.meta_data["clusterings"]:
+                for cluster in clustering["clusters"]:
+                    for gene in self.loom.get_cluster_marker_genes(clustering["id"], cluster["id"]):
                         key = SSKey(gene, element_type)
                         if (gene, element_type) in self.search_space_dict.keys():
                             self.search_space_dict[key].append(f"{clustering}_{cluster}")

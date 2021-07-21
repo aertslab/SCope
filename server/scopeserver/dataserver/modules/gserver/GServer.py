@@ -136,7 +136,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     l_max_v_max = 0
                     loom = self.lfh.get_loom(loom_file_path=Path(loomFilePath))
                     if request.featureType[n] == "gene":
-                        vals, _ = loom.get_gene_expression(
+                        vals = loom.get_gene_expression(
                             gene_symbol=feature,
                             log_transform=request.hasLogTransform,
                             cpm_normalise=request.hasCpmTransform,
@@ -284,7 +284,7 @@ class SCope(s_pb2_grpc.MainServicer):
         gene_exp = []
         for gene in request.selectedGenes:
             if gene != "":
-                vals, _ = loom.get_gene_expression(
+                vals = loom.get_gene_expression(
                     gene_symbol=gene, log_transform=request.hasLogTransform, cpm_normalise=request.hasCpmTransform
                 )
                 gene_exp.append(vals[cell_indices])
