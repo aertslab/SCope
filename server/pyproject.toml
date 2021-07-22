@@ -40,7 +40,7 @@ numpy = "^1.18.1"
 pandas = "^1.0.0"
 loompy = "^3.0.1"
 requests = "^2.22.0"
-fastapi = "^0.66.0"
+fastapi = "^0.66"
 hypercorn = "^0.11"
 methodtools = "^0.1.2"
 sqlalchemy = "^1.4"
@@ -61,6 +61,7 @@ hypothesis = {extras = ["numpy"], version = "*"}
 safety = "^1.8.5"
 types-protobuf = "^0.1.13"
 types-requests = "^2.25.0"
+typing-extensions = "^3.10.0"
 
 [tool.poetry.scripts]
 dev-script = 'scopeserver:run'

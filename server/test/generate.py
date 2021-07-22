@@ -1,12 +1,14 @@
 """ Fixtures for generating data in Loom formatted files. """
 
 import pytest
-from typing import Any, Dict, List, Literal, Optional, Text, Tuple, Union
+from typing import Any, Dict, List, Optional, Text, Tuple, Union
 from enum import Enum
 from functools import partial
 import json
 import pickle
 import os
+
+from typing_extensions import Literal
 
 import hypothesis.strategies as st
 import hypothesis.extra.numpy
@@ -23,6 +25,7 @@ import inspect
 
 from scopeserver.dataserver.utils.loom import Loom
 from scopeserver.dataserver.utils.loom_file_handler import LoomFileHandler
+from scopeserver.dataserver.utils.labels import Coordinate
 
 
 LARGEST: int = 64
@@ -348,8 +351,11 @@ class LoomData(object):
     regulons: LoomFeature
     embeddings: LoomFeature
     clusterings: LoomFeature
+    annotations: Dict[str, Dict[str, Any]]
 
-    def __init__(self, name, matrix, n_genes, n_cells, n_regulons, regulons, embeddings, clusterings):
+    def __init__(
+        self, name, matrix, n_genes, n_cells, n_regulons, regulons, embeddings, clusterings, annotations: List[str]
+    ):
         self.name = name
         self.matrix = matrix
         self.n_genes = n_genes
@@ -358,22 +364,38 @@ class LoomData(object):
         self.regulons = regulons
         self.embeddings = embeddings
         self.clusterings = clusterings
+        self.annotations = self.generate_annotations(n_cells, annotations, embeddings.column_attributes["Embedding"])
+
+    def generate_annotations(self, n_cells: int, values: List[str], coords: np.ndarray) -> Dict[str, Dict[str, Any]]:
+        assignment = [values[n % len(values)] for n in range(n_cells)]
+        return {
+            "My Annotation": {
+                "values": values,
+                "assignment": assignment,
+                "coordinates": {
+                    value: np.array([coords[i] for i in range(n_cells) if assignment[i] == value], dtype=coords.dtype)
+                    for value in values
+                },
+            },
+        }
 
     def __repr__(self):
-        return f"LoomData(self.name={self.name}, {self.n_genes}, {self.n_cells}, self.matrix={self.matrix})"
+        return f"LoomData(name={self.name}, {self.n_genes}, {self.n_cells}, matrix={self.matrix}, annotations={self.annotations})"
 
 
 @st.composite
 def loom_data_strategy(draw):
     sizes = st.integers(min_value=1, max_value=LARGEST)
+    names = st.text(st.characters(max_codepoint=1000, whitelist_categories=("Nd", "Ll", "Lu")), min_size=1)
     n_regulons = draw(sizes)
     n_cells = draw(sizes)
     n_genes = draw(sizes)
+    annotations = st.lists(names, min_size=1, max_size=n_cells, unique=True)
 
     return draw(
         st.builds(
             LoomData,
-            name=st.text(st.characters(max_codepoint=1000, whitelist_categories=("Nd", "Ll", "Lu")), min_size=1),
+            name=names,
             matrix=matrix_strategy(n_cells, n_genes),
             n_genes=st.just(n_genes),
             n_cells=st.just(n_cells),
@@ -381,6 +403,7 @@ def loom_data_strategy(draw):
             regulons=regulons_strategy(n_genes, n_cells, n_regulons),
             embeddings=embeddings_strategy(n_cells),
             clusterings=clusterings_strategy(n_cells, n_genes),
+            annotations=annotations,
         )
     )
 
@@ -405,7 +428,7 @@ def loom_generator(loom_data: LoomData):
         "CellID": np.array([f"Cell_{n}" for n in range(1, loom_data.n_cells + 1)]),
         "nUMI": loom_data.matrix.sum(axis=0),
         "nGene": (loom_data.matrix > 0).sum(axis=0),
-        "Half cells": ["First half" if n % 2 == 0 else "Second half" for n in range(loom_data.n_cells)],
+        **{annotation: loom_data.annotations[annotation]["assignment"] for annotation in loom_data.annotations},
         **loom_data.embeddings.column_attributes,
         **loom_data.clusterings.column_attributes,
         **loom_data.regulons.column_attributes,
@@ -423,7 +446,10 @@ def loom_generator(loom_data: LoomData):
         "MetaData": json.dumps(
             {
                 "metrics": [{"name": "nUMI"}, {"name": "nGene"}],
-                "annotations": [{"name": "Half cells", "values": ["First half", "Second half"]}],
+                "annotations": [
+                    {"name": annotation, "values": loom_data.annotations[annotation]["values"]}
+                    for annotation in loom_data.annotations
+                ],
                 **loom_data.embeddings.metadata,
                 **loom_data.clusterings.metadata,
                 **loom_data.regulons.metadata,
