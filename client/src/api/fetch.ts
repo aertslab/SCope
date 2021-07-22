@@ -1,14 +1,14 @@
-import { Result, error, success } from '../result';
+import { Either, Left, Right } from 'sanctuary-either';
 
-export async function fetchJson<T>(url: string): Promise<Result<T, string>> {
+export async function fetchJson<T>(url: string): Promise<Either<string, T>> {
     try {
         const response = await fetch(url);
         if (!response.ok) {
-            return error(response.statusText);
+            return Left(response.statusText);
         }
         const data: T = await response.json();
-        return success(data);
+        return Right(data);
     } catch (e) {
-        return error(e.statusText);
+        return Left(e.statusText);
     }
 }

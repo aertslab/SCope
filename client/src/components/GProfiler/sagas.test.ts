@@ -2,12 +2,12 @@
  * This module tests Sagas for GProfiler
  */
 import 'jest';
+import { Left, Right } from 'sanctuary';
 
 import { call, put } from 'redux-saga/effects';
 import { cloneableGenerator } from '@redux-saga/testing-utils';
 
 import { fetchJson } from '../../api/fetch';
-import { success, error } from '../../result';
 
 import { fetchAvailableOrganisms } from './sagas';
 import { setAvailableOrganisms, setError } from './actions';
@@ -47,7 +47,7 @@ describe('Query API side-effect', () => {
         });
 
         it('Raises a SET_AVAILABLE_ORGANISMS action', () => {
-            const result = clone.next(success(exampleResults)).value;
+            const result = clone.next(Right(exampleResults)).value;
             expect(result).toEqual(put(setAvailableOrganisms(exampleResults)));
         });
 
@@ -65,7 +65,7 @@ describe('Query API side-effect', () => {
 
         it('Raises a SET_ERROR action', () => {
             const msg = 'Error message';
-            const result = clone.next(error(msg)).value;
+            const result = clone.next(Left(msg)).value;
             expect(result).toEqual(
                 put(setError(`Unable to fetch list of organisms: ${msg}`))
             );

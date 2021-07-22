@@ -1,7 +1,8 @@
 import 'jest';
+import * as S from 'sanctuary';
+import { Either } from 'sanctuary-either';
 
 import { fetchJson } from './fetch';
-import { Result, withDefault, isError, match } from '../result';
 
 type Post = {
     id: number;
@@ -40,11 +41,11 @@ beforeEach(() => {
 
 describe('Fetches JSON', () => {
     it('fetches some data', async () => {
-        const result: Result<Post, string> = await fetchJson<Post>(
+        const result: Either<string, Post> = await fetchJson<Post>(
             'https://a.test.com/posts/1'
         );
 
-        const post: Post = withDefault(defaultPost(), result);
+        const post: Post = S.fromRight(defaultPost())(result);
 
         expect(post.id).toBe(1);
         expect(post.title).toBe('A test');
@@ -61,16 +62,16 @@ describe('Fetches JSON', () => {
             })
         );
 
-        const result: Result<Post, string> = await fetchJson<Post>(
+        const result: Either<string, Post> = await fetchJson<Post>(
             'https://a.test.com/posts/1'
         );
 
-        expect(isError(result)).toBe(true);
+        expect(S.isLeft(result)).toBe(true);
 
-        match(
-            (_post: Post): void => fail('Should not get here'),
-            (msg: string): void => expect(msg).toBe('API is down'),
-            result
-        );
+        if (S.isRight(result)) {
+            fail('Should not get here');
+        } else {
+            expect(S.fromLeft('')(result)).toBe('API is down');
+        }
     });
 });
