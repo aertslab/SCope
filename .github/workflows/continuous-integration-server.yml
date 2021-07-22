@@ -49,7 +49,7 @@ jobs:
 
             - name: Run mypy
               run: |
-                  ${HOME}/.poetry/bin/poetry run mypy --config-file pyproject.toml --ignore-missing-imports scopeserver main.py
+                  ${HOME}/.poetry/bin/poetry run mypy --config-file pyproject.toml --ignore-missing-imports scopeserver test main.py
               working-directory: ${{ env.working-directory }}
 
             - name: Run pytest

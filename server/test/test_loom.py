@@ -1,9 +1,10 @@
-import pytest
+""" Test the Loom API. """
+
 from hypothesis import given, settings, HealthCheck
 
 import numpy as np
 
-from generate import loom_data_strategy, loom_generator
+from .generate import loom_data_strategy, loom_generator
 
 
 @settings(deadline=1000, suppress_health_check=[HealthCheck.too_slow, HealthCheck.data_too_large], max_examples=10)
@@ -88,5 +89,5 @@ def test_get_coordinates_y(data):
 def test_get_gene_expression(data):
     "Check that the gene expression matrix is accessable as expected."
     with loom_generator(data) as loom:
-        for n in range(data.n_genes):
-            np.testing.assert_equal(loom.get_gene_expression(f"Gene_{n+1}", False, False), data.matrix[n])
+        for idx in range(data.n_genes):
+            np.testing.assert_equal(loom.get_gene_expression(f"Gene_{idx+1}", False, False), data.matrix[idx])

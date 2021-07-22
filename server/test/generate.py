@@ -1,12 +1,14 @@
 """ Fixtures for generating data in Loom formatted files. """
-
-import pytest
-from typing import Any, Dict, List, Optional, Text, Tuple, Union
+from typing import Any, Dict, List, Text, Tuple, Union
 from enum import Enum
 from functools import partial
 import json
 import pickle
 import os
+from pathlib import Path
+from tempfile import mkdtemp, mkstemp
+from contextlib import contextmanager
+import traceback
 
 from typing_extensions import Literal
 
@@ -15,29 +17,23 @@ import hypothesis.extra.numpy
 
 import numpy as np
 import loompy
-import pandas as pd
-from pathlib import Path
-from tempfile import mkdtemp, mkstemp
-from contextlib import contextmanager
-import traceback
 
-import inspect
 
 from scopeserver.dataserver.utils.loom import Loom
 from scopeserver.dataserver.utils.loom_file_handler import LoomFileHandler
-from scopeserver.dataserver.utils.labels import Coordinate
-
 
 LARGEST: int = 64
 
 
 class LoomFeatureLabel(Enum):
+    "Labal for LoomFeature objects."
     REGULON = 0
     CLUSTERING = 1
     EMBEDDING = 2
 
 
 class LoomFeature:
+    "Collects generated data for features such as regulons and embeddings."
     label: LoomFeatureLabel
     metadata: Dict[Text, Union[List[Dict[Text, Any]], Dict[Text, int]]] = {}
     column_attributes: Dict[Text, np.ndarray] = {}
@@ -56,6 +52,7 @@ class LoomFeature:
 def regulons_attr_strategy(
     which: Union[Literal["Motif"], Literal["Track"], Literal[""]], num_genes: int, num_regulons: int
 ):
+    "Generate regulon attributes."
     dtypes = [(f"{which}Regulon_{n}", np.int32) for n in range(1, num_regulons + 1)]
     element_strategies = [st.integers(min_value=0, max_value=1) for _ in range(num_regulons)]
     return hypothesis.extra.numpy.arrays(dtype=dtypes, shape=num_genes, elements=st.tuples(*element_strategies))
@@ -64,18 +61,21 @@ def regulons_attr_strategy(
 def regulons_auc_attr_strategy(
     which: Union[Literal["Motif"], Literal["Track"], Literal[""]], num_cells: int, num_regulons: int
 ):
+    "Generate regulon AUC attributes."
     dtypes = [(f"{which}Regulon_{n}", np.float64) for n in range(1, num_regulons + 1)]
     element_strategies = [st.floats(min_value=0, max_value=1, exclude_max=True) for _ in range(num_regulons)]
     return hypothesis.extra.numpy.arrays(dtype=dtypes, shape=num_cells, elements=st.tuples(*element_strategies))
 
 
 def regulons_occurences_strategy(which: Union[Literal["Motif"], Literal["Track"]], num_genes: int, num_regulons: int):
+    "Generate regulon occurences."
     dtypes = [(f"{which}Regulon_{n}", np.int32) for n in range(1, num_regulons + 1)]
     element_strategies = [st.integers(min_value=0, max_value=LARGEST) for _ in range(num_regulons)]
     return hypothesis.extra.numpy.arrays(dtype=dtypes, shape=num_genes, elements=st.tuples(*element_strategies))
 
 
 def regulons_column_attributes_strategy(num_cells: int, num_regulons: int):
+    "Generate regulon column attributes."
     return st.fixed_dictionaries(
         {
             "MotifRegulonsAUC": regulons_auc_attr_strategy("Motif", num_cells, num_regulons),
@@ -85,6 +85,7 @@ def regulons_column_attributes_strategy(num_cells: int, num_regulons: int):
 
 
 def regulons_row_attributes_strategy(num_genes: int, num_regulons: int):
+    "Generate regulon row attributes."
     return st.fixed_dictionaries(
         {
             "MotifRegulons": regulons_attr_strategy("Motif", num_genes, num_regulons),
@@ -96,6 +97,7 @@ def regulons_row_attributes_strategy(num_genes: int, num_regulons: int):
 
 
 def regulons_threshold_strategy(regulon: str):
+    "Generate a regulon thresholda dictionary."
     return st.fixed_dictionaries(
         {
             "regulon": st.just(regulon),
@@ -114,6 +116,7 @@ def regulons_threshold_strategy(regulon: str):
 
 @st.composite
 def regulons_thresholds_strategy(draw, num_regulons: int):
+    "Generate a regulon threshold dictionary for each regulon."
     names = [f"MotifRegulon_{i}" for i in range(1, num_regulons + 1)] + [
         f"TrackRegulon_{i}" for i in range(1, num_regulons + 1)
     ]
@@ -122,11 +125,13 @@ def regulons_thresholds_strategy(draw, num_regulons: int):
 
 @st.composite
 def regulons_legacy_thresholds_strategy(draw, num_regulons: int):
+    "Generate a regulon threshold dictionary with old-style labels."
     names = [f"Regulon_{i}" for i in range(1, num_regulons + 1)]
     return [draw(regulons_threshold_strategy(regulon)) for regulon in names]
 
 
 def regulons_new_strategy(num_genes: int, num_cells: int, num_regulons: int):
+    "Generate regulon features in the new-style."
     return st.builds(
         LoomFeature,
         label=st.just(LoomFeatureLabel.REGULON),
@@ -147,6 +152,7 @@ def regulons_new_strategy(num_genes: int, num_cells: int, num_regulons: int):
 
 
 def regulons_legacy_strategy(num_genes: int, num_cells: int, num_regulons: int):
+    "Generate regulon features in the old-style."
     return st.builds(
         LoomFeature,
         label=st.just(LoomFeatureLabel.REGULON),
@@ -159,6 +165,7 @@ def regulons_legacy_strategy(num_genes: int, num_cells: int, num_regulons: int):
 
 
 def regulons_strategy(num_genes: int, num_cells: int, num_regulons: int):
+    "Generate regulon features."
     return st.one_of(
         regulons_legacy_strategy(num_genes, num_cells, num_regulons),
         regulons_new_strategy(num_genes, num_cells, num_regulons),
@@ -166,6 +173,7 @@ def regulons_strategy(num_genes: int, num_cells: int, num_regulons: int):
 
 
 def embeddings_column_attributes_strategy(num_cells: int):
+    "Generate embedding column attributes."
     return st.fixed_dictionaries(
         {
             "Embedding": hypothesis.extra.numpy.arrays(
@@ -182,6 +190,7 @@ def embeddings_column_attributes_strategy(num_cells: int):
 
 
 def embeddings_strategy(num_cells: int):
+    "Generate Embedding features."
     return st.builds(
         LoomFeature,
         label=st.just(LoomFeatureLabel.EMBEDDING),
@@ -194,6 +203,7 @@ def embeddings_strategy(num_cells: int):
 
 
 class Clustering:
+    "Organise data for a single clustering containing multiple clusters."
     identifier: int
     clusters: List[int]
     assignment: List[int]
@@ -210,21 +220,28 @@ class Clustering:
         self.metrics = self.init_metric(markers[1])
 
     def init_metric(self, metric: np.ndarray):
+        "Apply the marker mask to metric."
         return np.array(
             [tuple(x * y for x, y in zip(mask, _metric)) for mask, _metric in zip(self.markers, metric)],
             dtype=metric.dtype,
         )
 
     def __repr__(self):
-        return f"Clustering(self.identifier={self.identifier}, self.clusters={self.clusters}, self.assignment={self.assignment})"
+        return f(
+            "Clustering(self.identifier={self.identifier}, "
+            "self.clusters={self.clusters}, "
+            "self.assignment={self.assignment})"
+        )
 
 
 def assign_cells_to_clusters(clusters: List[int], num_cells: int) -> List[int]:
+    "Distribute cell ids into a list of len(clusters)."
     num_clusters = len(clusters)
     return [clusters[num_clusters * n // num_cells] for n in range(num_cells)]
 
 
 def cluster_markers_strategy(clusters: List[int], num_genes: int):
+    "Generate valid cluster markers."
     dtypes = [(str(c), np.int32) for c in clusters]
     metric_strategy = [st.integers(min_value=1, max_value=LARGEST) for _ in clusters]
     score = hypothesis.extra.numpy.arrays(dtype=dtypes, shape=num_genes, elements=st.tuples(*metric_strategy))
@@ -237,6 +254,7 @@ def cluster_markers_strategy(clusters: List[int], num_genes: int):
 
 @st.composite
 def clustering_internal_strategy(draw, cluster_id: int, num_cells: int, num_genes: int):
+    "Generate valid Clustering objects."
     clusters = draw(
         st.lists(
             st.integers(min_value=0, max_value=LARGEST), min_size=min(1, num_cells), max_size=num_cells, unique=True
@@ -258,10 +276,12 @@ def clustering_internal_strategy(draw, cluster_id: int, num_cells: int, num_gene
 
 @st.composite
 def clusterings_internal_strategy(draw, clustering_ids: List[int], num_cells: int, num_genes: int):
+    "Generate a list of valid Clustering objects."
     return [draw(clustering_internal_strategy(cid, num_cells, num_genes)) for cid in clustering_ids]
 
 
 def cluster_metadata_strategy(cluster_id: int):
+    "Generate metadata for a single cluster."
     return st.fixed_dictionaries(
         {
             "id": st.just(cluster_id),
@@ -272,10 +292,12 @@ def cluster_metadata_strategy(cluster_id: int):
 
 @st.composite
 def clusters_metadata_strategy(draw, cluster_ids: List[int]):
+    "Generate metadata for each cluster in a clustering."
     return [draw(cluster_metadata_strategy(cid)) for cid in cluster_ids]
 
 
 def clustering_metadata_internal_strategy(identifier: int, clusters: List[int]):
+    "Generate metadata for a single Clustering."
     names = (
         st.text(st.characters(max_codepoint=1000, blacklist_categories=("Cc", "Cs")), min_size=1)
         .map(lambda s: s.strip())
@@ -303,6 +325,7 @@ def clustering_metadata_internal_strategy(identifier: int, clusters: List[int]):
 
 @st.composite
 def clusterings_strategy(draw, num_cells: int, num_genes: int):
+    "Generate valid clustering features."
     clustering_ids = st.lists(st.integers(min_value=0, max_value=LARGEST), min_size=1, max_size=LARGEST, unique=True)
     clusterings: List[Clustering] = draw(
         clustering_ids.flatmap(partial(clusterings_internal_strategy, num_cells=num_cells, num_genes=num_genes))
@@ -337,12 +360,14 @@ def clusterings_strategy(draw, num_cells: int, num_genes: int):
 
 
 def matrix_strategy(num_cells: int, num_genes: int):
+    "Generate an expression matrix."
     return hypothesis.extra.numpy.arrays(
         dtype=np.int32, shape=(num_genes, num_cells), elements=st.integers(min_value=1, max_value=LARGEST)
     )
 
 
-class LoomData(object):
+class LoomData:
+    "Data required to build a valid Loom file."
     name: str
     matrix: np.ndarray
     n_genes: int
@@ -367,6 +392,7 @@ class LoomData(object):
         self.annotations = self.generate_annotations(n_cells, annotations, embeddings.column_attributes["Embedding"])
 
     def generate_annotations(self, n_cells: int, values: List[str], coords: np.ndarray) -> Dict[str, Dict[str, Any]]:
+        "Organise information for an annotation entry."
         assignment = [values[n % len(values)] for n in range(n_cells)]
         return {
             "My Annotation": {
@@ -380,11 +406,17 @@ class LoomData(object):
         }
 
     def __repr__(self):
-        return f"LoomData(name={self.name}, {self.n_genes}, {self.n_cells}, matrix={self.matrix}, annotations={self.annotations})"
+        return f(
+            "LoomData(name={self.name}, "
+            "{self.n_genes}, {self.n_cells}, "
+            "matrix={self.matrix}, "
+            "annotations={self.annotations})"
+        )
 
 
 @st.composite
 def loom_data_strategy(draw):
+    "Generate LoomData objects."
     sizes = st.integers(min_value=1, max_value=LARGEST)
     names = st.text(st.characters(max_codepoint=1000, whitelist_categories=("Nd", "Ll", "Lu")), min_size=1)
     n_regulons = draw(sizes)
@@ -408,13 +440,15 @@ def loom_data_strategy(draw):
     )
 
 
-class SearchSpaceMock(object):
+class SearchSpaceMock:
+    "Mock of a SearchSpace for pickling."
     loom = ""
     dfh = ""
 
 
 @contextmanager
 def loom_generator(loom_data: LoomData):
+    "Generate a loom file on the filesystem."
     path = Path(mkdtemp())
     handle, _filep = mkstemp(dir=path)
     filepath = path / Path(_filep)

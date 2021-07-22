@@ -1,28 +1,22 @@
+"Test the mechanism for labeling features for display on the client."
+
 import pytest
-import json
-import os
-from pathlib import Path
 
 from hypothesis import given, settings, HealthCheck
 
-import loompy as lp
 import numpy as np
-import pandas as pd
-
-from generate import loom_data_strategy, loom_generator
 
 
-from scopeserver.dataserver.utils.loom import Loom
-from scopeserver.dataserver.utils.loom_file_handler import LoomFileHandler
 from scopeserver.dataserver.utils.labels import label_all_clusters, label_annotation, FeatureLabel, Coordinate
-from scopeserver.dataserver.utils.annotation import Annotation
 from scopeserver.dataserver.utils import constant
-from scopeserver.dataserver.utils.data import uniq
+
+from .generate import loom_data_strategy, loom_generator
 
 
 @settings(deadline=1000, suppress_health_check=[HealthCheck.too_slow, HealthCheck.data_too_large], max_examples=10)
 @given(data=loom_data_strategy())
 def test_label_annotation(data):
+    "Test that labels are generated for each annotation value."
     with loom_generator(data) as loom:
         full_observed = [
             label_annotation(loom, -1, anno["name"]) for anno in loom.get_meta_data_by_key(key="annotations")
@@ -54,6 +48,7 @@ def test_label_annotation(data):
 @settings(deadline=1000, suppress_health_check=[HealthCheck.too_slow, HealthCheck.data_too_large], max_examples=10)
 @given(data=loom_data_strategy())
 def test_label_all_clusters(data):
+    "Test that labels are generated for each cluster in a clustering."
     with loom_generator(data) as loom:
         for clustering_meta in data.clusterings.metadata["clusterings"]:
             cluster_names = {meta["id"]: meta["description"] for meta in clustering_meta["clusters"]}
