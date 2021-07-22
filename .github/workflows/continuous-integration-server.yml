@@ -54,7 +54,7 @@ jobs:
 
             - name: Run pytest
               run: |
-                  ${HOME}/.poetry/bin/poetry run dotenv -f .test.env run pytest --cov=scopeserver --cov-branch --cov-fail-under=41.0 --doctest-modules --ignore-glob=alembic
+                  ${HOME}/.poetry/bin/poetry run dotenv -f .test.env run pytest --cov=scopeserver --cov-branch --cov-fail-under=40.0 --doctest-modules --ignore-glob=alembic
               working-directory: ${{ env.working-directory }}
 
             - name: Run safety security checks
