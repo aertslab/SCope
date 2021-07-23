@@ -16,6 +16,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class CellColorByFeatures:
     def __init__(self, loom):
         self.loom = loom

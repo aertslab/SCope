@@ -35,6 +35,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class SCope(s_pb2_grpc.MainServicer):
 
     app_name = "SCope"
@@ -758,6 +759,7 @@ class SCope(s_pb2_grpc.MainServicer):
             progress=s_pb2.Progress(value=1.0, status="Sub Loom Created!"),
             isDone=True,
         )
+
 
 def serve(run_event, config: Dict[str, Any]) -> None:
     SCope.app_mode = False
