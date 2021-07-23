@@ -493,7 +493,7 @@ python-versions = ">=3.6.1"
 
 [[package]]
 name = "hypothesis"
-version = "6.14.1"
+version = "6.14.3"
 description = "A library for property-based testing"
 category = "dev"
 optional = false
@@ -1174,6 +1174,17 @@ security = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)"]
 socks = ["PySocks (>=1.5.6,!=1.5.7)", "win-inet-pton"]
 
 [[package]]
+name = "returns"
+version = "0.16.0"
+description = "Make your functions return something meaningful, typed, and safe!"
+category = "main"
+optional = false
+python-versions = ">=3.7,<4.0"
+
+[package.dependencies]
+typing-extensions = ">=3.7,<4.0"
+
+[[package]]
 name = "safety"
 version = "1.10.3"
 description = "Checks installed dependencies for known vulnerabilities."
@@ -1499,7 +1510,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7,<3.10"
-content-hash = "f54fba6f797071eebfb4c76b6784cae8f521aa423982f22a0d3cf6b316ecf823"
+content-hash = "03182c7ea68e96b0405d8ad4cdc2cc2570678d9fb514b76cb73b93965be254db"
 
 [metadata.files]
 aiohttp = [
@@ -1905,8 +1916,8 @@ hyperframe = [
     {file = "hyperframe-6.0.1.tar.gz", hash = "sha256:ae510046231dc8e9ecb1a6586f63d2347bf4c8905914aa84ba585ae85f28a914"},
 ]
 hypothesis = [
-    {file = "hypothesis-6.14.1-py3-none-any.whl", hash = "sha256:6dad44da8962cc7c13cdc28cf9b78c6779b5a0b0279a9baac427ae6d109f70e3"},
-    {file = "hypothesis-6.14.1.tar.gz", hash = "sha256:88b0736a5691b68b8e16a4b7ee8e4c8596810c5a20989ea5b5f64870a7c25740"},
+    {file = "hypothesis-6.14.3-py3-none-any.whl", hash = "sha256:6071ed0d25d90557f69e6a4d941b221f9b0beedde8ec8e4a136a40cad73d4886"},
+    {file = "hypothesis-6.14.3.tar.gz", hash = "sha256:1c8776d9fc8c598cf1b93b99bd87976f9d9b589fc58843d85a30090700f14a8a"},
 ]
 idna = [
     {file = "idna-2.10-py2.py3-none-any.whl", hash = "sha256:b97d804b1e9b523befed77c48dacec60e6dcb0b5391d57af6a65a312a90648c0"},
@@ -2569,6 +2580,10 @@ regex = [
 requests = [
     {file = "requests-2.25.1-py2.py3-none-any.whl", hash = "sha256:c210084e36a42ae6b9219e00e48287def368a26d03a048ddad7bfee44f75871e"},
     {file = "requests-2.25.1.tar.gz", hash = "sha256:27973dd4a904a4f13b263a19c866c13b92a39ed1c964655f025f3f8d3d75b804"},
+]
+returns = [
+    {file = "returns-0.16.0-py3-none-any.whl", hash = "sha256:3b7544f7b8c5aac8da3469b6ce34ed8878c993f0443d47f133cef2d38b08bc2a"},
+    {file = "returns-0.16.0.tar.gz", hash = "sha256:ac717aaf1de89c87988c9c7cd57ce0bb06f726bd0f37c8915a53fa8ec8f800b7"},
 ]
 safety = [
     {file = "safety-1.10.3-py2.py3-none-any.whl", hash = "sha256:5f802ad5df5614f9622d8d71fedec2757099705c2356f862847c58c6dfe13e84"},
