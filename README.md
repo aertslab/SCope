@@ -26,7 +26,7 @@ Eventually the functionality from pySCENIC will be expanded and put in its own p
 
 ### Command Line
 
-You will need access to at least Python 3.7 do run this.
+You will need access to at least Python 3.8 do run this.
 
 1. Clone the GitHub repository and install,
 
