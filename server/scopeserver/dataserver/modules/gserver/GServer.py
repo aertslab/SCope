@@ -35,11 +35,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-hexarr = np.vectorize("{:02x}".format)
-
-uploadedLooms: DefaultDict[str, Set[str]] = defaultdict(lambda: set())
-
-
 class SCope(s_pb2_grpc.MainServicer):
 
     app_name = "SCope"
@@ -126,10 +121,6 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.getORCIDReply(
             orcid_scope_uuid=orcid_scope_uuid, name=orcid_data["name"], orcid_id=orcid_data["orcid"], success=success
         )
-
-    def get_features(self, loom: Loom, query: str, category: str) -> List[CategorisedMatches]:
-        logger.debug(f"Searching for {query} filtered by type {category}")
-        return get_search_results(query, category, loom)
 
     def getVmax(self, request, context):
         v_max = np.zeros(3)
@@ -344,8 +335,6 @@ class SCope(s_pb2_grpc.MainServicer):
     def setAnnotationName(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         success = loom.rename_annotation(request.clusteringID, request.clusterID, request.newAnnoName)
-        if success:
-            self.get_features.cache_clear()
         return s_pb2.SetAnnotationNameReply(success=success)
 
     def setLoomHierarchy(self, request, context):
@@ -358,8 +347,6 @@ class SCope(s_pb2_grpc.MainServicer):
         if not self.dfh.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
             return s_pb2.setColabAnnotationDataReply(success=False, message="Could not confirm user!")
         success, message = loom.add_collab_annotation(request, self.config["DATAHASHSECRET"])
-        if success:
-            self.get_features.cache_clear()
         return s_pb2.setColabAnnotationDataReply(success=success, message=message)
 
     def addNewClustering(self, request, context):
@@ -367,8 +354,6 @@ class SCope(s_pb2_grpc.MainServicer):
         if not self.dfh.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
             return s_pb2.AddNewClusteringReply(success=False, message="Could not confirm user!")
         success, message = loom.add_user_clustering(request)
-        if success:
-            self.get_features.cache_clear()
         return s_pb2.AddNewClusteringReply(success=success, message=message)
 
     def voteAnnotation(self, request, context):
@@ -773,11 +758,6 @@ class SCope(s_pb2_grpc.MainServicer):
             progress=s_pb2.Progress(value=1.0, status="Sub Loom Created!"),
             isDone=True,
         )
-
-    def loomUploaded(self, request, content):
-        uploadedLooms[request.UUID].add(request.filename)
-        return s_pb2.LoomUploadedReply()
-
 
 def serve(run_event, config: Dict[str, Any]) -> None:
     SCope.app_mode = False
