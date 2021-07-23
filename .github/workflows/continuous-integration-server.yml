@@ -27,6 +27,11 @@ jobs:
             - name: Install Poetry
               run: |
                   curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+
+            - name: Install LibHDF5
+              run: |
+                apt install libhdf5-dev
+
             - name: Install dependencies
               run: |
                   ${HOME}/.poetry/bin/poetry install
