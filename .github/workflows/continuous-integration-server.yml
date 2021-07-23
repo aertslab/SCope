@@ -30,7 +30,7 @@ jobs:
 
             - name: Install LibHDF5
               run: |
-                apt install libhdf5-dev
+                sudo apt-get install libhdf5-dev
 
             - name: Install dependencies
               run: |
