@@ -31,7 +31,7 @@ classifiers = ["Development Status :: 5 - Production/Stable",
                "Topic :: Scientific/Engineering :: Bio-Informatics"]
 
 [tool.poetry.dependencies]
-python = ">=3.7,<3.10"
+python = ">=3.8,<3.10"
 
 grpcio = "^1.26.0"
 grpcio-tools = "^1.26.0"
