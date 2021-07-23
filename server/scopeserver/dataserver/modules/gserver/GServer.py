@@ -1,27 +1,19 @@
 from concurrent import futures
-import sys
 import time
 import grpc
 import loompy as lp
 from loompy import timestamp
 from loompy import _version
 import os
-import re
 import numpy as np
-import pandas as pd
 import shutil
 import json
-import zlib
-import base64
-import threading
-import pickle
 import requests
 import uuid
 import datetime
 
-from typing import DefaultDict, Set, List, Dict, Any, Tuple
-from collections import OrderedDict, defaultdict, deque
-from methodtools import lru_cache
+from typing import DefaultDict, Set, List, Dict, Any
+from collections import defaultdict
 from itertools import compress
 from pathlib import Path
 
@@ -30,19 +22,15 @@ from scopeserver.dataserver.modules.gserver import s_pb2_grpc
 from scopeserver.dataserver.utils import sys_utils as su
 from scopeserver.dataserver.utils import loom_file_handler as lfh
 from scopeserver.dataserver.utils import data_file_handler as dfh
-from scopeserver.dataserver.utils import gene_set_enrichment as _gse
 from scopeserver.dataserver.utils import cell_color_by_features as ccbf
 from scopeserver.dataserver.utils import constant
 from scopeserver.dataserver.utils import data
-from scopeserver.dataserver.utils import search_space as ss
 from scopeserver.dataserver.utils import proto
 from scopeserver.dataserver.utils.search import get_search_results, CategorisedMatches
 from scopeserver.dataserver.utils.loom import Loom
 from scopeserver.dataserver.utils.labels import label_annotation, label_all_clusters
 from scopeserver.dataserver.utils.annotation import Annotation
 
-from pyscenic.genesig import GeneSignature
-from pyscenic.aucell import create_rankings, enrichment, enrichment4cells
 import logging
 
 logger = logging.getLogger(__name__)
@@ -495,21 +483,6 @@ class SCope(s_pb2_grpc.MainServicer):
         metrics = [proto.protoize_cluster_marker_metric(x, cluster_marker_metrics) for x in md_cmm]
         return s_pb2.MarkerGenesReply(genes=cluster_marker_metrics.index, metrics=metrics)
 
-    def getMyGeneSets(self, request, context):
-        userDir = dfh.DataFileHandler.get_data_dir_path_by_file_type("GeneSet", UUID=request.UUID)
-        if not os.path.isdir(userDir):
-            for i in ["Loom", "GeneSet", "LoomAUCellRankings"]:
-                os.mkdir(os.path.join(self.dfh.get_data_dirs()[i]["path"], request.UUID))
-
-        geneSetsToProcess = sorted(self.dfh.get_gobal_sets()) + sorted(
-            [os.path.join(request.UUID, x) for x in os.listdir(userDir)]
-        )
-        gene_sets = [
-            s_pb2.MyGeneSet(geneSetFilePath=f, geneSetDisplayName=os.path.splitext(os.path.basename(f))[0])
-            for f in geneSetsToProcess
-        ]
-        return s_pb2.MyGeneSetsReply(myGeneSets=gene_sets)
-
     def getMyLooms(self, request, context):
         my_looms = []
         update = False
@@ -799,65 +772,6 @@ class SCope(s_pb2_grpc.MainServicer):
             loomFileSize=loom_file_size,
             progress=s_pb2.Progress(value=1.0, status="Sub Loom Created!"),
             isDone=True,
-        )
-
-    # Gene set enrichment
-    #
-    # Threaded makes it slower because of GIL
-    #
-    def doGeneSetEnrichment(self, request, context):
-        gene_set_file_path = os.path.join(self.dfh.get_gene_sets_dir(), request.geneSetFilePath)
-        loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
-        gse = _gse.GeneSetEnrichment(
-            scope=self, method="AUCell", loom=loom, gene_set_file_path=gene_set_file_path, annotation=""
-        )
-
-        # Running AUCell...
-        yield gse.update_state(step=-1, status_code=200, status_message="Running AUCell...", values=None)
-        time.sleep(1)
-
-        # Reading gene set...
-        yield gse.update_state(step=0, status_code=200, status_message="Reading the gene set...", values=None)
-        with open(gse.gene_set_file_path, "r") as f:
-            # Skip first line because it contains the name of the signature
-            gs = GeneSignature(
-                name="Gene Signature #1", gene2weight=[line.strip() for idx, line in enumerate(f) if idx > 0]
-            )
-        time.sleep(1)
-
-        if not gse.has_AUCell_rankings():
-            # Creating the matrix as DataFrame...
-            yield gse.update_state(step=1, status_code=200, status_message="Creating the matrix...", values=None)
-            loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
-            dgem = np.transpose(loom.get_connection()[:, :])
-            ex_mtx = pd.DataFrame(data=dgem, index=loom.get_ca_attr_by_name("CellID"), columns=loom.get_genes())
-            # Creating the rankings...
-            start_time = time.time()
-            yield gse.update_state(step=2.1, status_code=200, status_message="Creating the rankings...", values=None)
-            rnk_mtx = create_rankings(ex_mtx=ex_mtx)
-            # Saving the rankings...
-            yield gse.update_state(step=2.2, status_code=200, status_message="Saving the rankings...", values=None)
-            lp.create(
-                gse.get_AUCell_ranking_filepath(),
-                rnk_mtx.as_matrix(),
-                {"CellID": loom.get_cell_ids()},
-                {"Gene": loom.get_genes()},
-            )
-            logger.debug("{0:.5f} seconds elapsed generating rankings ---".format(time.time() - start_time))
-        else:
-            # Load the rankings...
-            yield gse.update_state(step=2, status_code=200, status_message="Rankings exists: loading...", values=None)
-            rnk_loom = self.lfh.get_loom_connection(gse.get_AUCell_ranking_filepath())
-            rnk_mtx = pd.DataFrame(data=rnk_loom[:, :], index=rnk_loom.ra.CellID, columns=rnk_loom.ca.Gene)
-
-        # Calculating AUCell enrichment...
-        start_time = time.time()
-        yield gse.update_state(step=3, status_code=200, status_message="Calculating AUCell enrichment...", values=None)
-        aucs = enrichment(rnk_mtx, gs).loc[:, "AUC"].values
-
-        logger.debug("{0:.5f} seconds elapsed calculating AUC ---".format(time.time() - start_time))
-        yield gse.update_state(
-            step=4, status_code=200, status_message=gse.get_method() + " enrichment done!", values=aucs
         )
 
     def loomUploaded(self, request, content):

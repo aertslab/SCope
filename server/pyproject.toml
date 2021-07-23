@@ -35,18 +35,10 @@ python = ">=3.7,<3.10"
 
 grpcio = "^1.26.0"
 grpcio-tools = "^1.26.0"
-
 appdirs = "^1.4.3"
-pyarrow = "^0.16.0"
-
 numpy = "^1.18.1"
 pandas = "^1.0.0"
-
 loompy = "^3.0.1"
-pyscenic = "^0.11"
-
-multiprocessing_on_dill = { version = "*", allow-prereleases = true }
-safety = "^1.8.5"
 requests = "^2.22.0"
 fastapi = "^0.66.0"
 hypercorn = "^0.11"
@@ -56,7 +48,6 @@ alembic = "^1.4.3"
 python-dotenv = "^0.18"
 python-multipart = "^0.0.5"
 h5py = ">=2.10,<3"
-scipy = "^1.6.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
@@ -67,6 +58,7 @@ black = { version = "*", allow-prereleases = true }
 mypy = "*"
 mypy-protobuf = "^1.19"
 hypothesis = {extras = ["numpy"], version = "*"}
+safety = "^1.8.5"
 types-protobuf = "^0.1.13"
 types-requests = "^2.25.0"
 

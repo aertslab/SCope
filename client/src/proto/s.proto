@@ -27,12 +27,10 @@ service Main {
   rpc getMyLooms (MyLoomsRequest) returns (MyLoomsReply) {}
   rpc translateLassoSelection (TranslateLassoSelectionRequest) returns (TranslateLassoSelectionReply) {}
   rpc getCellIDs (CellIDsRequest) returns (CellIDsReply) {}
-  rpc doGeneSetEnrichment (GeneSetEnrichmentRequest) returns (stream GeneSetEnrichmentReply) {}
   rpc getVmax (VmaxRequest) returns (VmaxReply) {}
   rpc getUUID (UUIDRequest) returns (UUIDReply) {}
   rpc getRemainingUUIDTime (RemainingUUIDTimeRequest) returns (RemainingUUIDTimeReply) {}
   rpc loomUploaded (LoomUploadedRequest) returns (LoomUploadedReply) {}
-  rpc getMyGeneSets (MyGeneSetsRequest) returns (MyGeneSetsReply) {}
   rpc deleteUserFile (DeleteUserFileRequest) returns (DeleteUserFileReply) {}
   rpc downloadSubLoom (DownloadSubLoomRequest) returns (stream DownloadSubLoomReply) {}
   rpc setAnnotationName (SetAnnotationNameRequest) returns (SetAnnotationNameReply) {}
@@ -340,21 +338,9 @@ message CellIDsReply {
   repeated string cellIds=1;
 }
 
-message GeneSetEnrichmentRequest {
-  string loomFilePath=1;
-  string geneSetFilePath=2;
-  string method=3;
-}
-
 message Progress {
   float value=1;
   string status=2;
-}
-
-message GeneSetEnrichmentReply {
-  Progress progress=1;
-  bool isDone=2;
-  CellColorByFeaturesReply cellValues=3;
 }
 
 message VmaxRequest {
@@ -397,19 +383,6 @@ message LoomUploadedRequest {
 }
 
 message LoomUploadedReply {}
-
-message MyGeneSet {
-  string geneSetFilePath=1;
-  string geneSetDisplayName=2;
-}
-
-message MyGeneSetsRequest {
-  string UUID=1;
-}
-
-message MyGeneSetsReply {
-  repeated MyGeneSet myGeneSets=1;
-}
 
 message DeleteUserFileRequest {
   string UUID=1;
