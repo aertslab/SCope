@@ -4,6 +4,8 @@ from typing import List
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
+from returns.io import IOResult
+from returns.unsafe import unsafe_perform_io
 from sqlalchemy.orm import Session
 
 from scopeserver import crud, models, schemas
@@ -21,7 +23,7 @@ async def my_projects(
     current_user: models.User = Depends(deps.get_current_user),
 ):
     """Retrieve all projects for the current user."""
-    return crud.get_projects(db=db, user_id=current_user.id)
+    return unsafe_perform_io(crud.get_projects(db=db, user_id=current_user.id))
 
 
 @router.get("/datasets", summary="Get all datasets in a project.", response_model=List[schemas.Dataset])
@@ -32,9 +34,9 @@ async def datasets(
     current_user: models.User = Depends(deps.get_current_user),
 ):
     """Retrieve all datasets in a given project."""
-    found_project = crud.get_project(db, user_id=current_user.id, project_uuid=project)
-    if found_project:
-        return found_project.datasets
+    found_project: IOResult[models.Project, str] = crud.get_project(db, user_id=current_user.id, project_uuid=project)
+    if isinstance(found_project, IOResult.success_type):
+        return unsafe_perform_io(found_project.unwrap()).datasets
 
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No project with id: {project} exists.")
 
@@ -49,7 +51,7 @@ async def users(
     current_user: models.User = Depends(deps.get_current_user),
 ):
     """Retrieve all users on a given project."""
-    all_users = crud.get_users_in_project(db, project_uuid=project)
+    all_users = unsafe_perform_io(crud.get_users_in_project(db, project_uuid=project))
     if current_user.id in (u.user for u in all_users):
         return all_users
 
@@ -64,7 +66,7 @@ async def new_project(
     current_user: models.User = Depends(deps.get_current_user),
 ):
     """Create a new project."""
-    project = crud.create_project(db, current_user.id, name)
+    project = unsafe_perform_io(crud.create_project(db, current_user.id, name))
     (settings.DATA_PATH / Path(project.uuid)).mkdir()
     return project
 
@@ -81,10 +83,12 @@ async def add_user(
     user = crud.get_user(db, schemas.User(id=user_id))
     found_project = crud.get_project(db, project_uuid=project, user_id=current_user.id)
 
-    if user is not None and found_project is not None:
-        project_existing_users = [existing_user.id for existing_user in found_project.users]
-        if user.id not in project_existing_users:
-            crud.add_user_to_project(db, user_id=user.id, project_id=found_project.id)
+    if isinstance(user, IOResult.success_type) and isinstance(found_project, IOResult.success_type):
+        _user = unsafe_perform_io(user.unwrap())
+        _project = unsafe_perform_io(found_project.unwrap())
+        project_existing_users = [existing_user.id for existing_user in _project.users]
+        if _user.id not in project_existing_users:
+            unsafe_perform_io(crud.add_user_to_project(db, user_id=_user.id, project_id=_project.id))
             return Response(status_code=status.HTTP_200_OK)
 
         raise HTTPException(
@@ -92,7 +96,9 @@ async def add_user(
             detail="User already in project",
         )
 
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User or project does not exist")
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST, detail="User or project does not exist or does not have permission"
+    )
 
 
 @router.post("/dataset", summary="", response_model=schemas.Dataset)
@@ -106,7 +112,8 @@ async def add_dataset(
 ):
     """Add a dataset to a project."""
     found_project = crud.get_project(db, project_uuid=project, user_id=current_user.id)
-    if found_project:
+    if isinstance(found_project, IOResult.success_type):
+        _project = unsafe_perform_io(found_project.unwrap())
         size = 0
         with (settings.DATA_PATH / Path(project) / Path(uploadfile.filename)).open(mode="wb") as datafile:
             data = await uploadfile.read()
@@ -115,7 +122,9 @@ async def add_dataset(
             size = len(data)
             datafile.write(data)
 
-        return crud.create_dataset(db, name=name, filename=uploadfile.filename, project=found_project, size=size)
+        return unsafe_perform_io(
+            crud.create_dataset(db, name=name, filename=uploadfile.filename, project=_project, size=size)
+        )
 
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not in this project")
 
