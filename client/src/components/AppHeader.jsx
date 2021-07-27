@@ -1,15 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { withRouter, Link } from 'react-router-dom';
-import {
-    Icon,
-    Label,
-    Button,
-    Menu,
-    Image,
-    Popup,
-    Checkbox,
-} from 'semantic-ui-react';
+import { Icon, Label, Button, Menu, Checkbox } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
 import PropTypes from 'prop-types';
 import { Cookies } from 'react-cookie';
