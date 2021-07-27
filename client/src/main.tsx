@@ -15,15 +15,20 @@ import './css/features.css';
 
 const store = configureStore({});
 
+const MainApp: React.FC<{}> = () => {
+    return (
+        <React.StrictMode>
+            <App />
+        </React.StrictMode>
+    );
+};
+
 const renderApp = () => {
     render(
         <Provider store={store}>
             <CookiesProvider>
                 <HashRouter>
-                    <Route
-                        path='/:uuid?/:loom?/:page?'
-                        component={() => <App />}
-                    />
+                    <Route path='/:uuid?/:loom?/:page?' component={MainApp} />
                 </HashRouter>
             </CookiesProvider>
         </Provider>,
