@@ -96,8 +96,8 @@ export const Welcome: React.FC<{}> = () => {
                                 )
                                 <ul>
                                     <li>
-                                        Whole Adult Brain - Filtered Dataset
-                                        - 57k Cells
+                                        Whole Adult Brain - Filtered Dataset -
+                                        57k Cells
                                     </li>
                                     <ul>
                                         <li>
