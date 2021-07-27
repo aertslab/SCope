@@ -120,30 +120,6 @@ class App extends Component {
 
         if (this.props.cookies.get('CookieConsent') === 'true') {
             this.props.consentToCookies();
-
-            if (
-                document.head.querySelector('[name=scope-orcid]') !== null &&
-                this.state.orcid_active
-            ) {
-                const auth_code = document.head
-                    .querySelector('[name=scope-orcid]')
-                    .getAttribute('auth');
-
-                BackendAPI.getORCID(
-                    auth_code,
-                    (orcid_scope_uuid, name, orcid_id) => {
-                        this.props.cookies.set(
-                            'scope_orcid_uuid',
-                            orcid_scope_uuid
-                        );
-                        this.props.cookies.set('scope_orcid_name', name);
-                        this.props.cookies.set('scope_orcid_id', orcid_id);
-                        // Possibly a bit hacky, but it works to remove the code from the URL
-                        location.href =
-                            location.origin + location.pathname + location.hash;
-                    }
-                );
-            }
         }
         document.addEventListener('click', this.clickHandler.bind(this));
         document.addEventListener('keypress', this.clickHandler.bind(this));

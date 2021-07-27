@@ -2,25 +2,8 @@ class API {
     constructor() {
         if (!__TEST_ONLY__) {
             this.GBC = require('grpc-bus-websocket-client');
-            try {
-                this.WSport = document.head
-                    .querySelector('[name=scope-wsport]')
-                    .getAttribute('port');
-                console.log('Using meta WSport');
-            } catch (ex) {
-                console.log('Using config WSport');
-                this.WSport = BACKEND.WSport;
-            }
-            try {
-                this.RPCport = document.head
-                    .querySelector('[name=scope-rpcport]')
-                    .getAttribute('port');
-                console.log('Using meta RPCport');
-            } catch (ex) {
-                this.RPCport = BACKEND.RPCport;
-                console.log('Using config RPCport');
-            }
-            console.log(this.WSport, this.RPCport);
+            this.WSport = BACKEND.WSport;
+            this.RPCport = BACKEND.RPCport;
 
             try {
                 if (REVERSEPROXYON) {
