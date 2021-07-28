@@ -62,7 +62,6 @@ class SCope(s_pb2_grpc.MainServicer):
     def __init__(self, config: Dict[str, str]):
 
         self.config = config
-        self.app_mode = False
 
         self.dfh = dfh.DataFileHandler()
         self.lfh = lfh.LoomFileHandler()
@@ -578,13 +577,8 @@ class SCope(s_pb2_grpc.MainServicer):
         return s_pb2.MyLoomsReply(myLooms=my_looms, update=update)
 
     def getUUID(self, request, context):
-        if SCope.app_mode:
-            with open(os.path.join(self.dfh.get_config_dir(), "Permanent_Session_IDs.txt"), "r") as fh:
-                newUUID = fh.readline().rstrip("\n")
-                logger.info(f"IP {request.ip} connected to SCope. Running in App mode. Passing UUID {newUUID}.")
-        else:
-            newUUID = str(uuid.uuid4())
-        if newUUID not in self.dfh.get_current_UUIDs().keys():
+        newUUID = str(uuid.uuid4())
+        if newUUID not in self.dfh.get_current_UUIDs():
             logger.info(f"IP {request.ip} connected to SCope. Passing new UUID {newUUID}.")
             self.dfh.get_uuid_log().write(
                 "{0} :: {1} :: New UUID ({2}) assigned.\n".format(
@@ -866,7 +860,6 @@ class SCope(s_pb2_grpc.MainServicer):
 
 
 def serve(run_event, config: Dict[str, Any]) -> None:
-    SCope.app_mode = False
     server = grpc.server(
         futures.ThreadPoolExecutor(max_workers=10),
         options=[("grpc.max_send_message_length", -1), ("grpc.max_receive_message_length", -1)],
