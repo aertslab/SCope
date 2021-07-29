@@ -12,8 +12,8 @@ import logging
 from pathlib import Path
 from typing import Dict, Any, Union, Optional
 
-from scopeserver.dataserver.modules.gserver import GServer as gs
-from scopeserver.dataserver.modules.pserver import PServer as ps
+from scopeserver.dataserver import GServer as gs
+from scopeserver.dataserver import PServer as ps
 from scopeserver.dataserver.utils import sys_utils as su
 import scopeserver.config as configuration
 
