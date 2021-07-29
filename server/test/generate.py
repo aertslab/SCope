@@ -189,16 +189,23 @@ def embeddings_column_attributes_strategy(num_cells: int):
     )
 
 
-def embeddings_strategy(num_cells: int):
+@st.composite
+def embeddings_strategy(draw, num_cells: int):
     "Generate Embedding features."
-    return st.builds(
-        LoomFeature,
-        label=st.just(LoomFeatureLabel.EMBEDDING),
-        metadata=st.just(
-            {"Embeddings": [{"id": -1, "name": "Vertical Clusters"}, {"id": 1, "name": "Horizontal Clusters"}]}
-        ),
-        column_attributes=embeddings_column_attributes_strategy(num_cells),
-        row_attributes=st.just({}),
+    names = (
+        st.text(st.characters(max_codepoint=1000, blacklist_categories=("Cc", "Cs")), min_size=1)
+        .map(lambda s: s.strip())
+        .filter(lambda s: len(s) > 0)
+    )
+
+    return draw(
+        st.builds(
+            LoomFeature,
+            label=st.just(LoomFeatureLabel.EMBEDDING),
+            metadata=st.just({"Embeddings": [{"id": -1, "name": draw(names)}, {"id": 1, "name": draw(names)}]}),
+            column_attributes=embeddings_column_attributes_strategy(num_cells),
+            row_attributes=st.just({}),
+        )
     )
 
 
