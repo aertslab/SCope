@@ -62,28 +62,23 @@ class SCope(scope_grpc_pb2_grpc.MainServicer):
         self.lfh.set_global_data()
 
     def check_ORCID_connection(self) -> None:
-        for i in ["orcidAPIClientID", "orcidAPIClientSecret", "orcidAPIRedirectURI"]:
-            if i not in self.config.keys():
-                self.orcid_active = False
-                return
-
-        r = requests.post(
+        request = requests.post(
             "https://orcid.org/oauth/token",
             data={
-                "client_id": self.config["orcidAPIClientID"],
-                "client_secret": self.config["orcidAPIClientSecret"],
+                "client_id": self.config["ORCID_CLIENT_ID"],
+                "client_secret": self.config["ORCID_CLIENT_SECRET"],
                 "grant_type": "client_credentials",
                 "scope": "/read-public",
             },
         )
-        if r.status_code != 200:
-            logger.error(f"ORCID connection failed! Please check your credentials. See DEBUG output for more details.")
-            logger.debug(f"HTTP Code: {r.status_code}")
-            logger.debug(f"ERROR: {r.text}")
+        if request.status_code != 200:
+            logger.error("ORCID connection failed! Please check your credentials. See DEBUG output for more details.")
+            logger.debug(f"HTTP Code: {request.status_code}")
+            logger.debug(f"ERROR: {request.text}")
             self.orcid_active = False
         else:
             logger.info("ORCID connection successful. Users will be able to authenticate.")
-            logger.debug(f"SUCCESS: {r.text}")
+            logger.debug(f"SUCCESS: {request.text}")
             self.orcid_active = True
 
     def getORCIDStatus(self, request, context):
@@ -94,32 +89,31 @@ class SCope(scope_grpc_pb2_grpc.MainServicer):
         logger.debug(f'Recieved code "{auth_code}" from frontend.')
 
         if self.orcid_active:
-            r = requests.post(
+            request = requests.post(
                 "https://orcid.org/oauth/token",
                 data={
-                    "client_id": self.config["orcidAPIClientID"],
-                    "client_secret": self.config["orcidAPIClientSecret"],
+                    "client_id": self.config["ORCID_CLIENT_ID"],
+                    "client_secret": self.config["ORCID_CLIENT_SECRET"],
                     "grant_type": "authorization_code",
                     "code": auth_code,
-                    "redirect_uri": self.config["orcidAPIRedirectURI"],
+                    "redirect_uri": self.config["ORCID_REDIRECT_URI"],
                 },
             )
 
-        if r.status_code != 200 or not self.orcid_active:
-            logger.debug(f"ERROR: {r.status_code}")
-            logger.debug(f"ERROR: {r.text}")
-            return scope_grpc_pb2.getORCIDReply(orcid_scope_uuid="null", name="null", orcid_id="null", success=False)
-        else:
-            logger.debug(f"SUCCESS: {r.text}")
-            orcid_data = json.loads(r.text)
-            success = True
+            if request.status_code != 200 or not self.orcid_active:
+                logger.debug(f"ERROR: {request.status_code}")
+                logger.debug(f"ERROR: {request.text}")
+                return scope_grpc_pb2.getORCIDReply(orcid_scope_uuid="null", name="null", orcid_id="null", success=False)
+            else:
+                logger.debug(f"SUCCESS: {request.text}")
+                orcid_data = json.loads(request.text)
 
         orcid_scope_uuid = str(uuid.uuid4())
 
         self.dfh.add_ORCIDiD(orcid_scope_uuid, orcid_data["name"], orcid_data["orcid"])
 
         return scope_grpc_pb2.getORCIDReply(
-            orcid_scope_uuid=orcid_scope_uuid, name=orcid_data["name"], orcid_id=orcid_data["orcid"], success=success
+            orcid_scope_uuid=orcid_scope_uuid, name=orcid_data["name"], orcid_id=orcid_data["orcid"], success=True
         )
 
     def getVmax(self, request, context):
@@ -346,7 +340,7 @@ class SCope(scope_grpc_pb2_grpc.MainServicer):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         if not self.dfh.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
             return scope_grpc_pb2.setColabAnnotationDataReply(success=False, message="Could not confirm user!")
-        success, message = loom.add_collab_annotation(request, self.config["DATAHASHSECRET"])
+        success, message = loom.add_collab_annotation(request, self.config["SECRET"])
         return scope_grpc_pb2.setColabAnnotationDataReply(success=success, message=message)
 
     def addNewClustering(self, request, context):
@@ -360,7 +354,7 @@ class SCope(scope_grpc_pb2_grpc.MainServicer):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         if not self.dfh.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
             return scope_grpc_pb2.voteAnnotationReply(success=False, message="Could not confirm user!")
-        success, message = loom.annotation_vote(request, self.config["DATAHASHSECRET"])
+        success, message = loom.annotation_vote(request, self.config["SECRET"])
         return scope_grpc_pb2.voteAnnotationReply(success=success, message=message)
 
     def getClusterOverlaps(self, request, context):
@@ -522,7 +516,7 @@ class SCope(scope_grpc_pb2_grpc.MainServicer):
                                 annotations=loom.get_meta_data_by_key(key="annotations"),
                                 embeddings=loom.get_meta_data_by_key(key="embeddings"),
                                 clusterings=proto.protoize_cell_type_annotation(
-                                    loom.get_meta_data_by_key(key="clusterings"), secret=self.config["DATAHASHSECRET"]
+                                    loom.get_meta_data_by_key(key="clusterings"), secret=self.config["SECRET"]
                                 ),
                             ),
                             fileMetaData=file_meta,
@@ -762,7 +756,7 @@ def serve(run_event, config: Dict[str, Any]) -> None:
     )
     scope = SCope(config=config)
     scope_grpc_pb2_grpc.add_MainServicer_to_server(scope, server)
-    server.add_insecure_port("[::]:{0}".format(config["DATA_PORT"]))
+    server.add_insecure_port("[::]:{0}".format(config["RPC_PORT"]))
     server.start()
 
     # Let the main process know that GServer has started.
