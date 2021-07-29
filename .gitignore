@@ -30,22 +30,21 @@ scope_data
 
 node_modules
 
+# GRPC/Protocol buffers compiler output
+server/scope_grpc_pb2*
+
 # Server
-opt/build/
-opt/dist/
+server/scope.sqlite
 
-opt/scopeserver/__pycache__
-opt/scopeserver/scope_server.egg-info
-opt/scopeserver/data/my-looms
-opt/scopeserver/dataserver/test
-opt/scopeserver/dataserver/dist/
-opt/scopeserver/dataserver/pyvenv
-opt/scopeserver/dataserver/build
-opt/scopeserver/dataserver/logs
-opt/scope_server.egg-info
-
-opt/scopeserver/bindserver/pbjs*
-opt/scopeserver/bindserver/window-size*
+server/scopeserver/__pycache__
+server/scopeserver/scope_server.egg-info
+server/scopeserver/data/my-looms
+server/scopeserver/dataserver/test
+server/scopeserver/dataserver/dist/
+server/scopeserver/dataserver/pyvenv
+server/scopeserver/dataserver/build
+server/scopeserver/dataserver/logs
+server/scope_server.egg-info
 
 apache/scope.conf
 

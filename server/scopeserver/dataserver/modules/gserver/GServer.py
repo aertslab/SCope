@@ -17,8 +17,8 @@ from collections import defaultdict
 from itertools import compress
 from pathlib import Path
 
-from scopeserver.dataserver.modules.gserver import s_pb2
-from scopeserver.dataserver.modules.gserver import s_pb2_grpc
+import scope_grpc_pb2
+import scope_grpc_pb2_grpc
 from scopeserver.dataserver.utils import sys_utils as su
 from scopeserver.dataserver.utils import loom_file_handler as lfh
 from scopeserver.dataserver.utils import data_file_handler as dfh
@@ -36,7 +36,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class SCope(s_pb2_grpc.MainServicer):
+class SCope(scope_grpc_pb2_grpc.MainServicer):
 
     app_name = "SCope"
     app_author = "Aertslab"
@@ -87,7 +87,7 @@ class SCope(s_pb2_grpc.MainServicer):
             self.orcid_active = True
 
     def getORCIDStatus(self, request, context):
-        return s_pb2.getORCIDStatusReply(active=self.orcid_active)
+        return scope_grpc_pb2.getORCIDStatusReply(active=self.orcid_active)
 
     def getORCID(self, request, context):
         auth_code = request.auth_code
@@ -108,7 +108,7 @@ class SCope(s_pb2_grpc.MainServicer):
         if r.status_code != 200 or not self.orcid_active:
             logger.debug(f"ERROR: {r.status_code}")
             logger.debug(f"ERROR: {r.text}")
-            return s_pb2.getORCIDReply(orcid_scope_uuid="null", name="null", orcid_id="null", success=False)
+            return scope_grpc_pb2.getORCIDReply(orcid_scope_uuid="null", name="null", orcid_id="null", success=False)
         else:
             logger.debug(f"SUCCESS: {r.text}")
             orcid_data = json.loads(r.text)
@@ -118,7 +118,7 @@ class SCope(s_pb2_grpc.MainServicer):
 
         self.dfh.add_ORCIDiD(orcid_scope_uuid, orcid_data["name"], orcid_data["orcid"])
 
-        return s_pb2.getORCIDReply(
+        return scope_grpc_pb2.getORCIDReply(
             orcid_scope_uuid=orcid_scope_uuid, name=orcid_data["name"], orcid_id=orcid_data["orcid"], success=success
         )
 
@@ -157,7 +157,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     f_max_v_max = l_max_v_max
             v_max[n] = f_v_max
             max_v_max[n] = f_max_v_max
-        return s_pb2.VmaxReply(vmax=v_max, maxVmax=max_v_max)
+        return scope_grpc_pb2.VmaxReply(vmax=v_max, maxVmax=max_v_max)
 
     def getCellColorByFeatures(self, request, context):
         start_time = time.time()
@@ -193,7 +193,7 @@ class SCope(s_pb2_grpc.MainServicer):
                 cell_color_by_features.addEmptyFeature()
 
         logger.debug("{0:.5f} seconds elapsed getting colours ---".format(time.time() - start_time))
-        return s_pb2.CellColorByFeaturesReply(
+        return scope_grpc_pb2.CellColorByFeaturesReply(
             color=None,
             compressedColor=cell_color_by_features.get_compressed_hex_vec(),
             hasAddCompressionLayer=True,
@@ -211,20 +211,20 @@ class SCope(s_pb2_grpc.MainServicer):
         label_extract = label_all_clusters if request.feature.startswith("Clustering:") else label_annotation
 
         labels = [
-            s_pb2.FeatureLabelReply.FeatureLabel(
+            scope_grpc_pb2.FeatureLabelReply.FeatureLabel(
                 label=label.label,
                 colour=label.colour,
-                coordinate=s_pb2.Coordinate(x=label.coordinate.x, y=label.coordinate.y),
+                coordinate=scope_grpc_pb2.Coordinate(x=label.coordinate.x, y=label.coordinate.y),
             )
             for label in label_extract(loom, request.embedding, request.feature)
         ]
 
-        return s_pb2.FeatureLabelReply(labels=labels)
+        return scope_grpc_pb2.FeatureLabelReply(labels=labels)
 
     def getCellAUCValuesByFeatures(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         vals, _ = loom.get_auc_values(regulon=request.feature[0])
-        return s_pb2.CellAUCValuesByFeaturesReply(value=vals)
+        return scope_grpc_pb2.CellAUCValuesByFeaturesReply(value=vals)
 
     def getNextCluster(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
@@ -257,12 +257,12 @@ class SCope(s_pb2_grpc.MainServicer):
             if result.category == f"Clustering: {clustering_meta['name']}"
         ]
 
-        return s_pb2.FeatureReply(
+        return scope_grpc_pb2.FeatureReply(
             features=[
-                s_pb2.FeatureReply.Feature(
+                scope_grpc_pb2.FeatureReply.Feature(
                     category=feature.category,
                     results=[
-                        s_pb2.FeatureReply.Feature.Match(title=match.feature, description=match.description)
+                        scope_grpc_pb2.FeatureReply.Feature.Match(title=match.feature, description=match.description)
                         for match in feature.matches
                     ],
                 )
@@ -297,22 +297,22 @@ class SCope(s_pb2_grpc.MainServicer):
             if anno != "":
                 annotations.append(loom.get_ca_attr_by_name(name=anno)[cell_indices].astype(str))
 
-        return s_pb2.CellMetaDataReply(
-            clusterIDs=[s_pb2.CellClusters(clusters=x) for x in cell_clusters],
-            geneExpression=[s_pb2.FeatureValues(features=x) for x in gene_exp],
-            aucValues=[s_pb2.FeatureValues(features=x) for x in auc_vals],
-            annotations=[s_pb2.CellAnnotations(annotations=x) for x in annotations],
+        return scope_grpc_pb2.CellMetaDataReply(
+            clusterIDs=[scope_grpc_pb2.CellClusters(clusters=x) for x in cell_clusters],
+            geneExpression=[scope_grpc_pb2.FeatureValues(features=x) for x in gene_exp],
+            aucValues=[scope_grpc_pb2.FeatureValues(features=x) for x in auc_vals],
+            annotations=[scope_grpc_pb2.CellAnnotations(annotations=x) for x in annotations],
         )
 
     def getFeatures(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         features = get_search_results(request.query, request.filter, loom)
-        return s_pb2.FeatureReply(
+        return scope_grpc_pb2.FeatureReply(
             features=[
-                s_pb2.FeatureReply.Feature(
+                scope_grpc_pb2.FeatureReply.Feature(
                     category=feature.category,
                     results=[
-                        s_pb2.FeatureReply.Feature.Match(title=match.feature, description=match.description)
+                        scope_grpc_pb2.FeatureReply.Feature.Match(title=match.feature, description=match.description)
                         for match in feature.matches
                     ],
                 )
@@ -330,45 +330,45 @@ class SCope(s_pb2_grpc.MainServicer):
             annotations = None
 
         c = loom.get_coordinates(coordinatesID=request.coordinatesID, annotation=annotations, logic=request.logic)
-        return s_pb2.CoordinatesReply(x=c["x"], y=c["y"], cellIndices=c["cellIndices"])
+        return scope_grpc_pb2.CoordinatesReply(x=c["x"], y=c["y"], cellIndices=c["cellIndices"])
 
     def setAnnotationName(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         success = loom.rename_annotation(request.clusteringID, request.clusterID, request.newAnnoName)
-        return s_pb2.SetAnnotationNameReply(success=success)
+        return scope_grpc_pb2.SetAnnotationNameReply(success=success)
 
     def setLoomHierarchy(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         success = loom.set_hierarchy(request.newHierarchy_L1, request.newHierarchy_L2, request.newHierarchy_L3)
-        return s_pb2.SetLoomHierarchyReply(success=success)
+        return scope_grpc_pb2.SetLoomHierarchyReply(success=success)
 
     def setColabAnnotationData(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         if not self.dfh.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
-            return s_pb2.setColabAnnotationDataReply(success=False, message="Could not confirm user!")
+            return scope_grpc_pb2.setColabAnnotationDataReply(success=False, message="Could not confirm user!")
         success, message = loom.add_collab_annotation(request, self.config["DATAHASHSECRET"])
-        return s_pb2.setColabAnnotationDataReply(success=success, message=message)
+        return scope_grpc_pb2.setColabAnnotationDataReply(success=success, message=message)
 
     def addNewClustering(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         if not self.dfh.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
-            return s_pb2.AddNewClusteringReply(success=False, message="Could not confirm user!")
+            return scope_grpc_pb2.AddNewClusteringReply(success=False, message="Could not confirm user!")
         success, message = loom.add_user_clustering(request)
-        return s_pb2.AddNewClusteringReply(success=success, message=message)
+        return scope_grpc_pb2.AddNewClusteringReply(success=success, message=message)
 
     def voteAnnotation(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         if not self.dfh.confirm_orcid_uuid(request.orcidInfo.orcidID, request.orcidInfo.orcidUUID):
-            return s_pb2.voteAnnotationReply(success=False, message="Could not confirm user!")
+            return scope_grpc_pb2.voteAnnotationReply(success=False, message="Could not confirm user!")
         success, message = loom.annotation_vote(request, self.config["DATAHASHSECRET"])
-        return s_pb2.voteAnnotationReply(success=success, message=message)
+        return scope_grpc_pb2.voteAnnotationReply(success=success, message=message)
 
     def getClusterOverlaps(self, request, context):
         """Get overlapping clusters of the requested cellIDs and return formatted protobuf object."""
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         cluster_overlap_data = loom.get_cluster_overlaps(request.cellIndices)
-        return s_pb2.ClusterOverlaps(
-            clusterOverlaps=[s_pb2.ClusterOverlaps.ClusterOverlap(**x) for x in cluster_overlap_data]
+        return scope_grpc_pb2.ClusterOverlaps(
+            clusterOverlaps=[scope_grpc_pb2.ClusterOverlaps.ClusterOverlap(**x) for x in cluster_overlap_data]
         )
 
     def getRegulonMetaData(self, request, context):
@@ -425,7 +425,7 @@ class SCope(s_pb2_grpc.MainServicer):
             regulon_genes = regulon_genes[mask]
             regulon_marker_metrics = list(
                 map(
-                    lambda metric: s_pb2.RegulonGenesMetric(
+                    lambda metric: scope_grpc_pb2.RegulonGenesMetric(
                         accessor=metric["accessor"],
                         name=metric["name"],
                         description=metric["description"],
@@ -445,14 +445,14 @@ class SCope(s_pb2_grpc.MainServicer):
             "metrics": regulon_marker_metrics,
         }
 
-        return s_pb2.RegulonMetaDataReply(regulonMeta=regulon)
+        return scope_grpc_pb2.RegulonMetaDataReply(regulonMeta=regulon)
 
     def getMarkerGenes(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         # Check if cluster markers for the given clustering are present in the loom
         if not loom.has_cluster_markers(clustering_id=request.clusteringID):
             logger.info("No markers for clustering {0} present in active loom.".format(request.clusteringID))
-            return s_pb2.MarkerGenesReply(genes=[], metrics=[])
+            return scope_grpc_pb2.MarkerGenesReply(genes=[], metrics=[])
 
         # Filter the MD clusterings by ID
         md_clustering = loom.get_meta_data_clustering_by_id(id=request.clusteringID)
@@ -466,7 +466,7 @@ class SCope(s_pb2_grpc.MainServicer):
             )
 
         metrics = [proto.protoize_cluster_marker_metric(x, cluster_marker_metrics) for x in md_cmm]
-        return s_pb2.MarkerGenesReply(genes=cluster_marker_metrics.index, metrics=metrics)
+        return scope_grpc_pb2.MarkerGenesReply(genes=cluster_marker_metrics.index, metrics=metrics)
 
     def getMyLooms(self, request, context):
         my_looms = []
@@ -514,11 +514,11 @@ class SCope(s_pb2_grpc.MainServicer):
                         L1 = "Uncategorized"
                         L2 = L3 = ""
                     my_looms.append(
-                        s_pb2.MyLoom(
+                        scope_grpc_pb2.MyLoom(
                             loomFilePath=f,
                             loomDisplayName=os.path.splitext(os.path.basename(f))[0],
                             loomSize=loomSize,
-                            cellMetaData=s_pb2.CellMetaData(
+                            cellMetaData=scope_grpc_pb2.CellMetaData(
                                 annotations=loom.get_meta_data_by_key(key="annotations"),
                                 embeddings=loom.get_meta_data_by_key(key="embeddings"),
                                 clusterings=proto.protoize_cell_type_annotation(
@@ -526,14 +526,14 @@ class SCope(s_pb2_grpc.MainServicer):
                                 ),
                             ),
                             fileMetaData=file_meta,
-                            loomHeierarchy=s_pb2.LoomHeierarchy(L1=L1, L2=L2, L3=L3),
+                            loomHeierarchy=scope_grpc_pb2.LoomHeierarchy(L1=L1, L2=L2, L3=L3),
                         )
                     )
             except ValueError:
                 pass
         self.dfh.update_UUID_db()
 
-        return s_pb2.MyLoomsReply(myLooms=my_looms, update=update)
+        return scope_grpc_pb2.MyLoomsReply(myLooms=my_looms, update=update)
 
     def getUUID(self, request, context):
         newUUID = str(uuid.uuid4())
@@ -546,7 +546,7 @@ class SCope(s_pb2_grpc.MainServicer):
         )
         self.dfh.get_uuid_log().flush()
         self.dfh.get_current_UUIDs()[newUUID] = [time.time(), "rw"]  # New sessions are rw
-        return s_pb2.UUIDReply(UUID=newUUID)
+        return scope_grpc_pb2.UUIDReply(UUID=newUUID)
 
     def getRemainingUUIDTime(
         self, request, context
@@ -608,7 +608,7 @@ class SCope(s_pb2_grpc.MainServicer):
             self.dfh.reset_active_session_timeout(uid)
 
         sessionMode = self.dfh.get_current_UUIDs()[uid][1]
-        return s_pb2.RemainingUUIDTimeReply(
+        return scope_grpc_pb2.RemainingUUIDTimeReply(
             UUID=uid, timeRemaining=timeRemaining, sessionsLimitReached=sessionsLimitReached, sessionMode=sessionMode
         )
 
@@ -619,13 +619,13 @@ class SCope(s_pb2_grpc.MainServicer):
         src_fast_index = set(src_cell_ids)
         dest_mask = [x in src_fast_index for x in dest_loom.get_cell_ids()]
         dest_cell_indices = list(compress(range(len(dest_mask)), dest_mask))
-        return s_pb2.TranslateLassoSelectionReply(cellIndices=dest_cell_indices)
+        return scope_grpc_pb2.TranslateLassoSelectionReply(cellIndices=dest_cell_indices)
 
     def getCellIDs(self, request, context):
         loom = self.lfh.get_loom(loom_file_path=Path(request.loomFilePath))
         cell_ids = loom.get_cell_ids()
         slctd_cell_ids = [cell_ids[i] for i in request.cellIndices]
-        return s_pb2.CellIDsReply(cellIds=slctd_cell_ids)
+        return scope_grpc_pb2.CellIDsReply(cellIds=slctd_cell_ids)
 
     def deleteUserFile(self, request, context):
         self.dfh.update_UUID_db()
@@ -654,7 +654,7 @@ class SCope(s_pb2_grpc.MainServicer):
                     logger.error(e)
         else:
             logger.error(f"UUID: {request.UUID} is read-only, but requested to delete file {finalPath}")
-        return s_pb2.DeleteUserFileReply(deletedSuccessfully=success)
+        return scope_grpc_pb2.DeleteUserFileReply(deletedSuccessfully=success)
 
     def downloadSubLoom(self, request, context):
         start_time = time.time()
@@ -710,10 +710,10 @@ class SCope(s_pb2_grpc.MainServicer):
         logger.debug("Subsetting {0} cluster from the active .loom...".format(request.featureValue))
         processed = 0
         tot_cells = loom.get_nb_cells()
-        yield s_pb2.DownloadSubLoomReply(
+        yield scope_grpc_pb2.DownloadSubLoomReply(
             loomFilePath="",
             loomFileSize=0,
-            progress=s_pb2.Progress(value=0.01, status="Sub Loom creation started!"),
+            progress=scope_grpc_pb2.Progress(value=0.01, status="Sub Loom creation started!"),
             isDone=False,
         )
         sub_matrices = []
@@ -721,16 +721,16 @@ class SCope(s_pb2_grpc.MainServicer):
             sub_matrices.append(view[:, :])
             # Send the progress
             processed = idx / tot_cells
-            yield s_pb2.DownloadSubLoomReply(
+            yield scope_grpc_pb2.DownloadSubLoomReply(
                 loomFilePath="",
                 loomFileSize=0,
-                progress=s_pb2.Progress(value=processed, status="Sub Loom Created!"),
+                progress=scope_grpc_pb2.Progress(value=processed, status="Sub Loom Created!"),
                 isDone=False,
             )
-        yield s_pb2.DownloadSubLoomReply(
+        yield scope_grpc_pb2.DownloadSubLoomReply(
             loomFilePath="",
             loomFileSize=0,
-            progress=s_pb2.Progress(value=0.99, status="Sub Loom Created!"),
+            progress=scope_grpc_pb2.Progress(value=0.99, status="Sub Loom Created!"),
             isDone=False,
         )
         sub_matrix = np.concatenate(sub_matrices, axis=1)
@@ -747,10 +747,10 @@ class SCope(s_pb2_grpc.MainServicer):
             loom_file_size = os.fstat(fh.fileno())[6]
         logger.debug("{0:.5f} seconds elapsed making loom ---".format(time.time() - start_time))
 
-        yield s_pb2.DownloadSubLoomReply(
+        yield scope_grpc_pb2.DownloadSubLoomReply(
             loomFilePath=sub_loom_file_path,
             loomFileSize=loom_file_size,
-            progress=s_pb2.Progress(value=1.0, status="Sub Loom Created!"),
+            progress=scope_grpc_pb2.Progress(value=1.0, status="Sub Loom Created!"),
             isDone=True,
         )
 
@@ -761,7 +761,7 @@ def serve(run_event, config: Dict[str, Any]) -> None:
         options=[("grpc.max_send_message_length", -1), ("grpc.max_receive_message_length", -1)],
     )
     scope = SCope(config=config)
-    s_pb2_grpc.add_MainServicer_to_server(scope, server)
+    scope_grpc_pb2_grpc.add_MainServicer_to_server(scope, server)
     server.add_insecure_port("[::]:{0}".format(config["DATA_PORT"]))
     server.start()
 

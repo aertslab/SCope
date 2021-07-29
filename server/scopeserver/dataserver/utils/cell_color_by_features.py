@@ -7,7 +7,7 @@ import sys
 import numpy as np
 import zlib
 
-from scopeserver.dataserver.modules.gserver import s_pb2
+import scope_grpc_pb2
 from scopeserver.dataserver.utils import constant
 from scopeserver.dataserver.utils.constant import to_colours
 from scopeserver.dataserver.utils import data
@@ -144,10 +144,12 @@ class CellColorByFeatures:
             cellIndices = self.loom.get_anno_cells(annotations=annotations, logic=logic)
             self.hex_vec = np.array(self.hex_vec)[cellIndices]
 
-        reply = s_pb2.CellColorByFeaturesReply(
+        reply = scope_grpc_pb2.CellColorByFeaturesReply(
             color=self.hex_vec,
             vmax=self.v_max,
-            legend=s_pb2.ColorLegend(values=md_annotation_values, colors=to_colours(range(len(md_annotation_values)))),
+            legend=scope_grpc_pb2.ColorLegend(
+                values=md_annotation_values, colors=to_colours(range(len(md_annotation_values)))
+            ),
         )
         self.setReply(reply=reply)
 
@@ -194,7 +196,7 @@ class CellColorByFeatures:
                         self.hex_vec.append(colour)
                         legend.add((cluster_names_dict[i], colour))
                     values, colors = zip(*legend)
-                    self.legend = s_pb2.ColorLegend(values=values, colors=colors)
+                    self.legend = scope_grpc_pb2.ColorLegend(values=values, colors=colors)
 
                     if len(request.annotation) > 0:
                         annotations = [Annotation(name=ann.name, values=ann.values) for ann in request.annotation]
@@ -202,7 +204,9 @@ class CellColorByFeatures:
                         self.hex_vec = np.array(self.hex_vec)[cellIndices]
 
                     # Set the reply and break the for loop
-                    reply = s_pb2.CellColorByFeaturesReply(color=self.hex_vec, vmax=self.v_max, legend=self.legend)
+                    reply = scope_grpc_pb2.CellColorByFeaturesReply(
+                        color=self.hex_vec, vmax=self.v_max, legend=self.legend
+                    )
                     self.setReply(reply=reply)
                     break
                 else:
@@ -215,7 +219,9 @@ class CellColorByFeatures:
                 request.feature[n]
             )
             self.setReply(
-                s_pb2.CellColorByFeaturesReply(error=s_pb2.ErrorReply(type="Value Error", message=error_message))
+                scope_grpc_pb2.CellColorByFeaturesReply(
+                    error=scope_grpc_pb2.ErrorReply(type="Value Error", message=error_message)
+                )
             )
 
         if clusteringID is not None and clusterID is not None:

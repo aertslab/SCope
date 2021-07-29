@@ -37,6 +37,11 @@ jobs:
                   ${HOME}/.poetry/bin/poetry install
               working-directory: ${{ env.working-directory }}
 
+            - name: Generate GRPC definitions
+              run: |
+                bash ./compile-proto.sh
+              working-directory: ${{ env.working-directory }}
+
             - name: Run pylint
               run: |
                   ${HOME}/.poetry/bin/poetry run pylint-fail-under --fail_under "7.5" --rcfile pyproject.toml scopeserver main.py

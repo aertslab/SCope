@@ -111,7 +111,7 @@ module.exports = {
         }),
         new CopyPlugin({
             patterns: [
-                { from: paths.src + '/proto/s.proto' },
+                { from: paths.shared + '/protobuf/scope-grpc.proto' },
                 { from: paths.src + '/images/*' },
                 { from: paths.images + '/*.png' },
             ],

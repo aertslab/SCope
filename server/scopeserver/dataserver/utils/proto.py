@@ -8,7 +8,7 @@ import hashlib
 from typing import Dict, Any
 from pandas import DataFrame
 
-from scopeserver.dataserver.modules.gserver import s_pb2
+import scope_grpc_pb2
 
 
 def protoize_cell_type_annotation(clusterings_metadata, secret: str):
@@ -35,12 +35,12 @@ def protoize_cell_type_annotation(clusterings_metadata, secret: str):
                             hash_data = json.dumps(cta["data"]) + v["voter_id"] + secret
                             user_hash = hashlib.sha256(hash_data.encode()).hexdigest()
                             v["voter_hash"] = user_hash == v["voter_hash"]
-                            votes[i]["voters"].append(s_pb2.CollabAnnoVoter(**v))
+                            votes[i]["voters"].append(scope_grpc_pb2.CollabAnnoVoter(**v))
                             votes[i]["total"] += 1
-                        votes[i] = s_pb2.CollabAnnoVotes(**votes[i])
+                        votes[i] = scope_grpc_pb2.CollabAnnoVotes(**votes[i])
 
-                    cta_proto = s_pb2.CellTypeAnnotation(
-                        data=s_pb2.CollabAnnoData(**cta["data"]),
+                    cta_proto = scope_grpc_pb2.CellTypeAnnotation(
+                        data=scope_grpc_pb2.CollabAnnoData(**cta["data"]),
                         validate_hash=data_hash == cta["validate_hash"],
                         votes_for=votes["votes_for"],
                         votes_against=votes["votes_against"],
@@ -54,7 +54,7 @@ def protoize_cluster_marker_metric(metric: Dict, cluster_marker_metrics: DataFra
     """
     Convert provided cluster marker metric into protobuf objects.
     """
-    return s_pb2.MarkerGenesMetric(
+    return scope_grpc_pb2.MarkerGenesMetric(
         accessor=metric["accessor"],
         name=metric["name"],
         description=metric["description"],
