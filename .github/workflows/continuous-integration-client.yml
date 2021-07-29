@@ -31,6 +31,9 @@ jobs:
         run: |
           npm audit --audit-level=moderate
         working-directory: ${{ env.working-directory }}
+      - name: Build production application
+        run: |
+          npm build
       - name: Lint
         run: |
           npm run lint
