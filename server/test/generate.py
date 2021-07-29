@@ -26,7 +26,7 @@ LARGEST: int = 64
 
 
 class LoomFeatureLabel(Enum):
-    "Labal for LoomFeature objects."
+    "Label for LoomFeature objects."
     REGULON = 0
     CLUSTERING = 1
     EMBEDDING = 2
