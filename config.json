@@ -1,7 +1,6 @@
 {
     "debug": true,
     "publicHostAddress": "127.0.0.1",
-    "localHostAddress": "127.0.0.1",
     "httpProtocol": "http",
     "wsProtocol": "ws",
     "mPort": 55850,
