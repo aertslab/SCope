@@ -56,7 +56,7 @@ def test_label_all_clusters(data):
             for cluster_id, cluster in cluster_names.items():
                 coords = loom.get_coordinates(-1, cluster_info=(clustering_meta["id"], cluster_id))
                 cluster_coords = Coordinate(np.mean(coords["x"]), y=np.mean(coords["y"]))
-                colour = constant.BIG_COLOR_LIST[cluster_id]
+                colour = constant.BIG_COLOR_LIST[cluster_id % len(constant.BIG_COLOR_LIST)]
                 labels.append(FeatureLabel(label=cluster, colour=colour, coordinate=cluster_coords))
 
             _observed = sorted(label_all_clusters(loom, -1, clustering_meta["name"]))
