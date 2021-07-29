@@ -79,7 +79,7 @@ class SCope(s_pb2_grpc.MainServicer):
         self.lfh.set_global_data()
 
     def check_ORCID_connection(self) -> None:
-        for i in ["orcidAPIClientID", "orcidAPIClientSecret", "orcidAPIRedirectURI"]:
+        for i in ["ORCIDAPICLIENTID", "ORCIDAPICLIENTSECRET", "ORCIDAPIREDIRECTURI"]:
             if i not in self.config.keys():
                 self.orcid_active = False
                 return
@@ -87,8 +87,8 @@ class SCope(s_pb2_grpc.MainServicer):
         r = requests.post(
             "https://orcid.org/oauth/token",
             data={
-                "client_id": self.config["orcidAPIClientID"],
-                "client_secret": self.config["orcidAPIClientSecret"],
+                "client_id": self.config["ORCIDAPICLIENTID"],
+                "client_secret": self.config["ORCIDAPICLIENTSECRET"],
                 "grant_type": "client_credentials",
                 "scope": "/read-public",
             },
@@ -114,11 +114,11 @@ class SCope(s_pb2_grpc.MainServicer):
             r = requests.post(
                 "https://orcid.org/oauth/token",
                 data={
-                    "client_id": self.config["orcidAPIClientID"],
-                    "client_secret": self.config["orcidAPIClientSecret"],
+                    "client_id": self.config["ORCIDAPICLIENTID"],
+                    "client_secret": self.config["ORCIDAPICLIENTSECRET"],
                     "grant_type": "authorization_code",
                     "code": auth_code,
-                    "redirect_uri": self.config["orcidAPIRedirectURI"],
+                    "redirect_uri": self.config["ORCIDAPIREDIRECTURI"],
                 },
             )
 
