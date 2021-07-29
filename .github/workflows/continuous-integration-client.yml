@@ -33,7 +33,7 @@ jobs:
         working-directory: ${{ env.working-directory }}
       - name: Build production application
         run: |
-          npm build
+          npm run build
         working-directory: ${{ env.working-directory }}
       - name: Lint
         run: |
