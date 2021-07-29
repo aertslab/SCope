@@ -39,7 +39,7 @@ jobs:
 
             - name: Generate GRPC definitions
               run: |
-                bash ./compile-proto.sh
+                ${HOME}/.poetry/bin/poetry run bash ./compile-proto.sh
               working-directory: ${{ env.working-directory }}
 
             - name: Run pylint

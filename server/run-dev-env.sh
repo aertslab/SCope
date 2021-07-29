@@ -7,7 +7,7 @@ echo "**************************************************************************
 
 export DATAHASHSECRET="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ab"
 
-bash ./compile-proto.sh
+poetry run bash ./compile-proto.sh
 
 poetry run dotenv run alembic upgrade head
 
