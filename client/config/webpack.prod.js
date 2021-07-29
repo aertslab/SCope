@@ -41,6 +41,10 @@ module.exports = merge(common, {
                 wsProtocol: 'wss',
                 host: 'scope.aertslab.org',
             }),
+            ORCID: JSON.stringify({
+                client_id: 'APP-1QNL921F7P9FC3S4',
+                redirect_uri: 'https://scope.aertslab.org/',
+            }),
             API_PREFIX: 'https://scope.aertslab.org/api/v1/',
             __TEST_ONLY__: false,
         }),

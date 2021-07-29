@@ -40,7 +40,11 @@ module.exports = merge(common, {
                 wsProtocol: 'ws',
                 host: '127.0.0.1',
             }),
-            API_PREFIX: 'http://localhost:8000/api/vi/',
+            ORCID: JSON.stringify({
+                client_id: 'APP-1QNL921F7P9FC3S4',
+                redirect_uri: 'http://127.0.0.1:55850/',
+            }),
+            API_PREFIX: 'http://localhost:8000/api/v1/',
             __TEST_ONLY__: false,
         }),
         new BundleAnalyzerPlugin({ openAnalyzer: false }),
