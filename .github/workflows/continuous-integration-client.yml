@@ -34,6 +34,7 @@ jobs:
       - name: Build production application
         run: |
           npm build
+        working-directory: ${{ env.working-directory }}
       - name: Lint
         run: |
           npm run lint
