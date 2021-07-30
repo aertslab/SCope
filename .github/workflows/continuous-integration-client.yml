@@ -1,10 +1,8 @@
 name: Client CI
 on:
   pull_request:
-    paths-ignore:
-    - 'server/**'
-    - 'grpc-proxy-server/**'
-    - 'docs/**'
+    paths:
+    - 'client/**'
 
 jobs:
   client-quality-checks:
