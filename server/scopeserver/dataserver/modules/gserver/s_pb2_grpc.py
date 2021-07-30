@@ -65,11 +65,6 @@ class MainStub(object):
             request_serializer=s__pb2.CellIDsRequest.SerializeToString,
             response_deserializer=s__pb2.CellIDsReply.FromString,
         )
-        self.doGeneSetEnrichment = channel.unary_stream(
-            "/scope.Main/doGeneSetEnrichment",
-            request_serializer=s__pb2.GeneSetEnrichmentRequest.SerializeToString,
-            response_deserializer=s__pb2.GeneSetEnrichmentReply.FromString,
-        )
         self.getVmax = channel.unary_unary(
             "/scope.Main/getVmax",
             request_serializer=s__pb2.VmaxRequest.SerializeToString,
@@ -89,11 +84,6 @@ class MainStub(object):
             "/scope.Main/loomUploaded",
             request_serializer=s__pb2.LoomUploadedRequest.SerializeToString,
             response_deserializer=s__pb2.LoomUploadedReply.FromString,
-        )
-        self.getMyGeneSets = channel.unary_unary(
-            "/scope.Main/getMyGeneSets",
-            request_serializer=s__pb2.MyGeneSetsRequest.SerializeToString,
-            response_deserializer=s__pb2.MyGeneSetsReply.FromString,
         )
         self.deleteUserFile = channel.unary_unary(
             "/scope.Main/deleteUserFile",
@@ -220,12 +210,6 @@ class MainServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def doGeneSetEnrichment(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
     def getVmax(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -245,12 +229,6 @@ class MainServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def loomUploaded(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
-    def getMyGeneSets(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -381,11 +359,6 @@ def add_MainServicer_to_server(servicer, server):
             request_deserializer=s__pb2.CellIDsRequest.FromString,
             response_serializer=s__pb2.CellIDsReply.SerializeToString,
         ),
-        "doGeneSetEnrichment": grpc.unary_stream_rpc_method_handler(
-            servicer.doGeneSetEnrichment,
-            request_deserializer=s__pb2.GeneSetEnrichmentRequest.FromString,
-            response_serializer=s__pb2.GeneSetEnrichmentReply.SerializeToString,
-        ),
         "getVmax": grpc.unary_unary_rpc_method_handler(
             servicer.getVmax,
             request_deserializer=s__pb2.VmaxRequest.FromString,
@@ -405,11 +378,6 @@ def add_MainServicer_to_server(servicer, server):
             servicer.loomUploaded,
             request_deserializer=s__pb2.LoomUploadedRequest.FromString,
             response_serializer=s__pb2.LoomUploadedReply.SerializeToString,
-        ),
-        "getMyGeneSets": grpc.unary_unary_rpc_method_handler(
-            servicer.getMyGeneSets,
-            request_deserializer=s__pb2.MyGeneSetsRequest.FromString,
-            response_serializer=s__pb2.MyGeneSetsReply.SerializeToString,
         ),
         "deleteUserFile": grpc.unary_unary_rpc_method_handler(
             servicer.deleteUserFile,
@@ -771,35 +739,6 @@ class Main(object):
         )
 
     @staticmethod
-    def doGeneSetEnrichment(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_stream(
-            request,
-            target,
-            "/scope.Main/doGeneSetEnrichment",
-            s__pb2.GeneSetEnrichmentRequest.SerializeToString,
-            s__pb2.GeneSetEnrichmentReply.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
     def getVmax(
         request,
         target,
@@ -905,35 +844,6 @@ class Main(object):
             "/scope.Main/loomUploaded",
             s__pb2.LoomUploadedRequest.SerializeToString,
             s__pb2.LoomUploadedReply.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def getMyGeneSets(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/scope.Main/getMyGeneSets",
-            s__pb2.MyGeneSetsRequest.SerializeToString,
-            s__pb2.MyGeneSetsReply.FromString,
             options,
             channel_credentials,
             insecure,

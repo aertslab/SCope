@@ -11,7 +11,7 @@ jobs:
             working-directory: ./server
         strategy:
             matrix:
-                python-version: [3.7, 3.8]
+                python-version: [3.8, 3.9]
 
         steps:
             - uses: actions/checkout@v2
@@ -27,6 +27,11 @@ jobs:
             - name: Install Poetry
               run: |
                   curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+
+            - name: Install LibHDF5
+              run: |
+                sudo apt-get install libhdf5-dev
+
             - name: Install dependencies
               run: |
                   ${HOME}/.poetry/bin/poetry install
@@ -34,7 +39,7 @@ jobs:
 
             - name: Run pylint
               run: |
-                  ${HOME}/.poetry/bin/poetry run pylint-fail-under --fail_under "7.1" --rcfile pyproject.toml scopeserver main.py
+                  ${HOME}/.poetry/bin/poetry run pylint-fail-under --fail_under "7.5" --rcfile pyproject.toml scopeserver main.py
               working-directory: ${{ env.working-directory }}
 
             - name: Run black

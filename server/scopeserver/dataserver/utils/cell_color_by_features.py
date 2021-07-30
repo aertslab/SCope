@@ -16,8 +16,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-RGB_COLORS: int = 255 * 255 * 255
-
 
 class CellColorByFeatures:
     def __init__(self, loom):
@@ -41,9 +39,6 @@ class CellColorByFeatures:
         savings_percent = 1 - str_array_joint_compressed_size / str_array_size
         logger.debug("Saving " + "{:.2%} of space".format(savings_percent))
         return str_array_joint_compressed
-
-    def get_features(self):
-        return self.features
 
     def get_hex_vec(self):
         for _ in itertools.repeat(None, 3 - len(self.features)):
