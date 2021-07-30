@@ -264,7 +264,10 @@ def clustering_internal_strategy(draw, cluster_id: int, num_cells: int, num_gene
     "Generate valid Clustering objects."
     clusters = draw(
         st.lists(
-            st.integers(min_value=0, max_value=MAX_GENERATED_SIZE), min_size=min(1, num_cells), max_size=num_cells, unique=True
+            st.integers(min_value=0, max_value=MAX_GENERATED_SIZE),
+            min_size=min(1, num_cells),
+            max_size=num_cells,
+            unique=True,
         )
     )
     assignment = assign_cells_to_clusters(clusters, num_cells=num_cells)
@@ -333,7 +336,9 @@ def clustering_metadata_internal_strategy(identifier: int, clusters: List[int]):
 @st.composite
 def clusterings_strategy(draw, num_cells: int, num_genes: int):
     "Generate valid clustering features."
-    clustering_ids = st.lists(st.integers(min_value=0, max_value=MAX_GENERATED_SIZE), min_size=1, max_size=MAX_GENERATED_SIZE, unique=True)
+    clustering_ids = st.lists(
+        st.integers(min_value=0, max_value=MAX_GENERATED_SIZE), min_size=1, max_size=MAX_GENERATED_SIZE, unique=True
+    )
     clusterings: List[Clustering] = draw(
         clustering_ids.flatmap(partial(clusterings_internal_strategy, num_cells=num_cells, num_genes=num_genes))
     )
