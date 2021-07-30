@@ -16,7 +16,7 @@ from google.protobuf.internal.containers import RepeatedScalarFieldContainer
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
 from scopeserver.dataserver.utils import search_space as ss
-from scopeserver.dataserver.modules.gserver import s_pb2
+import scope_grpc_pb2
 from scopeserver.dataserver.utils import constant
 from scopeserver.dataserver.utils.annotation import Annotation
 
@@ -331,7 +331,7 @@ class Loom:
 
     @staticmethod
     def create_new_clustering_meta(
-        metaJson: dict, request: s_pb2.AddNewClusteringRequest
+        metaJson: dict, request: scope_grpc_pb2.AddNewClusteringRequest
     ) -> Tuple[Clustering, Dict[str, int]]:
 
         new_clustering_id = max([int(x["id"]) for x in metaJson["clusterings"]]) + 1
@@ -350,7 +350,7 @@ class Loom:
         return cluster_meta, cluster_mapping
 
     def get_cells_overlap(
-        self, cluster_info: s_pb2.NewClusterInfo, cluster_mapping: Dict[str, int]
+        self, cluster_info: scope_grpc_pb2.NewClusterInfo, cluster_mapping: Dict[str, int]
     ) -> Tuple[List[int], List[int], Set[str]]:
         chosen_cells = []
         new_cluster_ids = []

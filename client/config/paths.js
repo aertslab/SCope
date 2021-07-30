@@ -6,4 +6,6 @@ module.exports = {
     build: path.resolve(__dirname, '../dist'),
 
     images: path.resolve(__dirname, '../images'),
+
+    shared: path.resolve(__dirname, '../../shared')
 };
