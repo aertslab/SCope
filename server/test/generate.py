@@ -22,7 +22,7 @@ import loompy
 from scopeserver.dataserver.utils.loom import Loom
 from scopeserver.dataserver.utils.loom_file_handler import LoomFileHandler
 
-LARGEST: int = 64
+MAX_GENERATED_SIZE: int = 64
 
 
 class LoomFeatureLabel(Enum):
@@ -70,7 +70,7 @@ def regulons_auc_attr_strategy(
 def regulons_occurences_strategy(which: Union[Literal["Motif"], Literal["Track"]], num_genes: int, num_regulons: int):
     "Generate regulon occurences."
     dtypes = [(f"{which}Regulon_{n}", np.int32) for n in range(1, num_regulons + 1)]
-    element_strategies = [st.integers(min_value=0, max_value=LARGEST) for _ in range(num_regulons)]
+    element_strategies = [st.integers(min_value=0, max_value=MAX_GENERATED_SIZE) for _ in range(num_regulons)]
     return hypothesis.extra.numpy.arrays(dtype=dtypes, shape=num_genes, elements=st.tuples(*element_strategies))
 
 
@@ -140,8 +140,8 @@ def regulons_new_strategy(num_genes: int, num_cells: int, num_regulons: int):
                 "regulonThresholds": regulons_thresholds_strategy(num_regulons),
                 "regulonSettings": st.fixed_dictionaries(
                     {
-                        "min_genes_regulon": st.integers(min_value=0, max_value=LARGEST),
-                        "min_regulon_gene_occurrence": st.integers(min_value=0, max_value=LARGEST),
+                        "min_genes_regulon": st.integers(min_value=0, max_value=MAX_GENERATED_SIZE),
+                        "min_regulon_gene_occurrence": st.integers(min_value=0, max_value=MAX_GENERATED_SIZE),
                     }
                 ),
             }
@@ -250,7 +250,7 @@ def assign_cells_to_clusters(clusters: List[int], num_cells: int) -> List[int]:
 def cluster_markers_strategy(clusters: List[int], num_genes: int):
     "Generate valid cluster markers."
     dtypes = [(str(c), np.int32) for c in clusters]
-    metric_strategy = [st.integers(min_value=1, max_value=LARGEST) for _ in clusters]
+    metric_strategy = [st.integers(min_value=1, max_value=MAX_GENERATED_SIZE) for _ in clusters]
     score = hypothesis.extra.numpy.arrays(dtype=dtypes, shape=num_genes, elements=st.tuples(*metric_strategy))
     mask = np.array(
         [tuple((clusters[gene % len(clusters)] == c) for c in clusters) for gene in range(num_genes)], dtype=dtypes
@@ -264,7 +264,7 @@ def clustering_internal_strategy(draw, cluster_id: int, num_cells: int, num_gene
     "Generate valid Clustering objects."
     clusters = draw(
         st.lists(
-            st.integers(min_value=0, max_value=LARGEST), min_size=min(1, num_cells), max_size=num_cells, unique=True
+            st.integers(min_value=0, max_value=MAX_GENERATED_SIZE), min_size=min(1, num_cells), max_size=num_cells, unique=True
         )
     )
     assignment = assign_cells_to_clusters(clusters, num_cells=num_cells)
@@ -333,7 +333,7 @@ def clustering_metadata_internal_strategy(identifier: int, clusters: List[int]):
 @st.composite
 def clusterings_strategy(draw, num_cells: int, num_genes: int):
     "Generate valid clustering features."
-    clustering_ids = st.lists(st.integers(min_value=0, max_value=LARGEST), min_size=1, max_size=LARGEST, unique=True)
+    clustering_ids = st.lists(st.integers(min_value=0, max_value=MAX_GENERATED_SIZE), min_size=1, max_size=MAX_GENERATED_SIZE, unique=True)
     clusterings: List[Clustering] = draw(
         clustering_ids.flatmap(partial(clusterings_internal_strategy, num_cells=num_cells, num_genes=num_genes))
     )
@@ -369,7 +369,7 @@ def clusterings_strategy(draw, num_cells: int, num_genes: int):
 def matrix_strategy(num_cells: int, num_genes: int):
     "Generate an expression matrix."
     return hypothesis.extra.numpy.arrays(
-        dtype=np.int32, shape=(num_genes, num_cells), elements=st.integers(min_value=1, max_value=LARGEST)
+        dtype=np.int32, shape=(num_genes, num_cells), elements=st.integers(min_value=1, max_value=MAX_GENERATED_SIZE)
     )
 
 
@@ -424,7 +424,7 @@ class LoomData:
 @st.composite
 def loom_data_strategy(draw):
     "Generate LoomData objects."
-    sizes = st.integers(min_value=1, max_value=LARGEST)
+    sizes = st.integers(min_value=1, max_value=MAX_GENERATED_SIZE)
     names = st.text(st.characters(max_codepoint=1000, whitelist_categories=("Nd", "Ll", "Lu")), min_size=1)
     n_regulons = draw(sizes)
     n_cells = draw(sizes)
