@@ -7,38 +7,20 @@ import base64
 import functools
 import cgi
 import tempfile
-import time
+from pathlib import PurePath
+import threading
+import logging
+
 from http import server as httpserver
 import socketserver
 from urllib import parse as urllibparse
 import loompy as lp
-from pathlib import Path, PurePath
-import threading
+
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
-from scopeserver.dataserver.modules.gserver import GServer
 from scopeserver.dataserver.utils import sys_utils as su
-import logging
 
 logger = logging.getLogger(__name__)
-
-unicode = str
-
-
-def _decode_str_if_py2(inputstr, encoding="utf-8"):
-    "Will return decoded with given encoding *if* input is a string and it's Py2."
-    if sys.version_info < (3,) and isinstance(inputstr, str):
-        return inputstr.decode(encoding)
-    else:
-        return inputstr
-
-
-def _encode_str_if_py2(inputstr, encoding="utf-8"):
-    "Will return encoded with given encoding *if* input is a string and it's Py2"
-    if sys.version_info < (3,) and isinstance(inputstr, str):
-        return inputstr.encode(encoding)
-    else:
-        return inputstr
 
 
 def fullpath(path):
@@ -57,10 +39,8 @@ def check_auth(method):
     def decorated(self, *pargs):
         "Reject if auth fails."
         if self.auth:
-            # TODO: Between minor versions this handles str/bytes differently
             received = self.get_case_insensitive_header("Authorization", None)
             expected = "Basic " + base64.b64encode(self.auth).decode()
-            # TODO: Timing attack?
             if received != expected:
                 self.send_response(401)
                 self.send_header("WWW-Authenticate", 'Basic realm="Droopy"')
@@ -214,12 +194,9 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
         logger.debug(name)
 
         name = urllibparse.unquote(name)
-        name = _decode_str_if_py2(name, "utf-8")
 
-        # TODO: Refactor special-method handling to make more modular?
         # Include ability to self-define "special method" prefix path?
-        # TODO Verify that this is path-injection proof
-        localpath = _encode_str_if_py2(os.path.join(self.directory, name), "utf-8")
+        localpath = os.path.join(self.directory, name)
         with open(localpath, "rb") as f:
             self.send_resp_headers(
                 200,
@@ -262,7 +239,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
 
         if "loomFilePath" in form.keys():
             self.directory = data_file_handler.get_data_dir_path_by_file_type(file_type=form.getvalue("file-type"))
-            localpath = _encode_str_if_py2(os.path.join(self.directory, form.getvalue("loomFilePath")), "utf-8")
+            localpath = os.path.join(self.directory, form.getvalue("loomFilePath"))
             with open(localpath, "rb") as f:
                 self.send_resp_headers(
                     200,
@@ -299,13 +276,13 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
             if not isinstance(file_items, list):
                 file_items = [file_items]
             for item in file_items:
-                filename = _decode_str_if_py2(basename(item.filename), "utf-8")
+                filename = basename(item.filename)
                 if filename == "":
                     continue
-                localpath = _encode_str_if_py2(os.path.join(self.directory, filename), "utf-8")
+                localpath = os.path.join(self.directory, filename)
                 root, ext = os.path.splitext(localpath)
                 i = 1
-                # TODO: race condition...
+
                 while os.path.exists(localpath):
                     localpath = "%s-%d%s" % (root, i, ext)
                     i = i + 1
@@ -388,7 +365,7 @@ class HTTPUploadHandler(httpserver.BaseHTTPRequestHandler):
         "Returns the list of files that should appear as download links."
         names = []
         # In py2, listdir() returns strings when the directory is a string.
-        for name in os.listdir(unicode(self.directory)):
+        for name in os.listdir(str(self.directory)):
             if name.startswith(DroopyFieldStorage.TMPPREFIX):
                 continue
             npath = os.path.join(self.directory, name)
@@ -453,7 +430,7 @@ def run(
     HTTPUploadHandler.file_mode = file_mode
     HTTPUploadHandler.auth = auth
     httpd = ThreadedHTTPServer((hostname, port), HTTPUploadHandler)
-    # TODO: Specify TLS1.2 only?
+
     if certfile:
         try:
             import ssl
