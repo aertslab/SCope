@@ -88,10 +88,12 @@ class CellColorByFeatures:
         if feature != "":
             if len(request.annotation) > 0:
                 annotations = [Annotation(name=ann.name, values=ann.values) for ann in request.annotation]
+                self.cellIndices = self.loom.get_anno_cells(annotations, request.logic)
             else:
                 annotations = None
+                self.cellIndices = list(range(self.loom.get_nb_cells()))
 
-            vals, self.cellIndices = self.loom.get_gene_expression(
+            vals = self.loom.get_gene_expression(
                 gene_symbol=feature,
                 log_transform=request.hasLogTransform,
                 cpm_normalise=request.hasCpmTransform,

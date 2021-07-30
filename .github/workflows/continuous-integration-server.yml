@@ -49,12 +49,12 @@ jobs:
 
             - name: Run mypy
               run: |
-                  ${HOME}/.poetry/bin/poetry run mypy --config-file pyproject.toml --ignore-missing-imports scopeserver main.py
+                  ${HOME}/.poetry/bin/poetry run mypy --config-file pyproject.toml --ignore-missing-imports scopeserver test main.py
               working-directory: ${{ env.working-directory }}
 
             - name: Run pytest
               run: |
-                  ${HOME}/.poetry/bin/poetry run dotenv -f .test.env run pytest --cov=scopeserver --cov-branch --cov-fail-under=38.5 --doctest-modules --ignore-glob=alembic
+                  ${HOME}/.poetry/bin/poetry run dotenv -f .test.env run pytest --cov=scopeserver --cov-branch --cov-fail-under=40.0 --doctest-modules --ignore-glob=alembic
               working-directory: ${{ env.working-directory }}
 
             - name: Run safety security checks
