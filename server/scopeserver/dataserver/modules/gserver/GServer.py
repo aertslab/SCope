@@ -578,15 +578,15 @@ class SCope(s_pb2_grpc.MainServicer):
 
     def getUUID(self, request, context):
         newUUID = str(uuid.uuid4())
-        if newUUID not in self.dfh.get_current_UUIDs():
-            logger.info(f"IP {request.ip} connected to SCope. Passing new UUID {newUUID}.")
-            self.dfh.get_uuid_log().write(
-                "{0} :: {1} :: New UUID ({2}) assigned.\n".format(
-                    time.strftime("%Y-%m-%d__%H-%M-%S", time.localtime()), request.ip, newUUID
-                )
+
+        logger.info(f"IP {request.ip} connected to SCope. Passing new UUID {newUUID}.")
+        self.dfh.get_uuid_log().write(
+            "{0} :: {1} :: New UUID ({2}) assigned.\n".format(
+                time.strftime("%Y-%m-%d__%H-%M-%S", time.localtime()), request.ip, newUUID
             )
-            self.dfh.get_uuid_log().flush()
-            self.dfh.get_current_UUIDs()[newUUID] = [time.time(), "rw"]  # New sessions are rw
+        )
+        self.dfh.get_uuid_log().flush()
+        self.dfh.get_current_UUIDs()[newUUID] = [time.time(), "rw"]  # New sessions are rw
         return s_pb2.UUIDReply(UUID=newUUID)
 
     def getRemainingUUIDTime(
