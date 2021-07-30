@@ -56,6 +56,8 @@ const OrcidLogout: React.FC<OrcidProps> = (props) => {
                         id='orcid-id-icon'
                         src='src/images/ORCIDiD_iconvector.svg'
                         alt='ORCID logout button'
+                        width={24}
+                        height={24}
                     />
                     Welcome {props?.name}! Logout?
                 </Button>
