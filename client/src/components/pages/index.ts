@@ -6,7 +6,7 @@ import { FullPageNotify } from './FullPageNotify';
 import Gene from './Gene';
 import Regulon from './Regulon';
 import Tutorial from './Tutorial';
-import Welcome from './Welcome';
+import { Welcome } from './Welcome';
 
 export {
     About,
