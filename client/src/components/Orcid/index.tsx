@@ -2,14 +2,17 @@ import React from 'react';
 
 import { Button, Image, Popup } from 'semantic-ui-react';
 
-type OrcidProps = {
+type OrcidLogoutProps = {
     identifier?: string;
     name?: string;
-    login: () => void;
     logout: () => void;
 };
 
-const OrcidLogin: React.FC<OrcidProps> = (props) => {
+type OrcidLoginProps = {
+    login: () => void;
+};
+
+const OrcidLogin: React.FC<OrcidLoginProps> = (props) => {
     return (
         <Popup
             trigger={
@@ -47,7 +50,7 @@ const OrcidLogin: React.FC<OrcidProps> = (props) => {
     );
 };
 
-const OrcidLogout: React.FC<OrcidProps> = (props) => {
+const OrcidLogout: React.FC<OrcidLogoutProps> = (props) => {
     return (
         <Popup
             trigger={
@@ -93,13 +96,26 @@ const CookieConsent: React.FC<CookieConsentProps> = (props) => {
     );
 };
 
-const OrcidButton: React.FC<OrcidProps & CookieConsentProps> = (props) => {
+const OrcidButton: React.FC<
+    OrcidLoginProps & OrcidLogoutProps & CookieConsentProps
+> = (props) => {
     if (!props.cookieConsent) {
-        return <CookieConsent {...props} />;
+        return (
+            <CookieConsent
+                acceptCookies={props.acceptCookies}
+                cookieConsent={props.cookieConsent}
+            />
+        );
     } else if (props.name !== undefined && props.identifier !== undefined) {
-        return <OrcidLogout {...props} />;
+        return (
+            <OrcidLogout
+                identifier={props.identifier}
+                name={props.name}
+                logout={props.logout}
+            />
+        );
     } else {
-        return <OrcidLogin {...props} />;
+        return <OrcidLogin login={props.login} />;
     }
 };
 
