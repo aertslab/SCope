@@ -523,8 +523,8 @@ class SCope(scope_grpc_pb2_grpc.MainServicer):
                             loomHeierarchy=scope_grpc_pb2.LoomHeierarchy(L1=L1, L2=L2, L3=L3),
                         )
                     )
-            except ValueError:
-                pass
+            except ValueError as ve:
+                logger.error(f"Serious error processing active loom files: {ve}")
         self.dfh.update_UUID_db()
 
         return scope_grpc_pb2.MyLoomsReply(myLooms=my_looms, update=update)
