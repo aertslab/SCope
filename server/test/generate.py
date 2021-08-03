@@ -234,10 +234,10 @@ class Clustering:
         )
 
     def __repr__(self):
-        return f(
-            "Clustering(self.identifier={self.identifier}, "
-            "self.clusters={self.clusters}, "
-            "self.assignment={self.assignment})"
+        return (
+            f"Clustering(self.identifier={self.identifier}, "
+            f"self.clusters={self.clusters}, "
+            f"self.assignment={self.assignment})"
         )
 
 
@@ -418,11 +418,11 @@ class LoomData:
         }
 
     def __repr__(self):
-        return f(
-            "LoomData(name={self.name}, "
-            "{self.n_genes}, {self.n_cells}, "
-            "matrix={self.matrix}, "
-            "annotations={self.annotations})"
+        return (
+            f"LoomData(name={self.name}, "
+            f"{self.n_genes}, {self.n_cells}, "
+            f"matrix={self.matrix}, "
+            f"annotations={self.annotations})"
         )
 
 

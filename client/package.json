@@ -184,6 +184,9 @@
             "curly": [
                 "error",
                 "all"
+            ],
+            "no-bitwise": [
+                "error"
             ]
         },
         "settings": {

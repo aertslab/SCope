@@ -2,19 +2,20 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { Tab } from 'semantic-ui-react';
-
-import 'react-table/react-table.css';
+import * as R from 'ramda';
 
 import { BackendAPI } from '../common/API';
 import Metadata from '../common/Metadata';
 import LassoControls from '../LassoControls';
 import QueryFeatureTab from '../QueryFeatureTool/QueryFeatureTab';
 
+import { Annotation } from '../pages/compareHelper';
+
 type RightSidebarProps = {
     hideFeatures: boolean;
     activeLegend: any;
     onActiveFeaturesChange: (_features, _id) => void;
-    getSelectedAnnotations: () => Object;
+    selectedAnnotations: Annotation;
     sessionIsRW: boolean;
 } & RouteComponentProps<{ uuid: string; loom: string }>;
 
@@ -81,47 +82,46 @@ class RightSidebar extends Component<RightSidebarProps, RightSidebarState> {
     }
 
     render() {
-        const { history, hideFeatures, activeLegend, getSelectedAnnotations } =
-            this.props;
+        const { history, hideFeatures, activeLegend } = this.props;
         const { lassoSelections, activeFeatures, activeTab, activePage } =
             this.state;
 
-        const panes = [
-            {
-                menuItem: 'Cell selections',
-                render: () => (
-                    <LassoControls
-                        selections={lassoSelections}
-                        setModalID={this.setModalID.bind(this)}
-                    />
-                ),
-            },
-        ];
-        if (!hideFeatures) {
-            [0, 1, 2].map((i) => {
-                panes.push({
-                    menuItem:
-                        activeFeatures[i] && activeFeatures[i].feature
-                            ? 'F' + (i + 1) + ': ' + activeFeatures[i].feature
-                            : 'F' + (i + 1),
+        const panes = R.concat(
+            [
+                {
+                    menuItem: 'Cell selections',
                     render: () => (
-                        <QueryFeatureTab
-                            history={history}
-                            activePage={activePage}
-                            activeLegend={activeLegend}
-                            activeFeature={activeFeatures[i]}
-                            activeFeatureIndex={i}
-                            sessionIsRW={this.props.sessionIsRW}
+                        <LassoControls
+                            selections={lassoSelections}
+                            setModalID={this.setModalID.bind(this)}
                         />
                     ),
-                });
-            });
-        }
-
-        let annotations = {};
-        if (getSelectedAnnotations) {
-            annotations = getSelectedAnnotations();
-        }
+                },
+            ],
+            hideFeatures
+                ? []
+                : [0, 1, 2].map((i) => {
+                      return {
+                          menuItem:
+                              activeFeatures[i] && activeFeatures[i].feature
+                                  ? 'F' +
+                                    (i + 1) +
+                                    ': ' +
+                                    activeFeatures[i].feature
+                                  : 'F' + (i + 1),
+                          render: () => (
+                              <QueryFeatureTab
+                                  history={history}
+                                  activePage={activePage}
+                                  activeLegend={activeLegend}
+                                  activeFeature={activeFeatures[i]}
+                                  activeFeatureIndex={i}
+                                  sessionIsRW={this.props.sessionIsRW}
+                              />
+                          ),
+                      };
+                  })
+        );
 
         return (
             <div className='flexDisplay'>
@@ -146,7 +146,7 @@ class RightSidebar extends Component<RightSidebarProps, RightSidebarState> {
                         this.setState({ modalID: null });
                         this.forceUpdate();
                     }}
-                    annotations={Object.keys(annotations)}
+                    annotations={R.keys(this.props.selectedAnnotations)}
                 />
             </div>
         );

@@ -149,7 +149,7 @@ export default class Annotations extends Component {
                 popupText = '';
 
             if (
-                props.value.validated &
+                props.value.validated &&
                 orcidIDRegex.test(props.value.curator_id)
             ) {
                 iconName = 'check circle outline';

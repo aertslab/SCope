@@ -386,7 +386,7 @@ export default class Viewer extends Component {
         });
         this.lassoLayer.on('mousemove', (e) => {
             // Bug in Firefox: this.state.mouse.down = false when left click pressed
-            if (this.state.mouse.down & this.isLassoActive()) {
+            if (this.state.mouse.down && this.isLassoActive()) {
                 this.setState({
                     lassoPoints: [
                         ...this.state.lassoPoints,
@@ -829,20 +829,22 @@ export default class Viewer extends Component {
     }
 
     getPoints(loomFile, coordinates, annotations, superposition, callback) {
-        let queryAnnotations = [];
+        const queryAnnotations = annotations
+            ? R.keys(annotations).map((name) => {
+                  return {
+                      name,
+                      values: annotations[name],
+                  };
+              })
+            : [];
+
         if (annotations) {
             this.setState({
-                activeAnnotations: Object.assign({}, annotations),
-            });
-            Object.keys(annotations).map((name) => {
-                queryAnnotations.push({
-                    name: name,
-                    values: annotations[name],
-                });
+                activeAnnotations: { ...annotations },
             });
         }
 
-        let query = {
+        const query = {
             loomFilePath: loomFile,
             coordinatesID: parseInt(coordinates),
             annotation: queryAnnotations,
@@ -1011,21 +1013,19 @@ export default class Viewer extends Component {
 
         if (!features || features.length === 0) {
             // prevent empty requests
-            //return this.resetDataPoints();
             return;
         }
 
-        let settings = BackendAPI.getSettings();
+        const settings = BackendAPI.getSettings();
 
-        let queryAnnotations = [];
-        if (annotations) {
-            Object.keys(annotations).map((name) => {
-                queryAnnotations.push({
-                    name: name,
-                    values: annotations[name],
-                });
-            });
-        }
+        const queryAnnotations = annotations
+            ? R.keys(annotations).map((name) => {
+                  return {
+                      name,
+                      values: annotations[name],
+                  };
+              })
+            : [];
 
         let query = {
             loomFilePath: loomFile,
