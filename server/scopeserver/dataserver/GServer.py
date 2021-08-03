@@ -103,7 +103,9 @@ class SCope(scope_grpc_pb2_grpc.MainServicer):
             if request.status_code != 200 or not self.orcid_active:
                 logger.debug(f"ERROR: {request.status_code}")
                 logger.debug(f"ERROR: {request.text}")
-                return scope_grpc_pb2.getORCIDReply(orcid_scope_uuid="null", name="null", orcid_id="null", success=False)
+                return scope_grpc_pb2.getORCIDReply(
+                    orcid_scope_uuid="null", name="null", orcid_id="null", success=False
+                )
             else:
                 logger.debug(f"SUCCESS: {request.text}")
                 orcid_data = json.loads(request.text)
