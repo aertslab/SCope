@@ -977,7 +977,9 @@ class API {
 
     removeActiveFeaturesChange(page, listener) {
         if (this.featureChangeListeners[page]) {
-            this.featureChangeListeners[page] = this.featureChangeListeners[page].filter((l) => l !== listener);
+            this.featureChangeListeners[page] = this.featureChangeListeners[
+                page
+            ].filter((l) => l !== listener);
         }
     }
 
