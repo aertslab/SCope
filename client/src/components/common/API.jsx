@@ -976,9 +976,8 @@ class API {
     }
 
     removeActiveFeaturesChange(page, listener) {
-        let i = this.featureChangeListeners[page].indexOf(listener);
-        if (i > -1) {
-            this.featureChangeListeners[page].splice(i, 1);
+        if (this.featureChangeListeners[page]) {
+            this.featureChangeListeners[page] = this.featureChangeListeners[page].filter((l) => l !== listener);
         }
     }
 
