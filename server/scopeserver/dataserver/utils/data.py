@@ -7,7 +7,7 @@ from typing import Tuple, Iterable, List, TypeVar
 import numpy as np
 
 
-T = TypeVar("T")
+Inner = TypeVar("Inner")
 
 
 def get_99_and_100_percentiles(values: np.ndarray) -> Tuple[np.ndarray, np.number]:
@@ -20,7 +20,7 @@ def get_99_and_100_percentiles(values: np.ndarray) -> Tuple[np.ndarray, np.numbe
     return (np.clip(_99_percentile, 0.01, _100_percentile), _100_percentile)
 
 
-def uniq(data: Iterable[T]) -> List[T]:
+def uniq(data: Iterable[Inner]) -> List[Inner]:
     """
     Extract unique values from a container while preserving
     the order.
@@ -29,9 +29,9 @@ def uniq(data: Iterable[T]) -> List[T]:
     seen = set()
     result = []
 
-    for x in data:
-        if x not in seen:
-            seen.add(x)
-            result.append(x)
+    for val in data:
+        if val not in seen:
+            seen.add(val)
+            result.append(val)
 
     return result

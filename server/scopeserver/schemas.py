@@ -3,7 +3,7 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=too-few-public-methods
 
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
@@ -23,7 +23,24 @@ class Dataset(DatasetBase):
         orm_mode = True
 
 
-# Projects
+# Users and Projects
+class UserBase(BaseModel):
+    name: Optional[str]
+    role: str = "guest"
+
+
+class UserCreate(UserBase):
+    iss: str  # Issuer
+    sub: str  # Subject
+
+
+class UserResponse(UserBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
 class ProjectBase(BaseModel):
     name: str
     uuid: str
@@ -39,12 +56,10 @@ class Project(ProjectBase):
         orm_mode = True
 
 
-# Users
-class UserBase(BaseModel):
-    id: int
+class OwnedProject(ProjectBase):
+    datasets: List[Dataset]
+    owned: List[UserResponse]
 
-
-class UserResponse(UserBase):
     class Config:
         orm_mode = True
 
@@ -55,3 +70,51 @@ class User(UserBase):
 
     class Config:
         orm_mode = True
+
+
+# Auth
+
+
+class AuthorizationResponse(BaseModel):
+    provider: int
+    state: str
+    code: str
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    user: UserResponse
+
+
+class ORCIDUser(BaseModel):
+    iss: str  # Issuer
+    sub: str  # Subject
+    name: Optional[str] = None
+
+
+class Provider(BaseModel):
+    id: int
+    name: str
+    issuer: str
+    clientid: str
+    secret: str
+
+    class Config:
+        orm_mode = True
+
+
+class LoginUrl(BaseModel):
+    id: int
+    name: str
+    url: str
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "url": (
+                    "http://localhost:8080/auth/realms/SCope/protocol/openid-connect/auth?client_id=scope"
+                    "&redirect_uri=http%3A%2F%2Flocalhost%3A55850&response_type=code&scope=openid+profile&state=1"
+                )
+            }
+        }

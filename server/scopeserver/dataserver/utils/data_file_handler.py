@@ -7,7 +7,7 @@ import logging
 
 from appdirs import AppDirs
 
-import scopeserver
+from scopeserver.config import settings
 
 LOGGER = logging.getLogger(__name__)
 
@@ -228,6 +228,5 @@ class DataFileHandler:
         self.active_sessions[UUID] = time.time()
 
     def load_gene_mappings(self) -> None:
-        gene_mappings_dir_path = os.path.join(scopeserver.__path__[0], "dataserver", "data", "gene_mappings")  # type: ignore
-        with open(os.path.join(gene_mappings_dir_path, "terminal_mappings.pickle"), "rb") as tm_fh:
+        with (settings.DATA_PATH / "terminal_mappings.pickle").open(mode="rb") as tm_fh:
             self.dmel_mappings = pickle.load(tm_fh)

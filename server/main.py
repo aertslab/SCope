@@ -9,7 +9,14 @@ from scopeserver.api.v1 import api_v1_router
 from scopeserver.config import settings
 from scopeserver import message_of_the_day, SCopeServer
 
-scope_api = FastAPI()
+scope_api = FastAPI(
+    title="SCope API",
+    version="1.0.0",
+    description="Fast visualization tool for large-scale and high dimensional single-cell data.",
+    openapi_url="/api/v1/openapi.json",
+    docs_url="/api/v1/docs",
+    redoc_url="/api/v1/redoc",
+)
 
 scope_api.add_middleware(
     CORSMiddleware,

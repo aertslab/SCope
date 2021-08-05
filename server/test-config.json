@@ -9,9 +9,6 @@
     "xPort": 55852,
     "gPort": 55853,
     "reverseProxyOn": false,
-    "orcidAPIClientID": "",
-    "orcidAPIClientSecret": "",
-    "orcidAPIRedirectURI": "",
     "dataHashSecret": "JU88SHJIQ63SIFLDOC4TMNC1JBMMJSZIMPHM9J0Y5C3O0WD0LXG5MYWR0IKOZ3G8",
-    "DATA_PATH": ""
+    "DATA_PATH": "data"
 }
