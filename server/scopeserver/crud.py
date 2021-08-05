@@ -12,6 +12,11 @@ from scopeserver import models, schemas
 # Projects
 
 
+def get_projects(db: Session, offset: int, limit: int) -> List[models.Project]:
+    "Read all projects"
+    return db.query(models.Project).order_by(models.Project.id).offset(offset).limit(limit).all()
+
+
 def get_projects(database: Session, offset: int, limit: int) -> List[models.Project]:
     "Read all projects"
     return database.query(models.Project).order_by(models.Project.id).offset(offset).limit(limit).all()
@@ -105,6 +110,12 @@ def delete_project(database: Session, project_uuid: str):
         database.commit()
 
 
+def delete_project(db: Session, project_uuid: str):
+    "Remove a project from the database by uuid"
+    db.query(models.Project).filter(models.Project.uuid == project_uuid).delete()
+    db.commit()
+
+
 # Users
 
 
@@ -171,6 +182,12 @@ def create_user(database: Session, user: Optional[schemas.UserCreate] = None) ->
 
     database.refresh(new_user)
     return new_user
+
+
+def delete_user(db: Session, user_id: int):
+    "Delete a user by id"
+    db.query(models.User).filter(models.User.id == user_id).delete()
+    db.commit()
 
 
 def delete_user(database: Session, user_id: int):
