@@ -1,27 +1,27 @@
 version: '3'
 
 services:
-    scope:
-        restart: always
-        build: .
-        expose:
-            - 55850
-            - 55851
-            - 55852
-            - 55853
-        volumes:
-            - ${SCOPE_DATA_DIR:-./scope_data/}:/root/.local/share/SCope/
-            - app-volume:/app
-        entrypoint: ['bash /app/start.sh']
-    httpd:
-        restart: always
-        build: ./apache
-        ports:
-            - ${SCOPE_PORT:-80}:80
-        depends_on:
-            - scope
-        volumes:
-            - app-volume:/usr/local/apache2/htdocs/
+  db:
+    image: postgres:13-alpine
+    container_name: db
+    environment:
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=abcdef
+    ports:
+      - "5432:5432"
 
-volumes:
-    app-volume:
+  keycloak:
+    image: jboss/keycloak:latest
+    container_name: keycloak
+    environment:
+      - KEYCLOAK_USER=scope
+      - KEYCLOAK_PASSWORD=scope
+      - KEYCLOAK_IMPORT=/tmp/keycloak_scope.json
+      - DB_VENDOR=postgres
+      - DB_ADDR=db
+      - DB_USER=keycloak
+      - DB_PASSWORD=abcdef
+    volumes:
+      - ./keycloak_scope.json:/tmp/keycloak_scope.json
+    ports:
+      - "8080:8080"

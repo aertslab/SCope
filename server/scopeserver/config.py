@@ -1,18 +1,9 @@
 """ Server configuration handling. """
 
 from pathlib import Path
+import secrets
 
 from pydantic import BaseSettings, validator
-
-
-def translate_config_key(key: str) -> str:
-    "Translate 'old' style config names into 'new' style names."
-    translate = {"PPORT": "UPLOAD_PORT", "GPORT": "DATA_PORT", "MPORT": "HTTP_PORT", "XPORT": "PROXY_PORT_DEPRECATED"}
-
-    if key in translate:
-        return translate[key]
-
-    return key
 
 
 class Settings(BaseSettings):
@@ -20,13 +11,12 @@ class Settings(BaseSettings):
 
     # pylint: disable=no-self-argument
     # pylint: disable=no-self-use
-    # pylint: disable=missing-class-docstring
     # pylint: disable=too-few-public-methods
 
     DATABASE_URL: str = ""
 
     @validator("DATABASE_URL", pre=True, allow_reuse=True)
-    def sqlite_conn(cls, value: str):  # pylint: disable=no-self-argument
+    def sqlite_conn(cls, value: str):
         "Validate that the connection string starts with sqlite and has the check_same_thread argument."
         if not value.startswith("sqlite:///"):
             raise ValueError("Not connecting to a sqlite database")
@@ -54,12 +44,14 @@ class Settings(BaseSettings):
     RPC_PORT: int = 55853  #  Was: gPort
 
     API_V1_STR: str = "/api/v1"
+    API_SECRET: str = secrets.token_urlsafe(32)
+    API_JWT_ALGORITHM: str = "HS256"
+    API_TOKEN_EXPIRE: int = 7 * 24 * 60  # 7 days in minutes
 
-    ORCID_CLIENT_ID: str = "APP-1QNL921F7P9FC3S4"
-    ORCID_CLIENT_SECRET: str
-    ORCID_REDIRECT_URI: str
+    AUTH_REDIRECT_URI: str
 
     class Config:
+        "Default configuration"
         env_file = Path("..") / ".env"
         env_file_encoding = "utf-8"
 

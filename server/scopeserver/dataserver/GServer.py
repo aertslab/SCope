@@ -8,7 +8,6 @@ import os
 import numpy as np
 import shutil
 import json
-import requests
 import uuid
 import datetime
 
@@ -62,61 +61,16 @@ class SCope(scope_grpc_pb2_grpc.MainServicer):
         self.lfh.set_global_data()
 
     def check_ORCID_connection(self) -> None:
-        request = requests.post(
-            "https://orcid.org/oauth/token",
-            data={
-                "client_id": self.config["ORCID_CLIENT_ID"],
-                "client_secret": self.config["ORCID_CLIENT_SECRET"],
-                "grant_type": "client_credentials",
-                "scope": "/read-public",
-            },
-        )
-        if request.status_code != 200:
-            logger.error("ORCID connection failed! Please check your credentials. See DEBUG output for more details.")
-            logger.debug(f"HTTP Code: {request.status_code}")
-            logger.debug(f"ERROR: {request.text}")
-            self.orcid_active = False
-        else:
-            logger.info("ORCID connection successful. Users will be able to authenticate.")
-            logger.debug(f"SUCCESS: {request.text}")
-            self.orcid_active = True
+        # TODO: Remove
+        self.orcid_active = False
 
     def getORCIDStatus(self, request, context):
+        # TODO: Remove
         return scope_grpc_pb2.getORCIDStatusReply(active=self.orcid_active)
 
     def getORCID(self, request, context):
-        auth_code = request.auth_code
-        logger.debug(f'Recieved code "{auth_code}" from frontend.')
-
-        if self.orcid_active:
-            request = requests.post(
-                "https://orcid.org/oauth/token",
-                data={
-                    "client_id": self.config["ORCID_CLIENT_ID"],
-                    "client_secret": self.config["ORCID_CLIENT_SECRET"],
-                    "grant_type": "authorization_code",
-                    "code": auth_code,
-                    "redirect_uri": self.config["ORCID_REDIRECT_URI"],
-                },
-            )
-
-            if request.status_code != 200 or not self.orcid_active:
-                logger.debug(f"ERROR: {request.status_code}")
-                logger.debug(f"ERROR: {request.text}")
-                return scope_grpc_pb2.getORCIDReply(
-                    orcid_scope_uuid="null", name="null", orcid_id="null", success=False
-                )
-            else:
-                logger.debug(f"SUCCESS: {request.text}")
-                orcid_data = json.loads(request.text)
-
-        orcid_scope_uuid = str(uuid.uuid4())
-
-        self.dfh.add_ORCIDiD(orcid_scope_uuid, orcid_data["name"], orcid_data["orcid"])
-
-        return scope_grpc_pb2.getORCIDReply(
-            orcid_scope_uuid=orcid_scope_uuid, name=orcid_data["name"], orcid_id=orcid_data["orcid"], success=True
-        )
+        # TODO: Remove
+        return scope_grpc_pb2.getORCIDReply(orcid_scope_uuid="null", name="null", orcid_id="null", success=False)
 
     def getVmax(self, request, context):
         v_max = np.zeros(3)

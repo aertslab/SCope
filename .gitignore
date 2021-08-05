@@ -20,8 +20,11 @@ scope_data
 # mypy
 .mypy_cache/
 
+# Code coverage and profiling
 .coverage
 .hypothesis/
+client/coverage
+server/prof
 
 *.pptx
 *.save
