@@ -88,6 +88,124 @@ describe('Check getCrossAnnotations', () => {
             getCrossAnnotations(cross, 0, 0)
         );
     });
+
+    it('Handles real data (cross-reference; all 4 grid squares set)', () => {
+        const cross: CrossAnnotations = {
+            both: [],
+            one: [],
+            horizontal: [{ Genotype: ['DGRP-551'] }, { Genotype: ['W1118'] }],
+            vertical: [{ Gender: ['Female'] }, { Gender: ['Male'] }],
+        };
+
+        [
+            [0, 0],
+            [0, 1],
+            [1, 0],
+            [1, 1],
+        ].map(([i, j]) => {
+            expect(getCrossAnnotationsOld(cross, i, j)).toStrictEqual(
+                getCrossAnnotations(cross, i, j)
+            );
+        });
+    });
+
+    it('Handles real data (cross-reference; both columns, top row)', () => {
+        const cross: CrossAnnotations = {
+            both: [],
+            one: [],
+            horizontal: [{ Genotype: ['DGRP-551'] }, { Genotype: ['W1118'] }],
+            vertical: [{ Gender: ['Female'] }, {}],
+        };
+
+        [
+            [0, 0],
+            [0, 1],
+            [1, 0],
+            [1, 1],
+        ].map(([i, j]) => {
+            expect(getCrossAnnotationsOld(cross, i, j)).toStrictEqual(
+                getCrossAnnotations(cross, i, j)
+            );
+        });
+    });
+
+    it('Handles real data (cross-reference; both columns, bottom row)', () => {
+        const cross: CrossAnnotations = {
+            both: [],
+            one: [],
+            horizontal: [{ Genotype: ['DGRP-551'] }, { Genotype: ['W1118'] }],
+            vertical: [{}, { Gender: ['Male'] }],
+        };
+
+        [
+            [0, 0],
+            [0, 1],
+            [1, 0],
+            [1, 1],
+        ].map(([i, j]) => {
+            expect(getCrossAnnotationsOld(cross, i, j)).toStrictEqual(
+                getCrossAnnotations(cross, i, j)
+            );
+        });
+    });
+
+    it('Handles real data (cross-reference; left column, both rows)', () => {
+        const cross: CrossAnnotations = {
+            both: [],
+            one: [],
+            horizontal: [{ Genotype: ['DGRP-551'] }, {}],
+            vertical: [{ Gender: ['Female'] }, { Gender: ['Male'] }],
+        };
+
+        [
+            [0, 0],
+            [0, 1],
+            [1, 0],
+            [1, 1],
+        ].map(([i, j]) => {
+            expect(getCrossAnnotationsOld(cross, i, j)).toStrictEqual(
+                getCrossAnnotations(cross, i, j)
+            );
+        });
+    });
+
+    it('Handles real data (cross-reference; right column, both rows)', () => {
+        const cross: CrossAnnotations = {
+            both: [],
+            one: [],
+            horizontal: [{}, { Genotype: ['W1118'] }],
+            vertical: [{ Gender: ['Female'] }, { Gender: ['Male'] }],
+        };
+
+        [
+            [0, 0],
+            [0, 1],
+            [1, 0],
+            [1, 1],
+        ].map(([i, j]) => {
+            expect(getCrossAnnotationsOld(cross, i, j)).toStrictEqual(
+                getCrossAnnotations(cross, i, j)
+            );
+        });
+    });
+
+    it('Handles real data (cross-reference; 2 displays)', () => {
+        const cross: CrossAnnotations = {
+            both: [],
+            one: [],
+            horizontal: [{ Gender: ['Female'] }, { Gender: ['Male'] }],
+            vertical: [{ Age: ['0'] }],
+        };
+
+        [
+            [0, 0],
+            [0, 1],
+        ].map(([i, j]) => {
+            expect(getCrossAnnotationsOld(cross, i, j)).toStrictEqual(
+                getCrossAnnotations(cross, i, j)
+            );
+        });
+    });
 });
 
 describe('Check getSelectedAnnotations', () => {
@@ -162,6 +280,84 @@ describe('Check getSelectedAnnotations', () => {
             horizontal: [{ a: ['baz', 'zzz', 'zzz'] }],
             both: [],
             one: [],
+        };
+
+        expect(getSelectedAnnotationsOld(cross)).toStrictEqual(
+            getSelectedAnnotations(cross)
+        );
+    });
+
+    it('Handles real data (cross-reference; all 4 grid squares set)', () => {
+        const cross: CrossAnnotations = {
+            both: [],
+            one: [],
+            horizontal: [{ Genotype: ['DGRP-551'] }, { Genotype: ['W1118'] }],
+            vertical: [{ Gender: ['Female'] }, { Gender: ['Male'] }],
+        };
+
+        expect(getSelectedAnnotationsOld(cross)).toStrictEqual(
+            getSelectedAnnotations(cross)
+        );
+    });
+
+    it('Handles real data (cross-reference; both columns, top row)', () => {
+        const cross: CrossAnnotations = {
+            both: [],
+            one: [],
+            horizontal: [{ Genotype: ['DGRP-551'] }, { Genotype: ['W1118'] }],
+            vertical: [{ Gender: ['Female'] }, {}],
+        };
+
+        expect(getSelectedAnnotationsOld(cross)).toStrictEqual(
+            getSelectedAnnotations(cross)
+        );
+    });
+
+    it('Handles real data (cross-reference; both columns, bottom row)', () => {
+        const cross: CrossAnnotations = {
+            both: [],
+            one: [],
+            horizontal: [{ Genotype: ['DGRP-551'] }, { Genotype: ['W1118'] }],
+            vertical: [{}, { Gender: ['Male'] }],
+        };
+
+        expect(getSelectedAnnotationsOld(cross)).toStrictEqual(
+            getSelectedAnnotations(cross)
+        );
+    });
+
+    it('Handles real data (cross-reference; left column, both rows)', () => {
+        const cross: CrossAnnotations = {
+            both: [],
+            one: [],
+            horizontal: [{ Genotype: ['DGRP-551'] }, {}],
+            vertical: [{ Gender: ['Female'] }, { Gender: ['Male'] }],
+        };
+
+        expect(getSelectedAnnotationsOld(cross)).toStrictEqual(
+            getSelectedAnnotations(cross)
+        );
+    });
+
+    it('Handles real data (cross-reference; right column, both rows)', () => {
+        const cross: CrossAnnotations = {
+            both: [],
+            one: [],
+            horizontal: [{}, { Genotype: ['W1118'] }],
+            vertical: [{ Gender: ['Female'] }, { Gender: ['Male'] }],
+        };
+
+        expect(getSelectedAnnotationsOld(cross)).toStrictEqual(
+            getSelectedAnnotations(cross)
+        );
+    });
+
+    it('Handles real data (cross-reference; 2 displays)', () => {
+        const cross: CrossAnnotations = {
+            both: [],
+            one: [],
+            horizontal: [{ Gender: ['Female'] }, { Gender: ['Male'] }],
+            vertical: [{ Age: ['0'] }],
         };
 
         expect(getSelectedAnnotationsOld(cross)).toStrictEqual(
