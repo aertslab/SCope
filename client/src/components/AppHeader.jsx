@@ -46,10 +46,7 @@ class AppHeader extends Component {
 
     openORCID = () => {
         window.open(
-            'https://orcid.org/oauth/authorize?client_id=' +
-                ORCID.orcidAPIClientID +
-                '&response_type=code&scope=/authenticate&show_login=false&redirect_uri=' +
-                ORCID.orcidAPIRedirectURI,
+            `https://orcid.org/oauth/authorize?client_id=${ORCID.client_id}&response_type=code&scope=/authenticate&show_login=false&redirect_uri=${ORCID.redirect_uri}`,
             '_self',
             'toolbar=no, scrollbars=yes, width=500, height=600, top=500, left=500'
         );

@@ -1,9 +1,7 @@
 var util = require('util')
 
-var port = require('../config.json').xPort;
-
 var WebSocketServer = require('ws').Server
-var wss = new WebSocketServer({ port: process.argv[2] || port });
+var wss = new WebSocketServer({ port: process.argv[2] || 55852 });
 
 console.log('Running GRPC Proxy on port ', wss.options.port);
 

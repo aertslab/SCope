@@ -53,9 +53,14 @@ SCOPE_CONFIG=config.json npm run scope
 
 For now, a standalone app is not available. One is planned for the future.
 
-### Deploy a Cloud-based Instance
+### Deploy your own instance
 
-For now, there is no in-tree support for deployment.
+This requires customising the client and server configuration.
+
+> TODO: Server deployment configuration is not yet finalised
+
+The client production deployment configuration can be found in `client/config/webpack.prod.js`. Here you can customise
+the `hostname`, protocols, ports, ORCID, and API information.
 
 ## Source
 

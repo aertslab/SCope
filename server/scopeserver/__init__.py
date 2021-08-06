@@ -36,7 +36,7 @@ class SCopeServer:
             LOGGER.setLevel(logging.DEBUG)
 
     def start_data_server(self) -> None:
-        LOGGER.debug(f"Starting data server on port {self.config['DATA_PORT']}.")
+        LOGGER.debug(f"Starting data server on port {self.config['RPC_PORT']}.")
         self.gs_thread = threading.Thread(
             target=gs.serve,
             args=(
@@ -96,7 +96,7 @@ def message_of_the_day(data_path: Union[str, Path]) -> None:
 
 def generate_config(args: argparse.Namespace) -> configuration.Settings:
     """Combine parsed command line arguments with configuration from a config file."""
-    argscfg = {"DATA_PORT": args.g_port, "UPLOAD_PORT": args.p_port, "BIND_PORT": args.x_port}
+    argscfg = {"RPC_PORT": args.g_port, "UPLOAD_PORT": args.p_port, "BIND_PORT": args.x_port}
     return configuration.Settings(*argscfg)
 
 
@@ -118,7 +118,7 @@ def run() -> None:
     LOGGER.info(f"Running SCope in {'debug' if config.DEBUG else 'production'} mode...")
 
     LOGGER.info(
-        f"""This secret key will be used to hash annotation data: {config.DATAHASHSECRET}
+        f"""This secret key will be used to hash annotation data: {config.SECRET}
         Losing this key will mean all annotations will display as unvalidated.
         """
     )
