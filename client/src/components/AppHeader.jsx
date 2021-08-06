@@ -1,15 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { withRouter, Link } from 'react-router-dom';
-import {
-    Icon,
-    Label,
-    Button,
-    Menu,
-    Image,
-    Popup,
-    Checkbox,
-} from 'semantic-ui-react';
+import { Icon, Label, Button, Menu, Checkbox } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
 import PropTypes from 'prop-types';
 import { Cookies } from 'react-cookie';
@@ -19,6 +11,8 @@ import pako from 'pako';
 let bitly = new Bitly(BITLY.token);
 
 import { consentToCookies } from '../redux/actions';
+
+import { OrcidButton } from './Orcid';
 
 const cookieName = 'SCOPE_UUID';
 
@@ -83,6 +77,7 @@ class AppHeader extends Component {
     render() {
         const { match, timeout } = this.props;
         const { shortUrl } = this.state;
+
         let metadata = BackendAPI.getLoomMetadata(
             decodeURIComponent(match.params.loom)
         );
@@ -92,128 +87,6 @@ class AppHeader extends Component {
             this.props.cookies.remove('scope_orcid_name');
             this.props.cookies.remove('scope_orcid_id');
             this.props.cookies.remove('scope_orcid_uuid');
-        };
-
-        let orcid_info = () => {
-            let orcid_name = this.props.cookies.get('scope_orcid_name');
-            let orcid_id = this.props.cookies.get('scope_orcid_id');
-            if (!this.props.cookieConsent) {
-                return (
-                    <Popup
-                        content={
-                            <div>
-                                You have not accepted the use of cookies, which
-                                is required for ORCID login and annotation
-                                abilities.
-                                <br />
-                                <br />
-                                <Button
-                                    onClick={() => {
-                                        this.acceptCookies();
-                                    }}>
-                                    Click here to accept cookies.
-                                </Button>
-                            </div>
-                        }
-                        trigger={
-                            <Button
-                                id='connect-orcid-button'
-                                onClick={() => {}}>
-                                <img
-                                    id='orcid-id-icon'
-                                    src='https://orcid.org/sites/default/files/images/orcid_24x24.png'
-                                    width='24'
-                                    height='24'
-                                    alt='ORCID iD icon'
-                                />
-                                Authenticate with ORCID
-                            </Button>
-                        }
-                        hoverable
-                    />
-                );
-            } else if (orcid_name && orcid_id) {
-                return (
-                    <div>
-                        <Popup
-                            position='bottom left'
-                            content={
-                                <div>
-                                    You are authenticated with ORCID: {orcid_id}
-                                    <p />
-                                    <Button onClick={() => orcid_logout()}>
-                                        Log out
-                                    </Button>
-                                    <p />
-                                    <b>
-                                        By logging out you will no longer be
-                                        able to annotate data. <br />
-                                        Your previous annotations and votes will
-                                        remain.
-                                    </b>
-                                </div>
-                            }
-                            trigger={
-                                <div>
-                                    <Image
-                                        src='src/images/ORCIDiD_iconvector.svg'
-                                        width='24'
-                                        height='24'
-                                        alt='ORCID iD icon'
-                                        avatar
-                                    />
-                                    Welcome {orcid_name}!
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Logout?
-                                </div>
-                            }
-                            flowing
-                            hoverable
-                        />
-                    </div>
-                );
-            } else {
-                return (
-                    this.state.orcid_active && (
-                        <Popup
-                            content={
-                                <div>
-                                    By logging in with ORCID, you will be able
-                                    to update and vote on annotations in SCope.
-                                    <p />
-                                    <p />
-                                    ORCID provides a persistent identifier – an
-                                    ORCID iD – that distinguishes you from other
-                                    researchers and a mechanism for linking your
-                                    research outputs and activities to your iD.{' '}
-                                    <br />
-                                    Learn more at{' '}
-                                    <a
-                                        href='https://orcid.org/'
-                                        target='_blank'
-                                        rel='noopener noreferrer'>
-                                        orcid.org
-                                    </a>
-                                </div>
-                            }
-                            trigger={
-                                <Button
-                                    id='connect-orcid-button'
-                                    onClick={() => this.openORCID()}>
-                                    <img
-                                        id='orcid-id-icon'
-                                        src='https://orcid.org/sites/default/files/images/orcid_24x24.png'
-                                        width='24'
-                                        height='24'
-                                        alt='ORCID iD icon'
-                                    />
-                                    Authenticate with ORCID
-                                </Button>
-                            }
-                            hoverable
-                        />
-                    )
-                );
-            }
         };
 
         return (
@@ -276,7 +149,16 @@ class AppHeader extends Component {
                         </Label>
                     )}
                 </Menu.Item>
-                <Menu.Item className='orcidInfo'>{orcid_info()}</Menu.Item>
+                <Menu.Item>
+                    <OrcidButton
+                        acceptCookies={() => this.acceptCookies()}
+                        cookieConsent={this.props.cookieConsent}
+                        identifier={this.props.cookies.get('scope_orcid_id')}
+                        name={this.props.cookies.get('scope_orcid_name')}
+                        login={() => this.openORCID()}
+                        logout={orcid_logout}
+                    />
+                </Menu.Item>
 
                 <Menu.Item className='sessionInfo'>
                     Your session will be deleted {timeout} &nbsp;
