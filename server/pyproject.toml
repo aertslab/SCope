@@ -65,6 +65,7 @@ types-protobuf = "^3.17.4"
 types-requests = "^2.25.6"
 typing-extensions = "^3.10.0"
 pytest-profiling = "^1.7.0"
+types-requests = "^2.25.6"
 
 [tool.poetry.scripts]
 scope-console = 'scopec:cli'
