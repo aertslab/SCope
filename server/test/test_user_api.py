@@ -1,6 +1,6 @@
 " Tests for the /user/ section of the HTTP API "
 
-from test.api_fixture import client, database_engine, database, guest, user, admin
+from test.api_fixture import client, my_tmp_path, database_engine, database, guest, user, admin
 
 
 def test_create_user(database):
