@@ -400,6 +400,29 @@ def test_guest_can_add_dataset_to_own_project(database, loom_limit_9_bytes, gues
     assert response.status_code == 200
     project = response.json()
 
+    # Checks start here
+    response = client.post(
+        "/api/v1/project/dataset",
+        params={"project": project["uuid"], "name": "Test dataset"},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/x-hdf5")},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 401
+    dbproj = db.query(models.Project).filter(models.Project.uuid == project["uuid"]).first()
+    assert dbproj.size == 0
+    assert len(dbproj.datasets) == 0
+
+
+def test_admin_can_add_dataset_to_own_project(database, admin):
+    "Test that an admin can add a dataset to a project they created"
+    db = database()
+
+    response = client.post(
+        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {admin['access_token']}"}
+    )
+    assert response.status_code == 200
+    project = response.json()
+
     some_file = io.BytesIO(b"Test data")
 
     # Checks start here
@@ -548,8 +571,6 @@ def test_user_cannot_add_dataset_to_non_owned_project(database, loom_limit_9_byt
     response = client.post(
         "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {guest['access_token']}"}
     )
-    assert response.status_code == 200
-    project = response.json()
 
     # Checks start here
     response = client.post(

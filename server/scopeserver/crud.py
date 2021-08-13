@@ -112,8 +112,13 @@ def delete_project(database: Session, project_uuid: str):
 
 def delete_project(database: Session, project_uuid: str):
     "Remove a project from the database by uuid"
-    database.query(models.Project).filter(models.Project.uuid == project_uuid).delete()
-    database.commit()
+    try:
+        database.query(models.Project).filter(models.Project.uuid == project_uuid).delete()
+    except SQLAlchemyError:
+        database.rollback()
+        raise
+    else:
+        database.commit()
 
 
 # Users
@@ -186,8 +191,13 @@ def create_user(database: Session, user: Optional[schemas.UserCreate] = None) ->
 
 def delete_user(database: Session, user_id: int):
     "Delete a user by id"
-    database.query(models.User).filter(models.User.id == user_id).delete()
-    database.commit()
+    try:
+        database.query(models.User).filter(models.User.id == user_id).delete()
+    except SQLAlchemyError:
+        database.rollback()
+        raise
+    else:
+        database.commit()
 
 
 def delete_user(database: Session, user_id: int):
