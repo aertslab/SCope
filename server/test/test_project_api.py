@@ -1498,6 +1498,49 @@ def test_user_can_list_users_in_own_project(user):
     assert users == [{"name": user["user"]["name"], "role": "user", "id": 1, "projects": [project]}]
 
 
+def test_guest_second_owner_can_list_users(loom_limit_9_bytes, guest, user):
+    "Test that a guest user who did not create the project, but is an owner, can list users"
+    response = client.post(
+        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {user['access_token']}"}
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Add guest to project owners
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+
+    # Checks start here
+    response = client.get(
+        "/api/v1/project/users",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [user["user"], guest["user"]]
+
+
+def test_user_can_list_users_in_own_project(user):
+    "Test that a regular user can list the users in a project they created"
+    response = client.post(
+        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {user['access_token']}"}
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    response = client.get(
+        "/api/v1/project/users",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+    users = response.json()
+    assert users == [{"name": user["user"]["name"], "role": "user", "id": 1}]
+
+
 def test_user_cannot_list_users_in_non_owned_project(guest, user):
     "Test that a regular user cannot list the users in a project they do not own"
     response = client.post(
