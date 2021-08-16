@@ -201,6 +201,16 @@ def admin(database):
 
 
 @pytest.fixture
+def loom_limit_9_bytes(database):
+    db = database()
+    limit = models.UploadLimit(mime="application/vnd.loom", maxsize=9)
+    db.add(limit)
+    db.commit()
+    db.refresh(limit)
+    return limit
+
+
+@pytest.fixture
 def identity_provider(database):
     db = database()
     provider = models.IdentityProvider(name="Test", issuer="http://localhost:8080", clientid="test", secret="123")

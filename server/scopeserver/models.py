@@ -53,7 +53,7 @@ class Project(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
-    uuid = Column(String, index=True, nullable=False)
+    uuid = Column(String, index=True, nullable=False, unique=True)
     created = Column(DateTime, nullable=False, default=datetime.now())
     size = Column(Integer, nullable=False)
     users = relationship("User", secondary="project_user_mapping", back_populates="projects")
@@ -82,3 +82,11 @@ class IdentityProvider(Base):
     issuer = Column(String, nullable=False)
     clientid = Column(String, nullable=False)
     secret = Column(String, nullable=False)
+
+
+class UploadLimit(Base):
+    "A table of acceptable upload file MIME types and file sizes."
+    __tablename__ = "uploadlimit"
+
+    mime = Column(String, nullable=False, primary_key=True, index=True, unique=True)
+    maxsize = Column(Integer, nullable=False)
