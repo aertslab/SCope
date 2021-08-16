@@ -36,7 +36,7 @@ async def datasets(
     if (found_project := crud.get_project(database, project)) is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No project with id: {project} exists.")
 
-    if crud.is_admin(current_user) or current_user.id in (user.id for user in found_project.users):
+    if crud.is_admin(current_user) or crud.is_user(current_user, found_project):
         return found_project.datasets
 
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not a member of this project")
@@ -55,7 +55,7 @@ async def users(
     if (found_project := crud.get_project(database, project_uuid=project)) is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project does not exist")
 
-    if crud.is_admin(current_user) or current_user.id in (u.id for u in found_project.users):
+    if crud.is_admin(current_user) or crud.is_user(current_user, found_project):
         return found_project.users
 
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not in this project")
@@ -90,9 +90,8 @@ async def add_user(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot find project")
 
     # Check that the user is an admin or an owner
-    if crud.is_admin(current_user) or current_user.id in (owner.id for owner in found_project.owners):
-        project_existing_users = [existing_user.id for existing_user in found_project.users]
-        if user_to_add.id not in project_existing_users:
+    if crud.is_admin(current_user) or crud.is_owner(current_user, found_project):
+        if not crud.is_user(user_to_add, found_project):
             crud.add_user_to_project(database, user_id=user_to_add.id, project_id=found_project.id)
             return Response(status_code=status.HTTP_200_OK)
 
@@ -119,14 +118,8 @@ async def delete_user(
     if (found_project := crud.get_project(database, project_uuid=project)) is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot find project")
 
-    print(current_user.id)
-    print(user_to_remove.id)
-    print(found_project.owners)
-    print(found_project.users)
-
-    if crud.is_admin(current_user) or current_user.id in (owner.id for owner in found_project.owners):
-        project_existing_users = [existing_user.id for existing_user in found_project.users]
-        if user_to_remove.id in project_existing_users:
+    if crud.is_admin(current_user) or crud.is_owner(current_user, found_project):
+        if crud.is_user(user_to_remove, found_project):
             crud.remove_user_from_project(database, user_to_remove, found_project)
             return Response(status_code=status.HTTP_200_OK)
 
@@ -164,7 +157,7 @@ async def add_dataset(
     max_upload_size = limits[uploadfile.content_type]
 
     # Check that the user is an admin or an owner
-    if crud.is_admin(current_user) or current_user.id in (owner.id for owner in found_project.owners):
+    if crud.is_admin(current_user) or crud.is_owner(current_user, found_project):
         size = 0
         with (settings.DATA_PATH / Path(project) / Path(uploadfile.filename)).open(mode="wb") as datafile:
             data = await uploadfile.read(max_upload_size + 1)
@@ -191,11 +184,10 @@ async def delete_dataset(
     if (found_project := crud.get_project(database, project_uuid=project)) is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Project does not exist.")
 
-    # Check that the user is an admin or an owner
-    is_admin = crud.is_admin(current_user)
     if (found_dataset := crud.get_dataset(database, dataset_id=dataset)) is not None:
         if found_dataset.id in (proj_dataset.id for proj_dataset in found_project.datasets):
-            if is_admin or current_user.id in (owner.id for owner in found_project.owners):
+            # Check that the user is an admin or an owner
+            if crud.is_admin(current_user) or crud.is_owner(current_user, found_project):
                 (settings.DATA_PATH / Path(project) / Path(found_dataset.filename)).unlink()
                 crud.delete_dataset(database, dataset=found_dataset)
                 return Response(status_code=status.HTTP_200_OK)
@@ -218,9 +210,84 @@ def delete_project(
     if (found_project := crud.get_project(database, project_uuid=project)) is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Project does not exist")
 
-    if crud.is_admin(current_user) or current_user.id in (owner.id for owner in found_project.owners):
+    if crud.is_admin(current_user) or crud.is_owner(current_user, found_project):
         crud.delete_project(database, project)
         shutil.rmtree(settings.DATA_PATH / Path(project))
         return Response(status_code=status.HTTP_200_OK)
+
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You do not own this project")
+
+
+@router.get("/owner", summary="Get the owners of this project", response_model=List[schemas.UserResponse])
+def get_owners(
+    *,
+    database: Session = Depends(deps.get_db),
+    project: str,
+    current_user: models.User = Depends(deps.get_current_user),
+):
+    "Get a list of the owners of this project."
+    if (found_project := crud.get_project(database, project_uuid=project)) is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Project does not exist")
+
+    if crud.is_admin(current_user) or crud.is_user(current_user, found_project):
+        return found_project.owners
+
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not in this project")
+
+
+@router.post("/owner", summary="Make a user an owner of this project")
+async def add_owner(
+    *,
+    database: Session = Depends(deps.get_db),
+    project: str,
+    user_id: int,
+    current_user: models.User = Depends(deps.get_current_user),
+):
+    """Add a new owner to an existing project."""
+    if (user_to_add := crud.get_user(database, user_id=user_id)) is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot find this user")
+
+    if (found_project := crud.get_project(database, project_uuid=project)) is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot find project")
+
+    # Check that the user is an admin or an owner
+    if crud.is_admin(current_user) or crud.is_owner(current_user, found_project):
+        if not crud.is_owner(user_to_add, found_project):
+            crud.add_user_to_project(database, user_id=user_to_add.id, project_id=found_project.id)
+            crud.add_owner_to_project(database, user_id=user_to_add.id, project_id=found_project.id)
+            return Response(status_code=status.HTTP_200_OK)
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User is already an owner.",
+        )
+
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You do not own this project")
+
+
+@router.delete("/owner", summary="Remove a user from ownership of this project")
+async def delete_owner(
+    *,
+    database: Session = Depends(deps.get_db),
+    project: str,
+    user_id: int,
+    current_user: models.User = Depends(deps.get_current_user),
+):
+    "Remove a user from ownership over an existing project"
+    if (user_to_remove := crud.get_user(database, user_id=user_id)) is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Cannot find {user_id=}")
+
+    if (found_project := crud.get_project(database, project_uuid=project)) is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot find project")
+
+    if crud.is_admin(current_user) or crud.is_owner(current_user, found_project):
+        if crud.is_owner(user_to_remove, found_project):
+            crud.remove_owner_from_project(database, user_to_remove, found_project)
+            return Response(status_code=status.HTTP_200_OK)
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User is not an owner of this project",
+        )
 
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You do not own this project")

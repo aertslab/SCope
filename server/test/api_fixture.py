@@ -185,6 +185,24 @@ def user(database):
 
 
 @pytest.fixture
+def another_user(database):
+    response = client.post("/api/v1/user/new")
+    user_user = response.json()
+    db = database()
+    myuser = db.query(models.User).filter(models.User.id == user_user["user"]["id"]).first()
+    myuser.name = "User 2"
+    myuser.role = "user"
+    myuser.iss = "http://localhost:8080"
+    myuser.sub = user_user["user"]["id"]
+    db.commit()
+    db.flush()
+    user_user["user"]["name"] = "User 2"
+    user_user["user"]["role"] = "user"
+    yield user_user
+    db.close()
+
+
+@pytest.fixture
 def admin(database):
     response = client.post("/api/v1/user/new")
     admin_user = response.json()

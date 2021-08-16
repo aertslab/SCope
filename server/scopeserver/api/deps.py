@@ -53,7 +53,9 @@ def get_current_user(database: Session = Depends(get_db), authorization: str = H
     try:
         payload = jwt.decode(token, settings.API_SECRET, settings.API_JWT_ALGORITHM)
     except JWTError as err:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(err))
+        raise HTTPException(  # pylint: disable=raise-missing-from
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=str(err)
+        )
 
     expiry = datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
     current_time = datetime.now(tz=timezone.utc)
