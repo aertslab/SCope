@@ -42,13 +42,14 @@ loompy = "^3.0.1"
 fastapi = "^0.68"
 hypercorn = "^0.11"
 methodtools = "^0.4.5"
-sqlalchemy = "^1.4"
+sqlalchemy = {version = ">=1.4", extras = ["mypy"]}
 alembic = "^1.6.5"
 python-dotenv = "^0.19.0"
 python-multipart = "^0.0.5"
 h5py = ">=2.10,<3"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 httpx = "^0.18.2"
+click = "^8.0.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
@@ -61,13 +62,12 @@ mypy-protobuf = "^2.9"
 hypothesis = {extras = ["numpy"], version = "*"}
 safety = "^1.10.3"
 types-protobuf = "^3.17.4"
-types-requests = "^2.25.2"
-typing-extensions = "^3.10.0"
 types-requests = "^2.25.6"
+typing-extensions = "^3.10.0"
 pytest-profiling = "^1.7.0"
 
 [tool.poetry.scripts]
-dev-script = 'scopeserver:run'
+scope-console = 'scopec:cli'
 
 [tool.pylint.'MESSAGES CONTROL']
 max-line-length = '120'
@@ -85,5 +85,8 @@ requires = [
         ]
 build-backend = "poetry.masonry.api"
 
-[mypy]
+[tool.mypy]
 python_version = 3.8
+plugins = [
+        "sqlalchemy.ext.mypy.plugin"
+]

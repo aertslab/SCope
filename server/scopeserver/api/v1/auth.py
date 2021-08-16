@@ -1,7 +1,6 @@
 " API endpoints dealing with authentication and authorization. "
 
 from typing import List
-from urllib.parse import urlencode
 
 import httpx
 import jose
@@ -9,10 +8,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from jose.exceptions import ExpiredSignatureError, JWTClaimsError, JWTError
 from sqlalchemy.orm import Session
 
-from scopeserver import crud, schemas
+from scopeserver import crud, oidc, schemas
 from scopeserver.api import deps
-from scopeserver.config import settings
-from scopeserver import oidc
+from scopeserver.result import Result, raise_
 
 router = APIRouter()
 
@@ -31,14 +29,7 @@ async def get_login_url(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Could not get identity provider configuration",
             )
-        params = {
-            "client_id": provider.clientid,
-            "redirect_uri": settings.AUTH_REDIRECT_URI,
-            "response_type": "code",
-            "scope": "openid profile",
-            "state": provider.id,
-        }
-        urls.append(f"{config['authorization_endpoint']}?{urlencode(params)}")
+        urls.append(oidc.login_url(config["authorization_endpoint"], schemas.Provider.from_orm(provider)))
 
     return [
         schemas.LoginUrl(id=provider.id, name=provider.name, issuer=provider.issuer, url=url)
@@ -53,8 +44,18 @@ async def verify_authorization(
     http_client: httpx.AsyncClient = Depends(deps.get_http_client),
 ) -> schemas.Token:
     "Submit the 'code' from the authorization service to get an API access token."
-    if (provider := crud.get_provider_by_id(database, body.provider)) is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Not a valid provider")
+    provider = (
+        oidc.decode_state(body.state)
+        .and_then(
+            lambda state: Result.from_optional(
+                crud.get_provider_by_id(database, state.get("provider")), f"No provider with id={state.get('provider')}"
+            )
+        )
+        .match(
+            on_success=lambda provider: provider,
+            on_error=lambda error: raise_(HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error)),
+        )
+    )
 
     if (config := await oidc.configuration(http_client, provider.issuer)) is None:
         raise HTTPException(

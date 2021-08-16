@@ -112,8 +112,8 @@ def test_guest_create_project(guest):
     )
     assert response.status_code == 200
     project = response.json()
-    project["name"] == "test"
-    len(project["uuid"]) > 0
+    assert project["name"] == "test"
+    assert len(project["uuid"]) > 0
 
 
 def test_user_create_project(user):
@@ -123,8 +123,8 @@ def test_user_create_project(user):
     )
     assert response.status_code == 200
     project = response.json()
-    project["name"] == "test"
-    len(project["uuid"]) > 0
+    assert project["name"] == "test"
+    assert len(project["uuid"]) > 0
 
 
 def test_admin_create_project(admin):
@@ -134,8 +134,8 @@ def test_admin_create_project(admin):
     )
     assert response.status_code == 200
     project = response.json()
-    project["name"] == "test"
-    len(project["uuid"]) > 0
+    assert project["name"] == "test"
+    assert len(project["uuid"]) > 0
 
 
 # ====================

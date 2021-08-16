@@ -22,9 +22,11 @@ Currently there are two packages to generate extended loom files compatible with
 
 Eventually the functionality from pySCENIC will be expanded and put in its own python package.
 
-## Run SCope
+## HTTP API Documentation
 
-### Command Line
+You can find auto-generated at `/api/v1/docs`.
+
+## Run SCope
 
 You will need access to at least Python 3.8 do run this.
 
@@ -37,44 +39,42 @@ LOCAL_SCOPE_REPO="${HOME}/repos/SCope"
 git clone https://github.com/aertslab/SCope "${LOCAL_SCOPE_REPO}"
 # Go to your local cloned SCope repository.
 cd "${LOCAL_SCOPE_REPO}"
-# Install SCope.
-npm install
+# Install server dependencies
+cd server/
+poetry install
 ```
 
-2. Run,
+2. Configure an identity provider
+
+Users are authenticated using OpenID Connect. Ensure you have the client identifer and secret provided
+to you by the provider you will use:
 
 ```bash
-# Go to your local cloned SCope repository.
-cd "${LOCAL_SCOPE_REPO}"
-SCOPE_CONFIG=config.json npm run scope
+poetry run scope-console add-identity-provider --issuer ${PROVIDER_URL} --clientid ${CLIENT_ID} --secret ${SECRET} --name ${PROVIDER_NAME}
 ```
 
-### Standalone App
+3. Add the first server administrator
 
-For now, a standalone app is not available. One is planned for the future.
+You will need to know the subject identifier of the user you wish to make an admin as provided by your chosen OpenID Connect provider.
 
-### Deploy your own instance
+```bash
+poetry run scope-console create-admin --iss ${PROVIDER_URL} --sub ${SUBJECT_ID} NAME
+```
 
-This requires customising the client and server configuration.
+4. Allow uploading LOOM files:
 
-> TODO: Server deployment configuration is not yet finalised
+You will need to consider the maximum file size you will allow (this can be changed later)
 
-The client production deployment configuration can be found in `client/config/webpack.prod.js`. Here you can customise
-the `hostname`, protocols, ports, ORCID, and API information.
+```bash
+# Allow uploading LOOM files up to 1 GiB
+poetry run scope-console add-upload-limit --mime="application/vnd.loom" --size=1073741824
+```
 
-## Source
+5. Finally, run the server
 
-To create a SCope AWS instance from scratch please read the tutorial [aws-deployment-source](https://github.com/aertslab/SCope/tree/master/tutorials/aws-deployment-source).
-
-## Features
-
-### Enabling ORCID Functionality
-
-To enable colaborative annotations and login via ORCID ID, API credentials (`orcidAPIClientID`, `orcidAPIClientSecret` and `orcidAPIRedirectURI`) must be added to the config file provided.
-These can be generated at the [orcid developer tools page](https://orcid.org/developer-tools).
-
-The `dataHashSecret` entry in the config file should be filled in with a randomly generated string for example from the python [secrets package](https://docs.python.org/3/library/secrets.html).
-This string will be used to salt all annotation data, allowing validation of data generated on the instance of SCope. Any changes in this string will invalidate all pre-existing annotations.
+```bash
+# TBD
+```
 
 ## Development
 
@@ -86,7 +86,7 @@ SCope consists of 3 major modules:
 HTTP API documentation can be found by running the server and navigating to `http://localhost:8000/docs`. Or by using
 [Postman](https://www.postman.com) to view the SCope collection found in `SCope.postman_collection.json` file.
 
-### Clone the Repo
+1. Clone the Repo
 
 ```bash
 # Define where you want to clone the SCope repository.
@@ -96,7 +96,7 @@ git clone https://github.com/aertslab/SCope "${LOCAL_SCOPE_REPO}"
 # Go to your local cloned SCope repository.
 cd "${LOCAL_SCOPE_REPO}/"
 ```
-### Run the GRPC-Proxy
+2. Run the GRPC-Proxy
 
 ```bash
 # Go to the GRPC-Proxy directory
@@ -106,8 +106,13 @@ npm install
 # Start the proxy server
 node server.js
 ```
+3. Run the local OpenID Connect provider
 
-### Run the Server in development mode
+```bash
+docker-compose up
+```
+
+4. Run the Server in development mode
 
 ```bash
 # Go to the GRPC-Proxy directory
@@ -118,7 +123,7 @@ poetry install
 ./run-dev-env.sh
 ```
 
-### Run the client in development mode
+5. Run the client in development mode
 
 ```bash
 # Go to the Client directory
@@ -140,61 +145,80 @@ poetry run dotenv run alembic revision --autogenerate -m "Short summary of chang
 This will generate a migration script that you can then manually edit if necessary. See the
 [Alembic tutorial](https://alembic.sqlalchemy.org/en/latest/tutorial.html) for more information.
 
-### Configuration file (`config.json`)
 
-Keys:
+### Authentication
 
--   `data`: This is a directory containing data files (e.g. the `motd.txt` message of the day).
-    Can be an absolute path or a relative path from where you start SCope. By default it is
-    `./data/`.
+[OpenID Connect](https://openid.net/connect/), an identity layer on top of [OAuth2](https://oauth.net/2/),
+is used for SCope user authentication.
 
+#### Definitions
 
-### Deploying SCope with Docker
+Identity provider
+: a third-party service providing an OpenID Connect API. Also known as an "authorization server", "Issuer", or "OpenID Provider".
 
-`docker-compose.yml` is configured to spin up 2 containers: One to run the SCope backend and another to run an Apache
-reverse proxy server.
+#### Context
+The OpenID Connect
+[Authentication Code flow](https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth) is used to obtain
+a token to access user info from the identity provider. However this is necesary in the context of a SCope client
+requesting a token to access the SCope API. See the SCope API token request flow below:
 
-The SCope application will be available on port `80` by default. You can specify a port by using env variable: `SCOPE_PORT`
-before running the docker-compose command. Apache will proxy requests through to the appropriate port inside the container.
+![Requesting a token to access the SCope API](docs/auth_code_flow.svg)
 
-The `docker-compose.yml` will serve the assets from inside the scope container, and the `docker-compose.host.yml` will serve them from the host.
-This supports as many use cases as possible, because you can either build the assets on the host yourself using whatever configuration you need,
-or serve them from the container if your environment doesn't allow for that (e.g. you don't have npm installed on the host).
+An identity provider can uniquely identify a user with a _subject identifier_. Therefore, a user is globally uniquely
+identified by a combination of Issuer and Subject. This is reflected in the database schema.
 
-Before running the compose build, you can specify a SCOPE_PORT with: `docker-compose build --build-arg SCOPE_PORT=8080`
+#### New user access to SCope API
 
-The scope webpack assets will have to be built with the config: `"reverseProxyOn": true`.
-You can use environment variable: `SCOPE_CONFIG=path to your config` to specify a config file instead of changing the main one.
+1. User navigates to the SCope client web app
+1. SCope client makes a request to `/api/v1/auth/loginurl` which returns a list of accepted OpenID Connect
+   identity providers and associated login URLs. These URLs are displayed in the client as login buttons.
+1. The user click on a login button and is redirected to the third-party login and consent form.
+1. The third-party identity provider authenticates the user and redirects the browser back to the
+   SCope client with an authorization `code` and the client state.
+1. The SCope client sends a SCope API access token request to `/api/v1/auth/authorize` along with the
+   authorization code and client state.
+1. The SCope API server verifies the identity of the user by requesting a token from the identity
+   provider using the authorization code. Once the token is obtained, `userinfo` is also requested
+   from the identity provider and a the user data is entered into the database.
+1. A SCope API access token is minted and returned to the SCope client along with basic user info.
 
-You can configure where the dockerised SCope data directories should be located
-on the host machine by using the env var `SCOPE_DATA_DIR` before launching the docker-compose. 
-The default location is `./scope_data` which will be created if you do not specify one.
+#### Client authentication and authorization for API access
 
-**Note**: in this config, you do not need to specify the port in `publicHostAddress`. The env var `SCOPE_PORT` gets appended for you.
+1. SCope client makes a request on an authenticated API
+1. SCope API server decodes the bearer token and checks the signature and expiry date
+1. If the bearer token is valid, has not expired, and the user has permission to access the API
+   then the request is successful.
 
-If deploying the container on a specific port with another external apache reverse-proxy server, 
-you may have to add a config to the external apache site config to allow http and websocket reverse-proxying.
-Here is an example:
+If the request is not successful the SCope client may transition to a "logged out" state and
+give the user the opportunity to log in again.
 
-```
-    ProxyPass / http://0.0.0.0:8080/
-    RewriteEngine on
-    RewriteCond %{HTTP:Upgrade} websocket [NC]
-    RewriteCond %{HTTP:Connection} upgrade [NC]
-    RewriteRule ^/?(.*) "ws://0.0.0.0:8080/$1" [P,L]
-```
+#### Local development
 
-##### Example serve from container
+Use the `scope-console` server administration interface to control recognised identity providers. Necessary
+information to add an identity provider are:
+- Identity provider URL
+- Client ID issued by the identity provider
+- Client secret issued by the identity provider
 
-1. Copy `config.json` to a new file and modify with `"reverseProxyOn": true,` and `publicHostAddress` set to your domain
-1. `docker-compose build --build-arg SCOPE_PORT=8080`
-1. ```SCOPE_DATA_DIR=$HOME/scope_data SCOPE_PORT=8080 docker-compose up -d```
+For development purposes, you can use a local [KeyCloak](https://www.keycloak.org/) instance as an
+identity provider. This is started with a `docker-compose up -d` (make sure you wait until it is
+fully operational, about 20 seconds, before starting the SCope API server).
 
-##### OR Serve from host
-1. ```npm run build```
-1. ```SCOPE_DATA_DIR=$HOME/scope_data SCOPE_PORT=8080 docker-compose -f docker-compose.host.yml up -d```
+The `run-dev-env.sh` script automatically adds the local keycloak instance as an identity provider.
+After you run the `run-dev-env.sh` script, you can request a token. I will describe the process of
+using the API with [Postman](https://www.postman.com/) here, other systems and services will work as well.
 
-You should be able to visit `http://localhost:8080` and see the app!
+1. Start Postman and import `server/SCope.postman_collection.json`.
+1. Open the "Authorization" collection and double-click on the "Get login urls" request. Send this request.
+1. Copy the entire response URL into a web browser. You will be presented with the KeyCloak login
+   screen. The username is "scope" and the password is "scope":
+   ![KeyCloak login window](docs/keycloak_screenshot.png)
+1. If login is successful, KeyCloak will redirect your browser. You must copy the `code` field.
+   ![Authentication redirect](docs/keycloak_code.png)
+1. Back to Postman, open the "Authorization" collection and double-click on the "Get API token"
+   request. In the body tab, paste the `code` and send the request.
+1. If all goes well, Postman will save the token response and you can now make authenticated API
+   requests.
 
 ### Static Analysis with SonarQube
 

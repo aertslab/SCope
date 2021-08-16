@@ -44,7 +44,7 @@ jobs:
 
             - name: Run pylint
               run: |
-                  ${HOME}/.poetry/bin/poetry run pylint-fail-under --fail_under "8" --rcfile pyproject.toml scopeserver main.py
+                  ${HOME}/.poetry/bin/poetry run pylint-fail-under --fail_under "8" --rcfile pyproject.toml scopeserver main.py scopec.py
               working-directory: ${{ env.working-directory }}
 
             - name: Run black
@@ -54,15 +54,16 @@ jobs:
 
             - name: Run mypy
               run: |
-                  ${HOME}/.poetry/bin/poetry run mypy --config-file pyproject.toml --ignore-missing-imports scopeserver test main.py
+                  ${HOME}/.poetry/bin/poetry run mypy --config-file pyproject.toml --ignore-missing-imports scopeserver test main.py scopec.py
               working-directory: ${{ env.working-directory }}
 
             - name: Run pytest
               run: |
-                  ${HOME}/.poetry/bin/poetry run dotenv -f .test.env run pytest --cov-report term-missing --cov=scopeserver --cov-branch --cov-fail-under=42.5 --doctest-modules --ignore-glob=alembic --profile
+                  ${HOME}/.poetry/bin/poetry run pytest --cov-report term-missing --cov=scopeserver --cov-branch --cov-fail-under=42.5 --doctest-modules --ignore-glob=alembic --profile
               working-directory: ${{ env.working-directory }}
 
             - name: Run safety security checks
               run: |
-                  ${HOME}/.poetry/bin/poetry run pip freeze | ${HOME}/.poetry/bin/poetry run safety check --stdin
+                  ${HOME}/.poetry/bin/poetry export --dev -o requirements.txt
+                  ${HOME}/.poetry/bin/poetry run safety check -r requirements.txt
               working-directory: ${{ env.working-directory }}

@@ -23,7 +23,7 @@ access the wrapped values directly.
 """
 
 from __future__ import annotations
-from typing import Generic, Optional, TypeVar, Callable
+from typing import Generic, Optional, TypeVar, Callable, NoReturn
 
 # pylint: disable=invalid-name
 T = TypeVar("T")
@@ -164,6 +164,22 @@ class Result(Generic[T, E]):
 
         return None
 
+    def match(self, on_success: Callable[[T], U], on_error: Callable[[Optional[E]], U]) -> U:
+        """
+        Operate on the underlying values directly. If the result is ok, call `on_success`
+        with the `T` value, otherwise call `on_error` with the `E` value.
+
+        >>> ok(10).match(lambda x: 2 * x, lambda e: f"Error {e}")
+        20
+
+        >>> err("Bad").match(lambda x: 2 * x, lambda e: f"Error {e}")
+        'Error Bad'
+        """
+        if self._value is not None:
+            return on_success(self._value)
+
+        return on_error(self._error)
+
     @staticmethod
     def from_optional(value: Optional[T], error: E) -> Result[T, E]:
         """
@@ -192,3 +208,8 @@ def ok(val: T) -> Result[T, E]:
 def err(error: E) -> Result[T, E]:
     """Construct a failing `Result` containing `error`."""
     return Result(error=error)
+
+
+def raise_(ex) -> NoReturn:
+    "The `raise` keyword as a function"
+    raise ex

@@ -47,7 +47,7 @@ def mock_http_handler(request):
         params = {key: val[0] for key, val in parse_qs(request.stream.read().decode("utf8")).items()}
         checks = [
             params["grant_type"] == "authorization_code",
-            params["redirect_uri"] == "http://localhost/",
+            params["redirect_uri"] == settings.AUTH_REDIRECT_URI,
             params["client_id"] == "test",
             params["client_secret"] == "123",
         ]
@@ -57,7 +57,7 @@ def mock_http_handler(request):
             )
             return httpx.Response(200, json={"access_token": token, "token_type": "bearer", "id_token": token})
 
-        return httpx.Response(401, json={"error": "Error", "error_description": "Error"})
+        return httpx.Response(401, json={"error": "Error", "error_description": "Error in token request parameters"})
     return httpx.Response(404, json={"error": "Unimplemented"})
 
 

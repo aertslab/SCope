@@ -27,6 +27,9 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [],
 						"url": {
@@ -45,12 +48,336 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "List all accessible projects",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/user/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List all users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/user/all",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Promote a user to an admin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/user/promote?user_id=2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"promote"
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Demote a user from admin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/user/demote?user_id=2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"demote"
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/user/?user_id=2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								""
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
 		{
 			"name": "Projects and Datasets",
 			"item": [
+				{
+					"name": "List all projects",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/project/all",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"project",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all datasets for a project",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/project/datasets?project={{project_uuid}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"project",
+								"datasets"
+							],
+							"query": [
+								{
+									"key": "project",
+									"value": "{{project_uuid}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List all users in a project",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/project/users?project={{project_uuid}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"project",
+								"users"
+							],
+							"query": [
+								{
+									"key": "project",
+									"value": "{{project_uuid}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List project owners",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/project/owner?project={{project_uuid}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"project",
+								"owner"
+							],
+							"query": [
+								{
+									"key": "project",
+									"value": "{{project_uuid}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "Create a new project",
 					"event": [
@@ -62,9 +389,33 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const sdk = require('postman-collection');",
+									"",
+									"const responseData = JSON.parse(responseBody);",
+									"if (responseData.hasOwnProperty(\"uuid\")) {",
+									"    pm.collectionVariables.set(\"project_uuid\", responseData.uuid);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"url": {
@@ -92,58 +443,18 @@
 					"response": []
 				},
 				{
-					"name": "List all accessible projects",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8000/api/v1/project/",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
-								"api",
-								"v1",
-								"project",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get all datasets for a project",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8000/api/v1/project/datasets?project=8fdb41f0-1b58-411d-96ac-6b7d8e433a73",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
-								"api",
-								"v1",
-								"project",
-								"datasets"
-							],
-							"query": [
-								{
-									"key": "project",
-									"value": "8fdb41f0-1b58-411d-96ac-6b7d8e433a73"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "Add a dataset to a project",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -151,13 +462,14 @@
 							"formdata": [
 								{
 									"key": "uploadfile",
+									"contentType": "application/vnd.loom",
 									"type": "file",
-									"src": "/home/jacol/Downloads/20200729_FCA_BioHub_B3_Leg.HARMONY_SCENIC.loom"
+									"src": "test/data/minimal.loom"
 								}
 							]
 						},
 						"url": {
-							"raw": "http://localhost:8000/api/v1/project/dataset?name=My test dataset&project=0b9d696e-c147-4eba-9d6d-53169428dba4",
+							"raw": "http://localhost:8000/api/v1/project/dataset?name=My test dataset&project={{project_uuid}}",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -177,7 +489,7 @@
 								},
 								{
 									"key": "project",
-									"value": "0b9d696e-c147-4eba-9d6d-53169428dba4",
+									"value": "{{project_uuid}}",
 									"description": "The UUID of the project to add this dataset to."
 								}
 							]
@@ -188,10 +500,20 @@
 				{
 					"name": "Add an existing user to an existing project",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8000/api/v1/project/adduser?project=0b9d696e-c147-4eba-9d6d-53169428dba4&user_id=1",
+							"raw": "http://localhost:8000/api/v1/project/user?project={{project_uuid}}&user_id=2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -201,17 +523,17 @@
 								"api",
 								"v1",
 								"project",
-								"adduser"
+								"user"
 							],
 							"query": [
 								{
 									"key": "project",
-									"value": "0b9d696e-c147-4eba-9d6d-53169428dba4",
+									"value": "{{project_uuid}}",
 									"description": "The UUID of the project to add this user to."
 								},
 								{
 									"key": "user_id",
-									"value": "1",
+									"value": "2",
 									"description": "The id of the user to add to the project."
 								}
 							]
@@ -220,12 +542,22 @@
 					"response": []
 				},
 				{
-					"name": "List all users in a project",
+					"name": "Make another user an owner of a project",
 					"request": {
-						"method": "GET",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8000/api/v1/project/users?project=0b9d696e-c147-4eba-9d6d-53169428dba4",
+							"raw": "http://localhost:8000/api/v1/project/owner?project={{project_uuid}}&user_id=2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -235,17 +567,306 @@
 								"api",
 								"v1",
 								"project",
-								"users"
+								"owner"
 							],
 							"query": [
 								{
 									"key": "project",
-									"value": "0b9d696e-c147-4eba-9d6d-53169428dba4"
+									"value": "{{project_uuid}}"
+								},
+								{
+									"key": "user_id",
+									"value": "2"
 								}
 							]
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Remove a user from a project",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/project/user?project={{project_uuid}}&user_id=2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"project",
+								"user"
+							],
+							"query": [
+								{
+									"key": "project",
+									"value": "{{project_uuid}}"
+								},
+								{
+									"key": "user_id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a dataset",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/project/dataset?project={{project_uuid}}&dataset=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"project",
+								"dataset"
+							],
+							"query": [
+								{
+									"key": "project",
+									"value": "{{project_uuid}}"
+								},
+								{
+									"key": "dataset",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove an owner from a project",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/project/owner?project={{project_uuid}}&user_id=2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"project",
+								"owner"
+							],
+							"query": [
+								{
+									"key": "project",
+									"value": "{{project_uuid}}"
+								},
+								{
+									"key": "user_id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a project",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/project/?project={{project_uuid}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"project",
+								""
+							],
+							"query": [
+								{
+									"key": "project",
+									"value": "{{project_uuid}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Authorization",
+			"item": [
+				{
+					"name": "Get login urls",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const sdk = require('postman-collection');",
+									"",
+									"const responseData = JSON.parse(responseBody);",
+									"pm.collectionVariables.set(\"state\", responseData.map((resp) => sdk.Url.parse(resp.url).query.filter((param) => param.key === \"state\")[0].value));",
+									"//if (responseData.hasOwnProperty(\"url\")) {",
+									"//    let uri = sdk.Url.parse(responseData.url);",
+									"//    const state = uri.query.filter((param) => param.key === \"state\")[0].value;",
+									"//    pm.collectionVariables.set(\"state\", state);",
+									"//} else if (responseData.hasOwnProperty(\"access_token\")) {",
+									"//    pm.collectionVariables.set(\"access_token\", responseData.access_token);",
+									"//}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/auth/loginurl",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"loginurl"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get an API token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const sdk = require('postman-collection');",
+									"",
+									"const responseData = JSON.parse(responseBody);",
+									"pm.collectionVariables.set(\"access_token\", responseData.access_token);",
+									"console.log(responseData);",
+									"//if (responseData.hasOwnProperty(\"url\")) {",
+									"//    let uri = sdk.Url.parse(responseData.url);",
+									"//    const state = uri.query.filter((param) => param.key === \"state\")[0].value;",
+									"//    pm.collectionVariables.set(\"state\", state);",
+									"//} else if (responseData.hasOwnProperty(\"access_token\")) {",
+									"//    pm.collectionVariables.set(\"access_token\", responseData.access_token);",
+									"//}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"0c75b43e-0702-4948-90d2-af541b8a54fb.edabae7c-57c4-4e66-8e0a-17e2bf53c5c4.ade6dd0a-608b-4620-847a-48a58f8b782b\",\n    \"state\": \"{{state}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/v1/auth/authorize",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"authorize"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
 				}
 			]
 		}
@@ -272,8 +893,19 @@
 	],
 	"variable": [
 		{
-			"id": "64e5bc9f-6cb3-43a0-ae8e-06ce29c360b3",
 			"key": "user_id",
+			"value": ""
+		},
+		{
+			"key": "state",
+			"value": ""
+		},
+		{
+			"key": "access_token",
+			"value": ""
+		},
+		{
+			"key": "project_uuid",
 			"value": ""
 		}
 	]

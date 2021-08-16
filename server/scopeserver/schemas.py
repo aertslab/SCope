@@ -76,7 +76,6 @@ class User(UserBase):
 
 
 class AuthorizationResponse(BaseModel):
-    provider: int
     state: str
     code: str
 
