@@ -118,3 +118,14 @@ class LoginUrl(BaseModel):
                 )
             }
         }
+
+
+# Limits
+
+
+class UploadLimit(BaseModel):
+    mime: str
+    maxsize: int
+
+    class Config:
+        orm_mode = True

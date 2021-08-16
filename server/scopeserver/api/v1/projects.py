@@ -151,14 +151,27 @@ async def add_dataset(
     if (found_project := crud.get_project(database, project_uuid=project)) is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Project does not exist")
 
+    limits = {
+        (limit := schemas.UploadLimit.from_orm(_limit)).mime: limit.maxsize
+        for _limit in crud.get_upload_limits(database)
+    }
+
+    if uploadfile.content_type not in limits:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=f"Unsupported upload mime type: {uploadfile.content_type}",
+        )
+    max_upload_size = limits[uploadfile.content_type]
+
     # Check that the user is an admin or an owner
     if crud.is_admin(current_user) or current_user.id in (owner.id for owner in found_project.owners):
         size = 0
         with (settings.DATA_PATH / Path(project) / Path(uploadfile.filename)).open(mode="wb") as datafile:
-            data = await uploadfile.read()
+            data = await uploadfile.read(max_upload_size + 1)
             if isinstance(data, str):
                 data = data.encode("utf8")
-            size = len(data)
+            if (size := len(data)) > max_upload_size:
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Uploaded file is too large")
             datafile.write(data)
 
         return crud.create_dataset(database, name=name, filename=uploadfile.filename, project=found_project, size=size)

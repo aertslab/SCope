@@ -213,3 +213,11 @@ def get_identity_providers(database: Session) -> List[models.IdentityProvider]:
 def get_provider_by_id(database: Session, provider_id: int) -> Optional[models.IdentityProvider]:
     "Get an identity provider given an identifier."
     return database.query(models.IdentityProvider).filter(models.IdentityProvider.id == provider_id).first()
+
+
+# Limits
+
+
+def get_upload_limits(database: Session) -> List[models.UploadLimit]:
+    "Get all upload limits."
+    return database.query(models.UploadLimit).all()

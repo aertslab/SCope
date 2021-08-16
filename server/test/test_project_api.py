@@ -11,6 +11,7 @@ from test.api_fixture import (
     guest,
     user,
     admin,
+    loom_limit_9_bytes,
     expired_admin_token,
     spoofed_admin_token,
 )
@@ -310,7 +311,7 @@ def test_admin_cannot_delete_nonexisting_project(admin):
 # =========================
 
 
-def test_unauthenticated_cannot_add_dataset_existing_project(database, guest):
+def test_unauthenticated_cannot_add_dataset_existing_project(loom_limit_9_bytes, guest):
     "Test that an unauthenticated user cannot add data to a real project"
     response = client.post(
         "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {guest['access_token']}"}
@@ -323,12 +324,12 @@ def test_unauthenticated_cannot_add_dataset_existing_project(database, guest):
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", some_file, "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", some_file, "application/vnd.loom")},
     )
     assert response.status_code == 422
 
 
-def test_add_text_dataset(database, guest):
+def test_add_text_dataset(database, loom_limit_9_bytes, guest):
     "Test that text (not binary) is handled correctly"
     db = database()
 
@@ -341,7 +342,7 @@ def test_add_text_dataset(database, guest):
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", io.StringIO("Test data"), "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", io.StringIO("Test data"), "application/vnd.loom")},
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
@@ -356,7 +357,7 @@ def test_add_text_dataset(database, guest):
     assert dataset["filename"] == "test-data-file.loom"
 
 
-def test_guest_can_add_dataset_to_own_project(database, guest):
+def test_guest_can_add_dataset_to_own_project(database, loom_limit_9_bytes, guest):
     "Test that a guest can add a dataset to a project they created"
     db = database()
 
@@ -372,7 +373,7 @@ def test_guest_can_add_dataset_to_own_project(database, guest):
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", some_file, "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", some_file, "application/vnd.loom")},
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
@@ -387,7 +388,7 @@ def test_guest_can_add_dataset_to_own_project(database, guest):
     assert dataset["filename"] == "test-data-file.loom"
 
 
-def test_guest_cannot_add_dataset_to_non_owned_project(database, guest, user):
+def test_guest_cannot_add_dataset_to_non_owned_project(database, loom_limit_9_bytes, guest, user):
     "Test that a guest can add a dataset to a project they created"
     db = database()
 
@@ -401,7 +402,7 @@ def test_guest_cannot_add_dataset_to_non_owned_project(database, guest, user):
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 401
@@ -410,7 +411,7 @@ def test_guest_cannot_add_dataset_to_non_owned_project(database, guest, user):
     assert len(dbproj.datasets) == 0
 
 
-def test_user_can_add_dataset_to_own_project(database, user):
+def test_user_can_add_dataset_to_own_project(database, loom_limit_9_bytes, user):
     "Test that a regular user can add a dataset to a project they created"
     db = database()
 
@@ -426,7 +427,7 @@ def test_user_can_add_dataset_to_own_project(database, user):
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", some_file, "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", some_file, "application/vnd.loom")},
         headers={"Authorization": f"bearer {user['access_token']}"},
     )
     assert response.status_code == 200
@@ -441,7 +442,7 @@ def test_user_can_add_dataset_to_own_project(database, user):
     assert dataset["filename"] == "test-data-file.loom"
 
 
-def test_user_cannot_add_dataset_to_non_owned_project(database, guest, user):
+def test_user_cannot_add_dataset_to_non_owned_project(database, loom_limit_9_bytes, guest, user):
     "Test that a guest can add a dataset to a project they created"
     db = database()
 
@@ -455,7 +456,7 @@ def test_user_cannot_add_dataset_to_non_owned_project(database, guest, user):
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
         headers={"Authorization": f"bearer {user['access_token']}"},
     )
     assert response.status_code == 401
@@ -464,7 +465,7 @@ def test_user_cannot_add_dataset_to_non_owned_project(database, guest, user):
     assert len(dbproj.datasets) == 0
 
 
-def test_admin_can_add_dataset_to_own_project(database, admin):
+def test_admin_can_add_dataset_to_own_project(database, loom_limit_9_bytes, admin):
     "Test that an admin can add a dataset to a project they created"
     db = database()
 
@@ -480,7 +481,7 @@ def test_admin_can_add_dataset_to_own_project(database, admin):
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", some_file, "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", some_file, "application/vnd.loom")},
         headers={"Authorization": f"bearer {admin['access_token']}"},
     )
     assert response.status_code == 200
@@ -495,7 +496,7 @@ def test_admin_can_add_dataset_to_own_project(database, admin):
     assert dataset["filename"] == "test-data-file.loom"
 
 
-def test_admin_can_add_dataset_to_non_owned_project(database, admin, user):
+def test_admin_can_add_dataset_to_non_owned_project(database, loom_limit_9_bytes, admin, user):
     "Test that an admin can add a dataset to a project they do not own"
     db = database()
 
@@ -511,7 +512,7 @@ def test_admin_can_add_dataset_to_non_owned_project(database, admin, user):
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", some_file, "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", some_file, "application/vnd.loom")},
         headers={"Authorization": f"bearer {admin['access_token']}"},
     )
     assert response.status_code == 200
@@ -526,24 +527,19 @@ def test_admin_can_add_dataset_to_non_owned_project(database, admin, user):
     assert dataset["filename"] == "test-data-file.loom"
 
 
-def test_admin_cannot_add_dataset_to_nonexisting_project(admin):
+def test_admin_cannot_add_dataset_to_nonexisting_project(admin, loom_limit_9_bytes):
     "Test that trying to delete a project that does not exist should fail"
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": "fake-project-uuid", "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
         headers={"Authorization": f"bearer {admin['access_token']}"},
     )
     assert response.status_code == 400
 
 
-# ===========================
-# DELETE: /v1/project/dataset
-# ===========================
-
-
-def test_unauthenticated_cannot_delete_dataset_existing_project(database, guest):
-    "Test that an unauthenticated user cannot delete dataset from a real project"
+def test_add_invalid_mime_type(loom_limit_9_bytes, guest):
+    "Test that text (not binary) is handled correctly"
     response = client.post(
         "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {guest['access_token']}"}
     )
@@ -554,6 +550,45 @@ def test_unauthenticated_cannot_delete_dataset_existing_project(database, guest)
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
         files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/x-hdf5")},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 415
+
+
+def test_add_too_big(loom_limit_9_bytes, guest):
+    "Test that text (not binary) is handled correctly"
+    response = client.post(
+        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {guest['access_token']}"}
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    response = client.post(
+        "/api/v1/project/dataset",
+        params={"project": project["uuid"], "name": "Test dataset"},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Too much data"), "application/vnd.loom")},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 409
+
+
+# ===========================
+# DELETE: /v1/project/dataset
+# ===========================
+
+
+def test_unauthenticated_cannot_delete_dataset_existing_project(database, loom_limit_9_bytes, guest):
+    "Test that an unauthenticated user cannot delete dataset from a real project"
+    response = client.post(
+        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {guest['access_token']}"}
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    response = client.post(
+        "/api/v1/project/dataset",
+        params={"project": project["uuid"], "name": "Test dataset"},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
@@ -567,7 +602,7 @@ def test_unauthenticated_cannot_delete_dataset_existing_project(database, guest)
     assert response.status_code == 422
 
 
-def test_guest_can_delete_dataset_from_own_project(database, guest):
+def test_guest_can_delete_dataset_from_own_project(database, loom_limit_9_bytes, guest):
     "Test that a guest can delete a dataset from a project they created"
     db = database()
 
@@ -582,7 +617,7 @@ def test_guest_can_delete_dataset_from_own_project(database, guest):
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", some_file, "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", some_file, "application/vnd.loom")},
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
@@ -602,7 +637,7 @@ def test_guest_can_delete_dataset_from_own_project(database, guest):
     assert db.query(models.Dataset).filter(models.Dataset.id == dataset["id"]).first() is None
 
 
-def test_guest_cannot_delete_dataset_from_non_owned_project(database, guest, user):
+def test_guest_cannot_delete_dataset_from_non_owned_project(database, loom_limit_9_bytes, guest, user):
     "Test that a guest cannot delete a dataset from a project the do not own"
     db = database()
 
@@ -615,7 +650,7 @@ def test_guest_cannot_delete_dataset_from_non_owned_project(database, guest, use
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
         headers={"Authorization": f"bearer {user['access_token']}"},
     )
     assert response.status_code == 200
@@ -638,7 +673,7 @@ def test_guest_cannot_delete_dataset_from_non_owned_project(database, guest, use
     )
 
 
-def test_user_can_delete_dataset_from_own_project(database, user):
+def test_user_can_delete_dataset_from_own_project(database, loom_limit_9_bytes, user):
     "Test that a regular user can delete a dataset from a project they created"
     db = database()
 
@@ -653,7 +688,7 @@ def test_user_can_delete_dataset_from_own_project(database, user):
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", some_file, "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", some_file, "application/vnd.loom")},
         headers={"Authorization": f"bearer {user['access_token']}"},
     )
     assert response.status_code == 200
@@ -673,7 +708,7 @@ def test_user_can_delete_dataset_from_own_project(database, user):
     assert db.query(models.Dataset).filter(models.Dataset.id == dataset["id"]).first() is None
 
 
-def test_user_cannot_delete_dataset_from_non_owned_project(database, guest, user):
+def test_user_cannot_delete_dataset_from_non_owned_project(database, loom_limit_9_bytes, guest, user):
     "Test that a guest cannot delete a dataset from a project the do not own"
     db = database()
 
@@ -686,7 +721,7 @@ def test_user_cannot_delete_dataset_from_non_owned_project(database, guest, user
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
@@ -709,7 +744,7 @@ def test_user_cannot_delete_dataset_from_non_owned_project(database, guest, user
     )
 
 
-def test_admin_can_delete_dataset_from_own_project(database, admin):
+def test_admin_can_delete_dataset_from_own_project(database, loom_limit_9_bytes, admin):
     "Test that an admin user can delete a dataset from a project they created"
     db = database()
 
@@ -724,7 +759,7 @@ def test_admin_can_delete_dataset_from_own_project(database, admin):
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", some_file, "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", some_file, "application/vnd.loom")},
         headers={"Authorization": f"bearer {admin['access_token']}"},
     )
     assert response.status_code == 200
@@ -744,7 +779,7 @@ def test_admin_can_delete_dataset_from_own_project(database, admin):
     assert db.query(models.Dataset).filter(models.Dataset.id == dataset["id"]).first() is None
 
 
-def test_admin_can_delete_dataset_from_non_owned_project(database, guest, admin):
+def test_admin_can_delete_dataset_from_non_owned_project(database, loom_limit_9_bytes, guest, admin):
     "Test that a admin cannot delete a dataset from a project the do not own"
     db = database()
 
@@ -757,7 +792,7 @@ def test_admin_can_delete_dataset_from_non_owned_project(database, guest, admin)
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
@@ -777,7 +812,7 @@ def test_admin_can_delete_dataset_from_non_owned_project(database, guest, admin)
     assert db.query(models.Dataset).filter(models.Dataset.id == dataset["id"]).first() is None
 
 
-def test_admin_cannot_delete_existing_dataset_not_in_project(admin):
+def test_admin_cannot_delete_existing_dataset_not_in_project(loom_limit_9_bytes, admin):
     "Test that an admin user cannot delete a nonexisting dataset from a project"
     response = client.post(
         "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {admin['access_token']}"}
@@ -794,7 +829,7 @@ def test_admin_cannot_delete_existing_dataset_not_in_project(admin):
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": projectA["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
         headers={"Authorization": f"bearer {admin['access_token']}"},
     )
     assert response.status_code == 200
@@ -855,7 +890,7 @@ def test_unauthenticated_cannot_list_projects(guest):
     assert response.status_code == 422
 
 
-def test_guest_can_list_datasets_in_own_project(guest):
+def test_guest_can_list_datasets_in_own_project(loom_limit_9_bytes, guest):
     "Test that a guest can list all datasets in a project they created"
     response = client.post(
         "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {guest['access_token']}"}
@@ -876,7 +911,7 @@ def test_guest_can_list_datasets_in_own_project(guest):
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
@@ -912,7 +947,7 @@ def test_guest_cannot_list_datasets_in_non_owned_project(guest, user):
     assert response.status_code == 401
 
 
-def test_user_can_list_datasets_in_own_project(user):
+def test_user_can_list_datasets_in_own_project(loom_limit_9_bytes, user):
     "Test that a regular user can list all datasets in a project they created"
     response = client.post(
         "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {user['access_token']}"}
@@ -933,7 +968,7 @@ def test_user_can_list_datasets_in_own_project(user):
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
         headers={"Authorization": f"bearer {user['access_token']}"},
     )
     assert response.status_code == 200
@@ -969,7 +1004,7 @@ def test_user_cannot_list_datasets_in_non_owned_project(guest, user):
     assert response.status_code == 401
 
 
-def test_admin_can_list_datasets_in_own_project(admin):
+def test_admin_can_list_datasets_in_own_project(loom_limit_9_bytes, admin):
     "Test that an admin user can list all datasets in a project they created"
     response = client.post(
         "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {admin['access_token']}"}
@@ -990,7 +1025,7 @@ def test_admin_can_list_datasets_in_own_project(admin):
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
         headers={"Authorization": f"bearer {admin['access_token']}"},
     )
     assert response.status_code == 200
@@ -1009,7 +1044,7 @@ def test_admin_can_list_datasets_in_own_project(admin):
     assert datasets[0] == dataset
 
 
-def test_admin_can_list_datasets_in_non_owned_project(guest, admin):
+def test_admin_can_list_datasets_in_non_owned_project(loom_limit_9_bytes, guest, admin):
     "Test that an admin user can list datasets in a project they do not own"
     response = client.post(
         "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {guest['access_token']}"}
@@ -1031,7 +1066,7 @@ def test_admin_can_list_datasets_in_non_owned_project(guest, admin):
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/x-hdf5")},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
