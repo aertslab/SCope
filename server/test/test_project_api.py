@@ -10,6 +10,7 @@ from test.api_fixture import (
     database,
     guest,
     user,
+    another_user,
     admin,
     loom_limit_9_bytes,
     expired_admin_token,
@@ -306,6 +307,38 @@ def test_admin_cannot_delete_nonexisting_project(admin):
     assert response.status_code == 400
 
 
+def test_owner_not_creator_delete_own_project(database, guest, user):
+    "Test that a user who is an owner, but did not create the project, can delete the project"
+    db = database()
+
+    # Guest creates a project (guest is the creator and initial owner)
+    response = client.post(
+        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {guest['access_token']}"}
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Guest adds user to owners
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": user["user"]["id"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+
+    # Check starts here
+    response = client.delete(
+        "/api/v1/project/",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+
+    # Check that the database entry and the directory are deleted
+    assert len(db.query(models.Project).filter(models.Project.uuid == project["uuid"]).all()) == 0
+    assert not (settings.DATA_PATH / Path(project["uuid"])).exists()
+
+
 # =========================
 # POST: /v1/project/dataset
 # =========================
@@ -409,6 +442,72 @@ def test_guest_cannot_add_dataset_to_non_owned_project(database, loom_limit_9_by
     dbproj = db.query(models.Project).filter(models.Project.uuid == project["uuid"]).first()
     assert dbproj.size == 0
     assert len(dbproj.datasets) == 0
+
+
+def test_guest_cannot_add_dataset_to_used_project(database, loom_limit_9_bytes, guest, user):
+    "Test that a guest user who has access to a project, but is not an owner, canNOT add a dataset"
+    db = database()
+
+    response = client.post(
+        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {user['access_token']}"}
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Add guest to project
+    response = client.post(
+        "/api/v1/project/user",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+
+    # Check starts here
+    response = client.post(
+        "/api/v1/project/dataset",
+        params={"project": project["uuid"], "name": "Test dataset"},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 401
+    dbproj = db.query(models.Project).filter(models.Project.uuid == project["uuid"]).first()
+    assert dbproj.size == 0
+    assert len(dbproj.datasets) == 0
+
+
+def test_guest_second_owner_can_add_dataset(database, loom_limit_9_bytes, guest, user):
+    "Test that a guest user who did not create the project, but is an owner, can add a dataset"
+    db = database()
+
+    response = client.post(
+        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {user['access_token']}"}
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Add guest to project owners
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+
+    # Checks start here
+    response = client.post(
+        "/api/v1/project/dataset",
+        params={"project": project["uuid"], "name": "Test dataset"},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    dataset = response.json()
+    db_project = db.query(models.Project).filter(models.Project.uuid == project["uuid"]).first()
+    db_dataset = db.query(models.Dataset).filter(models.Dataset.id == dataset["id"]).first()
+
+    assert (settings.DATA_PATH / Path(project["uuid"]) / "test-data-file.loom").exists()
+    assert db_project.size == 9
+    assert db_dataset.size == 9
+    assert db_dataset.filename == "test-data-file.loom"
+    assert dataset["filename"] == "test-data-file.loom"
 
 
 def test_user_can_add_dataset_to_own_project(database, loom_limit_9_bytes, user):
@@ -671,6 +770,89 @@ def test_guest_cannot_delete_dataset_from_non_owned_project(database, loom_limit
         schemas.Dataset.from_orm(db.query(models.Dataset).filter(models.Dataset.id == dataset["id"]).first()).dict()
         == dataset
     )
+
+
+def test_guest_cannot_delete_dataset_from_used_project(database, loom_limit_9_bytes, guest, user):
+    "Test that a guest user who has access to a project, but is not an owner, canNOT add a dataset"
+    db = database()
+
+    response = client.post(
+        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {user['access_token']}"}
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    response = client.post(
+        "/api/v1/project/dataset",
+        params={"project": project["uuid"], "name": "Test dataset"},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+    dataset = response.json()
+
+    # Add guest to project
+    response = client.post(
+        "/api/v1/project/user",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+
+    # Check starts here
+    response = client.delete(
+        "/api/v1/project/dataset",
+        params={"project": project["uuid"], "dataset": dataset["id"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 401
+    db_project = db.query(models.Project).filter(models.Project.uuid == project["uuid"]).first()
+
+    assert (settings.DATA_PATH / Path(project["uuid"]) / "test-data-file.loom").exists()
+    assert db_project.size == 9
+    assert (
+        schemas.Dataset.from_orm(db.query(models.Dataset).filter(models.Dataset.id == dataset["id"]).first()).dict()
+        == dataset
+    )
+
+
+def test_guest_second_owner_can_delete_dataset(database, loom_limit_9_bytes, guest, user):
+    "Test that a guest user who did not create the project, but is an owner, can add a dataset"
+    db = database()
+
+    response = client.post(
+        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {user['access_token']}"}
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    response = client.post(
+        "/api/v1/project/dataset",
+        params={"project": project["uuid"], "name": "Test dataset"},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+    dataset = response.json()
+
+    # Add guest to project owners
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+
+    # Checks start here
+    response = client.delete(
+        "/api/v1/project/dataset",
+        params={"project": project["uuid"], "dataset": dataset["id"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    db_project = db.query(models.Project).filter(models.Project.uuid == project["uuid"]).first()
+
+    assert not (settings.DATA_PATH / Path(project["uuid"]) / "test-data-file.loom").exists()
+    assert db_project.size == 0
+    assert db.query(models.Dataset).filter(models.Dataset.id == dataset["id"]).first() is None
 
 
 def test_user_can_delete_dataset_from_own_project(database, loom_limit_9_bytes, user):
@@ -947,6 +1129,74 @@ def test_guest_cannot_list_datasets_in_non_owned_project(guest, user):
     assert response.status_code == 401
 
 
+def test_guest_can_list_datasets_in_used_project(loom_limit_9_bytes, guest, user):
+    "Test that a guest user who has access to a project, but is not an owner, can list datasets"
+    response = client.post(
+        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {user['access_token']}"}
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    response = client.post(
+        "/api/v1/project/dataset",
+        params={"project": project["uuid"], "name": "Test dataset"},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+    dataset = response.json()
+
+    # Add guest to project
+    response = client.post(
+        "/api/v1/project/user",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+
+    # Check starts here
+    response = client.get(
+        "/api/v1/project/datasets",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [dataset]
+
+
+def test_guest_second_owner_can_list_datasets(database, loom_limit_9_bytes, guest, user):
+    "Test that a guest user who did not create the project, but is an owner, can list datasets"
+    response = client.post(
+        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {user['access_token']}"}
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    response = client.post(
+        "/api/v1/project/dataset",
+        params={"project": project["uuid"], "name": "Test dataset"},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+    dataset = response.json()
+
+    # Add guest to project owners
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+
+    # Checks start here
+    response = client.get(
+        "/api/v1/project/datasets",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [dataset]
+
+
 def test_user_can_list_datasets_in_own_project(loom_limit_9_bytes, user):
     "Test that a regular user can list all datasets in a project they created"
     response = client.post(
@@ -1149,6 +1399,56 @@ def test_guest_cannot_list_users_in_non_owned_project(guest, user):
     assert response.status_code == 401
 
 
+def test_guest_can_list_users_in_used_project(loom_limit_9_bytes, guest, user):
+    "Test that a guest user who has access to a project, but is not an owner, can list users"
+    response = client.post(
+        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {user['access_token']}"}
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Add guest to project
+    response = client.post(
+        "/api/v1/project/user",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+
+    # Check starts here
+    response = client.get(
+        "/api/v1/project/users",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [user["user"], guest["user"]]
+
+
+def test_guest_second_owner_can_list_users(loom_limit_9_bytes, guest, user):
+    "Test that a guest user who did not create the project, but is an owner, can list users"
+    response = client.post(
+        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {user['access_token']}"}
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Add guest to project owners
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+
+    # Checks start here
+    response = client.get(
+        "/api/v1/project/users",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [user["user"], guest["user"]]
+
+
 def test_user_can_list_users_in_own_project(user):
     "Test that a regular user can list the users in a project they created"
     response = client.post(
@@ -1302,6 +1602,62 @@ def test_guest_cannot_add_user_to_non_owned_project(guest, user):
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 401
+
+
+def test_guest_cannot_add_user_to_used_project(guest, user):
+    "Test that a guest user who has access to a project, but is not an owner, canNOT add users"
+    response = client.post(
+        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {user['access_token']}"}
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Add guest to project
+    response = client.post(
+        "/api/v1/project/user",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+
+    # Check starts here
+    response = client.post(
+        "/api/v1/project/user",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 401
+
+
+def test_guest_second_owner_can_add_users(guest, user, another_user):
+    "Test that a guest user who did not create the project, but is an owner, can add users"
+    response = client.post(
+        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {user['access_token']}"}
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Add guest to project owners
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+
+    # Checks start here
+    response = client.post(
+        "/api/v1/project/user",
+        params={"project": project["uuid"], "user_id": another_user["user"]["id"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+
+    # User can now list users?
+    response = client.get(
+        "/api/v1/project/users",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {another_user['access_token']}"},
+    )
+    assert response.json() == [user["user"], guest["user"], another_user["user"]]
 
 
 def test_user_can_add_user_to_own_project(guest, user):
@@ -1518,6 +1874,80 @@ def test_guest_cannot_delete_user_from_non_owned_project(guest, user):
     assert response.status_code == 401
 
 
+def test_guest_cannot_delete_user_from_used_project(guest, user):
+    "Test that a guest user who has access to a project, but is not an owner, canNOT delete users"
+    response = client.post(
+        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {user['access_token']}"}
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Add guest to project
+    response = client.post(
+        "/api/v1/project/user",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+
+    # Check starts here
+    response = client.delete(
+        "/api/v1/project/user",
+        params={"project": project["uuid"], "user_id": user["user"]["id"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 401
+
+
+def test_guest_second_owner_can_delete_users(guest, user, another_user):
+    "Test that a guest user who did not create the project, but is an owner, can delete users"
+    response = client.post(
+        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {user['access_token']}"}
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Add another_user to project
+    response = client.post(
+        "/api/v1/project/user",
+        params={"project": project["uuid"], "user_id": another_user["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+
+    # Add guest to project owners
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+
+    # Check that project now has 3 users:
+    response = client.get(
+        "/api/v1/project/users",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [user["user"], another_user["user"], guest["user"]]
+
+    # Checks start here
+    response = client.delete(
+        "/api/v1/project/user",
+        params={"project": project["uuid"], "user_id": another_user["user"]["id"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+
+    # Check that project now has 2 users:
+    response = client.get(
+        "/api/v1/project/users",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [user["user"], guest["user"]]
+
+
 def test_user_can_delete_user_from_own_project(user):
     "Test that a regular user can delete a user from a project they own"
     response = client.post(
@@ -1637,5 +2067,678 @@ def test_cannot_remove_user_not_in_project(guest, user):
         "/api/v1/project/user",
         params={"project": project["uuid"], "user_id": guest["user"]["id"]},
         headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 400
+
+
+# ======================
+# GET: /v1/project/owner
+# ======================
+
+
+def test_unauthenticated_cannot_list_owners_of_project(guest):
+    "Test that an unauthenticated user cannot owners of a project"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.get("/api/v1/project/owner", params={"project": project["uuid"]})
+    assert response.status_code == 422
+
+
+def test_guest_can_list_owners_of_own_project(guest):
+    "Test that a guest can list the owners of a project they own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [guest["user"]]
+
+
+def test_guest_cannot_list_owners_of_non_owned_project(guest, user):
+    "Test that a guest cannot list the owners of a project they do not own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 401
+
+
+def test_user_can_list_owners_of_own_project(user):
+    "Test that a regular user can list the owners of a project they own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [user["user"]]
+
+
+def test_user_cannot_list_owners_of_non_owned_project(guest, user):
+    "Test that a regular user cannot list the owners of a project they do not own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 401
+
+
+def test_admin_can_list_owners_of_own_project(admin):
+    "Test that an admin user can list the owners of a project they own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {admin['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {admin['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [admin["user"]]
+
+
+def test_admin_can_list_owners_of_non_owned_project(guest, admin):
+    "Test that a regular user cannot list the owners of a project they do not own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {admin['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [guest["user"]]
+
+
+def test_admin_cannot_list_owners_of_unknown_project(admin):
+    "Test that an admin cannot list the owners of a project that doesn't exist"
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": "not-a-valid-uuid"},
+        headers={"Authorization": f"bearer {admin['access_token']}"},
+    )
+    assert response.status_code == 400
+
+
+# =======================
+# POST: /v1/project/owner
+# =======================
+
+
+def test_unauthenticated_cannot_add_owner_to_project(user, guest):
+    "Test that an unauthenticated user cannot add owners to a project"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.post("/api/v1/project/owner", params={"project": project["uuid"], "user_id": user["user"]["id"]})
+    assert response.status_code == 422
+
+
+def test_guest_can_add_owner_to_own_project(guest, user):
+    "Test that a guest can add an owner to a project they own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": user["user"]["id"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [guest["user"], user["user"]]
+
+
+def test_guest_cannot_add_owner_to_non_owned_project(guest, user):
+    "Test that a guest cannot add an owner to a project they do not own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 401
+
+
+def test_user_can_add_owner_to_own_project(user, guest):
+    "Test that a regular user can add an owner to a project they own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [user["user"], guest["user"]]
+
+
+def test_user_cannot_add_owner_to_non_owned_project(guest, user):
+    "Test that a regular user cannot add an owner to a project they do not own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": user["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 401
+
+
+def test_admin_can_add_owner_to_own_project(admin, guest):
+    "Test that an admin user can add an owner to a project they own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {admin['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {admin['access_token']}"},
+    )
+    assert response.status_code == 200
+
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [admin["user"], guest["user"]]
+
+
+def test_admin_can_add_owner_to_non_owned_project(guest, admin):
+    "Test that an admin user can add an owner to a project they do not own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": admin["user"]["id"]},
+        headers={"Authorization": f"bearer {admin['access_token']}"},
+    )
+    assert response.status_code == 200
+
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {admin['access_token']}"},
+    )
+    assert response.status_code == 200
+    print(response.json())
+    assert response.json() == [guest["user"], admin["user"]]
+
+
+def test_admin_cannot_add_owner_to_unknown_project(admin):
+    "Test that an admin cannot add an owner to a project that doesn't exist"
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": "not-a-valid-uuid", "user_id": admin["user"]["id"]},
+        headers={"Authorization": f"bearer {admin['access_token']}"},
+    )
+    assert response.status_code == 400
+
+
+def test_add_owner_who_is_already_an_owner(guest):
+    "Try to add an owner who is already an owner"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 400
+
+
+def test_add_owner_who_does_not_exist(guest):
+    "Try to add an owner who doesn't exist"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": 666},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 400
+
+
+# =========================
+# DELETE: /v1/project/owner
+# =========================
+
+
+def test_unauthenticated_cannot_delete_owner_from_project(guest):
+    "Test that an unauthenticated user cannot delete owners from a project"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.delete(
+        "/api/v1/project/owner", params={"project": project["uuid"], "user_id": guest["user"]["id"]}
+    )
+    assert response.status_code == 422
+
+
+def test_guest_can_delete_owner_from_own_project(guest, user):
+    "Test that a guest can delete an owner to a project they own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": user["user"]["id"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [guest["user"], user["user"]]
+
+    # Check starts here
+    response = client.delete(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": user["user"]["id"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [guest["user"]]
+
+
+def test_owner_can_delete_other_owner_from_project(guest, user):
+    "Test that a project owner can delete another owner from a project they own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": user["user"]["id"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [guest["user"], user["user"]]
+
+    # Check starts here
+    response = client.delete(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [user["user"]]
+
+
+def test_guest_cannot_delete_owner_from_non_owned_project(guest, user):
+    "Test that a guest cannot delete an owner to a project they do not own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.delete(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": user["user"]["id"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 401
+
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [user["user"]]
+
+
+def test_user_can_delete_owner_from_own_project(user, guest):
+    "Test that a regular user can delete an owner from a project they own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+
+    # Check starts here
+    response = client.delete(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 200
+
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [user["user"]]
+
+
+def test_user_cannot_delete_owner_from_non_owned_project(guest, user):
+    "Test that a regular user cannot delete an owner from a project they do not own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {user['access_token']}"},
+    )
+    assert response.status_code == 401
+
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [guest["user"]]
+
+
+def test_admin_can_delete_owner_from_own_project(admin, guest):
+    "Test that an admin user can delete an owner from a project they own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {admin['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    response = client.post(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {admin['access_token']}"},
+    )
+    assert response.status_code == 200
+
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {admin['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [admin["user"], guest["user"]]
+
+    # Check starts here
+    response = client.delete(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {admin['access_token']}"},
+    )
+    assert response.status_code == 200
+
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {admin['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == [admin["user"]]
+
+
+def test_admin_can_delete_owner_from_non_owned_project(guest, admin):
+    "Test that an admin user can delete an owner from a project they do not own"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    response = client.delete(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
+        headers={"Authorization": f"bearer {admin['access_token']}"},
+    )
+    assert response.status_code == 200
+
+    response = client.get(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"]},
+        headers={"Authorization": f"bearer {admin['access_token']}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_admin_cannot_delete_owner_from_unknown_project(admin):
+    "Test that an admin cannot delete an owner from a project that doesn't exist"
+    response = client.delete(
+        "/api/v1/project/owner",
+        params={"project": "not-a-valid-uuid", "user_id": admin["user"]["id"]},
+        headers={"Authorization": f"bearer {admin['access_token']}"},
+    )
+    assert response.status_code == 400
+
+
+def test_delete_owner_who_does_not_exist(guest, user):
+    "Try to add an owner who doesn't exist"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.delete(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": 666},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 400
+
+
+def test_delete_owner_who_is_not_an_owner(guest, user):
+    "Try to add an owner who doesn't exist"
+    response = client.post(
+        "/api/v1/project/new",
+        params={"name": "test"},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
+    )
+    assert response.status_code == 200
+    project = response.json()
+
+    # Check starts here
+    response = client.delete(
+        "/api/v1/project/owner",
+        params={"project": project["uuid"], "user_id": user["user"]["id"]},
+        headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 400

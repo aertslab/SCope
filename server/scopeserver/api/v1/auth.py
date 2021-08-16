@@ -79,7 +79,9 @@ async def verify_authorization(
             response["id_token"], keys, audience=provider.clientid, access_token=response["access_token"]
         )
     except (JWTError, JWTClaimsError, ExpiredSignatureError) as err:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(err))
+        raise HTTPException(  # pylint: disable=raise-missing-from
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=str(err)
+        )
 
     userinfo = await oidc.userinfo(http_client, config, access_token=response["access_token"])
     user = schemas.ORCIDUser(**{**id_token, **userinfo})

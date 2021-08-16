@@ -28,14 +28,6 @@ def get_project(database: Session, project_uuid: str) -> Optional[models.Project
     return database.query(models.Project).filter(models.Project.uuid == project_uuid).first()
 
 
-def get_users_in_project(database: Session, project_uuid: str) -> List[models.User]:
-    "Get all users in a given project."
-    if (prj := database.query(models.Project).filter(models.Project.uuid == project_uuid).first()) is None:
-        return []
-
-    return prj.users
-
-
 def create_project(database: Session, user_id: int, name: str) -> models.Project:
     "Create a new project."
     try:
@@ -78,6 +70,30 @@ def remove_user_from_project(database: Session, user=models.User, project=models
         database.commit()
 
 
+def add_owner_to_project(database: Session, user_id: int, project_id: int):
+    "Add a specified user_id to the owners of this project."
+    try:
+        database.add(models.ProjectOwnerMapping(project=project_id, owner=user_id))
+    except SQLAlchemyError:
+        database.rollback()
+        raise
+    else:
+        database.commit()
+
+
+def remove_owner_from_project(database: Session, user=models.User, project=models.Project):
+    "Remove a specified user from the owners of this project."
+    try:
+        database.query(models.ProjectOwnerMapping).filter(
+            models.ProjectOwnerMapping.owner == user.id, models.ProjectOwnerMapping.project == project.id
+        ).delete()
+    except SQLAlchemyError:
+        database.rollback()
+        raise
+    else:
+        database.commit()
+
+
 def delete_project(database: Session, project_uuid: str):
     "Remove a project from the database by uuid"
     try:
@@ -110,6 +126,16 @@ def get_user_by_identity(database: Session, issuer: str, subject: str) -> Option
 def is_admin(user: models.User) -> bool:
     "Check if a user is an admin."
     return user.role == "admin"
+
+
+def is_owner(user: models.User, project: models.Project) -> bool:
+    "Check if a user owns a project."
+    return user.id in (owner.id for owner in project.owners)
+
+
+def is_user(user: models.User, project: models.Project) -> bool:
+    "Check if a user is allowed to access a project."
+    return user.id in (usr.id for usr in project.users)
 
 
 def promote_to_admin(database: Session, user: models.User) -> models.User:
