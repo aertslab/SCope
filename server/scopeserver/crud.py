@@ -154,6 +154,16 @@ def is_user(user: models.User, project: models.Project) -> bool:
     return user.id in (usr.id for usr in project.users)
 
 
+def is_owner(user: models.User, project: models.Project) -> bool:
+    "Check if a user owns a project."
+    return user.id in (owner.id for owner in project.owners)
+
+
+def is_user(user: models.User, project: models.Project) -> bool:
+    "Check if a user is allowed to access a project."
+    return user.id in (usr.id for usr in project.users)
+
+
 def promote_to_admin(database: Session, user: models.User) -> models.User:
     "Give user the admin role"
     user.role = "admin"
