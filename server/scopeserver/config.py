@@ -52,7 +52,7 @@ class Settings(BaseSettings):
 
     class Config:
         "Default configuration"
-        env_file = Path("..") / ".env"
+        env_file = ".env"
         env_file_encoding = "utf-8"
 
 

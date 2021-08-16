@@ -1,6 +1,6 @@
 import pytest
 
-from scopeserver.result import Result, ok, err
+from scopeserver.result import Result, ok, err, raise_
 
 
 def test_ok():
@@ -63,3 +63,18 @@ def test_to_optional_ok():
 def test_to_optional_err():
     check = err(1).to_optional()
     assert check is None
+
+
+def test_match_ok():
+    check = ok("Hello").match(on_success=lambda t: f"Success: {t}", on_error=lambda e: f"Error: {e}")
+    assert check == "Success: Hello"
+
+
+def test_match_err():
+    check = err("Hello").match(on_success=lambda t: f"Success: {t}", on_error=lambda e: f"Error: {e}")
+    assert check == "Error: Hello"
+
+
+def test_match_raise():
+    with pytest.raises(ValueError):
+        err(5).match(lambda x: x, lambda e: raise_(ValueError("Got an error")))

@@ -218,8 +218,9 @@ def get_dataset(database: Session, dataset_id: int) -> Optional[models.Dataset]:
 def delete_dataset(database: Session, dataset: models.Dataset):
     "Delete a dataset by id"
     try:
-        project = database.query(models.Project).filter(models.Project.id == dataset.project).first()
-        project.size -= dataset.size
+        if (project := database.query(models.Project).filter(models.Project.id == dataset.project).first()) is not None:
+            project.size -= dataset.size
+
         database.query(models.Dataset).filter(models.Dataset.id == dataset.id).delete()
     except SQLAlchemyError:
         database.rollback()
@@ -236,8 +237,11 @@ def get_identity_providers(database: Session) -> List[models.IdentityProvider]:
     return database.query(models.IdentityProvider).all()
 
 
-def get_provider_by_id(database: Session, provider_id: int) -> Optional[models.IdentityProvider]:
+def get_provider_by_id(database: Session, provider_id: Optional[int]) -> Optional[models.IdentityProvider]:
     "Get an identity provider given an identifier."
+    if provider_id is None:
+        return None
+
     return database.query(models.IdentityProvider).filter(models.IdentityProvider.id == provider_id).first()
 
 

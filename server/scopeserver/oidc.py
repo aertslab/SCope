@@ -1,13 +1,19 @@
 " Abstractions over OpenID Connect APIs "
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, TypedDict
 from datetime import datetime, timedelta, timezone
+import base64
+from binascii import Error as Base64DecodeError
+import json
+from json.decoder import JSONDecodeError
+from urllib.parse import urlencode
 
 import httpx
 import jose
 
 from scopeserver import schemas
 from scopeserver.config import settings
+from scopeserver.result import Result, ok, err
 
 ResponseType = Dict[Any, Any]
 
@@ -117,3 +123,41 @@ def create_access_token(*, data: schemas.UserResponse) -> bytes:
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.API_TOKEN_EXPIRE)
     to_encode.update({"exp": expire})
     return jose.jwt.encode(to_encode, settings.API_SECRET, settings.API_JWT_ALGORITHM)
+
+
+class OidcState(TypedDict):
+    "The state object passed between the auth provider, the client and us."
+    provider: int
+
+
+def encode_state(provider: int) -> str:
+    "Encode a state object in a URL safe way"
+    state: OidcState = {"provider": provider}
+
+    return base64.urlsafe_b64encode(json.dumps(state).encode("utf8")).decode()
+
+
+def decode_state(encoded: str) -> Result[OidcState, str]:
+    "Decode a URL encoded state object"
+    try:
+        decoded = json.loads(base64.urlsafe_b64decode(encoded))
+    except JSONDecodeError as json_error:
+        return err(f"Could not decode state: {json_error.msg}")
+    except Base64DecodeError as base64_error:
+        return err(f"Could not decode state: {base64_error}")
+    except UnicodeDecodeError as unicode_error:
+        return err(f"Could not decode state: {unicode_error}")
+    else:
+        return ok(decoded)
+
+
+def login_url(auth_endpoint: str, provider: schemas.Provider) -> str:
+    "Format a login URL for a provider"
+    params = {
+        "client_id": provider.clientid,
+        "redirect_uri": settings.AUTH_REDIRECT_URI,
+        "response_type": "code",
+        "scope": "openid profile",
+        "state": encode_state(provider=provider.id),
+    }
+    return f"{auth_endpoint}?{urlencode(params)}"
