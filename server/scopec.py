@@ -92,6 +92,7 @@ def show():
     "Sub-command to display info"
 
 
+
 @show.command()
 def providers():
     "Show identity providers"
@@ -117,6 +118,7 @@ def login(iss):
             click.echo(f"Error response {err.response.status_code} while requesting {err.request.url!r}")
         else:
             click.echo(oidc.login_url(config["authorization_endpoint"], provider))
+
 
 
 if __name__ == "__main__":
