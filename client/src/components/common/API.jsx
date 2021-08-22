@@ -1,3 +1,5 @@
+import * as R from 'ramda';
+
 class API {
     constructor() {
         if (!__TEST_ONLY__) {
@@ -399,10 +401,9 @@ class API {
         if (!update) {
             this.loomFiles = {};
         }
-        Object.keys(files).map((i) => {
-            let file = files[i];
-            this.loomFiles[file.loomFilePath] = file;
-        });
+        R.values(files).forEach(
+            (file) => (this.loomFiles[file.loomFilePath] = file)
+        );
         // TODO: Hacky implementation. To be refactored/reviewed properly
         if (!update) {
             this.activeLoomChangeListeners.forEach((listener) => {
@@ -975,9 +976,10 @@ class API {
     }
 
     removeActiveFeaturesChange(page, listener) {
-        let i = this.featureChangeListeners[page].indexOf(listener);
-        if (i > -1) {
-            this.featureChangeListeners[page].splice(i, 1);
+        if (this.featureChangeListeners[page]) {
+            this.featureChangeListeners[page] = this.featureChangeListeners[
+                page
+            ].filter((l) => l !== listener);
         }
     }
 

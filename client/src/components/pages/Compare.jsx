@@ -17,6 +17,8 @@ import RightSidebar from '../RightSidebar';
 import AnnotationDropContainer from '../common/AnnotationDropContainer';
 import ViewerDropContainer from '../common/ViewerDropContainer';
 
+import { getCrossAnnotations, getSelectedAnnotations } from './compareHelper';
+
 class Compare extends Component {
     constructor(props) {
         super(props);
@@ -366,7 +368,11 @@ class Compare extends Component {
                                             columns * i + j
                                         ];
                                 } else {
-                                    va = this.getCrossAnnotations(i, j);
+                                    va = getCrossAnnotations(
+                                        this.state.crossAnnotations,
+                                        i,
+                                        j
+                                    );
                                 }
                                 return (
                                     <Grid.Column key={j} className='viewerCell'>
@@ -496,8 +502,8 @@ class Compare extends Component {
                                 style={{ width: '100%' }}
                                 height='200px'></div>
                             <RightSidebar
-                                getSelectedAnnotations={this.getSelectedAnnotations.bind(
-                                    this
+                                selectedAnnotations={getSelectedAnnotations(
+                                    this.state.crossAnnotations
                                 )}
                                 onActiveFeaturesChange={(features) => {
                                     this.setState({ activeFeatures: features });
@@ -703,53 +709,11 @@ class Compare extends Component {
         });
     }
 
-    getCrossAnnotations(i, j) {
-        let annotations = {},
-            cross = this.state.crossAnnotations;
-        if (cross['horizontal'][j]) {
-            Object.keys(cross['horizontal'][j]).map((a) => {
-                annotations[a] = annotations[a] || [];
-                cross['horizontal'][j][a].map((v) => {
-                    if (annotations[a].indexOf(v) === -1) {
-                        annotations[a].push(v);
-                    }
-                });
-            });
-        }
-        if (cross['vertical'][i]) {
-            Object.keys(cross['vertical'][i]).map((a) => {
-                annotations[a] = annotations[a] || [];
-                cross['vertical'][i][a].map((v) => {
-                    if (annotations[a].indexOf(v) === -1) {
-                        annotations[a].push(v);
-                    }
-                });
-            });
-        }
-        return annotations;
-    }
-
-    getSelectedAnnotations() {
-        let annotations = this.state.crossAnnotations;
-        let selectedAnnotations = {};
-        Object.keys(annotations).map((orientation) => {
-            annotations[orientation].map((annotation) => {
-                Object.keys(annotation).map((a) => {
-                    selectedAnnotations[a] = selectedAnnotations[a] || [];
-                    annotation[a].map((v) => {
-                        if (selectedAnnotations[a].indexOf(v) === -1) {
-                            selectedAnnotations[a].push(v);
-                        }
-                    });
-                });
-            });
-        });
-        return selectedAnnotations;
-    }
-
     getCellMetadata() {
         let settings = BackendAPI.getSettings();
-        let selectedAnnotations = this.getSelectedAnnotations();
+        let selectedAnnotations = getSelectedAnnotations(
+            this.state.crossAnnotations
+        );
         const { selectedGenes, selectedRegulons } =
             BackendAPI.getParsedFeatures();
         let query = {
@@ -789,13 +753,15 @@ class Compare extends Component {
         if (selectedGenes.length + selectedRegulons.length === 0) {
             return;
         }
-        let selectedAnnotations = this.getSelectedAnnotations();
+        let selectedAnnotations = getSelectedAnnotations(
+            this.state.crossAnnotations
+        );
         d3.select('#chart-distro1').select('svg').remove();
-        Object.keys(selectedAnnotations).map((annotation, ai) => {
+        Object.keys(selectedAnnotations).forEach((annotation, ai) => {
             let selections = 0;
             let dataset = [];
-            selectedGenes.map((gene, gi) => {
-                data.annotations[ai].annotations.map((av, i) => {
+            selectedGenes.forEach((gene, gi) => {
+                data.annotations[ai].annotations.forEach((av, i) => {
                     dataset.push({
                         feature: selections,
                         annotation: av,
@@ -804,8 +770,8 @@ class Compare extends Component {
                 });
                 selections++;
             });
-            selectedRegulons.map((regulon, ri) => {
-                data.annotations[ai].annotations.map((av, i) => {
+            selectedRegulons.forEach((regulon, ri) => {
+                data.annotations[ai].annotations.forEach((av, i) => {
                     dataset.push({
                         feature: selections,
                         annotation: av,
@@ -958,7 +924,7 @@ class Compare extends Component {
     rebuildLoomOptions() {
         let loomFiles = BackendAPI.getLoomFiles();
         this.loomConf = [];
-        Object.keys(loomFiles).map((l) => {
+        Object.keys(loomFiles).forEach((l) => {
             this.loomConf.push({
                 text: loomFiles[l].loomDisplayName,
                 value: l,

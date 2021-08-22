@@ -377,7 +377,7 @@ class App extends Component {
             BackendAPI.importObject(settings);
             console.log('Restoring session' + uuid + '...');
             BackendAPI.queryLoomFiles(uuid, () => {
-                Object.keys(settings.features).map((page) => {
+                Object.keys(settings.features).forEach((page) => {
                     settings.features[page].map((f, i) => {
                         BackendAPI.updateFeature(
                             i,
