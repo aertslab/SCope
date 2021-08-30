@@ -69,6 +69,7 @@ def add_identity_provider(name, issuer, clientid, secret, icon):
         else:
             click.echo(f"Added identity provider: {name}")
 
+
 @cli.command()
 @click.option("--mime", help="MIME type of the file to allow")
 @click.option("--size", help="Maximum upload file size for this mime type")
