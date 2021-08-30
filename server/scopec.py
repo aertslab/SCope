@@ -11,7 +11,7 @@ import httpx
 from sqlalchemy.exc import SQLAlchemyError
 
 from scopeserver.database import SessionLocal
-from scopeserver import models, crud, oidc
+from scopeserver import models, crud
 
 
 @click.group()
@@ -74,6 +74,7 @@ def add_identity_provider(name, issuer, clientid, secret, icon):
 @click.option("--mime", help="MIME type of the file to allow")
 @click.option("--size", help="Maximum upload file size for this mime type")
 def add_upload_limit(mime, size):
+    "Add new upload size limits"
     with SessionLocal() as database:
         try:
             limit = models.UploadLimit(mime=mime, maxsize=size)
