@@ -11,7 +11,7 @@ import httpx
 from sqlalchemy.exc import SQLAlchemyError
 
 from scopeserver.database import SessionLocal
-from scopeserver import models, crud
+from scopeserver import models, crud, oidc
 
 
 @click.group()
