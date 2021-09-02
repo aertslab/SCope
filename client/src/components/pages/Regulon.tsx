@@ -12,9 +12,18 @@ import RightSidebar from '../RightSidebar';
 import ViewerToolbar from '../common/ViewerToolbar';
 import Histogram from '../Histogram';
 
-export default class Regulon extends Component {
-    constructor() {
-        super();
+type RegulonState = {
+    activeLoom: string;
+    activeCoordinates: any;
+    activeFeatures: any;
+};
+
+export default class Regulon extends Component<any, RegulonState> {
+    activeLoomListener: (_loom: any, _metadata: any, _coordinates: any) => void;
+    activeFeaturesListener: (_features: any) => void;
+
+    constructor(props) {
+        super(props);
         this.state = {
             activeLoom: BackendAPI.getActiveLoom(),
             activeCoordinates: BackendAPI.getActiveCoordinates(),
@@ -31,7 +40,7 @@ export default class Regulon extends Component {
     render() {
         const { activeLoom, activeCoordinates, activeFeatures } = this.state;
 
-        let featureThreshold = [0, 1, 2].map((i) => (
+        const featureThreshold = [0, 1, 2].map((i) => (
             <Grid.Column key={i} className='flexDisplay' stretched>
                 <Histogram
                     field={i}
@@ -66,14 +75,14 @@ export default class Regulon extends Component {
                 </Grid>
                 <div
                     style={{
-                        flexGrow: '1',
+                        flexGrow: 1,
                         display: 'flex',
                         flexDirection: 'row',
                     }}>
                     <div style={{ width: '78px', paddingTop: '20px' }}>
                         <ViewerToolbar location={this.props.location} />
                     </div>
-                    <div style={{ flexGrow: '1' }}>
+                    <div style={{ flexGrow: 1 }}>
                         <Grid
                             className='flexDisplay'
                             style={{ height: '100%' }}>
@@ -141,6 +150,9 @@ export default class Regulon extends Component {
                                                 activeFeatures: features,
                                             });
                                         }}
+                                        hideFeatures={false}
+                                        activeLegend={true}
+                                        getSelectedAnnotations={() => Object()}
                                     />
                                 </Grid.Column>
                             </Grid.Row>
