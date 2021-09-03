@@ -14,25 +14,25 @@ export default class Gene extends Component {
         super();
         this.state = {
             activeLoom: BackendAPI.getActiveLoom(),
-            activeCoordinates: BackendAPI.getActiveCoordinates(),
+            activeEmbeddingId: BackendAPI.getActiveEmbeddingId(),
             activeMetadata: BackendAPI.getActiveLoomMetadata(),
             activeFeatures: BackendAPI.getActiveFeatures(),
             activeLegend: null,
         };
-        this.activeLoomListener = (loom, metadata, coordinates) => {
+        this.activeLoomListener = (loom, metadata, embeddingId) => {
             if (DEBUG) {
-                console.log('activeLoomListener', loom, metadata, coordinates);
+                console.log('activeLoomListener', loom, metadata, embeddingId);
             }
             this.setState({
                 activeLoom: loom,
-                activeCoordinates: coordinates,
+                activeEmbeddingId: embeddingId,
                 activeMetadata: metadata,
             });
         };
     }
 
     render() {
-        const { activeLoom, activeFeatures, activeCoordinates, activeLegend } =
+        const { activeLoom, activeFeatures, activeEmbeddingId, activeLegend } =
             this.state;
 
         if (!activeLoom || activeLoom === '*') {
@@ -55,7 +55,7 @@ export default class Gene extends Component {
                             name='expr'
                             loomFile={activeLoom}
                             activeFeatures={activeFeatures}
-                            activeCoordinates={activeCoordinates}
+                            activeEmbeddingId={activeEmbeddingId}
                             onActiveLegendChange={(legend) => {
                                 this.setState({ activeLegend: legend });
                             }}

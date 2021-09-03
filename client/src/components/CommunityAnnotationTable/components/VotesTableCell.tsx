@@ -58,8 +58,7 @@ class VotesTableCell extends React.Component<
             activeFeature,
             orcidData,
             uuid,
-            (response) => {
-                console.log(response);
+            () => {
                 this.setState({ status: 'ready' });
             }
         );

@@ -66,7 +66,7 @@ class API {
         this.activePage = 'welcome';
         this.activePageListeners = [];
         this.activeLooms = [];
-        this.activeCoordinates = -1;
+        this.activeEmbeddingId = -1;
         this.activeLoomChangeListeners = [];
 
         this.features = {};
@@ -119,7 +119,7 @@ class API {
         this.spriteSettings = api.spriteSettings;
         this.activePage = api.activePage;
         this.activeLooms = api.activeLooms;
-        this.activeCoordinates = api.activeCoordinates;
+        this.activeEmbeddingId = api.activeEmbeddingId;
         this.features = api.features;
         this.settings = api.settings;
         this.viewerTool = api.viewerTool;
@@ -144,7 +144,7 @@ class API {
             'alpha',
             'activePage',
             'activeLooms',
-            'activeCoordinates',
+            'activeEmbeddingId',
             'features',
             'gene',
             'regulon',
@@ -257,7 +257,7 @@ class API {
 
     setActiveLooms(looms) {
         this.activeLooms = looms.slice(0);
-        this.activeCoordinates = -1;
+        this.activeEmbeddingId = -1;
         this.getMaxScale(null, (customValues) => {
             this.customValuesChangeListeners.forEach((listener) => {
                 listener(customValues);
@@ -278,12 +278,12 @@ class API {
         this.viewerSelectionsChangeListeners.forEach((listener) => {
             listener(this.viewerSelections[this.activePage]);
         });
-        this.activeCoordinates = -1;
+        this.activeEmbeddingId = -1;
         this.activeLoomChangeListeners.forEach((listener) => {
             listener(
                 this.activeLooms[id],
                 this.loomFiles[this.activeLooms[id]],
-                this.activeCoordinates
+                this.activeEmbeddingId
             );
         });
         this.getMaxScale(null, (customValues) => {
@@ -293,13 +293,13 @@ class API {
         });
     }
 
-    setActiveCoordinates(coords) {
-        this.activeCoordinates = coords;
+    setActiveEmbeddingId(activeEmbeddingId) {
+        this.activeEmbeddingId = activeEmbeddingId;
         this.activeLoomChangeListeners.forEach((listener) => {
             listener(
                 this.activeLooms[0],
                 this.loomFiles[this.activeLooms[0]],
-                this.activeCoordinates
+                this.activeEmbeddingId
             );
         });
     }
@@ -318,7 +318,7 @@ class API {
 
     getActiveLoomMetaDataEmbedding() {
         return this.getActiveLoomMetadataEmbeddings().filter(
-            (x) => x.id === this.getActiveCoordinates()
+            (x) => x.id === this.getActiveEmbeddingId()
         )[0];
     }
 
@@ -333,8 +333,8 @@ class API {
         }
     }
 
-    getActiveCoordinates() {
-        return this.activeCoordinates;
+    getActiveEmbeddingId() {
+        return this.activeEmbeddingId;
     }
 
     hasActiveCoordinatesTrajectory() {
@@ -409,7 +409,7 @@ class API {
                 listener(
                     this.activeLooms[0],
                     this.loomFiles[this.activeLooms[0]],
-                    this.activeCoordinates
+                    this.activeEmbeddingId
                 );
             });
         }

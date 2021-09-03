@@ -79,7 +79,6 @@ export default class OLSAutocomplete extends Component<
     }
 
     handleResultSelect = (e: React.SyntheticEvent, { result }) => {
-        console.log(result);
         this.props.updateParent(result);
         this.setState({
             value: result.label + ' (' + result.obo_id + ')',
