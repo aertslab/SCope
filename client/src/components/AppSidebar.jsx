@@ -26,7 +26,7 @@ class AppSidebar extends Component {
         super();
         let sprite = BackendAPI.getSpriteSettings();
         this.state = {
-            activeCoordinates: BackendAPI.getActiveCoordinates(),
+            activeEmbeddingId: BackendAPI.getActiveEmbeddingId(),
             settings: BackendAPI.getSettings(),
             loomFiles: BackendAPI.getLoomFiles(),
             userLoomTree: null,
@@ -46,7 +46,7 @@ class AppSidebar extends Component {
     render() {
         const { match } = this.props;
         const {
-            activeCoordinates,
+            activeEmbeddingId,
             settings,
             loading,
             loomFiles,
@@ -206,7 +206,7 @@ class AppSidebar extends Component {
                             ].join('/')
                         }
                         onClick={() => {
-                            this.setState({ activeCoordinates: -1 });
+                            this.setState({ activeEmbeddingId: -1 });
                             this.props.onMetadataChange(file);
                         }}>
                         <Menu.Item
@@ -373,9 +373,9 @@ class AppSidebar extends Component {
                         <Menu.Item>
                             <Dropdown
                                 inline
-                                value={activeCoordinates}
+                                value={activeEmbeddingId}
                                 options={coordinates}
-                                onChange={this.setActiveCoordinates.bind(this)}
+                                onChange={this.setActiveEmbeddingId.bind(this)}
                             />
                         </Menu.Item>
                         {BackendAPI.hasActiveCoordinatesTrajectory() && (
@@ -523,7 +523,7 @@ class AppSidebar extends Component {
         let sprite = BackendAPI.getSpriteSettings();
         this.setState({
             settings: BackendAPI.getSettings(),
-            activeCoordinates: BackendAPI.getActiveCoordinates(),
+            activeEmbeddingId: BackendAPI.getActiveEmbeddingId(),
             spriteAlpha: sprite.alpha,
             spriteScale: sprite.scale,
         });
@@ -688,9 +688,9 @@ class AppSidebar extends Component {
         this.setState({ settings: settings });
     }
 
-    setActiveCoordinates(evt, coords) {
-        BackendAPI.setActiveCoordinates(coords.value);
-        this.setState({ activeCoordinates: coords.value });
+    setActiveEmbeddingId(evt, coords) {
+        BackendAPI.setActiveEmbeddingId(coords.value);
+        this.setState({ activeEmbeddingId: coords.value });
     }
 
     onLoomUploaded(filename) {

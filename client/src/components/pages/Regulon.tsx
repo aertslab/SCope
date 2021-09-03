@@ -14,23 +14,31 @@ import Histogram from '../Histogram';
 
 type RegulonState = {
     activeLoom: string;
-    activeCoordinates: any;
+    activeEmbeddingId: number;
     activeFeatures: any;
 };
 
 export default class Regulon extends Component<any, RegulonState> {
-    activeLoomListener: (_loom: any, _metadata: any, _coordinates: any) => void;
+    activeLoomListener: (
+        _loom: string,
+        _metadata: Metadata,
+        _embeddingId: number
+    ) => void;
     activeFeaturesListener: (_features: any) => void;
 
     constructor(props) {
         super(props);
         this.state = {
             activeLoom: BackendAPI.getActiveLoom(),
-            activeCoordinates: BackendAPI.getActiveCoordinates(),
+            activeEmbeddingId: BackendAPI.getActiveEmbeddingId(),
             activeFeatures: BackendAPI.getActiveFeatures(),
         };
-        this.activeLoomListener = (loom, metadata, coordinates) => {
-            this.setState({ activeLoom: loom, activeCoordinates: coordinates });
+        this.activeLoomListener = (
+            loom: string,
+            metadata: Metadata,
+            embeddingId: number
+        ) => {
+            this.setState({ activeLoom: loom, activeEmbeddingId: embeddingId });
         };
         this.activeFeaturesListener = (features) => {
             this.setState({ activeFeatures: features });
@@ -38,7 +46,7 @@ export default class Regulon extends Component<any, RegulonState> {
     }
 
     render() {
-        const { activeLoom, activeCoordinates, activeFeatures } = this.state;
+        const { activeLoom, activeEmbeddingId, activeFeatures } = this.state;
 
         const featureThreshold = [0, 1, 2].map((i) => (
             <Grid.Column key={i} className='flexDisplay' stretched>
@@ -97,7 +105,7 @@ export default class Regulon extends Component<any, RegulonState> {
                                         name='reg'
                                         loomFile={activeLoom}
                                         activeFeatures={activeFeatures}
-                                        activeCoordinates={activeCoordinates}
+                                        activeEmbeddingId={activeEmbeddingId}
                                         scale={true}
                                         location={this.props.location}
                                     />
@@ -114,8 +122,8 @@ export default class Regulon extends Component<any, RegulonState> {
                                             name='auc'
                                             loomFile={activeLoom}
                                             activeFeatures={activeFeatures}
-                                            activeCoordinates={
-                                                activeCoordinates
+                                            activeEmbeddingId={
+                                                activeEmbeddingId
                                             }
                                             thresholds={true}
                                             location={this.props.location}
@@ -132,8 +140,8 @@ export default class Regulon extends Component<any, RegulonState> {
                                             name='expr'
                                             loomFile={activeLoom}
                                             activeFeatures={activeFeatures}
-                                            activeCoordinates={
-                                                activeCoordinates
+                                            activeEmbeddingId={
+                                                activeEmbeddingId
                                             }
                                             scale={true}
                                             genes={true}

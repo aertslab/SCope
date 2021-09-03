@@ -65,7 +65,7 @@ export default class Viewer extends Component {
 
                 this.getFeatureLabels(
                     this.props.loomFile,
-                    BackendAPI.getActiveCoordinates(),
+                    BackendAPI.getActiveEmbeddingId(),
                     this.state.activeFeatures
                 );
             }
@@ -152,7 +152,7 @@ export default class Viewer extends Component {
     getDataToDisplay() {
         this.getPoints(
             this.props.loomFile,
-            this.props.activeCoordinates,
+            this.props.activeEmbeddingId,
             this.props.activeAnnotations,
             this.props.superposition,
             () => {
@@ -170,7 +170,7 @@ export default class Viewer extends Component {
 
                     this.getFeatureLabels(
                         this.props.loomFile,
-                        BackendAPI.getActiveCoordinates(),
+                        BackendAPI.getActiveEmbeddingId(),
                         this.state.activeFeatures
                     );
                 }
@@ -200,7 +200,7 @@ export default class Viewer extends Component {
         );
         if (
             prevProps.loomFile !== this.props.loomFile ||
-            prevProps.activeCoordinates !== this.props.activeCoordinates
+            prevProps.activeEmbeddingId !== this.props.activeEmbeddingId
         ) {
             if (this.props.loomFile !== null && this.props.loomFile !== '*') {
                 this.mainLayer.removeChildren();
@@ -698,7 +698,7 @@ export default class Viewer extends Component {
                 );
                 this.getFeatureLabels(
                     this.props.loomFile,
-                    BackendAPI.getActiveCoordinates(),
+                    BackendAPI.getActiveEmbeddingId(),
                     features
                 );
             } else {
