@@ -1086,7 +1086,7 @@ export default class Viewer extends Component {
                             this.setState({ colors });
                             this.updateDataPoints(colors);
 
-                            if (this.props.onActiveLegendChange !== null) {
+                            if (this.props?.onActiveLegendChange) {
                                 this.props.onActiveLegendChange(
                                     response.legend
                                 );
