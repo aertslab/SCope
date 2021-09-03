@@ -12,10 +12,12 @@ import RightSidebar from '../RightSidebar';
 import ViewerToolbar from '../common/ViewerToolbar';
 import Histogram from '../Histogram';
 
+import { Metadata, Feature } from '../../model';
+
 type RegulonState = {
     activeLoom: string;
     activeEmbeddingId: number;
-    activeFeatures: any;
+    activeFeatures: Feature[];
 };
 
 export default class Regulon extends Component<any, RegulonState> {
@@ -24,7 +26,7 @@ export default class Regulon extends Component<any, RegulonState> {
         _metadata: Metadata,
         _embeddingId: number
     ) => void;
-    activeFeaturesListener: (_features: any) => void;
+    activeFeaturesListener: (_features: Feature[]) => void;
 
     constructor(props) {
         super(props);
@@ -40,7 +42,7 @@ export default class Regulon extends Component<any, RegulonState> {
         ) => {
             this.setState({ activeLoom: loom, activeEmbeddingId: embeddingId });
         };
-        this.activeFeaturesListener = (features) => {
+        this.activeFeaturesListener = (features: Feature[]) => {
             this.setState({ activeFeatures: features });
         };
     }
@@ -187,7 +189,7 @@ export default class Regulon extends Component<any, RegulonState> {
         );
     }
 
-    onThresholdChange(idx, threshold) {
+    onThresholdChange(idx: number, threshold: number) {
         BackendAPI.setFeatureThreshold(idx, threshold);
     }
 }
