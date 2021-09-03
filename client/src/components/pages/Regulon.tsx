@@ -79,10 +79,10 @@ export default class Regulon extends Component<any, RegulonState> {
                         display: 'flex',
                         flexDirection: 'row',
                     }}>
-                    <div style={{ width: '78px', paddingTop: '20px' }}>
+                    <div style={{ width: '78px', paddingTop: '45px' }}>
                         <ViewerToolbar location={this.props.location} />
                     </div>
-                    <div style={{ flexGrow: 1 }}>
+                    <div style={{ flexGrow: 1, paddingTop: '45px' }}>
                         <Grid
                             className='flexDisplay'
                             style={{ height: '100%' }}>
