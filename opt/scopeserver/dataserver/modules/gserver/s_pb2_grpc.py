@@ -16,145 +16,145 @@ class MainStub(object):
             channel: A grpc.Channel.
         """
         self.getCellColorByFeatures = channel.unary_unary(
-                '/scope.Main/getCellColorByFeatures',
-                request_serializer=s__pb2.CellColorByFeaturesRequest.SerializeToString,
-                response_deserializer=s__pb2.CellColorByFeaturesReply.FromString,
-                )
+            "/scope.Main/getCellColorByFeatures",
+            request_serializer=s__pb2.CellColorByFeaturesRequest.SerializeToString,
+            response_deserializer=s__pb2.CellColorByFeaturesReply.FromString,
+        )
         self.getCellAUCValuesByFeatures = channel.unary_unary(
-                '/scope.Main/getCellAUCValuesByFeatures',
-                request_serializer=s__pb2.CellAUCValuesByFeaturesRequest.SerializeToString,
-                response_deserializer=s__pb2.CellAUCValuesByFeaturesReply.FromString,
-                )
+            "/scope.Main/getCellAUCValuesByFeatures",
+            request_serializer=s__pb2.CellAUCValuesByFeaturesRequest.SerializeToString,
+            response_deserializer=s__pb2.CellAUCValuesByFeaturesReply.FromString,
+        )
         self.getCellMetaData = channel.unary_unary(
-                '/scope.Main/getCellMetaData',
-                request_serializer=s__pb2.CellMetaDataRequest.SerializeToString,
-                response_deserializer=s__pb2.CellMetaDataReply.FromString,
-                )
+            "/scope.Main/getCellMetaData",
+            request_serializer=s__pb2.CellMetaDataRequest.SerializeToString,
+            response_deserializer=s__pb2.CellMetaDataReply.FromString,
+        )
         self.getFeatures = channel.unary_unary(
-                '/scope.Main/getFeatures',
-                request_serializer=s__pb2.FeatureRequest.SerializeToString,
-                response_deserializer=s__pb2.FeatureReply.FromString,
-                )
+            "/scope.Main/getFeatures",
+            request_serializer=s__pb2.FeatureRequest.SerializeToString,
+            response_deserializer=s__pb2.FeatureReply.FromString,
+        )
         self.getCoordinates = channel.unary_unary(
-                '/scope.Main/getCoordinates',
-                request_serializer=s__pb2.CoordinatesRequest.SerializeToString,
-                response_deserializer=s__pb2.CoordinatesReply.FromString,
-                )
+            "/scope.Main/getCoordinates",
+            request_serializer=s__pb2.CoordinatesRequest.SerializeToString,
+            response_deserializer=s__pb2.CoordinatesReply.FromString,
+        )
         self.getRegulonMetaData = channel.unary_unary(
-                '/scope.Main/getRegulonMetaData',
-                request_serializer=s__pb2.RegulonMetaDataRequest.SerializeToString,
-                response_deserializer=s__pb2.RegulonMetaDataReply.FromString,
-                )
+            "/scope.Main/getRegulonMetaData",
+            request_serializer=s__pb2.RegulonMetaDataRequest.SerializeToString,
+            response_deserializer=s__pb2.RegulonMetaDataReply.FromString,
+        )
         self.getMarkerGenes = channel.unary_unary(
-                '/scope.Main/getMarkerGenes',
-                request_serializer=s__pb2.MarkerGenesRequest.SerializeToString,
-                response_deserializer=s__pb2.MarkerGenesReply.FromString,
-                )
+            "/scope.Main/getMarkerGenes",
+            request_serializer=s__pb2.MarkerGenesRequest.SerializeToString,
+            response_deserializer=s__pb2.MarkerGenesReply.FromString,
+        )
         self.getMyLooms = channel.unary_unary(
-                '/scope.Main/getMyLooms',
-                request_serializer=s__pb2.MyLoomsRequest.SerializeToString,
-                response_deserializer=s__pb2.MyLoomsReply.FromString,
-                )
+            "/scope.Main/getMyLooms",
+            request_serializer=s__pb2.MyLoomsRequest.SerializeToString,
+            response_deserializer=s__pb2.MyLoomsReply.FromString,
+        )
         self.translateLassoSelection = channel.unary_unary(
-                '/scope.Main/translateLassoSelection',
-                request_serializer=s__pb2.TranslateLassoSelectionRequest.SerializeToString,
-                response_deserializer=s__pb2.TranslateLassoSelectionReply.FromString,
-                )
+            "/scope.Main/translateLassoSelection",
+            request_serializer=s__pb2.TranslateLassoSelectionRequest.SerializeToString,
+            response_deserializer=s__pb2.TranslateLassoSelectionReply.FromString,
+        )
         self.getCellIDs = channel.unary_unary(
-                '/scope.Main/getCellIDs',
-                request_serializer=s__pb2.CellIDsRequest.SerializeToString,
-                response_deserializer=s__pb2.CellIDsReply.FromString,
-                )
+            "/scope.Main/getCellIDs",
+            request_serializer=s__pb2.CellIDsRequest.SerializeToString,
+            response_deserializer=s__pb2.CellIDsReply.FromString,
+        )
         self.doGeneSetEnrichment = channel.unary_stream(
-                '/scope.Main/doGeneSetEnrichment',
-                request_serializer=s__pb2.GeneSetEnrichmentRequest.SerializeToString,
-                response_deserializer=s__pb2.GeneSetEnrichmentReply.FromString,
-                )
+            "/scope.Main/doGeneSetEnrichment",
+            request_serializer=s__pb2.GeneSetEnrichmentRequest.SerializeToString,
+            response_deserializer=s__pb2.GeneSetEnrichmentReply.FromString,
+        )
         self.getVmax = channel.unary_unary(
-                '/scope.Main/getVmax',
-                request_serializer=s__pb2.VmaxRequest.SerializeToString,
-                response_deserializer=s__pb2.VmaxReply.FromString,
-                )
+            "/scope.Main/getVmax",
+            request_serializer=s__pb2.VmaxRequest.SerializeToString,
+            response_deserializer=s__pb2.VmaxReply.FromString,
+        )
         self.getUUID = channel.unary_unary(
-                '/scope.Main/getUUID',
-                request_serializer=s__pb2.UUIDRequest.SerializeToString,
-                response_deserializer=s__pb2.UUIDReply.FromString,
-                )
+            "/scope.Main/getUUID",
+            request_serializer=s__pb2.UUIDRequest.SerializeToString,
+            response_deserializer=s__pb2.UUIDReply.FromString,
+        )
         self.getRemainingUUIDTime = channel.unary_unary(
-                '/scope.Main/getRemainingUUIDTime',
-                request_serializer=s__pb2.RemainingUUIDTimeRequest.SerializeToString,
-                response_deserializer=s__pb2.RemainingUUIDTimeReply.FromString,
-                )
+            "/scope.Main/getRemainingUUIDTime",
+            request_serializer=s__pb2.RemainingUUIDTimeRequest.SerializeToString,
+            response_deserializer=s__pb2.RemainingUUIDTimeReply.FromString,
+        )
         self.loomUploaded = channel.unary_unary(
-                '/scope.Main/loomUploaded',
-                request_serializer=s__pb2.LoomUploadedRequest.SerializeToString,
-                response_deserializer=s__pb2.LoomUploadedReply.FromString,
-                )
+            "/scope.Main/loomUploaded",
+            request_serializer=s__pb2.LoomUploadedRequest.SerializeToString,
+            response_deserializer=s__pb2.LoomUploadedReply.FromString,
+        )
         self.getMyGeneSets = channel.unary_unary(
-                '/scope.Main/getMyGeneSets',
-                request_serializer=s__pb2.MyGeneSetsRequest.SerializeToString,
-                response_deserializer=s__pb2.MyGeneSetsReply.FromString,
-                )
+            "/scope.Main/getMyGeneSets",
+            request_serializer=s__pb2.MyGeneSetsRequest.SerializeToString,
+            response_deserializer=s__pb2.MyGeneSetsReply.FromString,
+        )
         self.deleteUserFile = channel.unary_unary(
-                '/scope.Main/deleteUserFile',
-                request_serializer=s__pb2.DeleteUserFileRequest.SerializeToString,
-                response_deserializer=s__pb2.DeleteUserFileReply.FromString,
-                )
+            "/scope.Main/deleteUserFile",
+            request_serializer=s__pb2.DeleteUserFileRequest.SerializeToString,
+            response_deserializer=s__pb2.DeleteUserFileReply.FromString,
+        )
         self.downloadSubLoom = channel.unary_stream(
-                '/scope.Main/downloadSubLoom',
-                request_serializer=s__pb2.DownloadSubLoomRequest.SerializeToString,
-                response_deserializer=s__pb2.DownloadSubLoomReply.FromString,
-                )
+            "/scope.Main/downloadSubLoom",
+            request_serializer=s__pb2.DownloadSubLoomRequest.SerializeToString,
+            response_deserializer=s__pb2.DownloadSubLoomReply.FromString,
+        )
         self.setAnnotationName = channel.unary_unary(
-                '/scope.Main/setAnnotationName',
-                request_serializer=s__pb2.SetAnnotationNameRequest.SerializeToString,
-                response_deserializer=s__pb2.SetAnnotationNameReply.FromString,
-                )
+            "/scope.Main/setAnnotationName",
+            request_serializer=s__pb2.SetAnnotationNameRequest.SerializeToString,
+            response_deserializer=s__pb2.SetAnnotationNameReply.FromString,
+        )
         self.setLoomHierarchy = channel.unary_unary(
-                '/scope.Main/setLoomHierarchy',
-                request_serializer=s__pb2.SetLoomHierarchyRequest.SerializeToString,
-                response_deserializer=s__pb2.SetLoomHierarchyReply.FromString,
-                )
+            "/scope.Main/setLoomHierarchy",
+            request_serializer=s__pb2.SetLoomHierarchyRequest.SerializeToString,
+            response_deserializer=s__pb2.SetLoomHierarchyReply.FromString,
+        )
         self.getORCID = channel.unary_unary(
-                '/scope.Main/getORCID',
-                request_serializer=s__pb2.getORCIDRequest.SerializeToString,
-                response_deserializer=s__pb2.getORCIDReply.FromString,
-                )
+            "/scope.Main/getORCID",
+            request_serializer=s__pb2.getORCIDRequest.SerializeToString,
+            response_deserializer=s__pb2.getORCIDReply.FromString,
+        )
         self.getORCIDStatus = channel.unary_unary(
-                '/scope.Main/getORCIDStatus',
-                request_serializer=s__pb2.getORCIDStatusRequest.SerializeToString,
-                response_deserializer=s__pb2.getORCIDStatusReply.FromString,
-                )
+            "/scope.Main/getORCIDStatus",
+            request_serializer=s__pb2.getORCIDStatusRequest.SerializeToString,
+            response_deserializer=s__pb2.getORCIDStatusReply.FromString,
+        )
         self.setColabAnnotationData = channel.unary_unary(
-                '/scope.Main/setColabAnnotationData',
-                request_serializer=s__pb2.setColabAnnotationDataRequest.SerializeToString,
-                response_deserializer=s__pb2.setColabAnnotationDataReply.FromString,
-                )
+            "/scope.Main/setColabAnnotationData",
+            request_serializer=s__pb2.setColabAnnotationDataRequest.SerializeToString,
+            response_deserializer=s__pb2.setColabAnnotationDataReply.FromString,
+        )
         self.voteAnnotation = channel.unary_unary(
-                '/scope.Main/voteAnnotation',
-                request_serializer=s__pb2.voteAnnotationRequest.SerializeToString,
-                response_deserializer=s__pb2.voteAnnotationReply.FromString,
-                )
+            "/scope.Main/voteAnnotation",
+            request_serializer=s__pb2.voteAnnotationRequest.SerializeToString,
+            response_deserializer=s__pb2.voteAnnotationReply.FromString,
+        )
         self.getNextCluster = channel.unary_unary(
-                '/scope.Main/getNextCluster',
-                request_serializer=s__pb2.getNextClusterRequest.SerializeToString,
-                response_deserializer=s__pb2.FeatureReply.FromString,
-                )
+            "/scope.Main/getNextCluster",
+            request_serializer=s__pb2.getNextClusterRequest.SerializeToString,
+            response_deserializer=s__pb2.FeatureReply.FromString,
+        )
         self.addNewClustering = channel.unary_unary(
-                '/scope.Main/addNewClustering',
-                request_serializer=s__pb2.AddNewClusteringRequest.SerializeToString,
-                response_deserializer=s__pb2.AddNewClusteringReply.FromString,
-                )
+            "/scope.Main/addNewClustering",
+            request_serializer=s__pb2.AddNewClusteringRequest.SerializeToString,
+            response_deserializer=s__pb2.AddNewClusteringReply.FromString,
+        )
         self.getClusterOverlaps = channel.unary_unary(
-                '/scope.Main/getClusterOverlaps',
-                request_serializer=s__pb2.GetClusterOverlapsRequest.SerializeToString,
-                response_deserializer=s__pb2.ClusterOverlaps.FromString,
-                )
+            "/scope.Main/getClusterOverlaps",
+            request_serializer=s__pb2.GetClusterOverlapsRequest.SerializeToString,
+            response_deserializer=s__pb2.ClusterOverlaps.FromString,
+        )
         self.getFeatureLabels = channel.unary_unary(
-                '/scope.Main/getFeatureLabels',
-                request_serializer=s__pb2.FeatureLabelRequest.SerializeToString,
-                response_deserializer=s__pb2.FeatureLabelReply.FromString,
-                )
+            "/scope.Main/getFeatureLabels",
+            request_serializer=s__pb2.FeatureLabelRequest.SerializeToString,
+            response_deserializer=s__pb2.FeatureLabelReply.FromString,
+        )
 
 
 class MainServicer(object):
@@ -163,796 +163,1131 @@ class MainServicer(object):
     def getCellColorByFeatures(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def getCellAUCValuesByFeatures(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def getCellMetaData(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def getFeatures(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def getCoordinates(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def getRegulonMetaData(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def getMarkerGenes(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def getMyLooms(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def translateLassoSelection(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def getCellIDs(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def doGeneSetEnrichment(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def getVmax(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def getUUID(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def getRemainingUUIDTime(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def loomUploaded(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def getMyGeneSets(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def deleteUserFile(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def downloadSubLoom(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def setAnnotationName(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def setLoomHierarchy(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def getORCID(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def getORCIDStatus(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def setColabAnnotationData(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def voteAnnotation(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def getNextCluster(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def addNewClustering(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def getClusterOverlaps(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def getFeatureLabels(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
 
 def add_MainServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'getCellColorByFeatures': grpc.unary_unary_rpc_method_handler(
-                    servicer.getCellColorByFeatures,
-                    request_deserializer=s__pb2.CellColorByFeaturesRequest.FromString,
-                    response_serializer=s__pb2.CellColorByFeaturesReply.SerializeToString,
-            ),
-            'getCellAUCValuesByFeatures': grpc.unary_unary_rpc_method_handler(
-                    servicer.getCellAUCValuesByFeatures,
-                    request_deserializer=s__pb2.CellAUCValuesByFeaturesRequest.FromString,
-                    response_serializer=s__pb2.CellAUCValuesByFeaturesReply.SerializeToString,
-            ),
-            'getCellMetaData': grpc.unary_unary_rpc_method_handler(
-                    servicer.getCellMetaData,
-                    request_deserializer=s__pb2.CellMetaDataRequest.FromString,
-                    response_serializer=s__pb2.CellMetaDataReply.SerializeToString,
-            ),
-            'getFeatures': grpc.unary_unary_rpc_method_handler(
-                    servicer.getFeatures,
-                    request_deserializer=s__pb2.FeatureRequest.FromString,
-                    response_serializer=s__pb2.FeatureReply.SerializeToString,
-            ),
-            'getCoordinates': grpc.unary_unary_rpc_method_handler(
-                    servicer.getCoordinates,
-                    request_deserializer=s__pb2.CoordinatesRequest.FromString,
-                    response_serializer=s__pb2.CoordinatesReply.SerializeToString,
-            ),
-            'getRegulonMetaData': grpc.unary_unary_rpc_method_handler(
-                    servicer.getRegulonMetaData,
-                    request_deserializer=s__pb2.RegulonMetaDataRequest.FromString,
-                    response_serializer=s__pb2.RegulonMetaDataReply.SerializeToString,
-            ),
-            'getMarkerGenes': grpc.unary_unary_rpc_method_handler(
-                    servicer.getMarkerGenes,
-                    request_deserializer=s__pb2.MarkerGenesRequest.FromString,
-                    response_serializer=s__pb2.MarkerGenesReply.SerializeToString,
-            ),
-            'getMyLooms': grpc.unary_unary_rpc_method_handler(
-                    servicer.getMyLooms,
-                    request_deserializer=s__pb2.MyLoomsRequest.FromString,
-                    response_serializer=s__pb2.MyLoomsReply.SerializeToString,
-            ),
-            'translateLassoSelection': grpc.unary_unary_rpc_method_handler(
-                    servicer.translateLassoSelection,
-                    request_deserializer=s__pb2.TranslateLassoSelectionRequest.FromString,
-                    response_serializer=s__pb2.TranslateLassoSelectionReply.SerializeToString,
-            ),
-            'getCellIDs': grpc.unary_unary_rpc_method_handler(
-                    servicer.getCellIDs,
-                    request_deserializer=s__pb2.CellIDsRequest.FromString,
-                    response_serializer=s__pb2.CellIDsReply.SerializeToString,
-            ),
-            'doGeneSetEnrichment': grpc.unary_stream_rpc_method_handler(
-                    servicer.doGeneSetEnrichment,
-                    request_deserializer=s__pb2.GeneSetEnrichmentRequest.FromString,
-                    response_serializer=s__pb2.GeneSetEnrichmentReply.SerializeToString,
-            ),
-            'getVmax': grpc.unary_unary_rpc_method_handler(
-                    servicer.getVmax,
-                    request_deserializer=s__pb2.VmaxRequest.FromString,
-                    response_serializer=s__pb2.VmaxReply.SerializeToString,
-            ),
-            'getUUID': grpc.unary_unary_rpc_method_handler(
-                    servicer.getUUID,
-                    request_deserializer=s__pb2.UUIDRequest.FromString,
-                    response_serializer=s__pb2.UUIDReply.SerializeToString,
-            ),
-            'getRemainingUUIDTime': grpc.unary_unary_rpc_method_handler(
-                    servicer.getRemainingUUIDTime,
-                    request_deserializer=s__pb2.RemainingUUIDTimeRequest.FromString,
-                    response_serializer=s__pb2.RemainingUUIDTimeReply.SerializeToString,
-            ),
-            'loomUploaded': grpc.unary_unary_rpc_method_handler(
-                    servicer.loomUploaded,
-                    request_deserializer=s__pb2.LoomUploadedRequest.FromString,
-                    response_serializer=s__pb2.LoomUploadedReply.SerializeToString,
-            ),
-            'getMyGeneSets': grpc.unary_unary_rpc_method_handler(
-                    servicer.getMyGeneSets,
-                    request_deserializer=s__pb2.MyGeneSetsRequest.FromString,
-                    response_serializer=s__pb2.MyGeneSetsReply.SerializeToString,
-            ),
-            'deleteUserFile': grpc.unary_unary_rpc_method_handler(
-                    servicer.deleteUserFile,
-                    request_deserializer=s__pb2.DeleteUserFileRequest.FromString,
-                    response_serializer=s__pb2.DeleteUserFileReply.SerializeToString,
-            ),
-            'downloadSubLoom': grpc.unary_stream_rpc_method_handler(
-                    servicer.downloadSubLoom,
-                    request_deserializer=s__pb2.DownloadSubLoomRequest.FromString,
-                    response_serializer=s__pb2.DownloadSubLoomReply.SerializeToString,
-            ),
-            'setAnnotationName': grpc.unary_unary_rpc_method_handler(
-                    servicer.setAnnotationName,
-                    request_deserializer=s__pb2.SetAnnotationNameRequest.FromString,
-                    response_serializer=s__pb2.SetAnnotationNameReply.SerializeToString,
-            ),
-            'setLoomHierarchy': grpc.unary_unary_rpc_method_handler(
-                    servicer.setLoomHierarchy,
-                    request_deserializer=s__pb2.SetLoomHierarchyRequest.FromString,
-                    response_serializer=s__pb2.SetLoomHierarchyReply.SerializeToString,
-            ),
-            'getORCID': grpc.unary_unary_rpc_method_handler(
-                    servicer.getORCID,
-                    request_deserializer=s__pb2.getORCIDRequest.FromString,
-                    response_serializer=s__pb2.getORCIDReply.SerializeToString,
-            ),
-            'getORCIDStatus': grpc.unary_unary_rpc_method_handler(
-                    servicer.getORCIDStatus,
-                    request_deserializer=s__pb2.getORCIDStatusRequest.FromString,
-                    response_serializer=s__pb2.getORCIDStatusReply.SerializeToString,
-            ),
-            'setColabAnnotationData': grpc.unary_unary_rpc_method_handler(
-                    servicer.setColabAnnotationData,
-                    request_deserializer=s__pb2.setColabAnnotationDataRequest.FromString,
-                    response_serializer=s__pb2.setColabAnnotationDataReply.SerializeToString,
-            ),
-            'voteAnnotation': grpc.unary_unary_rpc_method_handler(
-                    servicer.voteAnnotation,
-                    request_deserializer=s__pb2.voteAnnotationRequest.FromString,
-                    response_serializer=s__pb2.voteAnnotationReply.SerializeToString,
-            ),
-            'getNextCluster': grpc.unary_unary_rpc_method_handler(
-                    servicer.getNextCluster,
-                    request_deserializer=s__pb2.getNextClusterRequest.FromString,
-                    response_serializer=s__pb2.FeatureReply.SerializeToString,
-            ),
-            'addNewClustering': grpc.unary_unary_rpc_method_handler(
-                    servicer.addNewClustering,
-                    request_deserializer=s__pb2.AddNewClusteringRequest.FromString,
-                    response_serializer=s__pb2.AddNewClusteringReply.SerializeToString,
-            ),
-            'getClusterOverlaps': grpc.unary_unary_rpc_method_handler(
-                    servicer.getClusterOverlaps,
-                    request_deserializer=s__pb2.GetClusterOverlapsRequest.FromString,
-                    response_serializer=s__pb2.ClusterOverlaps.SerializeToString,
-            ),
-            'getFeatureLabels': grpc.unary_unary_rpc_method_handler(
-                    servicer.getFeatureLabels,
-                    request_deserializer=s__pb2.FeatureLabelRequest.FromString,
-                    response_serializer=s__pb2.FeatureLabelReply.SerializeToString,
-            ),
+        "getCellColorByFeatures": grpc.unary_unary_rpc_method_handler(
+            servicer.getCellColorByFeatures,
+            request_deserializer=s__pb2.CellColorByFeaturesRequest.FromString,
+            response_serializer=s__pb2.CellColorByFeaturesReply.SerializeToString,
+        ),
+        "getCellAUCValuesByFeatures": grpc.unary_unary_rpc_method_handler(
+            servicer.getCellAUCValuesByFeatures,
+            request_deserializer=s__pb2.CellAUCValuesByFeaturesRequest.FromString,
+            response_serializer=s__pb2.CellAUCValuesByFeaturesReply.SerializeToString,
+        ),
+        "getCellMetaData": grpc.unary_unary_rpc_method_handler(
+            servicer.getCellMetaData,
+            request_deserializer=s__pb2.CellMetaDataRequest.FromString,
+            response_serializer=s__pb2.CellMetaDataReply.SerializeToString,
+        ),
+        "getFeatures": grpc.unary_unary_rpc_method_handler(
+            servicer.getFeatures,
+            request_deserializer=s__pb2.FeatureRequest.FromString,
+            response_serializer=s__pb2.FeatureReply.SerializeToString,
+        ),
+        "getCoordinates": grpc.unary_unary_rpc_method_handler(
+            servicer.getCoordinates,
+            request_deserializer=s__pb2.CoordinatesRequest.FromString,
+            response_serializer=s__pb2.CoordinatesReply.SerializeToString,
+        ),
+        "getRegulonMetaData": grpc.unary_unary_rpc_method_handler(
+            servicer.getRegulonMetaData,
+            request_deserializer=s__pb2.RegulonMetaDataRequest.FromString,
+            response_serializer=s__pb2.RegulonMetaDataReply.SerializeToString,
+        ),
+        "getMarkerGenes": grpc.unary_unary_rpc_method_handler(
+            servicer.getMarkerGenes,
+            request_deserializer=s__pb2.MarkerGenesRequest.FromString,
+            response_serializer=s__pb2.MarkerGenesReply.SerializeToString,
+        ),
+        "getMyLooms": grpc.unary_unary_rpc_method_handler(
+            servicer.getMyLooms,
+            request_deserializer=s__pb2.MyLoomsRequest.FromString,
+            response_serializer=s__pb2.MyLoomsReply.SerializeToString,
+        ),
+        "translateLassoSelection": grpc.unary_unary_rpc_method_handler(
+            servicer.translateLassoSelection,
+            request_deserializer=s__pb2.TranslateLassoSelectionRequest.FromString,
+            response_serializer=s__pb2.TranslateLassoSelectionReply.SerializeToString,
+        ),
+        "getCellIDs": grpc.unary_unary_rpc_method_handler(
+            servicer.getCellIDs,
+            request_deserializer=s__pb2.CellIDsRequest.FromString,
+            response_serializer=s__pb2.CellIDsReply.SerializeToString,
+        ),
+        "doGeneSetEnrichment": grpc.unary_stream_rpc_method_handler(
+            servicer.doGeneSetEnrichment,
+            request_deserializer=s__pb2.GeneSetEnrichmentRequest.FromString,
+            response_serializer=s__pb2.GeneSetEnrichmentReply.SerializeToString,
+        ),
+        "getVmax": grpc.unary_unary_rpc_method_handler(
+            servicer.getVmax,
+            request_deserializer=s__pb2.VmaxRequest.FromString,
+            response_serializer=s__pb2.VmaxReply.SerializeToString,
+        ),
+        "getUUID": grpc.unary_unary_rpc_method_handler(
+            servicer.getUUID,
+            request_deserializer=s__pb2.UUIDRequest.FromString,
+            response_serializer=s__pb2.UUIDReply.SerializeToString,
+        ),
+        "getRemainingUUIDTime": grpc.unary_unary_rpc_method_handler(
+            servicer.getRemainingUUIDTime,
+            request_deserializer=s__pb2.RemainingUUIDTimeRequest.FromString,
+            response_serializer=s__pb2.RemainingUUIDTimeReply.SerializeToString,
+        ),
+        "loomUploaded": grpc.unary_unary_rpc_method_handler(
+            servicer.loomUploaded,
+            request_deserializer=s__pb2.LoomUploadedRequest.FromString,
+            response_serializer=s__pb2.LoomUploadedReply.SerializeToString,
+        ),
+        "getMyGeneSets": grpc.unary_unary_rpc_method_handler(
+            servicer.getMyGeneSets,
+            request_deserializer=s__pb2.MyGeneSetsRequest.FromString,
+            response_serializer=s__pb2.MyGeneSetsReply.SerializeToString,
+        ),
+        "deleteUserFile": grpc.unary_unary_rpc_method_handler(
+            servicer.deleteUserFile,
+            request_deserializer=s__pb2.DeleteUserFileRequest.FromString,
+            response_serializer=s__pb2.DeleteUserFileReply.SerializeToString,
+        ),
+        "downloadSubLoom": grpc.unary_stream_rpc_method_handler(
+            servicer.downloadSubLoom,
+            request_deserializer=s__pb2.DownloadSubLoomRequest.FromString,
+            response_serializer=s__pb2.DownloadSubLoomReply.SerializeToString,
+        ),
+        "setAnnotationName": grpc.unary_unary_rpc_method_handler(
+            servicer.setAnnotationName,
+            request_deserializer=s__pb2.SetAnnotationNameRequest.FromString,
+            response_serializer=s__pb2.SetAnnotationNameReply.SerializeToString,
+        ),
+        "setLoomHierarchy": grpc.unary_unary_rpc_method_handler(
+            servicer.setLoomHierarchy,
+            request_deserializer=s__pb2.SetLoomHierarchyRequest.FromString,
+            response_serializer=s__pb2.SetLoomHierarchyReply.SerializeToString,
+        ),
+        "getORCID": grpc.unary_unary_rpc_method_handler(
+            servicer.getORCID,
+            request_deserializer=s__pb2.getORCIDRequest.FromString,
+            response_serializer=s__pb2.getORCIDReply.SerializeToString,
+        ),
+        "getORCIDStatus": grpc.unary_unary_rpc_method_handler(
+            servicer.getORCIDStatus,
+            request_deserializer=s__pb2.getORCIDStatusRequest.FromString,
+            response_serializer=s__pb2.getORCIDStatusReply.SerializeToString,
+        ),
+        "setColabAnnotationData": grpc.unary_unary_rpc_method_handler(
+            servicer.setColabAnnotationData,
+            request_deserializer=s__pb2.setColabAnnotationDataRequest.FromString,
+            response_serializer=s__pb2.setColabAnnotationDataReply.SerializeToString,
+        ),
+        "voteAnnotation": grpc.unary_unary_rpc_method_handler(
+            servicer.voteAnnotation,
+            request_deserializer=s__pb2.voteAnnotationRequest.FromString,
+            response_serializer=s__pb2.voteAnnotationReply.SerializeToString,
+        ),
+        "getNextCluster": grpc.unary_unary_rpc_method_handler(
+            servicer.getNextCluster,
+            request_deserializer=s__pb2.getNextClusterRequest.FromString,
+            response_serializer=s__pb2.FeatureReply.SerializeToString,
+        ),
+        "addNewClustering": grpc.unary_unary_rpc_method_handler(
+            servicer.addNewClustering,
+            request_deserializer=s__pb2.AddNewClusteringRequest.FromString,
+            response_serializer=s__pb2.AddNewClusteringReply.SerializeToString,
+        ),
+        "getClusterOverlaps": grpc.unary_unary_rpc_method_handler(
+            servicer.getClusterOverlaps,
+            request_deserializer=s__pb2.GetClusterOverlapsRequest.FromString,
+            response_serializer=s__pb2.ClusterOverlaps.SerializeToString,
+        ),
+        "getFeatureLabels": grpc.unary_unary_rpc_method_handler(
+            servicer.getFeatureLabels,
+            request_deserializer=s__pb2.FeatureLabelRequest.FromString,
+            response_serializer=s__pb2.FeatureLabelReply.SerializeToString,
+        ),
     }
-    generic_handler = grpc.method_handlers_generic_handler(
-            'scope.Main', rpc_method_handlers)
+    generic_handler = grpc.method_handlers_generic_handler("scope.Main", rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
- # This class is part of an EXPERIMENTAL API.
+# This class is part of an EXPERIMENTAL API.
 class Main(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def getCellColorByFeatures(request,
+    def getCellColorByFeatures(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/getCellColorByFeatures',
+            "/scope.Main/getCellColorByFeatures",
             s__pb2.CellColorByFeaturesRequest.SerializeToString,
             s__pb2.CellColorByFeaturesReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def getCellAUCValuesByFeatures(request,
+    def getCellAUCValuesByFeatures(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/getCellAUCValuesByFeatures',
+            "/scope.Main/getCellAUCValuesByFeatures",
             s__pb2.CellAUCValuesByFeaturesRequest.SerializeToString,
             s__pb2.CellAUCValuesByFeaturesReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def getCellMetaData(request,
+    def getCellMetaData(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/getCellMetaData',
+            "/scope.Main/getCellMetaData",
             s__pb2.CellMetaDataRequest.SerializeToString,
             s__pb2.CellMetaDataReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def getFeatures(request,
+    def getFeatures(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/getFeatures',
+            "/scope.Main/getFeatures",
             s__pb2.FeatureRequest.SerializeToString,
             s__pb2.FeatureReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def getCoordinates(request,
+    def getCoordinates(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/getCoordinates',
+            "/scope.Main/getCoordinates",
             s__pb2.CoordinatesRequest.SerializeToString,
             s__pb2.CoordinatesReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def getRegulonMetaData(request,
+    def getRegulonMetaData(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/getRegulonMetaData',
+            "/scope.Main/getRegulonMetaData",
             s__pb2.RegulonMetaDataRequest.SerializeToString,
             s__pb2.RegulonMetaDataReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def getMarkerGenes(request,
+    def getMarkerGenes(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/getMarkerGenes',
+            "/scope.Main/getMarkerGenes",
             s__pb2.MarkerGenesRequest.SerializeToString,
             s__pb2.MarkerGenesReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def getMyLooms(request,
+    def getMyLooms(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/getMyLooms',
+            "/scope.Main/getMyLooms",
             s__pb2.MyLoomsRequest.SerializeToString,
             s__pb2.MyLoomsReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def translateLassoSelection(request,
+    def translateLassoSelection(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/translateLassoSelection',
+            "/scope.Main/translateLassoSelection",
             s__pb2.TranslateLassoSelectionRequest.SerializeToString,
             s__pb2.TranslateLassoSelectionReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def getCellIDs(request,
+    def getCellIDs(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/getCellIDs',
+            "/scope.Main/getCellIDs",
             s__pb2.CellIDsRequest.SerializeToString,
             s__pb2.CellIDsReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def doGeneSetEnrichment(request,
+    def doGeneSetEnrichment(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_stream(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/scope.Main/doGeneSetEnrichment',
+            "/scope.Main/doGeneSetEnrichment",
             s__pb2.GeneSetEnrichmentRequest.SerializeToString,
             s__pb2.GeneSetEnrichmentReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def getVmax(request,
+    def getVmax(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/getVmax',
+            "/scope.Main/getVmax",
             s__pb2.VmaxRequest.SerializeToString,
             s__pb2.VmaxReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def getUUID(request,
+    def getUUID(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/getUUID',
+            "/scope.Main/getUUID",
             s__pb2.UUIDRequest.SerializeToString,
             s__pb2.UUIDReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def getRemainingUUIDTime(request,
+    def getRemainingUUIDTime(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/getRemainingUUIDTime',
+            "/scope.Main/getRemainingUUIDTime",
             s__pb2.RemainingUUIDTimeRequest.SerializeToString,
             s__pb2.RemainingUUIDTimeReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def loomUploaded(request,
+    def loomUploaded(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/loomUploaded',
+            "/scope.Main/loomUploaded",
             s__pb2.LoomUploadedRequest.SerializeToString,
             s__pb2.LoomUploadedReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def getMyGeneSets(request,
+    def getMyGeneSets(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/getMyGeneSets',
+            "/scope.Main/getMyGeneSets",
             s__pb2.MyGeneSetsRequest.SerializeToString,
             s__pb2.MyGeneSetsReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def deleteUserFile(request,
+    def deleteUserFile(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/deleteUserFile',
+            "/scope.Main/deleteUserFile",
             s__pb2.DeleteUserFileRequest.SerializeToString,
             s__pb2.DeleteUserFileReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def downloadSubLoom(request,
+    def downloadSubLoom(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_stream(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/scope.Main/downloadSubLoom',
+            "/scope.Main/downloadSubLoom",
             s__pb2.DownloadSubLoomRequest.SerializeToString,
             s__pb2.DownloadSubLoomReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def setAnnotationName(request,
+    def setAnnotationName(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/setAnnotationName',
+            "/scope.Main/setAnnotationName",
             s__pb2.SetAnnotationNameRequest.SerializeToString,
             s__pb2.SetAnnotationNameReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def setLoomHierarchy(request,
+    def setLoomHierarchy(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/setLoomHierarchy',
+            "/scope.Main/setLoomHierarchy",
             s__pb2.SetLoomHierarchyRequest.SerializeToString,
             s__pb2.SetLoomHierarchyReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def getORCID(request,
+    def getORCID(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/getORCID',
+            "/scope.Main/getORCID",
             s__pb2.getORCIDRequest.SerializeToString,
             s__pb2.getORCIDReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def getORCIDStatus(request,
+    def getORCIDStatus(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/getORCIDStatus',
+            "/scope.Main/getORCIDStatus",
             s__pb2.getORCIDStatusRequest.SerializeToString,
             s__pb2.getORCIDStatusReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def setColabAnnotationData(request,
+    def setColabAnnotationData(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/setColabAnnotationData',
+            "/scope.Main/setColabAnnotationData",
             s__pb2.setColabAnnotationDataRequest.SerializeToString,
             s__pb2.setColabAnnotationDataReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def voteAnnotation(request,
+    def voteAnnotation(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/voteAnnotation',
+            "/scope.Main/voteAnnotation",
             s__pb2.voteAnnotationRequest.SerializeToString,
             s__pb2.voteAnnotationReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def getNextCluster(request,
+    def getNextCluster(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/getNextCluster',
+            "/scope.Main/getNextCluster",
             s__pb2.getNextClusterRequest.SerializeToString,
             s__pb2.FeatureReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def addNewClustering(request,
+    def addNewClustering(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/addNewClustering',
+            "/scope.Main/addNewClustering",
             s__pb2.AddNewClusteringRequest.SerializeToString,
             s__pb2.AddNewClusteringReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def getClusterOverlaps(request,
+    def getClusterOverlaps(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/getClusterOverlaps',
+            "/scope.Main/getClusterOverlaps",
             s__pb2.GetClusterOverlapsRequest.SerializeToString,
             s__pb2.ClusterOverlaps.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def getFeatureLabels(request,
+    def getFeatureLabels(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/scope.Main/getFeatureLabels',
+            "/scope.Main/getFeatureLabels",
             s__pb2.FeatureLabelRequest.SerializeToString,
             s__pb2.FeatureLabelReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )

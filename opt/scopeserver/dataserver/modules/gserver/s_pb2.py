@@ -8,4980 +8,8109 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
-
-
 DESCRIPTOR = _descriptor.FileDescriptor(
-  name='s.proto',
-  package='scope',
-  syntax='proto3',
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x07s.proto\x12\x05scope\"+\n\nErrorReply\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\"\x89\x02\n\x1a\x43\x65llColorByFeaturesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x02 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x03 \x03(\t\x12\x17\n\x0fhasLogTransform\x18\x04 \x01(\x08\x12\x17\n\x0fhasCpmTransform\x18\x05 \x01(\x08\x12\x11\n\tthreshold\x18\x06 \x03(\x02\x12\x18\n\x10scaleThresholded\x18\x07 \x01(\x08\x12%\n\nannotation\x18\x08 \x03(\x0b\x32\x11.scope.Annotation\x12\x0c\n\x04vmax\x18\t \x03(\x02\x12\x0c\n\x04vmin\x18\n \x03(\x02\x12\r\n\x05logic\x18\x0b \x01(\t\"-\n\x0b\x43olorLegend\x12\x0e\n\x06values\x18\x01 \x03(\t\x12\x0e\n\x06\x63olors\x18\x02 \x03(\t\"\xdc\x01\n\x18\x43\x65llColorByFeaturesReply\x12\x1e\n\x16hasAddCompressionLayer\x18\x01 \x01(\x08\x12\x17\n\x0f\x63ompressedColor\x18\x02 \x01(\x0c\x12\r\n\x05\x63olor\x18\x03 \x03(\t\x12\x0c\n\x04vmax\x18\x04 \x03(\x02\x12\x0f\n\x07maxVmax\x18\x05 \x03(\x02\x12\x13\n\x0b\x63\x65llIndices\x18\x06 \x03(\x05\x12\"\n\x06legend\x18\x07 \x01(\x0b\x32\x12.scope.ColorLegend\x12 \n\x05\x65rror\x18\x08 \x01(\x0b\x32\x11.scope.ErrorReply\"\\\n\x1e\x43\x65llAUCValuesByFeaturesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x02 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x03 \x03(\t\"-\n\x1c\x43\x65llAUCValuesByFeaturesReply\x12\r\n\x05value\x18\x01 \x03(\x02\"5\n\x0e\x46\x65\x61tureRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\r\n\x05query\x18\x02 \x01(\t\"\xcd\x01\n\x13\x43\x65llMetaDataRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x13\n\x0b\x63\x65llIndices\x18\x02 \x03(\x05\x12\x15\n\rselectedGenes\x18\x03 \x03(\t\x12\x17\n\x0fhasLogTransform\x18\x04 \x01(\x08\x12\x17\n\x0fhasCpmTransform\x18\x05 \x01(\x08\x12\x18\n\x10selectedRegulons\x18\x06 \x03(\t\x12\x13\n\x0b\x63lusterings\x18\x07 \x03(\x05\x12\x13\n\x0b\x61nnotations\x18\x08 \x03(\t\"P\n\x0c\x46\x65\x61tureReply\x12\x0f\n\x07\x66\x65\x61ture\x18\x01 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x02 \x03(\t\x12\x1a\n\x12\x66\x65\x61tureDescription\x18\x03 \x03(\t\"w\n\x12\x43oordinatesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x15\n\rcoordinatesID\x18\x02 \x01(\x05\x12%\n\nannotation\x18\x03 \x03(\x0b\x32\x11.scope.Annotation\x12\r\n\x05logic\x18\x04 \x01(\t\"=\n\x10\x43oordinatesReply\x12\t\n\x01x\x18\x01 \x03(\x02\x12\t\n\x01y\x18\x02 \x03(\x02\x12\x13\n\x0b\x63\x65llIndices\x18\x03 \x03(\x05\":\n\nAnnotation\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06values\x18\x02 \x03(\t\x12\x0e\n\x06\x63olors\x18\x03 \x03(\t\"\"\n\nCoordinate\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\"&\n\x04\x45\x64ge\x12\x0e\n\x06source\x18\x01 \x01(\t\x12\x0e\n\x06target\x18\x02 \x01(\t\"_\n\nTrajectory\x12\r\n\x05nodes\x18\x01 \x03(\t\x12\x1a\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x0b.scope.Edge\x12&\n\x0b\x63oordinates\x18\x03 \x03(\x0b\x32\x11.scope.Coordinate\"L\n\tEmbedding\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12%\n\ntrajectory\x18\x03 \x01(\x0b\x32\x11.scope.Trajectory\"J\n\x13\x43lusterMarkerMetric\x12\x10\n\x08\x61\x63\x63\x65ssor\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\"\xbf\x01\n\x0e\x43ollabAnnoData\x12\x14\n\x0c\x63urator_name\x18\x01 \x01(\t\x12\x12\n\ncurator_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x0e\n\x06obo_id\x18\x04 \x01(\t\x12\x0f\n\x07ols_iri\x18\x05 \x01(\t\x12\x18\n\x10\x61nnotation_label\x18\x06 \x01(\t\x12\x0f\n\x07markers\x18\x07 \x03(\t\x12\x13\n\x0bpublication\x18\x08 \x01(\t\x12\x0f\n\x07\x63omment\x18\t \x01(\t\"K\n\x0f\x43ollabAnnoVoter\x12\x12\n\nvoter_name\x18\x01 \x01(\t\x12\x10\n\x08voter_id\x18\x02 \x01(\t\x12\x12\n\nvoter_hash\x18\x03 \x01(\x08\"H\n\x0f\x43ollabAnnoVotes\x12\r\n\x05total\x18\x01 \x01(\x05\x12&\n\x06voters\x18\x02 \x03(\x0b\x32\x16.scope.CollabAnnoVoter\"\xaa\x01\n\x12\x43\x65llTypeAnnotation\x12#\n\x04\x64\x61ta\x18\x01 \x01(\x0b\x32\x15.scope.CollabAnnoData\x12\x15\n\rvalidate_hash\x18\x02 \x01(\x08\x12)\n\tvotes_for\x18\x03 \x01(\x0b\x32\x16.scope.CollabAnnoVotes\x12-\n\rvotes_against\x18\x04 \x01(\x0b\x32\x16.scope.CollabAnnoVotes\"m\n\x11\x43lusterAnnotation\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\x12\x37\n\x14\x63\x65ll_type_annotation\x18\x03 \x03(\x0b\x32\x19.scope.CellTypeAnnotation\"\x9b\x01\n\nClustering\x12\n\n\x02id\x18\x01 \x01(\x05\x12\r\n\x05group\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x38\n\x14\x63lusterMarkerMetrics\x18\x04 \x03(\x0b\x32\x1a.scope.ClusterMarkerMetric\x12*\n\x08\x63lusters\x18\x05 \x03(\x0b\x32\x18.scope.ClusterAnnotation\"\x84\x01\n\x0c\x43\x65llMetaData\x12&\n\x0b\x61nnotations\x18\x01 \x03(\x0b\x32\x11.scope.Annotation\x12$\n\nembeddings\x18\x02 \x03(\x0b\x32\x10.scope.Embedding\x12&\n\x0b\x63lusterings\x18\x03 \x03(\x0b\x32\x11.scope.Clustering\"/\n\x0c\x41UCThreshold\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x11\n\tthreshold\x18\x02 \x01(\x02\"Y\n\x12RegulonGenesMetric\x12\x10\n\x08\x61\x63\x63\x65ssor\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x0e\n\x06values\x18\x04 \x03(\x02\"\x9e\x01\n\x07Regulon\x12\r\n\x05genes\x18\x01 \x03(\t\x12+\n\x0e\x61utoThresholds\x18\x02 \x03(\x0b\x32\x13.scope.AUCThreshold\x12\x18\n\x10\x64\x65\x66\x61ultThreshold\x18\x03 \x01(\t\x12\x11\n\tmotifName\x18\x04 \x01(\t\x12*\n\x07metrics\x18\x05 \x03(\x0b\x32\x19.scope.RegulonGenesMetric\"\x97\x01\n\x0c\x46ileMetaData\x12\x16\n\x0ehasRegulonsAUC\x18\x01 \x01(\x08\x12\x13\n\x0bhasGeneSets\x18\x02 \x01(\x08\x12\x16\n\x0ehasClusterings\x18\x03 \x01(\x08\x12\x1a\n\x12hasExtraEmbeddings\x18\x04 \x01(\x08\x12\x15\n\rhasGlobalMeta\x18\x05 \x01(\x08\x12\x0f\n\x07species\x18\x06 \x01(\t\"!\n\rFeatureValues\x12\x10\n\x08\x66\x65\x61tures\x18\x01 \x03(\x02\"&\n\x0f\x43\x65llAnnotations\x12\x13\n\x0b\x61nnotations\x18\x01 \x03(\t\" \n\x0c\x43\x65llClusters\x12\x10\n\x08\x63lusters\x18\x01 \x03(\x05\"\xc0\x01\n\x11\x43\x65llMetaDataReply\x12\'\n\nclusterIDs\x18\x01 \x03(\x0b\x32\x13.scope.CellClusters\x12,\n\x0egeneExpression\x18\x02 \x03(\x0b\x32\x14.scope.FeatureValues\x12\'\n\taucValues\x18\x03 \x03(\x0b\x32\x14.scope.FeatureValues\x12+\n\x0b\x61nnotations\x18\x04 \x03(\x0b\x32\x16.scope.CellAnnotations\"?\n\x16RegulonMetaDataRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x0f\n\x07regulon\x18\x02 \x01(\t\";\n\x14RegulonMetaDataReply\x12#\n\x0bregulonMeta\x18\x01 \x01(\x0b\x32\x0e.scope.Regulon\"S\n\x12MarkerGenesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x14\n\x0c\x63lusteringID\x18\x02 \x01(\x05\x12\x11\n\tclusterID\x18\x03 \x01(\x05\"X\n\x11MarkerGenesMetric\x12\x10\n\x08\x61\x63\x63\x65ssor\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x0e\n\x06values\x18\x04 \x03(\x02\"L\n\x10MarkerGenesReply\x12\r\n\x05genes\x18\x01 \x03(\t\x12)\n\x07metrics\x18\x02 \x03(\x0b\x32\x18.scope.MarkerGenesMetric\"0\n\x0eMyLoomsRequest\x12\x0c\n\x04UUID\x18\x01 \x01(\t\x12\x10\n\x08loomFile\x18\x02 \x01(\t\"4\n\x0eLoomHeierarchy\x12\n\n\x02L1\x18\x01 \x01(\t\x12\n\n\x02L2\x18\x02 \x01(\t\x12\n\n\x02L3\x18\x03 \x01(\t\"\xce\x01\n\x06MyLoom\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x17\n\x0floomDisplayName\x18\x02 \x01(\t\x12\x10\n\x08loomSize\x18\x03 \x01(\x03\x12)\n\x0c\x63\x65llMetaData\x18\x04 \x01(\x0b\x32\x13.scope.CellMetaData\x12)\n\x0c\x66ileMetaData\x18\x05 \x01(\x0b\x32\x13.scope.FileMetaData\x12-\n\x0eloomHeierarchy\x18\x06 \x01(\x0b\x32\x15.scope.LoomHeierarchy\">\n\x0cMyLoomsReply\x12\x1e\n\x07myLooms\x18\x01 \x03(\x0b\x32\r.scope.MyLoom\x12\x0e\n\x06update\x18\x02 \x01(\x08\"h\n\x1eTranslateLassoSelectionRequest\x12\x17\n\x0fsrcLoomFilePath\x18\x01 \x01(\t\x12\x18\n\x10\x64\x65stLoomFilePath\x18\x02 \x01(\t\x12\x13\n\x0b\x63\x65llIndices\x18\x03 \x03(\x05\"3\n\x1cTranslateLassoSelectionReply\x12\x13\n\x0b\x63\x65llIndices\x18\x01 \x03(\x05\";\n\x0e\x43\x65llIDsRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x13\n\x0b\x63\x65llIndices\x18\x02 \x03(\x05\"\x1f\n\x0c\x43\x65llIDsReply\x12\x0f\n\x07\x63\x65llIds\x18\x01 \x03(\t\"Y\n\x18GeneSetEnrichmentRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x17\n\x0fgeneSetFilePath\x18\x02 \x01(\t\x12\x0e\n\x06method\x18\x03 \x01(\t\")\n\x08Progress\x12\r\n\x05value\x18\x01 \x01(\x02\x12\x0e\n\x06status\x18\x02 \x01(\t\"\x80\x01\n\x16GeneSetEnrichmentReply\x12!\n\x08progress\x18\x01 \x01(\x0b\x32\x0f.scope.Progress\x12\x0e\n\x06isDone\x18\x02 \x01(\x08\x12\x33\n\ncellValues\x18\x03 \x01(\x0b\x32\x1f.scope.CellColorByFeaturesReply\"{\n\x0bVmaxRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x03(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x02 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x03 \x03(\t\x12\x17\n\x0fhasLogTransform\x18\x04 \x01(\x08\x12\x17\n\x0fhasCpmTransform\x18\x05 \x01(\x08\"*\n\tVmaxReply\x12\x0c\n\x04vmax\x18\x01 \x03(\x02\x12\x0f\n\x07maxVmax\x18\x02 \x03(\x02\"\x19\n\x0bUUIDRequest\x12\n\n\x02ip\x18\x01 \x01(\t\"\x19\n\tUUIDReply\x12\x0c\n\x04UUID\x18\x01 \x01(\t\"I\n\x18RemainingUUIDTimeRequest\x12\n\n\x02ip\x18\x01 \x01(\t\x12\x0c\n\x04UUID\x18\x02 \x01(\t\x12\x13\n\x0bmouseEvents\x18\x03 \x01(\x03\"p\n\x16RemainingUUIDTimeReply\x12\x0c\n\x04UUID\x18\x01 \x01(\t\x12\x15\n\rtimeRemaining\x18\x02 \x01(\x03\x12\x1c\n\x14sessionsLimitReached\x18\x03 \x01(\x08\x12\x13\n\x0bsessionMode\x18\x04 \x01(\t\"5\n\x13LoomUploadedRequest\x12\x0c\n\x04UUID\x18\x01 \x01(\t\x12\x10\n\x08\x66ilename\x18\x02 \x01(\t\"\x13\n\x11LoomUploadedReply\"@\n\tMyGeneSet\x12\x17\n\x0fgeneSetFilePath\x18\x01 \x01(\t\x12\x1a\n\x12geneSetDisplayName\x18\x02 \x01(\t\"!\n\x11MyGeneSetsRequest\x12\x0c\n\x04UUID\x18\x01 \x01(\t\"7\n\x0fMyGeneSetsReply\x12$\n\nmyGeneSets\x18\x01 \x03(\x0b\x32\x10.scope.MyGeneSet\"I\n\x15\x44\x65leteUserFileRequest\x12\x0c\n\x04UUID\x18\x01 \x01(\t\x12\x10\n\x08\x66ilePath\x18\x02 \x01(\t\x12\x10\n\x08\x66ileType\x18\x03 \x01(\t\"2\n\x13\x44\x65leteUserFileReply\x12\x1b\n\x13\x64\x65letedSuccessfully\x18\x01 \x01(\x08\"\x95\x01\n\x16\x44ownloadSubLoomRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x02 \x01(\t\x12\x13\n\x0b\x66\x65\x61tureName\x18\x03 \x01(\t\x12\x14\n\x0c\x66\x65\x61tureValue\x18\x04 \x01(\t\x12\x10\n\x08operator\x18\x05 \x01(\t\x12\x13\n\x0b\x63\x65llIndices\x18\x06 \x03(\x05\"\x97\x01\n\x14\x44ownloadSubLoomReply\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x14\n\x0cloomFileSize\x18\x02 \x01(\x03\x12!\n\x08progress\x18\x03 \x01(\x0b\x32\x0f.scope.Progress\x12\x0e\n\x06isDone\x18\x04 \x01(\x08\x12 \n\x05\x65rror\x18\x05 \x01(\x0b\x32\x11.scope.ErrorReply\"n\n\x18SetAnnotationNameRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x14\n\x0c\x63lusteringID\x18\x02 \x01(\x03\x12\x11\n\tclusterID\x18\x03 \x01(\x03\x12\x13\n\x0bnewAnnoName\x18\x04 \x01(\t\")\n\x16SetAnnotationNameReply\x12\x0f\n\x07success\x18\x01 \x01(\x08\"z\n\x17SetLoomHierarchyRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x17\n\x0fnewHierarchy_L1\x18\x02 \x01(\t\x12\x17\n\x0fnewHierarchy_L2\x18\x03 \x01(\t\x12\x17\n\x0fnewHierarchy_L3\x18\x04 \x01(\t\"(\n\x15SetLoomHierarchyReply\x12\x0f\n\x07success\x18\x01 \x01(\x08\"$\n\x0fgetORCIDRequest\x12\x11\n\tauth_code\x18\x01 \x01(\t\"Z\n\rgetORCIDReply\x12\x18\n\x10orcid_scope_uuid\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x10\n\x08orcid_id\x18\x03 \x01(\t\x12\x0f\n\x07success\x18\x04 \x01(\x08\"\x17\n\x15getORCIDStatusRequest\"%\n\x13getORCIDStatusReply\x12\x0e\n\x06\x61\x63tive\x18\x01 \x01(\x08\"I\n\x10orcidInfoMessage\x12\x11\n\torcidName\x18\x01 \x01(\t\x12\x0f\n\x07orcidID\x18\x02 \x01(\t\x12\x11\n\torcidUUID\x18\x03 \x01(\t\"\xb3\x01\n\x1dsetColabAnnotationDataRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x14\n\x0c\x63lusteringID\x18\x02 \x01(\x05\x12\x11\n\tclusterID\x18\x03 \x01(\x05\x12*\n\torcidInfo\x18\x04 \x01(\x0b\x32\x17.scope.orcidInfoMessage\x12\'\n\x08\x61nnoData\x18\x05 \x01(\x0b\x32\x15.scope.CollabAnnoData\"?\n\x1bsetColabAnnotationDataReply\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"\xbe\x01\n\x15voteAnnotationRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x14\n\x0c\x63lusteringID\x18\x02 \x01(\x05\x12\x11\n\tclusterID\x18\x03 \x01(\x05\x12*\n\torcidInfo\x18\x04 \x01(\x0b\x32\x17.scope.orcidInfoMessage\x12\'\n\x08\x61nnoData\x18\x05 \x01(\x0b\x32\x15.scope.CollabAnnoData\x12\x11\n\tdirection\x18\x06 \x01(\t\"7\n\x13voteAnnotationReply\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"i\n\x15getNextClusterRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x14\n\x0c\x63lusteringID\x18\x02 \x01(\x05\x12\x11\n\tclusterID\x18\x03 \x01(\x05\x12\x11\n\tdirection\x18\x04 \x01(\t\"M\n\x0eNewClusterInfo\x12\x0f\n\x07\x63\x65llIDs\x18\x01 \x03(\t\x12\x12\n\nclusterIDs\x18\x02 \x03(\t\x12\x16\n\x0e\x63lusteringName\x18\x03 \x01(\t\"\x87\x01\n\x17\x41\x64\x64NewClusteringRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12*\n\torcidInfo\x18\x02 \x01(\x0b\x32\x17.scope.orcidInfoMessage\x12*\n\x0b\x63lusterInfo\x18\x03 \x01(\x0b\x32\x15.scope.NewClusterInfo\"9\n\x15\x41\x64\x64NewClusteringReply\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"F\n\x19GetClusterOverlapsRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x13\n\x0b\x63\x65llIndices\x18\x02 \x03(\x05\"\xd8\x01\n\x0f\x43lusterOverlaps\x12>\n\x0f\x63lusterOverlaps\x18\x01 \x03(\x0b\x32%.scope.ClusterOverlaps.ClusterOverlap\x1a\x84\x01\n\x0e\x43lusterOverlap\x12\x17\n\x0f\x63lustering_name\x18\x01 \x01(\t\x12\x14\n\x0c\x63luster_name\x18\x02 \x01(\t\x12\x0f\n\x07n_cells\x18\x03 \x01(\x05\x12\x18\n\x10\x63\x65lls_in_cluster\x18\x04 \x01(\x02\x12\x18\n\x10\x63luster_in_cells\x18\x05 \x01(\x02\"O\n\x13\x46\x65\x61tureLabelRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x11\n\tembedding\x18\x02 \x01(\x11\x12\x0f\n\x07\x66\x65\x61ture\x18\x03 \x01(\t\"\xa0\x01\n\x11\x46\x65\x61tureLabelReply\x12\x35\n\x06labels\x18\x01 \x03(\x0b\x32%.scope.FeatureLabelReply.FeatureLabel\x1aT\n\x0c\x46\x65\x61tureLabel\x12\r\n\x05label\x18\x01 \x01(\t\x12\x0e\n\x06\x63olour\x18\x02 \x01(\t\x12%\n\ncoordinate\x18\x03 \x01(\x0b\x32\x11.scope.Coordinate2\x8a\x11\n\x04Main\x12^\n\x16getCellColorByFeatures\x12!.scope.CellColorByFeaturesRequest\x1a\x1f.scope.CellColorByFeaturesReply\"\x00\x12j\n\x1agetCellAUCValuesByFeatures\x12%.scope.CellAUCValuesByFeaturesRequest\x1a#.scope.CellAUCValuesByFeaturesReply\"\x00\x12I\n\x0fgetCellMetaData\x12\x1a.scope.CellMetaDataRequest\x1a\x18.scope.CellMetaDataReply\"\x00\x12;\n\x0bgetFeatures\x12\x15.scope.FeatureRequest\x1a\x13.scope.FeatureReply\"\x00\x12\x46\n\x0egetCoordinates\x12\x19.scope.CoordinatesRequest\x1a\x17.scope.CoordinatesReply\"\x00\x12R\n\x12getRegulonMetaData\x12\x1d.scope.RegulonMetaDataRequest\x1a\x1b.scope.RegulonMetaDataReply\"\x00\x12\x46\n\x0egetMarkerGenes\x12\x19.scope.MarkerGenesRequest\x1a\x17.scope.MarkerGenesReply\"\x00\x12:\n\ngetMyLooms\x12\x15.scope.MyLoomsRequest\x1a\x13.scope.MyLoomsReply\"\x00\x12g\n\x17translateLassoSelection\x12%.scope.TranslateLassoSelectionRequest\x1a#.scope.TranslateLassoSelectionReply\"\x00\x12:\n\ngetCellIDs\x12\x15.scope.CellIDsRequest\x1a\x13.scope.CellIDsReply\"\x00\x12Y\n\x13\x64oGeneSetEnrichment\x12\x1f.scope.GeneSetEnrichmentRequest\x1a\x1d.scope.GeneSetEnrichmentReply\"\x00\x30\x01\x12\x31\n\x07getVmax\x12\x12.scope.VmaxRequest\x1a\x10.scope.VmaxReply\"\x00\x12\x31\n\x07getUUID\x12\x12.scope.UUIDRequest\x1a\x10.scope.UUIDReply\"\x00\x12X\n\x14getRemainingUUIDTime\x12\x1f.scope.RemainingUUIDTimeRequest\x1a\x1d.scope.RemainingUUIDTimeReply\"\x00\x12\x46\n\x0cloomUploaded\x12\x1a.scope.LoomUploadedRequest\x1a\x18.scope.LoomUploadedReply\"\x00\x12\x43\n\rgetMyGeneSets\x12\x18.scope.MyGeneSetsRequest\x1a\x16.scope.MyGeneSetsReply\"\x00\x12L\n\x0e\x64\x65leteUserFile\x12\x1c.scope.DeleteUserFileRequest\x1a\x1a.scope.DeleteUserFileReply\"\x00\x12Q\n\x0f\x64ownloadSubLoom\x12\x1d.scope.DownloadSubLoomRequest\x1a\x1b.scope.DownloadSubLoomReply\"\x00\x30\x01\x12U\n\x11setAnnotationName\x12\x1f.scope.SetAnnotationNameRequest\x1a\x1d.scope.SetAnnotationNameReply\"\x00\x12R\n\x10setLoomHierarchy\x12\x1e.scope.SetLoomHierarchyRequest\x1a\x1c.scope.SetLoomHierarchyReply\"\x00\x12:\n\x08getORCID\x12\x16.scope.getORCIDRequest\x1a\x14.scope.getORCIDReply\"\x00\x12L\n\x0egetORCIDStatus\x12\x1c.scope.getORCIDStatusRequest\x1a\x1a.scope.getORCIDStatusReply\"\x00\x12\x64\n\x16setColabAnnotationData\x12$.scope.setColabAnnotationDataRequest\x1a\".scope.setColabAnnotationDataReply\"\x00\x12L\n\x0evoteAnnotation\x12\x1c.scope.voteAnnotationRequest\x1a\x1a.scope.voteAnnotationReply\"\x00\x12\x45\n\x0egetNextCluster\x12\x1c.scope.getNextClusterRequest\x1a\x13.scope.FeatureReply\"\x00\x12R\n\x10\x61\x64\x64NewClustering\x12\x1e.scope.AddNewClusteringRequest\x1a\x1c.scope.AddNewClusteringReply\"\x00\x12P\n\x12getClusterOverlaps\x12 .scope.GetClusterOverlapsRequest\x1a\x16.scope.ClusterOverlaps\"\x00\x12J\n\x10getFeatureLabels\x12\x1a.scope.FeatureLabelRequest\x1a\x18.scope.FeatureLabelReply\"\x00\x62\x06proto3'
+    name="s.proto",
+    package="scope",
+    syntax="proto3",
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+    serialized_pb=b'\n\x07s.proto\x12\x05scope"+\n\nErrorReply\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t"\x89\x02\n\x1a\x43\x65llColorByFeaturesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x02 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x03 \x03(\t\x12\x17\n\x0fhasLogTransform\x18\x04 \x01(\x08\x12\x17\n\x0fhasCpmTransform\x18\x05 \x01(\x08\x12\x11\n\tthreshold\x18\x06 \x03(\x02\x12\x18\n\x10scaleThresholded\x18\x07 \x01(\x08\x12%\n\nannotation\x18\x08 \x03(\x0b\x32\x11.scope.Annotation\x12\x0c\n\x04vmax\x18\t \x03(\x02\x12\x0c\n\x04vmin\x18\n \x03(\x02\x12\r\n\x05logic\x18\x0b \x01(\t"-\n\x0b\x43olorLegend\x12\x0e\n\x06values\x18\x01 \x03(\t\x12\x0e\n\x06\x63olors\x18\x02 \x03(\t"\xdc\x01\n\x18\x43\x65llColorByFeaturesReply\x12\x1e\n\x16hasAddCompressionLayer\x18\x01 \x01(\x08\x12\x17\n\x0f\x63ompressedColor\x18\x02 \x01(\x0c\x12\r\n\x05\x63olor\x18\x03 \x03(\t\x12\x0c\n\x04vmax\x18\x04 \x03(\x02\x12\x0f\n\x07maxVmax\x18\x05 \x03(\x02\x12\x13\n\x0b\x63\x65llIndices\x18\x06 \x03(\x05\x12"\n\x06legend\x18\x07 \x01(\x0b\x32\x12.scope.ColorLegend\x12 \n\x05\x65rror\x18\x08 \x01(\x0b\x32\x11.scope.ErrorReply"\\\n\x1e\x43\x65llAUCValuesByFeaturesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x02 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x03 \x03(\t"-\n\x1c\x43\x65llAUCValuesByFeaturesReply\x12\r\n\x05value\x18\x01 \x03(\x02"5\n\x0e\x46\x65\x61tureRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\r\n\x05query\x18\x02 \x01(\t"\xcd\x01\n\x13\x43\x65llMetaDataRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x13\n\x0b\x63\x65llIndices\x18\x02 \x03(\x05\x12\x15\n\rselectedGenes\x18\x03 \x03(\t\x12\x17\n\x0fhasLogTransform\x18\x04 \x01(\x08\x12\x17\n\x0fhasCpmTransform\x18\x05 \x01(\x08\x12\x18\n\x10selectedRegulons\x18\x06 \x03(\t\x12\x13\n\x0b\x63lusterings\x18\x07 \x03(\x05\x12\x13\n\x0b\x61nnotations\x18\x08 \x03(\t"P\n\x0c\x46\x65\x61tureReply\x12\x0f\n\x07\x66\x65\x61ture\x18\x01 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x02 \x03(\t\x12\x1a\n\x12\x66\x65\x61tureDescription\x18\x03 \x03(\t"w\n\x12\x43oordinatesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x15\n\rcoordinatesID\x18\x02 \x01(\x05\x12%\n\nannotation\x18\x03 \x03(\x0b\x32\x11.scope.Annotation\x12\r\n\x05logic\x18\x04 \x01(\t"=\n\x10\x43oordinatesReply\x12\t\n\x01x\x18\x01 \x03(\x02\x12\t\n\x01y\x18\x02 \x03(\x02\x12\x13\n\x0b\x63\x65llIndices\x18\x03 \x03(\x05":\n\nAnnotation\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06values\x18\x02 \x03(\t\x12\x0e\n\x06\x63olors\x18\x03 \x03(\t""\n\nCoordinate\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02"&\n\x04\x45\x64ge\x12\x0e\n\x06source\x18\x01 \x01(\t\x12\x0e\n\x06target\x18\x02 \x01(\t"_\n\nTrajectory\x12\r\n\x05nodes\x18\x01 \x03(\t\x12\x1a\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x0b.scope.Edge\x12&\n\x0b\x63oordinates\x18\x03 \x03(\x0b\x32\x11.scope.Coordinate"L\n\tEmbedding\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12%\n\ntrajectory\x18\x03 \x01(\x0b\x32\x11.scope.Trajectory"J\n\x13\x43lusterMarkerMetric\x12\x10\n\x08\x61\x63\x63\x65ssor\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t"\xbf\x01\n\x0e\x43ollabAnnoData\x12\x14\n\x0c\x63urator_name\x18\x01 \x01(\t\x12\x12\n\ncurator_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x0e\n\x06obo_id\x18\x04 \x01(\t\x12\x0f\n\x07ols_iri\x18\x05 \x01(\t\x12\x18\n\x10\x61nnotation_label\x18\x06 \x01(\t\x12\x0f\n\x07markers\x18\x07 \x03(\t\x12\x13\n\x0bpublication\x18\x08 \x01(\t\x12\x0f\n\x07\x63omment\x18\t \x01(\t"K\n\x0f\x43ollabAnnoVoter\x12\x12\n\nvoter_name\x18\x01 \x01(\t\x12\x10\n\x08voter_id\x18\x02 \x01(\t\x12\x12\n\nvoter_hash\x18\x03 \x01(\x08"H\n\x0f\x43ollabAnnoVotes\x12\r\n\x05total\x18\x01 \x01(\x05\x12&\n\x06voters\x18\x02 \x03(\x0b\x32\x16.scope.CollabAnnoVoter"\xaa\x01\n\x12\x43\x65llTypeAnnotation\x12#\n\x04\x64\x61ta\x18\x01 \x01(\x0b\x32\x15.scope.CollabAnnoData\x12\x15\n\rvalidate_hash\x18\x02 \x01(\x08\x12)\n\tvotes_for\x18\x03 \x01(\x0b\x32\x16.scope.CollabAnnoVotes\x12-\n\rvotes_against\x18\x04 \x01(\x0b\x32\x16.scope.CollabAnnoVotes"m\n\x11\x43lusterAnnotation\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\x12\x37\n\x14\x63\x65ll_type_annotation\x18\x03 \x03(\x0b\x32\x19.scope.CellTypeAnnotation"\x9b\x01\n\nClustering\x12\n\n\x02id\x18\x01 \x01(\x05\x12\r\n\x05group\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x38\n\x14\x63lusterMarkerMetrics\x18\x04 \x03(\x0b\x32\x1a.scope.ClusterMarkerMetric\x12*\n\x08\x63lusters\x18\x05 \x03(\x0b\x32\x18.scope.ClusterAnnotation"\x84\x01\n\x0c\x43\x65llMetaData\x12&\n\x0b\x61nnotations\x18\x01 \x03(\x0b\x32\x11.scope.Annotation\x12$\n\nembeddings\x18\x02 \x03(\x0b\x32\x10.scope.Embedding\x12&\n\x0b\x63lusterings\x18\x03 \x03(\x0b\x32\x11.scope.Clustering"/\n\x0c\x41UCThreshold\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x11\n\tthreshold\x18\x02 \x01(\x02"Y\n\x12RegulonGenesMetric\x12\x10\n\x08\x61\x63\x63\x65ssor\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x0e\n\x06values\x18\x04 \x03(\x02"\x9e\x01\n\x07Regulon\x12\r\n\x05genes\x18\x01 \x03(\t\x12+\n\x0e\x61utoThresholds\x18\x02 \x03(\x0b\x32\x13.scope.AUCThreshold\x12\x18\n\x10\x64\x65\x66\x61ultThreshold\x18\x03 \x01(\t\x12\x11\n\tmotifName\x18\x04 \x01(\t\x12*\n\x07metrics\x18\x05 \x03(\x0b\x32\x19.scope.RegulonGenesMetric"\x97\x01\n\x0c\x46ileMetaData\x12\x16\n\x0ehasRegulonsAUC\x18\x01 \x01(\x08\x12\x13\n\x0bhasGeneSets\x18\x02 \x01(\x08\x12\x16\n\x0ehasClusterings\x18\x03 \x01(\x08\x12\x1a\n\x12hasExtraEmbeddings\x18\x04 \x01(\x08\x12\x15\n\rhasGlobalMeta\x18\x05 \x01(\x08\x12\x0f\n\x07species\x18\x06 \x01(\t"!\n\rFeatureValues\x12\x10\n\x08\x66\x65\x61tures\x18\x01 \x03(\x02"&\n\x0f\x43\x65llAnnotations\x12\x13\n\x0b\x61nnotations\x18\x01 \x03(\t" \n\x0c\x43\x65llClusters\x12\x10\n\x08\x63lusters\x18\x01 \x03(\x05"\xc0\x01\n\x11\x43\x65llMetaDataReply\x12\'\n\nclusterIDs\x18\x01 \x03(\x0b\x32\x13.scope.CellClusters\x12,\n\x0egeneExpression\x18\x02 \x03(\x0b\x32\x14.scope.FeatureValues\x12\'\n\taucValues\x18\x03 \x03(\x0b\x32\x14.scope.FeatureValues\x12+\n\x0b\x61nnotations\x18\x04 \x03(\x0b\x32\x16.scope.CellAnnotations"?\n\x16RegulonMetaDataRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x0f\n\x07regulon\x18\x02 \x01(\t";\n\x14RegulonMetaDataReply\x12#\n\x0bregulonMeta\x18\x01 \x01(\x0b\x32\x0e.scope.Regulon"S\n\x12MarkerGenesRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x14\n\x0c\x63lusteringID\x18\x02 \x01(\x05\x12\x11\n\tclusterID\x18\x03 \x01(\x05"X\n\x11MarkerGenesMetric\x12\x10\n\x08\x61\x63\x63\x65ssor\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x0e\n\x06values\x18\x04 \x03(\x02"L\n\x10MarkerGenesReply\x12\r\n\x05genes\x18\x01 \x03(\t\x12)\n\x07metrics\x18\x02 \x03(\x0b\x32\x18.scope.MarkerGenesMetric"0\n\x0eMyLoomsRequest\x12\x0c\n\x04UUID\x18\x01 \x01(\t\x12\x10\n\x08loomFile\x18\x02 \x01(\t"4\n\x0eLoomHeierarchy\x12\n\n\x02L1\x18\x01 \x01(\t\x12\n\n\x02L2\x18\x02 \x01(\t\x12\n\n\x02L3\x18\x03 \x01(\t"\xce\x01\n\x06MyLoom\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x17\n\x0floomDisplayName\x18\x02 \x01(\t\x12\x10\n\x08loomSize\x18\x03 \x01(\x03\x12)\n\x0c\x63\x65llMetaData\x18\x04 \x01(\x0b\x32\x13.scope.CellMetaData\x12)\n\x0c\x66ileMetaData\x18\x05 \x01(\x0b\x32\x13.scope.FileMetaData\x12-\n\x0eloomHeierarchy\x18\x06 \x01(\x0b\x32\x15.scope.LoomHeierarchy">\n\x0cMyLoomsReply\x12\x1e\n\x07myLooms\x18\x01 \x03(\x0b\x32\r.scope.MyLoom\x12\x0e\n\x06update\x18\x02 \x01(\x08"h\n\x1eTranslateLassoSelectionRequest\x12\x17\n\x0fsrcLoomFilePath\x18\x01 \x01(\t\x12\x18\n\x10\x64\x65stLoomFilePath\x18\x02 \x01(\t\x12\x13\n\x0b\x63\x65llIndices\x18\x03 \x03(\x05"3\n\x1cTranslateLassoSelectionReply\x12\x13\n\x0b\x63\x65llIndices\x18\x01 \x03(\x05";\n\x0e\x43\x65llIDsRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x13\n\x0b\x63\x65llIndices\x18\x02 \x03(\x05"\x1f\n\x0c\x43\x65llIDsReply\x12\x0f\n\x07\x63\x65llIds\x18\x01 \x03(\t"Y\n\x18GeneSetEnrichmentRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x17\n\x0fgeneSetFilePath\x18\x02 \x01(\t\x12\x0e\n\x06method\x18\x03 \x01(\t")\n\x08Progress\x12\r\n\x05value\x18\x01 \x01(\x02\x12\x0e\n\x06status\x18\x02 \x01(\t"\x80\x01\n\x16GeneSetEnrichmentReply\x12!\n\x08progress\x18\x01 \x01(\x0b\x32\x0f.scope.Progress\x12\x0e\n\x06isDone\x18\x02 \x01(\x08\x12\x33\n\ncellValues\x18\x03 \x01(\x0b\x32\x1f.scope.CellColorByFeaturesReply"{\n\x0bVmaxRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x03(\t\x12\x0f\n\x07\x66\x65\x61ture\x18\x02 \x03(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x03 \x03(\t\x12\x17\n\x0fhasLogTransform\x18\x04 \x01(\x08\x12\x17\n\x0fhasCpmTransform\x18\x05 \x01(\x08"*\n\tVmaxReply\x12\x0c\n\x04vmax\x18\x01 \x03(\x02\x12\x0f\n\x07maxVmax\x18\x02 \x03(\x02"\x19\n\x0bUUIDRequest\x12\n\n\x02ip\x18\x01 \x01(\t"\x19\n\tUUIDReply\x12\x0c\n\x04UUID\x18\x01 \x01(\t"I\n\x18RemainingUUIDTimeRequest\x12\n\n\x02ip\x18\x01 \x01(\t\x12\x0c\n\x04UUID\x18\x02 \x01(\t\x12\x13\n\x0bmouseEvents\x18\x03 \x01(\x03"p\n\x16RemainingUUIDTimeReply\x12\x0c\n\x04UUID\x18\x01 \x01(\t\x12\x15\n\rtimeRemaining\x18\x02 \x01(\x03\x12\x1c\n\x14sessionsLimitReached\x18\x03 \x01(\x08\x12\x13\n\x0bsessionMode\x18\x04 \x01(\t"5\n\x13LoomUploadedRequest\x12\x0c\n\x04UUID\x18\x01 \x01(\t\x12\x10\n\x08\x66ilename\x18\x02 \x01(\t"\x13\n\x11LoomUploadedReply"@\n\tMyGeneSet\x12\x17\n\x0fgeneSetFilePath\x18\x01 \x01(\t\x12\x1a\n\x12geneSetDisplayName\x18\x02 \x01(\t"!\n\x11MyGeneSetsRequest\x12\x0c\n\x04UUID\x18\x01 \x01(\t"7\n\x0fMyGeneSetsReply\x12$\n\nmyGeneSets\x18\x01 \x03(\x0b\x32\x10.scope.MyGeneSet"I\n\x15\x44\x65leteUserFileRequest\x12\x0c\n\x04UUID\x18\x01 \x01(\t\x12\x10\n\x08\x66ilePath\x18\x02 \x01(\t\x12\x10\n\x08\x66ileType\x18\x03 \x01(\t"2\n\x13\x44\x65leteUserFileReply\x12\x1b\n\x13\x64\x65letedSuccessfully\x18\x01 \x01(\x08"\x95\x01\n\x16\x44ownloadSubLoomRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x13\n\x0b\x66\x65\x61tureType\x18\x02 \x01(\t\x12\x13\n\x0b\x66\x65\x61tureName\x18\x03 \x01(\t\x12\x14\n\x0c\x66\x65\x61tureValue\x18\x04 \x01(\t\x12\x10\n\x08operator\x18\x05 \x01(\t\x12\x13\n\x0b\x63\x65llIndices\x18\x06 \x03(\x05"\x97\x01\n\x14\x44ownloadSubLoomReply\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x14\n\x0cloomFileSize\x18\x02 \x01(\x03\x12!\n\x08progress\x18\x03 \x01(\x0b\x32\x0f.scope.Progress\x12\x0e\n\x06isDone\x18\x04 \x01(\x08\x12 \n\x05\x65rror\x18\x05 \x01(\x0b\x32\x11.scope.ErrorReply"n\n\x18SetAnnotationNameRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x14\n\x0c\x63lusteringID\x18\x02 \x01(\x03\x12\x11\n\tclusterID\x18\x03 \x01(\x03\x12\x13\n\x0bnewAnnoName\x18\x04 \x01(\t")\n\x16SetAnnotationNameReply\x12\x0f\n\x07success\x18\x01 \x01(\x08"z\n\x17SetLoomHierarchyRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x17\n\x0fnewHierarchy_L1\x18\x02 \x01(\t\x12\x17\n\x0fnewHierarchy_L2\x18\x03 \x01(\t\x12\x17\n\x0fnewHierarchy_L3\x18\x04 \x01(\t"(\n\x15SetLoomHierarchyReply\x12\x0f\n\x07success\x18\x01 \x01(\x08"$\n\x0fgetORCIDRequest\x12\x11\n\tauth_code\x18\x01 \x01(\t"Z\n\rgetORCIDReply\x12\x18\n\x10orcid_scope_uuid\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x10\n\x08orcid_id\x18\x03 \x01(\t\x12\x0f\n\x07success\x18\x04 \x01(\x08"\x17\n\x15getORCIDStatusRequest"%\n\x13getORCIDStatusReply\x12\x0e\n\x06\x61\x63tive\x18\x01 \x01(\x08"I\n\x10orcidInfoMessage\x12\x11\n\torcidName\x18\x01 \x01(\t\x12\x0f\n\x07orcidID\x18\x02 \x01(\t\x12\x11\n\torcidUUID\x18\x03 \x01(\t"\xb3\x01\n\x1dsetColabAnnotationDataRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x14\n\x0c\x63lusteringID\x18\x02 \x01(\x05\x12\x11\n\tclusterID\x18\x03 \x01(\x05\x12*\n\torcidInfo\x18\x04 \x01(\x0b\x32\x17.scope.orcidInfoMessage\x12\'\n\x08\x61nnoData\x18\x05 \x01(\x0b\x32\x15.scope.CollabAnnoData"?\n\x1bsetColabAnnotationDataReply\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t"\xbe\x01\n\x15voteAnnotationRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x14\n\x0c\x63lusteringID\x18\x02 \x01(\x05\x12\x11\n\tclusterID\x18\x03 \x01(\x05\x12*\n\torcidInfo\x18\x04 \x01(\x0b\x32\x17.scope.orcidInfoMessage\x12\'\n\x08\x61nnoData\x18\x05 \x01(\x0b\x32\x15.scope.CollabAnnoData\x12\x11\n\tdirection\x18\x06 \x01(\t"7\n\x13voteAnnotationReply\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t"i\n\x15getNextClusterRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x14\n\x0c\x63lusteringID\x18\x02 \x01(\x05\x12\x11\n\tclusterID\x18\x03 \x01(\x05\x12\x11\n\tdirection\x18\x04 \x01(\t"M\n\x0eNewClusterInfo\x12\x0f\n\x07\x63\x65llIDs\x18\x01 \x03(\t\x12\x12\n\nclusterIDs\x18\x02 \x03(\t\x12\x16\n\x0e\x63lusteringName\x18\x03 \x01(\t"\x87\x01\n\x17\x41\x64\x64NewClusteringRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12*\n\torcidInfo\x18\x02 \x01(\x0b\x32\x17.scope.orcidInfoMessage\x12*\n\x0b\x63lusterInfo\x18\x03 \x01(\x0b\x32\x15.scope.NewClusterInfo"9\n\x15\x41\x64\x64NewClusteringReply\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t"F\n\x19GetClusterOverlapsRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x13\n\x0b\x63\x65llIndices\x18\x02 \x03(\x05"\xd8\x01\n\x0f\x43lusterOverlaps\x12>\n\x0f\x63lusterOverlaps\x18\x01 \x03(\x0b\x32%.scope.ClusterOverlaps.ClusterOverlap\x1a\x84\x01\n\x0e\x43lusterOverlap\x12\x17\n\x0f\x63lustering_name\x18\x01 \x01(\t\x12\x14\n\x0c\x63luster_name\x18\x02 \x01(\t\x12\x0f\n\x07n_cells\x18\x03 \x01(\x05\x12\x18\n\x10\x63\x65lls_in_cluster\x18\x04 \x01(\x02\x12\x18\n\x10\x63luster_in_cells\x18\x05 \x01(\x02"O\n\x13\x46\x65\x61tureLabelRequest\x12\x14\n\x0cloomFilePath\x18\x01 \x01(\t\x12\x11\n\tembedding\x18\x02 \x01(\x11\x12\x0f\n\x07\x66\x65\x61ture\x18\x03 \x01(\t"\xa0\x01\n\x11\x46\x65\x61tureLabelReply\x12\x35\n\x06labels\x18\x01 \x03(\x0b\x32%.scope.FeatureLabelReply.FeatureLabel\x1aT\n\x0c\x46\x65\x61tureLabel\x12\r\n\x05label\x18\x01 \x01(\t\x12\x0e\n\x06\x63olour\x18\x02 \x01(\t\x12%\n\ncoordinate\x18\x03 \x01(\x0b\x32\x11.scope.Coordinate2\x8a\x11\n\x04Main\x12^\n\x16getCellColorByFeatures\x12!.scope.CellColorByFeaturesRequest\x1a\x1f.scope.CellColorByFeaturesReply"\x00\x12j\n\x1agetCellAUCValuesByFeatures\x12%.scope.CellAUCValuesByFeaturesRequest\x1a#.scope.CellAUCValuesByFeaturesReply"\x00\x12I\n\x0fgetCellMetaData\x12\x1a.scope.CellMetaDataRequest\x1a\x18.scope.CellMetaDataReply"\x00\x12;\n\x0bgetFeatures\x12\x15.scope.FeatureRequest\x1a\x13.scope.FeatureReply"\x00\x12\x46\n\x0egetCoordinates\x12\x19.scope.CoordinatesRequest\x1a\x17.scope.CoordinatesReply"\x00\x12R\n\x12getRegulonMetaData\x12\x1d.scope.RegulonMetaDataRequest\x1a\x1b.scope.RegulonMetaDataReply"\x00\x12\x46\n\x0egetMarkerGenes\x12\x19.scope.MarkerGenesRequest\x1a\x17.scope.MarkerGenesReply"\x00\x12:\n\ngetMyLooms\x12\x15.scope.MyLoomsRequest\x1a\x13.scope.MyLoomsReply"\x00\x12g\n\x17translateLassoSelection\x12%.scope.TranslateLassoSelectionRequest\x1a#.scope.TranslateLassoSelectionReply"\x00\x12:\n\ngetCellIDs\x12\x15.scope.CellIDsRequest\x1a\x13.scope.CellIDsReply"\x00\x12Y\n\x13\x64oGeneSetEnrichment\x12\x1f.scope.GeneSetEnrichmentRequest\x1a\x1d.scope.GeneSetEnrichmentReply"\x00\x30\x01\x12\x31\n\x07getVmax\x12\x12.scope.VmaxRequest\x1a\x10.scope.VmaxReply"\x00\x12\x31\n\x07getUUID\x12\x12.scope.UUIDRequest\x1a\x10.scope.UUIDReply"\x00\x12X\n\x14getRemainingUUIDTime\x12\x1f.scope.RemainingUUIDTimeRequest\x1a\x1d.scope.RemainingUUIDTimeReply"\x00\x12\x46\n\x0cloomUploaded\x12\x1a.scope.LoomUploadedRequest\x1a\x18.scope.LoomUploadedReply"\x00\x12\x43\n\rgetMyGeneSets\x12\x18.scope.MyGeneSetsRequest\x1a\x16.scope.MyGeneSetsReply"\x00\x12L\n\x0e\x64\x65leteUserFile\x12\x1c.scope.DeleteUserFileRequest\x1a\x1a.scope.DeleteUserFileReply"\x00\x12Q\n\x0f\x64ownloadSubLoom\x12\x1d.scope.DownloadSubLoomRequest\x1a\x1b.scope.DownloadSubLoomReply"\x00\x30\x01\x12U\n\x11setAnnotationName\x12\x1f.scope.SetAnnotationNameRequest\x1a\x1d.scope.SetAnnotationNameReply"\x00\x12R\n\x10setLoomHierarchy\x12\x1e.scope.SetLoomHierarchyRequest\x1a\x1c.scope.SetLoomHierarchyReply"\x00\x12:\n\x08getORCID\x12\x16.scope.getORCIDRequest\x1a\x14.scope.getORCIDReply"\x00\x12L\n\x0egetORCIDStatus\x12\x1c.scope.getORCIDStatusRequest\x1a\x1a.scope.getORCIDStatusReply"\x00\x12\x64\n\x16setColabAnnotationData\x12$.scope.setColabAnnotationDataRequest\x1a".scope.setColabAnnotationDataReply"\x00\x12L\n\x0evoteAnnotation\x12\x1c.scope.voteAnnotationRequest\x1a\x1a.scope.voteAnnotationReply"\x00\x12\x45\n\x0egetNextCluster\x12\x1c.scope.getNextClusterRequest\x1a\x13.scope.FeatureReply"\x00\x12R\n\x10\x61\x64\x64NewClustering\x12\x1e.scope.AddNewClusteringRequest\x1a\x1c.scope.AddNewClusteringReply"\x00\x12P\n\x12getClusterOverlaps\x12 .scope.GetClusterOverlapsRequest\x1a\x16.scope.ClusterOverlaps"\x00\x12J\n\x10getFeatureLabels\x12\x1a.scope.FeatureLabelRequest\x1a\x18.scope.FeatureLabelReply"\x00\x62\x06proto3',
 )
 
 
-
-
 _ERRORREPLY = _descriptor.Descriptor(
-  name='ErrorReply',
-  full_name='scope.ErrorReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='type', full_name='scope.ErrorReply.type', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='message', full_name='scope.ErrorReply.message', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=18,
-  serialized_end=61,
+    name="ErrorReply",
+    full_name="scope.ErrorReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="type",
+            full_name="scope.ErrorReply.type",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="message",
+            full_name="scope.ErrorReply.message",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=18,
+    serialized_end=61,
 )
 
 
 _CELLCOLORBYFEATURESREQUEST = _descriptor.Descriptor(
-  name='CellColorByFeaturesRequest',
-  full_name='scope.CellColorByFeaturesRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.CellColorByFeaturesRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='feature', full_name='scope.CellColorByFeaturesRequest.feature', index=1,
-      number=2, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='featureType', full_name='scope.CellColorByFeaturesRequest.featureType', index=2,
-      number=3, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='hasLogTransform', full_name='scope.CellColorByFeaturesRequest.hasLogTransform', index=3,
-      number=4, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='hasCpmTransform', full_name='scope.CellColorByFeaturesRequest.hasCpmTransform', index=4,
-      number=5, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='threshold', full_name='scope.CellColorByFeaturesRequest.threshold', index=5,
-      number=6, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='scaleThresholded', full_name='scope.CellColorByFeaturesRequest.scaleThresholded', index=6,
-      number=7, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='annotation', full_name='scope.CellColorByFeaturesRequest.annotation', index=7,
-      number=8, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='vmax', full_name='scope.CellColorByFeaturesRequest.vmax', index=8,
-      number=9, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='vmin', full_name='scope.CellColorByFeaturesRequest.vmin', index=9,
-      number=10, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='logic', full_name='scope.CellColorByFeaturesRequest.logic', index=10,
-      number=11, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=64,
-  serialized_end=329,
+    name="CellColorByFeaturesRequest",
+    full_name="scope.CellColorByFeaturesRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.CellColorByFeaturesRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="feature",
+            full_name="scope.CellColorByFeaturesRequest.feature",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="featureType",
+            full_name="scope.CellColorByFeaturesRequest.featureType",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="hasLogTransform",
+            full_name="scope.CellColorByFeaturesRequest.hasLogTransform",
+            index=3,
+            number=4,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="hasCpmTransform",
+            full_name="scope.CellColorByFeaturesRequest.hasCpmTransform",
+            index=4,
+            number=5,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="threshold",
+            full_name="scope.CellColorByFeaturesRequest.threshold",
+            index=5,
+            number=6,
+            type=2,
+            cpp_type=6,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="scaleThresholded",
+            full_name="scope.CellColorByFeaturesRequest.scaleThresholded",
+            index=6,
+            number=7,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="annotation",
+            full_name="scope.CellColorByFeaturesRequest.annotation",
+            index=7,
+            number=8,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="vmax",
+            full_name="scope.CellColorByFeaturesRequest.vmax",
+            index=8,
+            number=9,
+            type=2,
+            cpp_type=6,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="vmin",
+            full_name="scope.CellColorByFeaturesRequest.vmin",
+            index=9,
+            number=10,
+            type=2,
+            cpp_type=6,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="logic",
+            full_name="scope.CellColorByFeaturesRequest.logic",
+            index=10,
+            number=11,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=64,
+    serialized_end=329,
 )
 
 
 _COLORLEGEND = _descriptor.Descriptor(
-  name='ColorLegend',
-  full_name='scope.ColorLegend',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='values', full_name='scope.ColorLegend.values', index=0,
-      number=1, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='colors', full_name='scope.ColorLegend.colors', index=1,
-      number=2, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=331,
-  serialized_end=376,
+    name="ColorLegend",
+    full_name="scope.ColorLegend",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="values",
+            full_name="scope.ColorLegend.values",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="colors",
+            full_name="scope.ColorLegend.colors",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=331,
+    serialized_end=376,
 )
 
 
 _CELLCOLORBYFEATURESREPLY = _descriptor.Descriptor(
-  name='CellColorByFeaturesReply',
-  full_name='scope.CellColorByFeaturesReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='hasAddCompressionLayer', full_name='scope.CellColorByFeaturesReply.hasAddCompressionLayer', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='compressedColor', full_name='scope.CellColorByFeaturesReply.compressedColor', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='color', full_name='scope.CellColorByFeaturesReply.color', index=2,
-      number=3, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='vmax', full_name='scope.CellColorByFeaturesReply.vmax', index=3,
-      number=4, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='maxVmax', full_name='scope.CellColorByFeaturesReply.maxVmax', index=4,
-      number=5, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='cellIndices', full_name='scope.CellColorByFeaturesReply.cellIndices', index=5,
-      number=6, type=5, cpp_type=1, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='legend', full_name='scope.CellColorByFeaturesReply.legend', index=6,
-      number=7, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='error', full_name='scope.CellColorByFeaturesReply.error', index=7,
-      number=8, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=379,
-  serialized_end=599,
+    name="CellColorByFeaturesReply",
+    full_name="scope.CellColorByFeaturesReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="hasAddCompressionLayer",
+            full_name="scope.CellColorByFeaturesReply.hasAddCompressionLayer",
+            index=0,
+            number=1,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="compressedColor",
+            full_name="scope.CellColorByFeaturesReply.compressedColor",
+            index=1,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"",
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="color",
+            full_name="scope.CellColorByFeaturesReply.color",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="vmax",
+            full_name="scope.CellColorByFeaturesReply.vmax",
+            index=3,
+            number=4,
+            type=2,
+            cpp_type=6,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="maxVmax",
+            full_name="scope.CellColorByFeaturesReply.maxVmax",
+            index=4,
+            number=5,
+            type=2,
+            cpp_type=6,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="cellIndices",
+            full_name="scope.CellColorByFeaturesReply.cellIndices",
+            index=5,
+            number=6,
+            type=5,
+            cpp_type=1,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="legend",
+            full_name="scope.CellColorByFeaturesReply.legend",
+            index=6,
+            number=7,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="error",
+            full_name="scope.CellColorByFeaturesReply.error",
+            index=7,
+            number=8,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=379,
+    serialized_end=599,
 )
 
 
 _CELLAUCVALUESBYFEATURESREQUEST = _descriptor.Descriptor(
-  name='CellAUCValuesByFeaturesRequest',
-  full_name='scope.CellAUCValuesByFeaturesRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.CellAUCValuesByFeaturesRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='feature', full_name='scope.CellAUCValuesByFeaturesRequest.feature', index=1,
-      number=2, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='featureType', full_name='scope.CellAUCValuesByFeaturesRequest.featureType', index=2,
-      number=3, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=601,
-  serialized_end=693,
+    name="CellAUCValuesByFeaturesRequest",
+    full_name="scope.CellAUCValuesByFeaturesRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.CellAUCValuesByFeaturesRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="feature",
+            full_name="scope.CellAUCValuesByFeaturesRequest.feature",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="featureType",
+            full_name="scope.CellAUCValuesByFeaturesRequest.featureType",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=601,
+    serialized_end=693,
 )
 
 
 _CELLAUCVALUESBYFEATURESREPLY = _descriptor.Descriptor(
-  name='CellAUCValuesByFeaturesReply',
-  full_name='scope.CellAUCValuesByFeaturesReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='value', full_name='scope.CellAUCValuesByFeaturesReply.value', index=0,
-      number=1, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=695,
-  serialized_end=740,
+    name="CellAUCValuesByFeaturesReply",
+    full_name="scope.CellAUCValuesByFeaturesReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="value",
+            full_name="scope.CellAUCValuesByFeaturesReply.value",
+            index=0,
+            number=1,
+            type=2,
+            cpp_type=6,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=695,
+    serialized_end=740,
 )
 
 
 _FEATUREREQUEST = _descriptor.Descriptor(
-  name='FeatureRequest',
-  full_name='scope.FeatureRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.FeatureRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='query', full_name='scope.FeatureRequest.query', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=742,
-  serialized_end=795,
+    name="FeatureRequest",
+    full_name="scope.FeatureRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.FeatureRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="query",
+            full_name="scope.FeatureRequest.query",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=742,
+    serialized_end=795,
 )
 
 
 _CELLMETADATAREQUEST = _descriptor.Descriptor(
-  name='CellMetaDataRequest',
-  full_name='scope.CellMetaDataRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.CellMetaDataRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='cellIndices', full_name='scope.CellMetaDataRequest.cellIndices', index=1,
-      number=2, type=5, cpp_type=1, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='selectedGenes', full_name='scope.CellMetaDataRequest.selectedGenes', index=2,
-      number=3, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='hasLogTransform', full_name='scope.CellMetaDataRequest.hasLogTransform', index=3,
-      number=4, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='hasCpmTransform', full_name='scope.CellMetaDataRequest.hasCpmTransform', index=4,
-      number=5, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='selectedRegulons', full_name='scope.CellMetaDataRequest.selectedRegulons', index=5,
-      number=6, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='clusterings', full_name='scope.CellMetaDataRequest.clusterings', index=6,
-      number=7, type=5, cpp_type=1, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='annotations', full_name='scope.CellMetaDataRequest.annotations', index=7,
-      number=8, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=798,
-  serialized_end=1003,
+    name="CellMetaDataRequest",
+    full_name="scope.CellMetaDataRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.CellMetaDataRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="cellIndices",
+            full_name="scope.CellMetaDataRequest.cellIndices",
+            index=1,
+            number=2,
+            type=5,
+            cpp_type=1,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="selectedGenes",
+            full_name="scope.CellMetaDataRequest.selectedGenes",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="hasLogTransform",
+            full_name="scope.CellMetaDataRequest.hasLogTransform",
+            index=3,
+            number=4,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="hasCpmTransform",
+            full_name="scope.CellMetaDataRequest.hasCpmTransform",
+            index=4,
+            number=5,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="selectedRegulons",
+            full_name="scope.CellMetaDataRequest.selectedRegulons",
+            index=5,
+            number=6,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="clusterings",
+            full_name="scope.CellMetaDataRequest.clusterings",
+            index=6,
+            number=7,
+            type=5,
+            cpp_type=1,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="annotations",
+            full_name="scope.CellMetaDataRequest.annotations",
+            index=7,
+            number=8,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=798,
+    serialized_end=1003,
 )
 
 
 _FEATUREREPLY = _descriptor.Descriptor(
-  name='FeatureReply',
-  full_name='scope.FeatureReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='feature', full_name='scope.FeatureReply.feature', index=0,
-      number=1, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='featureType', full_name='scope.FeatureReply.featureType', index=1,
-      number=2, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='featureDescription', full_name='scope.FeatureReply.featureDescription', index=2,
-      number=3, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1005,
-  serialized_end=1085,
+    name="FeatureReply",
+    full_name="scope.FeatureReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="feature",
+            full_name="scope.FeatureReply.feature",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="featureType",
+            full_name="scope.FeatureReply.featureType",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="featureDescription",
+            full_name="scope.FeatureReply.featureDescription",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1005,
+    serialized_end=1085,
 )
 
 
 _COORDINATESREQUEST = _descriptor.Descriptor(
-  name='CoordinatesRequest',
-  full_name='scope.CoordinatesRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.CoordinatesRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='coordinatesID', full_name='scope.CoordinatesRequest.coordinatesID', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='annotation', full_name='scope.CoordinatesRequest.annotation', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='logic', full_name='scope.CoordinatesRequest.logic', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1087,
-  serialized_end=1206,
+    name="CoordinatesRequest",
+    full_name="scope.CoordinatesRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.CoordinatesRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="coordinatesID",
+            full_name="scope.CoordinatesRequest.coordinatesID",
+            index=1,
+            number=2,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="annotation",
+            full_name="scope.CoordinatesRequest.annotation",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="logic",
+            full_name="scope.CoordinatesRequest.logic",
+            index=3,
+            number=4,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1087,
+    serialized_end=1206,
 )
 
 
 _COORDINATESREPLY = _descriptor.Descriptor(
-  name='CoordinatesReply',
-  full_name='scope.CoordinatesReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='x', full_name='scope.CoordinatesReply.x', index=0,
-      number=1, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='y', full_name='scope.CoordinatesReply.y', index=1,
-      number=2, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='cellIndices', full_name='scope.CoordinatesReply.cellIndices', index=2,
-      number=3, type=5, cpp_type=1, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1208,
-  serialized_end=1269,
+    name="CoordinatesReply",
+    full_name="scope.CoordinatesReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="x",
+            full_name="scope.CoordinatesReply.x",
+            index=0,
+            number=1,
+            type=2,
+            cpp_type=6,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="y",
+            full_name="scope.CoordinatesReply.y",
+            index=1,
+            number=2,
+            type=2,
+            cpp_type=6,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="cellIndices",
+            full_name="scope.CoordinatesReply.cellIndices",
+            index=2,
+            number=3,
+            type=5,
+            cpp_type=1,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1208,
+    serialized_end=1269,
 )
 
 
 _ANNOTATION = _descriptor.Descriptor(
-  name='Annotation',
-  full_name='scope.Annotation',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='name', full_name='scope.Annotation.name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='values', full_name='scope.Annotation.values', index=1,
-      number=2, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='colors', full_name='scope.Annotation.colors', index=2,
-      number=3, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1271,
-  serialized_end=1329,
+    name="Annotation",
+    full_name="scope.Annotation",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="name",
+            full_name="scope.Annotation.name",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="values",
+            full_name="scope.Annotation.values",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="colors",
+            full_name="scope.Annotation.colors",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1271,
+    serialized_end=1329,
 )
 
 
 _COORDINATE = _descriptor.Descriptor(
-  name='Coordinate',
-  full_name='scope.Coordinate',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='x', full_name='scope.Coordinate.x', index=0,
-      number=1, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='y', full_name='scope.Coordinate.y', index=1,
-      number=2, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1331,
-  serialized_end=1365,
+    name="Coordinate",
+    full_name="scope.Coordinate",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="x",
+            full_name="scope.Coordinate.x",
+            index=0,
+            number=1,
+            type=2,
+            cpp_type=6,
+            label=1,
+            has_default_value=False,
+            default_value=float(0),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="y",
+            full_name="scope.Coordinate.y",
+            index=1,
+            number=2,
+            type=2,
+            cpp_type=6,
+            label=1,
+            has_default_value=False,
+            default_value=float(0),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1331,
+    serialized_end=1365,
 )
 
 
 _EDGE = _descriptor.Descriptor(
-  name='Edge',
-  full_name='scope.Edge',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='source', full_name='scope.Edge.source', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='target', full_name='scope.Edge.target', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1367,
-  serialized_end=1405,
+    name="Edge",
+    full_name="scope.Edge",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="source",
+            full_name="scope.Edge.source",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="target",
+            full_name="scope.Edge.target",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1367,
+    serialized_end=1405,
 )
 
 
 _TRAJECTORY = _descriptor.Descriptor(
-  name='Trajectory',
-  full_name='scope.Trajectory',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='nodes', full_name='scope.Trajectory.nodes', index=0,
-      number=1, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='edges', full_name='scope.Trajectory.edges', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='coordinates', full_name='scope.Trajectory.coordinates', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1407,
-  serialized_end=1502,
+    name="Trajectory",
+    full_name="scope.Trajectory",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="nodes",
+            full_name="scope.Trajectory.nodes",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="edges",
+            full_name="scope.Trajectory.edges",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="coordinates",
+            full_name="scope.Trajectory.coordinates",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1407,
+    serialized_end=1502,
 )
 
 
 _EMBEDDING = _descriptor.Descriptor(
-  name='Embedding',
-  full_name='scope.Embedding',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='id', full_name='scope.Embedding.id', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='name', full_name='scope.Embedding.name', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='trajectory', full_name='scope.Embedding.trajectory', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1504,
-  serialized_end=1580,
+    name="Embedding",
+    full_name="scope.Embedding",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="id",
+            full_name="scope.Embedding.id",
+            index=0,
+            number=1,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="name",
+            full_name="scope.Embedding.name",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="trajectory",
+            full_name="scope.Embedding.trajectory",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1504,
+    serialized_end=1580,
 )
 
 
 _CLUSTERMARKERMETRIC = _descriptor.Descriptor(
-  name='ClusterMarkerMetric',
-  full_name='scope.ClusterMarkerMetric',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='accessor', full_name='scope.ClusterMarkerMetric.accessor', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='name', full_name='scope.ClusterMarkerMetric.name', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='description', full_name='scope.ClusterMarkerMetric.description', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1582,
-  serialized_end=1656,
+    name="ClusterMarkerMetric",
+    full_name="scope.ClusterMarkerMetric",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="accessor",
+            full_name="scope.ClusterMarkerMetric.accessor",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="name",
+            full_name="scope.ClusterMarkerMetric.name",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="description",
+            full_name="scope.ClusterMarkerMetric.description",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1582,
+    serialized_end=1656,
 )
 
 
 _COLLABANNODATA = _descriptor.Descriptor(
-  name='CollabAnnoData',
-  full_name='scope.CollabAnnoData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='curator_name', full_name='scope.CollabAnnoData.curator_name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='curator_id', full_name='scope.CollabAnnoData.curator_id', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='timestamp', full_name='scope.CollabAnnoData.timestamp', index=2,
-      number=3, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='obo_id', full_name='scope.CollabAnnoData.obo_id', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='ols_iri', full_name='scope.CollabAnnoData.ols_iri', index=4,
-      number=5, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='annotation_label', full_name='scope.CollabAnnoData.annotation_label', index=5,
-      number=6, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='markers', full_name='scope.CollabAnnoData.markers', index=6,
-      number=7, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='publication', full_name='scope.CollabAnnoData.publication', index=7,
-      number=8, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='comment', full_name='scope.CollabAnnoData.comment', index=8,
-      number=9, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1659,
-  serialized_end=1850,
+    name="CollabAnnoData",
+    full_name="scope.CollabAnnoData",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="curator_name",
+            full_name="scope.CollabAnnoData.curator_name",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="curator_id",
+            full_name="scope.CollabAnnoData.curator_id",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="timestamp",
+            full_name="scope.CollabAnnoData.timestamp",
+            index=2,
+            number=3,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="obo_id",
+            full_name="scope.CollabAnnoData.obo_id",
+            index=3,
+            number=4,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="ols_iri",
+            full_name="scope.CollabAnnoData.ols_iri",
+            index=4,
+            number=5,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="annotation_label",
+            full_name="scope.CollabAnnoData.annotation_label",
+            index=5,
+            number=6,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="markers",
+            full_name="scope.CollabAnnoData.markers",
+            index=6,
+            number=7,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="publication",
+            full_name="scope.CollabAnnoData.publication",
+            index=7,
+            number=8,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="comment",
+            full_name="scope.CollabAnnoData.comment",
+            index=8,
+            number=9,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1659,
+    serialized_end=1850,
 )
 
 
 _COLLABANNOVOTER = _descriptor.Descriptor(
-  name='CollabAnnoVoter',
-  full_name='scope.CollabAnnoVoter',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='voter_name', full_name='scope.CollabAnnoVoter.voter_name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='voter_id', full_name='scope.CollabAnnoVoter.voter_id', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='voter_hash', full_name='scope.CollabAnnoVoter.voter_hash', index=2,
-      number=3, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1852,
-  serialized_end=1927,
+    name="CollabAnnoVoter",
+    full_name="scope.CollabAnnoVoter",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="voter_name",
+            full_name="scope.CollabAnnoVoter.voter_name",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="voter_id",
+            full_name="scope.CollabAnnoVoter.voter_id",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="voter_hash",
+            full_name="scope.CollabAnnoVoter.voter_hash",
+            index=2,
+            number=3,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1852,
+    serialized_end=1927,
 )
 
 
 _COLLABANNOVOTES = _descriptor.Descriptor(
-  name='CollabAnnoVotes',
-  full_name='scope.CollabAnnoVotes',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='total', full_name='scope.CollabAnnoVotes.total', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='voters', full_name='scope.CollabAnnoVotes.voters', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1929,
-  serialized_end=2001,
+    name="CollabAnnoVotes",
+    full_name="scope.CollabAnnoVotes",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="total",
+            full_name="scope.CollabAnnoVotes.total",
+            index=0,
+            number=1,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="voters",
+            full_name="scope.CollabAnnoVotes.voters",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1929,
+    serialized_end=2001,
 )
 
 
 _CELLTYPEANNOTATION = _descriptor.Descriptor(
-  name='CellTypeAnnotation',
-  full_name='scope.CellTypeAnnotation',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='data', full_name='scope.CellTypeAnnotation.data', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='validate_hash', full_name='scope.CellTypeAnnotation.validate_hash', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='votes_for', full_name='scope.CellTypeAnnotation.votes_for', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='votes_against', full_name='scope.CellTypeAnnotation.votes_against', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2004,
-  serialized_end=2174,
+    name="CellTypeAnnotation",
+    full_name="scope.CellTypeAnnotation",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="data",
+            full_name="scope.CellTypeAnnotation.data",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="validate_hash",
+            full_name="scope.CellTypeAnnotation.validate_hash",
+            index=1,
+            number=2,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="votes_for",
+            full_name="scope.CellTypeAnnotation.votes_for",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="votes_against",
+            full_name="scope.CellTypeAnnotation.votes_against",
+            index=3,
+            number=4,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2004,
+    serialized_end=2174,
 )
 
 
 _CLUSTERANNOTATION = _descriptor.Descriptor(
-  name='ClusterAnnotation',
-  full_name='scope.ClusterAnnotation',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='id', full_name='scope.ClusterAnnotation.id', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='description', full_name='scope.ClusterAnnotation.description', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='cell_type_annotation', full_name='scope.ClusterAnnotation.cell_type_annotation', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2176,
-  serialized_end=2285,
+    name="ClusterAnnotation",
+    full_name="scope.ClusterAnnotation",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="id",
+            full_name="scope.ClusterAnnotation.id",
+            index=0,
+            number=1,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="description",
+            full_name="scope.ClusterAnnotation.description",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="cell_type_annotation",
+            full_name="scope.ClusterAnnotation.cell_type_annotation",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2176,
+    serialized_end=2285,
 )
 
 
 _CLUSTERING = _descriptor.Descriptor(
-  name='Clustering',
-  full_name='scope.Clustering',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='id', full_name='scope.Clustering.id', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='group', full_name='scope.Clustering.group', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='name', full_name='scope.Clustering.name', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='clusterMarkerMetrics', full_name='scope.Clustering.clusterMarkerMetrics', index=3,
-      number=4, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='clusters', full_name='scope.Clustering.clusters', index=4,
-      number=5, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2288,
-  serialized_end=2443,
+    name="Clustering",
+    full_name="scope.Clustering",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="id",
+            full_name="scope.Clustering.id",
+            index=0,
+            number=1,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="group",
+            full_name="scope.Clustering.group",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="name",
+            full_name="scope.Clustering.name",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="clusterMarkerMetrics",
+            full_name="scope.Clustering.clusterMarkerMetrics",
+            index=3,
+            number=4,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="clusters",
+            full_name="scope.Clustering.clusters",
+            index=4,
+            number=5,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2288,
+    serialized_end=2443,
 )
 
 
 _CELLMETADATA = _descriptor.Descriptor(
-  name='CellMetaData',
-  full_name='scope.CellMetaData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='annotations', full_name='scope.CellMetaData.annotations', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='embeddings', full_name='scope.CellMetaData.embeddings', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='clusterings', full_name='scope.CellMetaData.clusterings', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2446,
-  serialized_end=2578,
+    name="CellMetaData",
+    full_name="scope.CellMetaData",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="annotations",
+            full_name="scope.CellMetaData.annotations",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="embeddings",
+            full_name="scope.CellMetaData.embeddings",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="clusterings",
+            full_name="scope.CellMetaData.clusterings",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2446,
+    serialized_end=2578,
 )
 
 
 _AUCTHRESHOLD = _descriptor.Descriptor(
-  name='AUCThreshold',
-  full_name='scope.AUCThreshold',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='name', full_name='scope.AUCThreshold.name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='threshold', full_name='scope.AUCThreshold.threshold', index=1,
-      number=2, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2580,
-  serialized_end=2627,
+    name="AUCThreshold",
+    full_name="scope.AUCThreshold",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="name",
+            full_name="scope.AUCThreshold.name",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="threshold",
+            full_name="scope.AUCThreshold.threshold",
+            index=1,
+            number=2,
+            type=2,
+            cpp_type=6,
+            label=1,
+            has_default_value=False,
+            default_value=float(0),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2580,
+    serialized_end=2627,
 )
 
 
 _REGULONGENESMETRIC = _descriptor.Descriptor(
-  name='RegulonGenesMetric',
-  full_name='scope.RegulonGenesMetric',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='accessor', full_name='scope.RegulonGenesMetric.accessor', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='name', full_name='scope.RegulonGenesMetric.name', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='description', full_name='scope.RegulonGenesMetric.description', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='values', full_name='scope.RegulonGenesMetric.values', index=3,
-      number=4, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2629,
-  serialized_end=2718,
+    name="RegulonGenesMetric",
+    full_name="scope.RegulonGenesMetric",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="accessor",
+            full_name="scope.RegulonGenesMetric.accessor",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="name",
+            full_name="scope.RegulonGenesMetric.name",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="description",
+            full_name="scope.RegulonGenesMetric.description",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="values",
+            full_name="scope.RegulonGenesMetric.values",
+            index=3,
+            number=4,
+            type=2,
+            cpp_type=6,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2629,
+    serialized_end=2718,
 )
 
 
 _REGULON = _descriptor.Descriptor(
-  name='Regulon',
-  full_name='scope.Regulon',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='genes', full_name='scope.Regulon.genes', index=0,
-      number=1, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='autoThresholds', full_name='scope.Regulon.autoThresholds', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='defaultThreshold', full_name='scope.Regulon.defaultThreshold', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='motifName', full_name='scope.Regulon.motifName', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='metrics', full_name='scope.Regulon.metrics', index=4,
-      number=5, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2721,
-  serialized_end=2879,
+    name="Regulon",
+    full_name="scope.Regulon",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="genes",
+            full_name="scope.Regulon.genes",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="autoThresholds",
+            full_name="scope.Regulon.autoThresholds",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="defaultThreshold",
+            full_name="scope.Regulon.defaultThreshold",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="motifName",
+            full_name="scope.Regulon.motifName",
+            index=3,
+            number=4,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="metrics",
+            full_name="scope.Regulon.metrics",
+            index=4,
+            number=5,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2721,
+    serialized_end=2879,
 )
 
 
 _FILEMETADATA = _descriptor.Descriptor(
-  name='FileMetaData',
-  full_name='scope.FileMetaData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='hasRegulonsAUC', full_name='scope.FileMetaData.hasRegulonsAUC', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='hasGeneSets', full_name='scope.FileMetaData.hasGeneSets', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='hasClusterings', full_name='scope.FileMetaData.hasClusterings', index=2,
-      number=3, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='hasExtraEmbeddings', full_name='scope.FileMetaData.hasExtraEmbeddings', index=3,
-      number=4, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='hasGlobalMeta', full_name='scope.FileMetaData.hasGlobalMeta', index=4,
-      number=5, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='species', full_name='scope.FileMetaData.species', index=5,
-      number=6, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2882,
-  serialized_end=3033,
+    name="FileMetaData",
+    full_name="scope.FileMetaData",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="hasRegulonsAUC",
+            full_name="scope.FileMetaData.hasRegulonsAUC",
+            index=0,
+            number=1,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="hasGeneSets",
+            full_name="scope.FileMetaData.hasGeneSets",
+            index=1,
+            number=2,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="hasClusterings",
+            full_name="scope.FileMetaData.hasClusterings",
+            index=2,
+            number=3,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="hasExtraEmbeddings",
+            full_name="scope.FileMetaData.hasExtraEmbeddings",
+            index=3,
+            number=4,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="hasGlobalMeta",
+            full_name="scope.FileMetaData.hasGlobalMeta",
+            index=4,
+            number=5,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="species",
+            full_name="scope.FileMetaData.species",
+            index=5,
+            number=6,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2882,
+    serialized_end=3033,
 )
 
 
 _FEATUREVALUES = _descriptor.Descriptor(
-  name='FeatureValues',
-  full_name='scope.FeatureValues',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='features', full_name='scope.FeatureValues.features', index=0,
-      number=1, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3035,
-  serialized_end=3068,
+    name="FeatureValues",
+    full_name="scope.FeatureValues",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="features",
+            full_name="scope.FeatureValues.features",
+            index=0,
+            number=1,
+            type=2,
+            cpp_type=6,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3035,
+    serialized_end=3068,
 )
 
 
 _CELLANNOTATIONS = _descriptor.Descriptor(
-  name='CellAnnotations',
-  full_name='scope.CellAnnotations',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='annotations', full_name='scope.CellAnnotations.annotations', index=0,
-      number=1, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3070,
-  serialized_end=3108,
+    name="CellAnnotations",
+    full_name="scope.CellAnnotations",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="annotations",
+            full_name="scope.CellAnnotations.annotations",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3070,
+    serialized_end=3108,
 )
 
 
 _CELLCLUSTERS = _descriptor.Descriptor(
-  name='CellClusters',
-  full_name='scope.CellClusters',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='clusters', full_name='scope.CellClusters.clusters', index=0,
-      number=1, type=5, cpp_type=1, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3110,
-  serialized_end=3142,
+    name="CellClusters",
+    full_name="scope.CellClusters",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="clusters",
+            full_name="scope.CellClusters.clusters",
+            index=0,
+            number=1,
+            type=5,
+            cpp_type=1,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3110,
+    serialized_end=3142,
 )
 
 
 _CELLMETADATAREPLY = _descriptor.Descriptor(
-  name='CellMetaDataReply',
-  full_name='scope.CellMetaDataReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='clusterIDs', full_name='scope.CellMetaDataReply.clusterIDs', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='geneExpression', full_name='scope.CellMetaDataReply.geneExpression', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='aucValues', full_name='scope.CellMetaDataReply.aucValues', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='annotations', full_name='scope.CellMetaDataReply.annotations', index=3,
-      number=4, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3145,
-  serialized_end=3337,
+    name="CellMetaDataReply",
+    full_name="scope.CellMetaDataReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="clusterIDs",
+            full_name="scope.CellMetaDataReply.clusterIDs",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="geneExpression",
+            full_name="scope.CellMetaDataReply.geneExpression",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="aucValues",
+            full_name="scope.CellMetaDataReply.aucValues",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="annotations",
+            full_name="scope.CellMetaDataReply.annotations",
+            index=3,
+            number=4,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3145,
+    serialized_end=3337,
 )
 
 
 _REGULONMETADATAREQUEST = _descriptor.Descriptor(
-  name='RegulonMetaDataRequest',
-  full_name='scope.RegulonMetaDataRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.RegulonMetaDataRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='regulon', full_name='scope.RegulonMetaDataRequest.regulon', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3339,
-  serialized_end=3402,
+    name="RegulonMetaDataRequest",
+    full_name="scope.RegulonMetaDataRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.RegulonMetaDataRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="regulon",
+            full_name="scope.RegulonMetaDataRequest.regulon",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3339,
+    serialized_end=3402,
 )
 
 
 _REGULONMETADATAREPLY = _descriptor.Descriptor(
-  name='RegulonMetaDataReply',
-  full_name='scope.RegulonMetaDataReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='regulonMeta', full_name='scope.RegulonMetaDataReply.regulonMeta', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3404,
-  serialized_end=3463,
+    name="RegulonMetaDataReply",
+    full_name="scope.RegulonMetaDataReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="regulonMeta",
+            full_name="scope.RegulonMetaDataReply.regulonMeta",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3404,
+    serialized_end=3463,
 )
 
 
 _MARKERGENESREQUEST = _descriptor.Descriptor(
-  name='MarkerGenesRequest',
-  full_name='scope.MarkerGenesRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.MarkerGenesRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='clusteringID', full_name='scope.MarkerGenesRequest.clusteringID', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='clusterID', full_name='scope.MarkerGenesRequest.clusterID', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3465,
-  serialized_end=3548,
+    name="MarkerGenesRequest",
+    full_name="scope.MarkerGenesRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.MarkerGenesRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="clusteringID",
+            full_name="scope.MarkerGenesRequest.clusteringID",
+            index=1,
+            number=2,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="clusterID",
+            full_name="scope.MarkerGenesRequest.clusterID",
+            index=2,
+            number=3,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3465,
+    serialized_end=3548,
 )
 
 
 _MARKERGENESMETRIC = _descriptor.Descriptor(
-  name='MarkerGenesMetric',
-  full_name='scope.MarkerGenesMetric',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='accessor', full_name='scope.MarkerGenesMetric.accessor', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='name', full_name='scope.MarkerGenesMetric.name', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='description', full_name='scope.MarkerGenesMetric.description', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='values', full_name='scope.MarkerGenesMetric.values', index=3,
-      number=4, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3550,
-  serialized_end=3638,
+    name="MarkerGenesMetric",
+    full_name="scope.MarkerGenesMetric",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="accessor",
+            full_name="scope.MarkerGenesMetric.accessor",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="name",
+            full_name="scope.MarkerGenesMetric.name",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="description",
+            full_name="scope.MarkerGenesMetric.description",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="values",
+            full_name="scope.MarkerGenesMetric.values",
+            index=3,
+            number=4,
+            type=2,
+            cpp_type=6,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3550,
+    serialized_end=3638,
 )
 
 
 _MARKERGENESREPLY = _descriptor.Descriptor(
-  name='MarkerGenesReply',
-  full_name='scope.MarkerGenesReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='genes', full_name='scope.MarkerGenesReply.genes', index=0,
-      number=1, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='metrics', full_name='scope.MarkerGenesReply.metrics', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3640,
-  serialized_end=3716,
+    name="MarkerGenesReply",
+    full_name="scope.MarkerGenesReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="genes",
+            full_name="scope.MarkerGenesReply.genes",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="metrics",
+            full_name="scope.MarkerGenesReply.metrics",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3640,
+    serialized_end=3716,
 )
 
 
 _MYLOOMSREQUEST = _descriptor.Descriptor(
-  name='MyLoomsRequest',
-  full_name='scope.MyLoomsRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='UUID', full_name='scope.MyLoomsRequest.UUID', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='loomFile', full_name='scope.MyLoomsRequest.loomFile', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3718,
-  serialized_end=3766,
+    name="MyLoomsRequest",
+    full_name="scope.MyLoomsRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="UUID",
+            full_name="scope.MyLoomsRequest.UUID",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="loomFile",
+            full_name="scope.MyLoomsRequest.loomFile",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3718,
+    serialized_end=3766,
 )
 
 
 _LOOMHEIERARCHY = _descriptor.Descriptor(
-  name='LoomHeierarchy',
-  full_name='scope.LoomHeierarchy',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='L1', full_name='scope.LoomHeierarchy.L1', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='L2', full_name='scope.LoomHeierarchy.L2', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='L3', full_name='scope.LoomHeierarchy.L3', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3768,
-  serialized_end=3820,
+    name="LoomHeierarchy",
+    full_name="scope.LoomHeierarchy",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="L1",
+            full_name="scope.LoomHeierarchy.L1",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="L2",
+            full_name="scope.LoomHeierarchy.L2",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="L3",
+            full_name="scope.LoomHeierarchy.L3",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3768,
+    serialized_end=3820,
 )
 
 
 _MYLOOM = _descriptor.Descriptor(
-  name='MyLoom',
-  full_name='scope.MyLoom',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.MyLoom.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='loomDisplayName', full_name='scope.MyLoom.loomDisplayName', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='loomSize', full_name='scope.MyLoom.loomSize', index=2,
-      number=3, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='cellMetaData', full_name='scope.MyLoom.cellMetaData', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='fileMetaData', full_name='scope.MyLoom.fileMetaData', index=4,
-      number=5, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='loomHeierarchy', full_name='scope.MyLoom.loomHeierarchy', index=5,
-      number=6, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3823,
-  serialized_end=4029,
+    name="MyLoom",
+    full_name="scope.MyLoom",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.MyLoom.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="loomDisplayName",
+            full_name="scope.MyLoom.loomDisplayName",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="loomSize",
+            full_name="scope.MyLoom.loomSize",
+            index=2,
+            number=3,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="cellMetaData",
+            full_name="scope.MyLoom.cellMetaData",
+            index=3,
+            number=4,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="fileMetaData",
+            full_name="scope.MyLoom.fileMetaData",
+            index=4,
+            number=5,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="loomHeierarchy",
+            full_name="scope.MyLoom.loomHeierarchy",
+            index=5,
+            number=6,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3823,
+    serialized_end=4029,
 )
 
 
 _MYLOOMSREPLY = _descriptor.Descriptor(
-  name='MyLoomsReply',
-  full_name='scope.MyLoomsReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='myLooms', full_name='scope.MyLoomsReply.myLooms', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='update', full_name='scope.MyLoomsReply.update', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4031,
-  serialized_end=4093,
+    name="MyLoomsReply",
+    full_name="scope.MyLoomsReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="myLooms",
+            full_name="scope.MyLoomsReply.myLooms",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="update",
+            full_name="scope.MyLoomsReply.update",
+            index=1,
+            number=2,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4031,
+    serialized_end=4093,
 )
 
 
 _TRANSLATELASSOSELECTIONREQUEST = _descriptor.Descriptor(
-  name='TranslateLassoSelectionRequest',
-  full_name='scope.TranslateLassoSelectionRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='srcLoomFilePath', full_name='scope.TranslateLassoSelectionRequest.srcLoomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='destLoomFilePath', full_name='scope.TranslateLassoSelectionRequest.destLoomFilePath', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='cellIndices', full_name='scope.TranslateLassoSelectionRequest.cellIndices', index=2,
-      number=3, type=5, cpp_type=1, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4095,
-  serialized_end=4199,
+    name="TranslateLassoSelectionRequest",
+    full_name="scope.TranslateLassoSelectionRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="srcLoomFilePath",
+            full_name="scope.TranslateLassoSelectionRequest.srcLoomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="destLoomFilePath",
+            full_name="scope.TranslateLassoSelectionRequest.destLoomFilePath",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="cellIndices",
+            full_name="scope.TranslateLassoSelectionRequest.cellIndices",
+            index=2,
+            number=3,
+            type=5,
+            cpp_type=1,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4095,
+    serialized_end=4199,
 )
 
 
 _TRANSLATELASSOSELECTIONREPLY = _descriptor.Descriptor(
-  name='TranslateLassoSelectionReply',
-  full_name='scope.TranslateLassoSelectionReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='cellIndices', full_name='scope.TranslateLassoSelectionReply.cellIndices', index=0,
-      number=1, type=5, cpp_type=1, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4201,
-  serialized_end=4252,
+    name="TranslateLassoSelectionReply",
+    full_name="scope.TranslateLassoSelectionReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="cellIndices",
+            full_name="scope.TranslateLassoSelectionReply.cellIndices",
+            index=0,
+            number=1,
+            type=5,
+            cpp_type=1,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4201,
+    serialized_end=4252,
 )
 
 
 _CELLIDSREQUEST = _descriptor.Descriptor(
-  name='CellIDsRequest',
-  full_name='scope.CellIDsRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.CellIDsRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='cellIndices', full_name='scope.CellIDsRequest.cellIndices', index=1,
-      number=2, type=5, cpp_type=1, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4254,
-  serialized_end=4313,
+    name="CellIDsRequest",
+    full_name="scope.CellIDsRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.CellIDsRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="cellIndices",
+            full_name="scope.CellIDsRequest.cellIndices",
+            index=1,
+            number=2,
+            type=5,
+            cpp_type=1,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4254,
+    serialized_end=4313,
 )
 
 
 _CELLIDSREPLY = _descriptor.Descriptor(
-  name='CellIDsReply',
-  full_name='scope.CellIDsReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='cellIds', full_name='scope.CellIDsReply.cellIds', index=0,
-      number=1, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4315,
-  serialized_end=4346,
+    name="CellIDsReply",
+    full_name="scope.CellIDsReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="cellIds",
+            full_name="scope.CellIDsReply.cellIds",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4315,
+    serialized_end=4346,
 )
 
 
 _GENESETENRICHMENTREQUEST = _descriptor.Descriptor(
-  name='GeneSetEnrichmentRequest',
-  full_name='scope.GeneSetEnrichmentRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.GeneSetEnrichmentRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='geneSetFilePath', full_name='scope.GeneSetEnrichmentRequest.geneSetFilePath', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='method', full_name='scope.GeneSetEnrichmentRequest.method', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4348,
-  serialized_end=4437,
+    name="GeneSetEnrichmentRequest",
+    full_name="scope.GeneSetEnrichmentRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.GeneSetEnrichmentRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="geneSetFilePath",
+            full_name="scope.GeneSetEnrichmentRequest.geneSetFilePath",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="method",
+            full_name="scope.GeneSetEnrichmentRequest.method",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4348,
+    serialized_end=4437,
 )
 
 
 _PROGRESS = _descriptor.Descriptor(
-  name='Progress',
-  full_name='scope.Progress',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='value', full_name='scope.Progress.value', index=0,
-      number=1, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='status', full_name='scope.Progress.status', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4439,
-  serialized_end=4480,
+    name="Progress",
+    full_name="scope.Progress",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="value",
+            full_name="scope.Progress.value",
+            index=0,
+            number=1,
+            type=2,
+            cpp_type=6,
+            label=1,
+            has_default_value=False,
+            default_value=float(0),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="status",
+            full_name="scope.Progress.status",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4439,
+    serialized_end=4480,
 )
 
 
 _GENESETENRICHMENTREPLY = _descriptor.Descriptor(
-  name='GeneSetEnrichmentReply',
-  full_name='scope.GeneSetEnrichmentReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='progress', full_name='scope.GeneSetEnrichmentReply.progress', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='isDone', full_name='scope.GeneSetEnrichmentReply.isDone', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='cellValues', full_name='scope.GeneSetEnrichmentReply.cellValues', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4483,
-  serialized_end=4611,
+    name="GeneSetEnrichmentReply",
+    full_name="scope.GeneSetEnrichmentReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="progress",
+            full_name="scope.GeneSetEnrichmentReply.progress",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="isDone",
+            full_name="scope.GeneSetEnrichmentReply.isDone",
+            index=1,
+            number=2,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="cellValues",
+            full_name="scope.GeneSetEnrichmentReply.cellValues",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4483,
+    serialized_end=4611,
 )
 
 
 _VMAXREQUEST = _descriptor.Descriptor(
-  name='VmaxRequest',
-  full_name='scope.VmaxRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.VmaxRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='feature', full_name='scope.VmaxRequest.feature', index=1,
-      number=2, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='featureType', full_name='scope.VmaxRequest.featureType', index=2,
-      number=3, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='hasLogTransform', full_name='scope.VmaxRequest.hasLogTransform', index=3,
-      number=4, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='hasCpmTransform', full_name='scope.VmaxRequest.hasCpmTransform', index=4,
-      number=5, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4613,
-  serialized_end=4736,
+    name="VmaxRequest",
+    full_name="scope.VmaxRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.VmaxRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="feature",
+            full_name="scope.VmaxRequest.feature",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="featureType",
+            full_name="scope.VmaxRequest.featureType",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="hasLogTransform",
+            full_name="scope.VmaxRequest.hasLogTransform",
+            index=3,
+            number=4,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="hasCpmTransform",
+            full_name="scope.VmaxRequest.hasCpmTransform",
+            index=4,
+            number=5,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4613,
+    serialized_end=4736,
 )
 
 
 _VMAXREPLY = _descriptor.Descriptor(
-  name='VmaxReply',
-  full_name='scope.VmaxReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='vmax', full_name='scope.VmaxReply.vmax', index=0,
-      number=1, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='maxVmax', full_name='scope.VmaxReply.maxVmax', index=1,
-      number=2, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4738,
-  serialized_end=4780,
+    name="VmaxReply",
+    full_name="scope.VmaxReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="vmax",
+            full_name="scope.VmaxReply.vmax",
+            index=0,
+            number=1,
+            type=2,
+            cpp_type=6,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="maxVmax",
+            full_name="scope.VmaxReply.maxVmax",
+            index=1,
+            number=2,
+            type=2,
+            cpp_type=6,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4738,
+    serialized_end=4780,
 )
 
 
 _UUIDREQUEST = _descriptor.Descriptor(
-  name='UUIDRequest',
-  full_name='scope.UUIDRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='ip', full_name='scope.UUIDRequest.ip', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4782,
-  serialized_end=4807,
+    name="UUIDRequest",
+    full_name="scope.UUIDRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="ip",
+            full_name="scope.UUIDRequest.ip",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4782,
+    serialized_end=4807,
 )
 
 
 _UUIDREPLY = _descriptor.Descriptor(
-  name='UUIDReply',
-  full_name='scope.UUIDReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='UUID', full_name='scope.UUIDReply.UUID', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4809,
-  serialized_end=4834,
+    name="UUIDReply",
+    full_name="scope.UUIDReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="UUID",
+            full_name="scope.UUIDReply.UUID",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4809,
+    serialized_end=4834,
 )
 
 
 _REMAININGUUIDTIMEREQUEST = _descriptor.Descriptor(
-  name='RemainingUUIDTimeRequest',
-  full_name='scope.RemainingUUIDTimeRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='ip', full_name='scope.RemainingUUIDTimeRequest.ip', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='UUID', full_name='scope.RemainingUUIDTimeRequest.UUID', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='mouseEvents', full_name='scope.RemainingUUIDTimeRequest.mouseEvents', index=2,
-      number=3, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4836,
-  serialized_end=4909,
+    name="RemainingUUIDTimeRequest",
+    full_name="scope.RemainingUUIDTimeRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="ip",
+            full_name="scope.RemainingUUIDTimeRequest.ip",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="UUID",
+            full_name="scope.RemainingUUIDTimeRequest.UUID",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="mouseEvents",
+            full_name="scope.RemainingUUIDTimeRequest.mouseEvents",
+            index=2,
+            number=3,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4836,
+    serialized_end=4909,
 )
 
 
 _REMAININGUUIDTIMEREPLY = _descriptor.Descriptor(
-  name='RemainingUUIDTimeReply',
-  full_name='scope.RemainingUUIDTimeReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='UUID', full_name='scope.RemainingUUIDTimeReply.UUID', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='timeRemaining', full_name='scope.RemainingUUIDTimeReply.timeRemaining', index=1,
-      number=2, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='sessionsLimitReached', full_name='scope.RemainingUUIDTimeReply.sessionsLimitReached', index=2,
-      number=3, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='sessionMode', full_name='scope.RemainingUUIDTimeReply.sessionMode', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4911,
-  serialized_end=5023,
+    name="RemainingUUIDTimeReply",
+    full_name="scope.RemainingUUIDTimeReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="UUID",
+            full_name="scope.RemainingUUIDTimeReply.UUID",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="timeRemaining",
+            full_name="scope.RemainingUUIDTimeReply.timeRemaining",
+            index=1,
+            number=2,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="sessionsLimitReached",
+            full_name="scope.RemainingUUIDTimeReply.sessionsLimitReached",
+            index=2,
+            number=3,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="sessionMode",
+            full_name="scope.RemainingUUIDTimeReply.sessionMode",
+            index=3,
+            number=4,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4911,
+    serialized_end=5023,
 )
 
 
 _LOOMUPLOADEDREQUEST = _descriptor.Descriptor(
-  name='LoomUploadedRequest',
-  full_name='scope.LoomUploadedRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='UUID', full_name='scope.LoomUploadedRequest.UUID', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='filename', full_name='scope.LoomUploadedRequest.filename', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5025,
-  serialized_end=5078,
+    name="LoomUploadedRequest",
+    full_name="scope.LoomUploadedRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="UUID",
+            full_name="scope.LoomUploadedRequest.UUID",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="filename",
+            full_name="scope.LoomUploadedRequest.filename",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=5025,
+    serialized_end=5078,
 )
 
 
 _LOOMUPLOADEDREPLY = _descriptor.Descriptor(
-  name='LoomUploadedReply',
-  full_name='scope.LoomUploadedReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5080,
-  serialized_end=5099,
+    name="LoomUploadedReply",
+    full_name="scope.LoomUploadedReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=5080,
+    serialized_end=5099,
 )
 
 
 _MYGENESET = _descriptor.Descriptor(
-  name='MyGeneSet',
-  full_name='scope.MyGeneSet',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='geneSetFilePath', full_name='scope.MyGeneSet.geneSetFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='geneSetDisplayName', full_name='scope.MyGeneSet.geneSetDisplayName', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5101,
-  serialized_end=5165,
+    name="MyGeneSet",
+    full_name="scope.MyGeneSet",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="geneSetFilePath",
+            full_name="scope.MyGeneSet.geneSetFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="geneSetDisplayName",
+            full_name="scope.MyGeneSet.geneSetDisplayName",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=5101,
+    serialized_end=5165,
 )
 
 
 _MYGENESETSREQUEST = _descriptor.Descriptor(
-  name='MyGeneSetsRequest',
-  full_name='scope.MyGeneSetsRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='UUID', full_name='scope.MyGeneSetsRequest.UUID', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5167,
-  serialized_end=5200,
+    name="MyGeneSetsRequest",
+    full_name="scope.MyGeneSetsRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="UUID",
+            full_name="scope.MyGeneSetsRequest.UUID",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=5167,
+    serialized_end=5200,
 )
 
 
 _MYGENESETSREPLY = _descriptor.Descriptor(
-  name='MyGeneSetsReply',
-  full_name='scope.MyGeneSetsReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='myGeneSets', full_name='scope.MyGeneSetsReply.myGeneSets', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5202,
-  serialized_end=5257,
+    name="MyGeneSetsReply",
+    full_name="scope.MyGeneSetsReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="myGeneSets",
+            full_name="scope.MyGeneSetsReply.myGeneSets",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=5202,
+    serialized_end=5257,
 )
 
 
 _DELETEUSERFILEREQUEST = _descriptor.Descriptor(
-  name='DeleteUserFileRequest',
-  full_name='scope.DeleteUserFileRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='UUID', full_name='scope.DeleteUserFileRequest.UUID', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='filePath', full_name='scope.DeleteUserFileRequest.filePath', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='fileType', full_name='scope.DeleteUserFileRequest.fileType', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5259,
-  serialized_end=5332,
+    name="DeleteUserFileRequest",
+    full_name="scope.DeleteUserFileRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="UUID",
+            full_name="scope.DeleteUserFileRequest.UUID",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="filePath",
+            full_name="scope.DeleteUserFileRequest.filePath",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="fileType",
+            full_name="scope.DeleteUserFileRequest.fileType",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=5259,
+    serialized_end=5332,
 )
 
 
 _DELETEUSERFILEREPLY = _descriptor.Descriptor(
-  name='DeleteUserFileReply',
-  full_name='scope.DeleteUserFileReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='deletedSuccessfully', full_name='scope.DeleteUserFileReply.deletedSuccessfully', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5334,
-  serialized_end=5384,
+    name="DeleteUserFileReply",
+    full_name="scope.DeleteUserFileReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="deletedSuccessfully",
+            full_name="scope.DeleteUserFileReply.deletedSuccessfully",
+            index=0,
+            number=1,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=5334,
+    serialized_end=5384,
 )
 
 
 _DOWNLOADSUBLOOMREQUEST = _descriptor.Descriptor(
-  name='DownloadSubLoomRequest',
-  full_name='scope.DownloadSubLoomRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.DownloadSubLoomRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='featureType', full_name='scope.DownloadSubLoomRequest.featureType', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='featureName', full_name='scope.DownloadSubLoomRequest.featureName', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='featureValue', full_name='scope.DownloadSubLoomRequest.featureValue', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='operator', full_name='scope.DownloadSubLoomRequest.operator', index=4,
-      number=5, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='cellIndices', full_name='scope.DownloadSubLoomRequest.cellIndices', index=5,
-      number=6, type=5, cpp_type=1, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5387,
-  serialized_end=5536,
+    name="DownloadSubLoomRequest",
+    full_name="scope.DownloadSubLoomRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.DownloadSubLoomRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="featureType",
+            full_name="scope.DownloadSubLoomRequest.featureType",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="featureName",
+            full_name="scope.DownloadSubLoomRequest.featureName",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="featureValue",
+            full_name="scope.DownloadSubLoomRequest.featureValue",
+            index=3,
+            number=4,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="operator",
+            full_name="scope.DownloadSubLoomRequest.operator",
+            index=4,
+            number=5,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="cellIndices",
+            full_name="scope.DownloadSubLoomRequest.cellIndices",
+            index=5,
+            number=6,
+            type=5,
+            cpp_type=1,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=5387,
+    serialized_end=5536,
 )
 
 
 _DOWNLOADSUBLOOMREPLY = _descriptor.Descriptor(
-  name='DownloadSubLoomReply',
-  full_name='scope.DownloadSubLoomReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.DownloadSubLoomReply.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='loomFileSize', full_name='scope.DownloadSubLoomReply.loomFileSize', index=1,
-      number=2, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='progress', full_name='scope.DownloadSubLoomReply.progress', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='isDone', full_name='scope.DownloadSubLoomReply.isDone', index=3,
-      number=4, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='error', full_name='scope.DownloadSubLoomReply.error', index=4,
-      number=5, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5539,
-  serialized_end=5690,
+    name="DownloadSubLoomReply",
+    full_name="scope.DownloadSubLoomReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.DownloadSubLoomReply.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="loomFileSize",
+            full_name="scope.DownloadSubLoomReply.loomFileSize",
+            index=1,
+            number=2,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="progress",
+            full_name="scope.DownloadSubLoomReply.progress",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="isDone",
+            full_name="scope.DownloadSubLoomReply.isDone",
+            index=3,
+            number=4,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="error",
+            full_name="scope.DownloadSubLoomReply.error",
+            index=4,
+            number=5,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=5539,
+    serialized_end=5690,
 )
 
 
 _SETANNOTATIONNAMEREQUEST = _descriptor.Descriptor(
-  name='SetAnnotationNameRequest',
-  full_name='scope.SetAnnotationNameRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.SetAnnotationNameRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='clusteringID', full_name='scope.SetAnnotationNameRequest.clusteringID', index=1,
-      number=2, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='clusterID', full_name='scope.SetAnnotationNameRequest.clusterID', index=2,
-      number=3, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='newAnnoName', full_name='scope.SetAnnotationNameRequest.newAnnoName', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5692,
-  serialized_end=5802,
+    name="SetAnnotationNameRequest",
+    full_name="scope.SetAnnotationNameRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.SetAnnotationNameRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="clusteringID",
+            full_name="scope.SetAnnotationNameRequest.clusteringID",
+            index=1,
+            number=2,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="clusterID",
+            full_name="scope.SetAnnotationNameRequest.clusterID",
+            index=2,
+            number=3,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="newAnnoName",
+            full_name="scope.SetAnnotationNameRequest.newAnnoName",
+            index=3,
+            number=4,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=5692,
+    serialized_end=5802,
 )
 
 
 _SETANNOTATIONNAMEREPLY = _descriptor.Descriptor(
-  name='SetAnnotationNameReply',
-  full_name='scope.SetAnnotationNameReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='success', full_name='scope.SetAnnotationNameReply.success', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5804,
-  serialized_end=5845,
+    name="SetAnnotationNameReply",
+    full_name="scope.SetAnnotationNameReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="success",
+            full_name="scope.SetAnnotationNameReply.success",
+            index=0,
+            number=1,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=5804,
+    serialized_end=5845,
 )
 
 
 _SETLOOMHIERARCHYREQUEST = _descriptor.Descriptor(
-  name='SetLoomHierarchyRequest',
-  full_name='scope.SetLoomHierarchyRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.SetLoomHierarchyRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='newHierarchy_L1', full_name='scope.SetLoomHierarchyRequest.newHierarchy_L1', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='newHierarchy_L2', full_name='scope.SetLoomHierarchyRequest.newHierarchy_L2', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='newHierarchy_L3', full_name='scope.SetLoomHierarchyRequest.newHierarchy_L3', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5847,
-  serialized_end=5969,
+    name="SetLoomHierarchyRequest",
+    full_name="scope.SetLoomHierarchyRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.SetLoomHierarchyRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="newHierarchy_L1",
+            full_name="scope.SetLoomHierarchyRequest.newHierarchy_L1",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="newHierarchy_L2",
+            full_name="scope.SetLoomHierarchyRequest.newHierarchy_L2",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="newHierarchy_L3",
+            full_name="scope.SetLoomHierarchyRequest.newHierarchy_L3",
+            index=3,
+            number=4,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=5847,
+    serialized_end=5969,
 )
 
 
 _SETLOOMHIERARCHYREPLY = _descriptor.Descriptor(
-  name='SetLoomHierarchyReply',
-  full_name='scope.SetLoomHierarchyReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='success', full_name='scope.SetLoomHierarchyReply.success', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5971,
-  serialized_end=6011,
+    name="SetLoomHierarchyReply",
+    full_name="scope.SetLoomHierarchyReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="success",
+            full_name="scope.SetLoomHierarchyReply.success",
+            index=0,
+            number=1,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=5971,
+    serialized_end=6011,
 )
 
 
 _GETORCIDREQUEST = _descriptor.Descriptor(
-  name='getORCIDRequest',
-  full_name='scope.getORCIDRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='auth_code', full_name='scope.getORCIDRequest.auth_code', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=6013,
-  serialized_end=6049,
+    name="getORCIDRequest",
+    full_name="scope.getORCIDRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="auth_code",
+            full_name="scope.getORCIDRequest.auth_code",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=6013,
+    serialized_end=6049,
 )
 
 
 _GETORCIDREPLY = _descriptor.Descriptor(
-  name='getORCIDReply',
-  full_name='scope.getORCIDReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='orcid_scope_uuid', full_name='scope.getORCIDReply.orcid_scope_uuid', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='name', full_name='scope.getORCIDReply.name', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='orcid_id', full_name='scope.getORCIDReply.orcid_id', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='success', full_name='scope.getORCIDReply.success', index=3,
-      number=4, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=6051,
-  serialized_end=6141,
+    name="getORCIDReply",
+    full_name="scope.getORCIDReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="orcid_scope_uuid",
+            full_name="scope.getORCIDReply.orcid_scope_uuid",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="name",
+            full_name="scope.getORCIDReply.name",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="orcid_id",
+            full_name="scope.getORCIDReply.orcid_id",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="success",
+            full_name="scope.getORCIDReply.success",
+            index=3,
+            number=4,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=6051,
+    serialized_end=6141,
 )
 
 
 _GETORCIDSTATUSREQUEST = _descriptor.Descriptor(
-  name='getORCIDStatusRequest',
-  full_name='scope.getORCIDStatusRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=6143,
-  serialized_end=6166,
+    name="getORCIDStatusRequest",
+    full_name="scope.getORCIDStatusRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=6143,
+    serialized_end=6166,
 )
 
 
 _GETORCIDSTATUSREPLY = _descriptor.Descriptor(
-  name='getORCIDStatusReply',
-  full_name='scope.getORCIDStatusReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='active', full_name='scope.getORCIDStatusReply.active', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=6168,
-  serialized_end=6205,
+    name="getORCIDStatusReply",
+    full_name="scope.getORCIDStatusReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="active",
+            full_name="scope.getORCIDStatusReply.active",
+            index=0,
+            number=1,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=6168,
+    serialized_end=6205,
 )
 
 
 _ORCIDINFOMESSAGE = _descriptor.Descriptor(
-  name='orcidInfoMessage',
-  full_name='scope.orcidInfoMessage',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='orcidName', full_name='scope.orcidInfoMessage.orcidName', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='orcidID', full_name='scope.orcidInfoMessage.orcidID', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='orcidUUID', full_name='scope.orcidInfoMessage.orcidUUID', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=6207,
-  serialized_end=6280,
+    name="orcidInfoMessage",
+    full_name="scope.orcidInfoMessage",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="orcidName",
+            full_name="scope.orcidInfoMessage.orcidName",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="orcidID",
+            full_name="scope.orcidInfoMessage.orcidID",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="orcidUUID",
+            full_name="scope.orcidInfoMessage.orcidUUID",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=6207,
+    serialized_end=6280,
 )
 
 
 _SETCOLABANNOTATIONDATAREQUEST = _descriptor.Descriptor(
-  name='setColabAnnotationDataRequest',
-  full_name='scope.setColabAnnotationDataRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.setColabAnnotationDataRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='clusteringID', full_name='scope.setColabAnnotationDataRequest.clusteringID', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='clusterID', full_name='scope.setColabAnnotationDataRequest.clusterID', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='orcidInfo', full_name='scope.setColabAnnotationDataRequest.orcidInfo', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='annoData', full_name='scope.setColabAnnotationDataRequest.annoData', index=4,
-      number=5, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=6283,
-  serialized_end=6462,
+    name="setColabAnnotationDataRequest",
+    full_name="scope.setColabAnnotationDataRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.setColabAnnotationDataRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="clusteringID",
+            full_name="scope.setColabAnnotationDataRequest.clusteringID",
+            index=1,
+            number=2,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="clusterID",
+            full_name="scope.setColabAnnotationDataRequest.clusterID",
+            index=2,
+            number=3,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="orcidInfo",
+            full_name="scope.setColabAnnotationDataRequest.orcidInfo",
+            index=3,
+            number=4,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="annoData",
+            full_name="scope.setColabAnnotationDataRequest.annoData",
+            index=4,
+            number=5,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=6283,
+    serialized_end=6462,
 )
 
 
 _SETCOLABANNOTATIONDATAREPLY = _descriptor.Descriptor(
-  name='setColabAnnotationDataReply',
-  full_name='scope.setColabAnnotationDataReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='success', full_name='scope.setColabAnnotationDataReply.success', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='message', full_name='scope.setColabAnnotationDataReply.message', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=6464,
-  serialized_end=6527,
+    name="setColabAnnotationDataReply",
+    full_name="scope.setColabAnnotationDataReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="success",
+            full_name="scope.setColabAnnotationDataReply.success",
+            index=0,
+            number=1,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="message",
+            full_name="scope.setColabAnnotationDataReply.message",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=6464,
+    serialized_end=6527,
 )
 
 
 _VOTEANNOTATIONREQUEST = _descriptor.Descriptor(
-  name='voteAnnotationRequest',
-  full_name='scope.voteAnnotationRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.voteAnnotationRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='clusteringID', full_name='scope.voteAnnotationRequest.clusteringID', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='clusterID', full_name='scope.voteAnnotationRequest.clusterID', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='orcidInfo', full_name='scope.voteAnnotationRequest.orcidInfo', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='annoData', full_name='scope.voteAnnotationRequest.annoData', index=4,
-      number=5, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='direction', full_name='scope.voteAnnotationRequest.direction', index=5,
-      number=6, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=6530,
-  serialized_end=6720,
+    name="voteAnnotationRequest",
+    full_name="scope.voteAnnotationRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.voteAnnotationRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="clusteringID",
+            full_name="scope.voteAnnotationRequest.clusteringID",
+            index=1,
+            number=2,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="clusterID",
+            full_name="scope.voteAnnotationRequest.clusterID",
+            index=2,
+            number=3,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="orcidInfo",
+            full_name="scope.voteAnnotationRequest.orcidInfo",
+            index=3,
+            number=4,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="annoData",
+            full_name="scope.voteAnnotationRequest.annoData",
+            index=4,
+            number=5,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="direction",
+            full_name="scope.voteAnnotationRequest.direction",
+            index=5,
+            number=6,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=6530,
+    serialized_end=6720,
 )
 
 
 _VOTEANNOTATIONREPLY = _descriptor.Descriptor(
-  name='voteAnnotationReply',
-  full_name='scope.voteAnnotationReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='success', full_name='scope.voteAnnotationReply.success', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='message', full_name='scope.voteAnnotationReply.message', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=6722,
-  serialized_end=6777,
+    name="voteAnnotationReply",
+    full_name="scope.voteAnnotationReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="success",
+            full_name="scope.voteAnnotationReply.success",
+            index=0,
+            number=1,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="message",
+            full_name="scope.voteAnnotationReply.message",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=6722,
+    serialized_end=6777,
 )
 
 
 _GETNEXTCLUSTERREQUEST = _descriptor.Descriptor(
-  name='getNextClusterRequest',
-  full_name='scope.getNextClusterRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.getNextClusterRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='clusteringID', full_name='scope.getNextClusterRequest.clusteringID', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='clusterID', full_name='scope.getNextClusterRequest.clusterID', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='direction', full_name='scope.getNextClusterRequest.direction', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=6779,
-  serialized_end=6884,
+    name="getNextClusterRequest",
+    full_name="scope.getNextClusterRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.getNextClusterRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="clusteringID",
+            full_name="scope.getNextClusterRequest.clusteringID",
+            index=1,
+            number=2,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="clusterID",
+            full_name="scope.getNextClusterRequest.clusterID",
+            index=2,
+            number=3,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="direction",
+            full_name="scope.getNextClusterRequest.direction",
+            index=3,
+            number=4,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=6779,
+    serialized_end=6884,
 )
 
 
 _NEWCLUSTERINFO = _descriptor.Descriptor(
-  name='NewClusterInfo',
-  full_name='scope.NewClusterInfo',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='cellIDs', full_name='scope.NewClusterInfo.cellIDs', index=0,
-      number=1, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='clusterIDs', full_name='scope.NewClusterInfo.clusterIDs', index=1,
-      number=2, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='clusteringName', full_name='scope.NewClusterInfo.clusteringName', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=6886,
-  serialized_end=6963,
+    name="NewClusterInfo",
+    full_name="scope.NewClusterInfo",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="cellIDs",
+            full_name="scope.NewClusterInfo.cellIDs",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="clusterIDs",
+            full_name="scope.NewClusterInfo.clusterIDs",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="clusteringName",
+            full_name="scope.NewClusterInfo.clusteringName",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=6886,
+    serialized_end=6963,
 )
 
 
 _ADDNEWCLUSTERINGREQUEST = _descriptor.Descriptor(
-  name='AddNewClusteringRequest',
-  full_name='scope.AddNewClusteringRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.AddNewClusteringRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='orcidInfo', full_name='scope.AddNewClusteringRequest.orcidInfo', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='clusterInfo', full_name='scope.AddNewClusteringRequest.clusterInfo', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=6966,
-  serialized_end=7101,
+    name="AddNewClusteringRequest",
+    full_name="scope.AddNewClusteringRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.AddNewClusteringRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="orcidInfo",
+            full_name="scope.AddNewClusteringRequest.orcidInfo",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="clusterInfo",
+            full_name="scope.AddNewClusteringRequest.clusterInfo",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=6966,
+    serialized_end=7101,
 )
 
 
 _ADDNEWCLUSTERINGREPLY = _descriptor.Descriptor(
-  name='AddNewClusteringReply',
-  full_name='scope.AddNewClusteringReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='success', full_name='scope.AddNewClusteringReply.success', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='message', full_name='scope.AddNewClusteringReply.message', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=7103,
-  serialized_end=7160,
+    name="AddNewClusteringReply",
+    full_name="scope.AddNewClusteringReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="success",
+            full_name="scope.AddNewClusteringReply.success",
+            index=0,
+            number=1,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="message",
+            full_name="scope.AddNewClusteringReply.message",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=7103,
+    serialized_end=7160,
 )
 
 
 _GETCLUSTEROVERLAPSREQUEST = _descriptor.Descriptor(
-  name='GetClusterOverlapsRequest',
-  full_name='scope.GetClusterOverlapsRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.GetClusterOverlapsRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='cellIndices', full_name='scope.GetClusterOverlapsRequest.cellIndices', index=1,
-      number=2, type=5, cpp_type=1, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=7162,
-  serialized_end=7232,
+    name="GetClusterOverlapsRequest",
+    full_name="scope.GetClusterOverlapsRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.GetClusterOverlapsRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="cellIndices",
+            full_name="scope.GetClusterOverlapsRequest.cellIndices",
+            index=1,
+            number=2,
+            type=5,
+            cpp_type=1,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=7162,
+    serialized_end=7232,
 )
 
 
 _CLUSTEROVERLAPS_CLUSTEROVERLAP = _descriptor.Descriptor(
-  name='ClusterOverlap',
-  full_name='scope.ClusterOverlaps.ClusterOverlap',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='clustering_name', full_name='scope.ClusterOverlaps.ClusterOverlap.clustering_name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='cluster_name', full_name='scope.ClusterOverlaps.ClusterOverlap.cluster_name', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='n_cells', full_name='scope.ClusterOverlaps.ClusterOverlap.n_cells', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='cells_in_cluster', full_name='scope.ClusterOverlaps.ClusterOverlap.cells_in_cluster', index=3,
-      number=4, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='cluster_in_cells', full_name='scope.ClusterOverlaps.ClusterOverlap.cluster_in_cells', index=4,
-      number=5, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=7319,
-  serialized_end=7451,
+    name="ClusterOverlap",
+    full_name="scope.ClusterOverlaps.ClusterOverlap",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="clustering_name",
+            full_name="scope.ClusterOverlaps.ClusterOverlap.clustering_name",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="cluster_name",
+            full_name="scope.ClusterOverlaps.ClusterOverlap.cluster_name",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="n_cells",
+            full_name="scope.ClusterOverlaps.ClusterOverlap.n_cells",
+            index=2,
+            number=3,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="cells_in_cluster",
+            full_name="scope.ClusterOverlaps.ClusterOverlap.cells_in_cluster",
+            index=3,
+            number=4,
+            type=2,
+            cpp_type=6,
+            label=1,
+            has_default_value=False,
+            default_value=float(0),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="cluster_in_cells",
+            full_name="scope.ClusterOverlaps.ClusterOverlap.cluster_in_cells",
+            index=4,
+            number=5,
+            type=2,
+            cpp_type=6,
+            label=1,
+            has_default_value=False,
+            default_value=float(0),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=7319,
+    serialized_end=7451,
 )
 
 _CLUSTEROVERLAPS = _descriptor.Descriptor(
-  name='ClusterOverlaps',
-  full_name='scope.ClusterOverlaps',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='clusterOverlaps', full_name='scope.ClusterOverlaps.clusterOverlaps', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_CLUSTEROVERLAPS_CLUSTEROVERLAP, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=7235,
-  serialized_end=7451,
+    name="ClusterOverlaps",
+    full_name="scope.ClusterOverlaps",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="clusterOverlaps",
+            full_name="scope.ClusterOverlaps.clusterOverlaps",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[
+        _CLUSTEROVERLAPS_CLUSTEROVERLAP,
+    ],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=7235,
+    serialized_end=7451,
 )
 
 
 _FEATURELABELREQUEST = _descriptor.Descriptor(
-  name='FeatureLabelRequest',
-  full_name='scope.FeatureLabelRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='loomFilePath', full_name='scope.FeatureLabelRequest.loomFilePath', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='embedding', full_name='scope.FeatureLabelRequest.embedding', index=1,
-      number=2, type=17, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='feature', full_name='scope.FeatureLabelRequest.feature', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=7453,
-  serialized_end=7532,
+    name="FeatureLabelRequest",
+    full_name="scope.FeatureLabelRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="loomFilePath",
+            full_name="scope.FeatureLabelRequest.loomFilePath",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="embedding",
+            full_name="scope.FeatureLabelRequest.embedding",
+            index=1,
+            number=2,
+            type=17,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="feature",
+            full_name="scope.FeatureLabelRequest.feature",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=7453,
+    serialized_end=7532,
 )
 
 
 _FEATURELABELREPLY_FEATURELABEL = _descriptor.Descriptor(
-  name='FeatureLabel',
-  full_name='scope.FeatureLabelReply.FeatureLabel',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='label', full_name='scope.FeatureLabelReply.FeatureLabel.label', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='colour', full_name='scope.FeatureLabelReply.FeatureLabel.colour', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='coordinate', full_name='scope.FeatureLabelReply.FeatureLabel.coordinate', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=7611,
-  serialized_end=7695,
+    name="FeatureLabel",
+    full_name="scope.FeatureLabelReply.FeatureLabel",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="label",
+            full_name="scope.FeatureLabelReply.FeatureLabel.label",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="colour",
+            full_name="scope.FeatureLabelReply.FeatureLabel.colour",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="coordinate",
+            full_name="scope.FeatureLabelReply.FeatureLabel.coordinate",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=7611,
+    serialized_end=7695,
 )
 
 _FEATURELABELREPLY = _descriptor.Descriptor(
-  name='FeatureLabelReply',
-  full_name='scope.FeatureLabelReply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='labels', full_name='scope.FeatureLabelReply.labels', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_FEATURELABELREPLY_FEATURELABEL, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=7535,
-  serialized_end=7695,
+    name="FeatureLabelReply",
+    full_name="scope.FeatureLabelReply",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="labels",
+            full_name="scope.FeatureLabelReply.labels",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[
+        _FEATURELABELREPLY_FEATURELABEL,
+    ],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=7535,
+    serialized_end=7695,
 )
 
-_CELLCOLORBYFEATURESREQUEST.fields_by_name['annotation'].message_type = _ANNOTATION
-_CELLCOLORBYFEATURESREPLY.fields_by_name['legend'].message_type = _COLORLEGEND
-_CELLCOLORBYFEATURESREPLY.fields_by_name['error'].message_type = _ERRORREPLY
-_COORDINATESREQUEST.fields_by_name['annotation'].message_type = _ANNOTATION
-_TRAJECTORY.fields_by_name['edges'].message_type = _EDGE
-_TRAJECTORY.fields_by_name['coordinates'].message_type = _COORDINATE
-_EMBEDDING.fields_by_name['trajectory'].message_type = _TRAJECTORY
-_COLLABANNOVOTES.fields_by_name['voters'].message_type = _COLLABANNOVOTER
-_CELLTYPEANNOTATION.fields_by_name['data'].message_type = _COLLABANNODATA
-_CELLTYPEANNOTATION.fields_by_name['votes_for'].message_type = _COLLABANNOVOTES
-_CELLTYPEANNOTATION.fields_by_name['votes_against'].message_type = _COLLABANNOVOTES
-_CLUSTERANNOTATION.fields_by_name['cell_type_annotation'].message_type = _CELLTYPEANNOTATION
-_CLUSTERING.fields_by_name['clusterMarkerMetrics'].message_type = _CLUSTERMARKERMETRIC
-_CLUSTERING.fields_by_name['clusters'].message_type = _CLUSTERANNOTATION
-_CELLMETADATA.fields_by_name['annotations'].message_type = _ANNOTATION
-_CELLMETADATA.fields_by_name['embeddings'].message_type = _EMBEDDING
-_CELLMETADATA.fields_by_name['clusterings'].message_type = _CLUSTERING
-_REGULON.fields_by_name['autoThresholds'].message_type = _AUCTHRESHOLD
-_REGULON.fields_by_name['metrics'].message_type = _REGULONGENESMETRIC
-_CELLMETADATAREPLY.fields_by_name['clusterIDs'].message_type = _CELLCLUSTERS
-_CELLMETADATAREPLY.fields_by_name['geneExpression'].message_type = _FEATUREVALUES
-_CELLMETADATAREPLY.fields_by_name['aucValues'].message_type = _FEATUREVALUES
-_CELLMETADATAREPLY.fields_by_name['annotations'].message_type = _CELLANNOTATIONS
-_REGULONMETADATAREPLY.fields_by_name['regulonMeta'].message_type = _REGULON
-_MARKERGENESREPLY.fields_by_name['metrics'].message_type = _MARKERGENESMETRIC
-_MYLOOM.fields_by_name['cellMetaData'].message_type = _CELLMETADATA
-_MYLOOM.fields_by_name['fileMetaData'].message_type = _FILEMETADATA
-_MYLOOM.fields_by_name['loomHeierarchy'].message_type = _LOOMHEIERARCHY
-_MYLOOMSREPLY.fields_by_name['myLooms'].message_type = _MYLOOM
-_GENESETENRICHMENTREPLY.fields_by_name['progress'].message_type = _PROGRESS
-_GENESETENRICHMENTREPLY.fields_by_name['cellValues'].message_type = _CELLCOLORBYFEATURESREPLY
-_MYGENESETSREPLY.fields_by_name['myGeneSets'].message_type = _MYGENESET
-_DOWNLOADSUBLOOMREPLY.fields_by_name['progress'].message_type = _PROGRESS
-_DOWNLOADSUBLOOMREPLY.fields_by_name['error'].message_type = _ERRORREPLY
-_SETCOLABANNOTATIONDATAREQUEST.fields_by_name['orcidInfo'].message_type = _ORCIDINFOMESSAGE
-_SETCOLABANNOTATIONDATAREQUEST.fields_by_name['annoData'].message_type = _COLLABANNODATA
-_VOTEANNOTATIONREQUEST.fields_by_name['orcidInfo'].message_type = _ORCIDINFOMESSAGE
-_VOTEANNOTATIONREQUEST.fields_by_name['annoData'].message_type = _COLLABANNODATA
-_ADDNEWCLUSTERINGREQUEST.fields_by_name['orcidInfo'].message_type = _ORCIDINFOMESSAGE
-_ADDNEWCLUSTERINGREQUEST.fields_by_name['clusterInfo'].message_type = _NEWCLUSTERINFO
+_CELLCOLORBYFEATURESREQUEST.fields_by_name["annotation"].message_type = _ANNOTATION
+_CELLCOLORBYFEATURESREPLY.fields_by_name["legend"].message_type = _COLORLEGEND
+_CELLCOLORBYFEATURESREPLY.fields_by_name["error"].message_type = _ERRORREPLY
+_COORDINATESREQUEST.fields_by_name["annotation"].message_type = _ANNOTATION
+_TRAJECTORY.fields_by_name["edges"].message_type = _EDGE
+_TRAJECTORY.fields_by_name["coordinates"].message_type = _COORDINATE
+_EMBEDDING.fields_by_name["trajectory"].message_type = _TRAJECTORY
+_COLLABANNOVOTES.fields_by_name["voters"].message_type = _COLLABANNOVOTER
+_CELLTYPEANNOTATION.fields_by_name["data"].message_type = _COLLABANNODATA
+_CELLTYPEANNOTATION.fields_by_name["votes_for"].message_type = _COLLABANNOVOTES
+_CELLTYPEANNOTATION.fields_by_name["votes_against"].message_type = _COLLABANNOVOTES
+_CLUSTERANNOTATION.fields_by_name["cell_type_annotation"].message_type = _CELLTYPEANNOTATION
+_CLUSTERING.fields_by_name["clusterMarkerMetrics"].message_type = _CLUSTERMARKERMETRIC
+_CLUSTERING.fields_by_name["clusters"].message_type = _CLUSTERANNOTATION
+_CELLMETADATA.fields_by_name["annotations"].message_type = _ANNOTATION
+_CELLMETADATA.fields_by_name["embeddings"].message_type = _EMBEDDING
+_CELLMETADATA.fields_by_name["clusterings"].message_type = _CLUSTERING
+_REGULON.fields_by_name["autoThresholds"].message_type = _AUCTHRESHOLD
+_REGULON.fields_by_name["metrics"].message_type = _REGULONGENESMETRIC
+_CELLMETADATAREPLY.fields_by_name["clusterIDs"].message_type = _CELLCLUSTERS
+_CELLMETADATAREPLY.fields_by_name["geneExpression"].message_type = _FEATUREVALUES
+_CELLMETADATAREPLY.fields_by_name["aucValues"].message_type = _FEATUREVALUES
+_CELLMETADATAREPLY.fields_by_name["annotations"].message_type = _CELLANNOTATIONS
+_REGULONMETADATAREPLY.fields_by_name["regulonMeta"].message_type = _REGULON
+_MARKERGENESREPLY.fields_by_name["metrics"].message_type = _MARKERGENESMETRIC
+_MYLOOM.fields_by_name["cellMetaData"].message_type = _CELLMETADATA
+_MYLOOM.fields_by_name["fileMetaData"].message_type = _FILEMETADATA
+_MYLOOM.fields_by_name["loomHeierarchy"].message_type = _LOOMHEIERARCHY
+_MYLOOMSREPLY.fields_by_name["myLooms"].message_type = _MYLOOM
+_GENESETENRICHMENTREPLY.fields_by_name["progress"].message_type = _PROGRESS
+_GENESETENRICHMENTREPLY.fields_by_name["cellValues"].message_type = _CELLCOLORBYFEATURESREPLY
+_MYGENESETSREPLY.fields_by_name["myGeneSets"].message_type = _MYGENESET
+_DOWNLOADSUBLOOMREPLY.fields_by_name["progress"].message_type = _PROGRESS
+_DOWNLOADSUBLOOMREPLY.fields_by_name["error"].message_type = _ERRORREPLY
+_SETCOLABANNOTATIONDATAREQUEST.fields_by_name["orcidInfo"].message_type = _ORCIDINFOMESSAGE
+_SETCOLABANNOTATIONDATAREQUEST.fields_by_name["annoData"].message_type = _COLLABANNODATA
+_VOTEANNOTATIONREQUEST.fields_by_name["orcidInfo"].message_type = _ORCIDINFOMESSAGE
+_VOTEANNOTATIONREQUEST.fields_by_name["annoData"].message_type = _COLLABANNODATA
+_ADDNEWCLUSTERINGREQUEST.fields_by_name["orcidInfo"].message_type = _ORCIDINFOMESSAGE
+_ADDNEWCLUSTERINGREQUEST.fields_by_name["clusterInfo"].message_type = _NEWCLUSTERINFO
 _CLUSTEROVERLAPS_CLUSTEROVERLAP.containing_type = _CLUSTEROVERLAPS
-_CLUSTEROVERLAPS.fields_by_name['clusterOverlaps'].message_type = _CLUSTEROVERLAPS_CLUSTEROVERLAP
-_FEATURELABELREPLY_FEATURELABEL.fields_by_name['coordinate'].message_type = _COORDINATE
+_CLUSTEROVERLAPS.fields_by_name["clusterOverlaps"].message_type = _CLUSTEROVERLAPS_CLUSTEROVERLAP
+_FEATURELABELREPLY_FEATURELABEL.fields_by_name["coordinate"].message_type = _COORDINATE
 _FEATURELABELREPLY_FEATURELABEL.containing_type = _FEATURELABELREPLY
-_FEATURELABELREPLY.fields_by_name['labels'].message_type = _FEATURELABELREPLY_FEATURELABEL
-DESCRIPTOR.message_types_by_name['ErrorReply'] = _ERRORREPLY
-DESCRIPTOR.message_types_by_name['CellColorByFeaturesRequest'] = _CELLCOLORBYFEATURESREQUEST
-DESCRIPTOR.message_types_by_name['ColorLegend'] = _COLORLEGEND
-DESCRIPTOR.message_types_by_name['CellColorByFeaturesReply'] = _CELLCOLORBYFEATURESREPLY
-DESCRIPTOR.message_types_by_name['CellAUCValuesByFeaturesRequest'] = _CELLAUCVALUESBYFEATURESREQUEST
-DESCRIPTOR.message_types_by_name['CellAUCValuesByFeaturesReply'] = _CELLAUCVALUESBYFEATURESREPLY
-DESCRIPTOR.message_types_by_name['FeatureRequest'] = _FEATUREREQUEST
-DESCRIPTOR.message_types_by_name['CellMetaDataRequest'] = _CELLMETADATAREQUEST
-DESCRIPTOR.message_types_by_name['FeatureReply'] = _FEATUREREPLY
-DESCRIPTOR.message_types_by_name['CoordinatesRequest'] = _COORDINATESREQUEST
-DESCRIPTOR.message_types_by_name['CoordinatesReply'] = _COORDINATESREPLY
-DESCRIPTOR.message_types_by_name['Annotation'] = _ANNOTATION
-DESCRIPTOR.message_types_by_name['Coordinate'] = _COORDINATE
-DESCRIPTOR.message_types_by_name['Edge'] = _EDGE
-DESCRIPTOR.message_types_by_name['Trajectory'] = _TRAJECTORY
-DESCRIPTOR.message_types_by_name['Embedding'] = _EMBEDDING
-DESCRIPTOR.message_types_by_name['ClusterMarkerMetric'] = _CLUSTERMARKERMETRIC
-DESCRIPTOR.message_types_by_name['CollabAnnoData'] = _COLLABANNODATA
-DESCRIPTOR.message_types_by_name['CollabAnnoVoter'] = _COLLABANNOVOTER
-DESCRIPTOR.message_types_by_name['CollabAnnoVotes'] = _COLLABANNOVOTES
-DESCRIPTOR.message_types_by_name['CellTypeAnnotation'] = _CELLTYPEANNOTATION
-DESCRIPTOR.message_types_by_name['ClusterAnnotation'] = _CLUSTERANNOTATION
-DESCRIPTOR.message_types_by_name['Clustering'] = _CLUSTERING
-DESCRIPTOR.message_types_by_name['CellMetaData'] = _CELLMETADATA
-DESCRIPTOR.message_types_by_name['AUCThreshold'] = _AUCTHRESHOLD
-DESCRIPTOR.message_types_by_name['RegulonGenesMetric'] = _REGULONGENESMETRIC
-DESCRIPTOR.message_types_by_name['Regulon'] = _REGULON
-DESCRIPTOR.message_types_by_name['FileMetaData'] = _FILEMETADATA
-DESCRIPTOR.message_types_by_name['FeatureValues'] = _FEATUREVALUES
-DESCRIPTOR.message_types_by_name['CellAnnotations'] = _CELLANNOTATIONS
-DESCRIPTOR.message_types_by_name['CellClusters'] = _CELLCLUSTERS
-DESCRIPTOR.message_types_by_name['CellMetaDataReply'] = _CELLMETADATAREPLY
-DESCRIPTOR.message_types_by_name['RegulonMetaDataRequest'] = _REGULONMETADATAREQUEST
-DESCRIPTOR.message_types_by_name['RegulonMetaDataReply'] = _REGULONMETADATAREPLY
-DESCRIPTOR.message_types_by_name['MarkerGenesRequest'] = _MARKERGENESREQUEST
-DESCRIPTOR.message_types_by_name['MarkerGenesMetric'] = _MARKERGENESMETRIC
-DESCRIPTOR.message_types_by_name['MarkerGenesReply'] = _MARKERGENESREPLY
-DESCRIPTOR.message_types_by_name['MyLoomsRequest'] = _MYLOOMSREQUEST
-DESCRIPTOR.message_types_by_name['LoomHeierarchy'] = _LOOMHEIERARCHY
-DESCRIPTOR.message_types_by_name['MyLoom'] = _MYLOOM
-DESCRIPTOR.message_types_by_name['MyLoomsReply'] = _MYLOOMSREPLY
-DESCRIPTOR.message_types_by_name['TranslateLassoSelectionRequest'] = _TRANSLATELASSOSELECTIONREQUEST
-DESCRIPTOR.message_types_by_name['TranslateLassoSelectionReply'] = _TRANSLATELASSOSELECTIONREPLY
-DESCRIPTOR.message_types_by_name['CellIDsRequest'] = _CELLIDSREQUEST
-DESCRIPTOR.message_types_by_name['CellIDsReply'] = _CELLIDSREPLY
-DESCRIPTOR.message_types_by_name['GeneSetEnrichmentRequest'] = _GENESETENRICHMENTREQUEST
-DESCRIPTOR.message_types_by_name['Progress'] = _PROGRESS
-DESCRIPTOR.message_types_by_name['GeneSetEnrichmentReply'] = _GENESETENRICHMENTREPLY
-DESCRIPTOR.message_types_by_name['VmaxRequest'] = _VMAXREQUEST
-DESCRIPTOR.message_types_by_name['VmaxReply'] = _VMAXREPLY
-DESCRIPTOR.message_types_by_name['UUIDRequest'] = _UUIDREQUEST
-DESCRIPTOR.message_types_by_name['UUIDReply'] = _UUIDREPLY
-DESCRIPTOR.message_types_by_name['RemainingUUIDTimeRequest'] = _REMAININGUUIDTIMEREQUEST
-DESCRIPTOR.message_types_by_name['RemainingUUIDTimeReply'] = _REMAININGUUIDTIMEREPLY
-DESCRIPTOR.message_types_by_name['LoomUploadedRequest'] = _LOOMUPLOADEDREQUEST
-DESCRIPTOR.message_types_by_name['LoomUploadedReply'] = _LOOMUPLOADEDREPLY
-DESCRIPTOR.message_types_by_name['MyGeneSet'] = _MYGENESET
-DESCRIPTOR.message_types_by_name['MyGeneSetsRequest'] = _MYGENESETSREQUEST
-DESCRIPTOR.message_types_by_name['MyGeneSetsReply'] = _MYGENESETSREPLY
-DESCRIPTOR.message_types_by_name['DeleteUserFileRequest'] = _DELETEUSERFILEREQUEST
-DESCRIPTOR.message_types_by_name['DeleteUserFileReply'] = _DELETEUSERFILEREPLY
-DESCRIPTOR.message_types_by_name['DownloadSubLoomRequest'] = _DOWNLOADSUBLOOMREQUEST
-DESCRIPTOR.message_types_by_name['DownloadSubLoomReply'] = _DOWNLOADSUBLOOMREPLY
-DESCRIPTOR.message_types_by_name['SetAnnotationNameRequest'] = _SETANNOTATIONNAMEREQUEST
-DESCRIPTOR.message_types_by_name['SetAnnotationNameReply'] = _SETANNOTATIONNAMEREPLY
-DESCRIPTOR.message_types_by_name['SetLoomHierarchyRequest'] = _SETLOOMHIERARCHYREQUEST
-DESCRIPTOR.message_types_by_name['SetLoomHierarchyReply'] = _SETLOOMHIERARCHYREPLY
-DESCRIPTOR.message_types_by_name['getORCIDRequest'] = _GETORCIDREQUEST
-DESCRIPTOR.message_types_by_name['getORCIDReply'] = _GETORCIDREPLY
-DESCRIPTOR.message_types_by_name['getORCIDStatusRequest'] = _GETORCIDSTATUSREQUEST
-DESCRIPTOR.message_types_by_name['getORCIDStatusReply'] = _GETORCIDSTATUSREPLY
-DESCRIPTOR.message_types_by_name['orcidInfoMessage'] = _ORCIDINFOMESSAGE
-DESCRIPTOR.message_types_by_name['setColabAnnotationDataRequest'] = _SETCOLABANNOTATIONDATAREQUEST
-DESCRIPTOR.message_types_by_name['setColabAnnotationDataReply'] = _SETCOLABANNOTATIONDATAREPLY
-DESCRIPTOR.message_types_by_name['voteAnnotationRequest'] = _VOTEANNOTATIONREQUEST
-DESCRIPTOR.message_types_by_name['voteAnnotationReply'] = _VOTEANNOTATIONREPLY
-DESCRIPTOR.message_types_by_name['getNextClusterRequest'] = _GETNEXTCLUSTERREQUEST
-DESCRIPTOR.message_types_by_name['NewClusterInfo'] = _NEWCLUSTERINFO
-DESCRIPTOR.message_types_by_name['AddNewClusteringRequest'] = _ADDNEWCLUSTERINGREQUEST
-DESCRIPTOR.message_types_by_name['AddNewClusteringReply'] = _ADDNEWCLUSTERINGREPLY
-DESCRIPTOR.message_types_by_name['GetClusterOverlapsRequest'] = _GETCLUSTEROVERLAPSREQUEST
-DESCRIPTOR.message_types_by_name['ClusterOverlaps'] = _CLUSTEROVERLAPS
-DESCRIPTOR.message_types_by_name['FeatureLabelRequest'] = _FEATURELABELREQUEST
-DESCRIPTOR.message_types_by_name['FeatureLabelReply'] = _FEATURELABELREPLY
+_FEATURELABELREPLY.fields_by_name["labels"].message_type = _FEATURELABELREPLY_FEATURELABEL
+DESCRIPTOR.message_types_by_name["ErrorReply"] = _ERRORREPLY
+DESCRIPTOR.message_types_by_name["CellColorByFeaturesRequest"] = _CELLCOLORBYFEATURESREQUEST
+DESCRIPTOR.message_types_by_name["ColorLegend"] = _COLORLEGEND
+DESCRIPTOR.message_types_by_name["CellColorByFeaturesReply"] = _CELLCOLORBYFEATURESREPLY
+DESCRIPTOR.message_types_by_name["CellAUCValuesByFeaturesRequest"] = _CELLAUCVALUESBYFEATURESREQUEST
+DESCRIPTOR.message_types_by_name["CellAUCValuesByFeaturesReply"] = _CELLAUCVALUESBYFEATURESREPLY
+DESCRIPTOR.message_types_by_name["FeatureRequest"] = _FEATUREREQUEST
+DESCRIPTOR.message_types_by_name["CellMetaDataRequest"] = _CELLMETADATAREQUEST
+DESCRIPTOR.message_types_by_name["FeatureReply"] = _FEATUREREPLY
+DESCRIPTOR.message_types_by_name["CoordinatesRequest"] = _COORDINATESREQUEST
+DESCRIPTOR.message_types_by_name["CoordinatesReply"] = _COORDINATESREPLY
+DESCRIPTOR.message_types_by_name["Annotation"] = _ANNOTATION
+DESCRIPTOR.message_types_by_name["Coordinate"] = _COORDINATE
+DESCRIPTOR.message_types_by_name["Edge"] = _EDGE
+DESCRIPTOR.message_types_by_name["Trajectory"] = _TRAJECTORY
+DESCRIPTOR.message_types_by_name["Embedding"] = _EMBEDDING
+DESCRIPTOR.message_types_by_name["ClusterMarkerMetric"] = _CLUSTERMARKERMETRIC
+DESCRIPTOR.message_types_by_name["CollabAnnoData"] = _COLLABANNODATA
+DESCRIPTOR.message_types_by_name["CollabAnnoVoter"] = _COLLABANNOVOTER
+DESCRIPTOR.message_types_by_name["CollabAnnoVotes"] = _COLLABANNOVOTES
+DESCRIPTOR.message_types_by_name["CellTypeAnnotation"] = _CELLTYPEANNOTATION
+DESCRIPTOR.message_types_by_name["ClusterAnnotation"] = _CLUSTERANNOTATION
+DESCRIPTOR.message_types_by_name["Clustering"] = _CLUSTERING
+DESCRIPTOR.message_types_by_name["CellMetaData"] = _CELLMETADATA
+DESCRIPTOR.message_types_by_name["AUCThreshold"] = _AUCTHRESHOLD
+DESCRIPTOR.message_types_by_name["RegulonGenesMetric"] = _REGULONGENESMETRIC
+DESCRIPTOR.message_types_by_name["Regulon"] = _REGULON
+DESCRIPTOR.message_types_by_name["FileMetaData"] = _FILEMETADATA
+DESCRIPTOR.message_types_by_name["FeatureValues"] = _FEATUREVALUES
+DESCRIPTOR.message_types_by_name["CellAnnotations"] = _CELLANNOTATIONS
+DESCRIPTOR.message_types_by_name["CellClusters"] = _CELLCLUSTERS
+DESCRIPTOR.message_types_by_name["CellMetaDataReply"] = _CELLMETADATAREPLY
+DESCRIPTOR.message_types_by_name["RegulonMetaDataRequest"] = _REGULONMETADATAREQUEST
+DESCRIPTOR.message_types_by_name["RegulonMetaDataReply"] = _REGULONMETADATAREPLY
+DESCRIPTOR.message_types_by_name["MarkerGenesRequest"] = _MARKERGENESREQUEST
+DESCRIPTOR.message_types_by_name["MarkerGenesMetric"] = _MARKERGENESMETRIC
+DESCRIPTOR.message_types_by_name["MarkerGenesReply"] = _MARKERGENESREPLY
+DESCRIPTOR.message_types_by_name["MyLoomsRequest"] = _MYLOOMSREQUEST
+DESCRIPTOR.message_types_by_name["LoomHeierarchy"] = _LOOMHEIERARCHY
+DESCRIPTOR.message_types_by_name["MyLoom"] = _MYLOOM
+DESCRIPTOR.message_types_by_name["MyLoomsReply"] = _MYLOOMSREPLY
+DESCRIPTOR.message_types_by_name["TranslateLassoSelectionRequest"] = _TRANSLATELASSOSELECTIONREQUEST
+DESCRIPTOR.message_types_by_name["TranslateLassoSelectionReply"] = _TRANSLATELASSOSELECTIONREPLY
+DESCRIPTOR.message_types_by_name["CellIDsRequest"] = _CELLIDSREQUEST
+DESCRIPTOR.message_types_by_name["CellIDsReply"] = _CELLIDSREPLY
+DESCRIPTOR.message_types_by_name["GeneSetEnrichmentRequest"] = _GENESETENRICHMENTREQUEST
+DESCRIPTOR.message_types_by_name["Progress"] = _PROGRESS
+DESCRIPTOR.message_types_by_name["GeneSetEnrichmentReply"] = _GENESETENRICHMENTREPLY
+DESCRIPTOR.message_types_by_name["VmaxRequest"] = _VMAXREQUEST
+DESCRIPTOR.message_types_by_name["VmaxReply"] = _VMAXREPLY
+DESCRIPTOR.message_types_by_name["UUIDRequest"] = _UUIDREQUEST
+DESCRIPTOR.message_types_by_name["UUIDReply"] = _UUIDREPLY
+DESCRIPTOR.message_types_by_name["RemainingUUIDTimeRequest"] = _REMAININGUUIDTIMEREQUEST
+DESCRIPTOR.message_types_by_name["RemainingUUIDTimeReply"] = _REMAININGUUIDTIMEREPLY
+DESCRIPTOR.message_types_by_name["LoomUploadedRequest"] = _LOOMUPLOADEDREQUEST
+DESCRIPTOR.message_types_by_name["LoomUploadedReply"] = _LOOMUPLOADEDREPLY
+DESCRIPTOR.message_types_by_name["MyGeneSet"] = _MYGENESET
+DESCRIPTOR.message_types_by_name["MyGeneSetsRequest"] = _MYGENESETSREQUEST
+DESCRIPTOR.message_types_by_name["MyGeneSetsReply"] = _MYGENESETSREPLY
+DESCRIPTOR.message_types_by_name["DeleteUserFileRequest"] = _DELETEUSERFILEREQUEST
+DESCRIPTOR.message_types_by_name["DeleteUserFileReply"] = _DELETEUSERFILEREPLY
+DESCRIPTOR.message_types_by_name["DownloadSubLoomRequest"] = _DOWNLOADSUBLOOMREQUEST
+DESCRIPTOR.message_types_by_name["DownloadSubLoomReply"] = _DOWNLOADSUBLOOMREPLY
+DESCRIPTOR.message_types_by_name["SetAnnotationNameRequest"] = _SETANNOTATIONNAMEREQUEST
+DESCRIPTOR.message_types_by_name["SetAnnotationNameReply"] = _SETANNOTATIONNAMEREPLY
+DESCRIPTOR.message_types_by_name["SetLoomHierarchyRequest"] = _SETLOOMHIERARCHYREQUEST
+DESCRIPTOR.message_types_by_name["SetLoomHierarchyReply"] = _SETLOOMHIERARCHYREPLY
+DESCRIPTOR.message_types_by_name["getORCIDRequest"] = _GETORCIDREQUEST
+DESCRIPTOR.message_types_by_name["getORCIDReply"] = _GETORCIDREPLY
+DESCRIPTOR.message_types_by_name["getORCIDStatusRequest"] = _GETORCIDSTATUSREQUEST
+DESCRIPTOR.message_types_by_name["getORCIDStatusReply"] = _GETORCIDSTATUSREPLY
+DESCRIPTOR.message_types_by_name["orcidInfoMessage"] = _ORCIDINFOMESSAGE
+DESCRIPTOR.message_types_by_name["setColabAnnotationDataRequest"] = _SETCOLABANNOTATIONDATAREQUEST
+DESCRIPTOR.message_types_by_name["setColabAnnotationDataReply"] = _SETCOLABANNOTATIONDATAREPLY
+DESCRIPTOR.message_types_by_name["voteAnnotationRequest"] = _VOTEANNOTATIONREQUEST
+DESCRIPTOR.message_types_by_name["voteAnnotationReply"] = _VOTEANNOTATIONREPLY
+DESCRIPTOR.message_types_by_name["getNextClusterRequest"] = _GETNEXTCLUSTERREQUEST
+DESCRIPTOR.message_types_by_name["NewClusterInfo"] = _NEWCLUSTERINFO
+DESCRIPTOR.message_types_by_name["AddNewClusteringRequest"] = _ADDNEWCLUSTERINGREQUEST
+DESCRIPTOR.message_types_by_name["AddNewClusteringReply"] = _ADDNEWCLUSTERINGREPLY
+DESCRIPTOR.message_types_by_name["GetClusterOverlapsRequest"] = _GETCLUSTEROVERLAPSREQUEST
+DESCRIPTOR.message_types_by_name["ClusterOverlaps"] = _CLUSTEROVERLAPS
+DESCRIPTOR.message_types_by_name["FeatureLabelRequest"] = _FEATURELABELREQUEST
+DESCRIPTOR.message_types_by_name["FeatureLabelReply"] = _FEATURELABELREPLY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-ErrorReply = _reflection.GeneratedProtocolMessageType('ErrorReply', (_message.Message,), {
-  'DESCRIPTOR' : _ERRORREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.ErrorReply)
-  })
+ErrorReply = _reflection.GeneratedProtocolMessageType(
+    "ErrorReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ERRORREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.ErrorReply)
+    },
+)
 _sym_db.RegisterMessage(ErrorReply)
 
-CellColorByFeaturesRequest = _reflection.GeneratedProtocolMessageType('CellColorByFeaturesRequest', (_message.Message,), {
-  'DESCRIPTOR' : _CELLCOLORBYFEATURESREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.CellColorByFeaturesRequest)
-  })
+CellColorByFeaturesRequest = _reflection.GeneratedProtocolMessageType(
+    "CellColorByFeaturesRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CELLCOLORBYFEATURESREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.CellColorByFeaturesRequest)
+    },
+)
 _sym_db.RegisterMessage(CellColorByFeaturesRequest)
 
-ColorLegend = _reflection.GeneratedProtocolMessageType('ColorLegend', (_message.Message,), {
-  'DESCRIPTOR' : _COLORLEGEND,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.ColorLegend)
-  })
+ColorLegend = _reflection.GeneratedProtocolMessageType(
+    "ColorLegend",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _COLORLEGEND,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.ColorLegend)
+    },
+)
 _sym_db.RegisterMessage(ColorLegend)
 
-CellColorByFeaturesReply = _reflection.GeneratedProtocolMessageType('CellColorByFeaturesReply', (_message.Message,), {
-  'DESCRIPTOR' : _CELLCOLORBYFEATURESREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.CellColorByFeaturesReply)
-  })
+CellColorByFeaturesReply = _reflection.GeneratedProtocolMessageType(
+    "CellColorByFeaturesReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CELLCOLORBYFEATURESREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.CellColorByFeaturesReply)
+    },
+)
 _sym_db.RegisterMessage(CellColorByFeaturesReply)
 
-CellAUCValuesByFeaturesRequest = _reflection.GeneratedProtocolMessageType('CellAUCValuesByFeaturesRequest', (_message.Message,), {
-  'DESCRIPTOR' : _CELLAUCVALUESBYFEATURESREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.CellAUCValuesByFeaturesRequest)
-  })
+CellAUCValuesByFeaturesRequest = _reflection.GeneratedProtocolMessageType(
+    "CellAUCValuesByFeaturesRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CELLAUCVALUESBYFEATURESREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.CellAUCValuesByFeaturesRequest)
+    },
+)
 _sym_db.RegisterMessage(CellAUCValuesByFeaturesRequest)
 
-CellAUCValuesByFeaturesReply = _reflection.GeneratedProtocolMessageType('CellAUCValuesByFeaturesReply', (_message.Message,), {
-  'DESCRIPTOR' : _CELLAUCVALUESBYFEATURESREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.CellAUCValuesByFeaturesReply)
-  })
+CellAUCValuesByFeaturesReply = _reflection.GeneratedProtocolMessageType(
+    "CellAUCValuesByFeaturesReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CELLAUCVALUESBYFEATURESREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.CellAUCValuesByFeaturesReply)
+    },
+)
 _sym_db.RegisterMessage(CellAUCValuesByFeaturesReply)
 
-FeatureRequest = _reflection.GeneratedProtocolMessageType('FeatureRequest', (_message.Message,), {
-  'DESCRIPTOR' : _FEATUREREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.FeatureRequest)
-  })
+FeatureRequest = _reflection.GeneratedProtocolMessageType(
+    "FeatureRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _FEATUREREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.FeatureRequest)
+    },
+)
 _sym_db.RegisterMessage(FeatureRequest)
 
-CellMetaDataRequest = _reflection.GeneratedProtocolMessageType('CellMetaDataRequest', (_message.Message,), {
-  'DESCRIPTOR' : _CELLMETADATAREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.CellMetaDataRequest)
-  })
+CellMetaDataRequest = _reflection.GeneratedProtocolMessageType(
+    "CellMetaDataRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CELLMETADATAREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.CellMetaDataRequest)
+    },
+)
 _sym_db.RegisterMessage(CellMetaDataRequest)
 
-FeatureReply = _reflection.GeneratedProtocolMessageType('FeatureReply', (_message.Message,), {
-  'DESCRIPTOR' : _FEATUREREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.FeatureReply)
-  })
+FeatureReply = _reflection.GeneratedProtocolMessageType(
+    "FeatureReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _FEATUREREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.FeatureReply)
+    },
+)
 _sym_db.RegisterMessage(FeatureReply)
 
-CoordinatesRequest = _reflection.GeneratedProtocolMessageType('CoordinatesRequest', (_message.Message,), {
-  'DESCRIPTOR' : _COORDINATESREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.CoordinatesRequest)
-  })
+CoordinatesRequest = _reflection.GeneratedProtocolMessageType(
+    "CoordinatesRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _COORDINATESREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.CoordinatesRequest)
+    },
+)
 _sym_db.RegisterMessage(CoordinatesRequest)
 
-CoordinatesReply = _reflection.GeneratedProtocolMessageType('CoordinatesReply', (_message.Message,), {
-  'DESCRIPTOR' : _COORDINATESREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.CoordinatesReply)
-  })
+CoordinatesReply = _reflection.GeneratedProtocolMessageType(
+    "CoordinatesReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _COORDINATESREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.CoordinatesReply)
+    },
+)
 _sym_db.RegisterMessage(CoordinatesReply)
 
-Annotation = _reflection.GeneratedProtocolMessageType('Annotation', (_message.Message,), {
-  'DESCRIPTOR' : _ANNOTATION,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.Annotation)
-  })
+Annotation = _reflection.GeneratedProtocolMessageType(
+    "Annotation",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ANNOTATION,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.Annotation)
+    },
+)
 _sym_db.RegisterMessage(Annotation)
 
-Coordinate = _reflection.GeneratedProtocolMessageType('Coordinate', (_message.Message,), {
-  'DESCRIPTOR' : _COORDINATE,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.Coordinate)
-  })
+Coordinate = _reflection.GeneratedProtocolMessageType(
+    "Coordinate",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _COORDINATE,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.Coordinate)
+    },
+)
 _sym_db.RegisterMessage(Coordinate)
 
-Edge = _reflection.GeneratedProtocolMessageType('Edge', (_message.Message,), {
-  'DESCRIPTOR' : _EDGE,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.Edge)
-  })
+Edge = _reflection.GeneratedProtocolMessageType(
+    "Edge",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _EDGE,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.Edge)
+    },
+)
 _sym_db.RegisterMessage(Edge)
 
-Trajectory = _reflection.GeneratedProtocolMessageType('Trajectory', (_message.Message,), {
-  'DESCRIPTOR' : _TRAJECTORY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.Trajectory)
-  })
+Trajectory = _reflection.GeneratedProtocolMessageType(
+    "Trajectory",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _TRAJECTORY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.Trajectory)
+    },
+)
 _sym_db.RegisterMessage(Trajectory)
 
-Embedding = _reflection.GeneratedProtocolMessageType('Embedding', (_message.Message,), {
-  'DESCRIPTOR' : _EMBEDDING,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.Embedding)
-  })
+Embedding = _reflection.GeneratedProtocolMessageType(
+    "Embedding",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _EMBEDDING,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.Embedding)
+    },
+)
 _sym_db.RegisterMessage(Embedding)
 
-ClusterMarkerMetric = _reflection.GeneratedProtocolMessageType('ClusterMarkerMetric', (_message.Message,), {
-  'DESCRIPTOR' : _CLUSTERMARKERMETRIC,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.ClusterMarkerMetric)
-  })
+ClusterMarkerMetric = _reflection.GeneratedProtocolMessageType(
+    "ClusterMarkerMetric",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CLUSTERMARKERMETRIC,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.ClusterMarkerMetric)
+    },
+)
 _sym_db.RegisterMessage(ClusterMarkerMetric)
 
-CollabAnnoData = _reflection.GeneratedProtocolMessageType('CollabAnnoData', (_message.Message,), {
-  'DESCRIPTOR' : _COLLABANNODATA,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.CollabAnnoData)
-  })
+CollabAnnoData = _reflection.GeneratedProtocolMessageType(
+    "CollabAnnoData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _COLLABANNODATA,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.CollabAnnoData)
+    },
+)
 _sym_db.RegisterMessage(CollabAnnoData)
 
-CollabAnnoVoter = _reflection.GeneratedProtocolMessageType('CollabAnnoVoter', (_message.Message,), {
-  'DESCRIPTOR' : _COLLABANNOVOTER,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.CollabAnnoVoter)
-  })
+CollabAnnoVoter = _reflection.GeneratedProtocolMessageType(
+    "CollabAnnoVoter",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _COLLABANNOVOTER,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.CollabAnnoVoter)
+    },
+)
 _sym_db.RegisterMessage(CollabAnnoVoter)
 
-CollabAnnoVotes = _reflection.GeneratedProtocolMessageType('CollabAnnoVotes', (_message.Message,), {
-  'DESCRIPTOR' : _COLLABANNOVOTES,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.CollabAnnoVotes)
-  })
+CollabAnnoVotes = _reflection.GeneratedProtocolMessageType(
+    "CollabAnnoVotes",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _COLLABANNOVOTES,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.CollabAnnoVotes)
+    },
+)
 _sym_db.RegisterMessage(CollabAnnoVotes)
 
-CellTypeAnnotation = _reflection.GeneratedProtocolMessageType('CellTypeAnnotation', (_message.Message,), {
-  'DESCRIPTOR' : _CELLTYPEANNOTATION,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.CellTypeAnnotation)
-  })
+CellTypeAnnotation = _reflection.GeneratedProtocolMessageType(
+    "CellTypeAnnotation",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CELLTYPEANNOTATION,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.CellTypeAnnotation)
+    },
+)
 _sym_db.RegisterMessage(CellTypeAnnotation)
 
-ClusterAnnotation = _reflection.GeneratedProtocolMessageType('ClusterAnnotation', (_message.Message,), {
-  'DESCRIPTOR' : _CLUSTERANNOTATION,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.ClusterAnnotation)
-  })
+ClusterAnnotation = _reflection.GeneratedProtocolMessageType(
+    "ClusterAnnotation",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CLUSTERANNOTATION,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.ClusterAnnotation)
+    },
+)
 _sym_db.RegisterMessage(ClusterAnnotation)
 
-Clustering = _reflection.GeneratedProtocolMessageType('Clustering', (_message.Message,), {
-  'DESCRIPTOR' : _CLUSTERING,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.Clustering)
-  })
+Clustering = _reflection.GeneratedProtocolMessageType(
+    "Clustering",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CLUSTERING,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.Clustering)
+    },
+)
 _sym_db.RegisterMessage(Clustering)
 
-CellMetaData = _reflection.GeneratedProtocolMessageType('CellMetaData', (_message.Message,), {
-  'DESCRIPTOR' : _CELLMETADATA,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.CellMetaData)
-  })
+CellMetaData = _reflection.GeneratedProtocolMessageType(
+    "CellMetaData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CELLMETADATA,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.CellMetaData)
+    },
+)
 _sym_db.RegisterMessage(CellMetaData)
 
-AUCThreshold = _reflection.GeneratedProtocolMessageType('AUCThreshold', (_message.Message,), {
-  'DESCRIPTOR' : _AUCTHRESHOLD,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.AUCThreshold)
-  })
+AUCThreshold = _reflection.GeneratedProtocolMessageType(
+    "AUCThreshold",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _AUCTHRESHOLD,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.AUCThreshold)
+    },
+)
 _sym_db.RegisterMessage(AUCThreshold)
 
-RegulonGenesMetric = _reflection.GeneratedProtocolMessageType('RegulonGenesMetric', (_message.Message,), {
-  'DESCRIPTOR' : _REGULONGENESMETRIC,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.RegulonGenesMetric)
-  })
+RegulonGenesMetric = _reflection.GeneratedProtocolMessageType(
+    "RegulonGenesMetric",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _REGULONGENESMETRIC,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.RegulonGenesMetric)
+    },
+)
 _sym_db.RegisterMessage(RegulonGenesMetric)
 
-Regulon = _reflection.GeneratedProtocolMessageType('Regulon', (_message.Message,), {
-  'DESCRIPTOR' : _REGULON,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.Regulon)
-  })
+Regulon = _reflection.GeneratedProtocolMessageType(
+    "Regulon",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _REGULON,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.Regulon)
+    },
+)
 _sym_db.RegisterMessage(Regulon)
 
-FileMetaData = _reflection.GeneratedProtocolMessageType('FileMetaData', (_message.Message,), {
-  'DESCRIPTOR' : _FILEMETADATA,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.FileMetaData)
-  })
+FileMetaData = _reflection.GeneratedProtocolMessageType(
+    "FileMetaData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _FILEMETADATA,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.FileMetaData)
+    },
+)
 _sym_db.RegisterMessage(FileMetaData)
 
-FeatureValues = _reflection.GeneratedProtocolMessageType('FeatureValues', (_message.Message,), {
-  'DESCRIPTOR' : _FEATUREVALUES,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.FeatureValues)
-  })
+FeatureValues = _reflection.GeneratedProtocolMessageType(
+    "FeatureValues",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _FEATUREVALUES,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.FeatureValues)
+    },
+)
 _sym_db.RegisterMessage(FeatureValues)
 
-CellAnnotations = _reflection.GeneratedProtocolMessageType('CellAnnotations', (_message.Message,), {
-  'DESCRIPTOR' : _CELLANNOTATIONS,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.CellAnnotations)
-  })
+CellAnnotations = _reflection.GeneratedProtocolMessageType(
+    "CellAnnotations",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CELLANNOTATIONS,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.CellAnnotations)
+    },
+)
 _sym_db.RegisterMessage(CellAnnotations)
 
-CellClusters = _reflection.GeneratedProtocolMessageType('CellClusters', (_message.Message,), {
-  'DESCRIPTOR' : _CELLCLUSTERS,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.CellClusters)
-  })
+CellClusters = _reflection.GeneratedProtocolMessageType(
+    "CellClusters",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CELLCLUSTERS,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.CellClusters)
+    },
+)
 _sym_db.RegisterMessage(CellClusters)
 
-CellMetaDataReply = _reflection.GeneratedProtocolMessageType('CellMetaDataReply', (_message.Message,), {
-  'DESCRIPTOR' : _CELLMETADATAREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.CellMetaDataReply)
-  })
+CellMetaDataReply = _reflection.GeneratedProtocolMessageType(
+    "CellMetaDataReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CELLMETADATAREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.CellMetaDataReply)
+    },
+)
 _sym_db.RegisterMessage(CellMetaDataReply)
 
-RegulonMetaDataRequest = _reflection.GeneratedProtocolMessageType('RegulonMetaDataRequest', (_message.Message,), {
-  'DESCRIPTOR' : _REGULONMETADATAREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.RegulonMetaDataRequest)
-  })
+RegulonMetaDataRequest = _reflection.GeneratedProtocolMessageType(
+    "RegulonMetaDataRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _REGULONMETADATAREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.RegulonMetaDataRequest)
+    },
+)
 _sym_db.RegisterMessage(RegulonMetaDataRequest)
 
-RegulonMetaDataReply = _reflection.GeneratedProtocolMessageType('RegulonMetaDataReply', (_message.Message,), {
-  'DESCRIPTOR' : _REGULONMETADATAREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.RegulonMetaDataReply)
-  })
+RegulonMetaDataReply = _reflection.GeneratedProtocolMessageType(
+    "RegulonMetaDataReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _REGULONMETADATAREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.RegulonMetaDataReply)
+    },
+)
 _sym_db.RegisterMessage(RegulonMetaDataReply)
 
-MarkerGenesRequest = _reflection.GeneratedProtocolMessageType('MarkerGenesRequest', (_message.Message,), {
-  'DESCRIPTOR' : _MARKERGENESREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.MarkerGenesRequest)
-  })
+MarkerGenesRequest = _reflection.GeneratedProtocolMessageType(
+    "MarkerGenesRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _MARKERGENESREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.MarkerGenesRequest)
+    },
+)
 _sym_db.RegisterMessage(MarkerGenesRequest)
 
-MarkerGenesMetric = _reflection.GeneratedProtocolMessageType('MarkerGenesMetric', (_message.Message,), {
-  'DESCRIPTOR' : _MARKERGENESMETRIC,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.MarkerGenesMetric)
-  })
+MarkerGenesMetric = _reflection.GeneratedProtocolMessageType(
+    "MarkerGenesMetric",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _MARKERGENESMETRIC,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.MarkerGenesMetric)
+    },
+)
 _sym_db.RegisterMessage(MarkerGenesMetric)
 
-MarkerGenesReply = _reflection.GeneratedProtocolMessageType('MarkerGenesReply', (_message.Message,), {
-  'DESCRIPTOR' : _MARKERGENESREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.MarkerGenesReply)
-  })
+MarkerGenesReply = _reflection.GeneratedProtocolMessageType(
+    "MarkerGenesReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _MARKERGENESREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.MarkerGenesReply)
+    },
+)
 _sym_db.RegisterMessage(MarkerGenesReply)
 
-MyLoomsRequest = _reflection.GeneratedProtocolMessageType('MyLoomsRequest', (_message.Message,), {
-  'DESCRIPTOR' : _MYLOOMSREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.MyLoomsRequest)
-  })
+MyLoomsRequest = _reflection.GeneratedProtocolMessageType(
+    "MyLoomsRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _MYLOOMSREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.MyLoomsRequest)
+    },
+)
 _sym_db.RegisterMessage(MyLoomsRequest)
 
-LoomHeierarchy = _reflection.GeneratedProtocolMessageType('LoomHeierarchy', (_message.Message,), {
-  'DESCRIPTOR' : _LOOMHEIERARCHY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.LoomHeierarchy)
-  })
+LoomHeierarchy = _reflection.GeneratedProtocolMessageType(
+    "LoomHeierarchy",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LOOMHEIERARCHY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.LoomHeierarchy)
+    },
+)
 _sym_db.RegisterMessage(LoomHeierarchy)
 
-MyLoom = _reflection.GeneratedProtocolMessageType('MyLoom', (_message.Message,), {
-  'DESCRIPTOR' : _MYLOOM,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.MyLoom)
-  })
+MyLoom = _reflection.GeneratedProtocolMessageType(
+    "MyLoom",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _MYLOOM,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.MyLoom)
+    },
+)
 _sym_db.RegisterMessage(MyLoom)
 
-MyLoomsReply = _reflection.GeneratedProtocolMessageType('MyLoomsReply', (_message.Message,), {
-  'DESCRIPTOR' : _MYLOOMSREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.MyLoomsReply)
-  })
+MyLoomsReply = _reflection.GeneratedProtocolMessageType(
+    "MyLoomsReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _MYLOOMSREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.MyLoomsReply)
+    },
+)
 _sym_db.RegisterMessage(MyLoomsReply)
 
-TranslateLassoSelectionRequest = _reflection.GeneratedProtocolMessageType('TranslateLassoSelectionRequest', (_message.Message,), {
-  'DESCRIPTOR' : _TRANSLATELASSOSELECTIONREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.TranslateLassoSelectionRequest)
-  })
+TranslateLassoSelectionRequest = _reflection.GeneratedProtocolMessageType(
+    "TranslateLassoSelectionRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _TRANSLATELASSOSELECTIONREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.TranslateLassoSelectionRequest)
+    },
+)
 _sym_db.RegisterMessage(TranslateLassoSelectionRequest)
 
-TranslateLassoSelectionReply = _reflection.GeneratedProtocolMessageType('TranslateLassoSelectionReply', (_message.Message,), {
-  'DESCRIPTOR' : _TRANSLATELASSOSELECTIONREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.TranslateLassoSelectionReply)
-  })
+TranslateLassoSelectionReply = _reflection.GeneratedProtocolMessageType(
+    "TranslateLassoSelectionReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _TRANSLATELASSOSELECTIONREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.TranslateLassoSelectionReply)
+    },
+)
 _sym_db.RegisterMessage(TranslateLassoSelectionReply)
 
-CellIDsRequest = _reflection.GeneratedProtocolMessageType('CellIDsRequest', (_message.Message,), {
-  'DESCRIPTOR' : _CELLIDSREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.CellIDsRequest)
-  })
+CellIDsRequest = _reflection.GeneratedProtocolMessageType(
+    "CellIDsRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CELLIDSREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.CellIDsRequest)
+    },
+)
 _sym_db.RegisterMessage(CellIDsRequest)
 
-CellIDsReply = _reflection.GeneratedProtocolMessageType('CellIDsReply', (_message.Message,), {
-  'DESCRIPTOR' : _CELLIDSREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.CellIDsReply)
-  })
+CellIDsReply = _reflection.GeneratedProtocolMessageType(
+    "CellIDsReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CELLIDSREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.CellIDsReply)
+    },
+)
 _sym_db.RegisterMessage(CellIDsReply)
 
-GeneSetEnrichmentRequest = _reflection.GeneratedProtocolMessageType('GeneSetEnrichmentRequest', (_message.Message,), {
-  'DESCRIPTOR' : _GENESETENRICHMENTREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.GeneSetEnrichmentRequest)
-  })
+GeneSetEnrichmentRequest = _reflection.GeneratedProtocolMessageType(
+    "GeneSetEnrichmentRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GENESETENRICHMENTREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.GeneSetEnrichmentRequest)
+    },
+)
 _sym_db.RegisterMessage(GeneSetEnrichmentRequest)
 
-Progress = _reflection.GeneratedProtocolMessageType('Progress', (_message.Message,), {
-  'DESCRIPTOR' : _PROGRESS,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.Progress)
-  })
+Progress = _reflection.GeneratedProtocolMessageType(
+    "Progress",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PROGRESS,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.Progress)
+    },
+)
 _sym_db.RegisterMessage(Progress)
 
-GeneSetEnrichmentReply = _reflection.GeneratedProtocolMessageType('GeneSetEnrichmentReply', (_message.Message,), {
-  'DESCRIPTOR' : _GENESETENRICHMENTREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.GeneSetEnrichmentReply)
-  })
+GeneSetEnrichmentReply = _reflection.GeneratedProtocolMessageType(
+    "GeneSetEnrichmentReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GENESETENRICHMENTREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.GeneSetEnrichmentReply)
+    },
+)
 _sym_db.RegisterMessage(GeneSetEnrichmentReply)
 
-VmaxRequest = _reflection.GeneratedProtocolMessageType('VmaxRequest', (_message.Message,), {
-  'DESCRIPTOR' : _VMAXREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.VmaxRequest)
-  })
+VmaxRequest = _reflection.GeneratedProtocolMessageType(
+    "VmaxRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _VMAXREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.VmaxRequest)
+    },
+)
 _sym_db.RegisterMessage(VmaxRequest)
 
-VmaxReply = _reflection.GeneratedProtocolMessageType('VmaxReply', (_message.Message,), {
-  'DESCRIPTOR' : _VMAXREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.VmaxReply)
-  })
+VmaxReply = _reflection.GeneratedProtocolMessageType(
+    "VmaxReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _VMAXREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.VmaxReply)
+    },
+)
 _sym_db.RegisterMessage(VmaxReply)
 
-UUIDRequest = _reflection.GeneratedProtocolMessageType('UUIDRequest', (_message.Message,), {
-  'DESCRIPTOR' : _UUIDREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.UUIDRequest)
-  })
+UUIDRequest = _reflection.GeneratedProtocolMessageType(
+    "UUIDRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _UUIDREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.UUIDRequest)
+    },
+)
 _sym_db.RegisterMessage(UUIDRequest)
 
-UUIDReply = _reflection.GeneratedProtocolMessageType('UUIDReply', (_message.Message,), {
-  'DESCRIPTOR' : _UUIDREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.UUIDReply)
-  })
+UUIDReply = _reflection.GeneratedProtocolMessageType(
+    "UUIDReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _UUIDREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.UUIDReply)
+    },
+)
 _sym_db.RegisterMessage(UUIDReply)
 
-RemainingUUIDTimeRequest = _reflection.GeneratedProtocolMessageType('RemainingUUIDTimeRequest', (_message.Message,), {
-  'DESCRIPTOR' : _REMAININGUUIDTIMEREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.RemainingUUIDTimeRequest)
-  })
+RemainingUUIDTimeRequest = _reflection.GeneratedProtocolMessageType(
+    "RemainingUUIDTimeRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _REMAININGUUIDTIMEREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.RemainingUUIDTimeRequest)
+    },
+)
 _sym_db.RegisterMessage(RemainingUUIDTimeRequest)
 
-RemainingUUIDTimeReply = _reflection.GeneratedProtocolMessageType('RemainingUUIDTimeReply', (_message.Message,), {
-  'DESCRIPTOR' : _REMAININGUUIDTIMEREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.RemainingUUIDTimeReply)
-  })
+RemainingUUIDTimeReply = _reflection.GeneratedProtocolMessageType(
+    "RemainingUUIDTimeReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _REMAININGUUIDTIMEREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.RemainingUUIDTimeReply)
+    },
+)
 _sym_db.RegisterMessage(RemainingUUIDTimeReply)
 
-LoomUploadedRequest = _reflection.GeneratedProtocolMessageType('LoomUploadedRequest', (_message.Message,), {
-  'DESCRIPTOR' : _LOOMUPLOADEDREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.LoomUploadedRequest)
-  })
+LoomUploadedRequest = _reflection.GeneratedProtocolMessageType(
+    "LoomUploadedRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LOOMUPLOADEDREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.LoomUploadedRequest)
+    },
+)
 _sym_db.RegisterMessage(LoomUploadedRequest)
 
-LoomUploadedReply = _reflection.GeneratedProtocolMessageType('LoomUploadedReply', (_message.Message,), {
-  'DESCRIPTOR' : _LOOMUPLOADEDREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.LoomUploadedReply)
-  })
+LoomUploadedReply = _reflection.GeneratedProtocolMessageType(
+    "LoomUploadedReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LOOMUPLOADEDREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.LoomUploadedReply)
+    },
+)
 _sym_db.RegisterMessage(LoomUploadedReply)
 
-MyGeneSet = _reflection.GeneratedProtocolMessageType('MyGeneSet', (_message.Message,), {
-  'DESCRIPTOR' : _MYGENESET,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.MyGeneSet)
-  })
+MyGeneSet = _reflection.GeneratedProtocolMessageType(
+    "MyGeneSet",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _MYGENESET,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.MyGeneSet)
+    },
+)
 _sym_db.RegisterMessage(MyGeneSet)
 
-MyGeneSetsRequest = _reflection.GeneratedProtocolMessageType('MyGeneSetsRequest', (_message.Message,), {
-  'DESCRIPTOR' : _MYGENESETSREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.MyGeneSetsRequest)
-  })
+MyGeneSetsRequest = _reflection.GeneratedProtocolMessageType(
+    "MyGeneSetsRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _MYGENESETSREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.MyGeneSetsRequest)
+    },
+)
 _sym_db.RegisterMessage(MyGeneSetsRequest)
 
-MyGeneSetsReply = _reflection.GeneratedProtocolMessageType('MyGeneSetsReply', (_message.Message,), {
-  'DESCRIPTOR' : _MYGENESETSREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.MyGeneSetsReply)
-  })
+MyGeneSetsReply = _reflection.GeneratedProtocolMessageType(
+    "MyGeneSetsReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _MYGENESETSREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.MyGeneSetsReply)
+    },
+)
 _sym_db.RegisterMessage(MyGeneSetsReply)
 
-DeleteUserFileRequest = _reflection.GeneratedProtocolMessageType('DeleteUserFileRequest', (_message.Message,), {
-  'DESCRIPTOR' : _DELETEUSERFILEREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.DeleteUserFileRequest)
-  })
+DeleteUserFileRequest = _reflection.GeneratedProtocolMessageType(
+    "DeleteUserFileRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _DELETEUSERFILEREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.DeleteUserFileRequest)
+    },
+)
 _sym_db.RegisterMessage(DeleteUserFileRequest)
 
-DeleteUserFileReply = _reflection.GeneratedProtocolMessageType('DeleteUserFileReply', (_message.Message,), {
-  'DESCRIPTOR' : _DELETEUSERFILEREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.DeleteUserFileReply)
-  })
+DeleteUserFileReply = _reflection.GeneratedProtocolMessageType(
+    "DeleteUserFileReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _DELETEUSERFILEREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.DeleteUserFileReply)
+    },
+)
 _sym_db.RegisterMessage(DeleteUserFileReply)
 
-DownloadSubLoomRequest = _reflection.GeneratedProtocolMessageType('DownloadSubLoomRequest', (_message.Message,), {
-  'DESCRIPTOR' : _DOWNLOADSUBLOOMREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.DownloadSubLoomRequest)
-  })
+DownloadSubLoomRequest = _reflection.GeneratedProtocolMessageType(
+    "DownloadSubLoomRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _DOWNLOADSUBLOOMREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.DownloadSubLoomRequest)
+    },
+)
 _sym_db.RegisterMessage(DownloadSubLoomRequest)
 
-DownloadSubLoomReply = _reflection.GeneratedProtocolMessageType('DownloadSubLoomReply', (_message.Message,), {
-  'DESCRIPTOR' : _DOWNLOADSUBLOOMREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.DownloadSubLoomReply)
-  })
+DownloadSubLoomReply = _reflection.GeneratedProtocolMessageType(
+    "DownloadSubLoomReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _DOWNLOADSUBLOOMREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.DownloadSubLoomReply)
+    },
+)
 _sym_db.RegisterMessage(DownloadSubLoomReply)
 
-SetAnnotationNameRequest = _reflection.GeneratedProtocolMessageType('SetAnnotationNameRequest', (_message.Message,), {
-  'DESCRIPTOR' : _SETANNOTATIONNAMEREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.SetAnnotationNameRequest)
-  })
+SetAnnotationNameRequest = _reflection.GeneratedProtocolMessageType(
+    "SetAnnotationNameRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _SETANNOTATIONNAMEREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.SetAnnotationNameRequest)
+    },
+)
 _sym_db.RegisterMessage(SetAnnotationNameRequest)
 
-SetAnnotationNameReply = _reflection.GeneratedProtocolMessageType('SetAnnotationNameReply', (_message.Message,), {
-  'DESCRIPTOR' : _SETANNOTATIONNAMEREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.SetAnnotationNameReply)
-  })
+SetAnnotationNameReply = _reflection.GeneratedProtocolMessageType(
+    "SetAnnotationNameReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _SETANNOTATIONNAMEREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.SetAnnotationNameReply)
+    },
+)
 _sym_db.RegisterMessage(SetAnnotationNameReply)
 
-SetLoomHierarchyRequest = _reflection.GeneratedProtocolMessageType('SetLoomHierarchyRequest', (_message.Message,), {
-  'DESCRIPTOR' : _SETLOOMHIERARCHYREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.SetLoomHierarchyRequest)
-  })
+SetLoomHierarchyRequest = _reflection.GeneratedProtocolMessageType(
+    "SetLoomHierarchyRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _SETLOOMHIERARCHYREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.SetLoomHierarchyRequest)
+    },
+)
 _sym_db.RegisterMessage(SetLoomHierarchyRequest)
 
-SetLoomHierarchyReply = _reflection.GeneratedProtocolMessageType('SetLoomHierarchyReply', (_message.Message,), {
-  'DESCRIPTOR' : _SETLOOMHIERARCHYREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.SetLoomHierarchyReply)
-  })
+SetLoomHierarchyReply = _reflection.GeneratedProtocolMessageType(
+    "SetLoomHierarchyReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _SETLOOMHIERARCHYREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.SetLoomHierarchyReply)
+    },
+)
 _sym_db.RegisterMessage(SetLoomHierarchyReply)
 
-getORCIDRequest = _reflection.GeneratedProtocolMessageType('getORCIDRequest', (_message.Message,), {
-  'DESCRIPTOR' : _GETORCIDREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.getORCIDRequest)
-  })
+getORCIDRequest = _reflection.GeneratedProtocolMessageType(
+    "getORCIDRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GETORCIDREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.getORCIDRequest)
+    },
+)
 _sym_db.RegisterMessage(getORCIDRequest)
 
-getORCIDReply = _reflection.GeneratedProtocolMessageType('getORCIDReply', (_message.Message,), {
-  'DESCRIPTOR' : _GETORCIDREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.getORCIDReply)
-  })
+getORCIDReply = _reflection.GeneratedProtocolMessageType(
+    "getORCIDReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GETORCIDREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.getORCIDReply)
+    },
+)
 _sym_db.RegisterMessage(getORCIDReply)
 
-getORCIDStatusRequest = _reflection.GeneratedProtocolMessageType('getORCIDStatusRequest', (_message.Message,), {
-  'DESCRIPTOR' : _GETORCIDSTATUSREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.getORCIDStatusRequest)
-  })
+getORCIDStatusRequest = _reflection.GeneratedProtocolMessageType(
+    "getORCIDStatusRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GETORCIDSTATUSREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.getORCIDStatusRequest)
+    },
+)
 _sym_db.RegisterMessage(getORCIDStatusRequest)
 
-getORCIDStatusReply = _reflection.GeneratedProtocolMessageType('getORCIDStatusReply', (_message.Message,), {
-  'DESCRIPTOR' : _GETORCIDSTATUSREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.getORCIDStatusReply)
-  })
+getORCIDStatusReply = _reflection.GeneratedProtocolMessageType(
+    "getORCIDStatusReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GETORCIDSTATUSREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.getORCIDStatusReply)
+    },
+)
 _sym_db.RegisterMessage(getORCIDStatusReply)
 
-orcidInfoMessage = _reflection.GeneratedProtocolMessageType('orcidInfoMessage', (_message.Message,), {
-  'DESCRIPTOR' : _ORCIDINFOMESSAGE,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.orcidInfoMessage)
-  })
+orcidInfoMessage = _reflection.GeneratedProtocolMessageType(
+    "orcidInfoMessage",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ORCIDINFOMESSAGE,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.orcidInfoMessage)
+    },
+)
 _sym_db.RegisterMessage(orcidInfoMessage)
 
-setColabAnnotationDataRequest = _reflection.GeneratedProtocolMessageType('setColabAnnotationDataRequest', (_message.Message,), {
-  'DESCRIPTOR' : _SETCOLABANNOTATIONDATAREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.setColabAnnotationDataRequest)
-  })
+setColabAnnotationDataRequest = _reflection.GeneratedProtocolMessageType(
+    "setColabAnnotationDataRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _SETCOLABANNOTATIONDATAREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.setColabAnnotationDataRequest)
+    },
+)
 _sym_db.RegisterMessage(setColabAnnotationDataRequest)
 
-setColabAnnotationDataReply = _reflection.GeneratedProtocolMessageType('setColabAnnotationDataReply', (_message.Message,), {
-  'DESCRIPTOR' : _SETCOLABANNOTATIONDATAREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.setColabAnnotationDataReply)
-  })
+setColabAnnotationDataReply = _reflection.GeneratedProtocolMessageType(
+    "setColabAnnotationDataReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _SETCOLABANNOTATIONDATAREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.setColabAnnotationDataReply)
+    },
+)
 _sym_db.RegisterMessage(setColabAnnotationDataReply)
 
-voteAnnotationRequest = _reflection.GeneratedProtocolMessageType('voteAnnotationRequest', (_message.Message,), {
-  'DESCRIPTOR' : _VOTEANNOTATIONREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.voteAnnotationRequest)
-  })
+voteAnnotationRequest = _reflection.GeneratedProtocolMessageType(
+    "voteAnnotationRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _VOTEANNOTATIONREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.voteAnnotationRequest)
+    },
+)
 _sym_db.RegisterMessage(voteAnnotationRequest)
 
-voteAnnotationReply = _reflection.GeneratedProtocolMessageType('voteAnnotationReply', (_message.Message,), {
-  'DESCRIPTOR' : _VOTEANNOTATIONREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.voteAnnotationReply)
-  })
+voteAnnotationReply = _reflection.GeneratedProtocolMessageType(
+    "voteAnnotationReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _VOTEANNOTATIONREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.voteAnnotationReply)
+    },
+)
 _sym_db.RegisterMessage(voteAnnotationReply)
 
-getNextClusterRequest = _reflection.GeneratedProtocolMessageType('getNextClusterRequest', (_message.Message,), {
-  'DESCRIPTOR' : _GETNEXTCLUSTERREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.getNextClusterRequest)
-  })
+getNextClusterRequest = _reflection.GeneratedProtocolMessageType(
+    "getNextClusterRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GETNEXTCLUSTERREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.getNextClusterRequest)
+    },
+)
 _sym_db.RegisterMessage(getNextClusterRequest)
 
-NewClusterInfo = _reflection.GeneratedProtocolMessageType('NewClusterInfo', (_message.Message,), {
-  'DESCRIPTOR' : _NEWCLUSTERINFO,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.NewClusterInfo)
-  })
+NewClusterInfo = _reflection.GeneratedProtocolMessageType(
+    "NewClusterInfo",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _NEWCLUSTERINFO,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.NewClusterInfo)
+    },
+)
 _sym_db.RegisterMessage(NewClusterInfo)
 
-AddNewClusteringRequest = _reflection.GeneratedProtocolMessageType('AddNewClusteringRequest', (_message.Message,), {
-  'DESCRIPTOR' : _ADDNEWCLUSTERINGREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.AddNewClusteringRequest)
-  })
+AddNewClusteringRequest = _reflection.GeneratedProtocolMessageType(
+    "AddNewClusteringRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ADDNEWCLUSTERINGREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.AddNewClusteringRequest)
+    },
+)
 _sym_db.RegisterMessage(AddNewClusteringRequest)
 
-AddNewClusteringReply = _reflection.GeneratedProtocolMessageType('AddNewClusteringReply', (_message.Message,), {
-  'DESCRIPTOR' : _ADDNEWCLUSTERINGREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.AddNewClusteringReply)
-  })
+AddNewClusteringReply = _reflection.GeneratedProtocolMessageType(
+    "AddNewClusteringReply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ADDNEWCLUSTERINGREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.AddNewClusteringReply)
+    },
+)
 _sym_db.RegisterMessage(AddNewClusteringReply)
 
-GetClusterOverlapsRequest = _reflection.GeneratedProtocolMessageType('GetClusterOverlapsRequest', (_message.Message,), {
-  'DESCRIPTOR' : _GETCLUSTEROVERLAPSREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.GetClusterOverlapsRequest)
-  })
+GetClusterOverlapsRequest = _reflection.GeneratedProtocolMessageType(
+    "GetClusterOverlapsRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GETCLUSTEROVERLAPSREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.GetClusterOverlapsRequest)
+    },
+)
 _sym_db.RegisterMessage(GetClusterOverlapsRequest)
 
-ClusterOverlaps = _reflection.GeneratedProtocolMessageType('ClusterOverlaps', (_message.Message,), {
-
-  'ClusterOverlap' : _reflection.GeneratedProtocolMessageType('ClusterOverlap', (_message.Message,), {
-    'DESCRIPTOR' : _CLUSTEROVERLAPS_CLUSTEROVERLAP,
-    '__module__' : 's_pb2'
-    # @@protoc_insertion_point(class_scope:scope.ClusterOverlaps.ClusterOverlap)
-    })
-  ,
-  'DESCRIPTOR' : _CLUSTEROVERLAPS,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.ClusterOverlaps)
-  })
+ClusterOverlaps = _reflection.GeneratedProtocolMessageType(
+    "ClusterOverlaps",
+    (_message.Message,),
+    {
+        "ClusterOverlap": _reflection.GeneratedProtocolMessageType(
+            "ClusterOverlap",
+            (_message.Message,),
+            {
+                "DESCRIPTOR": _CLUSTEROVERLAPS_CLUSTEROVERLAP,
+                "__module__": "s_pb2"
+                # @@protoc_insertion_point(class_scope:scope.ClusterOverlaps.ClusterOverlap)
+            },
+        ),
+        "DESCRIPTOR": _CLUSTEROVERLAPS,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.ClusterOverlaps)
+    },
+)
 _sym_db.RegisterMessage(ClusterOverlaps)
 _sym_db.RegisterMessage(ClusterOverlaps.ClusterOverlap)
 
-FeatureLabelRequest = _reflection.GeneratedProtocolMessageType('FeatureLabelRequest', (_message.Message,), {
-  'DESCRIPTOR' : _FEATURELABELREQUEST,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.FeatureLabelRequest)
-  })
+FeatureLabelRequest = _reflection.GeneratedProtocolMessageType(
+    "FeatureLabelRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _FEATURELABELREQUEST,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.FeatureLabelRequest)
+    },
+)
 _sym_db.RegisterMessage(FeatureLabelRequest)
 
-FeatureLabelReply = _reflection.GeneratedProtocolMessageType('FeatureLabelReply', (_message.Message,), {
-
-  'FeatureLabel' : _reflection.GeneratedProtocolMessageType('FeatureLabel', (_message.Message,), {
-    'DESCRIPTOR' : _FEATURELABELREPLY_FEATURELABEL,
-    '__module__' : 's_pb2'
-    # @@protoc_insertion_point(class_scope:scope.FeatureLabelReply.FeatureLabel)
-    })
-  ,
-  'DESCRIPTOR' : _FEATURELABELREPLY,
-  '__module__' : 's_pb2'
-  # @@protoc_insertion_point(class_scope:scope.FeatureLabelReply)
-  })
+FeatureLabelReply = _reflection.GeneratedProtocolMessageType(
+    "FeatureLabelReply",
+    (_message.Message,),
+    {
+        "FeatureLabel": _reflection.GeneratedProtocolMessageType(
+            "FeatureLabel",
+            (_message.Message,),
+            {
+                "DESCRIPTOR": _FEATURELABELREPLY_FEATURELABEL,
+                "__module__": "s_pb2"
+                # @@protoc_insertion_point(class_scope:scope.FeatureLabelReply.FeatureLabel)
+            },
+        ),
+        "DESCRIPTOR": _FEATURELABELREPLY,
+        "__module__": "s_pb2"
+        # @@protoc_insertion_point(class_scope:scope.FeatureLabelReply)
+    },
+)
 _sym_db.RegisterMessage(FeatureLabelReply)
 _sym_db.RegisterMessage(FeatureLabelReply.FeatureLabel)
 
 
-
 _MAIN = _descriptor.ServiceDescriptor(
-  name='Main',
-  full_name='scope.Main',
-  file=DESCRIPTOR,
-  index=0,
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_start=7698,
-  serialized_end=9884,
-  methods=[
-  _descriptor.MethodDescriptor(
-    name='getCellColorByFeatures',
-    full_name='scope.Main.getCellColorByFeatures',
+    name="Main",
+    full_name="scope.Main",
+    file=DESCRIPTOR,
     index=0,
-    containing_service=None,
-    input_type=_CELLCOLORBYFEATURESREQUEST,
-    output_type=_CELLCOLORBYFEATURESREPLY,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='getCellAUCValuesByFeatures',
-    full_name='scope.Main.getCellAUCValuesByFeatures',
-    index=1,
-    containing_service=None,
-    input_type=_CELLAUCVALUESBYFEATURESREQUEST,
-    output_type=_CELLAUCVALUESBYFEATURESREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='getCellMetaData',
-    full_name='scope.Main.getCellMetaData',
-    index=2,
-    containing_service=None,
-    input_type=_CELLMETADATAREQUEST,
-    output_type=_CELLMETADATAREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='getFeatures',
-    full_name='scope.Main.getFeatures',
-    index=3,
-    containing_service=None,
-    input_type=_FEATUREREQUEST,
-    output_type=_FEATUREREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='getCoordinates',
-    full_name='scope.Main.getCoordinates',
-    index=4,
-    containing_service=None,
-    input_type=_COORDINATESREQUEST,
-    output_type=_COORDINATESREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='getRegulonMetaData',
-    full_name='scope.Main.getRegulonMetaData',
-    index=5,
-    containing_service=None,
-    input_type=_REGULONMETADATAREQUEST,
-    output_type=_REGULONMETADATAREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='getMarkerGenes',
-    full_name='scope.Main.getMarkerGenes',
-    index=6,
-    containing_service=None,
-    input_type=_MARKERGENESREQUEST,
-    output_type=_MARKERGENESREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='getMyLooms',
-    full_name='scope.Main.getMyLooms',
-    index=7,
-    containing_service=None,
-    input_type=_MYLOOMSREQUEST,
-    output_type=_MYLOOMSREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='translateLassoSelection',
-    full_name='scope.Main.translateLassoSelection',
-    index=8,
-    containing_service=None,
-    input_type=_TRANSLATELASSOSELECTIONREQUEST,
-    output_type=_TRANSLATELASSOSELECTIONREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='getCellIDs',
-    full_name='scope.Main.getCellIDs',
-    index=9,
-    containing_service=None,
-    input_type=_CELLIDSREQUEST,
-    output_type=_CELLIDSREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='doGeneSetEnrichment',
-    full_name='scope.Main.doGeneSetEnrichment',
-    index=10,
-    containing_service=None,
-    input_type=_GENESETENRICHMENTREQUEST,
-    output_type=_GENESETENRICHMENTREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='getVmax',
-    full_name='scope.Main.getVmax',
-    index=11,
-    containing_service=None,
-    input_type=_VMAXREQUEST,
-    output_type=_VMAXREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='getUUID',
-    full_name='scope.Main.getUUID',
-    index=12,
-    containing_service=None,
-    input_type=_UUIDREQUEST,
-    output_type=_UUIDREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='getRemainingUUIDTime',
-    full_name='scope.Main.getRemainingUUIDTime',
-    index=13,
-    containing_service=None,
-    input_type=_REMAININGUUIDTIMEREQUEST,
-    output_type=_REMAININGUUIDTIMEREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='loomUploaded',
-    full_name='scope.Main.loomUploaded',
-    index=14,
-    containing_service=None,
-    input_type=_LOOMUPLOADEDREQUEST,
-    output_type=_LOOMUPLOADEDREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='getMyGeneSets',
-    full_name='scope.Main.getMyGeneSets',
-    index=15,
-    containing_service=None,
-    input_type=_MYGENESETSREQUEST,
-    output_type=_MYGENESETSREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='deleteUserFile',
-    full_name='scope.Main.deleteUserFile',
-    index=16,
-    containing_service=None,
-    input_type=_DELETEUSERFILEREQUEST,
-    output_type=_DELETEUSERFILEREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='downloadSubLoom',
-    full_name='scope.Main.downloadSubLoom',
-    index=17,
-    containing_service=None,
-    input_type=_DOWNLOADSUBLOOMREQUEST,
-    output_type=_DOWNLOADSUBLOOMREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='setAnnotationName',
-    full_name='scope.Main.setAnnotationName',
-    index=18,
-    containing_service=None,
-    input_type=_SETANNOTATIONNAMEREQUEST,
-    output_type=_SETANNOTATIONNAMEREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='setLoomHierarchy',
-    full_name='scope.Main.setLoomHierarchy',
-    index=19,
-    containing_service=None,
-    input_type=_SETLOOMHIERARCHYREQUEST,
-    output_type=_SETLOOMHIERARCHYREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='getORCID',
-    full_name='scope.Main.getORCID',
-    index=20,
-    containing_service=None,
-    input_type=_GETORCIDREQUEST,
-    output_type=_GETORCIDREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='getORCIDStatus',
-    full_name='scope.Main.getORCIDStatus',
-    index=21,
-    containing_service=None,
-    input_type=_GETORCIDSTATUSREQUEST,
-    output_type=_GETORCIDSTATUSREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='setColabAnnotationData',
-    full_name='scope.Main.setColabAnnotationData',
-    index=22,
-    containing_service=None,
-    input_type=_SETCOLABANNOTATIONDATAREQUEST,
-    output_type=_SETCOLABANNOTATIONDATAREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='voteAnnotation',
-    full_name='scope.Main.voteAnnotation',
-    index=23,
-    containing_service=None,
-    input_type=_VOTEANNOTATIONREQUEST,
-    output_type=_VOTEANNOTATIONREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='getNextCluster',
-    full_name='scope.Main.getNextCluster',
-    index=24,
-    containing_service=None,
-    input_type=_GETNEXTCLUSTERREQUEST,
-    output_type=_FEATUREREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='addNewClustering',
-    full_name='scope.Main.addNewClustering',
-    index=25,
-    containing_service=None,
-    input_type=_ADDNEWCLUSTERINGREQUEST,
-    output_type=_ADDNEWCLUSTERINGREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='getClusterOverlaps',
-    full_name='scope.Main.getClusterOverlaps',
-    index=26,
-    containing_service=None,
-    input_type=_GETCLUSTEROVERLAPSREQUEST,
-    output_type=_CLUSTEROVERLAPS,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='getFeatureLabels',
-    full_name='scope.Main.getFeatureLabels',
-    index=27,
-    containing_service=None,
-    input_type=_FEATURELABELREQUEST,
-    output_type=_FEATURELABELREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-])
+    serialized_start=7698,
+    serialized_end=9884,
+    methods=[
+        _descriptor.MethodDescriptor(
+            name="getCellColorByFeatures",
+            full_name="scope.Main.getCellColorByFeatures",
+            index=0,
+            containing_service=None,
+            input_type=_CELLCOLORBYFEATURESREQUEST,
+            output_type=_CELLCOLORBYFEATURESREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="getCellAUCValuesByFeatures",
+            full_name="scope.Main.getCellAUCValuesByFeatures",
+            index=1,
+            containing_service=None,
+            input_type=_CELLAUCVALUESBYFEATURESREQUEST,
+            output_type=_CELLAUCVALUESBYFEATURESREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="getCellMetaData",
+            full_name="scope.Main.getCellMetaData",
+            index=2,
+            containing_service=None,
+            input_type=_CELLMETADATAREQUEST,
+            output_type=_CELLMETADATAREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="getFeatures",
+            full_name="scope.Main.getFeatures",
+            index=3,
+            containing_service=None,
+            input_type=_FEATUREREQUEST,
+            output_type=_FEATUREREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="getCoordinates",
+            full_name="scope.Main.getCoordinates",
+            index=4,
+            containing_service=None,
+            input_type=_COORDINATESREQUEST,
+            output_type=_COORDINATESREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="getRegulonMetaData",
+            full_name="scope.Main.getRegulonMetaData",
+            index=5,
+            containing_service=None,
+            input_type=_REGULONMETADATAREQUEST,
+            output_type=_REGULONMETADATAREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="getMarkerGenes",
+            full_name="scope.Main.getMarkerGenes",
+            index=6,
+            containing_service=None,
+            input_type=_MARKERGENESREQUEST,
+            output_type=_MARKERGENESREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="getMyLooms",
+            full_name="scope.Main.getMyLooms",
+            index=7,
+            containing_service=None,
+            input_type=_MYLOOMSREQUEST,
+            output_type=_MYLOOMSREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="translateLassoSelection",
+            full_name="scope.Main.translateLassoSelection",
+            index=8,
+            containing_service=None,
+            input_type=_TRANSLATELASSOSELECTIONREQUEST,
+            output_type=_TRANSLATELASSOSELECTIONREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="getCellIDs",
+            full_name="scope.Main.getCellIDs",
+            index=9,
+            containing_service=None,
+            input_type=_CELLIDSREQUEST,
+            output_type=_CELLIDSREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="doGeneSetEnrichment",
+            full_name="scope.Main.doGeneSetEnrichment",
+            index=10,
+            containing_service=None,
+            input_type=_GENESETENRICHMENTREQUEST,
+            output_type=_GENESETENRICHMENTREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="getVmax",
+            full_name="scope.Main.getVmax",
+            index=11,
+            containing_service=None,
+            input_type=_VMAXREQUEST,
+            output_type=_VMAXREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="getUUID",
+            full_name="scope.Main.getUUID",
+            index=12,
+            containing_service=None,
+            input_type=_UUIDREQUEST,
+            output_type=_UUIDREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="getRemainingUUIDTime",
+            full_name="scope.Main.getRemainingUUIDTime",
+            index=13,
+            containing_service=None,
+            input_type=_REMAININGUUIDTIMEREQUEST,
+            output_type=_REMAININGUUIDTIMEREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="loomUploaded",
+            full_name="scope.Main.loomUploaded",
+            index=14,
+            containing_service=None,
+            input_type=_LOOMUPLOADEDREQUEST,
+            output_type=_LOOMUPLOADEDREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="getMyGeneSets",
+            full_name="scope.Main.getMyGeneSets",
+            index=15,
+            containing_service=None,
+            input_type=_MYGENESETSREQUEST,
+            output_type=_MYGENESETSREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="deleteUserFile",
+            full_name="scope.Main.deleteUserFile",
+            index=16,
+            containing_service=None,
+            input_type=_DELETEUSERFILEREQUEST,
+            output_type=_DELETEUSERFILEREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="downloadSubLoom",
+            full_name="scope.Main.downloadSubLoom",
+            index=17,
+            containing_service=None,
+            input_type=_DOWNLOADSUBLOOMREQUEST,
+            output_type=_DOWNLOADSUBLOOMREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="setAnnotationName",
+            full_name="scope.Main.setAnnotationName",
+            index=18,
+            containing_service=None,
+            input_type=_SETANNOTATIONNAMEREQUEST,
+            output_type=_SETANNOTATIONNAMEREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="setLoomHierarchy",
+            full_name="scope.Main.setLoomHierarchy",
+            index=19,
+            containing_service=None,
+            input_type=_SETLOOMHIERARCHYREQUEST,
+            output_type=_SETLOOMHIERARCHYREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="getORCID",
+            full_name="scope.Main.getORCID",
+            index=20,
+            containing_service=None,
+            input_type=_GETORCIDREQUEST,
+            output_type=_GETORCIDREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="getORCIDStatus",
+            full_name="scope.Main.getORCIDStatus",
+            index=21,
+            containing_service=None,
+            input_type=_GETORCIDSTATUSREQUEST,
+            output_type=_GETORCIDSTATUSREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="setColabAnnotationData",
+            full_name="scope.Main.setColabAnnotationData",
+            index=22,
+            containing_service=None,
+            input_type=_SETCOLABANNOTATIONDATAREQUEST,
+            output_type=_SETCOLABANNOTATIONDATAREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="voteAnnotation",
+            full_name="scope.Main.voteAnnotation",
+            index=23,
+            containing_service=None,
+            input_type=_VOTEANNOTATIONREQUEST,
+            output_type=_VOTEANNOTATIONREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="getNextCluster",
+            full_name="scope.Main.getNextCluster",
+            index=24,
+            containing_service=None,
+            input_type=_GETNEXTCLUSTERREQUEST,
+            output_type=_FEATUREREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="addNewClustering",
+            full_name="scope.Main.addNewClustering",
+            index=25,
+            containing_service=None,
+            input_type=_ADDNEWCLUSTERINGREQUEST,
+            output_type=_ADDNEWCLUSTERINGREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="getClusterOverlaps",
+            full_name="scope.Main.getClusterOverlaps",
+            index=26,
+            containing_service=None,
+            input_type=_GETCLUSTEROVERLAPSREQUEST,
+            output_type=_CLUSTEROVERLAPS,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="getFeatureLabels",
+            full_name="scope.Main.getFeatureLabels",
+            index=27,
+            containing_service=None,
+            input_type=_FEATURELABELREQUEST,
+            output_type=_FEATURELABELREPLY,
+            serialized_options=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+)
 _sym_db.RegisterServiceDescriptor(_MAIN)
 
-DESCRIPTOR.services_by_name['Main'] = _MAIN
+DESCRIPTOR.services_by_name["Main"] = _MAIN
 
 # @@protoc_insertion_point(module_scope)
