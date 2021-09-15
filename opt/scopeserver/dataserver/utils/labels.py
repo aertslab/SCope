@@ -38,8 +38,9 @@ def label_annotation(loom: Loom, embedding: int, feature: str) -> List[FeatureLa
     Extract and group cells based on annotation. Place labels for each annotation
     at the barycentre of the cell cluster.
     """
-    values = loom.get_meta_data_annotation_by_name(name=feature)["values"]
-    colours = to_colours(range(len(values)))
+    md_annotation = loom.get_meta_data_annotation_by_name(name=feature)
+    values = md_annotation["values"]
+    colours = to_colours(range(len(values)), color_list=md_annotation["colors"] if "colors" in md_annotation else None)
 
     def labels() -> Generator[FeatureLabel, None, None]:
         for i, annotation in enumerate(values):

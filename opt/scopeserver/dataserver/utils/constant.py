@@ -1,3 +1,4 @@
+import numpy as np
 from enum import Enum, auto, unique
 from typing import Iterable, List
 
@@ -273,9 +274,17 @@ BIG_COLOR_LIST = [
 ]
 
 
-def to_colours(index: Iterable[int]) -> List[str]:
+def to_colours(index: Iterable[int], color_list=None) -> List[str]:
     """Convert indexes (`index`) into pre-determined HTML hex colour values.
     `index` can be a `range(some_number)` or any iterable collection of numbers.
     """
-    num_colours = len(BIG_COLOR_LIST)
-    return [BIG_COLOR_LIST[i % num_colours] for i in index]
+    if color_list is not None and len(np.unique(index)) > len(color_list):
+        raise Exception(f"Not enough custom colors defined.")
+
+    COLOR_LIST = (
+        BIG_COLOR_LIST
+        if color_list is None
+        else [color[1:] if color.startswith("#") else color for color in color_list]
+    )
+    num_colours = len(COLOR_LIST)
+    return [COLOR_LIST[i % num_colours] for i in index]

@@ -138,10 +138,13 @@ class CellColorByFeatures:
             self.features.append(np.zeros(self.n_cells))
 
     def setAnnotationFeature(self, feature: str, annotations: Optional[List[Annotation]] = None, logic: str = "OR"):
-        md_annotation_values = self.loom.get_meta_data_annotation_by_name(name=feature)["values"]
+        md_annotation = self.loom.get_meta_data_annotation_by_name(name=feature)
+        md_annotation_values = md_annotation["values"]
         ca_annotation = self.loom.get_ca_attr_by_name(name=feature)
         ca_annotation_as_int = list(map(lambda x: md_annotation_values.index(str(x)), ca_annotation))
-        self.hex_vec = to_colours(ca_annotation_as_int)
+        self.hex_vec = to_colours(
+            ca_annotation_as_int, color_list=md_annotation["colors"] if "colors" in md_annotation else None
+        )
 
         if annotations is not None:
             cellIndices = self.loom.get_anno_cells(annotations=annotations, logic=logic)
@@ -150,7 +153,13 @@ class CellColorByFeatures:
         reply = s_pb2.CellColorByFeaturesReply(
             color=self.hex_vec,
             vmax=self.v_max,
-            legend=s_pb2.ColorLegend(values=md_annotation_values, colors=to_colours(range(len(md_annotation_values)))),
+            legend=s_pb2.ColorLegend(
+                values=md_annotation_values,
+                colors=to_colours(
+                    range(len(md_annotation_values)),
+                    color_list=md_annotation["colors"] if "colors" in md_annotation else None,
+                ),
+            ),
         )
         self.setReply(reply=reply)
 

@@ -132,6 +132,7 @@ message CoordinatesReply {
 message Annotation {
   string name=1;
   repeated string values=2;
+  repeated string colors=3;
 }
 
 message Coordinate {
