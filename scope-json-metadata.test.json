@@ -40,6 +40,9 @@
                 }
             }]
         }],
+        "clusterColors": [
+            "#00FF00"
+        ],
         "clusterMarkerMetrics": [{
            "accessor": "avg_logFC", 
            "name": "Avg. logFC",

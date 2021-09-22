@@ -69,11 +69,22 @@ def label_all_clusters(loom: Loom, embedding: int, feature: str) -> List[Feature
             cluster_names_dict = loom.get_cluster_names(int(clustering_id))
 
     label_set = set()
+
+    md_clustering = loom.get_meta_data_clustering_by_id(int(clustering_id))
+    colour_list = (
+        [color[1:] if color.startswith("#") else color for color in md_clustering["clusterColors"]]
+        if "clusterColors" in md_clustering
+        else constant.BIG_COLOR_LIST
+    )
+    if len(cluster_names_dict.keys()) > len(colour_list):
+        logger.warning(f"Not enough custom colors defined. Falling back to BIG_COLOR_LIST")
+        colour_list = constant.BIG_COLOR_LIST
+
     for i in uniq(loom.get_clustering_by_id(int(clustering_id))):
         if i == -1:
             label_set.add((i, "Unclustered", "XX" * 3))
             continue
-        label_set.add((i, cluster_names_dict[i], constant.BIG_COLOR_LIST[i % len(constant.BIG_COLOR_LIST)]))
+        label_set.add((i, cluster_names_dict[i], colour_list[i % len(colour_list)]))
 
     cluster_ids, clusters, colours = zip(*label_set)
 

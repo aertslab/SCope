@@ -195,14 +195,23 @@ class CellColorByFeatures:
             if clustering["name"] == re.sub("^Clustering: ", "", request.featureType[n]):
                 clusteringID = str(clustering["id"])
                 if request.feature[n] == "All Clusters":
-                    numClusters = max(self.loom.get_clustering_by_id(clusteringID))
                     legend = set()
                     cluster_names_dict = self.loom.get_cluster_names(int(clusteringID))
+                    md_clustering = self.loom.get_meta_data_clustering_by_id(int(clusteringID))
+                    colour_list = (
+                        [color[1:] if color.startswith("#") else color for color in md_clustering["clusterColors"]]
+                        if "clusterColors" in md_clustering
+                        else constant.BIG_COLOR_LIST
+                    )
+                    if len(cluster_names_dict.keys()) > len(colour_list):
+                        logger.warning(f"Not enough custom colors defined. Falling back to BIG_COLOR_LIST")
+                        colour_list = constant.BIG_COLOR_LIST
+
                     for i in self.loom.get_clustering_by_id(clusteringID):
                         if i == -1:
                             self.hex_vec.append("XX" * 3)
                             continue
-                        colour = constant.BIG_COLOR_LIST[i % len(constant.BIG_COLOR_LIST)]
+                        colour = colour_list[i % len(colour_list)]
                         self.hex_vec.append(colour)
                         legend.add((cluster_names_dict[i], colour))
                     values, colors = zip(*legend)

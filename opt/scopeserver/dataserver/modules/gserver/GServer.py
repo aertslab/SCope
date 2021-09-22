@@ -560,7 +560,8 @@ class SCope(s_pb2_grpc.MainServicer):
                             loomHeierarchy=s_pb2.LoomHeierarchy(L1=L1, L2=L2, L3=L3),
                         )
                     )
-            except ValueError:
+            except ValueError as error:
+                logging.error(error)
                 pass
         self.dfh.update_UUID_db()
 
