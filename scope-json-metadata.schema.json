@@ -289,6 +289,13 @@
                         "items": {
                             "type": "string"
                         }
+                    },
+                    "colors": {
+                        "type": "array",
+                        "description": "A unique set of the colors associated to each value of the annotation",
+                        "items": {
+                            "type": "string"
+                        }
                     }
                 },
                 "required": ["name", "values"]
