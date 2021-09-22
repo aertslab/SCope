@@ -562,7 +562,6 @@ class SCope(s_pb2_grpc.MainServicer):
                     )
             except ValueError as error:
                 logging.error(error)
-                pass
         self.dfh.update_UUID_db()
 
         return s_pb2.MyLoomsReply(myLooms=my_looms, update=update)
