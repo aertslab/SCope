@@ -1,6 +1,9 @@
 import numpy as np
 from enum import Enum, auto, unique
 from typing import Iterable, List
+import logging
+
+logger = logging.getLogger(__name__)
 
 ACTIVE_SESSIONS_LIMIT = 25
 MOUSE_EVENTS_THRESHOLD = 1
@@ -278,13 +281,15 @@ def to_colours(index: Iterable[int], color_list=None) -> List[str]:
     """Convert indexes (`index`) into pre-determined HTML hex colour values.
     `index` can be a `range(some_number)` or any iterable collection of numbers.
     """
-    if color_list is not None and len(np.unique(index)) > len(color_list):
-        raise Exception(f"Not enough custom colors defined.")
 
-    COLOR_LIST = (
-        BIG_COLOR_LIST
-        if color_list is None
-        else [color[1:] if color.startswith("#") else color for color in color_list]
-    )
-    num_colours = len(COLOR_LIST)
-    return [COLOR_LIST[i % num_colours] for i in index]
+    if color_list is None:
+        final_color_list = BIG_COLOR_LIST
+    elif len(np.unique(index)) > len(color_list):
+        logger.warning(f"Not enough custom colors defined. Falling back to BIG_COLOR_LIST")
+        final_color_list = BIG_COLOR_LIST
+    else:
+        final_color_list = [color[1:] if color.startswith("#") else color for color in color_list]
+
+    num_colours = len(final_color_list)
+
+    return [final_color_list[i % num_colours] for i in index]
