@@ -342,13 +342,17 @@ class Annotation(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     name: typing___Text = ...
     values: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text] = ...
+    colors: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text] = ...
     def __init__(
         self,
         *,
         name: typing___Optional[typing___Text] = None,
         values: typing___Optional[typing___Iterable[typing___Text]] = None,
+        colors: typing___Optional[typing___Iterable[typing___Text]] = None,
     ) -> None: ...
-    def ClearField(self, field_name: typing_extensions___Literal["name", b"name", "values", b"values"]) -> None: ...
+    def ClearField(
+        self, field_name: typing_extensions___Literal["colors", b"colors", "name", b"name", "values", b"values"]
+    ) -> None: ...
 
 type___Annotation = Annotation
 
@@ -600,6 +604,7 @@ class Clustering(google___protobuf___message___Message):
     id: builtin___int = ...
     group: typing___Text = ...
     name: typing___Text = ...
+    clusterColors: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text] = ...
     @property
     def clusterMarkerMetrics(
         self,
@@ -616,10 +621,13 @@ class Clustering(google___protobuf___message___Message):
         name: typing___Optional[typing___Text] = None,
         clusterMarkerMetrics: typing___Optional[typing___Iterable[type___ClusterMarkerMetric]] = None,
         clusters: typing___Optional[typing___Iterable[type___ClusterAnnotation]] = None,
+        clusterColors: typing___Optional[typing___Iterable[typing___Text]] = None,
     ) -> None: ...
     def ClearField(
         self,
         field_name: typing_extensions___Literal[
+            "clusterColors",
+            b"clusterColors",
             "clusterMarkerMetrics",
             b"clusterMarkerMetrics",
             "clusters",

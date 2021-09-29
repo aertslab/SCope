@@ -138,10 +138,13 @@ class CellColorByFeatures:
             self.features.append(np.zeros(self.n_cells))
 
     def setAnnotationFeature(self, feature: str, annotations: Optional[List[Annotation]] = None, logic: str = "OR"):
-        md_annotation_values = self.loom.get_meta_data_annotation_by_name(name=feature)["values"]
+        md_annotation = self.loom.get_meta_data_annotation_by_name(name=feature)
+        md_annotation_values = md_annotation["values"]
         ca_annotation = self.loom.get_ca_attr_by_name(name=feature)
         ca_annotation_as_int = list(map(lambda x: md_annotation_values.index(str(x)), ca_annotation))
-        self.hex_vec = to_colours(ca_annotation_as_int)
+        self.hex_vec = to_colours(
+            ca_annotation_as_int, color_list=md_annotation["colors"] if "colors" in md_annotation else None
+        )
 
         if annotations is not None:
             cellIndices = self.loom.get_anno_cells(annotations=annotations, logic=logic)
@@ -150,7 +153,13 @@ class CellColorByFeatures:
         reply = s_pb2.CellColorByFeaturesReply(
             color=self.hex_vec,
             vmax=self.v_max,
-            legend=s_pb2.ColorLegend(values=md_annotation_values, colors=to_colours(range(len(md_annotation_values)))),
+            legend=s_pb2.ColorLegend(
+                values=md_annotation_values,
+                colors=to_colours(
+                    range(len(md_annotation_values)),
+                    color_list=md_annotation["colors"] if "colors" in md_annotation else None,
+                ),
+            ),
         )
         self.setReply(reply=reply)
 
@@ -186,14 +195,23 @@ class CellColorByFeatures:
             if clustering["name"] == re.sub("^Clustering: ", "", request.featureType[n]):
                 clusteringID = str(clustering["id"])
                 if request.feature[n] == "All Clusters":
-                    numClusters = max(self.loom.get_clustering_by_id(clusteringID))
                     legend = set()
                     cluster_names_dict = self.loom.get_cluster_names(int(clusteringID))
+                    md_clustering = self.loom.get_meta_data_clustering_by_id(int(clusteringID))
+                    colour_list = (
+                        [color[1:] if color.startswith("#") else color for color in md_clustering["clusterColors"]]
+                        if "clusterColors" in md_clustering
+                        else constant.BIG_COLOR_LIST
+                    )
+                    if len(cluster_names_dict.keys()) > len(colour_list):
+                        logger.warning(f"Not enough custom colors defined. Falling back to BIG_COLOR_LIST")
+                        colour_list = constant.BIG_COLOR_LIST
+
                     for i in self.loom.get_clustering_by_id(clusteringID):
                         if i == -1:
                             self.hex_vec.append("XX" * 3)
                             continue
-                        colour = constant.BIG_COLOR_LIST[i % len(constant.BIG_COLOR_LIST)]
+                        colour = colour_list[i % len(colour_list)]
                         self.hex_vec.append(colour)
                         legend.add((cluster_names_dict[i], colour))
                     values, colors = zip(*legend)

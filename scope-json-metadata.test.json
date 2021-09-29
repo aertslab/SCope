@@ -40,6 +40,9 @@
                 }
             }]
         }],
+        "clusterColors": [
+            "#00FF00"
+        ],
         "clusterMarkerMetrics": [{
            "accessor": "avg_logFC", 
            "name": "Avg. logFC",
@@ -61,6 +64,10 @@
         "values": [
             "W1118",
             "DGRP-551"
+        ],
+        "colors": [
+            "#00FF00",
+            "#800080"
         ]
     }],
     "metrics": [{

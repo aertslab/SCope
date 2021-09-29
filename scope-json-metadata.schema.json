@@ -208,6 +208,13 @@
                             "required": ["id", "description"]
                         }
                     },
+                    "clusterColors": {
+                        "type": "array",
+                        "description": "A unique set of the colors associated to each cluster",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
                     "clusterMarkerMetrics": {
                         "type": "array",
                         "description": "List of different metrics available from the clustering. Shown in the table in the right sidebar of SCope",
@@ -286,6 +293,13 @@
                     "values": {
                         "type": "array",
                         "description": "A unique set of the values of the annotation",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "colors": {
+                        "type": "array",
+                        "description": "A unique set of the colors associated to each value of the annotation",
                         "items": {
                             "type": "string"
                         }
