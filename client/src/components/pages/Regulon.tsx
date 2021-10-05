@@ -163,6 +163,7 @@ export default class Regulon extends Component<any, RegulonState> {
                                         hideFeatures={false}
                                         activeLegend={true}
                                         getSelectedAnnotations={() => Object()}
+
                                     />
                                 </Grid.Column>
                             </Grid.Row>
