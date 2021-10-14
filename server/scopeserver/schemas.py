@@ -107,6 +107,7 @@ class LoginUrl(BaseModel):
     id: int
     name: str
     url: str
+    icon: Optional[str]
 
     class Config:
         schema_extra = {

@@ -5,14 +5,10 @@ import { Icon, Label, Button, Menu, Checkbox } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
 import PropTypes from 'prop-types';
 import { Cookies } from 'react-cookie';
-import Bitly from 'bitly4api';
-import pako from 'pako';
-
-let bitly = new Bitly(BITLY.token);
 
 import { consentToCookies } from '../redux/actions';
 
-import { OrcidButton } from './Orcid';
+import * as Auth from './Auth';
 
 const cookieName = 'SCOPE_UUID';
 
@@ -25,15 +21,9 @@ class AppHeader extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            shortUrl: null,
             cookies: props.cookies,
-            permalinkUUID: false,
-            orcid_active: true,
         };
 
-        BackendAPI.getORCIDStatus((active) => {
-            this.setState({ orcid_active: active });
-        });
     }
 
     acceptCookies = () => {
@@ -42,14 +32,6 @@ class AppHeader extends Component {
             path: '/',
         });
         this.props.consentToCookies();
-    };
-
-    openORCID = () => {
-        window.open(
-            `https://orcid.org/oauth/authorize?client_id=${ORCID.client_id}&response_type=code&scope=/authenticate&show_login=false&redirect_uri=${ORCID.redirect_uri}`,
-            '_self',
-            'toolbar=no, scrollbars=yes, width=500, height=600, top=500, left=500'
-        );
     };
 
     // TODO: Hacky implementation. To be refactored/reviewed properly
@@ -118,73 +100,13 @@ class AppHeader extends Component {
                             </Menu.Item>
                         )
                 )}
-                <Menu.Item>
-                    <Icon
-                        name='linkify'
-                        onClick={this.getPermalink.bind(
-                            this,
-                            this.state.permalinkUUID,
-                            false
-                        )}
-                        className='pointer'
-                        title='Get permalink'
-                    />
-                    {shortUrl && (
-                        <Label className='permalink'>{shortUrl}</Label>
-                    )}
-                    {shortUrl && (
-                        <Label>
-                            <Checkbox
-                                className='permalink'
-                                checked={this.state.permalinkUUID}
-                                onChange={this.getPermalink.bind(this, true)}
-                                data-tooltip='WARNING: Anyone that uses this link will have read and write access to this session but will be able to see all loom files in this session.'
-                                data-position='bottom center'
-                                data-variation='tiny'
-                            />
-                            {'      Include session UUID in permalink?'}
-                        </Label>
-                    )}
-                </Menu.Item>
-                <Menu.Item>
-                    <OrcidButton
-                        acceptCookies={() => this.acceptCookies()}
-                        cookieConsent={this.props.cookieConsent}
-                        identifier={this.props.cookies.get('scope_orcid_id')}
-                        name={this.props.cookies.get('scope_orcid_name')}
-                        login={() => this.openORCID()}
-                        logout={orcid_logout}
-                    />
-                </Menu.Item>
-
-                <Menu.Item className='sessionInfo'>
-                    Your session will be deleted {timeout} &nbsp;
-                    <Icon
-                        name='info circle'
-                        inverted
-                        title='Our servers can only store that much data. Your files will be removed after the session times out.'
-                    />
-                    <Button
-                        data-tooltip='Start with a new session ID. Your old ID will remain until its timeout expires, please store it if you would like to return. It cannot be recovered.'
-                        data-position='bottom right'
-                        onClick={this.resetUUID.bind(this)}>
-                        Get new session
-                    </Button>
-                </Menu.Item>
+                <Menu.Menu position='right'>
+                    <Menu.Item>
+                        <Auth.AuthPanel/>
+                    </Menu.Item>
+                </Menu.Menu>
             </Menu>
         );
-    }
-
-    resetUUID() {
-        const { history, cookies } = this.props;
-        BackendAPI.getUUIDFromIP((uuid) => {
-            cookies.remove(cookieName);
-            if (this.props.cookieConsent) {
-                cookies.set(cookieName, uuid, { path: '/' });
-            }
-            history.replace('/' + [uuid]);
-            BackendAPI.forceUpdate();
-        });
     }
 
     menuList(metadata) {
@@ -195,14 +117,6 @@ class AppHeader extends Component {
                 title: 'SCope',
                 icon: 'home',
             },
-            /*
-			{
-				display: metadata ? true : false,
-				path: 'dataset',
-				title: 'Dataset info',
-				icon: false
-			},
-			*/
             {
                 display: metadata ? true : false,
                 path: 'gene',
@@ -246,37 +160,6 @@ class AppHeader extends Component {
                 icon: false,
             },
         ];
-    }
-
-    getPermalink(togglePermalinkUUID) {
-        const { match } = this.props;
-        if (togglePermalinkUUID) {
-            let state = !this.state.permalinkUUID;
-            this.state.setState({
-                permalinkUUID: state,
-            });
-        }
-        let j = JSON.stringify(
-            BackendAPI.getExportObject(match.params),
-            BackendAPI.getExportKeys()
-        );
-        let d = pako.deflate(j, { to: 'string' });
-        let b = encodeURIComponent(window.btoa(d).replace(/\//g, '$'));
-        const uuid =
-            'permalink' +
-            (this.state.permalinkUUID ? '__' + match.params.uuid : '');
-
-        bitly
-            .shorten(BITLY.baseURL + '/#/' + uuid + '/' + b)
-            .then((result) => {
-                this.setState({ shortUrl: result.link });
-                this.forceUpdate();
-            })
-            .then((error) => {
-                if (error) {
-                    console.log(error);
-                }
-            });
     }
 }
 

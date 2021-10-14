@@ -13,8 +13,13 @@ function* getFeatures(action: Action.SearchQuery) {
         );
 
         yield put(Action.results(action.payload.field, features));
-    } catch (error) {
-        yield put(Action.error(action.payload.field, error));
+    } catch (error: unknown) {
+        yield put(
+            Action.error(
+                action.payload.field,
+                `Could not query ${action.payload.query}`
+            )
+        );
     }
 }
 

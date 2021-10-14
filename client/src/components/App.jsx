@@ -73,7 +73,7 @@ class App extends Component {
         const { isAppLoading } = this.props;
 
         return (
-            <React.Fragment>
+            <React.StrictMode>
                 <Favicon url='src/images/SCope_favicon.ico' />
                 <Route exact path='/'>
                     <SessionLoading />
@@ -110,7 +110,7 @@ class App extends Component {
                 </CookieConsent>
                 <Alert />{' '}
                 {/* Needed for react popup to function. Do not remove */}
-            </React.Fragment>
+            </React.StrictMode>
         );
     }
 

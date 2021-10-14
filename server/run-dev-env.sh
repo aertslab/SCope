@@ -16,7 +16,7 @@ poetry run bash ./compile-proto.sh
 poetry run alembic upgrade head
 
 # Add the keycloak identity provider
-poetry run scope-console add-identity-provider --issuer "http://localhost:8080/auth/realms/SCope" --clientid "scope" --secret "4e979b39-9386-45a3-b3f8-e47461b03e3e" --name "Keycloak (Dev only)"
+poetry run scope-console add-identity-provider --issuer "http://localhost:8080/auth/realms/SCope" --clientid "scope" --secret "4e979b39-9386-45a3-b3f8-e47461b03e3e" --name "Keycloak (Dev only)" --icon "http://localhost:8080/auth/resources/dniau/welcome/keycloak/logo.png"
 
 # Add an admin
 poetry run scope-console create-admin --iss 1 --sub "5e349424-520e-436f-904b-18369a9a9033" Administrator

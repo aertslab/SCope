@@ -46,7 +46,8 @@ def create_admin(iss, sub, name):
 @click.option("--clientid", help="Client identifier issued by the identity provider")
 @click.option("--secret", help="Client secret issued by the identity provider")
 @click.option("--name", help="Human readable name of this provider")
-def add_identity_provider(name, issuer, clientid, secret):
+@click.option("--icon", default=None, help="Icon to display in a client login button")
+def add_identity_provider(name, issuer, clientid, secret, icon):
     "Add a new identity provider"
     try:
         response = httpx.get(f"{issuer}/.well-known/openid-configuration")
@@ -59,7 +60,7 @@ def add_identity_provider(name, issuer, clientid, secret):
 
     with SessionLocal() as database:
         try:
-            provider = models.IdentityProvider(name=name, issuer=issuer, clientid=clientid, secret=secret)
+            provider = models.IdentityProvider(name=name, issuer=issuer, clientid=clientid, secret=secret, icon=icon)
             database.add(provider)
             database.commit()
         except SQLAlchemyError as err:

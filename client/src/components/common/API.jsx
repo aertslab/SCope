@@ -356,7 +356,7 @@ class API {
         return this.getActiveLoomMetaDataEmbedding().trajectory;
     }
 
-    queryLoomFiles(uuid, callback, loomFile = null) {
+    queryLoomFiles(uuid, callback, loomFile) {
         let query = {
             UUID: uuid,
         };

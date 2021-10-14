@@ -6,10 +6,13 @@ import * as GProfiler from '../../components/GProfiler/constants';
 import { reducer as SearchReducer } from '../../components/Search/reducer';
 import * as Search from '../../components/Search/constants';
 
+import * as Auth from '../../components/Auth';
+
 const rootReducer = combineReducers({
     ['main']: main,
     [GProfiler.NAME]: GProfilerReducer,
     [Search.NAME]: SearchReducer,
+    [Auth.NAME]: Auth.Reducer,
 });
 
 export default rootReducer;
