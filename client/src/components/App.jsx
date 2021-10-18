@@ -79,14 +79,7 @@ class App extends Component {
                     <SessionLoading />
                 </Route>
                 <Route path='/:uuid/:loom?/:page?'>
-                    <Main
-                        loaded={loaded}
-                        timeout={this.timeFormatter.format(
-                            Math.round(millisecondsToDays(this.timeout)),
-                            'day'
-                        )}
-                        cookies={this.props.cookies}
-                    />
+                    <Main />
                 </Route>
                 <FullPageNotify
                     starting={isAppLoading}

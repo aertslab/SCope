@@ -3,5 +3,3 @@ export const SET_APP_LOADING = 'SET_APP_LOADING';
 export const SET_UUID = 'SET_UUID';
 
 export const SET_SESSION_MODE = 'SET_SESSION_MODE';
-
-export const CONSENT_TO_COOKIES = 'CONSENT_TO_COOKIES';

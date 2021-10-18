@@ -15,7 +15,3 @@ export const setSessionMode = (sessionMode: MainState['sessionMode']) => ({
     type: Action.SET_SESSION_MODE,
     payload: sessionMode,
 });
-
-export const consentToCookies = () => ({
-    type: Action.CONSENT_TO_COOKIES,
-});

@@ -1,18 +1,7 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { Icon, Popup, Button } from 'semantic-ui-react';
 import ClusteringAddPopup from './ClusteringAddPopup';
-
-import { instanceOf } from 'prop-types';
-import { withCookies, Cookies } from 'react-cookie';
-
-import { RootState } from '../../redux/reducers';
-
-interface OptionsPopupProps extends RouteComponentProps {
-    cookies: Cookies;
-    cookieConsent: boolean;
-}
 
 interface OptionsPopupState {
     optionsOpen: boolean;
@@ -22,12 +11,8 @@ interface OptionsPopupState {
     orcid_uuid?: string;
 }
 
-class OptionsPopup extends Component<OptionsPopupProps, OptionsPopupState> {
-    static propTypes = {
-        cookies: instanceOf(Cookies).isRequired,
-    };
-
-    constructor(props: OptionsPopupProps) {
+class OptionsPopup extends Component<RouteComponentProps, OptionsPopupState> {
+    constructor(props: RouteComponentProps) {
         super(props);
         this.state = {
             optionsOpen: false,
@@ -63,8 +48,7 @@ class OptionsPopup extends Component<OptionsPopupProps, OptionsPopupState> {
                 orcid_uuid &&
                 orcid_name !== '' &&
                 orcid_id !== '' &&
-                orcid_uuid !== '' &&
-                this.props.cookieConsent
+                orcid_uuid !== ''
             ) {
                 return (
                     <ClusteringAddPopup
@@ -118,26 +102,6 @@ class OptionsPopup extends Component<OptionsPopupProps, OptionsPopupState> {
             />
         );
     }
-
-    componentDidMount() {
-        const orcid_name = this.props.cookies.get('scope_orcid_name');
-        const orcid_id = this.props.cookies.get('scope_orcid_id');
-        const orcid_uuid = this.props.cookies.get('scope_orcid_uuid');
-
-        this.setState({
-            orcid_name: orcid_name,
-            orcid_id: orcid_id,
-            orcid_uuid: orcid_uuid,
-        });
-    }
 }
 
-const optionsPopup = withRouter(withCookies(OptionsPopup));
-
-const mapStateToProps = (state: RootState) => {
-    return {
-        cookieConsent: state.main.cookieConsent,
-    };
-};
-
-export default connect(mapStateToProps)(optionsPopup);
+export default withRouter(OptionsPopup);

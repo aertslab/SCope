@@ -17,7 +17,7 @@ const LoginRedirect: React.FC<{}> = () => {
         }
     });
 
-    return <Redirect to='/' />;
+    return <Redirect to='/welcome' />;
 };
 
 export { LoginRedirect };

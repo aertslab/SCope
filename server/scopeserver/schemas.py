@@ -129,3 +129,9 @@ class UploadLimit(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+# Legacy compatibility
+
+class Permalink(BaseModel):
+    sessiondata: str

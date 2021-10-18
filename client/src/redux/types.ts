@@ -1,9 +1,4 @@
-import {
-    SET_APP_LOADING,
-    SET_UUID,
-    SET_SESSION_MODE,
-    CONSENT_TO_COOKIES,
-} from './actionTypes';
+import { SET_APP_LOADING, SET_UUID, SET_SESSION_MODE } from './actionTypes';
 
 export const SESSION_READ = 'r';
 export const SESSION_READWRITE = 'rw';
@@ -14,7 +9,6 @@ export interface MainState {
     isAppLoading: boolean;
     uuid: string;
     sessionMode: SessionMode;
-    cookieConsent: boolean;
 }
 
 export interface SetLoadingAction {
@@ -32,12 +26,7 @@ export interface SetSessionModeAction {
     payload: SessionMode;
 }
 
-export interface ConsentToCookies {
-    type: typeof CONSENT_TO_COOKIES;
-}
-
 export type MainAction =
     | SetLoadingAction
     | SetUUIDAction
-    | SetSessionModeAction
-    | ConsentToCookies;
+    | SetSessionModeAction;

@@ -4,3 +4,4 @@ export {
     watchRequestToken,
     watchRequestProviders,
 } from '../../../components/Auth';
+export * from '../../../components/Legacy';

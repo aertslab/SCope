@@ -7,7 +7,6 @@ const initialState: MainState = {
     isAppLoading: true,
     uuid: '',
     sessionMode: SESSION_READ,
-    cookieConsent: false,
 };
 
 const main = produce((draft: MainState, action: MainAction) => {
@@ -20,9 +19,6 @@ const main = produce((draft: MainState, action: MainAction) => {
             break;
         case Action.SET_SESSION_MODE:
             draft.sessionMode = action.payload;
-            break;
-        case Action.CONSENT_TO_COOKIES:
-            draft.cookieConsent = true;
             break;
     }
 }, initialState);

@@ -6,6 +6,7 @@ import {
     watchGuestLogin,
     watchRequestToken,
     watchRequestProviders,
+    watchPermalinkRequests,
 } from './scope';
 
 export default function* rootSaga() {
@@ -15,5 +16,6 @@ export default function* rootSaga() {
         watchGuestLogin(),
         watchRequestToken(),
         watchRequestProviders(),
+        watchPermalinkRequests(),
     ]);
 }
