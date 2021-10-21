@@ -5,12 +5,16 @@ export type AuthInit = {
 };
 
 export type AuthProvidersRequested = {
-    status: 'requested';
+    status: 'requested_providers';
 };
 
 export type AuthLoginReady = {
     status: 'have_providers';
     providers: Array<Provider>;
+};
+
+export type AuthTokenRequested = {
+    status: 'requested_token';
 };
 
 export type Authenticated = {
@@ -28,6 +32,7 @@ export type State =
     | AuthInit
     | AuthProvidersRequested
     | AuthLoginReady
+    | AuthTokenRequested
     | Authenticated
     | AuthError;
 

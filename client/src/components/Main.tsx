@@ -4,7 +4,7 @@
 
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Route, Redirect, useLocation } from 'react-router-dom';
+import { Route, Redirect, Switch, useLocation } from 'react-router-dom';
 
 import { Segment } from 'semantic-ui-react';
 
@@ -48,12 +48,12 @@ export const Main: React.FC<{}> = () => {
     const [metadata, setMetadata] = useState(null);
 
     const loc = useLocation();
-    console.log(loc);
     if (loc.hash.startsWith('#/permalink/')) {
         console.log('Is a permalink');
         return <Redirect to={'/legacy/restore/' + loc.hash.substring(12)} />;
     } else if (loc.hash.length > 0) {
-        return <Redirect to={'/legacy/' + loc.hash.substring(1)} />;
+        console.log('Is a legacy session');
+        return <Redirect to={'/legacy/' + loc.hash.substring(2)} />;
     }
 
     return (
@@ -83,21 +83,26 @@ export const Main: React.FC<{}> = () => {
                         sessionMode={state.sessionMode}
                     />
                 </div>
-                {/* <Route path='/:uuid/:loom?/welcome' component={Welcome} />
-                    <Route path='/:uuid/:loom?/dataset' component={Dataset} />
-                    <Route path='/:uuid/:loom?/gene' component={Gene} />
-                    <Route path='/:uuid/:loom?/regulon' component={Regulon} />
-                    <Route
-                    path='/:uuid/:loom?/annotations'
-                    component={Annotations}
-                    />
-                    <Route path='/:uuid/:loom?/compare'>
-                    <Compare metadata={metadata} />
-                    </Route>
-                    <Route path='/:uuid/:loom?/tutorial' component={Tutorial} />
-                    <Route path='/:uuid/:loom?/about' component={About} /> */}
                 <div style={{ gridColumn: 2, height: '100%' }}>
-                    <Route exact path='/welcome' component={Welcome} />
+                    <Switch>
+                        <Route exact path='/welcome' component={Welcome} />
+                        <Route exact path='/tutorial' component={Tutorial} />
+                        <Route exact path='/about' component={About} />
+                        <Route exact path='/dataset' component={Dataset} />
+                        <Route exact path='/gene' component={Gene} />
+                        <Route exact path='/regulon' component={Regulon} />
+                        <Route
+                            exact
+                            path='/annotations'
+                            component={Annotations}
+                        />
+                        <Route exact path='/compare'>
+                            <Compare metadata={metadata} />
+                        </Route>
+                        <Route path='/'>
+                            <Redirect to='/welcome' />
+                        </Route>
+                    </Switch>
                 </div>
             </div>
         </React.StrictMode>

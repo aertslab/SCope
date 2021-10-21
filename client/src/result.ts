@@ -1,34 +1,38 @@
-type SuccessT<T> = {
-    kind: 'Success';
-    value: T;
-};
+import { Functor } from 'ramda';
 
-type ErrorT<T> = {
-    kind: 'Error';
-    error: T;
-};
+export type Result<T, E> = (
+    | { kind: 'Success'; value: T }
+    | { kind: 'Error'; error: E }
+) &
+    Functor<T>;
 
-export type Result<S, E> = SuccessT<S> | ErrorT<E>;
-
-export function success<T>(value: T): SuccessT<T> {
+export function success<T, E>(value: T): Result<T, E> {
     return {
         kind: 'Success',
         value,
+        map: (fn) => success(fn(value)),
+        ap: (f) => f.map(value),
     };
 }
 
-export function error<T>(err: T): ErrorT<T> {
+export function error<T, E>(err: E): Result<T, E> {
     return {
         kind: 'Error',
         error: err,
+        map: (_fn) => error(err),
+        ap: (_f) => error(err),
     };
 }
 
-export function isSuccess<S, E>(result: Result<S, E>): result is SuccessT<S> {
+export function of<S, E>(value: S): Result<S, E> {
+    return success(value);
+}
+
+export function isSuccess<S, E>(result: Result<S, E>): boolean {
     return result.kind === 'Success';
 }
 
-export function isError<S, E>(result: Result<S, E>): result is ErrorT<E> {
+export function isError<S, E>(result: Result<S, E>): boolean {
     return result.kind === 'Error';
 }
 
@@ -52,14 +56,11 @@ export function match<S, E, V>(
     }
 }
 
-export function map<S, T, E>(
+export function map<S, E, T>(
     fn: (_val: S) => T,
     result: Result<S, E>
 ): Result<T, E> {
-    if (isSuccess(result)) {
-        return success(fn(result.value));
-    }
-    return result;
+    return result.map(fn);
 }
 
 export function mapError<S, E, F>(
@@ -70,5 +71,5 @@ export function mapError<S, E, F>(
         return error(fn(result.error));
     }
 
-    return result;
+    return result as unknown as Result<S, F>;
 }

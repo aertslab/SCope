@@ -5,7 +5,6 @@ import {
     BrowserRouter,
     Route,
     Switch,
-    Redirect,
 } from 'react-router-dom';
 import { Provider } from 'react-redux';
 
@@ -25,11 +24,6 @@ declare const LOGIN_REDIRECT: string;
 
 const store = configureStore({});
 
-const LegacySession = () => {
-    console.log('Legacy session...');
-    return <Redirect to='/welcome' />;
-};
-
 ReactDOM.render(
     <Provider store={store}>
         <BrowserRouter>
@@ -41,7 +35,7 @@ ReactDOM.render(
                 />
                 <Route
                     path='/legacy/:uuid/:loom?/:page?'
-                    component={LegacySession}
+                    component={Legacy.Session}
                 />
                 <Route path='/' component={Main} />
             </Switch>

@@ -18,12 +18,17 @@ export const reducer: Reducer<State, AuthAction> = produce(
     (draft: State, action: AuthAction) => {
         switch (action.type) {
             case t.REQUEST_PROVIDERS:
-                (draft as AuthProvidersRequested).status = 'requested';
+                (draft as AuthProvidersRequested).status =
+                    'requested_providers';
                 break;
 
             case t.PROVIDERS:
                 (draft as AuthLoginReady).providers = action.payload.providers;
                 draft.status = 'have_providers';
+                break;
+
+            case t.REQUEST_TOKEN:
+                draft.status = 'requested_token';
                 break;
 
             case t.AUTH_TOKEN:

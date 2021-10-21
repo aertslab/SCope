@@ -7,6 +7,8 @@ const initialState: MainState = {
     isAppLoading: true,
     uuid: '',
     sessionMode: SESSION_READ,
+    projects: [],
+    datasets: [],
 };
 
 const main = produce((draft: MainState, action: MainAction) => {
@@ -19,6 +21,10 @@ const main = produce((draft: MainState, action: MainAction) => {
             break;
         case Action.SET_SESSION_MODE:
             draft.sessionMode = action.payload;
+            break;
+        case Action.MY_PROJECTS:
+            draft.projects = action.payload.projects;
+            draft.datasets = action.payload.datasets;
             break;
     }
 }, initialState);

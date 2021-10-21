@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { Icon, Label, Button, Menu } from 'semantic-ui-react';
 
 import { LegacyAPI } from '../api';
@@ -8,8 +8,8 @@ import * as Auth from './Auth';
 import { SemanticICONS } from 'semantic-ui-react/dist/commonjs/generic';
 
 export const AppHeader: React.FC<{}> = () => {
-    const { uuid, loom, page } =
-        useParams<{ uuid?: string; loom?: string; page?: string }>();
+    const { pathname } = useLocation();
+    const loom = '*';
 
     // TODO: Hacky implementation. To be refactored/reviewed properly
     const countAnnotations = (metadata) => {
@@ -23,50 +23,49 @@ export const AppHeader: React.FC<{}> = () => {
     };
 
     const metadata =
-        loom !== undefined
-            ? LegacyAPI.getLoomMetadata(decodeURIComponent(loom))
-            : null;
+        loom !== undefined ? LegacyAPI.getLoomMetadata(loom) : null;
+
     const menu = [
         {
             display: true,
-            path: 'welcome',
+            path: '/welcome',
             title: 'SCope',
             icon: 'home',
         },
         {
             display: metadata ? true : false,
-            path: 'gene',
+            path: '/gene',
             title: 'Gene',
             icon: false,
         },
         {
             display:
                 metadata && metadata.fileMetaData.hasRegulonsAUC ? true : false,
-            path: 'regulon',
+            path: '/regulon',
             title: 'Regulon',
             icon: false,
         },
         {
             display: metadata && countAnnotations(metadata) > 0 ? true : false,
-            path: 'annotations',
+            path: '/annotations',
             title: 'All Annotations',
             icon: false,
         },
         {
             display: metadata ? true : false,
-            path: 'compare',
+            path: '/compare',
             title: 'Compare',
             icon: false,
         },
         {
             display: true,
-            path: 'tutorial',
+            path: '/tutorial',
             title: 'Tutorial',
             icon: false,
         },
         {
             display: true,
-            path: 'about',
+            path: '/about',
             title: 'About',
             icon: false,
         },
@@ -78,8 +77,8 @@ export const AppHeader: React.FC<{}> = () => {
                 (item, i) =>
                     item.display && (
                         <Menu.Item key={i}>
-                            <Link to={'/' + [uuid, loom, item.path].join('/')}>
-                                <Button basic active={page === item.path}>
+                            <Link to={item.path}>
+                                <Button basic active={pathname === item.path}>
                                     {item.icon && (
                                         <Icon
                                             name={item.icon as SemanticICONS}
