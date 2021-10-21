@@ -12,26 +12,45 @@ import RightSidebar from '../RightSidebar';
 import ViewerToolbar from '../common/ViewerToolbar';
 import Histogram from '../Histogram';
 
-export default class Regulon extends Component {
-    constructor() {
-        super();
+import { Metadata, Feature } from '../../model';
+
+type RegulonState = {
+    activeLoom: string;
+    activeEmbeddingId: number;
+    activeFeatures: Feature[];
+};
+
+export default class Regulon extends Component<any, RegulonState> {
+    activeLoomListener: (
+        _loom: string,
+        _metadata: Metadata,
+        _embeddingId: number
+    ) => void;
+    activeFeaturesListener: (_features: Feature[]) => void;
+
+    constructor(props) {
+        super(props);
         this.state = {
             activeLoom: BackendAPI.getActiveLoom(),
-            activeCoordinates: BackendAPI.getActiveCoordinates(),
+            activeEmbeddingId: BackendAPI.getActiveEmbeddingId(),
             activeFeatures: BackendAPI.getActiveFeatures(),
         };
-        this.activeLoomListener = (loom, metadata, coordinates) => {
-            this.setState({ activeLoom: loom, activeCoordinates: coordinates });
+        this.activeLoomListener = (
+            loom: string,
+            metadata: Metadata,
+            embeddingId: number
+        ) => {
+            this.setState({ activeLoom: loom, activeEmbeddingId: embeddingId });
         };
-        this.activeFeaturesListener = (features) => {
+        this.activeFeaturesListener = (features: Feature[]) => {
             this.setState({ activeFeatures: features });
         };
     }
 
     render() {
-        const { activeLoom, activeCoordinates, activeFeatures } = this.state;
+        const { activeLoom, activeEmbeddingId, activeFeatures } = this.state;
 
-        let featureThreshold = [0, 1, 2].map((i) => (
+        const featureThreshold = [0, 1, 2].map((i) => (
             <Grid.Column key={i} className='flexDisplay' stretched>
                 <Histogram
                     field={i}
@@ -66,14 +85,14 @@ export default class Regulon extends Component {
                 </Grid>
                 <div
                     style={{
-                        flexGrow: '1',
+                        flexGrow: 1,
                         display: 'flex',
                         flexDirection: 'row',
                     }}>
-                    <div style={{ width: '78px', paddingTop: '20px' }}>
+                    <div style={{ width: '78px', paddingTop: '45px' }}>
                         <ViewerToolbar location={this.props.location} />
                     </div>
-                    <div style={{ flexGrow: '1' }}>
+                    <div style={{ flexGrow: 1, paddingTop: '45px' }}>
                         <Grid
                             className='flexDisplay'
                             style={{ height: '100%' }}>
@@ -88,7 +107,7 @@ export default class Regulon extends Component {
                                         name='reg'
                                         loomFile={activeLoom}
                                         activeFeatures={activeFeatures}
-                                        activeCoordinates={activeCoordinates}
+                                        activeEmbeddingId={activeEmbeddingId}
                                         scale={true}
                                         location={this.props.location}
                                     />
@@ -105,8 +124,8 @@ export default class Regulon extends Component {
                                             name='auc'
                                             loomFile={activeLoom}
                                             activeFeatures={activeFeatures}
-                                            activeCoordinates={
-                                                activeCoordinates
+                                            activeEmbeddingId={
+                                                activeEmbeddingId
                                             }
                                             thresholds={true}
                                             location={this.props.location}
@@ -123,8 +142,8 @@ export default class Regulon extends Component {
                                             name='expr'
                                             loomFile={activeLoom}
                                             activeFeatures={activeFeatures}
-                                            activeCoordinates={
-                                                activeCoordinates
+                                            activeEmbeddingId={
+                                                activeEmbeddingId
                                             }
                                             scale={true}
                                             genes={true}
@@ -141,6 +160,9 @@ export default class Regulon extends Component {
                                                 activeFeatures: features,
                                             });
                                         }}
+                                        hideFeatures={false}
+                                        activeLegend={true}
+                                        selectedAnnotations={{}}
                                     />
                                 </Grid.Column>
                             </Grid.Row>
@@ -167,7 +189,7 @@ export default class Regulon extends Component {
         );
     }
 
-    onThresholdChange(idx, threshold) {
+    onThresholdChange(idx: number, threshold: number) {
         BackendAPI.setFeatureThreshold(idx, threshold);
     }
 }

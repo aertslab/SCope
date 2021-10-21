@@ -40,7 +40,7 @@ class Compare extends Component {
         this.state = {
             activePage: BackendAPI.getActivePage(),
             multiLoom: BackendAPI.getActiveLooms(),
-            multiCoordinates: [BackendAPI.getActiveCoordinates()],
+            multiCoordinates: [BackendAPI.getActiveEmbeddingId()],
             multiMetadata: [BackendAPI.getActiveLoomMetadata()],
             activeFeatures: BackendAPI.getActiveFeatures(),
             activeAnnotation: -1,
@@ -398,7 +398,7 @@ class Compare extends Component {
                                             }
                                             activeFeatures={activeFeatures}
                                             superposition={superposition}
-                                            activeCoordinates={
+                                            activeEmbeddingId={
                                                 configuration === 'multi'
                                                     ? R.defaultTo(
                                                           -1,
