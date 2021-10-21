@@ -6,8 +6,6 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Route, Redirect, Switch, useLocation } from 'react-router-dom';
 
-import { Segment } from 'semantic-ui-react';
-
 import { RootState } from '../redux/reducers';
 import { SessionMode } from '../redux/types';
 
@@ -23,14 +21,6 @@ import {
     Tutorial,
     Welcome,
 } from './pages';
-
-export const SessionLoading: React.FC = () => {
-    return (
-        <Segment vertical textAlign='center' className='parentView'>
-            <h1>SCope</h1>
-        </Segment>
-    );
-};
 
 type MainState = {
     sessionMode: SessionMode;
