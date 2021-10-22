@@ -1,5 +1,9 @@
 import * as R from 'ramda';
 
+declare module 'ramda' {
+    export const sequence: any;
+}
+
 declare const API_PREFIX: string;
 
 import { Result, of, success, error } from '../result';

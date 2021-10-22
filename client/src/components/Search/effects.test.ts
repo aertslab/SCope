@@ -40,6 +40,11 @@ const exampleResults = [
 describe('Query API side-effect', () => {
     const exampleField = '1';
     const exampleSearchQuery = 'query';
+    const query = {
+        dataset: '',
+        category: 'all',
+        query: exampleSearchQuery,
+    };
 
     // @ts-ignore
     const generator = cloneableGenerator(getFeatures)(
@@ -48,13 +53,7 @@ describe('Query API side-effect', () => {
 
     it('Calls the queryFeatures API', () => {
         const result = generator.next().value;
-        expect(result).toEqual(
-            call(queryFeatures, {
-                dataset: '',
-                category: 'all',
-                query: exampleSearchQuery,
-            })
-        );
+        expect(result).toEqual(call(queryFeatures, query));
     });
 
     describe('...and if the request is successful', () => {
@@ -83,7 +82,7 @@ describe('Query API side-effect', () => {
         });
 
         it('Raises an ERROR action', () => {
-            const err = 'No connection to back-end';
+            const err = `Could not query ${JSON.stringify(query)}`;
             const result = clone.throw(err).value;
             expect(result).toEqual(put(error(exampleField, err)));
         });

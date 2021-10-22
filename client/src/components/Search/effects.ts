@@ -17,7 +17,7 @@ function* getFeatures(action: Action.SearchQuery) {
         yield put(
             Action.error(
                 action.payload.field,
-                `Could not query ${action.payload.query}`
+                `Could not query ${JSON.stringify(action.payload.query)}`
             )
         );
     }

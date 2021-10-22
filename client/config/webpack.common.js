@@ -87,4 +87,9 @@ module.exports = {
             ],
         }),
     ],
+
+    stats: {
+        orphanModules: true,
+        assetsSpace: 100,
+    }
 };

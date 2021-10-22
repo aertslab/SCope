@@ -1,5 +1,5 @@
 import * as AT from './actionTypes';
-import { MainState } from './types';
+import { MainState, MyProjects } from './types';
 
 export const setAppLoading = (isAppLoading: MainState['isAppLoading']) => ({
     type: AT.SET_APP_LOADING,
@@ -19,7 +19,7 @@ export const setSessionMode = (sessionMode: MainState['sessionMode']) => ({
 export const myProjects = (
     projects: MainState['projects'],
     datasets: MainState['datasets']
-) => ({
+): MyProjects => ({
     type: AT.MY_PROJECTS,
     payload: { projects, datasets },
 });
