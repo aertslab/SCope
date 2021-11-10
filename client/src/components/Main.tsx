@@ -26,6 +26,15 @@ type MainState = {
     sessionMode: SessionMode;
 };
 
+const validateSessionID = (name: string): string | null => {
+    const allowedChars = /^[*\-0-9A-Za-z]+$/gi;
+    if (allowedChars.test(name)) {
+        return name;
+    }
+
+    return null;
+};
+
 export const Main: React.FC<{}> = () => {
     const state: MainState = useSelector<RootState, MainState>(
         (root: RootState) => {
@@ -40,10 +49,12 @@ export const Main: React.FC<{}> = () => {
     const loc = useLocation();
     if (loc.hash.startsWith('#/permalink/')) {
         console.log('Is a permalink');
-        return <Redirect to={'/legacy/restore/' + loc.hash.substring(12)} />;
+        const session = validateSessionID(loc.hash.substring(12));
+        return <Redirect to={`/legacy/restore/${session}`} />; // nosemgrep: typescript.react.security.audit.react-router-redirect.react-router-redirect
     } else if (loc.hash.length > 0) {
         console.log('Is a legacy session');
-        return <Redirect to={'/legacy/' + loc.hash.substring(2)} />;
+        const session = validateSessionID(loc.hash.substring(2));
+        return <Redirect to={`/legacy/${session}`} />; // nosemgrep: typescript.react.security.audit.react-router-redirect.react-router-redirect
     }
 
     return (
