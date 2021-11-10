@@ -22,7 +22,6 @@ import {
 } from '../redux/actions';
 
 import { FullPageNotify } from './pages';
-import { millisecondsToDays } from './utils';
 
 const publicIp = require('public-ip');
 
@@ -68,7 +67,7 @@ class App extends Component {
     }
 
     render() {
-        const { error, loaded, sessionsLimitReached } = this.state;
+        const { error, sessionsLimitReached } = this.state;
 
         const { isAppLoading } = this.props;
 

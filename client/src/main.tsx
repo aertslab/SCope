@@ -1,11 +1,7 @@
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import 'semantic-ui-css/semantic.min.css';
-import {
-    BrowserRouter,
-    Route,
-    Switch,
-} from 'react-router-dom';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { Provider } from 'react-redux';
 
 import configureStore from './redux/store';
