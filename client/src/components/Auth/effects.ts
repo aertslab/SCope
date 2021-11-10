@@ -1,7 +1,7 @@
 import { call, put, takeEvery, throttle } from 'redux-saga/effects';
 
-import { myProjects as myProjectsAction } from '../../redux/actions';
-import { MyProjects } from '../../redux/types';
+import { myProjects as myProjectsAction, error } from '../../redux/actions';
+import { MainAction } from '../../redux/types';
 
 import { Result, match } from '../../result';
 import * as API from '../../api';
@@ -79,9 +79,9 @@ export function* requestMyProjects(action: Action.AuthToken) {
     );
 
     yield put(
-        match<[API.Project[], API.DataSet[]], string, MyProjects>(
+        match<[API.Project[], API.DataSet[]], string, MainAction>(
             ([projects, datasets]) => myProjectsAction(projects, datasets),
-            (_err) => myProjectsAction([], []),
+            (_err) => error('Failed to get user projects'),
             response
         )
     );

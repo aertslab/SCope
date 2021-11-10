@@ -1,5 +1,9 @@
 import { Functor } from 'ramda';
 
+declare module 'ramda' {
+    export const sequence: any;
+}
+
 export type Result<T, E> = (
     | { kind: 'Success'; value: T }
     | { kind: 'Error'; error: E }

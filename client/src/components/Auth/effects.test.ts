@@ -8,6 +8,7 @@ import * as E from './effects';
 import * as A from './actions';
 import * as T from './actionTypes';
 import * as API from '../../api';
+import * as GR from '../../redux/actions';
 import { success, error } from '../../result';
 
 const exampleToken: API.AuthTokenResponse = {
@@ -19,6 +20,30 @@ const exampleToken: API.AuthTokenResponse = {
         id: 0,
     },
 };
+
+const exampleProjects: API.Project[] = [
+    {
+        id: '1',
+        name: 'test1',
+    },
+    {
+        id: '2',
+        name: 'A Test',
+    },
+];
+
+const exampleDatasets: API.DataSet[] = [
+    {
+        id: 0,
+        name: 'My dataset',
+        project: '1',
+    },
+    {
+        id: 1,
+        name: 'test',
+        project: '1',
+    },
+];
 
 describe('New guest user', () => {
     it('Listens for guest login actions', () => {
@@ -152,7 +177,7 @@ describe('SCope API token', () => {
     it('Listens for token request actions', () => {
         const requestGen = cloneableGenerator(E.watchRequestToken)(
             // @ts-ignore
-            A.requestToken
+            A.requestToken('abc', 'def')
         );
         expect(requestGen.next().value).toEqual(
             takeEvery(T.REQUEST_TOKEN, E.requestToken)
@@ -163,10 +188,12 @@ describe('SCope API token', () => {
 
     describe('Get token', () => {
         // @ts-ignore
-        const requestGen = cloneableGenerator(E.requestToken)();
+        const requestGen = cloneableGenerator(E.requestToken)(
+            A.requestToken('abc', 'def')
+        );
         const authCode: API.AuthTokenRequest = { code: 'abc', state: 'def' };
         it('Calls the authorize API', () => {
-            expect(requestGen.next(success(authCode)).value).toEqual(
+            expect(requestGen.next().value).toEqual(
                 call(API.requestAuthToken, authCode)
             );
         });
@@ -198,6 +225,71 @@ describe('SCope API token', () => {
             it('Submits an error', () => {
                 expect(clone.next(error('Error')).value).toStrictEqual(
                     put(A.error('Error'))
+                );
+            });
+
+            it('performs no further work', () => {
+                expect(clone.next().done).toBe(true);
+            });
+        });
+    });
+});
+
+describe('Once authorized, get the list of projects', () => {
+    it('Listens for auth token actions', () => {
+        const requestGen = cloneableGenerator(E.watchAuthorized)(
+            // @ts-ignore
+            A.token(exampleToken)
+        );
+        expect(requestGen.next().value).toEqual(
+            takeEvery(T.AUTH_TOKEN, E.requestMyProjects)
+        );
+
+        expect(requestGen.next().done).toBe(true);
+    });
+
+    describe('Get list of projects', () => {
+        // @ts-ignore
+        const requestGen = cloneableGenerator(E.requestMyProjects)(
+            A.token(exampleToken)
+        );
+
+        it('Calls my projects API', () => {
+            expect(requestGen.next().value).toEqual(
+                call(API.myProjects, exampleToken.access_token)
+            );
+        });
+
+        describe('...and if the request succeeds', () => {
+            let clone;
+
+            beforeAll(() => {
+                clone = requestGen.clone();
+            });
+
+            it('Submits list of projects and list of datasets', () => {
+                expect(
+                    clone.next(success([exampleProjects, exampleDatasets]))
+                        .value
+                ).toStrictEqual(
+                    put(GR.myProjects(exampleProjects, exampleDatasets))
+                );
+            });
+
+            it('performs no further work', () => {
+                expect(clone.next().done).toBe(true);
+            });
+        });
+
+        describe('...and if the request fails', () => {
+            let clone;
+            beforeAll(() => {
+                clone = requestGen.clone();
+            });
+
+            it('Submits an error', () => {
+                expect(clone.next(error('Error')).value).toStrictEqual(
+                    put(GR.error('Failed to get user projects'))
                 );
             });
 

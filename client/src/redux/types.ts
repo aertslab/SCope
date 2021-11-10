@@ -38,8 +38,14 @@ export interface MyProjects {
     };
 }
 
+export interface ErrorAction {
+    type: typeof AT.ERROR;
+    payload: string;
+}
+
 export type MainAction =
     | SetLoadingAction
     | SetUUIDAction
     | SetSessionModeAction
-    | MyProjects;
+    | MyProjects
+    | ErrorAction;

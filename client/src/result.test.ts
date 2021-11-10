@@ -2,10 +2,6 @@ import 'jest';
 
 import * as R from 'ramda';
 
-declare module 'ramda' {
-    export const sequence: any;
-}
-
 import {
     error,
     success,

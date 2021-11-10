@@ -1,5 +1,5 @@
 import * as AT from './actionTypes';
-import { MainState, MyProjects } from './types';
+import { MainState, MyProjects, ErrorAction } from './types';
 
 export const setAppLoading = (isAppLoading: MainState['isAppLoading']) => ({
     type: AT.SET_APP_LOADING,
@@ -22,4 +22,9 @@ export const myProjects = (
 ): MyProjects => ({
     type: AT.MY_PROJECTS,
     payload: { projects, datasets },
+});
+
+export const error = (message: string): ErrorAction => ({
+    type: AT.ERROR,
+    payload: message,
 });
