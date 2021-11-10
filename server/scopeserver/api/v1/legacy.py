@@ -11,6 +11,7 @@ from scopeserver import schemas
 
 router = APIRouter()
 
+
 @router.post("/permalink", summary="Decode data from an old permalink")
 def permalink(body: schemas.Permalink):
-    return json.loads(decompress(b64decode(unquote(body.sessiondata).replace('$', '/'))))
+    return json.loads(decompress(b64decode(unquote(body.sessiondata).replace("$", "/"))))

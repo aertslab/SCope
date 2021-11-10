@@ -133,5 +133,6 @@ class UploadLimit(BaseModel):
 
 # Legacy compatibility
 
+
 class Permalink(BaseModel):
     sessiondata: str
