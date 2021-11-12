@@ -1,6 +1,7 @@
 declare const API_PREFIX: string;
 
 import { Result, error, success, map } from '../result';
+import { Project, DataSet, decodeProjects } from './project';
 
 const USER_ROLES = ['guest', 'user', 'admin'] as const;
 export type UserRole = typeof USER_ROLES[number];
@@ -20,6 +21,8 @@ export type AuthTokenResponse = {
     access_token: string;
     token_type: string;
     user: User;
+    projects: Array<Project>;
+    datasets: Array<DataSet>;
 };
 
 export const decodeUserRole = (role: unknown): Result<UserRole, string> => {
@@ -33,7 +36,9 @@ export const decodeUserRole = (role: unknown): Result<UserRole, string> => {
     return error(`Cannot decode ${role} to a UserRole`);
 };
 
-const decodeUser = (user: unknown): Result<User, string> => {
+const decodeUser = (
+    user: unknown
+): Result<[User, Array<Project>, Array<DataSet>], string> => {
     if (user === undefined) {
         return error('User was undefined');
     }
@@ -43,17 +48,31 @@ const decodeUser = (user: unknown): Result<User, string> => {
             user !== null &&
             'name' in user &&
             'id' in user &&
+            'projects' in user &&
             typeof (user as { name: unknown }).name === 'string' &&
             typeof (user as { id: unknown }).id === 'number'
         ) {
             if ('role' in user) {
-                return map((role: UserRole): User => {
-                    return {
-                        id: (user as User).id,
-                        name: (user as User).name,
-                        role,
-                    };
-                }, decodeUserRole((user as { role: unknown }).role));
+                return decodeProjects(
+                    (user as { projects: unknown }).projects
+                ).chain(([prjs, ds]) => {
+                    return map(
+                        (
+                            role: UserRole
+                        ): [User, Array<Project>, Array<DataSet>] => {
+                            return [
+                                {
+                                    id: (user as User).id,
+                                    name: (user as User).name,
+                                    role,
+                                },
+                                prjs,
+                                ds,
+                            ];
+                        },
+                        decodeUserRole((user as { role: unknown }).role)
+                    );
+                });
             }
         }
     }
@@ -78,12 +97,14 @@ const decodeAuthTokenResponse = (
             typeof (response as { token_type: unknown }).token_type === 'string'
         ) {
             if ('user' in response) {
-                return map((user: User): AuthTokenResponse => {
+                return map(([user, prjs, ds]): AuthTokenResponse => {
                     return {
                         access_token: (response as AuthTokenResponse)
                             .access_token,
                         token_type: (response as AuthTokenResponse).token_type,
                         user,
+                        projects: prjs,
+                        datasets: ds,
                     };
                 }, decodeUser((response as { user: unknown }).user));
             }
@@ -112,7 +133,7 @@ export async function requestAuthToken(
         const token: unknown = await response.json();
         return decodeAuthTokenResponse(token);
     } catch (err) {
-        return error(`Unknown error: ${JSON.stringify(err)}`);
+        return error(`Error in AuthToken request: ${JSON.stringify(err)}`);
     }
 }
 
@@ -129,7 +150,9 @@ export async function requestGuestToken(): Promise<
         const token: unknown = await response.json();
         return decodeAuthTokenResponse(token);
     } catch (err) {
-        return error(`Unknown error: ${JSON.stringify(err)}`);
+        return error(
+            `Error in guest AuthToken request: ${JSON.stringify(err)}`
+        );
     }
 }
 

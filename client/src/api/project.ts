@@ -37,6 +37,29 @@ const decodeDataset = (data: unknown): Result<DataSet, string> => {
     return error(`${JSON.stringify(data)} is not a valid Dataset`);
 };
 
+const decodeBareProject = (data: unknown): Result<Project, string> => {
+    if (data === undefined) {
+        return error('Project was undefined');
+    }
+
+    if (typeof data === 'object') {
+        if (
+            data !== null &&
+            'name' in data &&
+            'uuid' in data &&
+            typeof (data as { name: unknown }).name === 'string' &&
+            typeof (data as { uuid: unknown }).uuid === 'string'
+        ) {
+            return success({
+                id: (data as { uuid: string }).uuid,
+                name: (data as { name: string }).name,
+            });
+        }
+    }
+
+    return error(`${JSON.stringify(data)} is not a valid bare Project`);
+};
+
 const decodeProject = (
     data: unknown
 ): Result<[Project, Array<DataSet>], string> => {
@@ -73,10 +96,12 @@ const decodeProject = (
         }
     }
 
-    return error(`${JSON.stringify(data)} is not a valid Project`);
+    return error(
+        `${JSON.stringify(data)} is not a valid Project with datasets`
+    );
 };
 
-const decodeProjects = (
+export const decodeProjects = (
     data: unknown
 ): Result<[Array<Project>, Array<DataSet>], string> => {
     if (data === undefined) {
@@ -121,5 +146,31 @@ export async function myProjects(
         return decodeProjects(projects);
     } catch (err: unknown) {
         return error(`Unknown error: ${JSON.stringify(err)}`);
+    }
+}
+
+export async function makeProject(
+    token: string,
+    name: string
+): Promise<Result<Project, string>> {
+    try {
+        const url = new URL(API_PREFIX + 'project/new');
+        url.search = new URLSearchParams({ name }).toString();
+        const response = await fetch(url.toString(), {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            return error(response.statusText);
+        }
+
+        const project: unknown = await response.json();
+        return decodeBareProject(project);
+    } catch (err: unknown) {
+        return error(`Cannot create project: ${JSON.stringify(err)}`);
     }
 }

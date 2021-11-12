@@ -40,7 +40,7 @@ export function success<T, E>(value: T): Result<T, E> {
         value,
         map: (fn) => success(fn(value)),
         ap: (f) => f.map(value),
-        'fantasy-land/chain': (fn) => fn(value),
+        chain: (fn) => fn(value),
     };
 }
 
@@ -50,7 +50,7 @@ export function error<T, E>(err: E): Result<T, E> {
         error: err,
         map: (_fn) => error(err),
         ap: (_f) => error(err),
-        'fantasy-land/chain': (_fn) => error(err),
+        chain: (_fn) => error(err),
     };
 }
 
@@ -108,5 +108,5 @@ export function chain<S, E, T>(
     result: Result<S, E>,
     fn: (_unwrapped: S) => Result<T, E>
 ): Result<T, E> {
-    return result['fantasy-land/chain'](fn);
+    return result.chain(fn);
 }

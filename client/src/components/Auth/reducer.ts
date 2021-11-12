@@ -38,6 +38,7 @@ export const reducer: Reducer<State, AuthAction> = produce(
                 break;
 
             case t.AUTH_ERROR:
+                console.error(action.payload.message);
                 (draft as AuthError).error = action.payload.message;
                 draft.status = 'error';
                 break;

@@ -33,14 +33,6 @@ class UserCreate(UserBase):
     iss: str  # Issuer
     sub: str  # Subject
 
-
-class UserResponse(UserBase):
-    id: int
-
-    class Config:
-        orm_mode = True
-
-
 class ProjectBase(BaseModel):
     name: str
     uuid: str
@@ -51,6 +43,13 @@ class ProjectBase(BaseModel):
 
 class Project(ProjectBase):
     datasets: List[Dataset]
+
+    class Config:
+        orm_mode = True
+
+class UserResponse(UserBase):
+    id: int
+    projects: List[Project]
 
     class Config:
         orm_mode = True

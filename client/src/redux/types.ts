@@ -38,6 +38,20 @@ export interface MyProjects {
     };
 }
 
+export interface NewProjectAction {
+    type: typeof AT.NEW_PROJECT;
+    payload: {
+        name: string;
+    };
+}
+
+export interface AddProjectAction {
+    type: typeof AT.ADD_PROJECT;
+    payload: {
+        project: Project;
+    };
+}
+
 export interface ErrorAction {
     type: typeof AT.ERROR;
     payload: string;
@@ -48,4 +62,6 @@ export type MainAction =
     | SetUUIDAction
     | SetSessionModeAction
     | MyProjects
+    | NewProjectAction
+    | AddProjectAction
     | ErrorAction;

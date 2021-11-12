@@ -19,31 +19,9 @@ const exampleToken: API.AuthTokenResponse = {
         role: 'guest',
         id: 0,
     },
+    projects: [],
+    datasets: [],
 };
-
-const exampleProjects: API.Project[] = [
-    {
-        id: '1',
-        name: 'test1',
-    },
-    {
-        id: '2',
-        name: 'A Test',
-    },
-];
-
-const exampleDatasets: API.DataSet[] = [
-    {
-        id: 0,
-        name: 'My dataset',
-        project: '1',
-    },
-    {
-        id: 1,
-        name: 'test',
-        project: '1',
-    },
-];
 
 describe('New guest user', () => {
     it('Listens for guest login actions', () => {
@@ -76,6 +54,12 @@ describe('New guest user', () => {
                 );
             });
 
+            it('Submits user projects and datasets', () => {
+                expect(clone.next(success(exampleToken)).value).toStrictEqual(
+                    put(GR.myProjects([], []))
+                );
+            });
+
             it('performs no further work', () => {
                 expect(clone.next().done).toBe(true);
             });
@@ -90,6 +74,16 @@ describe('New guest user', () => {
             it('Submits an error', () => {
                 expect(clone.next(error('Error')).value).toStrictEqual(
                     put(A.error('Error'))
+                );
+            });
+
+            it('Submits an error', () => {
+                expect(clone.next(error('Error')).value).toStrictEqual(
+                    put(
+                        GR.error(
+                            'Failed to retrieve projects with token: Error'
+                        )
+                    )
                 );
             });
 
@@ -211,6 +205,12 @@ describe('SCope API token', () => {
                 );
             });
 
+            it('Submits user projects and datasets', () => {
+                expect(clone.next(success(exampleToken)).value).toStrictEqual(
+                    put(GR.myProjects([], []))
+                );
+            });
+
             it('performs no further work', () => {
                 expect(clone.next().done).toBe(true);
             });
@@ -228,68 +228,13 @@ describe('SCope API token', () => {
                 );
             });
 
-            it('performs no further work', () => {
-                expect(clone.next().done).toBe(true);
-            });
-        });
-    });
-});
-
-describe('Once authorized, get the list of projects', () => {
-    it('Listens for auth token actions', () => {
-        const requestGen = cloneableGenerator(E.watchAuthorized)(
-            // @ts-ignore
-            A.token(exampleToken)
-        );
-        expect(requestGen.next().value).toEqual(
-            takeEvery(T.AUTH_TOKEN, E.requestMyProjects)
-        );
-
-        expect(requestGen.next().done).toBe(true);
-    });
-
-    describe('Get list of projects', () => {
-        // @ts-ignore
-        const requestGen = cloneableGenerator(E.requestMyProjects)(
-            A.token(exampleToken)
-        );
-
-        it('Calls my projects API', () => {
-            expect(requestGen.next().value).toEqual(
-                call(API.myProjects, exampleToken.access_token)
-            );
-        });
-
-        describe('...and if the request succeeds', () => {
-            let clone;
-
-            beforeAll(() => {
-                clone = requestGen.clone();
-            });
-
-            it('Submits list of projects and list of datasets', () => {
-                expect(
-                    clone.next(success([exampleProjects, exampleDatasets]))
-                        .value
-                ).toStrictEqual(
-                    put(GR.myProjects(exampleProjects, exampleDatasets))
-                );
-            });
-
-            it('performs no further work', () => {
-                expect(clone.next().done).toBe(true);
-            });
-        });
-
-        describe('...and if the request fails', () => {
-            let clone;
-            beforeAll(() => {
-                clone = requestGen.clone();
-            });
-
-            it('Submits an error', () => {
+            it('Submits another error', () => {
                 expect(clone.next(error('Error')).value).toStrictEqual(
-                    put(GR.error('Failed to get user projects'))
+                    put(
+                        GR.error(
+                            'Failed to retrieve projects with token: Error'
+                        )
+                    )
                 );
             });
 

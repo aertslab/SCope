@@ -23,3 +23,11 @@ export const username = (state: RootState): string | null => {
 
     return null;
 };
+
+export const token = (state: RootState): string | null => {
+    if (state[NAME].status === 'authenticated') {
+        return (state[NAME] as Authenticated).token;
+    }
+
+    return null;
+};

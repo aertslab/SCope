@@ -17,12 +17,17 @@ export function* requestToken(action: Action.RequestToken) {
 
     yield put(
         match<API.AuthTokenResponse, string, Action.AuthAction>(
-            (token: API.AuthTokenResponse) => {
-                return Action.token(token);
-            },
-            (err: string) => {
-                return Action.error(err);
-            },
+            (token: API.AuthTokenResponse) => Action.token(token),
+            (err: string) => Action.error(err),
+            response
+        )
+    );
+
+    yield put(
+        match<API.AuthTokenResponse, string, MainAction>(
+            (token: API.AuthTokenResponse) =>
+                myProjectsAction(token.projects, token.datasets),
+            (err) => error(`Failed to retrieve projects with token: ${err}`),
             response
         )
     );
@@ -66,27 +71,17 @@ export function* requestGuestLogin() {
             response
         )
     );
-}
-
-export function* watchGuestLogin() {
-    yield takeEvery(t.AUTH_GUEST_LOGIN, requestGuestLogin);
-}
-
-export function* requestMyProjects(action: Action.AuthToken) {
-    const response: Result<[API.Project[], API.DataSet[]], string> = yield call(
-        API.myProjects,
-        action.payload.access_token
-    );
 
     yield put(
-        match<[API.Project[], API.DataSet[]], string, MainAction>(
-            ([projects, datasets]) => myProjectsAction(projects, datasets),
-            (_err) => error('Failed to get user projects'),
+        match<API.AuthTokenResponse, string, MainAction>(
+            (token: API.AuthTokenResponse) =>
+                myProjectsAction(token.projects, token.datasets),
+            (err) => error(`Failed to retrieve projects with token: ${err}`),
             response
         )
     );
 }
 
-export function* watchAuthorized() {
-    yield takeEvery(t.AUTH_TOKEN, requestMyProjects);
+export function* watchGuestLogin() {
+    yield takeEvery(t.AUTH_GUEST_LOGIN, requestGuestLogin);
 }

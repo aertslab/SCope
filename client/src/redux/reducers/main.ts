@@ -26,6 +26,12 @@ const main = produce((draft: MainState, action: MainAction) => {
             draft.projects = action.payload.projects;
             draft.datasets = action.payload.datasets;
             break;
+        case Action.ADD_PROJECT:
+            draft.projects = [...draft.projects, action.payload.project];
+            break;
+        case Action.ERROR:
+            console.error(action.payload);
+            break;
     }
 }, initialState);
 
