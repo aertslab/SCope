@@ -3,6 +3,8 @@ import 'jest';
 import * as R from 'ramda';
 
 import {
+    Result,
+    chain,
     error,
     success,
     isError,
@@ -75,7 +77,13 @@ describe('Operations on Result', () => {
         ).toEqual('test');
     });
 
-    it('Works with Ramda', () => {
+    it('Can chain results', () => {
+        const res = chain(success(5), (a) => success(a * 2));
+        expect(isSuccess(res)).toBe(true);
+        expect(withDefault(0, res)).toEqual(10);
+    });
+
+    it('Works with Ramda map and sequence', () => {
         expect(withDefault('', R.map(R.toString, success(5)))).toBe('5');
 
         expect(
@@ -85,5 +93,25 @@ describe('Operations on Result', () => {
         expect(
             withDefault([], R.sequence(of, [success(1), error(2)]))
         ).toStrictEqual([]);
+    });
+
+    it('Works with Ramda chain', () => {
+        // @ts-ignore
+        const res = R.chain(
+            // @ts-ignore
+            (a: number) => success(a * 2),
+            success(4)
+        ) as Result<number, unknown>;
+        expect(isSuccess(res)).toBe(true);
+        expect(withDefault(0, res)).toEqual(8);
+
+        // @ts-ignore
+        const err = R.chain(
+            // @ts-ignore
+            (a: number) => success(a * 3),
+            error('error')
+        ) as Result<number, string>;
+        expect(isError(err)).toBe(true);
+        expect(withDefault(0, err)).toEqual(0);
     });
 });
