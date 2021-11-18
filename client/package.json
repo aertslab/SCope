@@ -203,7 +203,8 @@
             ".+\\.css$": "jest-css-modules-transform"
         },
         "globals": {
-            "__TEST_ONLY__": true
+            "__TEST_ONLY__": true,
+            "API_PREFIX": "http://localhost:8000/api/v1/"
         },
         "coverageThreshold": {
             "global": {

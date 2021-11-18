@@ -1,7 +1,10 @@
+import * as R from 'ramda';
+
 declare const API_PREFIX: string;
 
-import { Result, error, success, map } from '../result';
+import { Result, error, success, map, of } from '../result';
 import { Project, DataSet, decodeProjects } from './project';
+import { handleError } from './err';
 
 const USER_ROLES = ['guest', 'user', 'admin'] as const;
 export type UserRole = typeof USER_ROLES[number];
@@ -132,8 +135,8 @@ export async function requestAuthToken(
         }
         const token: unknown = await response.json();
         return decodeAuthTokenResponse(token);
-    } catch (err) {
-        return error(`Error in AuthToken request: ${JSON.stringify(err)}`);
+    } catch (err: unknown) {
+        return handleError('Error in AuthToken request:', err);
     }
 }
 
@@ -150,9 +153,7 @@ export async function requestGuestToken(): Promise<
         const token: unknown = await response.json();
         return decodeAuthTokenResponse(token);
     } catch (err) {
-        return error(
-            `Error in guest AuthToken request: ${JSON.stringify(err)}`
-        );
+        return handleError('Error in guest AuthToken request:', err);
     }
 }
 
@@ -163,6 +164,47 @@ export type Provider = {
     url: string;
 };
 
+const decodeProvider = (data: unknown): Result<Provider, string> => {
+    if (data === undefined) {
+        return error('Provider was undefined');
+    }
+
+    if (
+        typeof data === 'object' &&
+        data !== null &&
+        'id' in data &&
+        'name' in data &&
+        'icon' in data &&
+        'url' in data &&
+        typeof (data as { id: unknown }).id === 'number' &&
+        typeof (data as { name: unknown }).name === 'string' &&
+        typeof (data as { icon: unknown }).icon === 'string' &&
+        typeof (data as { url: unknown }).url === 'string'
+    ) {
+        const provider: Provider = {
+            id: (data as { id: number }).id,
+            name: (data as { name: string }).name,
+            icon: (data as { icon: string }).icon,
+            url: (data as { url: string }).url,
+        };
+        return success(provider);
+    }
+
+    return error(`${JSON.stringify(data)} is not a valid provider`);
+};
+
+const decodeProviders = (data: unknown): Result<Array<Provider>, string> => {
+    if (data === undefined) {
+        return error('List of providers was undefined');
+    }
+
+    if (typeof data === 'object' && data !== null && 'map' in data) {
+        return R.sequence(of, R.map(decodeProvider, data));
+    }
+
+    return error(`Cannot decode list of providers: ${JSON.stringify(data)}`);
+};
+
 export async function requestAuthProviders(): Promise<
     Result<Array<Provider>, string>
 > {
@@ -171,9 +213,9 @@ export async function requestAuthProviders(): Promise<
         if (!response.ok) {
             return error(response.statusText);
         }
-        const providers: Array<Provider> = await response.json();
-        return success(providers);
+        const providers: unknown = await response.json();
+        return decodeProviders(providers);
     } catch (err) {
-        return error(`Unknown error: ${JSON.stringify(err)}`);
+        return handleError('Error requesting auth providers:', err);
     }
 }

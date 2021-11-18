@@ -120,7 +120,15 @@ export const decodeProjects = (
                 string
             >;
 
-            return R.map(([projs, ds]) => [projs, R.flatten(ds)], unzipped);
+            return R.map(([projs, ds]) => {
+                if (ds === undefined) {
+                    // The user has no projects so
+                    // `datasets` is undefined here
+                    return [[], []];
+                } else {
+                    return [projs, R.flatten(ds)];
+                }
+            }, unzipped);
         }
     }
 
