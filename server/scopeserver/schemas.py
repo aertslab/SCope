@@ -33,6 +33,7 @@ class UserCreate(UserBase):
     iss: str  # Issuer
     sub: str  # Subject
 
+
 class ProjectBase(BaseModel):
     name: str
     uuid: str
@@ -46,6 +47,7 @@ class Project(ProjectBase):
 
     class Config:
         orm_mode = True
+
 
 class UserResponse(UserBase):
     id: int
