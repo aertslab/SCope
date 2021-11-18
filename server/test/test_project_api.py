@@ -1372,6 +1372,7 @@ def test_guest_can_list_users_in_own_project(guest):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     response = client.get(
         "/api/v1/project/users",
@@ -1380,7 +1381,7 @@ def test_guest_can_list_users_in_own_project(guest):
     )
     assert response.status_code == 200
     users = response.json()
-    assert users == [{"name": guest["user"]["name"], "role": "guest", "id": 1}]
+    assert users == [{"name": guest["user"]["name"], "role": "guest", "id": 1, "projects": [project]}]
 
 
 def test_guest_cannot_list_users_in_non_owned_project(guest, user):
@@ -1406,6 +1407,7 @@ def test_guest_can_list_users_in_used_project(loom_limit_9_bytes, guest, user):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     # Add guest to project
     response = client.post(
@@ -1421,7 +1423,10 @@ def test_guest_can_list_users_in_used_project(loom_limit_9_bytes, guest, user):
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [user["user"], guest["user"]]
+    assert response.json() == [
+        {**user["user"], **{"projects": [project]}},
+        {**guest["user"], **{"projects": [project]}},
+    ]
 
 
 def test_guest_second_owner_can_list_users(loom_limit_9_bytes, guest, user):
@@ -1431,6 +1436,7 @@ def test_guest_second_owner_can_list_users(loom_limit_9_bytes, guest, user):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     # Add guest to project owners
     response = client.post(
@@ -1446,7 +1452,10 @@ def test_guest_second_owner_can_list_users(loom_limit_9_bytes, guest, user):
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [user["user"], guest["user"]]
+    assert response.json() == [
+        {**user["user"], **{"projects": [project]}},
+        {**guest["user"], **{"projects": [project]}},
+    ]
 
 
 def test_user_can_list_users_in_own_project(user):
@@ -1456,6 +1465,7 @@ def test_user_can_list_users_in_own_project(user):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     response = client.get(
         "/api/v1/project/users",
@@ -1464,7 +1474,7 @@ def test_user_can_list_users_in_own_project(user):
     )
     assert response.status_code == 200
     users = response.json()
-    assert users == [{"name": user["user"]["name"], "role": "user", "id": 1}]
+    assert users == [{"name": user["user"]["name"], "role": "user", "id": 1, "projects": [project]}]
 
 
 def test_user_cannot_list_users_in_non_owned_project(guest, user):
@@ -1490,6 +1500,7 @@ def test_admin_can_list_users_in_own_project(admin):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     response = client.get(
         "/api/v1/project/users",
@@ -1498,7 +1509,7 @@ def test_admin_can_list_users_in_own_project(admin):
     )
     assert response.status_code == 200
     users = response.json()
-    assert users == [{"name": admin["user"]["name"], "role": "admin", "id": 1}]
+    assert users == [{"name": admin["user"]["name"], "role": "admin", "id": 1, "projects": [project]}]
 
 
 def test_admin_can_list_users_in_non_owned_project(admin, user):
@@ -1508,6 +1519,7 @@ def test_admin_can_list_users_in_non_owned_project(admin, user):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     response = client.get(
         "/api/v1/project/users",
@@ -1516,7 +1528,7 @@ def test_admin_can_list_users_in_non_owned_project(admin, user):
     )
     assert response.status_code == 200
     users = response.json()
-    assert users == [user["user"]]
+    assert users == [{**user["user"], **{"projects": [project]}}]
 
 
 def test_list_users_nonexistent_project(admin):
@@ -1558,6 +1570,7 @@ def test_guest_can_add_user_to_own_project(guest, user):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     # Check starts here
     response = client.post(
@@ -1574,7 +1587,10 @@ def test_guest_can_add_user_to_own_project(guest, user):
         headers={"Authorization": f"bearer {user['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [guest["user"], user["user"]]
+    assert response.json() == [
+        {**guest["user"], **{"projects": [project]}},
+        {**user["user"], **{"projects": [project]}},
+    ]
 
 
 def test_guest_cannot_add_user_to_non_owned_project(guest, user):
@@ -1635,6 +1651,7 @@ def test_guest_second_owner_can_add_users(guest, user, another_user):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     # Add guest to project owners
     response = client.post(
@@ -1657,7 +1674,11 @@ def test_guest_second_owner_can_add_users(guest, user, another_user):
         params={"project": project["uuid"]},
         headers={"Authorization": f"bearer {another_user['access_token']}"},
     )
-    assert response.json() == [user["user"], guest["user"], another_user["user"]]
+    assert response.json() == [
+        {**user["user"], **{"projects": [project]}},
+        {**guest["user"], **{"projects": [project]}},
+        {**another_user["user"], **{"projects": [project]}},
+    ]
 
 
 def test_user_can_add_user_to_own_project(guest, user):
@@ -1669,6 +1690,7 @@ def test_user_can_add_user_to_own_project(guest, user):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     # Check starts here
     response = client.post(
@@ -1685,7 +1707,10 @@ def test_user_can_add_user_to_own_project(guest, user):
         headers={"Authorization": f"bearer {user['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [user["user"], guest["user"]]
+    assert response.json() == [
+        {**user["user"], **{"projects": [project]}},
+        {**guest["user"], **{"projects": [project]}},
+    ]
 
 
 def test_user_cannot_add_user_to_non_owned_project(guest, user):
@@ -1724,6 +1749,7 @@ def test_admin_can_add_user_to_own_project(admin, user):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     # Check starts here
     response = client.post(
@@ -1740,7 +1766,10 @@ def test_admin_can_add_user_to_own_project(admin, user):
         headers={"Authorization": f"bearer {user['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [admin["user"], user["user"]]
+    assert response.json() == [
+        {**admin["user"], **{"projects": [project]}},
+        {**user["user"], **{"projects": [project]}},
+    ]
 
 
 def test_admin_can_add_user_to_non_owned_project(admin, user):
@@ -1752,6 +1781,7 @@ def test_admin_can_add_user_to_non_owned_project(admin, user):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     # Check starts here
     response = client.post(
@@ -1768,7 +1798,10 @@ def test_admin_can_add_user_to_non_owned_project(admin, user):
         headers={"Authorization": f"bearer {admin['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [user["user"], admin["user"]]
+    assert response.json() == [
+        {**user["user"], **{"projects": [project]}},
+        {**admin["user"], **{"projects": [project]}},
+    ]
 
 
 def test_admin_cannot_add_user_to_nonexistent_project(admin):
@@ -1905,6 +1938,7 @@ def test_guest_second_owner_can_delete_users(guest, user, another_user):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     # Add another_user to project
     response = client.post(
@@ -1928,7 +1962,11 @@ def test_guest_second_owner_can_delete_users(guest, user, another_user):
         headers={"Authorization": f"bearer {user['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [user["user"], another_user["user"], guest["user"]]
+    assert response.json() == [
+        {**user["user"], **{"projects": [project]}},
+        {**another_user["user"], **{"projects": [project]}},
+        {**guest["user"], **{"projects": [project]}},
+    ]
 
     # Checks start here
     response = client.delete(
@@ -1945,7 +1983,10 @@ def test_guest_second_owner_can_delete_users(guest, user, another_user):
         headers={"Authorization": f"bearer {user['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [user["user"], guest["user"]]
+    assert response.json() == [
+        {**user["user"], **{"projects": [project]}},
+        {**guest["user"], **{"projects": [project]}},
+    ]
 
 
 def test_user_can_delete_user_from_own_project(user):
@@ -2100,6 +2141,7 @@ def test_guest_can_list_owners_of_own_project(guest):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     # Check starts here
     response = client.get(
@@ -2108,7 +2150,7 @@ def test_guest_can_list_owners_of_own_project(guest):
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [guest["user"]]
+    assert response.json() == [{**guest["user"], **{"projects": [project]}}]
 
 
 def test_guest_cannot_list_owners_of_non_owned_project(guest, user):
@@ -2139,6 +2181,7 @@ def test_user_can_list_owners_of_own_project(user):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     # Check starts here
     response = client.get(
@@ -2147,7 +2190,7 @@ def test_user_can_list_owners_of_own_project(user):
         headers={"Authorization": f"bearer {user['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [user["user"]]
+    assert response.json() == [{**user["user"], **{"projects": [project]}}]
 
 
 def test_user_cannot_list_owners_of_non_owned_project(guest, user):
@@ -2178,6 +2221,7 @@ def test_admin_can_list_owners_of_own_project(admin):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     # Check starts here
     response = client.get(
@@ -2186,7 +2230,7 @@ def test_admin_can_list_owners_of_own_project(admin):
         headers={"Authorization": f"bearer {admin['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [admin["user"]]
+    assert response.json() == [{**admin["user"], **{"projects": [project]}}]
 
 
 def test_admin_can_list_owners_of_non_owned_project(guest, admin):
@@ -2198,6 +2242,7 @@ def test_admin_can_list_owners_of_non_owned_project(guest, admin):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     # Check starts here
     response = client.get(
@@ -2206,7 +2251,7 @@ def test_admin_can_list_owners_of_non_owned_project(guest, admin):
         headers={"Authorization": f"bearer {admin['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [guest["user"]]
+    assert response.json() == [{**guest["user"], **{"projects": [project]}}]
 
 
 def test_admin_cannot_list_owners_of_unknown_project(admin):
@@ -2248,6 +2293,7 @@ def test_guest_can_add_owner_to_own_project(guest, user):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     # Check starts here
     response = client.post(
@@ -2263,7 +2309,10 @@ def test_guest_can_add_owner_to_own_project(guest, user):
         headers={"Authorization": f"bearer {user['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [guest["user"], user["user"]]
+    assert response.json() == [
+        {**guest["user"], **{"projects": [project]}},
+        {**user["user"], **{"projects": [project]}},
+    ]
 
 
 def test_guest_cannot_add_owner_to_non_owned_project(guest, user):
@@ -2294,6 +2343,7 @@ def test_user_can_add_owner_to_own_project(user, guest):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     # Check starts here
     response = client.post(
@@ -2309,7 +2359,10 @@ def test_user_can_add_owner_to_own_project(user, guest):
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [user["user"], guest["user"]]
+    assert response.json() == [
+        {**user["user"], **{"projects": [project]}},
+        {**guest["user"], **{"projects": [project]}},
+    ]
 
 
 def test_user_cannot_add_owner_to_non_owned_project(guest, user):
@@ -2340,6 +2393,7 @@ def test_admin_can_add_owner_to_own_project(admin, guest):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     # Check starts here
     response = client.post(
@@ -2355,7 +2409,10 @@ def test_admin_can_add_owner_to_own_project(admin, guest):
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [admin["user"], guest["user"]]
+    assert response.json() == [
+        {**admin["user"], **{"projects": [project]}},
+        {**guest["user"], **{"projects": [project]}},
+    ]
 
 
 def test_admin_can_add_owner_to_non_owned_project(guest, admin):
@@ -2367,6 +2424,7 @@ def test_admin_can_add_owner_to_non_owned_project(guest, admin):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     # Check starts here
     response = client.post(
@@ -2383,7 +2441,10 @@ def test_admin_can_add_owner_to_non_owned_project(guest, admin):
     )
     assert response.status_code == 200
     print(response.json())
-    assert response.json() == [guest["user"], admin["user"]]
+    assert response.json() == [
+        {**guest["user"], **{"projects": [project]}},
+        {**admin["user"], **{"projects": [project]}},
+    ]
 
 
 def test_admin_cannot_add_owner_to_unknown_project(admin):
@@ -2465,6 +2526,7 @@ def test_guest_can_delete_owner_from_own_project(guest, user):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     response = client.post(
         "/api/v1/project/owner",
@@ -2479,7 +2541,10 @@ def test_guest_can_delete_owner_from_own_project(guest, user):
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [guest["user"], user["user"]]
+    assert response.json() == [
+        {**guest["user"], **{"projects": [project]}},
+        {**user["user"], **{"projects": [project]}},
+    ]
 
     # Check starts here
     response = client.delete(
@@ -2495,7 +2560,7 @@ def test_guest_can_delete_owner_from_own_project(guest, user):
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [guest["user"]]
+    assert response.json() == [{**guest["user"], **{"projects": [project]}}]
 
 
 def test_owner_can_delete_other_owner_from_project(guest, user):
@@ -2507,6 +2572,7 @@ def test_owner_can_delete_other_owner_from_project(guest, user):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     response = client.post(
         "/api/v1/project/owner",
@@ -2521,7 +2587,10 @@ def test_owner_can_delete_other_owner_from_project(guest, user):
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [guest["user"], user["user"]]
+    assert response.json() == [
+        {**guest["user"], **{"projects": [project]}},
+        {**user["user"], **{"projects": [project]}},
+    ]
 
     # Check starts here
     response = client.delete(
@@ -2537,7 +2606,7 @@ def test_owner_can_delete_other_owner_from_project(guest, user):
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [user["user"]]
+    assert response.json() == [{**user["user"], **{"projects": [project]}}]
 
 
 def test_guest_cannot_delete_owner_from_non_owned_project(guest, user):
@@ -2549,6 +2618,7 @@ def test_guest_cannot_delete_owner_from_non_owned_project(guest, user):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     # Check starts here
     response = client.delete(
@@ -2564,7 +2634,7 @@ def test_guest_cannot_delete_owner_from_non_owned_project(guest, user):
         headers={"Authorization": f"bearer {user['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [user["user"]]
+    assert response.json() == [{**user["user"], **{"projects": [project]}}]
 
 
 def test_user_can_delete_owner_from_own_project(user, guest):
@@ -2576,6 +2646,7 @@ def test_user_can_delete_owner_from_own_project(user, guest):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     response = client.post(
         "/api/v1/project/owner",
@@ -2598,7 +2669,7 @@ def test_user_can_delete_owner_from_own_project(user, guest):
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [user["user"]]
+    assert response.json() == [{**user["user"], **{"projects": [project]}}]
 
 
 def test_user_cannot_delete_owner_from_non_owned_project(guest, user):
@@ -2610,6 +2681,7 @@ def test_user_cannot_delete_owner_from_non_owned_project(guest, user):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     # Check starts here
     response = client.post(
@@ -2625,7 +2697,7 @@ def test_user_cannot_delete_owner_from_non_owned_project(guest, user):
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [guest["user"]]
+    assert response.json() == [{**guest["user"], **{"projects": [project]}}]
 
 
 def test_admin_can_delete_owner_from_own_project(admin, guest):
@@ -2637,6 +2709,7 @@ def test_admin_can_delete_owner_from_own_project(admin, guest):
     )
     assert response.status_code == 200
     project = response.json()
+    project["datasets"] = []
 
     response = client.post(
         "/api/v1/project/owner",
@@ -2651,7 +2724,10 @@ def test_admin_can_delete_owner_from_own_project(admin, guest):
         headers={"Authorization": f"bearer {admin['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [admin["user"], guest["user"]]
+    assert response.json() == [
+        {**admin["user"], **{"projects": [project]}},
+        {**guest["user"], **{"projects": [project]}},
+    ]
 
     # Check starts here
     response = client.delete(
@@ -2667,7 +2743,7 @@ def test_admin_can_delete_owner_from_own_project(admin, guest):
         headers={"Authorization": f"bearer {admin['access_token']}"},
     )
     assert response.status_code == 200
-    assert response.json() == [admin["user"]]
+    assert response.json() == [{**admin["user"], **{"projects": [project]}}]
 
 
 def test_admin_can_delete_owner_from_non_owned_project(guest, admin):
