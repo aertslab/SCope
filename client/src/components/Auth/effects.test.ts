@@ -228,16 +228,6 @@ describe('SCope API token', () => {
                 );
             });
 
-            it('Submits another error', () => {
-                expect(clone.next(error('Error')).value).toStrictEqual(
-                    put(
-                        GR.error(
-                            'Failed to retrieve projects with token: Error'
-                        )
-                    )
-                );
-            });
-
             it('performs no further work', () => {
                 expect(clone.next().done).toBe(true);
             });

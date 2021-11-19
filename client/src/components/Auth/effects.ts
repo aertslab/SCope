@@ -23,14 +23,20 @@ export function* requestToken(action: Action.RequestToken) {
         )
     );
 
-    yield put(
-        match<API.AuthTokenResponse, string, MainAction>(
-            (token: API.AuthTokenResponse) =>
-                myProjectsAction(token.projects, token.datasets),
-            (err) => error(`Failed to retrieve projects with token: ${err}`),
-            response
-        )
+    const projectsAction = match<
+        API.AuthTokenResponse,
+        string,
+        MainAction | undefined
+    >(
+        (token: API.AuthTokenResponse) =>
+            myProjectsAction(token.projects, token.datasets),
+        (_err) => undefined, // Already handled
+        response
     );
+
+    if (projectsAction !== undefined) {
+        yield put(projectsAction);
+    }
 }
 
 export function* watchRequestToken() {
