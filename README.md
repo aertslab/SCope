@@ -196,3 +196,22 @@ Here is an example:
 
 You should be able to visit `http://localhost:8080` and see the app!
 
+### Static Analysis with SonarQube
+
+[LogRocket](https://blog.logrocket.com/how-to-use-static-code-analysis-to-write-quality-javascript-typescript/) have a blog
+post describing how to set up and use SonarQube for whole system static analysis (amongst other tools).
+
+Essentially, download `sonar-scanner` from [here](https://docs.sonarqube.org/latest/analysis/scan/sonarscanner/). Then
+run the SonarQube server in docker:
+
+```bash
+docker run -it --rm --name sonarqube -p 9000:9000 sonarqube:8.3-community
+```
+
+Login with `admin`/`admin` at `localhost:9000`, Create a new project and get the token. Then run
+
+```bash
+sonar-scanner -Dsonar.projectKey=scope -Dsonar.sources=. -Dsonar.host.url=http://localhost:9000 -Dsonar.login=${TOKEN}
+```
+
+This should take about 30 seconds. Then you can find the results at `localhost:9000`.
