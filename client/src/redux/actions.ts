@@ -1,4 +1,4 @@
-import { Project } from '../api';
+import { Project, DataSet } from '../api';
 
 import * as AT from './actionTypes';
 import {
@@ -7,6 +7,7 @@ import {
     ErrorAction,
     NewProjectAction,
     AddProjectAction,
+    AddDataSetAction,
 } from './types';
 
 export const setAppLoading = (isAppLoading: MainState['isAppLoading']) => ({
@@ -42,7 +43,27 @@ export const addProject = (project: Project): AddProjectAction => ({
     payload: { project },
 });
 
+export const addDataset = (dataset: DataSet): AddDataSetAction => ({
+    type: AT.ADD_DATASET,
+    payload: { dataset },
+});
+
 export const error = (message: string): ErrorAction => ({
     type: AT.ERROR,
     payload: message,
+});
+
+export const uploadRequest = (file: File, name: string, project: string) => ({
+    type: AT.UPLOAD_REQUEST,
+    payload: { name, project, file },
+});
+
+export const uploadProgress = (file: File, progress: number) => ({
+    type: AT.UPLOAD_PROGRESS,
+    payload: { progress, file },
+});
+
+export const uploadSuccess = (file: File) => ({
+    type: AT.UPLOAD_SUCCESS,
+    payload: { file },
 });

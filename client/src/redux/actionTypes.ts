@@ -10,4 +10,12 @@ export const NEW_PROJECT = 'NEW_PROJECT';
 
 export const ADD_PROJECT = 'ADD_PROJECT';
 
+export const ADD_DATASET = 'ADD_DATASET';
+
 export const ERROR = 'ERROR';
+
+export const UPLOAD_REQUEST = 'UPLOAD_REQUEST';
+
+export const UPLOAD_PROGRESS = 'UPLOAD_PROGRESS';
+
+export const UPLOAD_SUCCESS = 'UPLOAD_SUCCESS';

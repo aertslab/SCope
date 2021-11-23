@@ -24,4 +24,7 @@ poetry run scope-console create-admin --iss 1 --sub "5e349424-520e-436f-904b-183
 # Allow loom files up to 1 GiB
 poetry run scope-console add-upload-limit --mime="application/vnd.loom" --size=1073741824
 
+# Allow byte streams up to 1 GiB
+poetry run scope-console add-upload-limit --mime="application/octet-stream" --size=1073741824
+
 poetry run hypercorn --log-level=debug main:scope_api --reload

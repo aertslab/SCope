@@ -9,6 +9,12 @@ const initialState: MainState = {
     sessionMode: SESSION_READ,
     projects: [],
     datasets: [],
+    upload: {
+        state: 'none',
+        progress: 0,
+        file: undefined,
+    },
+    error: '',
 };
 
 const main = produce((draft: MainState, action: MainAction) => {
@@ -29,8 +35,22 @@ const main = produce((draft: MainState, action: MainAction) => {
         case Action.ADD_PROJECT:
             draft.projects = [...draft.projects, action.payload.project];
             break;
+        case Action.ADD_DATASET:
+            draft.datasets = [...draft.datasets, action.payload.dataset];
+            break;
         case Action.ERROR:
             console.error(action.payload);
+            draft.error = action.payload;
+            break;
+        case Action.UPLOAD_PROGRESS:
+            draft.upload.state = 'in progress';
+            draft.upload.progress = action.payload.progress;
+            draft.upload.file = action.payload.file;
+            break;
+        case Action.UPLOAD_SUCCESS:
+            draft.upload.state = 'finished';
+            draft.upload.progress = 0;
+            draft.upload.file = undefined;
             break;
     }
 }, initialState);

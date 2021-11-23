@@ -3,22 +3,16 @@
  */
 
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Button } from 'semantic-ui-react';
 
-import { RootState } from '../redux/reducers';
 import * as A from '../redux/actions';
-import { Project } from '../api';
 
 import { NewProjectForm } from './NewProjectForm';
-
-type SidebarState = Array<Project>;
+import { ProjectsOverview } from './ProjectsOverview';
 
 const Sidebar: React.FC<{}> = () => {
     const dispatch = useDispatch();
-    const projects: SidebarState = useSelector<RootState, SidebarState>(
-        (root: RootState) => root.main.projects
-    );
 
     const [showNewProjectForm, setShowNewProjectForm] = useState(false);
 
@@ -51,11 +45,8 @@ const Sidebar: React.FC<{}> = () => {
             )}
 
             <h4>Projects</h4>
-            <ul>
-                {projects.map((project) => (
-                    <li key={project.id}>{project.name}</li>
-                ))}
-            </ul>
+            <ProjectsOverview />
+
             <h4>Public datasets</h4>
         </div>
     );

@@ -15,26 +15,30 @@ export type Project = {
     name: string;
 };
 
-const decodeDataset = (data: unknown): Result<DataSet, string> => {
-    if (data === undefined) {
-        return error('Dataset was undefined');
-    }
-
-    if (typeof data === 'object') {
-        if (
-            data !== null &&
-            'id' in data &&
-            'name' in data &&
-            'filename' in data &&
-            typeof (data as { id: unknown }).id === 'number' &&
-            typeof (data as { name: unknown }).name === 'string' &&
-            typeof (data as { filename: unknown }).filename === 'string'
-        ) {
-            return success(data as DataSet);
+const decodeDataset = (project: string) => {
+    return (data: unknown): Result<DataSet, string> => {
+        if (data === undefined) {
+            return error('Dataset was undefined');
         }
-    }
 
-    return error(`${JSON.stringify(data)} is not a valid Dataset`);
+        if (typeof data === 'object') {
+            if (
+                data !== null &&
+                'id' in data &&
+                'name' in data &&
+                typeof (data as { id: unknown }).id === 'number' &&
+                typeof (data as { name: unknown }).name === 'string'
+            ) {
+                return success({
+                    id: (data as { id: number }).id,
+                    name: (data as { name: string }).name,
+                    project,
+                });
+            }
+        }
+
+        return error(`${JSON.stringify(data)} is not a valid Dataset`);
+    };
 };
 
 const decodeBareProject = (data: unknown): Result<Project, string> => {
@@ -83,7 +87,7 @@ const decodeProject = (
                 const datasets = R.sequence(
                     of,
                     R.map(
-                        decodeDataset,
+                        decodeDataset((data as { uuid: string }).uuid),
                         (data as { datasets: unknown[] }).datasets
                     )
                 );
@@ -91,7 +95,7 @@ const decodeProject = (
                     id: (data as { uuid: string }).uuid,
                     name: (data as { name: string }).name,
                 };
-                return success([project, datasets]);
+                return R.map((datasets) => [project, datasets], datasets);
             }
         }
     }

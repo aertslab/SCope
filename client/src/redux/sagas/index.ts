@@ -12,5 +12,6 @@ export default function* rootSaga() {
         SCOPE.watchRequestProviders(),
         SCOPE.watchPermalinkRequests(),
         SCOPE.watchCreateNewProject(),
+        SCOPE.watchUploadRequest(),
     ]);
 }

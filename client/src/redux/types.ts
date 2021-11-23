@@ -7,12 +7,20 @@ export const SESSION_READWRITE = 'rw';
 
 export type SessionMode = 'r' | 'rw';
 
+export type UploadState = 'none' | 'in progress' | 'finished';
+
 export interface MainState {
     isAppLoading: boolean;
     uuid: string;
     sessionMode: SessionMode;
     projects: Array<Project>;
     datasets: Array<DataSet>;
+    upload: {
+        state: UploadState;
+        progress: number;
+        file?: File;
+    };
+    error: string;
 }
 
 export interface SetLoadingAction {
@@ -52,9 +60,40 @@ export interface AddProjectAction {
     };
 }
 
+export interface AddDataSetAction {
+    type: typeof AT.ADD_DATASET;
+    payload: {
+        dataset: DataSet;
+    };
+}
+
 export interface ErrorAction {
     type: typeof AT.ERROR;
     payload: string;
+}
+
+export interface UploadRequest {
+    type: typeof AT.UPLOAD_REQUEST;
+    payload: {
+        name: string;
+        project: string;
+        file: File;
+    };
+}
+
+export interface UploadProgress {
+    type: typeof AT.UPLOAD_PROGRESS;
+    payload: {
+        progress: number;
+        file: File;
+    };
+}
+
+export interface UploadSuccess {
+    type: typeof AT.UPLOAD_SUCCESS;
+    payload: {
+        file: File;
+    };
 }
 
 export type MainAction =
@@ -64,4 +103,8 @@ export type MainAction =
     | MyProjects
     | NewProjectAction
     | AddProjectAction
-    | ErrorAction;
+    | AddDataSetAction
+    | ErrorAction
+    | UploadRequest
+    | UploadProgress
+    | UploadSuccess;
