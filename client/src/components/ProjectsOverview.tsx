@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { Accordion, Button, Icon, List } from 'semantic-ui-react';
 import * as R from 'ramda';
 
 import { RootState } from '../redux/reducers';
 import * as Select from '../redux/selectors';
 import { DataSet, Project } from '../api';
+
+import * as ViewerAction from './Viewer/actions';
 
 import { UploadForm } from './UploadForm';
 
@@ -19,14 +22,17 @@ type ProjectViewState = Array<DataSet>;
 
 const ProjectView: React.FC<ProjectViewProps> = (props) => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const datasets = useSelector<RootState, ProjectViewState>(
         (state: RootState) => Select.datasets(state, props.project)
     );
 
     const [displayUpload, setDisplayUpload] = useState(false);
 
-    /* const selectDataset = (project: string, dataset: number) => {
-     *     dispatch( */
+    const selectDataset = (project: string, dataset: number) => {
+        dispatch(ViewerAction.selectDataset(project, dataset));
+        navigate('/viewer', { replace: true });
+    };
 
     return (
         <div>
@@ -46,7 +52,7 @@ const ProjectView: React.FC<ProjectViewProps> = (props) => {
                         <List.Item
                             key={d.id}
                             as={'a'}
-                            onClick={selectDataset(props.project, d.id)}>
+                            onClick={() => selectDataset(props.project, d.id)}>
                             {d.name}
                         </List.Item>
                     ))}

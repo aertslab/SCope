@@ -7,12 +7,14 @@ import { reducer as SearchReducer } from '../../components/Search/reducer';
 import * as Search from '../../components/Search/constants';
 
 import * as Auth from '../../components/Auth';
+import * as Viewer from '../../components/Viewer';
 
 const rootReducer = combineReducers({
     ['main']: main,
     [GProfiler.NAME]: GProfilerReducer,
     [Search.NAME]: SearchReducer,
     [Auth.NAME]: Auth.Reducer,
+    [Viewer.NAME]: Viewer.Reducer,
 });
 
 export default rootReducer;

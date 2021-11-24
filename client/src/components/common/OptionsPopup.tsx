@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { Icon, Popup, Button } from 'semantic-ui-react';
 import ClusteringAddPopup from './ClusteringAddPopup';
 
@@ -11,9 +10,9 @@ interface OptionsPopupState {
     orcid_uuid?: string;
 }
 
-class OptionsPopup extends Component<RouteComponentProps, OptionsPopupState> {
-    constructor(props: RouteComponentProps) {
-        super(props);
+class OptionsPopup extends Component<{}, OptionsPopupState> {
+    constructor() {
+        super({});
         this.state = {
             optionsOpen: false,
             someModalOpen: false,
@@ -104,4 +103,4 @@ class OptionsPopup extends Component<RouteComponentProps, OptionsPopupState> {
     }
 }
 
-export default withRouter(OptionsPopup);
+export default OptionsPopup;

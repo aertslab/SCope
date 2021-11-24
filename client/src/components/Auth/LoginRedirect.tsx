@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { Redirect, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 import * as Action from './actions';
 
@@ -17,7 +17,7 @@ const LoginRedirect: React.FC<{}> = () => {
         }
     });
 
-    return <Redirect to='/welcome' />;
+    return <Navigate to='/welcome' replace />;
 };
 
 export { LoginRedirect };

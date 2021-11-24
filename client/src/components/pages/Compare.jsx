@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { DragDropContext } from 'react-dnd';
-import { withRouter } from 'react-router-dom';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { Accordion, Grid, Menu, Icon, Dropdown } from 'semantic-ui-react';
 
@@ -933,4 +932,4 @@ class Compare extends Component {
     }
 }
 
-export default DragDropContext(HTML5Backend)(withRouter(Compare));
+export default Compare;

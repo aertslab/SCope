@@ -16,15 +16,10 @@ import {
 import { instanceOf } from 'prop-types';
 import CollabAnnoGeneSearch from './CollabAnnoGeneSearch';
 import OLSAutocomplete from './../OLSAutocomplete';
-import { Cookies } from 'react-cookie';
 
 import { BackendAPI } from '../common/API';
 
 class CollaborativeAnnotation extends Component {
-    static propTypes = {
-        cookies: instanceOf(Cookies).isRequired,
-    };
-
     constructor() {
         super();
         this.OLSAutocomplete = React.createRef();
@@ -432,17 +427,17 @@ class CollaborativeAnnotation extends Component {
             );
         };
 
-        if (
-            orcid_name &&
-            orcid_id &&
-            orcid_uuid &&
-            orcid_name !== '' &&
-            orcid_id !== '' &&
-            orcid_uuid !== '' &&
-            this.props.cookieConsent
-        ) {
-            return annotationModal(orcid_id, orcid_name);
-        } else {
+        // if (
+        //     orcid_name &&
+        //     orcid_id &&
+        //     orcid_uuid &&
+        //     orcid_name !== '' &&
+        //     orcid_id !== '' &&
+        //     orcid_uuid !== '' &&
+        //     this.props.cookieConsent
+        // ) {
+        //     return annotationModal(orcid_id, orcid_name);
+        // } else {
             return (
                 <Popup
                     position='bottom left'
@@ -461,19 +456,19 @@ class CollaborativeAnnotation extends Component {
                     fluid
                 />
             );
-        }
+        //}
     }
 
     componentDidMount() {
-        let orcid_name = this.props.cookies.get('scope_orcid_name');
-        let orcid_id = this.props.cookies.get('scope_orcid_id');
-        let orcid_uuid = this.props.cookies.get('scope_orcid_uuid');
+        // let orcid_name = this.props.cookies.get('scope_orcid_name');
+        // let orcid_id = this.props.cookies.get('scope_orcid_id');
+        // let orcid_uuid = this.props.cookies.get('scope_orcid_uuid');
 
-        this.setState({
-            orcid_name: orcid_name,
-            orcid_id: orcid_id,
-            orcid_uuid: orcid_uuid,
-        });
+        // this.setState({
+        //     orcid_name: orcid_name,
+        //     orcid_id: orcid_id,
+        //     orcid_uuid: orcid_uuid,
+        // });
     }
 }
 

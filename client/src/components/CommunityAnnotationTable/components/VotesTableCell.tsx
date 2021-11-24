@@ -2,14 +2,11 @@ import React from 'react';
 import * as R from 'ramda';
 import { BackendAPI } from '../../common/API';
 import { Icon, Button, Popup } from 'semantic-ui-react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { withCookies, ReactCookieProps } from 'react-cookie';
 
 import {
     CommunityAnnotationData,
     CommunityVotes,
     makeTableColumnData,
-    getORCIDDataFromCookies,
 } from '../model';
 
 type VotesTableCellProps = {
@@ -17,17 +14,17 @@ type VotesTableCellProps = {
         data: CommunityAnnotationData;
     } & CommunityVotes;
     activeFeature: any;
-} & RouteComponentProps<{ uuid: string }>;
+};
 
 type VotesTableCellState = {
     status: string;
 };
 
 class VotesTableCell extends React.Component<
-    VotesTableCellProps & ReactCookieProps,
+    VotesTableCellProps,
     VotesTableCellState
 > {
-    constructor(props: VotesTableCellProps & ReactCookieProps) {
+    constructor(props: VotesTableCellProps) {
         super(props);
         this.state = {
             status: 'ready',
@@ -38,17 +35,9 @@ class VotesTableCell extends React.Component<
         communityAnnotationData: CommunityAnnotationData,
         direction: 'for' | 'against'
     ) {
-        const {
-            activeFeature,
-            cookies,
-            match: {
-                params: { uuid },
-            },
-        } = this.props;
-        if (!cookies) {
-            return;
-        }
-        const orcidData = getORCIDDataFromCookies(cookies);
+        const { activeFeature } = this.props;
+
+        //TODO: `uuid` is no longer a valid concept
 
         this.setState({ status: 'processing' });
 
@@ -56,9 +45,10 @@ class VotesTableCell extends React.Component<
             direction,
             communityAnnotationData,
             activeFeature,
-            orcidData,
-            uuid,
-            () => {
+            null,
+            null,
+            (response) => {
+                console.log(response);
                 this.setState({ status: 'ready' });
             }
         );
@@ -131,19 +121,14 @@ class VotesTableCell extends React.Component<
     }
 }
 
-const VotesTableCellWithCookiesRouter = withCookies(withRouter(VotesTableCell));
-
-function asReactTableVotesColumn(activeFeature) {
+export function asReactTableVotesColumn(activeFeature) {
     return makeTableColumnData({
         header: 'Endorsements',
         id: 'votes',
         accessor: 'votes',
         cell: (props) => {
             const cell = (
-                <VotesTableCellWithCookiesRouter
-                    activeFeature={activeFeature}
-                    {...props}
-                />
+                <VotesTableCell activeFeature={activeFeature} {...props} />
             );
 
             return cell;
@@ -154,6 +139,4 @@ function asReactTableVotesColumn(activeFeature) {
     });
 }
 
-export { asReactTableVotesColumn };
-
-export default withCookies(withRouter(VotesTableCell));
+export default VotesTableCell;
