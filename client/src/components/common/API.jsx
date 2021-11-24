@@ -224,13 +224,6 @@ class API {
         }
     }
 
-    getUUIDFromIP(onSuccess) {
-        const publicIp = require('public-ip');
-        publicIp.v4().then((ip) => {
-            this.obtainNewUUID(ip, onSuccess);
-        });
-    }
-
     obtainNewUUID(ip, onSuccess) {
         BackendAPI.getConnection().then((gbc) => {
             let query = {
