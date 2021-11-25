@@ -1,19 +1,51 @@
 import * as Action from './actionTypes';
 
-export interface SelectDataset {
-    type: typeof Action.SELECT_DATASET;
+export type AddViewer = {
+    type: typeof Action.ADD_VIEWER_ROW | typeof Action.ADD_VIEWER_COL;
+};
+
+export const addViewerRow = (): AddViewer => ({
+    type: Action.ADD_VIEWER_ROW,
+});
+
+export const addViewerCol = (): AddViewer => ({
+    type: Action.ADD_VIEWER_COL,
+});
+
+export type AppendViewer = {
+    type: typeof Action.APPEND_VIEWER;
     payload: {
         project: string;
         dataset: number;
     };
-}
+};
 
-export const selectDataset = (
+export const appendViewer = (
     project: string,
     dataset: number
-): SelectDataset => ({
-    type: Action.SELECT_DATASET,
+): AppendViewer => ({
+    type: Action.APPEND_VIEWER,
     payload: { project, dataset },
 });
 
-export type ViewerAction = SelectDataset;
+export type InsertViewer = {
+    type: typeof Action.INSERT_VIEWER;
+    payload: {
+        project: string;
+        dataset: number;
+        row: number;
+        col: number;
+    };
+};
+
+export const insertViewer = (
+    project: string,
+    dataset: number,
+    row: number,
+    col: number
+): InsertViewer => ({
+    type: Action.INSERT_VIEWER,
+    payload: { project, dataset, row, col },
+});
+
+export type ViewerAction = AddViewer | AppendViewer | InsertViewer;

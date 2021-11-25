@@ -48,6 +48,12 @@ export const AppHeader: React.FC<{}> = () => {
         },
         {
             display: true,
+            path: '/viewer',
+            title: 'Viewer',
+            icon: false,
+        },
+        {
+            display: true,
             path: '/tutorial',
             title: 'Tutorial',
             icon: false,
