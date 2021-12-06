@@ -32,7 +32,10 @@ export const Main: React.FC<{}> = () => {
         }
     );
 
+    /* eslint-disable no-unused-vars */
+    // TODO: metadata is unused (remove)
     const [metadata, setMetadata] = useState(null);
+    /* eslint-enable no-unused-vars */
 
     // TODO: sessions and permalinks are deprecated. To be removed
     const loc = useLocation();

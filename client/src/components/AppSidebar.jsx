@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import {
     Menu,
     Icon,
@@ -12,7 +11,7 @@ import {
     Progress,
 } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
-import { UploadForm } from './UploadForm';
+//import { UploadForm } from './UploadForm';
 import Slider from 'rc-slider';
 import FileDownloader from '../js/http';
 import Alert from 'react-popup';
@@ -52,7 +51,7 @@ class AppSidebar extends Component {
             loomFiles,
             userLoomTree,
             generalLoomTree,
-            uploadModalOpened,
+            //uploadModalOpened,
             spriteScale,
             spriteAlpha,
         } = this.state;
@@ -208,13 +207,11 @@ class AppSidebar extends Component {
                         onClick={() => {
                             this.setState({ activeEmbeddingId: -1 });
                             this.props.onMetadataChange(file);
-                        }}
-                    >
+                        }}>
                         <Menu.Item
                             className={'level' + l}
                             active={active}
-                            key={file.loomFilePath}
-                        >
+                            key={file.loomFilePath}>
                             {canRemove && (
                                 <Icon
                                     name='sitemap'
@@ -250,8 +247,7 @@ class AppSidebar extends Component {
                                         percent={this.state.downloadPercentage}
                                         indicating
                                         progress
-                                        disabled
-                                    ></Progress>
+                                        disabled></Progress>
                                 )}
                             {!this.state.downloadPercentage && (
                                 <Icon
@@ -284,8 +280,7 @@ class AppSidebar extends Component {
                                     wordWrap: 'break-word',
                                     display: 'inline-block',
                                     width: '90%',
-                                }}
-                            >
+                                }}>
                                 {file.loomDisplayName}
                             </span>
                         </Menu.Item>
@@ -342,15 +337,13 @@ class AppSidebar extends Component {
                 vertical
                 style={{
                     border: 'none',
-                }}
-            >
+                }}>
                 <Menu.Header>DATASETS</Menu.Header>
                 <Menu.Menu>
                     {this.props.sessionMode === 'rw' && (
                         <Menu.Item
                             key='new'
-                            onClick={this.toggleUploadModal.bind(this)}
-                        >
+                            onClick={this.toggleUploadModal.bind(this)}>
                             <Icon name='add' />
                             <em>Upload new dataset</em>
                         </Menu.Item>

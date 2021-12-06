@@ -258,7 +258,4 @@ type PropsFromRedux = ConnectedProps<typeof Container>;
 
 export type GProfilerModalProps = PropsFromRedux & GProfilerPopupProps;
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(GProfilerPopup);
+export default connect(mapStateToProps, mapDispatchToProps)(GProfilerPopup);

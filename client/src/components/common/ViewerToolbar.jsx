@@ -113,8 +113,7 @@ export default class ViewerToolbar extends Component {
                         <Menu.Item
                             name='lasso'
                             active={activeTool === 'lasso'}
-                            onClick={this.handleItemClick.bind(this)}
-                        >
+                            onClick={this.handleItemClick.bind(this)}>
                             <div
                                 title='Lasso Tool'
                                 style={{
@@ -124,14 +123,12 @@ export default class ViewerToolbar extends Component {
                                     backgroundImage:
                                         'url("src/images/lasso.svg")',
                                     backgroundSize: 'cover',
-                                }}
-                            ></div>
+                                }}></div>
                         </Menu.Item>
                         <Menu.Item
                             name='s-zoom'
                             active={activeTool === 's-zoom'}
-                            onClick={this.handleItemClick.bind(this)}
-                        >
+                            onClick={this.handleItemClick.bind(this)}>
                             <div
                                 title='Semantic Zoom'
                                 style={{
@@ -141,8 +138,7 @@ export default class ViewerToolbar extends Component {
                                     backgroundImage:
                                         'url("src/images/expad-arrows.svg")',
                                     backgroundSize: 'cover',
-                                }}
-                            ></div>
+                                }}></div>
                         </Menu.Item>
                     </Menu>
                 </Grid.Row>

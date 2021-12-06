@@ -64,8 +64,7 @@ export default class Histogram extends Component<
             <div className='flexDisplay'>
                 <svg
                     id={'thresholdSVG' + field}
-                    style={{ width: '100%', height: '100%' }}
-                ></svg>
+                    style={{ width: '100%', height: '100%' }}></svg>
                 <div className='auc'>
                     AUC threshold: <b>{selected.toFixed(4)}</b> (matched points:{' '}
                     {matched} / {total})

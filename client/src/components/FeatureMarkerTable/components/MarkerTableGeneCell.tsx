@@ -12,11 +12,7 @@ type GeneTableCellProps = {
 };
 
 const GeneTableCell: React.FC<GeneTableCellProps> = (props) => {
-    const {
-        activeFeature,
-        activeFeatureIndex,
-        value,
-    } = props;
+    const { activeFeature, activeFeatureIndex, value } = props;
 
     return (
         <a

@@ -65,11 +65,7 @@ export const UploadForm: React.FC<UploadFormProps> = (props) => {
     };
 
     return (
-        <Modal
-            open
-            onClose={props.onCancel}
-            closeIcon
-            className='upload'>
+        <Modal open onClose={props.onCancel} closeIcon className='upload'>
             <Modal.Header>Add a dataset to your project</Modal.Header>
             <Modal.Content>
                 <Modal.Description>

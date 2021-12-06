@@ -1,5 +1,3 @@
-import * as R from 'ramda';
-
 import { buffers, eventChannel } from 'redux-saga';
 import { call, put, select, take, takeEvery } from 'redux-saga/effects';
 
