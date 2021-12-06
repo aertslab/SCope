@@ -4,7 +4,7 @@ import * as Action from '../actionTypes';
 import { MainState, MainAction, SESSION_READ } from '../types';
 
 const initialState: MainState = {
-    isAppLoading: true,
+    isAppLoading: false,
     uuid: '',
     sessionMode: SESSION_READ,
     projects: [],
