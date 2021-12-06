@@ -2,11 +2,17 @@
  * Happy path routing for the main application.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/reducers';
+import { SessionMode } from '../redux/types';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 import { AppHeader } from './AppHeader';
-import { Sidebar } from './Sidebar';
+import AppSidebar from './AppSidebar';
+type MainState = {
+    sessionMode: SessionMode;
+};
 
 const validateSessionID = (name: string): string | null => {
     const allowedChars = /^[*\-0-9A-Za-z]+$/gi;
@@ -18,6 +24,16 @@ const validateSessionID = (name: string): string | null => {
 };
 
 export const Main: React.FC<{}> = () => {
+    const state: MainState = useSelector<RootState, MainState>(
+        (root: RootState) => {
+            return {
+                sessionMode: root.main.sessionMode,
+            };
+        }
+    );
+
+    const [metadata, setMetadata] = useState(null);
+
     // TODO: sessions and permalinks are deprecated. To be removed
     const loc = useLocation();
     if (loc.hash.startsWith('#/permalink/')) {
@@ -51,7 +67,11 @@ export const Main: React.FC<{}> = () => {
                         height: '100%',
                         gridColumn: 1,
                     }}>
-                    <Sidebar />
+                    <AppSidebar
+                        visible={true}
+                        onMetadataChange={setMetadata}
+                        sessionMode={state.sessionMode}
+                    />
                 </div>
                 <div style={{ gridColumn: 2, height: '100%' }}>
                     <Outlet />
