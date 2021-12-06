@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as R from 'ramda';
 import { Button, Icon } from 'semantic-ui-react';
 
+import * as MainSelect from '../../redux/selectors';
 import { RootState } from '../../redux/reducers';
 
 import { ViewerId, ViewerInfo, ViewerMap } from './model';
@@ -22,6 +23,61 @@ type WrapperState = {
     grid: Array<Array<ViewerId | undefined>>;
     rows: number;
     cols: number;
+    remove: boolean;
+};
+
+type ChangeButtonProps = {
+    rows: number;
+    cols: number;
+    addrow: () => void;
+};
+
+type ChangeButtonState = {
+    remove: boolean;
+};
+
+const RowChangeButton: React.FC<ChangeButtonProps> = (props) => {
+    const state: ChangeButtonState = useSelector<RootState, ChangeButtonState>(
+        (root: RootState) => ({
+            remove: MainSelect.modifierKey(root) === 'Shift',
+        })
+    );
+    if (state.remove) {
+        return (
+            <>
+                {R.range(1, props.rows + 1).map((i) => {
+                    return (
+                        <div
+                            style={{
+                                display: 'flex',
+                                placeItems: 'center',
+                                flexDirection: 'column',
+                                gridColumn: `${i}`,
+                                gridRow: `${props.cols}`,
+                            }}>
+                            <Button icon fluid color='red'>
+                                <Icon name='minus' />
+                            </Button>
+                        </div>
+                    );
+                })}
+            </>
+        );
+    } else {
+        return (
+            <div
+                style={{
+                    display: 'flex',
+                    placeItems: 'center',
+                    flexDirection: 'column',
+                    gridArea: 'addRow',
+                }}>
+                <Button icon fluid color='green' onClick={props.addrow}>
+                    <Icon name='plus' />
+                </Button>
+            </div>
+        );
+    }
 };
 
 export const ViewerWrapper: React.FC<{}> = () => {
@@ -30,7 +86,13 @@ export const ViewerWrapper: React.FC<{}> = () => {
         const [rows, cols] = Select.shape(root);
         const viewers = Select.viewers(root);
         const grid = Select.grid(root);
-        return { viewers, grid, rows, cols };
+        return {
+            viewers,
+            grid,
+            rows,
+            cols,
+            remove: MainSelect.modifierKey(root) === 'Shift',
+        };
     });
 
     const templateAreas = R.concat(
@@ -79,20 +141,42 @@ export const ViewerWrapper: React.FC<{}> = () => {
                 </Button>
             </div>
 
-            <div
-                style={{
-                    display: 'flex',
-                    placeItems: 'center',
-                    flexDirection: 'column',
-                    gridArea: 'addRow',
-                }}>
-                <Button
-                    icon
-                    fluid
-                    onClick={() => dispatch(Action.addViewerRow())}>
-                    <Icon name='plus' />
-                </Button>
-            </div>
+            {state.remove ? (
+                R.range(1, state.cols + 1).map((i) => {
+                    return (
+                        <div
+                            style={{
+                                display: 'flex',
+                                placeItems: 'center',
+                                flexDirection: 'column',
+                                gridColumn: `${i}`,
+                                gridRow: `${state.rows + 1}`,
+                                paddingLeft: '1px',
+                                paddingRight: '1px',
+                            }}>
+                            <Button icon fluid color='red'>
+                                <Icon name='minus' />
+                            </Button>
+                        </div>
+                    );
+                })
+            ) : (
+                <div
+                    style={{
+                        display: 'flex',
+                        placeItems: 'center',
+                        flexDirection: 'column',
+                        gridArea: 'addRow',
+                    }}>
+                    <Button
+                        icon
+                        fluid
+                        color='green'
+                        onClick={() => dispatch(Action.addViewerRow())}>
+                        <Icon name='plus' />
+                    </Button>
+                </div>
+            )}
         </div>
     );
 };

@@ -1,16 +1,19 @@
 module.exports = {
-  presets: [
-    [
-      '@babel/preset-env',
-      {
-        targets: {
-          "esmodules": true
-        },
-        loose: true,
-      }
+    presets: [
+        [
+            '@babel/preset-env',
+            {
+                targets: {
+                    esmodules: true,
+                },
+                loose: true,
+            },
+        ],
+        '@babel/preset-react',
     ],
-    '@babel/preset-react'
-  ],
-  plugins: ['@babel/plugin-transform-runtime',
-           ["@babel/plugin-proposal-private-methods", { "loose": true }]]
+    plugins: [
+        '@babel/plugin-transform-runtime',
+        ['@babel/plugin-proposal-private-methods', { loose: true }],
+        ['@babel/plugin-proposal-private-property-in-object', { loose: true }],
+    ],
 };

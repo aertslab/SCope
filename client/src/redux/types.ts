@@ -9,6 +9,8 @@ export type SessionMode = 'r' | 'rw';
 
 export type UploadState = 'none' | 'in progress' | 'finished';
 
+export type ModifierKey = 'None' | 'Shift' | 'Control' | 'Alt';
+
 export interface MainState {
     isAppLoading: boolean;
     uuid: string;
@@ -20,6 +22,7 @@ export interface MainState {
         progress: number;
         file?: File;
     };
+    modifierKey: ModifierKey;
     error: string;
 }
 
@@ -96,6 +99,13 @@ export interface UploadSuccess {
     };
 }
 
+export interface ToggleModifierKey {
+    type: typeof AT.MODIFIER_KEY_TOGGLE;
+    payload: {
+        key: ModifierKey;
+    };
+}
+
 export type MainAction =
     | SetLoadingAction
     | SetUUIDAction
@@ -107,4 +117,5 @@ export type MainAction =
     | ErrorAction
     | UploadRequest
     | UploadProgress
-    | UploadSuccess;
+    | UploadSuccess
+    | ToggleModifierKey;

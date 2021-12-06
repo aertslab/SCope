@@ -8,6 +8,8 @@ import {
     NewProjectAction,
     AddProjectAction,
     AddDataSetAction,
+    ModifierKey,
+    ToggleModifierKey,
 } from './types';
 
 export const setAppLoading = (isAppLoading: MainState['isAppLoading']) => ({
@@ -66,4 +68,9 @@ export const uploadProgress = (file: File, progress: number) => ({
 export const uploadSuccess = (file: File) => ({
     type: AT.UPLOAD_SUCCESS,
     payload: { file },
+});
+
+export const toggleModifierKey = (key: ModifierKey): ToggleModifierKey => ({
+    type: AT.MODIFIER_KEY_TOGGLE,
+    payload: { key },
 });

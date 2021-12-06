@@ -2,11 +2,15 @@
  * Happy path routing for the main application.
  */
 
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/reducers';
 import { SessionMode } from '../redux/types';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import Favicon from 'react-favicon';
+
+import { toggleModifierKey } from '../redux/actions';
+import { ModifierKey } from '../redux/types';
 
 import { AppHeader } from './AppHeader';
 import AppSidebar from './AppSidebar';
@@ -49,8 +53,26 @@ export const Main: React.FC<{}> = () => {
         return <Navigate to={`/legacy/${session}`} replace />; // nosemgrep: typescript.react.security.audit.react-router-redirect.react-router-redirect
     }
 
+    const dispatch = useDispatch();
+
+    const keyevent = (event: KeyboardEvent): void => {
+        if (['Shift', 'Alt', 'Control'].includes(event.key)) {
+            dispatch(toggleModifierKey(event.key as ModifierKey));
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener('keydown', keyevent);
+        document.addEventListener('keyup', keyevent);
+        return () => {
+            document.removeEventListener('keydown', keyevent);
+            document.removeEventListener('keyup', keyevent);
+        };
+    }, []);
+
     return (
         <React.StrictMode>
+            <Favicon url='src/images/SCope_favicon.ico' />
             <div
                 style={{
                     display: 'grid',
