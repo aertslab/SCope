@@ -53,7 +53,6 @@ const GeneTableCell: React.FC<GeneTableCellProps> = (props) => {
 };
 
 function asReactTableGeneColumn({
-    history,
     activePage,
     activeFeature,
     activeFeatureIndex,
@@ -65,11 +64,10 @@ function asReactTableGeneColumn({
         cell: (props) => {
             const cell = (
                 <GeneTableCell
-                    history={history}
                     activePage={activePage}
                     activeFeature={activeFeature}
                     activeFeatureIndex={activeFeatureIndex}
-                    {...props}
+                    value={props.value}
                 />
             );
             return cell;

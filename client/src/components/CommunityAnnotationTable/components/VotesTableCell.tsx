@@ -128,7 +128,10 @@ export function asReactTableVotesColumn(activeFeature) {
         accessor: 'votes',
         cell: (props) => {
             const cell = (
-                <VotesTableCell activeFeature={activeFeature} {...props} />
+                <VotesTableCell
+                    activeFeature={activeFeature}
+                    value={props.value}
+                />
             );
 
             return cell;
