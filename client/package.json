@@ -69,7 +69,6 @@
         "@testing-library/react": "^12.1.2",
         "@testing-library/user-event": "^13.5.0",
         "@types/jest": "^27.0.2",
-        "@types/node": "^15.14.1",
         "@types/ramda": "^0.27.32",
         "@types/react": "^16.14.2",
         "@types/react-dom": "^16.9.10",
@@ -84,6 +83,7 @@
         "eslint-config-prettier": "^8.3.0",
         "eslint-plugin-prettier": "^3.2.0",
         "eslint-plugin-react": "^7.21.5",
+        "file-loader": "^6.2.0",
         "html-webpack-plugin": "^5.3.1",
         "jest": "^27.0.6",
         "jest-css-modules-transform": "^4.2.1",
@@ -152,7 +152,10 @@
             "ecmaVersion": 2018,
             "sourceType": "module"
         },
-        "plugins": ["react", "@typescript-eslint"],
+        "plugins": [
+            "react",
+            "@typescript-eslint"
+        ],
         "rules": {
             "prettier/prettier": "error",
             "no-unused-vars": [
@@ -170,9 +173,17 @@
             "no-var": "warn",
             "react/prop-types": "off",
             "react/jsx-key": "off",
-            "eqeqeq": ["error", "always"],
-            "curly": ["error", "all"],
-            "no-bitwise": ["error"]
+            "eqeqeq": [
+                "error",
+                "always"
+            ],
+            "curly": [
+                "error",
+                "all"
+            ],
+            "no-bitwise": [
+                "error"
+            ]
         },
         "settings": {
             "react": {
