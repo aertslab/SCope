@@ -84,3 +84,31 @@ const placeInGrid = (grid: ViewerGrid, viewer: ViewerId): ViewerGrid => {
     newGrid.grid[row][col] = viewer;
     return newGrid;
 };
+
+export const removeRow = (grid: ViewerGrid, row: number): ViewerGrid => {
+    if (grid.rows > 1) {
+        return {
+            grid: R.addIndex(R.filter)((_, i) => i !== row, grid.grid),
+            rows: grid.rows - 1,
+            cols: grid.cols,
+        };
+    } else {
+        return grid;
+    }
+};
+
+export const removeCol = (grid: ViewerGrid, col: number): ViewerGrid => {
+    const indexedFilter = R.addIndex(R.filter);
+    if (grid.cols > 1) {
+        return {
+            grid: R.map(
+                (row) => indexedFilter((_, i) => i !== col, row),
+                grid.grid
+            ),
+            rows: grid.rows,
+            cols: grid.cols - 1,
+        };
+    } else {
+        return grid;
+    }
+};

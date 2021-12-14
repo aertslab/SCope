@@ -12,6 +12,21 @@ export const addViewerCol = (): AddViewer => ({
     type: Action.ADD_VIEWER_COL,
 });
 
+export type RemoveViewer = {
+    type: typeof Action.REMOVE_VIEWER_ROW | typeof Action.REMOVE_VIEWER_COL;
+    payload: number;
+};
+
+export const removeViewerRow = (row: number): RemoveViewer => ({
+    type: Action.REMOVE_VIEWER_ROW,
+    payload: row,
+});
+
+export const removeViewerCol = (col: number): RemoveViewer => ({
+    type: Action.REMOVE_VIEWER_COL,
+    payload: col,
+});
+
 export type AppendViewer = {
     type: typeof Action.APPEND_VIEWER;
     payload: {
@@ -48,4 +63,8 @@ export const insertViewer = (
     payload: { project, dataset, row, col },
 });
 
-export type ViewerAction = AddViewer | AppendViewer | InsertViewer;
+export type ViewerAction =
+    | AddViewer
+    | RemoveViewer
+    | AppendViewer
+    | InsertViewer;

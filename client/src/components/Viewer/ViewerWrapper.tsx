@@ -26,60 +26,6 @@ type WrapperState = {
     remove: boolean;
 };
 
-type ChangeButtonProps = {
-    rows: number;
-    cols: number;
-    addrow: () => void;
-};
-
-type ChangeButtonState = {
-    remove: boolean;
-};
-
-const RowChangeButton: React.FC<ChangeButtonProps> = (props) => {
-    const state: ChangeButtonState = useSelector<RootState, ChangeButtonState>(
-        (root: RootState) => ({
-            remove: MainSelect.modifierKey(root) === 'Shift',
-        })
-    );
-    if (state.remove) {
-        return (
-            <>
-                {R.range(1, props.rows + 1).map((i) => {
-                    return (
-                        <div
-                            style={{
-                                display: 'flex',
-                                placeItems: 'center',
-                                flexDirection: 'column',
-                                gridColumn: `${i}`,
-                                gridRow: `${props.cols}`,
-                            }}>
-                            <Button icon fluid color='red'>
-                                <Icon name='minus' />
-                            </Button>
-                        </div>
-                    );
-                })}
-            </>
-        );
-    } else {
-        return (
-            <div
-                style={{
-                    display: 'flex',
-                    placeItems: 'center',
-                    flexDirection: 'column',
-                    gridArea: 'addRow',
-                }}>
-                <Button icon fluid color='green' onClick={props.addrow}>
-                    <Icon name='plus' />
-                </Button>
-            </div>
-        );
-    }
-};
-
 export const ViewerWrapper: React.FC<{}> = () => {
     const dispatch = useDispatch();
     const state = useSelector<RootState, WrapperState>((root: RootState) => {
@@ -127,24 +73,54 @@ export const ViewerWrapper: React.FC<{}> = () => {
                 }
             })}
 
-            <div
-                style={{
-                    display: 'flex',
-                    placeItems: 'center',
-                    gridArea: 'addColumn',
-                }}>
-                <Button
-                    icon
-                    style={{ height: '100%' }}
-                    onClick={() => dispatch(Action.addViewerCol())}>
-                    <Icon name='plus' />
-                </Button>
-            </div>
+            {state.remove ? (
+                R.range(1, state.rows + 1).map((i) => {
+                    return (
+                        <div
+                            key={i}
+                            style={{
+                                display: 'flex',
+                                placeItems: 'center',
+                                gridColumn: `${state.cols + 1}`,
+                                gridRow: `${i}`,
+                                paddingTop: '1px',
+                                paddingBottom: '1px',
+                            }}>
+                            <Button
+                                icon
+                                color='red'
+                                disabled={state.rows <= 1}
+                                style={{ height: '100%' }}
+                                onClick={() =>
+                                    dispatch(Action.removeViewerRow(i - 1))
+                                }>
+                                <Icon name='minus' />
+                            </Button>
+                        </div>
+                    );
+                })
+            ) : (
+                <div
+                    style={{
+                        display: 'flex',
+                        placeItems: 'center',
+                        gridArea: 'addColumn',
+                    }}>
+                    <Button
+                        icon
+                        color='green'
+                        style={{ height: '100%' }}
+                        onClick={() => dispatch(Action.addViewerCol())}>
+                        <Icon name='plus' />
+                    </Button>
+                </div>
+            )}
 
             {state.remove ? (
                 R.range(1, state.cols + 1).map((i) => {
                     return (
                         <div
+                            key={i}
                             style={{
                                 display: 'flex',
                                 placeItems: 'center',
@@ -154,7 +130,14 @@ export const ViewerWrapper: React.FC<{}> = () => {
                                 paddingLeft: '1px',
                                 paddingRight: '1px',
                             }}>
-                            <Button icon fluid color='red'>
+                            <Button
+                                icon
+                                fluid
+                                color='red'
+                                disabled={state.cols <= 1}
+                                onClick={() =>
+                                    dispatch(Action.removeViewerCol(i - 1))
+                                }>
                                 <Icon name='minus' />
                             </Button>
                         </div>

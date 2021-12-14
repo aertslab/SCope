@@ -202,6 +202,79 @@ describe('Grid manipulation', () => {
     });
 });
 
+describe('Remove rows and or cols from a grid', () => {
+    it('Cannot remove a row from a 1x1 grid', () => {
+        const grid = {
+            grid: [[0]],
+            rows: 1,
+            cols: 1,
+        };
+        expect(Model.removeRow(grid, 0)).toStrictEqual(grid);
+    });
+
+    it('Cannot remove a column from a 1x1 grid', () => {
+        const grid = {
+            grid: [[0]],
+            rows: 1,
+            cols: 1,
+        };
+        expect(Model.removeCol(grid, 0)).toStrictEqual(grid);
+    });
+
+    it('Can remove row 0 from a 2x1 grid', () => {
+        const grid = {
+            grid: [[1], [2]],
+            rows: 2,
+            cols: 1,
+        };
+        expect(Model.removeRow(grid, 0)).toStrictEqual({
+            grid: [[2]],
+            rows: 1,
+            cols: 1,
+        });
+    });
+
+    it('Can remove row 1 from a 2x1 grid', () => {
+        const grid = {
+            grid: [[1], [2]],
+            rows: 2,
+            cols: 1,
+        };
+        expect(Model.removeRow(grid, 1)).toStrictEqual({
+            grid: [[1]],
+            rows: 1,
+            cols: 1,
+        });
+    });
+
+    //
+    it('Can remove column 0 from a 1x2 grid', () => {
+        const grid = {
+            grid: [[1, 2]],
+            rows: 1,
+            cols: 2,
+        };
+        expect(Model.removeCol(grid, 0)).toStrictEqual({
+            grid: [[2]],
+            rows: 1,
+            cols: 1,
+        });
+    });
+
+    it('Can remove column 1 from a 1x2 grid', () => {
+        const grid = {
+            grid: [[1, 2]],
+            rows: 1,
+            cols: 2,
+        };
+        expect(Model.removeCol(grid, 1)).toStrictEqual({
+            grid: [[1]],
+            rows: 1,
+            cols: 1,
+        });
+    });
+});
+
 describe('State', () => {
     it('Can initialise the state', () => {
         expect(Model.initState()).toStrictEqual({

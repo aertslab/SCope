@@ -3,7 +3,12 @@ import { Reducer } from 'redux';
 
 import { State, initState } from './model';
 import * as Model from './model';
-import { ViewerAction, AppendViewer, InsertViewer } from './actions';
+import {
+    ViewerAction,
+    AppendViewer,
+    InsertViewer,
+    RemoveViewer,
+} from './actions';
 import * as AT from './actionTypes';
 
 const initialState: State = initState();
@@ -17,6 +22,20 @@ export const reducer: Reducer<State, ViewerAction> = produce(
 
             case AT.ADD_VIEWER_ROW:
                 draft.grid = Model.appendRow(draft.grid);
+                break;
+
+            case AT.REMOVE_VIEWER_COL:
+                draft.grid = Model.removeCol(
+                    draft.grid,
+                    (action as RemoveViewer).payload
+                );
+                break;
+
+            case AT.REMOVE_VIEWER_ROW:
+                draft.grid = Model.removeRow(
+                    draft.grid,
+                    (action as RemoveViewer).payload
+                );
                 break;
 
             case AT.INSERT_VIEWER:
