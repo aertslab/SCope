@@ -229,6 +229,14 @@ def delete_dataset(database: Session, dataset: models.Dataset):
         database.commit()
 
 
+def user_has_access_to_dataset(database: Session, user: models.User, dataset: models.Dataset) -> bool:
+    "Check if a user has access to a given dataset"
+    if (project := database.query(models.Project).filter(models.Project.id == dataset.project).first()) is None:
+        return False
+
+    return is_user(user, project)
+
+
 # Auth
 
 
