@@ -900,6 +900,7 @@ class Loom:
         annotation: Optional[List[Annotation]] = None,
         cluster_info: Optional[Tuple[int, int]] = None,
         logic: str = "OR",
+        to_list: bool = False,
     ):
         loom = self.loom_connection
         if coordinatesID == -1:
@@ -939,7 +940,14 @@ class Loom:
             y = y[cellIndices]
         else:
             cellIndices = list(range(self.get_nb_cells()))
-        return {"x": x, "y": -y, "cellIndices": cellIndices}
+
+        ret = {"x": x, "y": -y, "cellIndices": cellIndices}
+
+        if to_list:
+            return {"x": ret["x"].tolist(), "y": ret["y"].tolist(), "cellIndices": ret["cellIndices"]}
+
+        return ret
+
 
     ##############
     # Annotation #

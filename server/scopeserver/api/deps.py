@@ -1,18 +1,19 @@
 " Provides Depends() objects for all API endpoints. "
 
-from typing import AsyncGenerator, Generator
 from datetime import datetime, timezone
+from functools import lru_cache
+from typing import AsyncGenerator, Generator
 
 import httpx
 from fastapi import Depends, Header, HTTPException, status
 from fastapi.security.utils import get_authorization_scheme_param
 from jose import jwt
 from jose.exceptions import JWTError
-from sqlalchemy.orm import Session
-
 from scopeserver import crud, models, schemas
-from scopeserver.database import SessionLocal
 from scopeserver.config import settings
+from scopeserver.database import SessionLocal
+from scopeserver.dataserver.utils.loom_file_handler import LoomFileHandler
+from sqlalchemy.orm import Session
 
 
 def get_db() -> Generator:
@@ -31,6 +32,14 @@ async def get_http_client() -> AsyncGenerator:
         yield client
     finally:
         await client.aclose()
+
+@lru_cache(maxsize=1)
+def lfh() -> LoomFileHandler:
+    "Provide access to a loom file handler (lfh)"
+
+    handler = LoomFileHandler()
+    handler.set_global_data()
+    return handler
 
 
 def get_current_user(database: Session = Depends(get_db), authorization: str = Header(...)) -> models.User:

@@ -7,6 +7,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
+
 # Datasets
 class DatasetBase(BaseModel):
     id: int
@@ -21,6 +22,12 @@ class Dataset(DatasetBase):
 
     class Config:
         orm_mode = True
+
+
+class Coordinates(BaseModel):
+    x: List[float]
+    y: List[float]
+    cellIndices: List[int]
 
 
 # Users and Projects
