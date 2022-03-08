@@ -10,6 +10,7 @@ import * as A from '../../actions';
 
 import * as AuthSelectors from '../../../components/Auth/selectors';
 
+declare const SERVER_URL: string;
 declare const API_PREFIX: string;
 
 export function* createNewProject(action: T.NewProjectAction) {
@@ -75,7 +76,7 @@ export function* uploadFile(endpoint: string, project: string, file: File) {
 }
 
 export function* uploadRequest(action: T.UploadRequest) {
-    const url = new URL(API_PREFIX + 'project/dataset');
+    const url = new URL(SERVER_URL + API_PREFIX + 'project/dataset');
     url.search = new URLSearchParams({
         name: action.payload.name,
         project: action.payload.project,

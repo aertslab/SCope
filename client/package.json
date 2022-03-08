@@ -152,10 +152,7 @@
             "ecmaVersion": 2018,
             "sourceType": "module"
         },
-        "plugins": [
-            "react",
-            "@typescript-eslint"
-        ],
+        "plugins": ["react", "@typescript-eslint"],
         "rules": {
             "prettier/prettier": "error",
             "no-unused-vars": [
@@ -173,17 +170,9 @@
             "no-var": "warn",
             "react/prop-types": "off",
             "react/jsx-key": "off",
-            "eqeqeq": [
-                "error",
-                "always"
-            ],
-            "curly": [
-                "error",
-                "all"
-            ],
-            "no-bitwise": [
-                "error"
-            ]
+            "eqeqeq": ["error", "always"],
+            "curly": ["error", "all"],
+            "no-bitwise": ["error"]
         },
         "settings": {
             "react": {
@@ -199,7 +188,8 @@
         },
         "globals": {
             "__TEST_ONLY__": true,
-            "API_PREFIX": "http://localhost:8000/api/v1/"
+            "SERVER_URL": "http://localhost:8000",
+            "API_PREFIX": "/api/v1/"
         },
         "coverageThreshold": {
             "global": {

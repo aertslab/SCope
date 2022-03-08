@@ -1,6 +1,5 @@
-declare const API_PREFIX: string;
-
 import { Result, error, success } from '../result';
+import { API_URL } from './api';
 
 export type LegacySession = {
     uuid: string;
@@ -30,7 +29,7 @@ export async function requestDecodePermalink(
     sessiondata: string
 ): Promise<Result<LegacySession, string>> {
     try {
-        const response = await fetch(API_PREFIX + 'legacy/permalink', {
+        const response = await fetch(API_URL + 'legacy/permalink', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

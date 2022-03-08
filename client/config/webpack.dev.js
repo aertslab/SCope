@@ -6,6 +6,10 @@ const common = require('./webpack.common');
 const BundleAnalyzerPlugin =
     require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
+const SCOPE_SERVER_URL = process.env.SCOPE_SERVER_URL
+    ? process.env.SCOPE_SERVER_URL
+    : 'http://localhost:8000';
+
 module.exports = merge(common, {
     mode: 'development',
 
@@ -45,7 +49,8 @@ module.exports = merge(common, {
                 client_id: 'APP-1QNL921F7P9FC3S4',
                 redirect_uri: 'http://127.0.0.1:55850/',
             }),
-            API_PREFIX: JSON.stringify('http://localhost:8000/api/v1/'),
+            SERVER_URL: SCOPE_SERVER_URL,
+            API_PREFIX: JSON.stringify('/api/v1/'),
             LOGIN_REDIRECT: JSON.stringify('/oidc_redirect'),
             LOGOUT_REDIRECT: JSON.stringify('/'),
             __TEST_ONLY__: false,

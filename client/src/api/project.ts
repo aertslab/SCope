@@ -1,8 +1,7 @@
 import * as R from 'ramda';
 
-declare const API_PREFIX: string;
-
 import { Result, of, success, error } from '../result';
+import { API_URL } from './api';
 
 export type DataSet = {
     id: number;
@@ -143,7 +142,7 @@ export async function myProjects(
     token: string
 ): Promise<Result<[Array<Project>, Array<DataSet>], string>> {
     try {
-        const response = await fetch(API_PREFIX + 'user/', {
+        const response = await fetch(API_URL + 'user/', {
             headers: {
                 Accept: 'application/json',
                 Authorization: `Bearer ${token}`,
@@ -166,7 +165,7 @@ export async function makeProject(
     name: string
 ): Promise<Result<Project, string>> {
     try {
-        const url = new URL(API_PREFIX + 'project/new');
+        const url = new URL(API_URL + 'project/new');
         url.search = new URLSearchParams({ name }).toString();
         const response = await fetch(url.toString(), {
             method: 'POST',

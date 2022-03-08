@@ -1,10 +1,9 @@
 import * as R from 'ramda';
 
-declare const API_PREFIX: string;
-
 import { Result, error, success, map, of } from '../result';
 import { Project, DataSet, decodeProjects } from './project';
 import { handleError } from './err';
+import { API_URL } from './api';
 
 const USER_ROLES = ['guest', 'user', 'admin'] as const;
 export type UserRole = typeof USER_ROLES[number];
@@ -123,7 +122,7 @@ export async function requestAuthToken(
     req: AuthTokenRequest
 ): Promise<Result<AuthTokenResponse, string>> {
     try {
-        const response = await fetch(API_PREFIX + 'auth/authorize', {
+        const response = await fetch(API_URL + 'auth/authorize', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -144,7 +143,7 @@ export async function requestGuestToken(): Promise<
     Result<AuthTokenResponse, string>
 > {
     try {
-        const response = await fetch(API_PREFIX + 'user/new', {
+        const response = await fetch(API_URL + 'user/new', {
             method: 'POST',
         });
         if (!response.ok) {
@@ -209,7 +208,7 @@ export async function requestAuthProviders(): Promise<
     Result<Array<Provider>, string>
 > {
     try {
-        const response = await fetch(API_PREFIX + 'auth/loginurl');
+        const response = await fetch(API_URL + 'auth/loginurl');
         if (!response.ok) {
             return error(response.statusText);
         }
