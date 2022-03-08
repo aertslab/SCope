@@ -60,7 +60,7 @@ def test_authorize_new_user(identity_provider):
     assert response.status_code == 200
     token = response.json()
     assert token["token_type"] == "bearer"
-    assert token["user"] == {"name": "Test", "role": "user", "id": 1}
+    assert token["user"] == {"name": "Test", "role": "user", "id": 1, "projects": []}
 
 
 def test_authorize_existing_user(user, identity_provider):

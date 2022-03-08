@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { withRouter, Link } from 'react-router-dom';
 import {
     Menu,
     Icon,
@@ -12,7 +11,7 @@ import {
     Progress,
 } from 'semantic-ui-react';
 import { BackendAPI } from './common/API';
-import { UploadForm } from './UploadForm';
+//import { UploadForm } from './UploadForm';
 import Slider from 'rc-slider';
 import FileDownloader from '../js/http';
 import Alert from 'react-popup';
@@ -34,7 +33,7 @@ class AppSidebar extends Component {
             spriteScale: sprite.scale,
             spriteAlpha: sprite.alpha,
             uploadModalOpened: false,
-            loading: true,
+            loading: false,
             downloading: false,
             downloadPercentage: null,
             newHierarchy_L1: '',
@@ -52,7 +51,7 @@ class AppSidebar extends Component {
             loomFiles,
             userLoomTree,
             generalLoomTree,
-            uploadModalOpened,
+            //uploadModalOpened,
             spriteScale,
             spriteAlpha,
         } = this.state;
@@ -193,9 +192,9 @@ class AppSidebar extends Component {
                     match.params.loom === loomUri ||
                     encodeURIComponent(match.params.loom) === loomUri;
                 return (
-                    <Link
+                    <a
                         key={l + '-node- ' + i}
-                        to={
+                        href={
                             '/' +
                             [
                                 match.params.uuid,
@@ -285,7 +284,7 @@ class AppSidebar extends Component {
                                 {file.loomDisplayName}
                             </span>
                         </Menu.Item>
-                    </Link>
+                    </a>
                 );
             });
             let children = Object.keys(t.children).map((level) => {
@@ -494,26 +493,26 @@ class AppSidebar extends Component {
                         </Menu.Item>
                     </Menu.Menu>
                 )}
-                <Divider />
-                <UploadForm
-                    title='Import a .loom file'
-                    type='Loom'
-                    uuid={match.params.uuid}
-                    open={uploadModalOpened}
-                    onClose={this.toggleUploadModal.bind(this)}
-                    onUploaded={this.onLoomUploaded.bind(this)}
-                />
+                {/* <Divider /> */}
+                {/* <UploadForm */}
+                {/*     title='Import a .loom file' */}
+                {/*     type='Loom' */}
+                {/*     uuid={match.params.uuid} */}
+                {/*     open={uploadModalOpened} */}
+                {/*     onClose={this.toggleUploadModal.bind(this)} */}
+                {/*     onUploaded={this.onLoomUploaded.bind(this)} */}
+                {/* /> */}
             </Menu>
         );
     }
 
     UNSAFE_componentWillMount() {
-        this.getLoomFiles();
-        BackendAPI.onUpdate(this.onSettingsUpdate.bind(this));
+        //this.getLoomFiles();
+        //BackendAPI.onUpdate(this.onSettingsUpdate.bind(this));
     }
 
     componentWillUnmount() {
-        BackendAPI.removeOnUpdate(this.onSettingsUpdate.bind(this));
+        //BackendAPI.removeOnUpdate(this.onSettingsUpdate.bind(this));
     }
 
     onSettingsUpdate() {
@@ -713,4 +712,4 @@ class AppSidebar extends Component {
     }
 }
 
-export default withRouter(AppSidebar);
+export default AppSidebar;

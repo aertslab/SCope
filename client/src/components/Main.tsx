@@ -4,46 +4,26 @@
 
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Route } from 'react-router-dom';
-
-import { Segment, Header, Grid } from 'semantic-ui-react';
-import { Cookies } from 'react-cookie';
-
 import { RootState } from '../redux/reducers';
 import { SessionMode } from '../redux/types';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
-import AppHeader from './AppHeader';
+import { AppHeader } from './AppHeader';
 import AppSidebar from './AppSidebar';
-import {
-    About,
-    Annotations,
-    Compare,
-    Dataset,
-    Gene,
-    Regulon,
-    Tutorial,
-    Welcome,
-} from './pages';
-
-export const SessionLoading: React.FC = () => {
-    return (
-        <Segment vertical textAlign='center' className='parentView'>
-            <Header as='h1'>SCope</Header>
-        </Segment>
-    );
-};
-
-type MainProps = {
-    loaded: boolean;
-    timeout: string;
-    cookies: Cookies;
-};
-
 type MainState = {
     sessionMode: SessionMode;
 };
 
-export const Main: React.FC<MainProps> = (props: MainProps) => {
+const validateSessionID = (name: string): string | null => {
+    const allowedChars = /^[*\-0-9A-Za-z]+$/gi;
+    if (allowedChars.test(name)) {
+        return name;
+    }
+
+    return null;
+};
+
+export const Main: React.FC<{}> = () => {
     const state: MainState = useSelector<RootState, MainState>(
         (root: RootState) => {
             return {
@@ -52,53 +32,54 @@ export const Main: React.FC<MainProps> = (props: MainProps) => {
         }
     );
 
+    /* eslint-disable no-unused-vars */
+    // TODO: metadata is unused (remove)
     const [metadata, setMetadata] = useState(null);
+    /* eslint-enable no-unused-vars */
+
+    // TODO: sessions and permalinks are deprecated. To be removed
+    const loc = useLocation();
+    if (loc.hash.startsWith('#/permalink/')) {
+        console.log('Is a permalink');
+        const session = validateSessionID(loc.hash.substring(12));
+        return <Navigate to={`/legacy/restore/${session}`} replace />; // nosemgrep: typescript.react.security.audit.react-router-redirect.react-router-redirect
+    } else if (loc.hash.length > 0) {
+        console.log('Is a legacy session');
+        const session = validateSessionID(loc.hash.substring(2));
+        return <Navigate to={`/legacy/${session}`} replace />; // nosemgrep: typescript.react.security.audit.react-router-redirect.react-router-redirect
+    }
 
     return (
-        <React.Fragment>
-            <AppHeader
-                loaded={props.loaded}
-                timeout={props.timeout}
-                cookies={props.cookies}
-            />
-            <Grid
-                stretched
-                columns={2}
+        <React.StrictMode>
+            <div
                 style={{
-                    display: 'flex',
+                    display: 'grid',
+                    gridTemplateColumns: 'max-content 1fr',
+                    gridTemplateRows: 'max-content 1fr',
+                    marginTop: 0,
+                    flexGrow: 1,
                     height: '100vh',
                 }}>
-                <Grid.Column
+                <div
+                    style={{ height: 'max-content', gridColumn: '1 / span 2' }}>
+                    <AppHeader />
+                </div>
+                <div
                     style={{
                         width: 'max-content',
-                    }}
-                    stretched>
+                        height: '100%',
+                        gridColumn: 1,
+                    }}>
                     <AppSidebar
                         visible={true}
                         onMetadataChange={setMetadata}
                         sessionMode={state.sessionMode}
                     />
-                </Grid.Column>
-                <Grid.Column
-                    style={{
-                        flexGrow: 100,
-                    }}
-                    stretched>
-                    <Route path='/:uuid/:loom?/welcome' component={Welcome} />
-                    <Route path='/:uuid/:loom?/dataset' component={Dataset} />
-                    <Route path='/:uuid/:loom?/gene' component={Gene} />
-                    <Route path='/:uuid/:loom?/regulon' component={Regulon} />
-                    <Route
-                        path='/:uuid/:loom?/annotations'
-                        component={Annotations}
-                    />
-                    <Route path='/:uuid/:loom?/compare'>
-                        <Compare metadata={metadata} />
-                    </Route>
-                    <Route path='/:uuid/:loom?/tutorial' component={Tutorial} />
-                    <Route path='/:uuid/:loom?/about' component={About} />
-                </Grid.Column>
-            </Grid>
-        </React.Fragment>
+                </div>
+                <div style={{ gridColumn: 2, height: '100%' }}>
+                    <Outlet />
+                </div>
+            </div>
+        </React.StrictMode>
     );
 };

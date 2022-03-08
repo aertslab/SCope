@@ -7,8 +7,8 @@ export const About: React.FC<{}> = () => {
                 display: 'grid',
                 alignContent: 'baseline',
             }}>
+            <h1>About SCope</h1>
             <p>
-                <h1>About SCope</h1>
                 The original version of SCope was designed and developed by
                 Maxime De Waegeneer. The current version was made as a joint
                 effort of{' '}

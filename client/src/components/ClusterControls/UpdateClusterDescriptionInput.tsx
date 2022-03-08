@@ -1,5 +1,4 @@
 import React, { createRef } from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { Input } from 'semantic-ui-react';
 import Alert from 'react-popup';
 
@@ -8,7 +7,7 @@ import { BackendAPI } from '../common/API';
 type UpdateClusterDescriptionInputProps = {
     featureIndex: number;
     feature: any;
-} & RouteComponentProps<{ uuid: string }>;
+};
 
 type UpdateClusterDescriptionInputState = {
     newClusterDescription: string;
@@ -31,7 +30,9 @@ class UpdateClusterDescriptionInput extends React.Component<
 
     handleAnnoUpdate = (feature: any, featureIndex: number) => {
         const { newClusterDescription } = this.state;
-        const { uuid } = this.props.match.params;
+
+        //TODO: `uuid` is no longer a valid concept
+        const uuid = null;
 
         if (newClusterDescription !== '') {
             Alert.create({
@@ -124,4 +125,4 @@ class UpdateClusterDescriptionInput extends React.Component<
     }
 }
 
-export default withRouter(UpdateClusterDescriptionInput);
+export default UpdateClusterDescriptionInput;

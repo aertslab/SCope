@@ -4,10 +4,17 @@ import * as Action from '../actionTypes';
 import { MainState, MainAction, SESSION_READ } from '../types';
 
 const initialState: MainState = {
-    isAppLoading: true,
+    isAppLoading: false,
     uuid: '',
     sessionMode: SESSION_READ,
-    cookieConsent: false,
+    projects: [],
+    datasets: [],
+    upload: {
+        state: 'none',
+        progress: 0,
+        file: undefined,
+    },
+    error: '',
 };
 
 const main = produce((draft: MainState, action: MainAction) => {
@@ -21,8 +28,29 @@ const main = produce((draft: MainState, action: MainAction) => {
         case Action.SET_SESSION_MODE:
             draft.sessionMode = action.payload;
             break;
-        case Action.CONSENT_TO_COOKIES:
-            draft.cookieConsent = true;
+        case Action.MY_PROJECTS:
+            draft.projects = action.payload.projects;
+            draft.datasets = action.payload.datasets;
+            break;
+        case Action.ADD_PROJECT:
+            draft.projects = [...draft.projects, action.payload.project];
+            break;
+        case Action.ADD_DATASET:
+            draft.datasets = [...draft.datasets, action.payload.dataset];
+            break;
+        case Action.ERROR:
+            console.error(action.payload);
+            draft.error = action.payload;
+            break;
+        case Action.UPLOAD_PROGRESS:
+            draft.upload.state = 'in progress';
+            draft.upload.progress = action.payload.progress;
+            draft.upload.file = action.payload.file;
+            break;
+        case Action.UPLOAD_SUCCESS:
+            draft.upload.state = 'finished';
+            draft.upload.progress = 0;
+            draft.upload.file = undefined;
             break;
     }
 }, initialState);

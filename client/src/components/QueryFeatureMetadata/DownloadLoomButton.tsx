@@ -1,5 +1,4 @@
 import React from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { Button, Progress } from 'semantic-ui-react';
 
 import FileDownloader from '../../js/http';
@@ -7,9 +6,9 @@ import { BackendAPI } from '../common/API';
 
 declare const DEBUG: boolean;
 
-type DownloadLoomButtonProps = { activeFeature: any } & RouteComponentProps<{
-    uuid: string;
-}>;
+type DownloadLoomButtonProps = {
+    activeFeature: any;
+};
 
 type DownloadLoomButtonState = {
     loomDownloading: string;
@@ -31,12 +30,8 @@ class DownloadLoomButton extends React.Component<
     }
 
     progressListener(call) {
-        const {
-            match: {
-                params: { uuid },
-            },
-        } = this.props;
-
+        //TODO: `uuid` is no longer a valid concept
+        const uuid = null;
         call.on('data', (loomDownloader) => {
             if (DEBUG) {
                 console.log('downloadSubLoom data');
@@ -168,4 +163,4 @@ class DownloadLoomButton extends React.Component<
     }
 }
 
-export default withRouter(DownloadLoomButton);
+export default DownloadLoomButton;

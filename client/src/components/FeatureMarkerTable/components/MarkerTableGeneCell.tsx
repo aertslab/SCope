@@ -1,29 +1,18 @@
 import React from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { BackendAPI } from '../../common/API';
 
 import { makeTableColumnData } from '../model';
 
 type GeneTableCellProps = {
-    history: any;
     activePage: string;
     activeFeature: any;
     activeFeatureIndex: number;
     value: string;
-} & RouteComponentProps<{ uuid: string; loom: string }>;
+};
 
 const GeneTableCell: React.FC<GeneTableCellProps> = (props) => {
-    const {
-        match: {
-            params: { uuid, loom },
-        },
-        history,
-        activePage,
-        activeFeature,
-        activeFeatureIndex,
-        value,
-    } = props;
+    const { activeFeature, activeFeatureIndex, value } = props;
 
     return (
         <a
@@ -33,12 +22,7 @@ const GeneTableCell: React.FC<GeneTableCellProps> = (props) => {
                     loomFilePath: BackendAPI.getActiveLoom(),
                     query: value,
                 };
-                if (activePage === 'regulon') {
-                    BackendAPI.setActivePage('gene');
-                    history.push(
-                        '/' + [uuid, loom ? loom : '*', 'gene'].join('/')
-                    );
-                }
+
                 BackendAPI.getConnection().then(
                     (gbc) => {
                         gbc.services.scope.Main.getFeatures(
@@ -68,10 +52,7 @@ const GeneTableCell: React.FC<GeneTableCellProps> = (props) => {
     );
 };
 
-const GeneTableCellWithRouter = withRouter(GeneTableCell);
-
 function asReactTableGeneColumn({
-    history,
     activePage,
     activeFeature,
     activeFeatureIndex,
@@ -82,12 +63,11 @@ function asReactTableGeneColumn({
         accessor: 'gene',
         cell: (props) => {
             const cell = (
-                <GeneTableCellWithRouter
-                    history={history}
+                <GeneTableCell
                     activePage={activePage}
                     activeFeature={activeFeature}
                     activeFeatureIndex={activeFeatureIndex}
-                    {...props}
+                    value={props.value}
                 />
             );
             return cell;
@@ -97,4 +77,4 @@ function asReactTableGeneColumn({
 
 export { asReactTableGeneColumn };
 
-export default withRouter(GeneTableCell);
+export default GeneTableCell;

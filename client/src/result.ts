@@ -1,34 +1,68 @@
-type SuccessT<T> = {
-    kind: 'Success';
-    value: T;
-};
+/**
+ * A Result<Success, Error> type.
+ *
+ * Result<T, E> is used for returning and propagating errors. Functions
+ * should return a Result when errors are expected and recoverable.
+ *
+ * This type implements the following Fantasyland specs:
+ *   - Functor: https://github.com/fantasyland/fantasy-land#functor
+ *   - Apply: https://github.com/fantasyland/fantasy-land#apply
+ *   - Applicative: https://github.com/fantasyland/fantasy-land#applicative
+ *   - Chain: https://github.com/fantasyland/fantasy-land#chain
+ */
 
-type ErrorT<T> = {
-    kind: 'Error';
-    error: T;
-};
+import { Functor } from 'ramda';
 
-export type Result<S, E> = SuccessT<S> | ErrorT<E>;
+declare module 'ramda' {
+    export const sequence: any;
+}
 
-export function success<T>(value: T): SuccessT<T> {
+// Chain typeclass definition
+// class Chain m where
+//   chain :: forall a b. m a ~> (a -> m b) -> m b
+type Chain<A> =
+    | {
+          ['fantasy-land/chain']: <B>(_fn: (_a: A) => Chain<B>) => Chain<B>;
+          [key: string]: any;
+      }
+    | { chain: <B>(_fn: (_a: A) => Chain<B>) => Chain<B>; [key: string]: any };
+
+export type Result<T, E> = (
+    | { kind: 'Success'; value: T }
+    | { kind: 'Error'; error: E }
+) &
+    Functor<T> &
+    Chain<T>;
+
+export function success<T, E>(value: T): Result<T, E> {
     return {
         kind: 'Success',
         value,
+        map: (fn) => success(fn(value)),
+        ap: (f) => f.map(value),
+        chain: (fn) => fn(value),
     };
 }
 
-export function error<T>(err: T): ErrorT<T> {
+export function error<T, E>(err: E): Result<T, E> {
     return {
         kind: 'Error',
         error: err,
+        map: (_fn) => error(err),
+        ap: (_f) => error(err),
+        chain: (_fn) => error(err),
     };
 }
 
-export function isSuccess<S, E>(result: Result<S, E>): result is SuccessT<S> {
+export function of<S, E>(value: S): Result<S, E> {
+    return success(value);
+}
+
+export function isSuccess<S, E>(result: Result<S, E>): boolean {
     return result.kind === 'Success';
 }
 
-export function isError<S, E>(result: Result<S, E>): result is ErrorT<E> {
+export function isError<S, E>(result: Result<S, E>): boolean {
     return result.kind === 'Error';
 }
 
@@ -52,14 +86,11 @@ export function match<S, E, V>(
     }
 }
 
-export function map<S, T, E>(
+export function map<S, E, T>(
     fn: (_val: S) => T,
     result: Result<S, E>
 ): Result<T, E> {
-    if (isSuccess(result)) {
-        return success(fn(result.value));
-    }
-    return result;
+    return result.map(fn);
 }
 
 export function mapError<S, E, F>(
@@ -70,5 +101,12 @@ export function mapError<S, E, F>(
         return error(fn(result.error));
     }
 
-    return result;
+    return result as unknown as Result<S, F>;
+}
+
+export function chain<S, E, T>(
+    result: Result<S, E>,
+    fn: (_unwrapped: S) => Result<T, E>
+): Result<T, E> {
+    return result.chain(fn);
 }

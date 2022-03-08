@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
     Button,
     Modal,
@@ -37,9 +36,7 @@ interface GProfilerPopupProps {
     featureMetadata: FeatureMetadata;
 }
 
-class GProfilerPopup extends React.Component<
-    GProfilerModalProps & RouteComponentProps
-> {
+class GProfilerPopup extends React.Component<GProfilerModalProps> {
     featureMetricTable: FeatureMetricTable;
     availableSortBy: { key: number; text: string; value: string }[];
 
@@ -261,7 +258,4 @@ type PropsFromRedux = ConnectedProps<typeof Container>;
 
 export type GProfilerModalProps = PropsFromRedux & GProfilerPopupProps;
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(withRouter(GProfilerPopup));
+export default connect(mapStateToProps, mapDispatchToProps)(GProfilerPopup);

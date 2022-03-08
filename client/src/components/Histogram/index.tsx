@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import * as d3 from 'd3';
 
 import 'rc-slider/assets/index.css';
-import 'rc-tooltip/assets/bootstrap.css';
 import Slider from 'rc-slider';
 
 import { FEATURE_COLOURS } from '../constants';

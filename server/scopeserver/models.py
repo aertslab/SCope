@@ -87,6 +87,7 @@ class IdentityProvider(Base):
     issuer: str = Column(String, nullable=False)
     clientid: str = Column(String, nullable=False)
     secret: str = Column(String, nullable=False)
+    icon: str = Column(String, nullable=True)
 
 
 class UploadLimit(Base):

@@ -34,13 +34,6 @@ class UserCreate(UserBase):
     sub: str  # Subject
 
 
-class UserResponse(UserBase):
-    id: int
-
-    class Config:
-        orm_mode = True
-
-
 class ProjectBase(BaseModel):
     name: str
     uuid: str
@@ -51,6 +44,14 @@ class ProjectBase(BaseModel):
 
 class Project(ProjectBase):
     datasets: List[Dataset]
+
+    class Config:
+        orm_mode = True
+
+
+class UserResponse(UserBase):
+    id: int
+    projects: List[Project]
 
     class Config:
         orm_mode = True
@@ -107,6 +108,7 @@ class LoginUrl(BaseModel):
     id: int
     name: str
     url: str
+    icon: Optional[str]
 
     class Config:
         schema_extra = {
@@ -128,3 +130,10 @@ class UploadLimit(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+# Legacy compatibility
+
+
+class Permalink(BaseModel):
+    sessiondata: str

@@ -2,13 +2,14 @@ import React from 'react';
 import { Grid } from 'semantic-ui-react';
 
 import GProfilerModal from '../GProfiler/GProfilerModal';
-import ClusterControls from '../ClusterControls';
+import { ClusterControls } from '../ClusterControls';
 import { EmptyFeatureDisplayMessage } from '../QueryFeatureTool/EmptyFeatureDisplayMessage';
 import { MotifLogo } from '../MotifLogo';
 import CommunityAnnotationTable from '../CommunityAnnotationTable';
 import FeatureMarkerTable from '../FeatureMarkerTable';
 import LegendTable from '../LegendTable';
-import DownloadLoomButton from '../buttons/DownloadLoomButton';
+import DownloadLoomButton from './DownloadLoomButton';
+import { FeatureMetadata } from '../../model';
 
 type QueryFeatureMetadataProps = {
     history: any;
@@ -60,15 +61,15 @@ export const QueryFeatureMetadata: React.FC<QueryFeatureMetadataProps> = (
     };
 
     if (props.activeFeature?.metadata) {
-        const md = props.activeFeature.metadata;
+        const md: FeatureMetadata = props.activeFeature.metadata;
 
         return (
             <Grid.Row columns='1' centered className='viewerRow'>
                 <Grid.Column stretched className='viewerCell'>
-                    {md.featureType}{' '}
+                    {/* {md.featureType}{' '} */}
                     {props.activeFeature.featureType.startsWith('Clustering') &&
                         `Group: ${md.clusteringGroup}`}{' '}
-                    {md.feature}
+                    {/* md.feature */}
                     <br />
                     {showMotifLogo() && (
                         <MotifLogo
@@ -83,7 +84,9 @@ export const QueryFeatureMetadata: React.FC<QueryFeatureMetadataProps> = (
                     )}
                     {showCommunityAnnotationTable() && (
                         <CommunityAnnotationTable
-                            communityAnnotations={md.cellTypeAnno}
+                            communityAnnotations={
+                                md.cellTypeAnno as unknown as any
+                            }
                             activeFeature={props.activeFeature}
                             sessionIsRW={props.sessionIsRW}
                         />

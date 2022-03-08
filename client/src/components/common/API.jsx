@@ -101,9 +101,6 @@ class API {
         this.viewerTransform = null;
         this.viewerTransformChangeListeners = [];
 
-        this.sidebarVisible = true;
-        this.sidebarListeners = [];
-
         this.maxValues = {};
         this.maxValuesChangeListeners = [];
         this.emptyColorScale = [
@@ -113,84 +110,6 @@ class API {
         ];
         this.customValues = {};
         this.customValuesChangeListeners = [];
-
-        this.updateListeners = [];
-    }
-
-    importObject(api) {
-        this.spriteSettings = api.spriteSettings;
-        this.activePage = api.activePage;
-        this.activeLooms = api.activeLooms;
-        this.activeEmbeddingId = api.activeEmbeddingId;
-        this.features = api.features;
-        this.settings = api.settings;
-        this.viewerTool = api.viewerTool;
-        this.viewerSelections = api.viewerSelections;
-        this.sidebarVisible = api.sidebarVisible;
-        this.maxValues = api.maxValues;
-        this.customValues = api.customValues;
-    }
-
-    getExportObject(params) {
-        this.loom = params.loom;
-        this.page = params.page;
-        return this;
-    }
-
-    getExportKeys() {
-        return [
-            'loom',
-            'page',
-            'spriteSettings',
-            'scale',
-            'alpha',
-            'activePage',
-            'activeLooms',
-            'activeEmbeddingId',
-            'features',
-            'gene',
-            'regulon',
-            'compare',
-            'feature',
-            'featureType',
-            'threshold',
-            'type',
-            'metadata',
-            'description',
-            'settings',
-            'hasCpmNormalization',
-            'hasLogTransform',
-            'sortCells',
-            'dissociateViewers',
-            'hideTrajectory',
-            'viewerTool',
-            'viewerSelections',
-            'viewerTransform',
-            'sidebarVisible',
-            'maxValues',
-            'customValues',
-        ];
-    }
-
-    onUpdate(listener) {
-        this.updateListeners.push(listener);
-    }
-
-    removeOnUpdate(listener) {
-        let i = this.updateListeners.indexOf(listener);
-        if (i > -1) {
-            this.updateListeners.splice(i, 1);
-        }
-    }
-
-    forceUpdate() {
-        this.updateListeners.forEach((listener) => {
-            listener(this.settings);
-        });
-    }
-
-    isConnected() {
-        return this.connected;
     }
 
     showError() {
@@ -199,14 +118,6 @@ class API {
 
     getConnection() {
         return this.GBCConnection;
-    }
-
-    setSpriteSettings(scale, alpha) {
-        this.spriteSettings.scale = scale;
-        this.spriteSettings.alpha = alpha;
-        this.spriteSettingsChangeListeners.forEach((listener) => {
-            listener(this.spriteSettings);
-        });
     }
 
     getSpriteSettings() {
@@ -224,31 +135,6 @@ class API {
         }
     }
 
-    getUUIDFromIP(onSuccess) {
-        const publicIp = require('public-ip');
-        publicIp.v4().then((ip) => {
-            this.obtainNewUUID(ip, onSuccess);
-        });
-    }
-
-    obtainNewUUID(ip, onSuccess) {
-        BackendAPI.getConnection().then((gbc) => {
-            let query = {
-                ip: ip,
-            };
-            if (DEBUG) {
-                console.log('getUUIDAPI', query);
-            }
-            gbc.services.scope.Main.getUUID(query, (err, response) => {
-                if (DEBUG) {
-                    console.log('getUUIDAPI', response);
-                }
-                if (response !== null) {
-                    onSuccess(response.UUID, response.timeout);
-                }
-            });
-        });
-    }
     getActiveLoom() {
         return this.activeLooms[0];
     }
@@ -264,45 +150,6 @@ class API {
             this.customValuesChangeListeners.forEach((listener) => {
                 listener(customValues);
             });
-        });
-    }
-
-    setActiveLoom(loom, id) {
-        if (id === undefined) {
-            id = 0;
-        }
-        if (this.activeLooms[id] === loom) {
-            return;
-        }
-        this.activeLooms[id] = loom;
-        this.viewerSelections = {};
-        this.viewerSelections[this.activePage] = [];
-        this.viewerSelectionsChangeListeners.forEach((listener) => {
-            listener(this.viewerSelections[this.activePage]);
-        });
-        this.activeEmbeddingId = -1;
-        this.activeLoomChangeListeners.forEach((listener) => {
-            listener(
-                this.activeLooms[id],
-                this.loomFiles[this.activeLooms[id]],
-                this.activeEmbeddingId
-            );
-        });
-        this.getMaxScale(null, (customValues) => {
-            this.customValuesChangeListeners.forEach((listener) => {
-                listener(customValues);
-            });
-        });
-    }
-
-    setActiveEmbeddingId(activeEmbeddingId) {
-        this.activeEmbeddingId = activeEmbeddingId;
-        this.activeLoomChangeListeners.forEach((listener) => {
-            listener(
-                this.activeLooms[0],
-                this.loomFiles[this.activeLooms[0]],
-                this.activeEmbeddingId
-            );
         });
     }
 
@@ -354,43 +201,6 @@ class API {
             return null;
         }
         return this.getActiveLoomMetaDataEmbedding().trajectory;
-    }
-
-    queryLoomFiles(uuid, callback, loomFile = null) {
-        let query = {
-            UUID: uuid,
-        };
-
-        console.log(loomFile);
-        if (loomFile) {
-            query['loomFile'] = loomFile;
-        }
-
-        this.getConnection().then(
-            (gbc) => {
-                if (DEBUG) {
-                    console.log('getMyLooms', query);
-                }
-                gbc.services.scope.Main.getMyLooms(query, (error, response) => {
-                    if (response !== null) {
-                        if (DEBUG) {
-                            console.log('getMyLooms', response);
-                        }
-                        BackendAPI.setLoomFiles(
-                            response.myLooms,
-                            response.update
-                        );
-                        callback(response.myLooms);
-                    } else {
-                        console.log('No loom files detected');
-                        callback([]);
-                    }
-                });
-            },
-            () => {
-                this.showError();
-            }
-        );
     }
 
     getLoomFiles() {
@@ -515,31 +325,6 @@ class API {
                 }
             );
         }
-    }
-
-    setLoomHierarchy(L1, L2, L3, callback) {
-        let setLoomHierarchyQuery = {
-            loomFilePath: this.getActiveLoom(),
-            newHierarchy_L1: L1,
-            newHierarchy_L2: L2,
-            newHierarchy_L3: L3,
-        };
-        this.getConnection().then(
-            (gbc) => {
-                if (DEBUG) {
-                    console.log('setLoomHierarchy', setLoomHierarchyQuery);
-                }
-                gbc.services.scope.Main.setLoomHierarchy(
-                    setLoomHierarchyQuery,
-                    (setLoomHierarchyErr, setLoomHierarchyResponse) => {
-                        callback(setLoomHierarchyResponse);
-                    }
-                );
-            },
-            () => {
-                this.showError();
-            }
-        );
     }
 
     getNextCluster(clusteringID, clusterID, direction, callback) {
@@ -726,52 +511,6 @@ class API {
                 this.maxValues[page]
             );
         });
-    }
-
-    getORCIDStatus(callback) {
-        BackendAPI.getConnection().then(
-            (gbc) => {
-                gbc.services.scope.Main.getORCIDStatus({}, (err, response) => {
-                    if (DEBUG) {
-                        console.log('getORCIDStatus', response);
-                    }
-                    callback(response.active);
-                });
-            },
-            () => {
-                this.showError();
-            }
-        );
-    }
-
-    getORCID(auth_code, callback) {
-        if (DEBUG) {
-            console.log('getORCID', auth_code);
-        }
-        BackendAPI.getConnection().then(
-            (gbc) => {
-                gbc.services.scope.Main.getORCID(
-                    { auth_code },
-                    (err, response) => {
-                        if (DEBUG) {
-                            console.log('getORCID', response);
-                        }
-                        if (response.success) {
-                            callback(
-                                response.orcid_scope_uuid,
-                                response.name,
-                                response.orcid_id
-                            );
-                        } else {
-                            console.log('ORCID AUTH FAILED');
-                        }
-                    }
-                );
-            },
-            () => {
-                this.showError();
-            }
-        );
     }
 
     setColabAnnotationData(feature, annotationData, orcidInfo, uuid, callback) {
@@ -1046,38 +785,7 @@ class API {
         return this.activePage;
     }
 
-    setActivePage(page) {
-        this.maxValues[page] = this.maxValues[page] || [0, 0, 0];
-        this.customValues[page] =
-            this.customValues[page] || this.emptyColorScale;
-        this.activePage = page;
-        this.activePageListeners.forEach((listener) => {
-            listener(this.activePage);
-        });
-    }
-
-    onActivePageChange(listener) {
-        this.activePageListeners.push(listener);
-    }
-
-    removeActivePageChange(listener) {
-        let i = this.activePageListeners.indexOf(listener);
-        if (i > -1) {
-            this.activePageListeners.splice(i, 1);
-        }
-    }
-
     getSettings() {
-        return this.settings;
-    }
-
-    setSetting(key, value) {
-        this.settings[key] = value;
-        this.getMaxScale(null, (customValues, maxValues) => {
-            this.settingsChangeListeners.forEach((listener) => {
-                listener(this.settings, customValues, maxValues);
-            });
-        });
         return this.settings;
     }
 
@@ -1175,10 +883,6 @@ class API {
         if (i > -1) {
             this.viewerSelectionsChangeListeners.splice(i, 1);
         }
-    }
-
-    clearViewerSelections() {
-        this.viewerSelections[this.activePage] = [];
     }
 
     toggleLassoSelection(index) {

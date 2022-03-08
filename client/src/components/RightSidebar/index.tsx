@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { Tab } from 'semantic-ui-react';
 import * as R from 'ramda';
 
@@ -17,7 +16,7 @@ type RightSidebarProps = {
     onActiveFeaturesChange: (_features, _id) => void;
     selectedAnnotations: Annotation;
     sessionIsRW: boolean;
-} & RouteComponentProps<{ uuid: string; loom: string }>;
+};
 
 type RightSidebarState = {
     activePage: string;
@@ -57,22 +56,22 @@ class RightSidebar extends Component<RightSidebarProps, RightSidebarState> {
     }
 
     updateMetadata = () => {
-        BackendAPI.queryLoomFiles(
-            this.props.match.params.uuid,
-            () => {
-                BackendAPI.getActiveFeatures().forEach((f, n) => {
-                    BackendAPI.updateFeature(
-                        n,
-                        f.type,
-                        f.feature,
-                        f.featureType,
-                        f.metadata ? f.metadata.description : null,
-                        ''
-                    );
-                });
-            },
-            this.state.activeLoom
-        );
+        /* BackendAPI.queryLoomFiles(
+         *     this.props.match.params.uuid,
+         *     () => {
+         *         BackendAPI.getActiveFeatures().forEach((f, n) => {
+         *             BackendAPI.updateFeature(
+         *                 n,
+         *                 f.type,
+         *                 f.feature,
+         *                 f.featureType,
+         *                 f.metadata ? f.metadata.description : null,
+         *                 ''
+         *             );
+         *         });
+         *     },
+         *     this.state.activeLoom
+         * ); */
     };
 
     setModalID(idx: string) {
@@ -82,7 +81,7 @@ class RightSidebar extends Component<RightSidebarProps, RightSidebarState> {
     }
 
     render() {
-        const { history, hideFeatures, activeLegend } = this.props;
+        const { hideFeatures, activeLegend } = this.props;
         const { lassoSelections, activeFeatures, activeTab, activePage } =
             this.state;
 
@@ -153,15 +152,15 @@ class RightSidebar extends Component<RightSidebarProps, RightSidebarState> {
     }
 
     componentDidMount() {
-        const activePage = decodeURI(this.props.location.pathname)
-            .split('/')
-            .slice(-1)[0];
-        BackendAPI.onViewerSelectionsChange(this.selectionsListener);
+        /* const activePage = decodeURI(this.props.location.pathname)
+         *     .split('/')
+         *     .slice(-1)[0];
+         * BackendAPI.onViewerSelectionsChange(this.selectionsListener);
 
-        BackendAPI.onActiveFeaturesChange(
-            activePage,
-            this.activeFeaturesListener
-        );
+         * BackendAPI.onActiveFeaturesChange(
+         *     activePage,
+         *     this.activeFeaturesListener
+         * ); */
     }
 
     componentWillUnmount() {
@@ -172,10 +171,10 @@ class RightSidebar extends Component<RightSidebarProps, RightSidebarState> {
         );
     }
 
-    componentDidUpdate(prevProps) {
-        if (this.props.match.params.loom !== prevProps.match.params.loom) {
-            this.updateMetadata();
-        }
+    componentDidUpdate(_prevProps) {
+        /* if (this.props.match.params.loom !== prevProps.match.params.loom) {
+         *     this.updateMetadata();
+         * } */
     }
 }
 
@@ -185,4 +184,4 @@ const mapStateToProps = (rootState) => {
     };
 };
 
-export default connect(mapStateToProps)(withRouter(RightSidebar));
+export default connect(mapStateToProps)(RightSidebar);

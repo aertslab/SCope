@@ -5,6 +5,10 @@ const common = require('./webpack.common');
 
 const TerserPlugin = require('terser-webpack-plugin');
 
+const SCOPE_SERVER_URL = process.env.SCOPE_SERVER_URL
+    ? process.env.SCOPE_SERVER_URL
+    : 'https://scope.aertslab.org';
+
 module.exports = merge(common, {
     mode: 'production',
     devtool: false,
@@ -24,10 +28,6 @@ module.exports = merge(common, {
         new webpack.DefinePlugin({
             DEBUG: true,
             REVERSEPROXYON: true,
-            BITLY: JSON.stringify({
-                baseURL: 'http://scope.aertslab.org',
-                token: '8422dd882b60604d327939997448dd1b5c61f54e',
-            }),
             BACKEND: JSON.stringify({
                 httpProtocol: 'https',
                 wsProtocol: 'wss',
@@ -41,11 +41,10 @@ module.exports = merge(common, {
                 wsProtocol: 'wss',
                 host: 'scope.aertslab.org',
             }),
-            ORCID: JSON.stringify({
-                client_id: 'APP-1QNL921F7P9FC3S4',
-                redirect_uri: 'https://scope.aertslab.org/',
-            }),
-            API_PREFIX: 'https://scope.aertslab.org/api/v1/',
+            SERVER_URL: JSON.stringify(SCOPE_SERVER_URL),
+            API_PREFIX: JSON.stringify('/api/v1/'),
+            LOGIN_REDIRECT: JSON.stringify('/oidc_redirect'),
+            LOGOUT_REDIRECT: JSON.stringify('/'),
             __TEST_ONLY__: false,
         }),
     ],

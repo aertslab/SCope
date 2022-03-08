@@ -1,60 +1,53 @@
-declare const DEBUG: boolean;
-declare const FRONTEND: any;
-declare const BACKEND: any;
-declare const REVERSEPROXYON: boolean;
+import { END } from 'redux-saga';
 
-export function upload(uuid, type, file, onProgress, onUploaded) {
-    if (file === null) {
-        alert('Please select a file first');
-        return;
-    }
-
-    const form = new FormData();
-    form.append('UUID', uuid);
-    form.append('file-type', type);
-    form.append('file', file);
-
-    const XHRport =
-        document.head
-            .querySelector('[name=scope-xhrport]')
-            ?.getAttribute('port') || BACKEND.XHRport;
-
+export const upload = (
+    emitter: (_input: unknown) => void,
+    endpoint: string,
+    token: string,
+    file: File
+) => {
     const xhr = new XMLHttpRequest();
-    if (REVERSEPROXYON) {
-        xhr.open(
-            'POST',
-            FRONTEND.httpProtocol + '://' + FRONTEND.host + '/upload/'
-        );
-    } else {
-        xhr.open(
-            'POST',
-            BACKEND.httpProtocol + '://' + BACKEND.host + ':' + XHRport + '/'
-        );
-    }
-    xhr.upload.addEventListener('progress', (event) => {
-        if (DEBUG) {
-            console.log('Data uploaded: ' + event.loaded + '/' + event.total);
-        }
-        const progress = ((event.loaded / event.total) * 100).toPrecision(1);
-        onProgress(progress);
-    });
 
-    xhr.upload.addEventListener('load', () => {
-        if (DEBUG) {
-            console.log('file uploaded: ' + file.name);
-        }
-    });
-
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            setTimeout(() => {
-                onUploaded(file.name, xhr.status);
-            }, 1000);
+    const onProgress = (e: ProgressEvent) => {
+        if (e.lengthComputable) {
+            const progress = e.loaded / e.total;
+            emitter({ progress });
         }
     };
-    xhr.setRequestHeader(
-        'Content-Disposition',
-        'attachment;filename=' + file.name
-    );
+
+    const onFailure = (_e: ProgressEvent | null) => {
+        emitter({ err: 'Upload failed' });
+        emitter(END);
+    };
+
+    xhr.upload.addEventListener('progress', onProgress);
+    xhr.upload.addEventListener('error', onFailure);
+    xhr.upload.addEventListener('abort', onFailure);
+    xhr.onreadystatechange = () => {
+        const { readyState, status, response } = xhr;
+        if (readyState === 4) {
+            if (status === 200) {
+                emitter({ success: true, response: JSON.parse(response) });
+                emitter(END);
+            } else {
+                onFailure(null);
+            }
+        }
+    };
+
+    xhr.open('POST', endpoint, true);
+    xhr.setRequestHeader('Accept', 'application/json');
+    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+
+    const form = new FormData();
+    form.append('uploadfile', file);
     xhr.send(form);
-}
+
+    return () => {
+        xhr.upload.removeEventListener('progress', onProgress);
+        xhr.upload.removeEventListener('error', onFailure);
+        xhr.upload.removeEventListener('abort', onFailure);
+        xhr.onreadystatechange = null;
+        xhr.abort();
+    };
+};

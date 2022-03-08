@@ -32,7 +32,7 @@ async def get_login_url(
         urls.append(oidc.login_url(config["authorization_endpoint"], schemas.Provider.from_orm(provider)))
 
     return [
-        schemas.LoginUrl(id=provider.id, name=provider.name, issuer=provider.issuer, url=url)
+        schemas.LoginUrl(id=provider.id, name=provider.name, issuer=provider.issuer, url=url, icon=provider.icon)
         for provider, url in zip(providers, urls)
     ]
 
