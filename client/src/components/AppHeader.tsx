@@ -11,17 +11,6 @@ export const AppHeader: React.FC<{}> = () => {
     const { pathname } = useLocation();
     const loom = '*';
 
-    // TODO: Hacky implementation. To be refactored/reviewed properly
-    const countAnnotations = (metadata) => {
-        let count = 0;
-        for (const clustering of metadata['cellMetaData']['clusterings']) {
-            for (const cluster of clustering['clusters']) {
-                count += cluster['cell_type_annotation'].length;
-            }
-        }
-        return count;
-    };
-
     const metadata =
         loom !== undefined ? LegacyAPI.getLoomMetadata(loom) : null;
 
@@ -46,7 +35,7 @@ export const AppHeader: React.FC<{}> = () => {
             icon: false,
         },
         {
-            display: metadata && countAnnotations(metadata) > 0 ? true : false,
+            display: metadata ? true : false,
             path: '/annotations',
             title: 'All Annotations',
             icon: false,
