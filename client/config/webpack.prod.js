@@ -41,7 +41,7 @@ module.exports = merge(common, {
                 wsProtocol: 'wss',
                 host: 'scope.aertslab.org',
             }),
-            SERVER_URL: SCOPE_SERVER_URL,
+            SERVER_URL: JSON.stringify(SCOPE_SERVER_URL),
             API_PREFIX: JSON.stringify('/api/v1/'),
             LOGIN_REDIRECT: JSON.stringify('/oidc_redirect'),
             LOGOUT_REDIRECT: JSON.stringify('/'),

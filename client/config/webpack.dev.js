@@ -49,7 +49,7 @@ module.exports = merge(common, {
                 client_id: 'APP-1QNL921F7P9FC3S4',
                 redirect_uri: 'http://127.0.0.1:55850/',
             }),
-            SERVER_URL: SCOPE_SERVER_URL,
+            SERVER_URL: JSON.stringify(SCOPE_SERVER_URL),
             API_PREFIX: JSON.stringify('/api/v1/'),
             LOGIN_REDIRECT: JSON.stringify('/oidc_redirect'),
             LOGOUT_REDIRECT: JSON.stringify('/'),
