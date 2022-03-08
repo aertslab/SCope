@@ -1,11 +1,19 @@
 import { Result, error } from '../result';
 
 export const handleError = <T>(
-    prefix: string,
+    prefix: string | undefined,
     err: unknown
 ): Result<T, string> => {
+    const message = (msg: string): string => {
+        if (prefix) {
+            return `${prefix} ${msg}`;
+        } else {
+            return msg;
+        }
+    };
+
     if (err === undefined) {
-        return error(prefix + ' undefined');
+        return error(message('undefined'));
     }
 
     if (
@@ -15,8 +23,8 @@ export const handleError = <T>(
         typeof (err as { statusText: unknown }).statusText === 'string'
     ) {
         const msg = (err as { statusText: string }).statusText;
-        return error(`${prefix} ${msg}`);
+        return error(message(msg));
     }
 
-    return error(`${prefix} ${JSON.stringify(err)}`);
+    return error(message(JSON.stringify(err)));
 };
