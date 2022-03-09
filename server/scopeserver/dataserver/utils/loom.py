@@ -1,17 +1,17 @@
-import numpy as np
+from typing import Tuple, Dict, Any, Union, List, Set, Optional, TypedDict
 import json
 import zlib
 import base64
-from methodtools import lru_cache
-import pandas as pd
-import time
 import hashlib
 import functools
 from collections import Counter
 from pathlib import Path
-from typing import Tuple, Dict, Any, Union, List, Set, Optional
+import logging
+
+import numpy as np
+import pandas as pd
+from methodtools import lru_cache
 from loompy.loompy import LoomConnection
-from typing_extensions import TypedDict
 from google.protobuf.internal.containers import RepeatedScalarFieldContainer
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
@@ -19,8 +19,6 @@ from scopeserver.dataserver.utils import search_space as ss
 import scope_grpc_pb2
 from scopeserver.dataserver.utils import constant
 from scopeserver.dataserver.utils.annotation import Annotation
-
-import logging
 
 logger = logging.getLogger(__name__)
 

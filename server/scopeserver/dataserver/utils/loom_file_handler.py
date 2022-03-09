@@ -1,14 +1,15 @@
+from typing import Optional
 import os
-import loompy as lp
-from loompy import LoomConnection
+import logging
 import threading
 from collections import defaultdict
 from pathlib import Path
-from typing import Optional
+
+import loompy as lp
+from loompy import LoomConnection
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
 from scopeserver.dataserver.utils.loom import Loom
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +17,9 @@ logger = logging.getLogger(__name__)
 class LoomFileHandler:
     def __init__(self):
         self.active_looms = {}
-        self.file_locks = defaultdict(lambda: threading.Lock())
+        self.file_locks = defaultdict(threading.Lock)
         self.loom_dir = Path(dfh.DataFileHandler.get_data_dir_path_by_file_type(file_type="Loom"))
+        self.set_global_data()
 
     def add_loom(self, file_path: Path, abs_file_path: Path, loom_connection) -> Loom:
         loom = Loom(
@@ -48,7 +50,7 @@ class LoomFileHandler:
         del self.active_looms[abs_file_path]
         return abs_file_path
 
-    def change_loom_mode(self, loom_file_path: Path, mode: str = "r", keep_ss: bool = False) -> LoomConnection:
+    def change_loom_mode(self, loom_file_path: Path, mode: str = "r") -> LoomConnection:
         abs_file_path = self.get_loom_absolute_file_path(loom_file_path)
         if not os.path.exists(abs_file_path):
             raise ValueError(f"The file located at {abs_file_path} does not exist.")
@@ -62,7 +64,7 @@ class LoomFileHandler:
             logger.info(f"{loom_file_path} now {self.active_looms[abs_file_path].get_connection().mode}")
 
         else:
-            logger.debug(f"Reopening file as r")
+            logger.debug("Reopening file as r")
             self.active_looms[abs_file_path] = self.get_loom(loom_file_path=loom_file_path)
             logger.info(f"{loom_file_path} now {self.active_looms[abs_file_path].get_connection().mode}")
 
@@ -91,16 +93,18 @@ class LoomFileHandler:
                 logger.debug("Should be preloaded")
                 loom = self.active_looms[abs_loom_file_path]
                 try:
-                    logger.debug(
-                        f"Current mode: {self.active_looms[abs_loom_file_path].get_connection().mode}, wanted mode {mode}"
-                    )
+                    logger.debug(f"Mode: {self.active_looms[abs_loom_file_path].get_connection().mode}, wanted {mode}")
                     if self.active_looms[abs_loom_file_path].get_connection().mode == mode:
                         logger.debug(f"Returning pre-loaded loom file {loom_file_path}. Object {id(loom)}")
                         return loom
-                    else:
-                        logger.error(
-                            f"Mode {mode} was requested for {loom_file_path}, but mode is currently {self.active_looms[abs_loom_file_path].get_connection().mode}"
+
+                    logger.error(
+                        (
+                            f"Mode {mode} was requested for {loom_file_path}, "
+                            "but mode is currently "
+                            f"{self.active_looms[abs_loom_file_path].get_connection().mode}"
                         )
+                    )
                 except AttributeError:
                     logger.error("Loom was previously closed")
                     loom.loom_connection = lp.connect(abs_loom_file_path.as_posix(), mode=mode, validate=False)
@@ -108,6 +112,9 @@ class LoomFileHandler:
             else:
                 loom = self.load_loom_file(mode=mode, file_path=loom_file_path, abs_file_path=abs_loom_file_path)
                 logger.debug(
-                    f"Returning newly loaded loom file {loom_file_path}. Object {id(loom)}, mode {loom.get_connection().mode}"
+                    (
+                        f"Returning newly loaded loom file {loom_file_path}. "
+                        f"Object {id(loom)}, mode {loom.get_connection().mode}"
+                    )
                 )
         return loom

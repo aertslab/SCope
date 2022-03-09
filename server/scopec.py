@@ -87,23 +87,6 @@ def add_upload_limit(mime, size):
             click.echo(f"Added upload limit on {mime} up to {size} bytes")
 
 
-@cli.command()
-@click.option("--mime", help="MIME type of the file to allow")
-@click.option("--size", help="Maximum upload file size for this mime type")
-def add_upload_limit(mime, size):
-    "Add new upload size limits"
-    with SessionLocal() as database:
-        try:
-            limit = models.UploadLimit(mime=mime, maxsize=size)
-            database.add(limit)
-            database.commit()
-        except SQLAlchemyError as err:
-            database.rollback()
-            click.echo(f"Could not add upload limit: {err}", err=True)
-        else:
-            click.echo(f"Added upload limit on {mime} up to {size} bytes")
-
-
 @cli.group()
 def show():
     "Sub-command to display info"

@@ -17,11 +17,6 @@ def get_projects(database: Session, offset: int, limit: int) -> List[models.Proj
     return database.query(models.Project).order_by(models.Project.id).offset(offset).limit(limit).all()
 
 
-def get_projects(database: Session, offset: int, limit: int) -> List[models.Project]:
-    "Read all projects"
-    return database.query(models.Project).order_by(models.Project.id).offset(offset).limit(limit).all()
-
-
 def get_projects_for_user(database: Session, user_id: int) -> List[models.Project]:
     "Read all projects for a given user."
     user = database.query(models.User).filter(models.User.id == user_id).first()
@@ -110,17 +105,6 @@ def delete_project(database: Session, project_uuid: str):
         database.commit()
 
 
-def delete_project(database: Session, project_uuid: str):
-    "Remove a project from the database by uuid"
-    try:
-        database.query(models.Project).filter(models.Project.uuid == project_uuid).delete()
-    except SQLAlchemyError:
-        database.rollback()
-        raise
-    else:
-        database.commit()
-
-
 # Users
 
 
@@ -142,16 +126,6 @@ def get_user_by_identity(database: Session, issuer: str, subject: str) -> Option
 def is_admin(user: models.User) -> bool:
     "Check if a user is an admin."
     return user.role == "admin"
-
-
-def is_owner(user: models.User, project: models.Project) -> bool:
-    "Check if a user owns a project."
-    return user.id in (owner.id for owner in project.owners)
-
-
-def is_user(user: models.User, project: models.Project) -> bool:
-    "Check if a user is allowed to access a project."
-    return user.id in (usr.id for usr in project.users)
 
 
 def is_owner(user: models.User, project: models.Project) -> bool:
@@ -197,17 +171,6 @@ def create_user(database: Session, user: Optional[schemas.UserCreate] = None) ->
 
     database.refresh(new_user)
     return new_user
-
-
-def delete_user(database: Session, user_id: int):
-    "Delete a user by id"
-    try:
-        database.query(models.User).filter(models.User.id == user_id).delete()
-    except SQLAlchemyError:
-        database.rollback()
-        raise
-    else:
-        database.commit()
 
 
 def delete_user(database: Session, user_id: int):

@@ -44,7 +44,7 @@ jobs:
 
             - name: Run pylint
               run: |
-                  ${HOME}/.poetry/bin/poetry run pylint-fail-under --fail_under "8" --rcfile pyproject.toml scopeserver main.py scopec.py
+                  ${HOME}/.poetry/bin/poetry run pylint --fail-under=8.0 --rcfile pyproject.toml scopeserver main.py scopec.py
               working-directory: ${{ env.working-directory }}
 
             - name: Run black

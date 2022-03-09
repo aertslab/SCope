@@ -5,15 +5,12 @@ Main definition and entrypoint for the legacy SCope server
 import argparse
 import threading
 import time
-from urllib.request import urlopen
-import http
 import sys
 import logging
 from pathlib import Path
 from typing import Dict, Any, Union, Optional
 
 from scopeserver.dataserver import GServer as gs
-from scopeserver.dataserver import PServer as ps
 from scopeserver.dataserver.utils import sys_utils as su
 import scopeserver.config as configuration
 
@@ -30,12 +27,11 @@ class SCopeServer:
         self.run_event.set()
         self.config = config
         self.gs_thread: Optional[threading.Thread] = None
-        self.ps_thread: Optional[threading.Thread] = None
 
         if self.config["DEBUG"]:
             LOGGER.setLevel(logging.DEBUG)
 
-    def start_data_server(self) -> None:
+    def start_scope_server(self) -> None:
         LOGGER.debug(f"Starting data server on port {self.config['RPC_PORT']}.")
         self.gs_thread = threading.Thread(
             target=gs.serve,
@@ -44,15 +40,7 @@ class SCopeServer:
                 self.config,
             ),
         )
-        LOGGER.debug(f"Starting upload server on port {self.config['UPLOAD_PORT']}")
-        self.ps_thread = threading.Thread(
-            target=ps.run, args=(self.run_event,), kwargs={"port": self.config["UPLOAD_PORT"]}
-        )
         self.gs_thread.start()
-        self.ps_thread.start()
-
-    def start_scope_server(self) -> None:
-        self.start_data_server()
 
     def stop_servers(self) -> None:
         """Stop all running threads."""
@@ -61,13 +49,6 @@ class SCopeServer:
         if self.gs_thread:
             self.gs_thread.join()
 
-        try:
-            urlopen("http://127.0.0.1:{0}/".format(self.config["UPLOAD_PORT"]))
-        except http.client.RemoteDisconnected:
-            pass
-
-        if self.ps_thread:
-            self.ps_thread.join()
         LOGGER.info("Servers successfully terminated. Exiting.")
 
     def wait(self) -> None:
@@ -88,7 +69,7 @@ def message_of_the_day(data_path: Union[str, Path]) -> None:
     """Log a server startup message."""
     motd_path = data_path / Path("motd.txt")
     if motd_path.is_file():
-        with open(motd_path) as motd:
+        with open(motd_path, encoding="utf8") as motd:
             LOGGER.info(motd.read())
     else:
         LOGGER.info("Welcome to SCope.")
@@ -105,9 +86,6 @@ def run() -> None:
 
     parser = argparse.ArgumentParser(description="Launch the scope server")
     parser.add_argument("--g_port", metavar="gPort", type=int, help="gPort", default=55853)
-    parser.add_argument("--p_port", metavar="pPort", type=int, help="pPort", default=55851)
-    parser.add_argument("--x_port", metavar="xPort", type=int, help="xPort", default=55852)
-    parser.add_argument("--app_mode", action="store_true", help="Run in app mode (Fixed UUID)", default=False)
     parser.add_argument("--config_file", type=str, help="Path to config file", default=None)
     parser.add_argument("--debug", action="store_true", help="Show debug logging", default=False)
     args = parser.parse_args()

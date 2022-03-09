@@ -54,23 +54,9 @@ class SCope(scope_grpc_pb2_grpc.MainServicer):
         self.dfh.read_UUID_db()
         self.dfh.read_ORCID_db()
 
-        self.check_ORCID_connection()
-
     def update_global_data(self) -> None:
         self.dfh.set_global_data()
         self.lfh.set_global_data()
-
-    def check_ORCID_connection(self) -> None:
-        # TODO: Remove
-        self.orcid_active = False
-
-    def getORCIDStatus(self, request, context):
-        # TODO: Remove
-        return scope_grpc_pb2.getORCIDStatusReply(active=self.orcid_active)
-
-    def getORCID(self, request, context):
-        # TODO: Remove
-        return scope_grpc_pb2.getORCIDReply(orcid_scope_uuid="null", name="null", orcid_id="null", success=False)
 
     def getVmax(self, request, context):
         v_max = np.zeros(3)
@@ -346,10 +332,6 @@ class SCope(scope_grpc_pb2_grpc.MainServicer):
                         logger.error(f"Exception raised {e}")
                         motifName = None
                     break
-
-        # min_gene_occurrence_mask = regulon_marker_metrics >= meta_data["regulonSettings"]["min_regulon_gene_occurrence"]
-        # # Filter the regulon genes by threshold
-        # regulon_genes = regulon_genes[min_gene_occurrence_mask]
 
         if "regulonSettings" in meta_data:
             metrics = [
