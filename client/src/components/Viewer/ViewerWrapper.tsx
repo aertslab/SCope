@@ -60,10 +60,10 @@ export const ViewerWrapper: React.FC<{}> = () => {
                 height: '100%',
             }}>
             {R.flatten(state.grid).map((vid) => {
-                if (vid === undefined) {
+                const viewer = R.prop(vid, state.viewers);
+                if (viewer === undefined) {
                     return <div>Empty</div>;
                 } else {
-                    const viewer = state.viewers[vid];
                     return (
                         <Placeholder
                             dataset={viewer.dataset}
