@@ -55,7 +55,6 @@ click = "^8.0.1"
 pytest = "*"
 pytest-cov = "*"
 pylint = "*"
-pylint-fail-under = "*"
 black = { version = "*", allow-prereleases = true }
 mypy = "*"
 mypy-protobuf = "^2.9"
