@@ -404,42 +404,17 @@ def test_guest_can_add_dataset_to_own_project(database, loom_limit_9_bytes, gues
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/x-hdf5")},
-        headers={"Authorization": f"bearer {user['access_token']}"},
-    )
-    assert response.status_code == 401
-    dbproj = db.query(models.Project).filter(models.Project.uuid == project["uuid"]).first()
-    assert dbproj.size == 0
-    assert len(dbproj.datasets) == 0
-
-
-def test_admin_can_add_dataset_to_own_project(database, admin):
-    "Test that an admin can add a dataset to a project they created"
-    db = database()
-
-    response = client.post(
-        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {admin['access_token']}"}
-    )
-    assert response.status_code == 200
-    project = response.json()
-
-    some_file = io.BytesIO(b"Test data")
-
-    # Checks start here
-    response = client.post(
-        "/api/v1/project/dataset",
-        params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", some_file, "application/vnd.loom")},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
     dataset = response.json()
     db_project = db.query(models.Project).filter(models.Project.uuid == project["uuid"]).first()
     db_dataset = db.query(models.Dataset).filter(models.Dataset.id == dataset["id"]).first()
-
     assert (settings.DATA_PATH / Path(project["uuid"]) / "test-data-file.loom").exists()
     assert db_project.size == 9
     assert db_dataset.size == 9
+    assert len(db_project.datasets) == 1
     assert db_dataset.filename == "test-data-file.loom"
     assert dataset["filename"] == "test-data-file.loom"
 
@@ -571,6 +546,8 @@ def test_user_cannot_add_dataset_to_non_owned_project(database, loom_limit_9_byt
     response = client.post(
         "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {guest['access_token']}"}
     )
+    assert response.status_code == 200
+    project = response.json()
 
     # Checks start here
     response = client.post(
@@ -1496,49 +1473,6 @@ def test_user_can_list_users_in_own_project(user):
     assert response.status_code == 200
     users = response.json()
     assert users == [{"name": user["user"]["name"], "role": "user", "id": 1, "projects": [project]}]
-
-
-def test_guest_second_owner_can_list_users(loom_limit_9_bytes, guest, user):
-    "Test that a guest user who did not create the project, but is an owner, can list users"
-    response = client.post(
-        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {user['access_token']}"}
-    )
-    assert response.status_code == 200
-    project = response.json()
-
-    # Add guest to project owners
-    response = client.post(
-        "/api/v1/project/owner",
-        params={"project": project["uuid"], "user_id": guest["user"]["id"]},
-        headers={"Authorization": f"bearer {user['access_token']}"},
-    )
-
-    # Checks start here
-    response = client.get(
-        "/api/v1/project/users",
-        params={"project": project["uuid"]},
-        headers={"Authorization": f"bearer {guest['access_token']}"},
-    )
-    assert response.status_code == 200
-    assert response.json() == [user["user"], guest["user"]]
-
-
-def test_user_can_list_users_in_own_project(user):
-    "Test that a regular user can list the users in a project they created"
-    response = client.post(
-        "/api/v1/project/new", params={"name": "test"}, headers={"Authorization": f"bearer {user['access_token']}"}
-    )
-    assert response.status_code == 200
-    project = response.json()
-
-    response = client.get(
-        "/api/v1/project/users",
-        params={"project": project["uuid"]},
-        headers={"Authorization": f"bearer {user['access_token']}"},
-    )
-    assert response.status_code == 200
-    users = response.json()
-    assert users == [{"name": user["user"]["name"], "role": "user", "id": 1}]
 
 
 def test_user_cannot_list_users_in_non_owned_project(guest, user):
