@@ -18,8 +18,8 @@ import {
     Regulon,
     Tutorial,
     Welcome,
+    Viewer,
 } from './components/pages';
-import { ViewerWrapper } from './components/Viewer/ViewerWrapper';
 
 import './css/styles.css';
 import './css/header.css';
@@ -45,21 +45,21 @@ ReactDOM.render(
                     element={<Legacy.Session />}
                 />
                 <Route path='/' element={<Main />}>
-                    <Route path='welcome' element={<Welcome />} />
                     <Route path='tutorial' element={<Tutorial />} />
                     <Route path='about' element={<About />} />
                     <Route path='dataset' element={<Dataset />} />
                     <Route path='gene' element={<Gene />} />
                     <Route path='regulon' element={<Regulon />} />
                     <Route path='annotations' element={<Annotations />} />
-                    <Route path='viewer' element={<ViewerWrapper />} />
+                    <Route path='viewer' element={<Viewer />} />
                     <Route
                         path='compare'
                         element={<Compare metadata={null} />}
                     />
+                    <Route path='/' element={<Welcome />} />
                     <Route
-                        path='/'
-                        element={<Navigate to='welcome' replace />}
+                        path='/welcome'
+                        element={<Navigate to='/' replace />}
                     />
                 </Route>
             </Routes>

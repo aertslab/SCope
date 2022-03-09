@@ -1,16 +1,16 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { Icon, Label, Button, Menu } from 'semantic-ui-react';
+import { Icon, Button, Menu } from 'semantic-ui-react';
+import { SemanticICONS } from 'semantic-ui-react/dist/commonjs/generic';
 
 import * as Auth from './Auth';
-import { SemanticICONS } from 'semantic-ui-react/dist/commonjs/generic';
 
 export const AppHeader: React.FC<{}> = () => {
     const { pathname } = useLocation();
 
     const menu = [
         {
-            path: '/welcome',
+            path: '/',
             title: 'SCope',
             icon: 'home',
         },
@@ -50,12 +50,7 @@ export const AppHeader: React.FC<{}> = () => {
                             {item.icon && (
                                 <Icon name={item.icon as SemanticICONS} />
                             )}
-                            {item.title} &nbsp;{' '}
-                            {item.path === 'geneset' && (
-                                <Label color='violet' size='mini'>
-                                    beta
-                                </Label>
-                            )}
+                            {item.title}
                         </Button>
                     </Link>
                 </Menu.Item>
