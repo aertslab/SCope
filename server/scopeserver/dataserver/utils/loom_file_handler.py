@@ -19,7 +19,7 @@ class LoomFileHandler:
         self.active_looms = {}
         self.file_locks = defaultdict(threading.Lock)
         self.loom_dir = Path(dfh.DataFileHandler.get_data_dir_path_by_file_type(file_type="Loom"))
-        self.set_global_data()
+        self.global_looms = []
 
     def add_loom(self, file_path: Path, abs_file_path: Path, loom_connection) -> Loom:
         loom = Loom(
