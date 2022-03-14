@@ -95,7 +95,7 @@ const decodeAuthTokenResponse = (
             'access_token' in response &&
             'token_type' in response &&
             typeof (response as { access_token: unknown }).access_token ===
-                'string' &&
+            'string' &&
             typeof (response as { token_type: unknown }).token_type === 'string'
         ) {
             if ('user' in response) {
@@ -177,7 +177,7 @@ const decodeProvider = (data: unknown): Result<Provider, string> => {
         'url' in data &&
         typeof (data as { id: unknown }).id === 'number' &&
         typeof (data as { name: unknown }).name === 'string' &&
-        typeof (data as { icon: unknown }).icon === 'string' &&
+        (typeof (data as { icon: unknown }).icon === 'string' || (data as { icon: unknown }).icon === null) &&
         typeof (data as { url: unknown }).url === 'string'
     ) {
         const provider: Provider = {
