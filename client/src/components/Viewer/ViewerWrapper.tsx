@@ -9,6 +9,7 @@ import { RootState } from '../../redux/reducers';
 import { ViewerId, ViewerInfo, ViewerMap } from './model';
 import * as Select from './selectors';
 import * as Action from './actions';
+import { Viewer } from './Viewer';
 
 const Placeholder: React.FC<ViewerInfo> = (props: ViewerInfo) => {
     return (
@@ -68,9 +69,8 @@ export const ViewerWrapper: React.FC<{}> = () => {
                         return <div>Empty</div>;
                     } else {
                         return (
-                            <Placeholder
+                            <Viewer
                                 dataset={viewer.dataset}
-                                project={viewer.project}
                             />
                         );
                     }
