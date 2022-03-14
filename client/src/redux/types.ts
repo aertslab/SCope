@@ -1,4 +1,4 @@
-import { Project, DataSet } from '../api';
+import { Project, DataSet, Coordinate } from '../api';
 
 import * as AT from './actionTypes';
 
@@ -17,6 +17,7 @@ export interface MainState {
     sessionMode: SessionMode;
     projects: Array<Project>;
     datasets: Array<DataSet>;
+    coords: Array<Coordinate>;
     upload: {
         state: UploadState;
         progress: number;
@@ -106,6 +107,22 @@ export interface ToggleModifierKey {
     };
 }
 
+export interface GetCoordinates {
+    type: typeof AT.GET_COORDINATES;
+    payload: {
+        dataset: string;
+    }
+}
+
+
+export interface ReceivedCoordinates {
+    type: typeof AT.RECEIVED_COORDINATES;
+    payload: {
+        coordinates: Array<Coordinate>;
+    }
+}
+
+
 export type MainAction =
     | SetLoadingAction
     | SetUUIDAction
@@ -118,4 +135,6 @@ export type MainAction =
     | UploadRequest
     | UploadProgress
     | UploadSuccess
-    | ToggleModifierKey;
+    | ToggleModifierKey
+    | GetCoordinates
+    | ReceivedCoordinates;

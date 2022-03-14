@@ -9,6 +9,7 @@ const initialState: MainState = {
     sessionMode: SESSION_READ,
     projects: [],
     datasets: [],
+    coords: [],
     upload: {
         state: 'none',
         progress: 0,
@@ -58,6 +59,10 @@ const main = produce((draft: MainState, action: MainAction) => {
                 draft.modifierKey === action.payload.key
                     ? 'None'
                     : action.payload.key;
+            break;
+
+        case Action.RECEIVED_COORDINATES:
+            draft.coords = action.payload.coordinates;
             break;
     }
 }, initialState);

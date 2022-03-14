@@ -185,3 +185,23 @@ export async function makeProject(
         return error(`Cannot create project: ${JSON.stringify(err)}`);
     }
 }
+
+export type Coordinate = {
+    x: number;
+    y: number;
+};
+
+export async function getCoordinates(
+    dataset: string,
+): Promise<Array<Coordinate>> {
+    const url = new URL(API_URL + 'data/dataset');
+    url.search = new URLSearchParams({ dataset }).toString();
+    const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: {
+            Accept: 'application/json',
+        },
+    });
+
+    return await response.json() as Array<Coordinate>;
+}

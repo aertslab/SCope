@@ -1,4 +1,4 @@
-import { Project, DataSet } from '../api';
+import { Project, DataSet, Coordinate } from '../api';
 
 import * as AT from './actionTypes';
 import {
@@ -10,6 +10,8 @@ import {
     AddDataSetAction,
     ModifierKey,
     ToggleModifierKey,
+    GetCoordinates,
+    ReceivedCoordinates,
 } from './types';
 
 export const setAppLoading = (isAppLoading: MainState['isAppLoading']) => ({
@@ -74,3 +76,14 @@ export const toggleModifierKey = (key: ModifierKey): ToggleModifierKey => ({
     type: AT.MODIFIER_KEY_TOGGLE,
     payload: { key },
 });
+
+export const getCoordinates = (dataset: string): GetCoordinates => ({
+    type: AT.GET_COORDINATES,
+    payload: { dataset },
+})
+
+
+export const receivedCoordinates = (coords: Array<Coordinate>): ReceivedCoordinates => ({
+    type: AT.RECEIVED_COORDINATES,
+    payload: { coordinates: coords },
+})
