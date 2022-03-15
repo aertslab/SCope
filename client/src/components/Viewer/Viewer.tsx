@@ -148,16 +148,17 @@ const intitializeDataPoints = (scene, camera, geometry, material, coords) => {
     );
     scene.clear();
 
-    const diff = function (a: number, b: number) {
-        return a - b;
-    };
-    const sorted_x = R.sort(diff, x);
-    const sorted_y = R.sort(diff, y);
+    const sorted_x = R.sort(R.subtract, x);
+    const sorted_y = R.sort(R.subtract, y);
 
-    const xMax = sorted_x[sorted_x.length - 1];
-    const xMin = sorted_x[0];
-    const yMax = sorted_y[sorted_y.length - 1];
-    const yMin = sorted_y[0];
+    const [xMin, xMax] = [
+        R.head(sorted_x) || 0,
+        R.nth(sorted_x.length - 1, sorted_x) || 0,
+    ];
+    const [yMin, yMax] = [
+        R.head(sorted_y) || 0,
+        R.nth(sorted_y.length - 1, sorted_y) || 0,
+    ];
 
     const xCenter = (xMax + xMin) / 2;
     const yCenter = (yMax + yMin) / 2;
@@ -196,7 +197,7 @@ export const Viewer: React.FC<ViewerProps> = (props: ViewerProps) => {
             return root.main.coords;
         }
     );
-    const mount = useRef<HTMLDivElement>(null!);
+    const mount = useRef<HTMLDivElement>(null!); // nosemgrep: typescript.react.security.audit.react-no-refs.react-no-refs
     const [rendererState, setRenderer] = React.useState<THREE.Renderer>();
     const [mounted, setMounted] = React.useState<Boolean>(false);
     const [sceneState, setScene] = React.useState<THREE.Scene>();
@@ -204,8 +205,8 @@ export const Viewer: React.FC<ViewerProps> = (props: ViewerProps) => {
     const [geometryState, setGeometry] = React.useState<THREE.BufferGeometry>();
     const [materialState, setMaterial] = React.useState<THREE.Material>();
 
-    const requestRef = React.useRef() as React.MutableRefObject<number>;
-    const previousTimeRef = React.useRef();
+    const requestRef = useRef() as React.MutableRefObject<number>; // nosemgrep: typescript.react.security.audit.react-no-refs.react-no-refs
+    const previousTimeRef = useRef(); // nosemgrep: typescript.react.security.audit.react-no-refs.react-no-refs
 
     const animate = (time) => {
         if (previousTimeRef.current !== undefined) {
@@ -249,5 +250,5 @@ export const Viewer: React.FC<ViewerProps> = (props: ViewerProps) => {
         return () => cancelAnimationFrame(requestRef.current);
     }, [coords]);
 
-    return <div ref={mount} />;
+    return <div ref={mount} />; // nosemgrep: typescript.react.security.audit.react-no-refs.react-no-refs
 };
