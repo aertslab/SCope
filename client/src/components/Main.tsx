@@ -38,7 +38,7 @@ export const Main: React.FC<{}> = () => {
     const dispatch = useDispatch();
 
     const keyevent = (event: KeyboardEvent): void => {
-        if (['Shift', 'Alt', 'Control'].includes(event.key)) {
+        if (['Shift', 'Control'].includes(event.key)) {
             dispatch(toggleModifierKey(event.key as ModifierKey));
         }
     };

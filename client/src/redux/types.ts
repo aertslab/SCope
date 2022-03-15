@@ -9,7 +9,7 @@ export type SessionMode = 'r' | 'rw';
 
 export type UploadState = 'none' | 'in progress' | 'finished';
 
-export type ModifierKey = 'None' | 'Shift' | 'Control' | 'Alt';
+export type ModifierKey = 'None' | 'Shift' | 'Control';
 
 export interface MainState {
     isAppLoading: boolean;
