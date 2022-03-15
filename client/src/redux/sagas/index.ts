@@ -13,5 +13,6 @@ export default function* rootSaga() {
         SCOPE.watchPermalinkRequests(),
         SCOPE.watchCreateNewProject(),
         SCOPE.watchUploadRequest(),
+        SCOPE.watchGetCoordinates(),
     ]);
 }

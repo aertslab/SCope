@@ -52,7 +52,8 @@
         "react-table": "^6.8.6",
         "redux": "^4.0.5",
         "redux-saga": "^1.1.3",
-        "semantic-ui-react": "^2.0.1"
+        "semantic-ui-react": "^2.0.1",
+        "three": "^0.138.3"
     },
     "devDependencies": {
         "@babel/cli": "^7.12.8",
@@ -73,6 +74,7 @@
         "@types/react": "^16.14.2",
         "@types/react-dom": "^16.9.10",
         "@types/react-redux": "^7.1.11",
+        "@types/three": "^0.138.0",
         "@typescript-eslint/eslint-plugin": "^5.5.0",
         "@typescript-eslint/parser": "^5.5.0",
         "babel-jest": "^27.0.6",
@@ -152,7 +154,10 @@
             "ecmaVersion": 2018,
             "sourceType": "module"
         },
-        "plugins": ["react", "@typescript-eslint"],
+        "plugins": [
+            "react",
+            "@typescript-eslint"
+        ],
         "rules": {
             "prettier/prettier": "error",
             "no-unused-vars": [
@@ -170,9 +175,17 @@
             "no-var": "warn",
             "react/prop-types": "off",
             "react/jsx-key": "off",
-            "eqeqeq": ["error", "always"],
-            "curly": ["error", "all"],
-            "no-bitwise": ["error"]
+            "eqeqeq": [
+                "error",
+                "always"
+            ],
+            "curly": [
+                "error",
+                "all"
+            ],
+            "no-bitwise": [
+                "error"
+            ]
         },
         "settings": {
             "react": {

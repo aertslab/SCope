@@ -23,6 +23,18 @@ class Dataset(DatasetBase):
         orm_mode = True
 
 
+class DatasetHack(Dataset):
+    project: "Project"
+
+    class Config:
+        orm_mode = True
+
+
+class Coordinate(BaseModel):
+    x: float
+    y: float
+
+
 # Users and Projects
 class UserBase(BaseModel):
     name: Optional[str]

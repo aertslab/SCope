@@ -93,6 +93,19 @@ export function* watchUploadRequest() {
     yield takeEvery(AT.UPLOAD_REQUEST, uploadRequest);
 }
 
+function* requestCoords(action: T.GetCoordinates) {
+    const coords = yield call(
+        API.getCoordinates,
+        action.payload.project,
+        action.payload.dataset
+    );
+    yield put(A.receivedCoordinates(coords));
+}
+
+export function* watchGetCoordinates() {
+    yield takeEvery(AT.GET_COORDINATES, requestCoords);
+}
+
 export * from '../../../components/Search/effects';
 export {
     watchGuestLogin,
