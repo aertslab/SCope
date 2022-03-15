@@ -22,24 +22,66 @@ const initGraphics = () => {
     camera.lookAt(new THREE.Vector3(0, 0, 0))
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
     renderer.setSize(width, height);
-    const texture = new THREE.TextureLoader().load('src/images/dot.png');
-    const geometry = new THREE.BufferGeometry();
-    const material = new THREE.PointsMaterial({
-        size: 5,
-        vertexColors: true,
-        map: texture,
+
+    // --------------- Start of sprite stuff ----------------
+    // const texture = new THREE.TextureLoader().load('src/images/dot.png');
+    // const material = new THREE.PointsMaterial({
+    //     size: 5,
+    //     vertexColors: true,
+    //     map: texture,
+    //     transparent: true,
+    //     depthWrite: false,
+    //     blending: THREE.NoBlending,
+    // });
+
+    // --------------- End of sprite stuff ----------------
+
+    // --------------- Start of shaders stuff ----------------
+    const uniforms = {
+        pointTexture: { value: new THREE.TextureLoader().load('src/images/dot.png') }
+    };
+
+    const vertexShader = `
+        attribute float size;
+        varying vec3 vColor;
+        void main() {
+            vColor = color;
+            vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+            gl_PointSize = size * ( 300.0 / -mvPosition.z );
+            gl_Position = projectionMatrix * mvPosition;
+
+        }`
+    const fragmentShader = `
+        uniform sampler2D pointTexture;
+        varying vec3 vColor;
+        void main() {
+            gl_FragColor = vec4( vColor, 1.0 );
+            gl_FragColor = gl_FragColor * texture2D( pointTexture, gl_PointCoord );
+        }`
+
+    const material = new THREE.ShaderMaterial({
+        uniforms: uniforms,
+        vertexShader: vertexShader,
+        fragmentShader: fragmentShader,
+        blending: THREE.AdditiveBlending,
+        depthTest: false,
         transparent: true,
-        depthWrite: false,
-        blending: THREE.NoBlending,
+        vertexColors: true
+
     });
+
+    // --------------- End of shaders stuff ----------------
+
+    const geometry = new THREE.BufferGeometry();
+
     const controls = new OrbitControls(
         camera,
         renderer.domElement
     );
     controls.mouseButtons = {
         LEFT: THREE.MOUSE.PAN,
-        MIDDLE: null,
-        RIGHT: null,
+        MIDDLE: THREE.MOUSE.MIDDLE,
+        RIGHT: THREE.MOUSE.RIGHT,
     };
     controls.enableRotate = false;
 
@@ -68,13 +110,31 @@ const intitializeDataPoints = (scene, camera, geometry, material, coords) => {
     const y = [] as any;
     const positions = [] as any;
     const colors = [] as any;
+    const sizes = [] as any;
 
+    // const multiplyCells = 50;
+    // const nRows = 10;
+    // const spacing = 30
+    // let col = 0;
+
+    // for (let n = 0; n < multiplyCells; ++n) {
+    //     if (n % nRows == 0) {
+    //         col += 1;
+    //     }
+    //     coords.forEach((coord: { x: number; y: number; }) => {
+    //         x.push(coord.x + spacing * (n % nRows));
+    //         y.push(coord.y + spacing * col);
+    //         positions.push(coord.x + spacing * (n % nRows), coord.y + spacing * col, 0);
+    //         colors.push(255, 0, 0);
+    //         sizes.push(20);
+    //     })
+    // }
     coords.forEach((coord: { x: number; y: number; }) => {
         x.push(coord.x);
         y.push(coord.y);
         positions.push(coord.x, coord.y, 0);
         colors.push(255, 0, 0);
-
+        sizes.push(1);
     })
 
     console.log('Initializing data points...' + colors.length + ' ' + positions.length);
@@ -110,6 +170,11 @@ const intitializeDataPoints = (scene, camera, geometry, material, coords) => {
         'color',
         new THREE.Float32BufferAttribute(colors, 3)
     );
+    geometry.setAttribute(
+        'size',
+        new THREE.Float32BufferAttribute(sizes, 1)
+            .setUsage(THREE.DynamicDrawUsage)
+    );
 
     const points = new THREE.Points(geometry, material);
     // const points = new THREE.Points(geometry);
@@ -122,12 +187,12 @@ export const Viewer: React.FC<ViewerProps> = (props: ViewerProps) => {
         return root.main.coords;
     });
     const mount = useRef<HTMLDivElement>(null!)
-    const [rendererState, setRenderer] = React.useState()
-    const [mounted, setMounted] = React.useState(false)
-    const [sceneState, setScene] = React.useState()
-    const [cameraState, setCamera] = React.useState()
-    const [geometryState, setGeometry] = React.useState()
-    const [materialState, setMaterial] = React.useState()
+    const [rendererState, setRenderer] = React.useState<THREE.Renderer>()
+    const [mounted, setMounted] = React.useState<Boolean>(false)
+    const [sceneState, setScene] = React.useState<THREE.Scene>()
+    const [cameraState, setCamera] = React.useState<THREE.Camera>()
+    const [geometryState, setGeometry] = React.useState<THREE.BufferGeometry>()
+    const [materialState, setMaterial] = React.useState<THREE.Material>()
 
     const requestRef = React.useRef() as React.MutableRefObject<number>;
     const previousTimeRef = React.useRef();
