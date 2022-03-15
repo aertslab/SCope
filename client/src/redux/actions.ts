@@ -77,9 +77,12 @@ export const toggleModifierKey = (key: ModifierKey): ToggleModifierKey => ({
     payload: { key },
 });
 
-export const getCoordinates = (dataset: string): GetCoordinates => ({
+export const getCoordinates = (
+    project: string,
+    dataset: number
+): GetCoordinates => ({
     type: AT.GET_COORDINATES,
-    payload: { dataset },
+    payload: { project, dataset },
 });
 
 export const receivedCoordinates = (

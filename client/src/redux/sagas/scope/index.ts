@@ -94,7 +94,11 @@ export function* watchUploadRequest() {
 }
 
 function* requestCoords(action: T.GetCoordinates) {
-    const coords = yield call(API.getCoordinates, action.payload.dataset);
+    const coords = yield call(
+        API.getCoordinates,
+        action.payload.project,
+        action.payload.dataset
+    );
     yield put(A.receivedCoordinates(coords));
 }
 

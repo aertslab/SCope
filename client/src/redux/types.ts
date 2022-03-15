@@ -110,7 +110,8 @@ export interface ToggleModifierKey {
 export interface GetCoordinates {
     type: typeof AT.GET_COORDINATES;
     payload: {
-        dataset: string;
+        project: string;
+        dataset: number;
     };
 }
 

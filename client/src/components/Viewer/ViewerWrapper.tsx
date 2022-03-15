@@ -60,7 +60,12 @@ export const ViewerWrapper: React.FC<{}> = () => {
                     if (viewer === undefined) {
                         return <div>Empty</div>;
                     } else {
-                        return <Viewer dataset={viewer.dataset} />;
+                        return (
+                            <Viewer
+                                project={viewer.project}
+                                dataset={viewer.dataset}
+                            />
+                        );
                     }
                 }
             })}

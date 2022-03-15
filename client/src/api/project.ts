@@ -192,10 +192,14 @@ export type Coordinate = {
 };
 
 export async function getCoordinates(
-    dataset: string
+    project: string,
+    dataset: number
 ): Promise<Array<Coordinate>> {
     const url = new URL(API_URL + 'data/dataset');
-    url.search = new URLSearchParams({ dataset }).toString();
+    url.search = new URLSearchParams({
+        project,
+        dataset: `${dataset}`,
+    }).toString();
     const response = await fetch(url.toString(), {
         method: 'GET',
         headers: {

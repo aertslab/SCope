@@ -8,6 +8,7 @@ import { getCoordinates } from '../../redux/actions';
 import * as R from 'ramda';
 
 export type ViewerProps = {
+    project: string;
     dataset: number;
 };
 
@@ -232,7 +233,7 @@ export const Viewer: React.FC<ViewerProps> = (props: ViewerProps) => {
         }
 
         if (coords.length === 0) {
-            dispatch(getCoordinates(`${props.dataset}`));
+            dispatch(getCoordinates(props.project, props.dataset));
         }
         if (sceneState && cameraState && geometryState) {
             intitializeDataPoints(
