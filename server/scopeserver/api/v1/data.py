@@ -23,10 +23,13 @@ def get_dataset(
 ):
     entry = crud.get_dataset(database, dataset)
 
-    with lp.connect(
-        settings.DATA_PATH / "c9ef0a31-a7cd-4d04-a73f-2575babf7e30" / Path(entry.filename), validate=False
-    ) as ds:
-        xs = [_x[0] for _x in ds.ca.Embeddings_X]
-        ys = [_y[0] for _y in ds.ca.Embeddings_Y]
+    if entry is not None:
+        with lp.connect(
+            settings.DATA_PATH / "c9ef0a31-a7cd-4d04-a73f-2575babf7e30" / Path(entry.filename), validate=False
+        ) as ds:
+            xs = [_x[0] for _x in ds.ca.Embeddings_X]
+            ys = [_y[0] for _y in ds.ca.Embeddings_Y]
 
-    return [schemas.Coordinate(x=X, y=Y) for X, Y in zip(xs, ys)]
+            return [schemas.Coordinate(x=X, y=Y) for X, Y in zip(xs, ys)]
+
+    return []
