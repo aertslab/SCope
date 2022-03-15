@@ -31,6 +31,7 @@ export function FeatureSearchGroup(props: FeatureSearchProps) {
             }}>
             {[0, 1, 2].map((i) => (
                 <FeatureSearchBox
+                    key={`${props.identifier}-${i}`}
                     field={`${props.identifier}-${i}`}
                     filter={props.filter}
                     colour={props.colour ? props.colour(i) : FEATURE_COLOURS[i]}
