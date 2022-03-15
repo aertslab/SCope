@@ -80,10 +80,11 @@ export const toggleModifierKey = (key: ModifierKey): ToggleModifierKey => ({
 export const getCoordinates = (dataset: string): GetCoordinates => ({
     type: AT.GET_COORDINATES,
     payload: { dataset },
-})
+});
 
-
-export const receivedCoordinates = (coords: Array<Coordinate>): ReceivedCoordinates => ({
+export const receivedCoordinates = (
+    coords: Array<Coordinate>
+): ReceivedCoordinates => ({
     type: AT.RECEIVED_COORDINATES,
     payload: { coordinates: coords },
-})
+});

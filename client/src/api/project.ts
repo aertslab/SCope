@@ -192,7 +192,7 @@ export type Coordinate = {
 };
 
 export async function getCoordinates(
-    dataset: string,
+    dataset: string
 ): Promise<Array<Coordinate>> {
     const url = new URL(API_URL + 'data/dataset');
     url.search = new URLSearchParams({ dataset }).toString();
@@ -203,5 +203,5 @@ export async function getCoordinates(
         },
     });
 
-    return await response.json() as Array<Coordinate>;
+    return (await response.json()) as Array<Coordinate>;
 }

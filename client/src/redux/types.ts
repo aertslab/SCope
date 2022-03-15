@@ -111,17 +111,15 @@ export interface GetCoordinates {
     type: typeof AT.GET_COORDINATES;
     payload: {
         dataset: string;
-    }
+    };
 }
-
 
 export interface ReceivedCoordinates {
     type: typeof AT.RECEIVED_COORDINATES;
     payload: {
         coordinates: Array<Coordinate>;
-    }
+    };
 }
-
 
 export type MainAction =
     | SetLoadingAction

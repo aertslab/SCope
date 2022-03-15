@@ -6,18 +6,10 @@ import { Button, Icon } from 'semantic-ui-react';
 import * as MainSelect from '../../redux/selectors';
 import { RootState } from '../../redux/reducers';
 
-import { ViewerId, ViewerInfo, ViewerMap } from './model';
+import { ViewerId, ViewerMap } from './model';
 import * as Select from './selectors';
 import * as Action from './actions';
 import { Viewer } from './Viewer';
-
-const Placeholder: React.FC<ViewerInfo> = (props: ViewerInfo) => {
-    return (
-        <div>
-            {props.project}, {props.dataset}
-        </div>
-    );
-};
 
 type WrapperState = {
     viewers: ViewerMap;
@@ -68,11 +60,7 @@ export const ViewerWrapper: React.FC<{}> = () => {
                     if (viewer === undefined) {
                         return <div>Empty</div>;
                     } else {
-                        return (
-                            <Viewer
-                                dataset={viewer.dataset}
-                            />
-                        );
+                        return <Viewer dataset={viewer.dataset} />;
                     }
                 }
             })}
