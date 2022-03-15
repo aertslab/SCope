@@ -47,7 +47,7 @@ const initGraphics = () => {
         void main() {
             vColor = color;
             vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-            gl_PointSize = size * ( 300.0 / -mvPosition.z );
+            gl_PointSize = size;
             gl_Position = projectionMatrix * mvPosition;
 
         }`
@@ -134,7 +134,7 @@ const intitializeDataPoints = (scene, camera, geometry, material, coords) => {
         y.push(coord.y);
         positions.push(coord.x, coord.y, 0);
         colors.push(255, 0, 0);
-        sizes.push(1);
+        sizes.push(5);
     })
 
     console.log('Initializing data points...' + colors.length + ' ' + positions.length);
