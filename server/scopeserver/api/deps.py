@@ -1,5 +1,6 @@
 " Provides Depends() objects for all API endpoints. "
 
+from functools import lru_cache
 from typing import AsyncGenerator, Generator
 from datetime import datetime, timezone
 
@@ -8,6 +9,7 @@ from fastapi import Depends, Header, HTTPException, status
 from fastapi.security.utils import get_authorization_scheme_param
 from jose import jwt
 from jose.exceptions import JWTError
+from scopeserver.dataserver.utils.loom_file_handler import LoomFileHandler
 from sqlalchemy.orm import Session
 
 from scopeserver import crud, models, schemas
@@ -75,3 +77,12 @@ def get_current_admin(current_user: models.User = Depends(get_current_user)) -> 
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not an admin")
 
     return current_user
+
+
+@lru_cache(maxsize=1)
+def lfh() -> LoomFileHandler:
+    "Provide access to a loom file handler (lfh)"
+
+    handler = LoomFileHandler()
+    handler.set_global_data()
+    return handler

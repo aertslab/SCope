@@ -154,20 +154,10 @@ async def add_dataset(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             detail=f"Unsupported upload mime type: {uploadfile.content_type}",
         )
-    max_upload_size = limits[uploadfile.content_type]
 
     # Check that the user is an admin or an owner
     if crud.is_admin(current_user) or crud.is_owner(current_user, found_project):
-        size = 0
-        with (settings.DATA_PATH / Path(project) / Path(uploadfile.filename)).open(mode="wb") as datafile:
-            data = await uploadfile.read(max_upload_size + 1)
-            if isinstance(data, str):
-                data = data.encode("utf8")
-            if (size := len(data)) > max_upload_size:
-                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Uploaded file is too large")
-            datafile.write(data)
-
-        return crud.create_dataset(database, name=name, filename=uploadfile.filename, project=found_project, size=size)
+        return crud.create_dataset(database, name=name, uploadfile=uploadfile, project=found_project)
 
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You do not own this project")
 

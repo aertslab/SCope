@@ -1,10 +1,19 @@
 """ Database model definitions. """
 
+from pathlib import Path
+import pickle
 from typing import List, Optional
 from datetime import datetime
+from scopeserver.dataserver.utils.loom import Loom
+from scopeserver.dataserver.utils.loom_file_handler import LoomFileHandler
+from scopeserver.dataserver.utils.loom_like_connection import LoomLikeConnection
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, LargeBinary, String, UniqueConstraint
 from sqlalchemy.orm import relationship, Mapped
+from sqlalchemy.ext.hybrid import hybrid_method
+from scipy.sparse import coo_matrix
+from h5py import File
+from io import BytesIO
 
 from scopeserver.database import Base
 
@@ -76,6 +85,42 @@ class Dataset(Base):
     filename: str = Column(String, nullable=False)
     size: int = Column(Integer, nullable=False)
     project = Column(Integer, ForeignKey("projects.id"), nullable=False)
+
+
+class BinaryData(Base):
+    "Data stored as a binary blob"
+    __tablename__ = "binary_data"
+
+    id: int = Column(Integer, primary_key=True, index=True)
+    dataset: int = Column(Integer, ForeignKey("datasets.id"), nullable=False)
+    data = Column(LargeBinary, nullable=False)
+    data_format: str = Column(String, nullable=False)
+
+    @hybrid_method
+    def load_scipy_sparse_matrix(self) -> Optional[coo_matrix]:
+        if self.data_format != "binary_scipy_sparse_matrix":
+            return
+
+        return pickle.loads(self.data)
+
+    @hybrid_method
+    def load_loom_file(self, lfh: LoomFileHandler) -> Optional[Loom]:
+        if self.data_format != "binary_loom":
+            return
+
+        h5 = File(BytesIO(self.data), mode="r")
+        return Loom(Path("virtual.loom"), Path("virtual.loom"), LoomLikeConnection(h5), lfh)
+
+
+class ExplodedMatrix(Base):
+    "Matrices exploded"
+    __tablename__ = "matrices"
+
+    id: int = Column(Integer, primary_key=True, index=True)
+    row: int = Column(Integer, nullable=False)
+    column: int = Column(Integer, nullable=False)
+    value: float = Column(Float, nullable=False)
+    dataset: Column(Integer, ForeignKey("datasets.id"), nullable=False)
 
 
 class IdentityProvider(Base):

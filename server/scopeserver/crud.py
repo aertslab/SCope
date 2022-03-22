@@ -1,13 +1,16 @@
 " Provides low-level Create, Read, Update, and Delete functions for API resources. "
 
+import pickle
 from typing import List, Optional
 from datetime import datetime
 from uuid import uuid4
 
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from fastapi import UploadFile
 
 from scopeserver import models, schemas
+from scopeserver.dataserver.utils import convert
 
 # Projects
 
@@ -187,26 +190,34 @@ def delete_user(database: Session, user_id: int):
 # Datasets
 
 
-def create_dataset(database: Session, name: str, filename: str, project: models.Project, size: int) -> models.Dataset:
+def create_dataset(database: Session, name: str, uploadfile: UploadFile, project: models.Project) -> models.Dataset:
     "Create a new dataset."
+
     new_dataset = models.Dataset(
         name=name,
         created=datetime.now(),
-        filename=filename,
-        size=size,
+        filename=uploadfile.filename,
+        size=0,
         project=project.id,
     )
 
     try:
         database.add(new_dataset)
-        project.size += size
+        database.flush()
+
+        binary_loom = models.BinaryData(dataset=new_dataset.id, data=uploadfile.file.read(), data_format="binary_loom")
+        mat = convert.matrix_from_binary_loom(binary_loom)
+        binary_sparse_matrix = models.BinaryData(
+            dataset=new_dataset.id, data=pickle.dumps(mat), data_format="binary_scipy_sparse_matrix"
+        )
+        database.add(binary_loom)
+        database.add(binary_sparse_matrix)
     except SQLAlchemyError:
         database.rollback()
         raise
     else:
         database.commit()
 
-    database.refresh(new_dataset)
     return new_dataset
 
 
@@ -227,6 +238,16 @@ def delete_dataset(database: Session, dataset: models.Dataset):
         raise
     else:
         database.commit()
+
+
+def get_binary_data(
+    database: Session, dataset_id: int, data_format: str = "binary_loom"
+) -> Optional[models.BinaryData]:
+    return (
+        database.query(models.BinaryData)
+        .filter(models.BinaryData.dataset == dataset_id, models.BinaryData.data_format == data_format)
+        .first()
+    )
 
 
 # Auth
