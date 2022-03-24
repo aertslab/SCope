@@ -50,6 +50,7 @@ h5py = ">=2.10,<3"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 httpx = "^0.18.2"
 click = "^8.0.1"
+pyarrow = "^7.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"

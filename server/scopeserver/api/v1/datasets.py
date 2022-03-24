@@ -59,7 +59,7 @@ async def expression(
     log_transform: bool = False,
     cpm_normalise: bool = False,
     combinator: Optional[Literal["AND", "OR"]] = "OR",
-    data_format: Optional[Literal["binary_loom", "binary_scipy_sparse_matrix"]] = "binary_loom",
+    data_format: Optional[Literal["loom", "pickled_scipy_sparse_matrix", "coo", "compressed_coo", "h5", "pq"]] = "loom",
     database: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_user),
     lfh: LoomFileHandler = Depends(deps.lfh),
@@ -72,8 +72,10 @@ async def expression(
     if not crud.is_admin(current_user) and not crud.user_has_access_to_dataset(database, current_user, found_data):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You have no access to this data")
 
-    if data_format == "binary_loom":
+    # All data formats should have a way to find the index of a gene. For now we hardcode a random index
+    gene_index = 36
 
+    if data_format == "loom":
         if (loom := found_data.load_loom_file(lfh)) is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=f"Failed to load loom file for dataset {dataset_id}"
@@ -82,17 +84,42 @@ async def expression(
         return loom.get_gene_expression(
             gene_symbol, log_transform, cpm_normalise, annotation=None, logic=combinator
         ).tolist()
-    elif data_format == "binary_scipy_sparse_matrix":
-        gene_index = 36
-
+    elif data_format == "pickled_scipy_sparse_matrix":
         if (matrix := found_data.load_scipy_sparse_matrix()) is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Failed to load scipy sparse matrix for dataset {dataset_id} and data id {found_data.id}",
             )
+        return matrix.getrow(gene_index).toarray()[0].tolist()
+    elif data_format == "coo":
+        if (matrix := found_data.load_coo()) is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Failed to load coo data for dataset {dataset_id} and data id {found_data.id}",
+            )
 
         return matrix.getrow(gene_index).toarray()[0].tolist()
-
+    elif data_format == "compressed_coo":
+        if (matrix := found_data.load_compressed_coo()) is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Failed to load compressed coo data for dataset {dataset_id} and data id {found_data.id}",
+            )
+        return matrix.getrow(gene_index).toarray()[0].tolist()
+    elif data_format == "h5":
+        if (matrix := found_data.load_h5()) is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Failed to load h5 data for dataset {dataset_id} and data id {found_data.id}",
+            )
+        return matrix.getrow(gene_index).toarray()[0].tolist()
+    elif data_format == "pq":
+        if (matrix := found_data.load_pq()) is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Failed to load pq data for dataset {dataset_id} and data id {found_data.id}",
+            )
+        return matrix.getrow(gene_index).toarray()[0].tolist()
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid data format {data_format} specified"
@@ -102,7 +129,7 @@ async def expression(
 @router.get("/{dataset_id}/genes", summary="Get available genes")
 async def genes(
     dataset_id: int,
-    data_format: Optional[Literal["binary_loom", "binary_scipy_sparse_matrix"]] = "binary_loom",
+    data_format: Optional[Literal["loom", "pickled_scipy_sparse_matrix"]] = "loom",
     database: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_user),
     lfh: LoomFileHandler = Depends(deps.lfh),

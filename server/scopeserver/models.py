@@ -11,9 +11,11 @@ from scopeserver.dataserver.utils.loom_like_connection import LoomLikeConnection
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, LargeBinary, String, UniqueConstraint
 from sqlalchemy.orm import relationship, Mapped
 from sqlalchemy.ext.hybrid import hybrid_method
-from scipy.sparse import coo_matrix
+from scipy.sparse import coo_matrix, csr_matrix
 from h5py import File
 from io import BytesIO
+import pyarrow.parquet as pq
+import numpy as np
 
 from scopeserver.database import Base
 
@@ -98,18 +100,53 @@ class BinaryData(Base):
 
     @hybrid_method
     def load_scipy_sparse_matrix(self) -> Optional[coo_matrix]:
-        if self.data_format != "binary_scipy_sparse_matrix":
+        if self.data_format != "pickled_scipy_sparse_matrix":
             return
 
         return pickle.loads(self.data)
 
     @hybrid_method
     def load_loom_file(self, lfh: LoomFileHandler) -> Optional[Loom]:
-        if self.data_format != "binary_loom":
+        if self.data_format != "loom":
             return
 
         h5 = File(BytesIO(self.data), mode="r")
         return Loom(Path("virtual.loom"), Path("virtual.loom"), LoomLikeConnection(h5), lfh)
+
+    @hybrid_method
+    def load_coo(self) -> Optional[coo_matrix]:
+        if self.data_format != "coo":
+            return
+
+        data = np.frombuffer(self.data, dtype=np.int32).reshape((3, -1))
+
+        return coo_matrix((data[2], (data[0], data[1])))
+
+    @hybrid_method
+    def load_compressed_coo(self) -> Optional[coo_matrix]:
+        if self.data_format != "compressed_coo":
+            return
+
+        data = np.load(BytesIO(self.data))
+
+        return coo_matrix((data["data"], (data["row"], data["col"])))
+
+    @hybrid_method
+    def load_h5(self) -> Optional[csr_matrix]:
+        if self.data_format != "h5":
+            return
+
+        with File(BytesIO(self.data), mode="r") as h5file:
+            return csr_matrix((h5file["data"], h5file["indices"], h5file["indptr"]))
+
+    @hybrid_method
+    def load_pq(self) -> Optional[coo_matrix]:
+        if self.data_format != "pq":
+            return
+
+        table = pq.read_table(BytesIO(self.data))
+
+        return coo_matrix((table.column("data"), (table.column("row"), table.column("col"))))
 
 
 class ExplodedMatrix(Base):

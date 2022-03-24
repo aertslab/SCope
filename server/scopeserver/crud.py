@@ -12,6 +12,12 @@ from fastapi import UploadFile
 from scopeserver import models, schemas
 from scopeserver.dataserver.utils import convert
 
+import numpy as np
+import io
+import h5py
+import pyarrow as pa
+import pyarrow.parquet as pq
+
 # Projects
 
 
@@ -205,13 +211,48 @@ def create_dataset(database: Session, name: str, uploadfile: UploadFile, project
         database.add(new_dataset)
         database.flush()
 
-        binary_loom = models.BinaryData(dataset=new_dataset.id, data=uploadfile.file.read(), data_format="binary_loom")
-        mat = convert.matrix_from_binary_loom(binary_loom)
-        binary_sparse_matrix = models.BinaryData(
-            dataset=new_dataset.id, data=pickle.dumps(mat), data_format="binary_scipy_sparse_matrix"
+        loom = models.BinaryData(dataset=new_dataset.id, data=uploadfile.file.read(), data_format="loom")
+        mat = convert.matrix_from_loom(loom)
+        pickled_sparse_matrix = models.BinaryData(
+            dataset=new_dataset.id, data=pickle.dumps(mat), data_format="pickled_scipy_sparse_matrix"
         )
-        database.add(binary_loom)
-        database.add(binary_sparse_matrix)
+        coo = models.BinaryData(
+            dataset=new_dataset.id,
+            data=np.array([mat.row, mat.col, mat.data.astype(np.int32)]).tobytes(),
+            data_format="coo",
+        )
+        mfile = io.BytesIO()
+        np.savez_compressed(mfile, row=mat.row, col=mat.col, data=mat.data)
+        mfile.seek(0)
+        compressed_coo = models.BinaryData(dataset=new_dataset.id, data=mfile.read(), data_format="compressed_coo")
+        mfile.close()
+
+        mat_csr = mat.tocsr()
+
+        mfile = io.BytesIO()
+        with h5py.File(mfile) as h5:
+            h5.create_dataset("data", data=mat_csr.data, compression="gzip")
+            h5.create_dataset("indices", data=mat_csr.indices, compression="gzip")
+            h5.create_dataset("indptr", data=mat_csr.indptr, compression="gzip")
+            h5.attrs["shape"] = mat.shape
+            h5.flush()
+        mfile.seek(0)
+        h5data = models.BinaryData(dataset=new_dataset.id, data=mfile.read(), data_format="h5")
+
+        table = pa.Table.from_arrays([pa.array(mat.row), pa.array(mat.col), pa.array(mat.data)], ["row", "col", "data"])
+
+        mfile = io.BytesIO()
+        with pq.ParquetWriter(mfile, table.schema) as pqfile:
+            pqfile.write_table(table)
+        mfile.seek(0)
+        pqdata = models.BinaryData(dataset=new_dataset.id, data=mfile.read(), data_format="pq")
+
+        database.add(loom)
+        database.add(pickled_sparse_matrix)
+        database.add(coo)
+        database.add(compressed_coo)
+        database.add(h5data)
+        database.add(pqdata)
     except SQLAlchemyError:
         database.rollback()
         raise
@@ -240,9 +281,7 @@ def delete_dataset(database: Session, dataset: models.Dataset):
         database.commit()
 
 
-def get_binary_data(
-    database: Session, dataset_id: int, data_format: str = "binary_loom"
-) -> Optional[models.BinaryData]:
+def get_binary_data(database: Session, dataset_id: int, data_format: str = "loom") -> Optional[models.BinaryData]:
     return (
         database.query(models.BinaryData)
         .filter(models.BinaryData.dataset == dataset_id, models.BinaryData.data_format == data_format)
