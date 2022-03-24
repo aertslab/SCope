@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "f26a9e8e-b853-42cd-a11b-86cc2aaf5108",
+		"_postman_id": "9a184d79-7ad2-4263-a545-2c07facbd9d7",
 		"name": "SCope",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -372,6 +372,116 @@
 								{
 									"key": "project",
 									"value": "{{project_uuid}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get dataset coordinates",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/dataset/{{dataset_id}}/coordinates",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"dataset",
+								"{{dataset_id}}",
+								"coordinates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get dataset genes",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/dataset/{{dataset_id}}/genes",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"dataset",
+								"{{dataset_id}}",
+								"genes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get dataset expression",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/api/v1/dataset/{{dataset_id}}/expression?gene_symbol={{gene_symbol}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"dataset",
+								"{{dataset_id}}",
+								"expression"
+							],
+							"query": [
+								{
+									"key": "gene_symbol",
+									"value": "{{gene_symbol}}"
+								},
+								{
+									"key": "data_format",
+									"value": "{{data_format}}",
+									"disabled": true
 								}
 							]
 						}
@@ -824,7 +934,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"code\": \"0c75b43e-0702-4948-90d2-af541b8a54fb.edabae7c-57c4-4e66-8e0a-17e2bf53c5c4.ade6dd0a-608b-4620-847a-48a58f8b782b\",\n    \"state\": \"{{state}}\"\n}",
+							"raw": "{\n    \"code\": \"41d58645-87f1-4f41-b844-4473217db74b.10b9081f-ba42-435b-a6ba-d9d85d1cc8ad.ade6dd0a-608b-4620-847a-48a58f8b782b\",\n    \"state\": \"{{state}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -907,6 +1017,20 @@
 		{
 			"key": "project_uuid",
 			"value": ""
+		},
+		{
+			"key": "dataset_id",
+			"value": ""
+		},
+		{
+			"key": "data_format",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "gene_symbol",
+			"value": "",
+			"type": "string"
 		}
 	]
 }
