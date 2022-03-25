@@ -227,6 +227,16 @@ def create_dataset(database: Session, name: str, uploadfile: UploadFile, project
         compressed_coo = models.BinaryData(dataset=new_dataset.id, data=mfile.read(), data_format="compressed_coo")
         mfile.close()
 
+        mfile = io.BytesIO()
+        with h5py.File(mfile) as h5:
+            h5.create_dataset("row", data=mat.row, compression="gzip")
+            h5.create_dataset("col", data=mat.col, compression="gzip")
+            h5.create_dataset("data", data=mat.data, compression="gzip")
+            h5.attrs["shape"] = mat.shape
+            h5.flush()
+        mfile.seek(0)
+        h5data = models.BinaryData(dataset=new_dataset.id, data=mfile.read(), data_format="h5")
+
         mat_csr = mat.tocsr()
 
         mfile = io.BytesIO()
@@ -234,10 +244,10 @@ def create_dataset(database: Session, name: str, uploadfile: UploadFile, project
             h5.create_dataset("data", data=mat_csr.data, compression="gzip")
             h5.create_dataset("indices", data=mat_csr.indices, compression="gzip")
             h5.create_dataset("indptr", data=mat_csr.indptr, compression="gzip")
-            h5.attrs["shape"] = mat.shape
+            h5.attrs["shape"] = mat_csr.shape
             h5.flush()
         mfile.seek(0)
-        h5data = models.BinaryData(dataset=new_dataset.id, data=mfile.read(), data_format="h5")
+        h5data_csr = models.BinaryData(dataset=new_dataset.id, data=mfile.read(), data_format="h5_csr")
 
         table = pa.Table.from_arrays([pa.array(mat.row), pa.array(mat.col), pa.array(mat.data)], ["row", "col", "data"])
 
@@ -252,6 +262,7 @@ def create_dataset(database: Session, name: str, uploadfile: UploadFile, project
         database.add(coo)
         database.add(compressed_coo)
         database.add(h5data)
+        database.add(h5data_csr)
         database.add(pqdata)
     except SQLAlchemyError:
         database.rollback()

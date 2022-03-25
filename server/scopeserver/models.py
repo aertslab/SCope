@@ -132,8 +132,16 @@ class BinaryData(Base):
         return coo_matrix((data["data"], (data["row"], data["col"])))
 
     @hybrid_method
-    def load_h5(self) -> Optional[csr_matrix]:
+    def load_h5(self) -> Optional[coo_matrix]:
         if self.data_format != "h5":
+            return
+
+        with File(BytesIO(self.data), mode="r") as h5file:
+            return coo_matrix((h5file["data"], (h5file["row"], h5file["col"])))
+
+    @hybrid_method
+    def load_h5_csr(self) -> Optional[csr_matrix]:
+        if self.data_format != "h5_csr":
             return
 
         with File(BytesIO(self.data), mode="r") as h5file:

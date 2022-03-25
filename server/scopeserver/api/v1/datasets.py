@@ -59,7 +59,9 @@ async def expression(
     log_transform: bool = False,
     cpm_normalise: bool = False,
     combinator: Optional[Literal["AND", "OR"]] = "OR",
-    data_format: Optional[Literal["loom", "pickled_scipy_sparse_matrix", "coo", "compressed_coo", "h5", "pq"]] = "loom",
+    data_format: Optional[
+        Literal["loom", "pickled_scipy_sparse_matrix", "coo", "compressed_coo", "h5", "h5_csr", "pq"]
+    ] = "loom",
     database: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_user),
     lfh: LoomFileHandler = Depends(deps.lfh),
@@ -111,6 +113,13 @@ async def expression(
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Failed to load h5 data for dataset {dataset_id} and data id {found_data.id}",
+            )
+        return matrix.getrow(gene_index).toarray()[0].tolist()
+    elif data_format == "h5_csr":
+        if (matrix := found_data.load_h5_csr()) is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Failed to load h5 csr data for dataset {dataset_id} and data id {found_data.id}",
             )
         return matrix.getrow(gene_index).toarray()[0].tolist()
     elif data_format == "pq":
