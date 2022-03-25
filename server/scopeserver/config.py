@@ -16,12 +16,16 @@ class Settings(BaseSettings):
     DATABASE_URL: str = ""
 
     @validator("DATABASE_URL", pre=True, allow_reuse=True)
-    def sqlite_conn(cls, value: str):
+    def valid_db_connection(cls, value: str):
         "Validate that the connection string starts with sqlite and has the check_same_thread argument."
-        if not value.startswith("sqlite:///"):
-            raise ValueError("Not connecting to a sqlite database")
-        if not value.endswith("?check_same_thread=false"):
-            raise ValueError("check_same_thread should be false")
+        if value.startswith("sqlite:///"):
+            if not value.endswith("?check_same_thread=false"):
+                raise ValueError("check_same_thread should be false")
+        elif value.startswith("postgresql"):
+            if " " in value:
+                raise ValueError("pgsql database url should not contain spaces")
+        else:
+            raise ValueError("Invalid database URL. Should be either a valid sqlite or pgsql url")
 
         return value
 
