@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Search from '../Search';
-import { ViewerWrapper } from '../Viewer/ViewerWrapper';
+import { LayoutManager } from '../Viewer/LayoutManager';
 import RightSidebar from '../RightSidebar';
 
 export const Viewer: React.FC<{}> = () => {
@@ -16,7 +16,7 @@ export const Viewer: React.FC<{}> = () => {
                 padding: '0px 14px 0px 14px',
             }}>
             <Search.FeatureSearchGroup filter='all' identifier='viewer-page' />
-            <ViewerWrapper />
+            <LayoutManager />
             <RightSidebar
                 hideFeatures={false}
                 onActiveFeaturesChange={(_a, _b) => {

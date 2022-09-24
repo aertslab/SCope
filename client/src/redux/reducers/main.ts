@@ -15,7 +15,6 @@ const initialState: MainState = {
         file: undefined,
     },
     error: '',
-    modifierKey: 'None',
 };
 
 const main = produce((draft: MainState, action: MainAction) => {
@@ -52,12 +51,6 @@ const main = produce((draft: MainState, action: MainAction) => {
             draft.upload.state = 'finished';
             draft.upload.progress = 0;
             draft.upload.file = undefined;
-            break;
-        case Action.MODIFIER_KEY_TOGGLE:
-            draft.modifierKey =
-                draft.modifierKey === action.payload.key
-                    ? 'None'
-                    : action.payload.key;
             break;
     }
 }, initialState);

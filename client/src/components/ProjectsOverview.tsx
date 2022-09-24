@@ -30,7 +30,7 @@ const ProjectView: React.FC<ProjectViewProps> = (props) => {
     const [displayUpload, setDisplayUpload] = useState(false);
 
     const selectDataset = (project: string, dataset: number) => {
-        dispatch(ViewerAction.appendViewer(project, dataset));
+        //dispatch(ViewerAction.appendViewer(project, dataset));
         navigate('/viewer', { replace: true });
     };
 

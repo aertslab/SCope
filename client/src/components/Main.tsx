@@ -1,14 +1,10 @@
 /**
- * Happy path routing for the main application.
+ * Top-level layout for SCope
  */
 
-import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import Favicon from 'react-favicon';
-
-import { toggleModifierKey } from '../redux/actions';
-import { ModifierKey } from '../redux/types';
 
 import { AppHeader } from './AppHeader';
 import { Sidebar } from './Sidebar';
@@ -34,23 +30,6 @@ export const Main: React.FC<{}> = () => {
         const session = validateSessionID(loc.hash.substring(2));
         return <Navigate to={`/legacy/${session}`} replace />; // nosemgrep: typescript.react.security.audit.react-router-redirect.react-router-redirect
     }
-
-    const dispatch = useDispatch();
-
-    const keyevent = (event: KeyboardEvent): void => {
-        if (['Shift', 'Control'].includes(event.key)) {
-            dispatch(toggleModifierKey(event.key as ModifierKey));
-        }
-    };
-
-    useEffect(() => {
-        document.addEventListener('keydown', keyevent);
-        document.addEventListener('keyup', keyevent);
-        return () => {
-            document.removeEventListener('keydown', keyevent);
-            document.removeEventListener('keyup', keyevent);
-        };
-    }, []);
 
     return (
         <React.StrictMode>

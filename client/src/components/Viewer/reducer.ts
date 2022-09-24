@@ -1,67 +1,45 @@
 import produce from 'immer';
 import { Reducer } from 'redux';
 
-import { State, initState } from './model';
+import { Layout } from './model';
 import * as Model from './model';
 import {
     ViewerAction,
-    AppendViewer,
-    InsertViewer,
-    RemoveViewer,
+    ChangeLayout,
+    DeleteViewer,
+    SplitViewer,
 } from './actions';
 import * as AT from './actionTypes';
 
-const initialState: State = initState();
+const initialState: Layout = Model.newLayout();
 
-export const reducer: Reducer<State, ViewerAction> = produce(
-    (draft: State, action: ViewerAction) => {
+export const reducer: Reducer<Layout, ViewerAction> = produce(
+    (draft: Layout, action: ViewerAction) => {
         switch (action.type) {
-            case AT.ADD_VIEWER_COL:
-                draft.grid = Model.appendCol(draft.grid);
-                break;
-
-            case AT.ADD_VIEWER_ROW:
-                draft.grid = Model.appendRow(draft.grid);
-                break;
-
-            case AT.REMOVE_VIEWER_COL:
-                draft.grid = Model.removeCol(
-                    draft.grid,
-                    (action as RemoveViewer).payload
+            case AT.SPLIT_HORIZONTAL:
+                draft = Model.verticalSplit(
+                    draft,
+                    (action as SplitViewer).payload
                 );
                 break;
 
-            case AT.REMOVE_VIEWER_ROW:
-                draft.grid = Model.removeRow(
-                    draft.grid,
-                    (action as RemoveViewer).payload
+            case AT.SPLIT_VERTICAL:
+                draft = Model.horizontalSplit(
+                    draft,
+                    (action as SplitViewer).payload
                 );
                 break;
 
-            case AT.INSERT_VIEWER:
-                draft.viewers = {
-                    ...draft.viewers,
-                    [draft.lastId]: {
-                        project: (action as InsertViewer).payload.project,
-                        dataset: (action as InsertViewer).payload.dataset,
-                    },
-                };
-                draft.grid[(action as InsertViewer).payload.col][
-                    (action as InsertViewer).payload.row
-                ] = draft.lastId;
-                draft.lastId += 1;
+            case AT.DELETE:
+                draft = Model.deleteView(
+                    draft,
+                    (action as DeleteViewer).payload
+                );
                 break;
 
-            case AT.APPEND_VIEWER:
-                draft.viewers = {
-                    ...draft.viewers,
-                    [draft.lastId]: {
-                        project: (action as AppendViewer).payload.project,
-                        dataset: (action as AppendViewer).payload.dataset,
-                    },
-                };
-                draft.grid = Model.placeViewer(draft.grid, draft.lastId);
-                draft.lastId += 1;
+            case AT.LAYOUT:
+                draft.width = (action as ChangeLayout).payload.width;
+                draft.height = (action as ChangeLayout).payload.height;
                 break;
         }
     },

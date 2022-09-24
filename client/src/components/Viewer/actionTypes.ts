@@ -1,13 +1,9 @@
 import { NAME } from './constants';
 
-export const ADD_VIEWER_ROW = `${NAME}/ADD_VIEWER_ROW`;
+export const SPLIT_VERTICAL = `${NAME}/SPLIT_VERTICAL`;
 
-export const ADD_VIEWER_COL = `${NAME}/ADD_VIEWER_COL`;
+export const SPLIT_HORIZONTAL = `${NAME}/SPLIT_HORIZONTAL`;
 
-export const REMOVE_VIEWER_ROW = `${NAME}/REMOVE_VIEWER_ROW`;
+export const DELETE = `${NAME}/DELETE`;
 
-export const REMOVE_VIEWER_COL = `${NAME}/REMOVE_VIEWER_COL`;
-
-export const APPEND_VIEWER = `${NAME}/APPEND_VIEWER`;
-
-export const INSERT_VIEWER = `${NAME}/INSERT_VIEWER`;
+export const LAYOUT = `${NAME}/LAYOUT`;
