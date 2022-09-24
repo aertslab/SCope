@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Segment, Search, SemanticCOLORS } from 'semantic-ui-react';
+import { Search } from 'semantic-ui-react';
 import * as R from 'ramda';
 
 import { RootState } from '../../redux/reducers';
@@ -161,10 +161,15 @@ export const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
     );
 
     return (
-        <Segment
-            color={props.colour as SemanticCOLORS}
-            inverted
-            className='noPadding'>
+        <div
+            style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                backgroundColor: `${props.colour}`,
+                padding: '0px 10px 0px 10px',
+                borderRadius: '5px',
+            }}>
             <Search
                 category
                 className='feature-search-input'
@@ -176,6 +181,6 @@ export const FeatureSearchBox = (props: FeatureSearchBoxProps) => {
                 results={displayResults}
                 value={state.value}
             />
-        </Segment>
+        </div>
     );
 };

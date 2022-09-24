@@ -40,7 +40,6 @@ class Settings(BaseSettings):
             raise ValueError(f"Secret {value} must be 64 characters long. This one is {len(value)}")
         return value
 
-    UPLOAD_PORT: int = 55851  #  Was: pPort
     RPC_PORT: int = 55853  #  Was: gPort
 
     API_V1_STR: str = "/api/v1"

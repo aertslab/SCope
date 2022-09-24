@@ -1,11 +1,12 @@
+from typing import Any, Dict, NamedTuple, Optional, List
 from copy import deepcopy
 from pathlib import Path
+
+# nosemgrep: gitlab.bandit.B403
 import pickle
-import re
-from typing import Any, Dict, NamedTuple, Optional, List
+import logging
 
 from scopeserver.dataserver.utils import data_file_handler as dfh
-import logging
 
 logger = logging.getLogger(__name__)
 

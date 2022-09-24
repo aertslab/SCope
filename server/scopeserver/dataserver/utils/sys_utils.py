@@ -1,7 +1,7 @@
 import json
 
 
-class Unbuffered(object):
+class Unbuffered:
     def __init__(self, stream):
         self.stream = stream
 

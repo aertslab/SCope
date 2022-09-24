@@ -7,6 +7,7 @@ import Gene from './Gene';
 import Regulon from './Regulon';
 import Tutorial from './Tutorial';
 import { Welcome } from './Welcome';
+import { Viewer } from './Viewer';
 
 export {
     About,
@@ -18,4 +19,5 @@ export {
     Regulon,
     Tutorial,
     Welcome,
+    Viewer,
 };

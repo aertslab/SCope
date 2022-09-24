@@ -55,7 +55,6 @@ click = "^8.0.1"
 pytest = "*"
 pytest-cov = "*"
 pylint = "*"
-pylint-fail-under = "*"
 black = { version = "*", allow-prereleases = true }
 mypy = "*"
 mypy-protobuf = "^2.9"
@@ -63,7 +62,6 @@ hypothesis = {extras = ["numpy"], version = "*"}
 safety = "^1.10.3"
 types-protobuf = "^3.17.4"
 types-requests = "^2.25.6"
-typing-extensions = "^3.10.0"
 pytest-profiling = "^1.7.0"
 
 [tool.poetry.scripts]

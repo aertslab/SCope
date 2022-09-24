@@ -3,16 +3,17 @@ import re
 import itertools
 import time
 import sys
+import logging
+import zlib
 
 import numpy as np
-import zlib
 
 import scope_grpc_pb2
 from scopeserver.dataserver.utils import constant
 from scopeserver.dataserver.utils.constant import to_colours
 from scopeserver.dataserver.utils import data
 from scopeserver.dataserver.utils.annotation import Annotation
-import logging
+
 
 logger = logging.getLogger(__name__)
 

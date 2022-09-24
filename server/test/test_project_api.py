@@ -400,23 +400,21 @@ def test_guest_can_add_dataset_to_own_project(database, loom_limit_9_bytes, gues
     assert response.status_code == 200
     project = response.json()
 
-    some_file = io.BytesIO(b"Test data")
-
     # Checks start here
     response = client.post(
         "/api/v1/project/dataset",
         params={"project": project["uuid"], "name": "Test dataset"},
-        files={"uploadfile": ("test-data-file.loom", some_file, "application/vnd.loom")},
+        files={"uploadfile": ("test-data-file.loom", io.BytesIO(b"Test data"), "application/vnd.loom")},
         headers={"Authorization": f"bearer {guest['access_token']}"},
     )
     assert response.status_code == 200
     dataset = response.json()
     db_project = db.query(models.Project).filter(models.Project.uuid == project["uuid"]).first()
     db_dataset = db.query(models.Dataset).filter(models.Dataset.id == dataset["id"]).first()
-
     assert (settings.DATA_PATH / Path(project["uuid"]) / "test-data-file.loom").exists()
     assert db_project.size == 9
     assert db_dataset.size == 9
+    assert len(db_project.datasets) == 1
     assert db_dataset.filename == "test-data-file.loom"
     assert dataset["filename"] == "test-data-file.loom"
 

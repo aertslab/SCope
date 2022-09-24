@@ -31,3 +31,11 @@ export const token = (state: RootState): string | null => {
 
     return null;
 };
+
+export const isAdmin = (state: RootState): boolean => {
+    if (state[NAME].status === 'authenticated') {
+        return (state[NAME] as Authenticated).user.role === 'admin';
+    }
+
+    return false;
+};

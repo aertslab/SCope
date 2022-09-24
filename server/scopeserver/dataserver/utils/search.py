@@ -1,17 +1,12 @@
+from typing import Dict, NamedTuple, Tuple, List
 import sys
 import logging
 import operator
-
-from typing import Dict, NamedTuple, Tuple, List, Optional, Type, Union
 from collections import OrderedDict, defaultdict
 from contextlib import suppress
 from itertools import groupby
 
-from scopeserver.dataserver.utils import data_file_handler
-from scopeserver.dataserver.utils.constant import Species
-
 from scopeserver.dataserver.utils.loom import Loom
-from scopeserver.dataserver.utils import constant
 from scopeserver.dataserver.utils.search_space import SSKey, SearchSpaceDict
 
 logger = logging.getLogger(__name__)
@@ -96,10 +91,7 @@ def sort_results(search_term: str, results: List[MatchResult]) -> List[MatchResu
         ((match_result_type_cost(match.element_type), match_result_cost(search_term, match.element)), match, result)
         for match, result in results
     ]
-    sorted_costs = sorted(
-        [(cost, match, result) for cost, match, result in costs],
-        key=operator.itemgetter(0),
-    )
+    sorted_costs = sorted(list(costs), key=operator.itemgetter(0))
     return [MatchResult(match, result) for _, match, result in sorted_costs]
 
 

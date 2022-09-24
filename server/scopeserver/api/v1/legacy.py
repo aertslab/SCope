@@ -14,4 +14,9 @@ router = APIRouter()
 
 @router.post("/permalink", summary="Decode data from an old permalink")
 def permalink(body: schemas.Permalink):
+    """
+    Decode data from a legacy permalink
+    This is then processed by the front-end into state needed
+    to fetch the correct dataset.
+    """
     return json.loads(decompress(b64decode(unquote(body.sessiondata).replace("$", "/"))))

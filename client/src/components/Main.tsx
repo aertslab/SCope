@@ -1,18 +1,13 @@
 /**
- * Happy path routing for the main application.
+ * Top-level layout for SCope
  */
 
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/reducers';
-import { SessionMode } from '../redux/types';
+import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import Favicon from 'react-favicon';
 
 import { AppHeader } from './AppHeader';
-import AppSidebar from './AppSidebar';
-type MainState = {
-    sessionMode: SessionMode;
-};
+import { Sidebar } from './Sidebar';
 
 const validateSessionID = (name: string): string | null => {
     const allowedChars = /^[*\-0-9A-Za-z]+$/gi;
@@ -24,19 +19,6 @@ const validateSessionID = (name: string): string | null => {
 };
 
 export const Main: React.FC<{}> = () => {
-    const state: MainState = useSelector<RootState, MainState>(
-        (root: RootState) => {
-            return {
-                sessionMode: root.main.sessionMode,
-            };
-        }
-    );
-
-    /* eslint-disable no-unused-vars */
-    // TODO: metadata is unused (remove)
-    const [metadata, setMetadata] = useState(null);
-    /* eslint-enable no-unused-vars */
-
     // TODO: sessions and permalinks are deprecated. To be removed
     const loc = useLocation();
     if (loc.hash.startsWith('#/permalink/')) {
@@ -51,6 +33,7 @@ export const Main: React.FC<{}> = () => {
 
     return (
         <React.StrictMode>
+            <Favicon url='src/images/SCope_favicon.ico' />
             <div
                 style={{
                     display: 'grid',
@@ -70,11 +53,7 @@ export const Main: React.FC<{}> = () => {
                         height: '100%',
                         gridColumn: 1,
                     }}>
-                    <AppSidebar
-                        visible={true}
-                        onMetadataChange={setMetadata}
-                        sessionMode={state.sessionMode}
-                    />
+                    <Sidebar />
                 </div>
                 <div style={{ gridColumn: 2, height: '100%' }}>
                     <Outlet />

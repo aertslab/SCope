@@ -56,7 +56,6 @@ module.exports = merge(common, {
             __TEST_ONLY__: false,
         }),
         new BundleAnalyzerPlugin({ openAnalyzer: false }),
-        new webpack.HotModuleReplacementPlugin(),
     ],
 
     optimization: {
