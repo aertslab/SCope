@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "react-mosaic-component": "^6.1.1"
+  }
+}
