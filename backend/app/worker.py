@@ -22,7 +22,7 @@ def process_dataset(dataset_id: int, file_path: str):
     from app.core.config import settings
     from app.models import Dataset, DataFile
     from sqlalchemy import select
-    from app.utils.loom_converter import convert_loom_to_anndata, convert_loom_to_zarr
+    from app.utils.loom_converter import convert_loom_to_zarr, convert_anndata_to_zarr
     
     async def process():
         # Create a local engine and session for this task to avoid loop issues
@@ -89,16 +89,15 @@ def process_dataset(dataset_id: int, file_path: str):
             # Read the file based on extension
             if file_path.endswith(".loom"):
                 await convert_loom_to_zarr(file_path, output_path, status_callback=update_status)
+            elif file_path.endswith(".h5ad"):
+                # Read in backed mode to avoid loading everything into memory
+                adata = anndata.read_h5ad(file_path, backed='r')
+                await convert_anndata_to_zarr(adata, output_path, status_callback=update_status)
+            elif file_path.endswith(".csv"):
+                adata = anndata.read_csv(file_path)
+                await convert_anndata_to_zarr(adata, output_path, status_callback=update_status)
             else:
-                if file_path.endswith(".h5ad"):
-                    adata = anndata.read_h5ad(file_path)
-                elif file_path.endswith(".csv"):
-                    adata = anndata.read_csv(file_path)
-                else:
-                    raise ValueError(f"Unsupported file format: {file_path}")
-                    
-                # Convert to Zarr
-                adata.write_zarr(output_path)
+                raise ValueError(f"Unsupported file format: {file_path}")
             
             print(f"Successfully converted to {output_path}")
             

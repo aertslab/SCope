@@ -2,9 +2,10 @@ import sys
 import os
 sys.path.append('/app')
 
-from app.utils.loom_converter import convert_loom_to_anndata
+from app.utils.loom_converter import convert_loom_to_zarr
 import zarr
 import shutil
+import asyncio
 
 input_file = "/app/uploads/Aerts_Fly_AdultBrain_Filtered_57k.loom"
 output_file = "/app/uploads/Aerts_Fly_AdultBrain_Filtered_57k.zarr"
@@ -16,10 +17,9 @@ if os.path.exists(output_file):
     shutil.rmtree(output_file)
 
 try:
-    adata = convert_loom_to_anndata(input_file)
-    print("Conversion successful. Writing to Zarr...")
-    adata.write_zarr(output_file)
-    print("Write successful.")
+    print("Conversion starting...")
+    asyncio.run(convert_loom_to_zarr(input_file, output_file))
+    print("Conversion successful.")
     
     # Verify
     z = zarr.open(output_file, mode='r')
