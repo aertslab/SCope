@@ -6,10 +6,11 @@ interface ColorScaleControlProps {
     colours: Record<string, number[]>
     activeColorInfo: { name: string, type: string } | null
     onRangeChange: (ranges: Record<string, [number, number]>) => void
+    isOpen: boolean
+    onToggle: () => void
 }
 
-export function ColorScaleControl({ colours, activeColorInfo, onRangeChange }: ColorScaleControlProps) {
-    const [isOpen, setIsOpen] = useState(false)
+export function ColorScaleControl({ colours, activeColorInfo, onRangeChange, isOpen, onToggle }: ColorScaleControlProps) {
     const [ranges, setRanges] = useState<Record<string, [number, number]>>({})
     
     // Calculate initial ranges from data
@@ -48,7 +49,7 @@ export function ColorScaleControl({ colours, activeColorInfo, onRangeChange }: C
     return (
         <div className="relative">
             <button
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={onToggle}
                 className={`p-2 rounded transition-colors ${isOpen ? 'bg-blue-600 text-white' : 'bg-gray-800 text-white hover:bg-gray-700'}`}
                 title="Adjust Color Scales"
             >
@@ -59,7 +60,7 @@ export function ColorScaleControl({ colours, activeColorInfo, onRangeChange }: C
                 <div className="absolute top-full right-0 mt-2 bg-black/90 text-white p-4 rounded border border-gray-800 w-72 backdrop-blur-sm z-50">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-sm font-bold">Color Scale</h3>
-                        <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-white">
+                        <button onClick={onToggle} className="text-gray-400 hover:text-white">
                             <X size={16} />
                         </button>
                     </div>

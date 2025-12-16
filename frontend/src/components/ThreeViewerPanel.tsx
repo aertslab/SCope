@@ -3,9 +3,8 @@ import { OrbitControls, OrthographicCamera, Html } from '@react-three/drei'
 import { useEffect, useState, useRef, useMemo, forwardRef, useImperativeHandle } from 'react'
 import api from '../api/client'
 import { ViewerControls } from './ViewerControls'
-import { SettingsPanel, ViewerSettings } from './SettingsPanel'
 import { Legend } from './Legend'
-import { Settings as SettingsIcon, Edit2, Share2, Copy, Check, Lasso, MousePointer2 } from 'lucide-react'
+import { Edit2 } from 'lucide-react'
 import { EditDatasetModal } from './EditDatasetModal'
 import { createSession } from '../api/sessions'
 import { useToast } from '../context/ToastContext'
@@ -15,7 +14,8 @@ import { Selection } from '../types'
 import { compressIndices, decompressIndices } from '../utils/compression'
 import { CameraController } from './CameraController'
 import { ZOrderedViewer } from './ZOrderedViewer'
-import { ColorScaleControl } from './ColorScaleControl'
+import { useViewerStore } from '../store/useViewerStore'
+import { ViewerToolbar } from './ViewerToolbar'
 
 interface ThreeViewerPanelProps {
     datasetId: string
@@ -31,6 +31,23 @@ export interface ThreeViewerPanelHandle {
 const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProps>(({ datasetId, instanceId = 'default', initialState: propInitialState, onStateChange }, ref) => {
   const { addToast } = useToast()
   
+  const {
+      dataset, setDataset,
+      metadata, setMetadata,
+      embeddingData, setEmbeddingData,
+      loading, setLoading,
+      error, setError,
+      settings, setSettings,
+      colours, setColours,
+      customColors, setCustomColors,
+      activeColorInfo, setActiveColorInfo,
+      colorRanges, setColorRanges,
+      selections, setSelections,
+      lassoMode, setLassoMode,
+      selectionDetails, setSelectionDetails,
+      selectedLegendItems, setSelectedLegendItems
+  } = useViewerStore()
+
   // Merge prop state
   const initialState = useMemo(() => {
       if (propInitialState) return propInitialState
@@ -46,7 +63,8 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
                       camera: parsed.camera,
                       selection: parsed.selection,
                       legendSelection: parsed.legendSelection,
-                      selections: parsed.selections
+                      selections: parsed.selections,
+                      colorRanges: parsed.colorRanges
                   }
               }
           } catch (e) {
@@ -56,41 +74,40 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
       return null
   }, [propInitialState, datasetId, instanceId])
 
-  const [dataset, setDataset] = useState<any>(null)
-  const [metadata, setMetadata] = useState<any>(null)
-  const [embeddingData, setEmbeddingData] = useState<{X: number[] | Float32Array, Y: number[] | Float32Array, Z: number[] | Float32Array} | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  // Initialize store from initialState
+  useEffect(() => {
+      if (initialState) {
+          if (initialState.settings) setSettings(initialState.settings)
+          if (initialState.selection) setSelectionDetails(initialState.selection)
+          if (initialState.legendSelection) setSelectedLegendItems(initialState.legendSelection)
+          if (initialState.selections) {
+              setSelections(initialState.selections.map((s: any) => ({
+                  ...s,
+                  indices: s.compressedIndices ? decompressIndices(s.compressedIndices) : s.indices || []
+              })))
+          }
+          if (initialState.colorRanges) setColorRanges(initialState.colorRanges)
+      }
+  }, [initialState, setSettings, setSelectionDetails, setSelectedLegendItems, setSelections, setColorRanges])
+
   const [pointCount, setPointCount] = useState(0)
   
-  const [colours, setColours] = useState<any>({ 0: [] })
-  const [customColors, setCustomColors] = useState<Float32Array | null>(null)
+  // UI State (Local to this viewer instance)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isColorScaleOpen, setIsColorScaleOpen] = useState(false)
+  const [isShareOpen, setIsShareOpen] = useState(false)
+  const [shareUrl, setShareUrl] = useState<string | null>(null)
+  
+  // const [customColors, setCustomColors] = useState<Float32Array | null>(null)
   const [baseCustomColors, setBaseCustomColors] = useState<Float32Array | null>(null)
   const [defaultColors, setDefaultColors] = useState<Float32Array | null>(null)
-  const [activeColorInfo, setActiveColorInfo] = useState<{name: string, type: string} | null>(null)
-  const [selectionDetails, setSelectionDetails] = useState<{ type: 'gene' | 'feature', items: string[] } | undefined>(undefined)
-  const [colorRanges, setColorRanges] = useState<Record<string, [number, number]>>({})
+  // const [activeColorInfo, setActiveColorInfo] = useState<{name: string, type: string} | null>(null)
+  // const [selectionDetails, setSelectionDetails] = useState<{ type: 'gene' | 'feature', items: string[] } | undefined>(undefined)
+  // const [colorRanges, setColorRanges] = useState<Record<string, [number, number]>>({})
 
   // New State
-  const [settings, setSettings] = useState<ViewerSettings>(() => {
-    const defaults = {
-        pointSize: 2,
-        embeddingName: '',
-        showLabels: true,
-        normalization: 'none',
-        dimX: 0,
-        dimY: 1,
-        shape: 0,
-        zOrdering: false
-    };
-    return initialState?.settings ? { ...defaults, ...initialState.settings } : defaults;
-  })
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [legendData, setLegendData] = useState<{label: string, color: string}[]>([])
-  
-  // Legend Selection State
-  const [selectedLegendItems, setSelectedLegendItems] = useState<string[]>([])
   
   const [rawValues, setRawValues] = useState<any[]>([])
   const [centroids, setCentroids] = useState<{label: string, x: number, y: number, color: string}[]>([])
@@ -101,30 +118,10 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
   // Restoration State
   const [isRestoring, setIsRestoring] = useState(!!initialState)
 
-  // Share State
-  const [isShareOpen, setIsShareOpen] = useState(false)
-  const [shareUrl, setShareUrl] = useState<string | null>(null)
-  const [isCopied, setIsCopied] = useState(false)
-
   // Password Protection
   const [isLocked, setIsLocked] = useState(false)
   const [projectPassword, setProjectPassword] = useState('')
   const [passwordInput, setPasswordInput] = useState('')
-
-  // Sidebar State
-  // const [isSidebarOpen, setIsSidebarOpen] = useState(true)
-
-  // Lasso Selection State
-  const [lassoMode, setLassoMode] = useState(false)
-  const [selections, setSelections] = useState<Selection[]>(() => {
-      if (initialState?.selections) {
-          return initialState.selections.map((s: any) => ({
-              ...s,
-              indices: s.compressedIndices ? decompressIndices(s.compressedIndices) : s.indices || []
-          }))
-      }
-      return []
-  })
 
   const controlsRef = useRef<any>(null)
 
@@ -132,17 +129,33 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
       settings,
       selectionDetails,
       selectedLegendItems,
-      selections
+      selections,
+      colorRanges
   })
 
   const isFirstRun = useRef(true);
+
+  // Handle Escape key to close menus
+  useEffect(() => {
+      const handleKeyDown = (e: KeyboardEvent) => {
+          if (e.key === 'Escape') {
+              setIsSettingsOpen(false)
+              setIsColorScaleOpen(false)
+              setIsShareOpen(false)
+              setLassoMode(false)
+          }
+      }
+      window.addEventListener('keydown', handleKeyDown)
+      return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [setLassoMode])
 
   useEffect(() => {
       latestStateRef.current = {
           settings,
           selectionDetails,
           selectedLegendItems,
-          selections
+          selections,
+          colorRanges
       }
       
       if (isFirstRun.current) {
@@ -169,10 +182,11 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
                   color: s.color,
                   visible: s.visible,
                   compressedIndices: compressIndices(s.indices)
-              }))
+              })),
+              colorRanges
           })
       }
-  }, [settings, selectionDetails, selectedLegendItems, selections, onStateChange])
+  }, [settings, selectionDetails, selectedLegendItems, selections, colorRanges, onStateChange])
 
   // Expose getState to parent
   useImperativeHandle(ref, () => ({
@@ -305,7 +319,7 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
       }
     }
     init()
-  }, [datasetId, projectPassword, initialState]) // Re-run when password changes
+  }, [datasetId, projectPassword, initialState, setDataset, setEmbeddingData, setError, setLoading, setMetadata, setSelectedLegendItems, setSelectionDetails, setSelections, setSettings]) // Re-run when password changes
 
   // Save settings to session storage
   const settingsDatasetIdRef = useRef(datasetId)
@@ -330,7 +344,8 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
                       color: s.color,
                       visible: s.visible,
                       compressedIndices: compressIndices(s.indices)
-                  }))
+                  })),
+                  colorRanges: latestStateRef.current.colorRanges
               }
               sessionStorage.setItem(`scope_settings_${settingsDatasetIdRef.current}_${instanceId}`, JSON.stringify(sessionData))
           }
@@ -364,8 +379,11 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
           if (initialState.selection) {
               setSelectionDetails(initialState.selection)
           }
+          if (initialState.colorRanges) {
+              setColorRanges(initialState.colorRanges)
+          }
       }
-  }, [initialState])
+  }, [initialState, setColorRanges, setSelectedLegendItems, setSelectionDetails, setSelections, setSettings])
 
   // Fetch Embedding Data when name changes
   useEffect(() => {
@@ -424,7 +442,7 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
         }
       }
       fetchEmbedding()
-  }, [datasetId, settings.embeddingName, projectPassword, metadata, dataset])
+  }, [datasetId, settings.embeddingName, projectPassword, metadata, dataset, setColours, setCustomColors, setEmbeddingData, setError, setLoading])
 
   // Calculate Centroids with Collision Resolution
   useEffect(() => {
@@ -513,7 +531,7 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
       setOpacities(newOpacities)
       setSizes(newSizes)
 
-  }, [selectedLegendItems, baseCustomColors, rawValues, settings.pointSize, pointCount])
+  }, [selectedLegendItems, baseCustomColors, rawValues, settings.pointSize, pointCount, setCustomColors])
 
   // Update sizes when settings change (if not selecting)
   useEffect(() => {
@@ -612,9 +630,6 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
       setLassoMode(false)
       
       setIsSettingsOpen(false)
-      
-      // Reload page to ensure clean slate (optional, but effective for camera/webgl state)
-      // window.location.reload() // Don't reload whole page in mosaic mode!
   }
 
   const handleShare = async () => {
@@ -624,7 +639,6 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
       if (isShareOpen) {
           setIsShareOpen(false)
           setShareUrl(null)
-          setIsCopied(false)
           return
       }
 
@@ -657,8 +671,7 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
           
           // Auto-copy
           await navigator.clipboard.writeText(url)
-          setIsCopied(true)
-          setTimeout(() => setIsCopied(false), 2000)
+          addToast('Link copied to clipboard', 'success')
       } catch (e) {
           console.error(e)
           addToast('Failed to create session link', 'error')
@@ -668,8 +681,6 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
   const copyToClipboard = async () => {
       if (shareUrl) {
           await navigator.clipboard.writeText(shareUrl)
-          setIsCopied(true)
-          setTimeout(() => setIsCopied(false), 2000)
           addToast('Link copied to clipboard', 'success')
       }
   }
@@ -793,74 +804,23 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
         onUpdate={setDataset}
       />
 
-      {/* Settings Button */}
-      <div className="absolute top-4 right-72 z-20 flex gap-2 items-center">
-        <div 
-            className={`flex items-center bg-gray-800 rounded transition-all duration-300 overflow-hidden ${isShareOpen ? 'w-80' : 'w-10'}`}
-            onBlur={(e) => {
-                if (!e.currentTarget.contains(e.relatedTarget)) {
-                    setIsShareOpen(false)
-                }
-            }}
-        >
-            <button 
-                onClick={handleShare}
-                className="text-white p-2 hover:bg-gray-700 transition-colors flex-shrink-0"
-                title="Share Session"
-            >
-                <Share2 size={20} />
-            </button>
-            {isShareOpen && shareUrl && (
-                <div className="flex items-center flex-1 pr-1 min-w-0">
-                    <input 
-                        type="text" 
-                        readOnly 
-                        value={shareUrl} 
-                        className="bg-gray-900 text-gray-300 text-xs px-2 py-1 rounded border border-gray-700 flex-1 min-w-0 mr-1 focus:outline-none"
-                        onClick={(e) => e.currentTarget.select()}
-                        autoFocus
-                    />
-                    <button 
-                        onClick={copyToClipboard}
-                        className="text-gray-400 hover:text-white p-1"
-                        title="Copy to clipboard"
-                    >
-                        {isCopied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
-                    </button>
-                </div>
-            )}
-        </div>
-
-        <button 
-            onClick={() => setLassoMode(!lassoMode)}
-            className={`text-white p-2 rounded transition-colors mr-2 ${lassoMode ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-800 hover:bg-gray-700'}`}
-            title={lassoMode ? "Exit Lasso Mode" : "Lasso Selection"}
-        >
-            {lassoMode ? <MousePointer2 size={20} /> : <Lasso size={20} />}
-        </button>
-
-        <ColorScaleControl 
-            colours={colours}
-            activeColorInfo={activeColorInfo}
-            onRangeChange={setColorRanges}
-        />
-
-        <button 
-            onClick={() => setIsSettingsOpen(true)}
-            className="text-white bg-gray-800 p-2 rounded hover:bg-gray-700 transition-colors"
-        >
-            <SettingsIcon size={20} />
-        </button>
-      </div>
-
-      {/* Settings Panel */}
-      <SettingsPanel 
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        settings={settings}
-        onSettingsChange={setSettings}
-        availableEmbeddings={metadata?.embeddings?.map((e: any) => e.name) || []}
-        onReset={handleReset}
+      {/* Toolbar */}
+      <ViewerToolbar 
+          isShareOpen={isShareOpen}
+          onShareToggle={handleShare}
+          shareUrl={shareUrl}
+          onCopyShareUrl={copyToClipboard}
+          isSettingsOpen={isSettingsOpen}
+          onSettingsToggle={() => {
+              setIsSettingsOpen(!isSettingsOpen)
+              setIsColorScaleOpen(false)
+          }}
+          isColorScaleOpen={isColorScaleOpen}
+          onColorScaleToggle={() => {
+              setIsColorScaleOpen(!isColorScaleOpen)
+              setIsSettingsOpen(false)
+          }}
+          onReset={handleReset}
       />
 
       <div className="absolute bottom-4 right-4 z-10 flex flex-col gap-2 items-end pointer-events-none">

@@ -28,7 +28,7 @@ export function SettingsPanel({ isOpen, onClose, settings, onSettingsChange, ava
   }
 
   return (
-    <div className="absolute top-4 right-72 z-20 w-64 bg-black/90 text-white p-4 rounded backdrop-blur-sm border border-gray-800 shadow-xl">
+    <div className="absolute top-full right-0 mt-2 z-20 w-64 bg-black/90 text-white p-4 rounded backdrop-blur-sm border border-gray-800 shadow-xl">
       <div className="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
         <h2 className="font-bold flex items-center gap-2">
           <SettingsIcon size={16} /> Settings
