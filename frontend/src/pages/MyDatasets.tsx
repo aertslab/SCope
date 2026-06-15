@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Dataset } from '../types'
-import { Trash2, ExternalLink, Upload, FileText, Edit } from 'lucide-react'
+import { Trash2, ExternalLink, Upload, FileText, Edit, Download, RefreshCw } from 'lucide-react'
 import { useToast } from '../context/ToastContext'
 import { EditDatasetModal } from '../components/EditDatasetModal'
 import { DeleteDatasetModal } from '../components/DeleteDatasetModal'
+import { ReplaceDatasetModal } from '../components/ReplaceDatasetModal'
+import { downloadDatasetFile } from '../utils/download'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { useDatasetStore } from '../store/useDatasetStore'
@@ -17,7 +19,7 @@ import { Modal } from '../components/Modal'
 
 export default function MyDatasets() {
     const { addToast } = useToast()
-    const { datasets, isLoading, fetchDatasets, deleteDataset } = useDatasetStore()
+    const { datasets, isLoading, fetchDatasets } = useDatasetStore()
     
     // Upload State
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
@@ -28,11 +30,30 @@ export default function MyDatasets() {
     // Delete State
     const [deletingDataset, setDeletingDataset] = useState<Dataset | null>(null)
 
+    // Replace State
+    const [replacingDataset, setReplacingDataset] = useState<Dataset | null>(null)
+
+    const handleDownload = async (ds: Dataset) => {
+        try {
+            await downloadDatasetFile(ds.id, `${ds.name}.${ds.file_type}`)
+        } catch (err: unknown) {
+            const e = err as { response?: { status?: number; data?: { detail?: string } } }
+            addToast(e.response?.data?.detail || 'Download failed', 'error')
+        }
+    }
+
+    const hasPendingWork = datasets.some(
+        (d) => d.status === 'pending' || d.status === 'processing'
+    )
+
     useEffect(() => {
+        // Always do an initial fetch on mount; only poll while a dataset is
+        // mid-conversion. Avoids hammering the API with no work to track.
         fetchDatasets()
+        if (!hasPendingWork) return
         const interval = setInterval(fetchDatasets, 5000)
         return () => clearInterval(interval)
-    }, [fetchDatasets])
+    }, [fetchDatasets, hasPendingWork])
 
     return (
         <div className="space-y-6">
@@ -66,7 +87,7 @@ export default function MyDatasets() {
                                             <div className="min-w-0">
                                                 <div className="flex items-center gap-2">
                                                     <h4 className="text-sm font-medium text-gray-900 truncate">{ds.name}</h4>
-                                                    <DatasetStatusBadge status={ds.status} />
+                                                    <DatasetStatusBadge status={ds.status} failureReason={ds.failure_reason} />
                                                 </div>
                                                 <p className="text-sm text-gray-500 truncate">{ds.description || 'No description'}</p>
                                                 <div className="mt-1 text-xs text-gray-400">
@@ -82,6 +103,24 @@ export default function MyDatasets() {
                                                     </Button>
                                                 </Link>
                                             )}
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => handleDownload(ds)}
+                                                title="Download original file"
+                                                aria-label="Download original file"
+                                            >
+                                                <Download className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => setReplacingDataset(ds)}
+                                                title="Replace file"
+                                                aria-label="Replace file"
+                                            >
+                                                <RefreshCw className="h-4 w-4" />
+                                            </Button>
                                             <Button
                                                 size="sm"
                                                 variant="ghost"
@@ -144,6 +183,13 @@ export default function MyDatasets() {
                 isOpen={!!deletingDataset}
                 onClose={() => setDeletingDataset(null)}
                 dataset={deletingDataset}
+            />
+
+            {/* Replace Modal */}
+            <ReplaceDatasetModal
+                isOpen={!!replacingDataset}
+                onClose={() => setReplacingDataset(null)}
+                dataset={replacingDataset}
             />
         </div>
     )

@@ -1,5 +1,12 @@
 version: '3.8'
 
+# Development compose file. Postgres and Redis are published to the host
+# for direct psql/redis-cli access. The backend reads secrets from
+# ./backend/.env (copy from ./backend/.env.example). Set
+# ALLOW_INSECURE_SECRETS=true in that file to skip the production
+# secret guards for local work; do NOT use this file for production
+# deployments \u2014 use docker-compose.prod.yml.
+
 services:
   db:
     image: postgres:15-alpine
@@ -28,7 +35,8 @@ services:
     environment:
       - DATABASE_URL=postgresql+asyncpg://scope:scope_password@db:5432/scope_db
       - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=changethis_in_production
+      # Secrets MUST be provided via backend/.env (JWT_SECRET, SESSION_SECRET).
+      # For local dev only, set ALLOW_INSECURE_SECRETS=true in .env.
     ports:
       - "8000:8000"
     depends_on:

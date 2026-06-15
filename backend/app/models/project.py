@@ -5,6 +5,8 @@ from app.db.base import Base
 import enum
 import uuid
 
+from app.models.tag import project_tag
+
 class ProjectVisibility(str, enum.Enum):
     PRIVATE = "private"
     PUBLIC = "public"
@@ -19,8 +21,18 @@ class ProjectPermission(str, enum.Enum):
 project_dataset = Table(
     "project_datasets",
     Base.metadata,
-    Column("project_id", Uuid(as_uuid=True), ForeignKey("projects.id"), primary_key=True),
-    Column("dataset_id", Uuid(as_uuid=True), ForeignKey("datasets.id"), primary_key=True),
+    Column(
+        "project_id",
+        Uuid(as_uuid=True),
+        ForeignKey("projects.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "dataset_id",
+        Uuid(as_uuid=True),
+        ForeignKey("datasets.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
 )
 
 class ProjectShare(Base):
@@ -52,6 +64,7 @@ class Project(Base):
     owner = relationship("User", back_populates="owned_projects")
     datasets = relationship("Dataset", secondary=project_dataset, back_populates="projects")
     shares = relationship("ProjectShare", back_populates="project", cascade="all, delete-orphan")
+    tags = relationship("Tag", secondary=project_tag, back_populates="projects")
 
 from app.models.user import User
 from app.models.group import Group

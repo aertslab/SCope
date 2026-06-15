@@ -16,15 +16,18 @@ export default function Dashboard() {
   const [deletingDataset, setDeletingDataset] = useState<Dataset | null>(null)
   const [editingDataset, setEditingDataset] = useState<Dataset | null>(null)
 
+  const hasPendingWork = datasets.some(
+    (d) => d.status === 'pending' || d.status === 'processing'
+  )
+
   useEffect(() => {
     fetchDatasets()
-    
+    if (!hasPendingWork) return
     const interval = setInterval(() => {
         fetchDatasets()
     }, 5000)
-    
     return () => clearInterval(interval)
-  }, [fetchDatasets])
+  }, [fetchDatasets, hasPendingWork])
 
   return (
     <div className="space-y-6">
@@ -80,7 +83,7 @@ export default function Dashboard() {
                             </div>
                         </div>
                         <div className="flex flex-col items-end gap-2">
-                            <DatasetStatusBadge status={dataset.status} />
+                            <DatasetStatusBadge status={dataset.status} failureReason={dataset.failure_reason} />
                             <div className="flex items-center gap-2">
                                 {dataset.status === 'ready' && (
                                     <Link to={`/viewer/${dataset.id}`}>

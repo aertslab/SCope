@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/useAuthStore'
 import { useToast } from '../context/ToastContext'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
+import { apiUrl } from '../api/config'
 
 export default function Login() {
   const { addToast } = useToast()
@@ -70,6 +71,12 @@ export default function Login() {
           </div>
         </form>
 
+        <div className="mt-3 text-right">
+          <Link to="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-500">
+            Forgot your password?
+          </Link>
+        </div>
+
         <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -85,7 +92,7 @@ export default function Login() {
               type="button"
               variant="outline"
               className="w-full"
-              onClick={() => window.location.href = 'http://127.0.0.1:8000/api/v1/login/google'}
+              onClick={() => window.location.href = apiUrl('/login/google')}
             >
               Google
             </Button>
@@ -93,7 +100,7 @@ export default function Login() {
               type="button"
               variant="outline"
               className="w-full"
-              onClick={() => window.location.href = 'http://127.0.0.1:8000/api/v1/login/orcid'}
+              onClick={() => window.location.href = apiUrl('/login/orcid')}
             >
               ORCiD
             </Button>

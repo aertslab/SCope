@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react'
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { X, CheckCircle, AlertCircle, Info } from 'lucide-react'
 
 type ToastType = 'success' | 'error' | 'info'
@@ -16,6 +16,14 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined)
 
+// Global bridge so non-React modules (e.g. axios interceptors) can surface
+// toasts without depending on the React tree.
+type ToastEmitter = (message: string, type: ToastType) => void
+let _toastEmitter: ToastEmitter | null = null
+export function emitToast(message: string, type: ToastType = 'error') {
+  if (_toastEmitter) _toastEmitter(message, type)
+}
+
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
 
@@ -30,6 +38,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id))
   }, [])
+
+  useEffect(() => {
+    _toastEmitter = addToast
+    return () => {
+      if (_toastEmitter === addToast) _toastEmitter = null
+    }
+  }, [addToast])
 
   return (
     <ToastContext.Provider value={{ addToast, removeToast }}>

@@ -4,6 +4,7 @@ import api from '../api/client'
 import { useToast } from '../context/ToastContext'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
+import { apiUrl } from '../api/config'
 
 export default function Register() {
   const { addToast } = useToast()
@@ -102,7 +103,7 @@ export default function Register() {
               type="button"
               variant="outline"
               className="w-full"
-              onClick={() => window.location.href = 'http://127.0.0.1:8000/api/v1/login/google'}
+              onClick={() => window.location.href = apiUrl('/login/google')}
             >
               Google
             </Button>

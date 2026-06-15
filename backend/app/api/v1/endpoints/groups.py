@@ -1,13 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
 from typing import List
 from uuid import UUID
+import logging
 from app.api import deps
 from app.models.group import Group, GroupMember, GroupRole
 from app.models.user import User
 from app.schemas import group as group_schema
+from app.services import notifications as notifications_service
+from app.services.audit import record_audit
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -17,7 +23,7 @@ async def create_group(
     db: AsyncSession = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_user),
 ):
-    group = Group(**group_in.dict(), owner_id=current_user.id)
+    group = Group(**group_in.model_dump(), owner_id=current_user.id)
     db.add(group)
     await db.commit()
     await db.refresh(group)
@@ -44,6 +50,75 @@ async def read_groups(
     
     result = await db.execute(query)
     return result.scalars().all()
+
+@router.put("/{group_id}", response_model=group_schema.Group)
+async def update_group(
+    group_id: UUID,
+    group_in: group_schema.GroupUpdate,
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_user),
+):
+    """Update group name/description. Owner, group admin, or superuser only."""
+    member_result = await db.execute(
+        select(GroupMember).where(
+            GroupMember.group_id == group_id,
+            GroupMember.user_id == current_user.id,
+        )
+    )
+    current_member = member_result.scalars().first()
+
+    if not current_user.is_superuser and (
+        not current_member or current_member.role not in [GroupRole.OWNER, GroupRole.ADMIN]
+    ):
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+
+    group_result = await db.execute(select(Group).where(Group.id == group_id))
+    group = group_result.scalars().first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    update_data = group_in.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(group, field, value)
+
+    db.add(group)
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(status_code=409, detail="A group with this name already exists")
+    await db.refresh(group)
+    return group
+
+
+@router.post("/{group_id}/leave")
+async def leave_group(
+    group_id: UUID,
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_user),
+):
+    """Allow a member to remove themselves from a group. The owner cannot leave;
+    they must transfer ownership or delete the group first."""
+    result = await db.execute(
+        select(GroupMember).where(
+            GroupMember.group_id == group_id,
+            GroupMember.user_id == current_user.id,
+        )
+    )
+    member = result.scalars().first()
+    if not member:
+        raise HTTPException(status_code=404, detail="You are not a member of this group")
+
+    if member.role == GroupRole.OWNER:
+        raise HTTPException(
+            status_code=400,
+            detail="Owners cannot leave their own group. Transfer ownership or delete the group first.",
+        )
+
+    await db.delete(member)
+    await db.commit()
+    return {"status": "success"}
+
 
 @router.get("/{group_id}", response_model=group_schema.Group)
 async def read_group(
@@ -84,12 +159,12 @@ async def add_group_member(
     if not user_result.scalars().first():
         raise HTTPException(status_code=404, detail="User not found")
 
-    member = GroupMember(group_id=group_id, **member_in.dict())
+    member = GroupMember(group_id=group_id, **member_in.model_dump())
     db.add(member)
     try:
         await db.commit()
         await db.refresh(member)
-        
+
         # Re-fetch with user
         result = await db.execute(
             select(GroupMember)
@@ -99,10 +174,14 @@ async def add_group_member(
         member_result = result.scalars().first()
         if not member_result:
             raise HTTPException(status_code=404, detail="Member not found")
-    except Exception:
+    except IntegrityError:
         await db.rollback()
         raise HTTPException(status_code=400, detail="User already in group")
-        
+    except Exception:
+        await db.rollback()
+        logger.exception("Failed to add member %s to group %s", member_in.user_id, group_id)
+        raise HTTPException(status_code=500, detail="Failed to add group member")
+
     return member_result
 
 @router.delete("/{group_id}/members/{user_id}")
@@ -198,6 +277,14 @@ async def update_group_member_role(
 
     target_member.role = member_in.role # type: ignore
     db.add(target_member)
+    await record_audit(
+        db,
+        actor=current_user,
+        action="group.member.role_change",
+        resource_type="group",
+        resource_id=group_id,
+        extra={"target_user_id": str(user_id), "new_role": str(member_in.role)},
+    )
     await db.commit()
     await db.refresh(target_member)
     
@@ -250,7 +337,29 @@ async def transfer_group_ownership(
     db.add(current_member)
     db.add(target_member)
     db.add(group)
-    
+
+    await record_audit(
+        db,
+        actor=current_user,
+        action="group.ownership.transfer",
+        resource_type="group",
+        resource_id=group.id,
+        extra={
+            "name": group.name,
+            "new_owner_id": str(transfer_in.new_owner_id),
+        },
+    )
+
+    await notifications_service.create(
+        db,
+        user_id=transfer_in.new_owner_id,
+        type="group_ownership_transferred",
+        title="Group ownership transferred to you",
+        message=f'You are now the owner of "{group.name}".',
+        link=f"/groups/{group.id}",
+        payload={"group_id": str(group.id), "group_name": group.name},
+    )
+
     await db.commit()
     await db.refresh(group)
     return group
@@ -278,7 +387,17 @@ async def delete_group(
 
     # Delete group
     # Cascade should handle members and shares if configured in models
+    deleted_id = group.id
+    deleted_name = group.name
     await db.delete(group)
+    await record_audit(
+        db,
+        actor=current_user,
+        action="group.delete",
+        resource_type="group",
+        resource_id=deleted_id,
+        extra={"name": deleted_name},
+    )
     await db.commit()
     
     return {"status": "success"}

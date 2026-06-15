@@ -6,6 +6,7 @@ import { useToast } from '../context/ToastContext'
 import { Button } from './ui/Button'
 import { useProjectStore } from '../store/useProjectStore'
 import { useDatasetStore } from '../store/useDatasetStore'
+import api from '../api/client'
 
 interface SidebarProps {
     currentDatasetId?: string
@@ -24,12 +25,19 @@ export function ViewerSidebar({ currentDatasetId, currentDataset, isOpen, onTogg
     const [isAuthenticated, setIsAuthenticated] = useState(false)
 
     useEffect(() => {
-        const token = localStorage.getItem('token')
-        setIsAuthenticated(!!token)
-        if (token) {
-            fetchProjects()
-            fetchDatasets()
-        }
+        // Auth is HttpOnly-cookie based; we cannot probe localStorage
+        // anymore. Probe the user endpoint and treat any success as
+        // authenticated. The 401 path falls through silently.
+        let cancelled = false
+        api.get('/users/me')
+            .then(() => {
+                if (cancelled) return
+                setIsAuthenticated(true)
+                fetchProjects()
+                fetchDatasets()
+            })
+            .catch(() => { if (!cancelled) setIsAuthenticated(false) })
+        return () => { cancelled = true }
     }, [fetchProjects, fetchDatasets])
 
     const handleAttach = async (projectId: string) => {

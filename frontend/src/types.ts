@@ -5,6 +5,7 @@ export interface User {
   is_superuser: boolean;
   is_active?: boolean;
   has_password?: boolean;
+  email_verified_at?: string | null;
 }
 
 export interface Group {
@@ -23,6 +24,13 @@ export interface GroupMember {
   user?: User;
 }
 
+export interface Tag {
+  id: string;
+  name: string;
+  slug: string;
+  created_at: string;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -31,6 +39,7 @@ export interface Project {
   visibility: 'private' | 'public' | 'password';
   created_at: string;
   datasets?: Dataset[];
+  tags?: Tag[];
 }
 
 export interface ProjectShare {
@@ -50,7 +59,10 @@ export interface Dataset {
   file_type: string;
   owner_id: string;
   status: string;
+  failure_reason?: string | null;
   created_at: string;
+  deleted_at?: string | null;
+  file_size?: number;
   projects?: Project[];
 }
 

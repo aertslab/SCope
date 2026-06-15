@@ -66,7 +66,7 @@ export const useViewerStore = create<ViewerState>((set) => ({
     error: null,
 
     settings: defaultSettings,
-    colours: { 0: [] },
+    colours: {},
     customColors: null,
     activeColorInfo: null,
     colorRanges: {},
@@ -109,7 +109,7 @@ export const useViewerStore = create<ViewerState>((set) => ({
         loading: false,
         error: null,
         settings: defaultSettings,
-        colours: { 0: [] },
+        colours: {},
         customColors: null,
         activeColorInfo: null,
         colorRanges: {},

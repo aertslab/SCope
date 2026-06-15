@@ -1,14 +1,27 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Users, Folder, Users as GroupsIcon } from 'lucide-react'
+import {
+    LayoutDashboard,
+    Users,
+    Folder,
+    Users as GroupsIcon,
+    Database,
+    Activity,
+    Link as LinkIcon,
+    HardDrive,
+} from 'lucide-react'
 
 export default function AdminLayout() {
     const location = useLocation()
 
     const navigation = [
         { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+        { name: 'System', href: '/admin/system', icon: Activity },
         { name: 'Users', href: '/admin/users', icon: Users },
         { name: 'Groups', href: '/admin/groups', icon: GroupsIcon },
         { name: 'Projects', href: '/admin/projects', icon: Folder },
+        { name: 'Datasets', href: '/admin/datasets', icon: Database },
+        { name: 'Sessions', href: '/admin/sessions', icon: LinkIcon },
+        { name: 'Files', href: '/admin/files', icon: HardDrive },
     ]
 
     return (

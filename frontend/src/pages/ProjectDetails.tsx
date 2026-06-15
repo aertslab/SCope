@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import api from '../api/client'
 import { Project, ProjectShare, Dataset, User, Group } from '../types'
-import { Trash2, Plus, Share2, Search, Database, Copy, ExternalLink, Info } from 'lucide-react'
+import { Trash2, Plus, Share2, Search, Database, Copy, ExternalLink, Info, X, ArrowRightLeft } from 'lucide-react'
 import { useToast } from '../context/ToastContext'
+import { useAuthStore } from '../store/useAuthStore'
 import { Modal } from '../components/Modal'
+import { ProjectTagEditor, ProjectTag } from '../components/ProjectTagEditor'
 
 interface DatasetWithVisibility extends Dataset {
     highest_visibility?: 'public' | 'password' | 'private'
@@ -14,6 +16,7 @@ export default function ProjectDetails() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { addToast } = useToast()
+  const currentUser = useAuthStore((s) => s.user)
   const [project, setProject] = useState<Project | null>(null)
   const [datasets, setDatasets] = useState<DatasetWithVisibility[]>([])
   const [shares, setShares] = useState<ProjectShare[]>([])
@@ -48,13 +51,18 @@ export default function ProjectDetails() {
   const [orphanedDatasets, setOrphanedDatasets] = useState<string[]>([])
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
+  // Transfer-ownership state
+  const [showTransfer, setShowTransfer] = useState(false)
+  const [transferQuery, setTransferQuery] = useState('')
+  const [transferResults, setTransferResults] = useState<User[]>([])
+  const [transferTarget, setTransferTarget] = useState<User | null>(null)
+
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    setIsAuthenticated(!!token)
+    setIsAuthenticated(!!currentUser)
     if (id) {
       fetchProjectDetails()
     }
-  }, [id])
+  }, [id, currentUser])
 
   const fetchProjectDetails = async (password?: string) => {
     try {
@@ -69,7 +77,7 @@ export default function ProjectDetails() {
       fetchProjectDatasets(password)
       
       // Only fetch shares if logged in
-      if (localStorage.getItem('token')) {
+      if (currentUser) {
           fetchProjectShares()
       }
     } catch (err: any) {
@@ -113,6 +121,19 @@ export default function ProjectDetails() {
       if (err.response && err.response.status !== 403) {
           console.error(err)
       }
+    }
+  }
+
+  const handleRevokeShare = async (shareId: string) => {
+    if (!id) return
+    if (!confirm('Revoke this share? The user/group will lose access.')) return
+    try {
+      await api.delete(`/projects/${id}/shares/${shareId}`)
+      addToast('Share revoked', 'success')
+      fetchProjectShares()
+    } catch (err: any) {
+      console.error(err)
+      addToast(err.response?.data?.detail || 'Failed to revoke share', 'error')
     }
   }
 
@@ -167,6 +188,37 @@ export default function ProjectDetails() {
   const handleConfirmDeleteOrphans = () => {
       setShowOrphanWarning(false)
       handleDeleteProject(true)
+  }
+
+  const searchTransferUsers = async (query: string) => {
+      setTransferQuery(query)
+      setTransferTarget(null)
+      if (!query.trim()) { setTransferResults([]); return }
+      try {
+          const res = await api.get(`/users/search?query=${encodeURIComponent(query)}`)
+          // Don't list the current owner as a target.
+          setTransferResults((res.data as User[]).filter(u => u.id !== project?.owner_id))
+      } catch (err) {
+          console.error(err)
+      }
+  }
+
+  const handleTransferOwnership = async () => {
+      if (!id || !transferTarget) return
+      if (!confirm(`Transfer this project to ${transferTarget.full_name || transferTarget.email}? You will no longer own it.`)) return
+      try {
+          await api.post(`/projects/${id}/transfer-ownership`, { new_owner_id: transferTarget.id })
+          addToast('Ownership transferred', 'success')
+          setShowTransfer(false)
+          setTransferQuery('')
+          setTransferResults([])
+          setTransferTarget(null)
+          fetchProjectDetails(projectPassword)
+      } catch (err: any) {
+          console.error(err)
+          // Toast surfaced by global interceptor; keep a fallback for older flows.
+          if (!err?.response) addToast('Failed to transfer ownership', 'error')
+      }
   }
 
   const handleAttach = async () => {
@@ -310,6 +362,14 @@ export default function ProjectDetails() {
                     Bookmark Project
                 </button>
             )}
+          </div>
+          <div className="mt-3">
+            <ProjectTagEditor
+              projectId={project.id}
+              tags={(project.tags as ProjectTag[]) || []}
+              canEdit={!!(currentUser && (currentUser.id === project.owner_id || currentUser.is_superuser))}
+              onChange={(newTags) => setProject({ ...project, tags: newTags })}
+            />
           </div>
         </div>
         <div className="flex space-x-2">
@@ -458,6 +518,65 @@ export default function ProjectDetails() {
                     </button>
                 </div>
             </form>
+            {(currentUser?.id === project?.owner_id || currentUser?.is_superuser) && (
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                    <button
+                        type="button"
+                        onClick={() => setShowTransfer(!showTransfer)}
+                        className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                    >
+                        <ArrowRightLeft className="h-4 w-4 mr-2" /> Transfer Ownership
+                    </button>
+                    {showTransfer && (
+                        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+                            <h4 className="text-sm font-medium text-yellow-800 mb-1">Transfer Project Ownership</h4>
+                            <p className="text-xs text-yellow-700 mb-3">
+                                Search for a user to receive ownership. You will lose owner privileges. This cannot be undone.
+                            </p>
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder="Search by name or email..."
+                                    value={transferQuery}
+                                    onChange={(e) => searchTransferUsers(e.target.value)}
+                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500 sm:text-sm border p-2"
+                                />
+                                {transferResults.length > 0 && !transferTarget && (
+                                    <ul className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-48 rounded-md text-base ring-1 ring-black ring-opacity-5 overflow-auto sm:text-sm">
+                                        {transferResults.map(u => (
+                                            <li
+                                                key={u.id}
+                                                onClick={() => { setTransferTarget(u); setTransferQuery(u.full_name || u.email); setTransferResults([]) }}
+                                                className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-yellow-50"
+                                            >
+                                                <div className="font-medium">{u.full_name || u.email}</div>
+                                                {u.full_name && <div className="text-xs text-gray-500">{u.email}</div>}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                            <div className="mt-3 flex justify-end space-x-2">
+                                <button
+                                    type="button"
+                                    onClick={() => { setShowTransfer(false); setTransferQuery(''); setTransferResults([]); setTransferTarget(null) }}
+                                    className="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleTransferOwnership}
+                                    disabled={!transferTarget}
+                                    className="px-3 py-2 text-sm text-white bg-yellow-600 rounded-md hover:bg-yellow-700 disabled:opacity-50"
+                                >
+                                    Transfer
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
       )}
 
@@ -677,10 +796,17 @@ export default function ProjectDetails() {
                     </div>
                     </div>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center gap-2">
                     <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                     {share.permission}
                     </span>
+                    <button
+                        onClick={() => handleRevokeShare(share.id)}
+                        className="text-gray-400 hover:text-red-600 p-1"
+                        title="Revoke share"
+                    >
+                        <X className="h-4 w-4" />
+                    </button>
                 </div>
                 </li>
             ))}

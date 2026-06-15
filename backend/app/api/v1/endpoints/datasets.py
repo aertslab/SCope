@@ -1,7 +1,12 @@
 import shutil
 import os
+import logging
+import threading
+from collections import OrderedDict
 from typing import Any, List, Optional, cast, MutableMapping
+import aiofiles
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Header
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_, and_, func
 from sqlalchemy.orm import selectinload
@@ -9,7 +14,7 @@ import zarr
 import json
 import numpy as np
 from uuid import UUID
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse, Response, FileResponse
 
 from app.api import deps
 from app.models.user import User
@@ -19,14 +24,155 @@ from app.models.project import Project, ProjectVisibility, ProjectShare, project
 from app.models.group import GroupMember
 from app.schemas.dataset import Dataset as DatasetSchema, DatasetCreate, DatasetUpdate
 from app.worker import process_dataset
-from app.core.security import verify_password
+from app.core.config import settings
+from app.core.security import verify_password_async
 from app.services.permissions import get_user_project_permission
+from app.services.audit import record_audit
+from app.utils.zarr_cache import find_gene_index, load_gene_index, load_metadata, open_zarr
+from app.utils import zarr_cache
 
 router = APIRouter()
 
+logger = logging.getLogger(__name__)
+
 UPLOAD_DIR = "uploads"
+
+
+# ---------------------------------------------------------------------------
+# Hot-path cache for gene expression columns.
+#
+# The viewer hammers /expression/{gene} every time the user picks a gene; for
+# a 60k-cell × 30k-gene zarr store each request decompresses a column-shard
+# off disk which can take 1-3s the first time. Once decoded the bytes are
+# tiny (n_cells × 4) and immutable until the dataset is reconverted, so a
+# small process-local LRU pays for itself within the first repeat click.
+#
+# Capacity is in *bytes*, not entries, so a workspace with one giant dataset
+# doesn't blow memory while another with many small ones still gets good
+# coverage.
+# ---------------------------------------------------------------------------
+_EXPRESSION_CACHE_MAX_BYTES = 128 * 1024 * 1024  # 128 MiB
+_expression_cache: "OrderedDict[tuple[str, int], bytes]" = OrderedDict()
+_expression_cache_bytes = 0
+_expression_cache_lock = threading.Lock()
+
+
+def _expression_cache_get(key: tuple[str, int]) -> Optional[bytes]:
+    with _expression_cache_lock:
+        payload = _expression_cache.get(key)
+        if payload is not None:
+            _expression_cache.move_to_end(key)
+        return payload
+
+
+def _expression_cache_put(key: tuple[str, int], payload: bytes) -> None:
+    global _expression_cache_bytes
+    size = len(payload)
+    if size > _EXPRESSION_CACHE_MAX_BYTES:
+        return
+    with _expression_cache_lock:
+        if key in _expression_cache:
+            _expression_cache_bytes -= len(_expression_cache.pop(key))
+        _expression_cache[key] = payload
+        _expression_cache_bytes += size
+        while _expression_cache_bytes > _EXPRESSION_CACHE_MAX_BYTES and _expression_cache:
+            _, evicted = _expression_cache.popitem(last=False)
+            _expression_cache_bytes -= len(evicted)
+
+
+def _invalidate_expression_cache(prefix: Optional[str] = None) -> None:
+    """Drop cached expression bytes for one path (or all of them)."""
+    global _expression_cache_bytes
+    with _expression_cache_lock:
+        if prefix is None:
+            _expression_cache.clear()
+            _expression_cache_bytes = 0
+            return
+        for key in [k for k in _expression_cache if k[0] == prefix]:
+            _expression_cache_bytes -= len(_expression_cache.pop(key))
+
+
+def _read_expression_column(path: str, idx: int) -> bytes:
+    """Decompress one column of X off disk. Runs in a threadpool."""
+    cached = _expression_cache_get((path, idx))
+    if cached is not None:
+        return cached
+    z = cast(zarr.Group, open_zarr(path))
+    x_arr = cast(zarr.Array, z["X"])
+    column = cast(np.ndarray, x_arr[:, idx])
+    if column.dtype != np.float32:
+        column = column.astype(np.float32, copy=False)
+    payload = column.tobytes()
+    _expression_cache_put((path, idx), payload)
+    return payload
+
+
+def _read_regulon_expression(path: str, gene: str) -> Optional[bytes]:
+    """Threadpool-safe lookup for AUC values stored under obsm/Regulons*."""
+    z = cast(zarr.Group, open_zarr(path))
+    obsm_group = z.get("obsm") if isinstance(z, MutableMapping) else None  # type: ignore[arg-type]
+    if not isinstance(obsm_group, zarr.Group):
+        return None
+    for reg_key in ("RegulonsAUC", "MotifRegulonsAUC", "TrackRegulonsAUC"):
+        if reg_key not in obsm_group:
+            continue
+        try:
+            obj = obsm_group[reg_key]
+            if isinstance(obj, zarr.Array):
+                if hasattr(obj.dtype, "names") and gene in (obj.dtype.names or ()):
+                    arr = np.asarray(obj[gene]).astype(np.float32, copy=False)
+                    return arr.tobytes()
+            elif isinstance(obj, zarr.Group) and gene in obj:
+                arr = np.asarray(obj[gene][:]).astype(np.float32, copy=False)
+                return arr.tobytes()
+        except Exception:
+            logger.exception("Error reading regulon %s from %s", gene, reg_key)
+    return None
+
 if not os.path.exists(UPLOAD_DIR):
     os.makedirs(UPLOAD_DIR)
+
+# 1 MiB per chunk: large enough that asyncio overhead is negligible, small
+# enough to enforce the size limit promptly without holding much memory.
+UPLOAD_CHUNK_SIZE = 1024 * 1024
+
+
+ALLOWED_FILE_TYPES = {"loom", "h5ad", "csv"}
+
+
+async def _stream_upload_to_disk(
+    file: UploadFile,
+    destination: str,
+    max_bytes: int,
+) -> int:
+    """Stream `file` to `destination` in chunks. Returns total bytes written.
+
+    Aborts (raising 413) if the cumulative size exceeds `max_bytes`. Cleans up
+    the partial file on failure.
+    """
+    total = 0
+    try:
+        async with aiofiles.open(destination, "wb") as out:
+            while True:
+                chunk = await file.read(UPLOAD_CHUNK_SIZE)
+                if not chunk:
+                    break
+                total += len(chunk)
+                if total > max_bytes:
+                    raise HTTPException(
+                        status_code=413,
+                        detail=f"Upload exceeds maximum allowed size of {max_bytes} bytes",
+                    )
+                await out.write(chunk)
+    except Exception:
+        # Best-effort cleanup of the partial file.
+        try:
+            if os.path.exists(destination):
+                os.remove(destination)
+        except OSError:
+            pass
+        raise
+    return total
 
 async def check_dataset_access(
     dataset_id: UUID,
@@ -37,7 +183,7 @@ async def check_dataset_access(
     # Fetch dataset with projects
     query = select(Dataset).options(
         selectinload(Dataset.projects)
-    ).where(Dataset.id == dataset_id)
+    ).where(Dataset.id == dataset_id, Dataset.deleted_at.is_(None))
     
     result = await db.execute(query)
     dataset = result.scalars().first()
@@ -77,7 +223,7 @@ async def check_dataset_access(
         if project.visibility == ProjectVisibility.PASSWORD:
             has_password_project = True
             if password and project.password_hash:
-                if verify_password(password, project.password_hash):
+                if await verify_password_async(password, project.password_hash):
                     password_match = True
                     # We don't break immediately, as we might find a public/shared one later which is better (no password needed)
                     # But if we finish loop and only have password_match, we allow.
@@ -109,9 +255,22 @@ async def read_datasets(
     Retrieve datasets.
     """
     if current_user.is_superuser:
-        result = await db.execute(select(Dataset).offset(skip).limit(limit))
+        result = await db.execute(
+            select(Dataset)
+            .where(Dataset.deleted_at.is_(None))
+            .offset(skip)
+            .limit(limit)
+        )
     else:
-        result = await db.execute(select(Dataset).where(Dataset.owner_id == current_user.id).offset(skip).limit(limit))
+        result = await db.execute(
+            select(Dataset)
+            .where(
+                Dataset.owner_id == current_user.id,
+                Dataset.deleted_at.is_(None),
+            )
+            .offset(skip)
+            .limit(limit)
+        )
     return result.scalars().all()
 
 @router.post("/check_hash")
@@ -183,15 +342,18 @@ async def create_dataset(
     if not file:
         raise HTTPException(status_code=400, detail="File required for new upload")
 
+    if file_type not in ALLOWED_FILE_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file_type. Allowed: {sorted(ALLOWED_FILE_TYPES)}",
+        )
+
     file_location = f"{UPLOAD_DIR}/{file_hash}.{file_type}" # Use hash for filename to avoid collisions
-    
-    # If file exists on disk but not in DB (orphan), overwrite or reuse?
-    # Safer to overwrite or just use it.
-    with open(file_location, "wb+") as file_object:
-        shutil.copyfileobj(file.file, file_object)
-    
-    # Calculate file size
-    file_size = os.path.getsize(file_location)
+
+    # Stream to disk in chunks; enforce MAX_UPLOAD_BYTES; clean up on failure.
+    file_size = await _stream_upload_to_disk(
+        file, file_location, settings.MAX_UPLOAD_BYTES
+    )
 
     # Create DataFile
     data_file = DataFile(
@@ -245,6 +407,184 @@ async def read_dataset(
     Get dataset by ID.
     """
     return await check_dataset_access(dataset_id, db, current_user, x_project_password)
+
+
+@router.get("/{dataset_id}/download")
+async def download_dataset(
+    dataset_id: UUID,
+    x_project_password: Optional[str] = Header(None),
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: Optional[User] = Depends(deps.get_current_user_optional),
+) -> Any:
+    """Stream the original uploaded file back to the caller.
+
+    Reuses ``check_dataset_access`` so anyone allowed to view the dataset
+    (owner, sharee, public/password-protected project) can also download it.
+    The file is served as an ``attachment`` so browsers prompt to save rather
+    than rendering. The on-disk filename is the content hash, so we substitute
+    the user-friendly ``dataset.name`` for the download.
+    """
+    dataset = await check_dataset_access(dataset_id, db, current_user, x_project_password)
+
+    file_path = dataset.file_path
+    if not file_path or not os.path.exists(file_path):
+        raise HTTPException(
+            status_code=404,
+            detail="Original file is no longer available on disk",
+        )
+
+    # Build a safe download filename from the dataset's display name and the
+    # known file_type extension. Strip path separators / trailing dots that
+    # could let a renamed dataset escape the attachment hint.
+    safe_stem = (dataset.name or "dataset").strip().replace("/", "_").replace("\\", "_")
+    safe_stem = safe_stem.strip(". ") or "dataset"
+    suggested = f"{safe_stem}.{dataset.file_type}"
+
+    return FileResponse(
+        path=file_path,
+        filename=suggested,
+        media_type="application/octet-stream",
+    )
+
+
+@router.post("/{dataset_id}/replace", response_model=DatasetSchema)
+async def replace_dataset_file(
+    dataset_id: UUID,
+    file_hash: str = Form(...),
+    file: UploadFile = File(...),
+    file_type: Optional[str] = Form(None),
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_user),
+) -> Any:
+    """Replace the underlying file of an existing dataset and re-trigger conversion.
+
+    Only the dataset owner (or a superuser) may replace. This preserves the
+    dataset row, its id, all project links and shares — only the bytes change.
+
+    Implementation notes:
+    - We never mutate a shared ``DataFile`` in place; that row may back other
+      users' datasets via hash deduplication. Instead we rebind this dataset
+      to a fresh (or already-existing) ``DataFile``.
+    - If the previous DataFile becomes orphaned (zero referencing datasets),
+      its physical files and converted store are cleaned up here. Restoring
+      from trash on a different dataset that shared the hash is unaffected.
+    - Status flips back to ``pending`` and a new conversion is enqueued.
+    """
+    result = await db.execute(select(Dataset).where(Dataset.id == dataset_id))
+    dataset = result.scalars().first()
+    if not dataset:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+    if not current_user.is_superuser and dataset.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    if dataset.deleted_at is not None:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot replace a trashed dataset; restore it first",
+        )
+
+    effective_type = (file_type or dataset.file_type or "").lower()
+    if effective_type not in ALLOWED_FILE_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file_type. Allowed: {sorted(ALLOWED_FILE_TYPES)}",
+        )
+
+    old_data_file_id = dataset.data_file_id
+    old_converted_path = dataset.converted_path
+
+    # Look for an existing DataFile with this hash so re-uploads of an already
+    # known blob short-circuit the upload + reconversion.
+    existing_res = await db.execute(
+        select(DataFile).where(DataFile.file_hash == file_hash)
+    )
+    existing = existing_res.scalars().first()
+
+    if existing:
+        # Drain the upload stream so the client's request body is consumed,
+        # but discard the bytes — we already have them on disk.
+        try:
+            while await file.read(UPLOAD_CHUNK_SIZE):
+                pass
+        except Exception:
+            pass
+
+        new_data_file = existing
+        new_file_path = existing.file_path
+        new_file_size = existing.file_size
+        new_status = existing.status
+        new_converted_path = existing.converted_path
+        new_converted_size = existing.converted_size
+        trigger_processing = existing.status not in {"completed", "ready"}
+    else:
+        new_file_location = f"{UPLOAD_DIR}/{file_hash}.{effective_type}"
+        new_file_size = await _stream_upload_to_disk(
+            file, new_file_location, settings.MAX_UPLOAD_BYTES
+        )
+        new_data_file = DataFile(
+            file_hash=file_hash,
+            file_path=new_file_location,
+            file_size=new_file_size,
+            status="pending",
+        )
+        db.add(new_data_file)
+        await db.commit()
+        await db.refresh(new_data_file)
+        new_file_path = new_file_location
+        new_status = "pending"
+        new_converted_path = None
+        new_converted_size = 0
+        trigger_processing = True
+
+    # Rebind this dataset to the new DataFile.
+    dataset.data_file_id = new_data_file.id
+    dataset.file_type = effective_type
+    dataset.file_path = new_file_path
+    dataset.file_size = new_file_size
+    dataset.status = new_status
+    dataset.failure_reason = None
+    dataset.converted_path = new_converted_path
+    dataset.converted_size = new_converted_size
+    db.add(dataset)
+    await db.commit()
+    await db.refresh(dataset)
+
+    # Garbage-collect the previous DataFile if nothing else references it.
+    if old_data_file_id and old_data_file_id != new_data_file.id:
+        ref_res = await db.execute(
+            select(func.count(Dataset.id)).where(Dataset.data_file_id == old_data_file_id)
+        )
+        if (ref_res.scalar() or 0) == 0:
+            old_df_res = await db.execute(
+                select(DataFile).where(DataFile.id == old_data_file_id)
+            )
+            old_df = old_df_res.scalars().first()
+            if old_df:
+                if old_df.file_path and os.path.exists(old_df.file_path):
+                    try:
+                        os.remove(old_df.file_path)
+                    except Exception:
+                        logger.exception("Error removing old file %s", old_df.file_path)
+                if old_df.converted_path and os.path.exists(old_df.converted_path):
+                    try:
+                        if os.path.isdir(old_df.converted_path):
+                            shutil.rmtree(old_df.converted_path)
+                        else:
+                            os.remove(old_df.converted_path)
+                    except Exception:
+                        logger.exception(
+                            "Error removing old converted store %s",
+                            old_df.converted_path,
+                        )
+                await db.delete(old_df)
+                await db.commit()
+        if old_converted_path:
+            zarr_cache.invalidate(old_converted_path)
+
+    if trigger_processing:
+        process_dataset.delay(dataset.id, new_file_path)
+
+    return dataset
+
 
 @router.put("/{dataset_id}", response_model=DatasetSchema)
 async def update_dataset(
@@ -300,74 +640,185 @@ async def get_dataset_usage(
         })
     return usage
 
+@router.get("/trash", response_model=List[DatasetSchema])
+async def list_trashed_datasets(
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_user),
+) -> Any:
+    """List the current user's soft-deleted datasets, newest deletions first.
+
+    Mounted before the parameterized routes so the literal "trash" path is not
+    swallowed by ``/{dataset_id}``.
+    """
+    base = select(Dataset).where(Dataset.deleted_at.is_not(None))
+    if not current_user.is_superuser:
+        base = base.where(Dataset.owner_id == current_user.id)
+    result = await db.execute(base.order_by(Dataset.deleted_at.desc()))
+    return result.scalars().all()
+
+
 @router.delete("/{dataset_id}", response_model=DatasetSchema)
 async def delete_dataset(
     dataset_id: UUID,
     db: AsyncSession = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_user),
 ) -> Any:
-    """
-    Delete dataset.
+    """Soft-delete a dataset.
+
+    Sets ``deleted_at`` and hides the dataset from default queries. The
+    physical files and any DataFile reference are kept until ``/purge`` is
+    called or the trash is emptied — restoring is fast because nothing on
+    disk has been touched.
     """
     result = await db.execute(select(Dataset).where(Dataset.id == dataset_id))
     dataset = result.scalars().first()
     if not dataset:
         raise HTTPException(status_code=404, detail="Dataset not found")
-    
+
     if not current_user.is_superuser and dataset.owner_id != current_user.id:
         raise HTTPException(status_code=400, detail="Not enough permissions")
 
+    if dataset.deleted_at is not None:
+        # Already trashed — idempotent.
+        return dataset
+
+    from datetime import datetime, timezone as _tz
+    dataset.deleted_at = datetime.now(_tz.utc)  # type: ignore[assignment]
+    db.add(dataset)
+    await record_audit(
+        db,
+        actor=current_user,
+        action="dataset.trash",
+        resource_type="dataset",
+        resource_id=dataset.id,
+        extra={"name": dataset.name},
+    )
+    await db.commit()
+    await db.refresh(dataset)
+    return dataset
+
+
+@router.post("/{dataset_id}/restore", response_model=DatasetSchema)
+async def restore_dataset(
+    dataset_id: UUID,
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_user),
+) -> Any:
+    """Restore a soft-deleted dataset back into the user's active list."""
+    result = await db.execute(select(Dataset).where(Dataset.id == dataset_id))
+    dataset = result.scalars().first()
+    if not dataset:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+    if not current_user.is_superuser and dataset.owner_id != current_user.id:
+        raise HTTPException(status_code=400, detail="Not enough permissions")
+    if dataset.deleted_at is None:
+        return dataset
+    dataset.deleted_at = None  # type: ignore[assignment]
+    db.add(dataset)
+    await record_audit(
+        db,
+        actor=current_user,
+        action="dataset.restore",
+        resource_type="dataset",
+        resource_id=dataset.id,
+        extra={"name": dataset.name},
+    )
+    await db.commit()
+    await db.refresh(dataset)
+    return dataset
+
+
+@router.delete("/{dataset_id}/purge", response_model=DatasetSchema)
+async def purge_dataset(
+    dataset_id: UUID,
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_user),
+) -> Any:
+    """Permanently delete a dataset and its physical files.
+
+    The dataset must already be in the trash (``deleted_at`` set). This is
+    the irreversible step — once the row and files are gone, nothing can be
+    restored.
+    """
+    result = await db.execute(select(Dataset).where(Dataset.id == dataset_id))
+    dataset = result.scalars().first()
+    if not dataset:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+
+    if not current_user.is_superuser and dataset.owner_id != current_user.id:
+        raise HTTPException(status_code=400, detail="Not enough permissions")
+    if dataset.deleted_at is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Dataset must be in the trash before it can be purged",
+        )
+
     data_file_id = dataset.data_file_id
-    
-    # Delete the dataset record first
+
+    # Capture file paths up-front; we still need them after the row is deleted.
+    legacy_file_path = dataset.file_path
+    legacy_converted_path = dataset.converted_path
+    purged_name = dataset.name
+    purged_id = dataset.id
+
     await db.delete(dataset)
+    await record_audit(
+        db,
+        actor=current_user,
+        action="dataset.purge",
+        resource_type="dataset",
+        resource_id=purged_id,
+        extra={"name": purged_name},
+    )
     await db.commit()
 
-    # Check if we should delete the physical file
     if data_file_id:
-        # Check if any other datasets use this file
-        ref_count_res = await db.execute(select(func.count(Dataset.id)).where(Dataset.data_file_id == data_file_id))
+        ref_count_res = await db.execute(
+            select(func.count(Dataset.id)).where(Dataset.data_file_id == data_file_id)
+        )
         ref_count = ref_count_res.scalar()
-        
         if ref_count == 0:
-            # No more references, delete DataFile and physical files
             df_res = await db.execute(select(DataFile).where(DataFile.id == data_file_id))
             data_file = df_res.scalars().first()
-            
             if data_file:
                 if data_file.file_path and os.path.exists(data_file.file_path):
                     try:
                         os.remove(data_file.file_path)
-                    except Exception as e:
-                        print(f"Error deleting file {data_file.file_path}: {e}")
-                
+                    except Exception:
+                        logger.exception("Error deleting file %s", data_file.file_path)
                 if data_file.converted_path and os.path.exists(data_file.converted_path):
                     try:
                         if os.path.isdir(data_file.converted_path):
                             shutil.rmtree(data_file.converted_path)
                         else:
                             os.remove(data_file.converted_path)
-                    except Exception as e:
-                        print(f"Error deleting converted file {data_file.converted_path}: {e}")
-                
+                    except Exception:
+                        logger.exception(
+                            "Error deleting converted file %s", data_file.converted_path
+                        )
                 await db.delete(data_file)
                 await db.commit()
     else:
-        # Legacy deletion (no DataFile linked)
-        if dataset.file_path and os.path.exists(dataset.file_path):
+        # Legacy datasets that predate the DataFile table own their paths
+        # directly. Best-effort cleanup; missing files are not an error.
+        if legacy_file_path and os.path.exists(legacy_file_path):
             try:
-                os.remove(dataset.file_path)
-            except Exception as e:
-                print(f"Error deleting file {dataset.file_path}: {e}")
-                
-        if dataset.converted_path and os.path.exists(dataset.converted_path):
+                os.remove(legacy_file_path)
+            except Exception:
+                logger.exception("Error deleting file %s", legacy_file_path)
+        if legacy_converted_path and os.path.exists(legacy_converted_path):
             try:
-                if os.path.isdir(dataset.converted_path):
-                    shutil.rmtree(dataset.converted_path)
+                if os.path.isdir(legacy_converted_path):
+                    shutil.rmtree(legacy_converted_path)
                 else:
-                    os.remove(dataset.converted_path)
-            except Exception as e:
-                print(f"Error deleting converted file {dataset.converted_path}: {e}")
+                    os.remove(legacy_converted_path)
+            except Exception:
+                logger.exception(
+                    "Error deleting converted file %s", legacy_converted_path
+                )
+
+    if legacy_converted_path:
+        zarr_cache.invalidate(legacy_converted_path)
 
     return dataset
 
@@ -385,28 +836,9 @@ async def get_dataset_metadata(
         
     if dataset.status != "ready" or not dataset.converted_path:
         raise HTTPException(status_code=400, detail="Dataset is not ready")
-        
+
     try:
-        z = cast(zarr.Group, zarr.open(dataset.converted_path, mode='r'))
-        if 'uns' in z:
-            uns_group = z['uns']
-            if isinstance(uns_group, zarr.Group) and 'MetaData' in uns_group:
-                # It might be stored as a string or bytes
-                metadata_arr = cast(zarr.Array, uns_group['MetaData'])
-                md = metadata_arr[()]
-                if isinstance(md, bytes):
-                    md = md.decode('utf-8')
-                
-                # Ensure md is string for json.loads
-                if not isinstance(md, str):
-                    md = str(md)
-                    
-                # It was double serialized in loom_converter?
-                # adata.uns['MetaData'] = json.dumps(meta_json)
-                # So md is a JSON string.
-                return json.loads(md)
-        
-        return {}
+        return load_metadata(dataset.converted_path) or {}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reading metadata: {str(e)}")
 
@@ -427,7 +859,7 @@ async def get_dataset_embedding(
         raise HTTPException(status_code=400, detail="Dataset is not ready")
         
     try:
-        z = cast(zarr.Group, zarr.open(dataset.converted_path, mode='r'))
+        z = cast(zarr.Group, open_zarr(dataset.converted_path))
         key = f"X_{embedding_name}"
         
         if 'obsm' in cast(MutableMapping, z):
@@ -468,51 +900,54 @@ async def search_genes(
         raise HTTPException(status_code=400, detail="Dataset is not ready")
     
     try:
-        z = cast(zarr.Group, zarr.open(dataset.converted_path, mode='r'))
-        var_obj: Any = z['var'] if 'var' in cast(MutableMapping, z) else None
-        if var_obj is not None and '_index' in var_obj:
+        z = cast(zarr.Group, open_zarr(dataset.converted_path))
+
+        # Prefer the precomputed gene-name list from the sidecar — avoids a
+        # full var/_index decode on every keystroke of the gene-search bar.
+        cached_index = load_gene_index(dataset.converted_path)
+        if cached_index is not None:
+            all_gene_names = list(cached_index.keys())
+        else:
+            var_obj: Any = z['var'] if 'var' in cast(MutableMapping, z) else None
+            if var_obj is None or '_index' not in var_obj:
+                return []
             var_group = cast(zarr.Group, var_obj)
             index_arr = cast(zarr.Array, var_group['_index'])
-            # Read all genes. For 30k, it's fine.
-            all_genes = cast(np.ndarray, index_arr[:])
-            # Convert to string if bytes
-            if all_genes.dtype.kind == 'S' or all_genes.dtype.kind == 'U':
-                 all_genes = all_genes.astype(str)
-            
-            # Filter
-            if query:
-                # Case insensitive search
-                query = query.lower()
-                matches = [g for g in all_genes if query in g.lower()]
-            else:
-                matches = all_genes.tolist()
-            
-            # Search in Regulons (obsm)
-            if 'obsm' in cast(MutableMapping, z):
-                obsm_group = z['obsm']
-                if isinstance(obsm_group, zarr.Group):
-                    for reg_key in ["RegulonsAUC", "MotifRegulonsAUC", "TrackRegulonsAUC"]:
-                        if reg_key in obsm_group:
-                            try:
-                                obj = obsm_group[reg_key]
-                                reg_names = []
-                                
-                                if isinstance(obj, zarr.Array) and hasattr(obj.dtype, 'names') and obj.dtype.names:
-                                    reg_names = obj.dtype.names
-                                elif isinstance(obj, zarr.Group):
-                                    reg_names = [k for k in obj.keys() if k != '_index' and not k.startswith('__')]
-                                    
-                                if reg_names:
-                                    if query:
-                                        matches.extend([r for r in reg_names if query in r.lower()])
-                                    else:
-                                        matches.extend(reg_names)
-                            except Exception as e:
-                                print(f"Error searching regulons in {reg_key}: {e}")
+            all_genes_arr = cast(np.ndarray, index_arr[:])
+            if all_genes_arr.dtype.kind in ('S', 'U'):
+                all_genes_arr = all_genes_arr.astype(str)
+            all_gene_names = all_genes_arr.tolist()
 
-            return matches[:limit]
+        if query:
+            q = query.lower()
+            matches = [g for g in all_gene_names if q in g.lower()]
         else:
-            return []
+            matches = list(all_gene_names)
+
+        # Search in Regulons (obsm) — they're searchable as gene-like names
+        if 'obsm' in cast(MutableMapping, z):
+            obsm_group = z['obsm']
+            if isinstance(obsm_group, zarr.Group):
+                for reg_key in ["RegulonsAUC", "MotifRegulonsAUC", "TrackRegulonsAUC"]:
+                    if reg_key in obsm_group:
+                        try:
+                            obj = obsm_group[reg_key]
+                            reg_names: list = []
+
+                            if isinstance(obj, zarr.Array) and hasattr(obj.dtype, 'names') and obj.dtype.names:
+                                reg_names = list(obj.dtype.names)
+                            elif isinstance(obj, zarr.Group):
+                                reg_names = [k for k in obj.keys() if k != '_index' and not k.startswith('__')]
+
+                            if reg_names:
+                                if query:
+                                    matches.extend([r for r in reg_names if query in r.lower()])
+                                else:
+                                    matches.extend(reg_names)
+                        except Exception:
+                            logger.exception("Error searching regulons in %s", reg_key)
+
+        return matches[:limit]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error searching genes: {str(e)}")
 
@@ -533,7 +968,7 @@ async def get_features(
         raise HTTPException(status_code=400, detail="Dataset is not ready")
     
     try:
-        z = cast(zarr.Group, zarr.open(dataset.converted_path, mode='r'))
+        z = cast(zarr.Group, open_zarr(dataset.converted_path))
         features = []
         
         # 1. Standard obs columns
@@ -562,29 +997,12 @@ async def get_features(
             
             # 3. Regulons - REMOVED to prevent pollution. Now accessible via gene search.
 
-        # 2. Clusterings from MetaData
-        if 'uns' in cast(MutableMapping, z):
-            uns_obj = z['uns']
-            if isinstance(uns_obj, zarr.Group):
-                uns_map: Any = uns_obj
-                if 'MetaData' in uns_map:
-                    try:
-                        metadata_arr = cast(zarr.Array, uns_map['MetaData'])
-                        md = metadata_arr[()]
-                        if isinstance(md, bytes):
-                            md = md.decode('utf-8')
-                        
-                        if not isinstance(md, str):
-                            md = str(md)
+        # 2. Clusterings from MetaData (cached parse)
+        meta_json = load_metadata(dataset.converted_path)
+        if meta_json and 'clusterings' in meta_json:
+            for c in meta_json['clusterings']:
+                features.append({"name": f"Clustering: {c['name']}", "type": "categorical"})
 
-                        meta_json = json.loads(md)
-                        
-                        if 'clusterings' in meta_json:
-                            for c in meta_json['clusterings']:
-                                features.append({"name": f"Clustering: {c['name']}", "type": "categorical"})
-                    except Exception as e:
-                        print(f"Error parsing MetaData for clusterings: {e}")
-                
         return features
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error listing features: {str(e)}")
@@ -602,68 +1020,47 @@ async def get_gene_expression(
     Returns binary float32 array.
     """
     dataset = await check_dataset_access(dataset_id, db, current_user, x_project_password)
-    
+
     if dataset.status != "ready" or not dataset.converted_path:
         raise HTTPException(status_code=400, detail="Dataset is not ready")
-    
+
+    path = dataset.converted_path
+
+    # Browser-side cache key: a gene's expression for a particular dataset
+    # version is immutable. Tag the response with the dataset's updated_at
+    # so a reconvert busts the cache automatically.
+    version = dataset.updated_at or dataset.created_at
+    etag = f'"{dataset.id}-{int(version.timestamp()) if version else 0}-{gene}"'
+    headers = {
+        "Cache-Control": "private, max-age=86400, immutable",
+        "ETag": etag,
+    }
+
     try:
-        z = cast(zarr.Group, zarr.open(dataset.converted_path, mode='r'))
-        var_obj: Any = z['var'] if 'var' in cast(MutableMapping, z) else None
-        if var_obj is not None and '_index' in var_obj:
-            var_group = cast(zarr.Group, var_obj)
-            index_arr = cast(zarr.Array, var_group['_index'])
-            all_genes = cast(np.ndarray, index_arr[:])
-            if all_genes.dtype.kind == 'S' or all_genes.dtype.kind == 'U':
-                 all_genes = all_genes.astype(str)
-            
-            # Find index
-            # np.where returns tuple
-            indices = np.where(all_genes == gene)[0]
-            if len(indices) > 0:
-                idx = indices[0]
-                
-                # Read from X
-                # X is (cells, genes)
-                # We want column idx
-                # This reads all chunks intersecting the column
-                x_arr = cast(zarr.Array, z['X'])
-                expression = cast(np.ndarray, x_arr[:, idx])
-                
-                # Ensure float32
-                expression = expression.astype(np.float32)
-                
-                return Response(content=expression.tobytes(), media_type="application/octet-stream")
+        idx = find_gene_index(path, gene)
+        if idx >= 0:
+            payload = await run_in_threadpool(_read_expression_column, path, idx)
+            return Response(
+                content=payload,
+                media_type="application/octet-stream",
+                headers=headers,
+            )
 
-        # If not found in genes, try to find in Regulons (obsm)
-        if 'obsm' in cast(MutableMapping, z):
-            obsm_group = z['obsm']
-            if isinstance(obsm_group, zarr.Group):
-                for reg_key in ["RegulonsAUC", "MotifRegulonsAUC", "TrackRegulonsAUC"]:
-                    if reg_key in obsm_group:
-                        try:
-                            obj = obsm_group[reg_key]
-                            
-                            # Case 1: Structured Array
-                            if isinstance(obj, zarr.Array):
-                                if hasattr(obj.dtype, 'names') and gene in obj.dtype.names:
-                                    # Found it!
-                                    expression = obj[gene]
-                                    expression = expression.astype(np.float32)
-                                    return Response(content=expression.tobytes(), media_type="application/octet-stream")
-                            
-                            # Case 2: Group (DataFrame-like)
-                            elif isinstance(obj, zarr.Group):
-                                if gene in obj:
-                                    expression = obj[gene][:]
-                                    expression = expression.astype(np.float32)
-                                    return Response(content=expression.tobytes(), media_type="application/octet-stream")
-
-                        except Exception as e:
-                            print(f"Error reading regulon {gene} from {reg_key}: {e}")
+        regulon = await run_in_threadpool(_read_regulon_expression, path, gene)
+        if regulon is not None:
+            return Response(
+                content=regulon,
+                media_type="application/octet-stream",
+                headers=headers,
+            )
 
         raise HTTPException(status_code=404, detail="Gene or Regulon not found")
+    except HTTPException:
+        raise
     except Exception as e:
+        logger.exception("expression read failed for %s / %s", dataset_id, gene)
         raise HTTPException(status_code=500, detail=f"Error reading expression: {str(e)}")
+
 
 @router.get("/{dataset_id}/feature/{feature}")
 async def get_feature_values(
@@ -674,16 +1071,29 @@ async def get_feature_values(
     current_user: Optional[User] = Depends(deps.get_current_user_optional),
 ) -> Any:
     """
-    Get values for a specific feature (obs column).
-    Returns JSON list (handles strings and numbers).
+    Get values for a specific feature.
+
+    Continuous-numeric features (library size, regulons, gene expression,
+    numeric obs columns) are returned as a raw ``application/octet-stream``
+    of float32 little-endian bytes — the client decodes with
+    ``new Float32Array(buffer)``. This avoids JSON-encoding millions of
+    floats per request.
+
+    Categorical / string features are returned as a JSON list.
     """
     dataset = await check_dataset_access(dataset_id, db, current_user, x_project_password)
-    
+
     if dataset.status != "ready" or not dataset.converted_path:
         raise HTTPException(status_code=400, detail="Dataset is not ready")
-    
+
+    def _numeric_response(values: np.ndarray) -> Response:
+        return Response(
+            content=np.ascontiguousarray(values, dtype=np.float32).tobytes(),
+            media_type="application/octet-stream",
+        )
+
     try:
-        z = cast(zarr.Group, zarr.open(dataset.converted_path, mode='r'))
+        z = cast(zarr.Group, open_zarr(dataset.converted_path))
         
         # Handle Library Size
         if feature == "__library_size__":
@@ -691,26 +1101,24 @@ async def get_feature_values(
                 obs = z['obs']
                 # Common keys for library size
                 keys_to_check = ['n_counts', 'total_counts', 'TotalUMI', 'nCount_RNA', 'n_genes']
-                
+
                 # Case 1: obs is a group (columns are datasets)
                 if isinstance(obs, zarr.Group):
                     for key in keys_to_check:
                         if key in obs:
                             lib_size_arr = cast(zarr.Array, obs[key])
                             lib_size = cast(np.ndarray, lib_size_arr[:])
-                            return lib_size.tolist()
-                
+                            return _numeric_response(lib_size)
+
                 # Case 2: obs is an array (structured array)
                 elif isinstance(obs, zarr.Array):
                     if obs.dtype.names:
                         for key in keys_to_check:
                             if key in obs.dtype.names:
-                                # obs is a zarr array, we need to read it to numpy to access fields by name
-                                # or use structured array slicing if zarr supports it (it doesn't for fields directly)
                                 obs_data = cast(np.ndarray, obs[:])
                                 lib_size = cast(np.ndarray, obs_data[key])
-                                return lib_size.tolist()
-            
+                                return _numeric_response(lib_size)
+
             raise HTTPException(status_code=404, detail="Library size not found in dataset")
 
         # Handle Regulons
@@ -721,282 +1129,155 @@ async def get_feature_values(
                 if isinstance(obs_group, zarr.Group) and 'RegulonsAUC' in cast(MutableMapping, obs_group):
                     regulons_arr = cast(zarr.Array, obs_group['RegulonsAUC'])
                     if regulons_arr.dtype.names and regulon_name in regulons_arr.dtype.names:
-                        # Read all data then access field
                         regulons_data = cast(np.ndarray, regulons_arr[:])
                         values = cast(np.ndarray, regulons_data[regulon_name])
-                        return values.tolist()
+                        return _numeric_response(values)
                     else:
                         raise HTTPException(status_code=404, detail=f"Regulon {regulon_name} not found")
-            
+
             raise HTTPException(status_code=404, detail="Regulons data not found")
 
         # Handle Clusterings
         if feature.startswith("Clustering: "):
             clustering_name = feature.replace("Clustering: ", "")
-            
-            if 'uns' in cast(MutableMapping, z):
-                uns_obj = z['uns']
-                if isinstance(uns_obj, zarr.Group):
-                    uns_map = cast(MutableMapping, uns_obj)
-                    if 'MetaData' in uns_map:
-                        metadata_arr = cast(zarr.Array, uns_map['MetaData'])
-                        md = metadata_arr[()]
-                        if isinstance(md, bytes):
-                            md = md.decode('utf-8')
-                        
-                        if not isinstance(md, str):
-                            md = str(md)
 
-                        meta_json = json.loads(md)
-                        
-                        # Find clustering ID
-                        clustering_id = None
-                        clusters_map = {}
-                        
-                        if 'clusterings' in meta_json:
-                            for c in meta_json['clusterings']:
-                                if c['name'] == clustering_name:
-                                    clustering_id = str(c['id'])
-                                    # Create map id -> description
-                                    for cluster in c['clusters']:
-                                        clusters_map[cluster['id']] = cluster['description']
-                                    break
-                        
-                        if clustering_id is not None and 'obs' in cast(MutableMapping, z):
-                            obs_group = z['obs']
-                            if isinstance(obs_group, zarr.Group) and 'Clusterings' in cast(MutableMapping, obs_group):
-                                # Access the specific field in the structured array
-                                # z['obs']['Clusterings'] is a Zarr array with compound dtype
-                                # We can access fields by name
-                                clusterings_arr = cast(zarr.Array, obs_group['Clusterings'])
-                                
-                                if clusterings_arr.dtype.names and clustering_id in clusterings_arr.dtype.names:
-                                    # Read the data for this field
-                                    # This returns a numpy array of integers
-                                    clusterings_data = cast(np.ndarray, clusterings_arr[:])
-                                    codes = cast(np.ndarray, clusterings_data[clustering_id])
-                                    
-                                    # Map to descriptions
-                                    # Handle potential missing values if any (though usually clusterings are complete)
-                                    # Using a list comprehension or numpy map
-                                    
-                                    # Convert map to array for fast lookup if keys are contiguous integers
-                                    # But keys might not be contiguous or start at 0 (though they usually do)
-                                    # Safer to use a lookup function or map
-                                    
-                                    # Optimization: if max id is small, use array lookup
-                                    max_id = codes.max()
-                                    if max_id < len(clusters_map) + 100: # Heuristic
-                                        # Create lookup array
-                                        lookup = np.empty(max_id + 1, dtype=object)
-                                        for k, v in clusters_map.items():
-                                            if k <= max_id:
-                                                lookup[k] = v
-                                        
-                                        # Handle codes that might be out of range or missing in map
-                                        # We'll assume data is consistent with metadata
-                                        values = lookup[codes]
-                                        
-                                        # Replace None with empty string or "Unknown"
-                                        # values[values == None] = "Unknown" 
-                                        # (numpy object array comparison is tricky with None)
-                                        
-                                        return [v if v is not None else "Unknown" for v in values]
-                                    else:
-                                        # Fallback to slow map
-                                        return [clusters_map.get(c, "Unknown") for c in codes]
-                                else:
-                                    raise HTTPException(status_code=404, detail=f"Clustering ID {clustering_id} not found in data")
-                            else:
-                                raise HTTPException(status_code=404, detail="Clustering data not found")
-                        else:
-                            raise HTTPException(status_code=404, detail="Clustering data not found")
-                    else:
-                        raise HTTPException(status_code=404, detail="Metadata not found")
-                else:
-                    raise HTTPException(status_code=404, detail="Metadata not found")
-            else:
-                 raise HTTPException(status_code=404, detail="Metadata not found")
+            meta_json = load_metadata(dataset.converted_path)
+            if not meta_json:
+                raise HTTPException(status_code=404, detail="Metadata not found")
 
-        # Handle Genes
-        # Check if it's a gene (in var/index or var/Gene)
-        # We need to find the index of the gene
-        gene_index = -1
-        
-        if 'var' in cast(MutableMapping, z):
+            # Find clustering ID
+            clustering_id = None
+            clusters_map: dict = {}
+            if 'clusterings' in meta_json:
+                for c in meta_json['clusterings']:
+                    if c['name'] == clustering_name:
+                        clustering_id = str(c['id'])
+                        for cluster in c['clusters']:
+                            clusters_map[cluster['id']] = cluster['description']
+                        break
+
+            if clustering_id is None or 'obs' not in cast(MutableMapping, z):
+                raise HTTPException(status_code=404, detail="Clustering data not found")
+
+            obs_group = z['obs']
+            if not (isinstance(obs_group, zarr.Group) and 'Clusterings' in cast(MutableMapping, obs_group)):
+                raise HTTPException(status_code=404, detail="Clustering data not found")
+
+            clusterings_arr = cast(zarr.Array, obs_group['Clusterings'])
+            if not (clusterings_arr.dtype.names and clustering_id in clusterings_arr.dtype.names):
+                raise HTTPException(status_code=404, detail=f"Clustering ID {clustering_id} not found in data")
+
+            clusterings_data = cast(np.ndarray, clusterings_arr[:])
+            codes = cast(np.ndarray, clusterings_data[clustering_id])
+
+            # Vectorised lookup via numpy object array
+            max_id = int(codes.max()) if codes.size else 0
+            lookup = np.empty(max_id + 1, dtype=object)
+            for k, v in clusters_map.items():
+                if 0 <= k <= max_id:
+                    lookup[k] = v
+            values = lookup[codes]
+            return [v if v is not None else "Unknown" for v in values]
+
+        # Handle Genes — translate name → column index using the cached
+        # sidecar when available, falling back to a var/_index scan otherwise.
+        gene_index = find_gene_index(dataset.converted_path, feature)
+
+        if gene_index == -1 and 'var' in cast(MutableMapping, z):
+            # Last-ditch fallback: some legacy stores keep the name list under
+            # var/Gene rather than var/_index.
             var_group = z['var']
-            if isinstance(var_group, zarr.Group):
-                # Try standard index first (usually _index)
-                # But AnnData usually stores index in .zattrs['_index']
-                # Or we can look for 'index' or 'Gene' arrays
-                
-                var_index_name = 'index' # Default
-                # Check if .zattrs exists in store (it's a key in the store)
-                if hasattr(var_group.store, '__contains__') and '.zattrs' in var_group.store: 
-                    # We can check attrs
-                    if '_index' in var_group.attrs:
-                        var_index_name = cast(str, var_group.attrs['_index'])
-                elif isinstance(var_group.store, dict) and '.zattrs' in var_group.store:
-                     if '_index' in var_group.attrs:
-                        var_index_name = cast(str, var_group.attrs['_index'])
-                
-                if var_index_name in var_group:
-                    var_index = cast(zarr.Array, var_group[var_index_name])
-                    # This might be slow if we read all genes. 
-                    # Optimization: Check if we can search without loading everything?
-                    # Zarr doesn't support search. We have to load.
-                    # But 'var' is usually small enough (20k-30k strings)
-                    
-                    genes = cast(np.ndarray, var_index[:])
-                    # Handle bytes if necessary
-                    if genes.dtype.kind == 'S':
-                        genes = genes.astype(str)
-                        
-                    # Find index
-                    # np.where returns a tuple
-                    matches = np.where(genes == feature)[0]
-                    if len(matches) > 0:
-                        gene_index = matches[0]
-                
-                # If not found in index, try 'Gene' column if it exists (SCope convention sometimes)
-                if gene_index == -1 and 'Gene' in var_group:
-                    gene_col = cast(zarr.Array, var_group['Gene'])
-                    genes = cast(np.ndarray, gene_col[:])
-                    if genes.dtype.kind == 'S':
-                        genes = genes.astype(str)
-                    matches = np.where(genes == feature)[0]
-                    if len(matches) > 0:
-                        gene_index = matches[0]
+            if isinstance(var_group, zarr.Group) and 'Gene' in var_group:
+                gene_col = cast(zarr.Array, var_group['Gene'])
+                genes = cast(np.ndarray, gene_col[:])
+                if genes.dtype.kind == 'S':
+                    genes = genes.astype(str)
+                matches = np.where(genes == feature)[0]
+                if len(matches) > 0:
+                    gene_index = int(matches[0])
 
         if gene_index != -1:
             # Get expression data
-            # Usually in X, but X can be a group (CSC/CSR) or array
             if 'X' in cast(MutableMapping, z):
                 x_obj = z['X']
                 if isinstance(x_obj, zarr.Array):
-                    # Dense array
-                    # Shape is (n_obs, n_vars)
-                    # We want all obs for one var: [:, gene_index]
-                    return cast(np.ndarray, x_obj[:, gene_index]).tolist()
+                    # Dense (cells, genes) — single column read
+                    return _numeric_response(cast(np.ndarray, x_obj[:, gene_index]))
                 elif isinstance(x_obj, zarr.Group):
-                    # Sparse matrix (CSC or CSR)
-                    # AnnData stores sparse matrices as groups with data, indices, indptr
-                    # We need to know the format.
-                    # Usually 'encoding-type' in attrs
                     encoding = x_obj.attrs.get('encoding-type')
                     if encoding == 'csc_matrix':
-                        # Compressed Sparse Column
-                        # Efficient for column slicing (getting a gene)
-                        # data, indices, indptr
-                        # We need to reconstruct the column
-                        
-                        # This is complex to do efficiently with Zarr without loading too much
-                        # But for a single column, it's doable if we know the range in data/indices
-                        
                         indptr = cast(zarr.Array, x_obj['indptr'])
-                        # Range for column i is indptr[i] to indptr[i+1]
-                        # indptr[i] returns a numpy scalar, we need to convert to int
-                        # Cast to Any first to avoid mypy errors about .item() on int/float union
                         start = int(cast(Any, indptr[gene_index]).item())
-                        end = int(cast(Any, indptr[gene_index+1]).item())
-                        
+                        end = int(cast(Any, indptr[gene_index + 1]).item())
+
                         data = cast(zarr.Array, x_obj['data'])
                         indices = cast(zarr.Array, x_obj['indices'])
-                        
                         col_data = cast(np.ndarray, data[start:end])
                         col_indices = cast(np.ndarray, indices[start:end])
-                        
-                        # Create full array of zeros
-                        n_obs = z.attrs['n_obs'] if 'n_obs' in z.attrs else 0
-                        # Fallback for n_obs
-                        if n_obs == 0 and 'obs' in cast(MutableMapping, z):
-                             obs_group = z['obs']
-                             if isinstance(obs_group, zarr.Group) and 'index' in obs_group:
-                                 n_obs = cast(zarr.Array, obs_group['index']).shape[0]
-                        
-                        res = np.zeros(cast(int, n_obs), dtype=np.float64)
-                        res[col_indices] = col_data
-                        return res.tolist()
-                        
-                    elif encoding == 'csr_matrix':
-                        # Compressed Sparse Row
-                        # Inefficient for column slicing
-                        # We have to scan all rows? That's too slow.
-                        # Or maybe we can just load it if it fits in memory? No.
-                        
-                        # For now, raise error or implement slow scan?
-                        # Or maybe we can use scipy if we can load chunks?
-                        
-                        # Let's try to load the whole matrix if it's not too huge?
-                        # No, that defeats the purpose.
-                        
-                        # If it's CSR, getting a column is hard.
-                        # We might have to iterate over chunks.
-                        
-                        raise HTTPException(status_code=501, detail="CSR matrix slicing for genes not yet optimized")
-                    else:
-                         # Try to guess or handle legacy formats
-                         if 'data' in x_obj and 'indices' in x_obj and 'indptr' in x_obj:
-                             # Assume CSC if not specified? Or check shape?
-                             # Usually AnnData uses CSR for X.
-                             # If it is CSR, we are in trouble for speed.
-                             pass
-                         pass
 
-        # Handle regular features
+                        # Determine n_obs from store shape attrs or fall back
+                        n_obs = 0
+                        shape_attr = x_obj.attrs.get('shape')
+                        if shape_attr is not None:
+                            n_obs = int(shape_attr[0])
+                        elif 'n_obs' in z.attrs:
+                            n_obs = int(z.attrs['n_obs'])
+                        elif 'obs' in cast(MutableMapping, z):
+                            obs_group = z['obs']
+                            if isinstance(obs_group, zarr.Group) and 'index' in obs_group:
+                                n_obs = cast(zarr.Array, obs_group['index']).shape[0]
+
+                        res = np.zeros(n_obs, dtype=np.float32)
+                        res[col_indices] = col_data
+                        return _numeric_response(res)
+
+                    elif encoding == 'csr_matrix':
+                        raise HTTPException(status_code=501, detail="CSR matrix slicing for genes not yet optimized")
+
+        # Handle regular features (obs columns)
         if 'obs' in cast(MutableMapping, z):
             obs_obj = z['obs']
             if isinstance(obs_obj, zarr.Group):
                 obs_map = cast(MutableMapping, obs_obj)
                 if feature in obs_map:
                     obj = obs_map[feature]
-                    
+
                     if isinstance(obj, zarr.Group):
-                        # Handle categorical (AnnData format)
+                        # Categorical (AnnData format)
                         if 'codes' in cast(MutableMapping, obj) and 'categories' in cast(MutableMapping, obj):
                             codes_arr = cast(zarr.Array, obj['codes'])
                             cats_arr = cast(zarr.Array, obj['categories'])
                             codes = cast(np.ndarray, codes_arr[:])
                             cats = cast(np.ndarray, cats_arr[:])
-                            
-                            # Decode categories if bytes
+
                             if cats.dtype.kind == 'S':
                                 cats = cats.astype(str)
-                            
-                            # Map codes to categories
+
                             if codes.min() >= 0:
                                 values = cats[codes]
                                 return values.tolist()
-                            else:
-                                # Handle missing values (-1)
-                                res = np.empty(codes.shape, dtype=object)
-                                mask = codes >= 0
-                                res[mask] = cats[codes[mask]]
-                                # res[~mask] = None # Implicitly None for object array if not set? No, it's uninitialized or None.
-                                # Actually np.empty(dtype=object) initializes to None usually? No, it's uninitialized (garbage).
-                                # We should set it to None explicitly.
-                                res[~mask] = cast(Any, None)
-                                return res.tolist()
-                        else:
-                            # Return empty or error for unknown group types
-                            return []
-                    else:
-                        # Regular Array
-                        arr = cast(zarr.Array, obj)
-                        values = cast(np.ndarray, arr[:])
-                        # If bytes, decode
-                        if values.dtype.kind == 'S':
-                            values = values.astype(str)
-                        
-                        return values.tolist()
-                else:
-                    raise HTTPException(status_code=404, detail="Feature not found")
-            else:
+                            res = np.empty(codes.shape, dtype=object)
+                            mask = codes >= 0
+                            res[mask] = cats[codes[mask]]
+                            res[~mask] = cast(Any, None)
+                            return res.tolist()
+                        return []
+
+                    # Regular array
+                    arr = cast(zarr.Array, obj)
+                    values = cast(np.ndarray, arr[:])
+                    # Numeric → octet-stream; strings → JSON
+                    if values.dtype.kind in ('f', 'i', 'u', 'b'):
+                        return _numeric_response(values)
+                    if values.dtype.kind == 'S':
+                        values = values.astype(str)
+                    return values.tolist()
+
                 raise HTTPException(status_code=404, detail="Feature not found")
-        else:
             raise HTTPException(status_code=404, detail="Feature not found")
+        raise HTTPException(status_code=404, detail="Feature not found")
+    except HTTPException:
+        raise
     except Exception as e:
-        # Log the full error for debugging
-        import traceback
-        traceback.print_exc()
+        logger.exception("Error reading feature %s", feature)
         raise HTTPException(status_code=500, detail=f"Error reading feature: {str(e)}")

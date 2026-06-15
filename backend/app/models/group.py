@@ -29,7 +29,7 @@ class Group(Base):
     description = Column(String, nullable=True)
     owner_id = Column(Uuid(as_uuid=True), ForeignKey("users.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     owner = relationship("User", back_populates="owned_groups")
     members = relationship("GroupMember", back_populates="group", cascade="all, delete-orphan")

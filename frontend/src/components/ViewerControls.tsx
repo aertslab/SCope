@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import api from '../api/client'
+import { fetchGeneExpression } from '../api/expression'
 import { Search, Layers, X } from 'lucide-react'
 import { useToast } from '../context/ToastContext'
 
@@ -53,9 +54,12 @@ export function ViewerControls({ datasetId, onColorChange, normalization, initia
       if ((normalization === 'cpm' || normalization === 'log_cpm') && !librarySize) {
           const fetchLibSize = async () => {
               try {
-                  const config = projectPassword ? { headers: { 'x-project-password': projectPassword } } : {}
-                  const res = await api.get(`/datasets/${datasetId}/feature/__library_size__`, config)
-                  setLibrarySize(res.data)
+                  const headers = projectPassword ? { 'x-project-password': projectPassword } : undefined
+                  const res = await api.get(`/datasets/${datasetId}/feature/__library_size__`, {
+                      headers,
+                      responseType: 'arraybuffer' as const,
+                  })
+                  setLibrarySize(Array.from(new Float32Array(res.data as ArrayBuffer)))
               } catch (e) {
                   console.error("Failed to fetch library size", e)
                   addToast("Library size not found. CPM normalization might be inaccurate.", "info")
@@ -104,15 +108,13 @@ export function ViewerControls({ datasetId, onColorChange, normalization, initia
                   setLoading(true)
                   try {
                       const newSelectedGenes: SelectedGene[] = []
-                      const config = projectPassword ? { headers: { 'x-project-password': projectPassword }, responseType: 'arraybuffer' as const } : { responseType: 'arraybuffer' as const }
                       // Load all genes
                       for (let i = 0; i < initialSelection.items.length; i++) {
                           const gene = initialSelection.items[i]
                           if (!gene) continue
                           if (i >= 3) break // Max 3
 
-                          const res = await api.get(`/datasets/${datasetId}/expression/${gene}`, config)
-                          const floatArray = new Float32Array(res.data)
+                          const floatArray = await fetchGeneExpression(datasetId, gene, projectPassword)
                           newSelectedGenes.push({
                               name: gene,
                               slot: i,
@@ -233,9 +235,7 @@ export function ViewerControls({ datasetId, onColorChange, normalization, initia
           setActiveFeature(null)
       }
 
-      const config = projectPassword ? { headers: { 'x-project-password': projectPassword }, responseType: 'arraybuffer' as const } : { responseType: 'arraybuffer' as const }
-      const res = await api.get(`/datasets/${datasetId}/expression/${gene}`, config)
-      const floatArray = new Float32Array(res.data)
+      const floatArray = await fetchGeneExpression(datasetId, gene, projectPassword)
       
       let slot = targetSlot
       if (slot === undefined) {
@@ -287,32 +287,40 @@ export function ViewerControls({ datasetId, onColorChange, normalization, initia
       setSelectedGenes([])
       setActiveFeature(feature.name)
 
-      const config = projectPassword ? { headers: { 'x-project-password': projectPassword } } : {}
+      const isContinuous = feature.type !== 'categorical'
+      const baseHeaders = projectPassword ? { 'x-project-password': projectPassword } : undefined
+      const config = isContinuous
+          ? { headers: baseHeaders, responseType: 'arraybuffer' as const }
+          : { headers: baseHeaders }
+
       const res = await api.get(`/datasets/${datasetId}/feature/${feature.name}`, config)
-      const values = res.data
-      
+
       let numericValues: number[] = []
       let customColors: Float32Array | null = null
+      let rawValues: any[] = []
       const legendData: { label: string, color: string }[] = []
 
-      if (values.length > 0) {
-          if (feature.type === 'categorical') {
-              // Categorical: Map to indices
-              // Filter out nulls for unique set
+      if (isContinuous) {
+          // Server returned a Float32 binary buffer — decode in one shot.
+          const floats = new Float32Array(res.data as ArrayBuffer)
+          numericValues = Array.from(floats)
+          rawValues = numericValues
+      } else {
+          const values = res.data as any[]
+          rawValues = values
+          if (values && values.length > 0) {
               const unique = Array.from(new Set(values.filter((v: any) => v !== null))) as string[]
               unique.sort()
               const map = new Map(unique.map((v, i) => [v, i]))
-              
+
               numericValues = values.map((v: any) => {
-                  if (v === null || v === undefined) return 0 
+                  if (v === null || v === undefined) return 0
                   return map.get(v) ?? 0
               })
 
-              // Generate custom colors
               customColors = new Float32Array(values.length * 3)
               const colorMap = new Map<string, number[]>()
-              
-              // Assign colors to unique values
+
               unique.forEach((val, i) => {
                   const hex = BIG_COLOR_LIST[i % BIG_COLOR_LIST.length]
                   colorMap.set(val, hexToRgb(hex))
@@ -320,7 +328,7 @@ export function ViewerControls({ datasetId, onColorChange, normalization, initia
               })
 
               values.forEach((v: any, i: number) => {
-                  let rgb = [0.8, 0.8, 0.8] // Default grey for null
+                  let rgb = [0.8, 0.8, 0.8]
                   if (v !== null && v !== undefined) {
                       rgb = colorMap.get(v) || [0, 0, 0]
                   }
@@ -328,18 +336,10 @@ export function ViewerControls({ datasetId, onColorChange, normalization, initia
                   customColors![i * 3 + 1] = rgb[1]
                   customColors![i * 3 + 2] = rgb[2]
               })
-
-          } else {
-              // Continuous
-              // Ensure numbers
-              numericValues = values.map((v: any) => {
-                  if (v === null || v === undefined) return 0
-                  return Number(v)
-              })
           }
       }
-      
-      updateColors([], feature.name, numericValues, customColors, legendData, values, restoredLegendSelection)
+
+      updateColors([], feature.name, numericValues, customColors, legendData, rawValues, restoredLegendSelection)
 
     } catch (e) {
       console.error(e)

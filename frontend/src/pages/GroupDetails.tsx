@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../api/client'
 import { Group, GroupMember, User } from '../types'
-import { Trash2, UserPlus, Search, ArrowRightLeft } from 'lucide-react'
+import { Trash2, UserPlus, Search, ArrowRightLeft, Pencil, LogOut, Mail, X } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { useToast } from '../context/ToastContext'
 
@@ -13,6 +13,7 @@ export default function GroupDetails() {
   const { user: currentUser } = useAuthStore()
   const [group, setGroup] = useState<Group | null>(null)
   const [members, setMembers] = useState<GroupMember[]>([])
+  const [invitations, setInvitations] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   
   // Add member state
@@ -26,6 +27,11 @@ export default function GroupDetails() {
   const [showTransfer, setShowTransfer] = useState(false)
   const [transferTarget, setTransferTarget] = useState<string | null>(null)
 
+  // Edit group state
+  const [showEdit, setShowEdit] = useState(false)
+  const [editName, setEditName] = useState('')
+  const [editDesc, setEditDesc] = useState('')
+
   const currentMember = members.find(m => m.user_id === currentUser?.id)
   const isOwner = currentMember?.role === 'owner'
   const isAdmin = currentMember?.role === 'admin' || isOwner
@@ -37,14 +43,51 @@ export default function GroupDetails() {
     }
   }, [id])
 
+  // Re-fetch pending invitations whenever membership changes (so we know if
+  // the viewer is now an admin who can see them).
+  useEffect(() => {
+    if (id && isAdmin) {
+      fetchInvitations()
+    }
+  }, [id, isAdmin])
+
 
   const fetchGroupDetails = async () => {
     try {
       const res = await api.get(`/groups/${id}`)
       setGroup(res.data)
+      setEditName(res.data.name || '')
+      setEditDesc(res.data.description || '')
     } catch (err) {
       console.error(err)
       navigate('/groups')
+    }
+  }
+
+  const handleSaveGroup = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!id) return
+    try {
+      await api.put(`/groups/${id}`, { name: editName, description: editDesc })
+      addToast('Group updated', 'success')
+      setShowEdit(false)
+      fetchGroupDetails()
+    } catch (err: any) {
+      console.error(err)
+      addToast(err.response?.data?.detail || 'Failed to update group', 'error')
+    }
+  }
+
+  const handleLeaveGroup = async () => {
+    if (!id) return
+    if (!confirm('Are you sure you want to leave this group?')) return
+    try {
+      await api.post(`/groups/${id}/leave`)
+      addToast('You left the group', 'success')
+      navigate('/groups')
+    } catch (err: any) {
+      console.error(err)
+      addToast(err.response?.data?.detail || 'Failed to leave group', 'error')
     }
   }
 
@@ -102,17 +145,41 @@ export default function GroupDetails() {
   const handleAddMember = async () => {
     if (!selectedUser || !id) return
     try {
-      await api.post(`/groups/${id}/members`, {
+      // Send an invitation rather than adding directly: the user must accept.
+      await api.post(`/groups/${id}/invitations`, {
         user_id: selectedUser.id,
-        role: selectedRole
+        role: selectedRole,
       })
       setShowAddMember(false)
       setSelectedUser(null)
       setSearchQuery('')
-      fetchGroupMembers()
+      addToast('Invitation sent', 'success')
+      fetchInvitations()
+    } catch (err: any) {
+      console.error(err)
+      const detail = err?.response?.data?.detail
+      addToast(typeof detail === 'string' ? detail : 'Failed to send invitation', 'error')
+    }
+  }
+
+  const fetchInvitations = async () => {
+    if (!id || !isAdmin) return
+    try {
+      const res = await api.get(`/groups/${id}/invitations`)
+      setInvitations(res.data)
     } catch (err) {
       console.error(err)
-      addToast('Failed to add member', 'error')
+    }
+  }
+
+  const handleRevokeInvitation = async (invitationId: string) => {
+    if (!confirm('Revoke this invitation?')) return
+    try {
+      await api.delete(`/invitations/${invitationId}`)
+      fetchInvitations()
+    } catch (err) {
+      console.error(err)
+      addToast('Failed to revoke invitation', 'error')
     }
   }
 
@@ -150,15 +217,60 @@ export default function GroupDetails() {
             <h1 className="text-3xl font-bold text-gray-900">{group.name}</h1>
             <p className="mt-2 text-gray-600">{group.description}</p>
         </div>
-        {isOwner && (
+        <div className="flex items-center gap-2">
+          {isAdmin && (
+            <button
+                onClick={() => setShowEdit(s => !s)}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            >
+                <Pencil className="mr-2 h-4 w-4" /> Edit
+            </button>
+          )}
+          {currentMember && !isOwner && (
+            <button
+                onClick={handleLeaveGroup}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50"
+            >
+                <LogOut className="mr-2 h-4 w-4" /> Leave Group
+            </button>
+          )}
+          {isOwner && (
             <button
                 onClick={handleDeleteGroup}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
             >
                 <Trash2 className="mr-2 h-4 w-4" /> Delete Group
             </button>
-        )}
+          )}
+        </div>
       </div>
+
+      {showEdit && isAdmin && (
+        <form onSubmit={handleSaveGroup} className="bg-white shadow sm:rounded-lg mb-6 p-6 space-y-4 border border-gray-200">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Name</label>
+            <input
+              type="text"
+              required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
+              value={editName}
+              onChange={e => setEditName(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Description</label>
+            <textarea
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2 h-24 resize-none"
+              value={editDesc}
+              onChange={e => setEditDesc(e.target.value)}
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <button type="button" onClick={() => setShowEdit(false)} className="px-4 py-2 text-sm rounded-md border border-gray-300 bg-white hover:bg-gray-50">Cancel</button>
+            <button type="submit" className="px-4 py-2 text-sm rounded-md text-white bg-indigo-600 hover:bg-indigo-700">Save</button>
+          </div>
+        </form>
+      )}
 
       <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
         <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
@@ -331,6 +443,38 @@ export default function GroupDetails() {
             </li>
           ))}
         </ul>
+
+        {isAdmin && invitations.length > 0 && (
+          <div className="border-t border-gray-200">
+            <div className="px-4 py-3 sm:px-6 bg-gray-50">
+              <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Mail className="h-4 w-4" /> Pending invitations ({invitations.length})
+              </h4>
+            </div>
+            <ul className="divide-y divide-gray-200">
+              {invitations.map((inv) => (
+                <li key={inv.id} className="px-4 py-3 sm:px-6 flex items-center justify-between">
+                  <div className="text-sm">
+                    <div className="text-gray-900 font-medium">
+                      {inv.invitee_id}
+                    </div>
+                    <div className="text-gray-500 text-xs">
+                      Invited as {inv.role} ·{' '}
+                      {new Date(inv.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleRevokeInvitation(inv.id)}
+                    className="text-gray-500 hover:text-red-600"
+                    title="Revoke invitation"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   )

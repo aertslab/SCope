@@ -23,8 +23,10 @@ class DatasetInDBBase(DatasetBase):
     converted_path: Optional[str] = None
     converted_size: Optional[int] = 0
     status: str
+    failure_reason: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
+    deleted_at: Optional[datetime] = None
     meta_data: Optional[Dict[str, Any]] = None
 
     model_config = ConfigDict(from_attributes=True)

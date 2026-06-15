@@ -1,37 +1,70 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../store/useAuthStore'
 import { useEffect, useState } from 'react'
-import { LayoutDashboard, Folder, Users, Shield, LogOut, User as UserIcon, Menu, X } from 'lucide-react'
+import { LayoutDashboard, Folder, Users, Shield, LogOut, User as UserIcon, Menu, X, Globe, MailWarning } from 'lucide-react'
 import { Button } from './ui/Button'
+import api from '../api/client'
+import { useToast } from '../context/ToastContext'
+import NotificationBell from './NotificationBell'
 
 export default function Layout() {
   const { isAuthenticated, user, logout, fetchUser } = useAuthStore()
   const navigate = useNavigate()
   const location = useLocation()
+  const { addToast } = useToast()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [resendingEmail, setResendingEmail] = useState(false)
+  const [emailResent, setEmailResent] = useState(false)
 
   useEffect(() => {
-    if (isAuthenticated && !user) {
+    // The auth cookie is HttpOnly so JS can't see it: probe /users/me on every
+    // mount to discover whether a session is alive. Cheap call, runs once.
+    if (!user) {
       fetchUser()
     }
-  }, [isAuthenticated, user, fetchUser])
+  }, [])
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     navigate('/login')
   }
 
+  const handleResendVerification = async () => {
+    setResendingEmail(true)
+    try {
+      await api.post('/send-verification-email')
+      setEmailResent(true)
+      addToast('Verification email sent. Check your inbox.', 'success')
+    } catch {
+      // Global interceptor surfaces the error toast.
+    } finally {
+      setResendingEmail(false)
+    }
+  }
+
   const isViewer = location.pathname.startsWith('/viewer')
+  // Hide the banner on auth pages so signup/verify flows aren't cluttered.
+  const showVerifyBanner =
+    isAuthenticated &&
+    user &&
+    user.email_verified_at == null &&
+    user.has_password !== false &&
+    !location.pathname.startsWith('/verify-email') &&
+    !location.pathname.startsWith('/login') &&
+    !location.pathname.startsWith('/register')
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, current: location.pathname === '/dashboard' },
-    { name: 'Projects', href: '/projects', icon: Folder, current: location.pathname.startsWith('/projects') },
-    { name: 'Groups', href: '/groups', icon: Users, current: location.pathname.startsWith('/groups') },
+    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, current: location.pathname === '/dashboard', authOnly: true },
+    { name: 'Projects', href: '/projects', icon: Folder, current: location.pathname.startsWith('/projects') && !location.pathname.startsWith('/public'), authOnly: true },
+    { name: 'Groups', href: '/groups', icon: Users, current: location.pathname.startsWith('/groups'), authOnly: true },
+    { name: 'Public', href: '/public', icon: Globe, current: location.pathname.startsWith('/public'), authOnly: false },
   ]
 
   if (user?.is_superuser) {
-    navigation.push({ name: 'Admin', href: '/admin', icon: Shield, current: location.pathname.startsWith('/admin') })
+    navigation.push({ name: 'Admin', href: '/admin', icon: Shield, current: location.pathname.startsWith('/admin'), authOnly: true })
   }
+
+  const visibleNavigation = navigation.filter((item) => !item.authOnly || isAuthenticated)
 
   return (
     <div className={`h-screen flex flex-col overflow-hidden ${isViewer ? 'bg-black' : 'bg-gray-50'}`}>
@@ -46,7 +79,7 @@ export default function Layout() {
                 <span className="font-bold text-xl text-gray-900 tracking-tight">SCope v2</span>
               </Link>
               <div className="hidden sm:ml-8 sm:flex sm:space-x-8">
-                {isAuthenticated && navigation.map((item) => (
+                {visibleNavigation.map((item) => (
                   <Link
                     key={item.name}
                     to={item.href}
@@ -64,7 +97,8 @@ export default function Layout() {
             </div>
             <div className="flex items-center">
               {isAuthenticated ? (
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <NotificationBell />
                   <Link to="/profile" className="hidden md:flex items-center gap-2 text-sm text-gray-700 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-100 transition-colors">
                     <UserIcon className="w-4 h-4 text-gray-500" />
                     <span className="font-medium">{user?.full_name || user?.email}</span>
@@ -104,7 +138,7 @@ export default function Layout() {
         {isMobileMenuOpen && (
             <div className="sm:hidden border-t border-gray-200">
                 <div className="pt-2 pb-3 space-y-1">
-                    {isAuthenticated && navigation.map((item) => (
+                    {visibleNavigation.map((item) => (
                         <Link
                             key={item.name}
                             to={item.href}
@@ -125,6 +159,26 @@ export default function Layout() {
             </div>
         )}
       </header>
+      {showVerifyBanner && !isViewer && (
+        <div className="bg-yellow-50 border-b border-yellow-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm text-yellow-800">
+              <MailWarning className="h-4 w-4 flex-shrink-0" />
+              <span>
+                Please verify your email address ({user?.email}) to access all features.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleResendVerification}
+              disabled={resendingEmail || emailResent}
+              className="text-sm font-medium text-yellow-900 hover:text-yellow-700 underline disabled:opacity-60 disabled:no-underline"
+            >
+              {emailResent ? 'Email sent' : resendingEmail ? 'Sending…' : 'Resend email'}
+            </button>
+          </div>
+        </div>
+      )}
       <main className={`flex-1 flex flex-col ${isViewer ? 'overflow-hidden' : 'overflow-auto'}`}>
         {isViewer ? (
             <Outlet />

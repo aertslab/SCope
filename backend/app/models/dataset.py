@@ -17,10 +17,14 @@ class Dataset(Base):
     converted_path = Column(String, nullable=True)
     converted_size = Column(BigInteger, nullable=True, default=0) # Size in bytes
     status = Column(String, default="pending")  # pending, processing, ready, failed
+    failure_reason = Column(String, nullable=True)
     owner_id = Column(Uuid(as_uuid=True), ForeignKey("users.id"))
     data_file_id = Column(Uuid(as_uuid=True), ForeignKey("data_files.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    # Set when the dataset is moved to trash. Filtered out of default queries;
+    # cleared on restore. Hard-deletion drops the row entirely.
+    deleted_at = Column(DateTime(timezone=True), nullable=True, index=True)
     meta_data = Column(JSON, nullable=True)
 
     owner = relationship("User", back_populates="datasets")

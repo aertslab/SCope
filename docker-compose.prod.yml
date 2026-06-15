@@ -1,21 +1,31 @@
 version: '3.8'
 
+# Production compose file. All secrets MUST be supplied via the host
+# environment or a sibling .env file (see ./backend/.env.example). The
+# database and Redis are intentionally NOT published to the host — only
+# the frontend (and backend, indirectly via the frontend's nginx proxy)
+# are reachable from outside the compose network.
+#
+# Required env vars at deploy time:
+#   POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
+#   JWT_SECRET, SESSION_SECRET   (set in ./backend/.env)
+#   FRONTEND_URL                  (HTTPS origin, e.g. https://scope.example.org)
+
 services:
   db:
     image: postgres:15-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_USER=scope
-      - POSTGRES_PASSWORD=scope_password
-      - POSTGRES_DB=scope_db
-    ports:
-      - "5432:5432"
+      - POSTGRES_USER=${POSTGRES_USER:?POSTGRES_USER is required}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      - POSTGRES_DB=${POSTGRES_DB:?POSTGRES_DB is required}
+    # No ports: stanza — Postgres is only reachable on the internal compose
+    # network. Operators who need direct access should use `docker compose exec`.
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    # No ports: stanza for the same reason as db.
 
   backend:
     build:
@@ -24,9 +34,9 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      - DATABASE_URL=postgresql+asyncpg://scope:scope_password@db:5432/scope_db
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=changethis_in_production
+      # Secrets MUST be provided via backend/.env (JWT_SECRET, SESSION_SECRET).
     depends_on:
       - db
       - redis
@@ -39,7 +49,7 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      - DATABASE_URL=postgresql+asyncpg://scope:scope_password@db:5432/scope_db
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       - REDIS_URL=redis://redis:6379/0
     depends_on:
       - db

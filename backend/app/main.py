@@ -1,7 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
+from app.core.limiter import limiter
+from app.core.csrf import CSRFMiddleware
 from app.api.v1.api import api_router
 
 app = FastAPI(
@@ -9,8 +13,20 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
-# Add Session Middleware for OAuth
-app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
+# Rate limiter: shared instance keyed by client IP, registered on app.state
+# so route handlers can attach @limiter.limit(...) decorators.
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Session Middleware backs Authlib's OAuth state. Uses its own secret, not the JWT one.
+app.add_middleware(SessionMiddleware, secret_key=settings.SESSION_SECRET)
+
+# Double-submit CSRF guard. add_middleware is LIFO (most recently added
+# wraps the others), so we register CSRF *before* CORS \u2014 that way CORS
+# becomes the outermost middleware and any 403 we emit from here still
+# carries the Access-Control-Allow-* headers, letting the browser surface
+# the real error to the SPA instead of a generic CORS failure.
+app.add_middleware(CSRFMiddleware)
 
 # Set all CORS enabled origins
 if settings.BACKEND_CORS_ORIGINS:
@@ -18,8 +34,16 @@ if settings.BACKEND_CORS_ORIGINS:
         CORSMiddleware,
         allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        allow_headers=[
+            "Authorization",
+            "Content-Type",
+            "X-Project-Password",
+            "X-CSRF-Token",
+            "Accept",
+            "Origin",
+            "X-Requested-With",
+        ],
     )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)

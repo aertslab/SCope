@@ -15,6 +15,7 @@ class ProjectShareCreate(ProjectShareBase):
 from app.schemas.user import User
 from app.schemas.group import Group
 from app.schemas.dataset import Dataset
+from app.schemas.tag import Tag
 
 class ProjectShare(ProjectShareBase):
     id: UUID
@@ -38,6 +39,10 @@ class ProjectUpdate(ProjectBase):
     name: Optional[str] = None
     password: Optional[str] = None
 
+
+class ProjectTransferOwnership(BaseModel):
+    new_owner_id: UUID
+
 class Project(ProjectBase):
     id: UUID
     name: str
@@ -45,6 +50,7 @@ class Project(ProjectBase):
     created_at: datetime
     shares: List[ProjectShare] = []
     datasets: List[Dataset] = []
+    tags: List[Tag] = []
 
     class Config:
         from_attributes = True
