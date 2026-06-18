@@ -6,35 +6,19 @@ import { useToast } from '../context/ToastContext';
 export default function AuthCallback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { setToken, fetchUser } = useAuthStore();
+  const { fetchUser } = useAuthStore();
   const { addToast } = useToast();
   const processedRef = useRef(false);
 
   useEffect(() => {
     if (processedRef.current) return;
 
-    // Legacy support: if the backend (or a CLI) still passes a token in the
-    // URL, accept it once and then clean the address bar. New backend versions
-    // set an HttpOnly cookie instead and never expose the token in the URL.
-    const legacyToken = searchParams.get('token');
+    // OAuth tokens are delivered exclusively via an HttpOnly cookie set by the
+    // backend on redirect — never in the URL. We only read non-secret status
+    // flags here. (The old ?token= query path was removed: a token in the URL
+    // leaks via Referer, history, and server logs.)
     const error = searchParams.get('error');
     const successMsg = searchParams.get('success');
-
-    const cleanUrl = () => {
-      try { window.history.replaceState({}, document.title, window.location.pathname); } catch { /* ignore */ }
-    };
-
-    if (legacyToken) {
-      processedRef.current = true;
-      cleanUrl();
-      setToken(legacyToken)
-        .then((ok: boolean) => {
-          if (ok) { addToast('Successfully logged in', 'success'); navigate('/dashboard'); }
-          else   { addToast('Failed to verify session', 'error'); navigate('/login'); }
-        })
-        .catch(() => { addToast('Failed to complete login', 'error'); navigate('/login'); });
-      return;
-    }
 
     if (successMsg === 'orcid_linked') {
       processedRef.current = true;
@@ -65,7 +49,7 @@ export default function AuthCallback() {
         else   { addToast('Failed to verify session', 'error'); navigate('/login'); }
       })
       .catch(() => { addToast('Failed to complete login', 'error'); navigate('/login'); });
-  }, [searchParams, navigate, setToken, fetchUser, addToast]);
+  }, [searchParams, navigate, fetchUser, addToast]);
 
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">

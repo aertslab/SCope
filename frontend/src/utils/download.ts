@@ -1,23 +1,14 @@
 import api from '../api/client'
 
 /**
- * Download the original uploaded file for a dataset.
- *
- * Uses the API client (with cookie + Bearer auth) to fetch the file as a blob,
- * then triggers a synthetic download via an object URL. Works for both JWT
- * cookie sessions and PAT users.
+ * Fetch an API path as a blob (with cookie + Bearer auth) and trigger a
+ * synthetic browser download, honoring a server-provided Content-Disposition
+ * filename when present.
  */
-export async function downloadDatasetFile(
-  datasetId: string,
-  suggestedFilename?: string,
-): Promise<void> {
-  const response = await api.get(`/datasets/${datasetId}/download`, {
-    responseType: 'blob',
-  })
+async function fetchAndSave(path: string, fallbackName: string): Promise<void> {
+  const response = await api.get(path, { responseType: 'blob' })
 
-  // Try to honor the server-provided filename; fall back to the caller's hint
-  // and finally to the dataset id.
-  let filename = suggestedFilename || `dataset-${datasetId}`
+  let filename = fallbackName
   const disposition = response.headers['content-disposition']
   if (disposition) {
     const match = /filename="?([^"]+)"?/i.exec(disposition)
@@ -37,4 +28,24 @@ export async function downloadDatasetFile(
     // Defer revocation slightly so the browser has time to start the save.
     setTimeout(() => URL.revokeObjectURL(url), 1000)
   }
+}
+
+/** Download the original uploaded file for a dataset. */
+export function downloadDatasetFile(
+  datasetId: string,
+  suggestedFilename?: string,
+): Promise<void> {
+  return fetchAndSave(`/datasets/${datasetId}/download`, suggestedFilename || `dataset-${datasetId}`)
+}
+
+/**
+ * Export a dataset's converted data as standard AnnData .h5ad (materialized
+ * from the TileDB-SOMA store on the server). Useful to get a portable h5ad out
+ * of a loom upload, or to round-trip the data.
+ */
+export function downloadDatasetExport(
+  datasetId: string,
+  suggestedFilename?: string,
+): Promise<void> {
+  return fetchAndSave(`/datasets/${datasetId}/export`, suggestedFilename || `dataset-${datasetId}.h5ad`)
 }

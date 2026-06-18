@@ -6,11 +6,15 @@ carries an optional JSON payload for type-specific metadata (e.g. the
 group_invitation_id on a "group_invitation" notification) and an optional
 ``link`` which the frontend uses as a click target.
 """
-from sqlalchemy import Column, DateTime, ForeignKey, String, Uuid, Index
+from sqlalchemy import Column, DateTime, ForeignKey, String, Uuid, Index, JSON
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 from app.db.base import Base
 import uuid
+
+# JSONB on Postgres (indexable, binary), generic JSON elsewhere (e.g. SQLite in
+# hermetic tests) so the schema is portable for `Base.metadata.create_all`.
+PayloadJSON = JSONB().with_variant(JSON(), "sqlite")
 
 
 class Notification(Base):
@@ -31,7 +35,7 @@ class Notification(Base):
     message = Column(String, nullable=True)
     link = Column(String, nullable=True)
     # JSONB on Postgres; SQLAlchemy maps to dict at the Python layer.
-    payload = Column(JSONB, nullable=True)
+    payload = Column(PayloadJSON, nullable=True)
     read_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 

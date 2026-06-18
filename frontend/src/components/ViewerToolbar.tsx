@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Settings as SettingsIcon, Share2, Copy, Check, Lasso } from 'lucide-react'
+import { Settings as SettingsIcon, Share2, Copy, Check, Lasso, Filter } from 'lucide-react'
 import { useViewerStore } from '../store/useViewerStore'
 import { ColorScaleControl } from './ColorScaleControl'
 import { SettingsPanel } from './SettingsPanel'
@@ -13,6 +13,8 @@ interface ViewerToolbarProps {
     onSettingsToggle: () => void
     isColorScaleOpen: boolean
     onColorScaleToggle: () => void
+    isFilterOpen: boolean
+    onFilterToggle: () => void
     onReset: () => void
 }
 
@@ -25,9 +27,11 @@ export function ViewerToolbar({
     onSettingsToggle,
     isColorScaleOpen,
     onColorScaleToggle,
+    isFilterOpen,
+    onFilterToggle,
     onReset
 }: ViewerToolbarProps) {
-    const { 
+    const {
         metadata,
         settings,
         colours,
@@ -35,8 +39,11 @@ export function ViewerToolbar({
         lassoMode,
         setSettings,
         setColorRanges,
-        setLassoMode
+        setLassoMode,
+        filterTokens
     } = useViewerStore()
+
+    const hasFilter = filterTokens.length > 0
 
     const [isCopied, setIsCopied] = useState(false)
 
@@ -87,12 +94,24 @@ export function ViewerToolbar({
             </div>
 
             {/* Lasso Button */}
-            <button 
+            <button
                 onClick={() => setLassoMode(!lassoMode)}
-                className={`text-white p-2 rounded transition-colors mr-2 ${lassoMode ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-800 hover:bg-gray-700'}`}
+                className={`text-white p-2 rounded transition-colors ${lassoMode ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-800 hover:bg-gray-700'}`}
                 title={lassoMode ? "Deactivate Lasso Selection" : "Activate Lasso Selection"}
             >
                 <Lasso size={20} />
+            </button>
+
+            {/* Filter Button — expands the filter bar. A dot marks an active filter. */}
+            <button
+                onClick={onFilterToggle}
+                className={`relative text-white p-2 rounded transition-colors mr-2 ${isFilterOpen || hasFilter ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-800 hover:bg-gray-700'}`}
+                title={hasFilter ? 'Filter active' : isFilterOpen ? 'Hide filter bar' : 'Filter cells'}
+            >
+                <Filter size={20} />
+                {hasFilter && (
+                    <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-amber-400 border border-gray-900" />
+                )}
             </button>
 
             {/* Color Scale Control */}

@@ -3,18 +3,18 @@ import os
 import logging
 import threading
 from collections import OrderedDict
-from typing import Any, List, Optional, cast, MutableMapping
+from typing import Any, List, Optional
 import aiofiles
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Header
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Header, Request, Query
 from fastapi.concurrency import run_in_threadpool
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_, and_, func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
-import zarr
-import json
 import numpy as np
 from uuid import UUID
 from fastapi.responses import JSONResponse, Response, FileResponse
+from starlette.background import BackgroundTask
 
 from app.api import deps
 from app.models.user import User
@@ -22,14 +22,23 @@ from app.models.dataset import Dataset
 from app.models.data_file import DataFile
 from app.models.project import Project, ProjectVisibility, ProjectShare, project_dataset
 from app.models.group import GroupMember
-from app.schemas.dataset import Dataset as DatasetSchema, DatasetCreate, DatasetUpdate
+from app.schemas.dataset import (
+    Dataset as DatasetSchema,
+    DatasetCreate,
+    DatasetUpdate,
+    DatasetListItem,
+    DatasetListResponse,
+    DatasetProjectRef,
+    TrashedDataset,
+)
 from app.worker import process_dataset
 from app.core.config import settings
 from app.core.security import verify_password_async
 from app.services.permissions import get_user_project_permission
 from app.services.audit import record_audit
-from app.utils.zarr_cache import find_gene_index, load_gene_index, load_metadata, open_zarr
-from app.utils import zarr_cache
+from app.services.dataset_purge import purge_dataset_completely
+from app.utils import soma_cache, soma_reader
+from app.utils.soma_cache import find_gene_index
 
 router = APIRouter()
 
@@ -42,10 +51,10 @@ UPLOAD_DIR = "uploads"
 # Hot-path cache for gene expression columns.
 #
 # The viewer hammers /expression/{gene} every time the user picks a gene; for
-# a 60k-cell × 30k-gene zarr store each request decompresses a column-shard
-# off disk which can take 1-3s the first time. Once decoded the bytes are
-# tiny (n_cells × 4) and immutable until the dataset is reconverted, so a
-# small process-local LRU pays for itself within the first repeat click.
+# a large SOMA store the first sparse-column read off disk has real latency.
+# Once decoded the bytes are tiny (n_cells × 4) and immutable until the dataset
+# is reconverted, so a small process-local LRU pays for itself within the first
+# repeat click.
 #
 # Capacity is in *bytes*, not entries, so a workspace with one giant dataset
 # doesn't blow memory while another with many small ones still gets good
@@ -93,41 +102,15 @@ def _invalidate_expression_cache(prefix: Optional[str] = None) -> None:
 
 
 def _read_expression_column(path: str, idx: int) -> bytes:
-    """Decompress one column of X off disk. Runs in a threadpool."""
+    """Read one gene's column across all cells from the SOMA store → float32
+    bytes. Runs in a threadpool; result cached by (path, idx)."""
     cached = _expression_cache_get((path, idx))
     if cached is not None:
         return cached
-    z = cast(zarr.Group, open_zarr(path))
-    x_arr = cast(zarr.Array, z["X"])
-    column = cast(np.ndarray, x_arr[:, idx])
-    if column.dtype != np.float32:
-        column = column.astype(np.float32, copy=False)
-    payload = column.tobytes()
+    payload = soma_reader.read_expression_column(path, idx)
     _expression_cache_put((path, idx), payload)
     return payload
 
-
-def _read_regulon_expression(path: str, gene: str) -> Optional[bytes]:
-    """Threadpool-safe lookup for AUC values stored under obsm/Regulons*."""
-    z = cast(zarr.Group, open_zarr(path))
-    obsm_group = z.get("obsm") if isinstance(z, MutableMapping) else None  # type: ignore[arg-type]
-    if not isinstance(obsm_group, zarr.Group):
-        return None
-    for reg_key in ("RegulonsAUC", "MotifRegulonsAUC", "TrackRegulonsAUC"):
-        if reg_key not in obsm_group:
-            continue
-        try:
-            obj = obsm_group[reg_key]
-            if isinstance(obj, zarr.Array):
-                if hasattr(obj.dtype, "names") and gene in (obj.dtype.names or ()):
-                    arr = np.asarray(obj[gene]).astype(np.float32, copy=False)
-                    return arr.tobytes()
-            elif isinstance(obj, zarr.Group) and gene in obj:
-                arr = np.asarray(obj[gene][:]).astype(np.float32, copy=False)
-                return arr.tobytes()
-        except Exception:
-            logger.exception("Error reading regulon %s from %s", gene, reg_key)
-    return None
 
 if not os.path.exists(UPLOAD_DIR):
     os.makedirs(UPLOAD_DIR)
@@ -164,8 +147,46 @@ async def _stream_upload_to_disk(
                         detail=f"Upload exceeds maximum allowed size of {max_bytes} bytes",
                     )
                 await out.write(chunk)
-    except Exception:
-        # Best-effort cleanup of the partial file.
+    except BaseException:
+        # Best-effort cleanup of the partial file. Catch BaseException (not just
+        # Exception) so a request cancelled mid-upload — a client/proxy
+        # disconnect raises asyncio.CancelledError — doesn't leave a partial file.
+        try:
+            if os.path.exists(destination):
+                os.remove(destination)
+        except OSError:
+            pass
+        raise
+    return total
+
+
+async def _stream_request_body_to_disk(
+    request: Request,
+    destination: str,
+    max_bytes: int,
+) -> int:
+    """Stream the raw request body to `destination`. Returns bytes written.
+
+    Unlike multipart/form-data (which makes Starlette spool the whole upload to a
+    temp file before the handler even runs — doubling disk use and buffering
+    100 GB+ files through the temp dir), this consumes ``request.stream()``
+    directly, writing to disk in constant memory. Aborts with 413 past
+    `max_bytes`; cleans up the partial file on any failure/cancellation.
+    """
+    total = 0
+    try:
+        async with aiofiles.open(destination, "wb") as out:
+            async for chunk in request.stream():
+                if not chunk:
+                    continue
+                total += len(chunk)
+                if total > max_bytes:
+                    raise HTTPException(
+                        status_code=413,
+                        detail=f"Upload exceeds maximum allowed size of {max_bytes} bytes",
+                    )
+                await out.write(chunk)
+    except BaseException:
         try:
             if os.path.exists(destination):
                 os.remove(destination)
@@ -244,34 +265,102 @@ async def check_dataset_access(
 
     raise HTTPException(status_code=403, detail="Not enough permissions")
 
-@router.get("/", response_model=List[DatasetSchema])
+_SORT_COLUMNS = {
+    "name": Dataset.name,
+    "created_at": Dataset.created_at,
+    "file_size": Dataset.file_size,
+    "status": Dataset.status,
+}
+
+
+def _visibility_value(v: Any) -> str:
+    """ProjectVisibility may be stored as a str or an enum; normalize to str."""
+    return getattr(v, "value", v)
+
+
+@router.get("/", response_model=DatasetListResponse)
 async def read_datasets(
     db: AsyncSession = Depends(deps.get_db),
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 50,
+    search: Optional[str] = None,
+    status: Optional[str] = None,
+    sort_by: str = "created_at",
+    sort_order: str = "desc",
     current_user: User = Depends(deps.get_current_active_user),
 ) -> Any:
+    """Retrieve the caller's datasets (superusers see all), with server-side
+    search, status filter, sorting, and pagination so the list scales to
+    hundreds/thousands of datasets. Each row includes its owning project(s),
+    who it is shared with, size, and dates — no per-row follow-up requests.
     """
-    Retrieve datasets.
-    """
-    if current_user.is_superuser:
-        result = await db.execute(
-            select(Dataset)
-            .where(Dataset.deleted_at.is_(None))
-            .offset(skip)
-            .limit(limit)
-        )
-    else:
-        result = await db.execute(
-            select(Dataset)
-            .where(
-                Dataset.owner_id == current_user.id,
-                Dataset.deleted_at.is_(None),
+    base = select(Dataset).where(Dataset.deleted_at.is_(None))
+    count_q = select(func.count(Dataset.id)).where(Dataset.deleted_at.is_(None))
+
+    if not current_user.is_superuser:
+        base = base.where(Dataset.owner_id == current_user.id)
+        count_q = count_q.where(Dataset.owner_id == current_user.id)
+
+    if search and search.strip():
+        like = f"%{search.strip()}%"
+        cond = or_(Dataset.name.ilike(like), Dataset.description.ilike(like))
+        base = base.where(cond)
+        count_q = count_q.where(cond)
+
+    if status:
+        base = base.where(Dataset.status == status)
+        count_q = count_q.where(Dataset.status == status)
+
+    sort_col = _SORT_COLUMNS.get(sort_by, Dataset.created_at)
+    base = base.order_by(sort_col.asc() if sort_order == "asc" else sort_col.desc())
+
+    # Eager-load projects + their shares (with user/group) so we can render the
+    # "project" and "shared with" columns without N+1 queries. Bounded by limit.
+    base = base.options(
+        selectinload(Dataset.projects).selectinload(Project.shares).joinedload(ProjectShare.user),
+        selectinload(Dataset.projects).selectinload(Project.shares).joinedload(ProjectShare.group),
+    ).offset(skip).limit(limit)
+
+    total = await db.scalar(count_q)
+    rows = (await db.execute(base)).scalars().unique().all()
+
+    items: list[DatasetListItem] = []
+    for ds in rows:
+        proj_refs: list[DatasetProjectRef] = []
+        shared: set[str] = set()
+        highest = "private"
+        for p in ds.projects:
+            vis = _visibility_value(p.visibility)
+            proj_refs.append(DatasetProjectRef(id=p.id, name=p.name, visibility=vis))
+            if vis == "public":
+                highest = "public"
+                shared.add("Public")
+            elif vis == "password" and highest != "public":
+                highest = "password"
+            for sh in p.shares:
+                if sh.user is not None:
+                    shared.add(sh.user.email)
+                elif sh.group is not None:
+                    shared.add(sh.group.name)
+        items.append(
+            DatasetListItem(
+                id=ds.id,
+                name=ds.name,
+                description=ds.description,
+                file_type=ds.file_type,
+                status=ds.status,
+                failure_reason=ds.failure_reason,
+                file_size=ds.file_size,
+                converted_size=ds.converted_size,
+                created_at=ds.created_at,
+                updated_at=ds.updated_at,
+                projects=proj_refs,
+                shared_with=sorted(shared),
+                visibility=highest,
             )
-            .offset(skip)
-            .limit(limit)
         )
-    return result.scalars().all()
+
+    return DatasetListResponse(items=items, total=total or 0)
 
 @router.post("/check_hash")
 async def check_hash(
@@ -290,30 +379,43 @@ async def check_hash(
 
 @router.post("/", response_model=DatasetSchema)
 async def create_dataset(
-    *,
+    request: Request,
+    name: str = Query(..., description="Display name for the dataset"),
+    file_type: str = Query(..., description="loom | h5ad | csv"),
+    file_hash: str = Query(..., description="MD5 of the file, used for de-duplication"),
+    description: Optional[str] = Query(None),
     db: AsyncSession = Depends(deps.get_db),
-    name: str = Form(...),
-    description: str = Form(None),
-    file_type: str = Form(...),
-    file_hash: str = Form(...),
-    file: Optional[UploadFile] = File(None),
     current_user: User = Depends(deps.get_current_active_user),
 ) -> Any:
+    """Create a dataset by streaming the file as the raw request body.
+
+    Metadata is passed as query params; the body is the raw file bytes
+    (``application/octet-stream``). This streams straight to disk in constant
+    memory — multipart/form-data would instead make Starlette spool the entire
+    file to a temp dir first, doubling disk use and making 100 GB+ uploads
+    impractical.
+
+    If ``file_hash`` already exists, links to the stored file (no body needed).
     """
-    Create new dataset. 
-    If file_hash exists, link to it.
-    If not, upload file and create DataFile.
-    """
+    logger.info(
+        "Dataset upload request: user=%s name=%r file_type=%s hash=%s declared_bytes=%s",
+        current_user.id, name, file_type, file_hash,
+        request.headers.get("content-length") or "?",
+    )
+
     # Check if DataFile exists
     result = await db.execute(select(DataFile).where(DataFile.file_hash == file_hash))
     data_file = result.scalars().first()
 
     if data_file:
-        # Check if user already has this dataset
+        # Already-uploaded check ignores TRASHED datasets: if the user's only
+        # copy is in the trash, let them re-create an active one (links to the
+        # same stored file).
         existing_link = await db.execute(
             select(Dataset).where(
                 Dataset.owner_id == current_user.id,
-                Dataset.data_file_id == data_file.id
+                Dataset.data_file_id == data_file.id,
+                Dataset.deleted_at.is_(None),
             )
         )
         if existing_link.scalars().first():
@@ -336,65 +438,207 @@ async def create_dataset(
         db.add(dataset)
         await db.commit()
         await db.refresh(dataset)
+        await record_audit(
+            db, actor=current_user, action="dataset.create",
+            resource_type="dataset", resource_id=dataset.id,
+            extra={"name": dataset.name, "file_type": file_type, "deduped": True},
+        )
+        await db.commit()
+        logger.info(
+            "Linked dataset %s to existing file (hash=%s, status=%s, dedup) for user %s",
+            dataset.id, file_hash, data_file.status, current_user.id,
+        )
+        # The stored file may never have been converted (e.g. its original upload
+        # was cancelled after the DataFile row committed but before conversion was
+        # queued — leaving it 'pending'/'failed' with no task). Without this, a
+        # dataset linked to such a file would sit unprocessed forever. Re-trigger
+        # conversion when the file isn't already converted/in-flight.
+        if (data_file.status or "pending") in ("pending", "failed"):
+            process_dataset.delay(str(dataset.id), data_file.file_path)
+            logger.info(
+                "Linked file is %s — enqueued conversion for dataset %s",
+                data_file.status, dataset.id,
+            )
         return dataset
-    
-    # New Upload
-    if not file:
-        raise HTTPException(status_code=400, detail="File required for new upload")
 
+    # New Upload
     if file_type not in ALLOWED_FILE_TYPES:
         raise HTTPException(
             status_code=400,
             detail=f"Unsupported file_type. Allowed: {sorted(ALLOWED_FILE_TYPES)}",
         )
 
-    file_location = f"{UPLOAD_DIR}/{file_hash}.{file_type}" # Use hash for filename to avoid collisions
+    # Capture the owner id as a plain value BEFORE the rollback below: rollback()
+    # EXPIRES every ORM object in the session, so reading current_user.id after
+    # the (possibly multi-minute) upload would trigger a lazy reload — which is
+    # illegal in async SQLAlchemy (MissingGreenlet) and 500s the whole request
+    # after the bytes are already on disk.
+    owner_id = current_user.id
 
-    # Stream to disk in chunks; enforce MAX_UPLOAD_BYTES; clean up on failure.
-    file_size = await _stream_upload_to_disk(
-        file, file_location, settings.MAX_UPLOAD_BYTES
+    # Release the read transaction opened by the de-dup SELECT above before the
+    # (potentially very long) upload. Otherwise the connection sits "idle in
+    # transaction" for the whole stream and can be reclaimed by the pool / killed
+    # by Postgres' idle_in_transaction_session_timeout, making the post-upload
+    # commit fail.
+    await db.rollback()
+
+    file_location = f"{UPLOAD_DIR}/{file_hash}.{file_type}"  # hash filename avoids collisions
+
+    # Stream the raw request body straight to disk (constant memory, no temp
+    # spool); enforce MAX_UPLOAD_BYTES; clean up on failure/cancellation.
+    logger.info("Streaming upload body to %s …", file_location)
+    file_size = await _stream_request_body_to_disk(
+        request, file_location, settings.MAX_UPLOAD_BYTES
+    )
+    if file_size == 0:
+        # No body and the hash wasn't known above ⇒ nothing to create. Remove the
+        # empty placeholder the open() created.
+        try:
+            os.remove(file_location)
+        except OSError:
+            pass
+        logger.warning("Upload for hash=%s had an empty body; nothing created.", file_hash)
+        raise HTTPException(status_code=400, detail="Request body (file bytes) required for a new upload")
+
+    logger.info("Upload complete: %s (%.1f MiB on disk)", file_location, file_size / (1024 * 1024))
+
+    # Persist DataFile + Dataset. The bytes are already on disk, so if anything
+    # here fails — including the request being CANCELLED (client/proxy disconnect
+    # on a long upload, which raises asyncio.CancelledError) — remove the orphan
+    # and log it loudly, instead of leaking disk with no DB record (the exact
+    # symptom this guards against).
+    file_has_owner = False  # some DataFile row references file_location
+    try:
+        data_file = DataFile(
+            file_hash=file_hash,
+            file_path=file_location,
+            file_size=file_size,
+            status="pending",
+        )
+        db.add(data_file)
+        try:
+            await db.commit()
+            await db.refresh(data_file)
+            file_has_owner = True
+        except IntegrityError:
+            # A concurrent upload of the same bytes won the unique(file_hash)
+            # race. Reuse its DataFile — our on-disk copy is identical bytes at
+            # the same path, so it's now owned by that row; keep the file.
+            await db.rollback()
+            existing = await db.execute(
+                select(DataFile).where(DataFile.file_hash == file_hash)
+            )
+            data_file = existing.scalars().first()
+            if data_file is None:
+                raise
+            file_has_owner = True
+
+        dataset = Dataset(
+            name=name,
+            description=description,
+            file_type=file_type,
+            owner_id=owner_id,
+            data_file_id=data_file.id,
+            status=data_file.status or "pending",
+            file_path=data_file.file_path,
+            file_size=data_file.file_size,
+            converted_path=data_file.converted_path,
+            converted_size=data_file.converted_size,
+        )
+        db.add(dataset)
+        await db.commit()
+        await db.refresh(dataset)
+    except BaseException:
+        logger.exception(
+            "Upload streamed to %s but persisting the dataset failed/was cancelled.",
+            file_location,
+        )
+        # Only delete a genuine orphan — never a file already owned by a DataFile
+        # row (e.g. the concurrent-dedup winner's, which is the same bytes/path).
+        if not file_has_owner:
+            try:
+                os.remove(file_location)
+            except OSError:
+                pass
+        raise
+
+    # Audit is non-fatal: the dataset is already committed and visible.
+    try:
+        # current_user was expired by the rollback above; reload it (awaited, so
+        # no MissingGreenlet) before record_audit reads actor.id / actor.email.
+        await db.refresh(current_user)
+        await record_audit(
+            db, actor=current_user, action="dataset.create",
+            resource_type="dataset", resource_id=dataset.id,
+            extra={"name": dataset.name, "file_type": file_type, "file_size": file_size},
+        )
+        await db.commit()
+    except Exception:
+        logger.warning("Audit log for dataset %s failed (non-fatal)", dataset.id, exc_info=True)
+
+    logger.info(
+        "Created dataset %s (data_file=%s, %d bytes) for user %s",
+        dataset.id, dataset.data_file_id, file_size, owner_id,
     )
 
-    # Create DataFile
-    data_file = DataFile(
-        file_hash=file_hash,
-        file_path=file_location,
-        file_size=file_size,
-        status="pending"
-    )
-    db.add(data_file)
-    await db.commit()
-    await db.refresh(data_file)
+    # Hand off conversion to the worker. If this DataFile was just created
+    # (not the dedup-reuse path) it still needs processing. Pass the id as a
+    # string (consistent with the admin reconvert path) for the JSON broker.
+    process_dataset.delay(str(dataset.id), file_location)
+    logger.info("Enqueued conversion task for dataset %s", dataset.id)
 
-    # Create Dataset
-    dataset = Dataset(
-        name=name,
-        description=description,
-        file_type=file_type,
-        owner_id=current_user.id,
-        data_file_id=data_file.id,
-        status="pending",
-        file_path=file_location,
-        file_size=file_size
-    )
-    db.add(dataset)
-    await db.commit()
-    await db.refresh(dataset)
-
-    # Trigger background task
-    # We pass dataset.id, but the worker should update DataFile too?
-    # The worker updates Dataset.status. We need to update DataFile.status too.
-    # For now, let's update the worker to handle this, OR just rely on Dataset status for the user.
-    # Ideally, worker should update DataFile, and we sync Dataset status?
-    # Or worker updates Dataset, and we have a trigger?
-    # Let's update worker to be aware of DataFile if possible, or just update Dataset for now.
-    # Actually, if multiple Datasets point to same DataFile, and one triggers processing, 
-    # the others should see the update.
-    # So the worker should update DataFile, and Datasets should read from DataFile.
-    # But for now, to minimize changes, let's just process.
-    process_dataset.delay(dataset.id, file_location)
-    
     return dataset
+
+@router.get("/events")
+async def dataset_events(
+    request: Request,
+    current_user: User = Depends(deps.get_current_active_user),
+) -> Any:
+    """Server-Sent Events stream of the caller's dataset status changes.
+
+    The worker publishes ``{dataset_id, status}`` to a per-user Redis channel as
+    conversions progress; this endpoint relays them so the UI updates instantly
+    instead of polling. Auth is via the HttpOnly cookie (EventSource sends it
+    automatically). Registered before ``/{dataset_id}`` so the literal path
+    isn't captured by the UUID route.
+    """
+    import redis.asyncio as aioredis
+    from fastapi.responses import StreamingResponse
+
+    channel = f"scope:ds-events:{current_user.id}"
+
+    async def event_gen():
+        client = aioredis.from_url(settings.REDIS_URL)
+        pubsub = client.pubsub()
+        await pubsub.subscribe(channel)
+        try:
+            yield ": connected\n\n"
+            while True:
+                if await request.is_disconnected():
+                    break
+                msg = await pubsub.get_message(ignore_subscribe_messages=True, timeout=15.0)
+                if msg and msg.get("type") == "message":
+                    data = msg["data"]
+                    if isinstance(data, bytes):
+                        data = data.decode("utf-8")
+                    yield f"data: {data}\n\n"
+                else:
+                    # Comment line keeps the connection (and proxies) alive.
+                    yield ": keepalive\n\n"
+        finally:
+            try:
+                await pubsub.unsubscribe(channel)
+                await pubsub.aclose()
+                await client.aclose()
+            except Exception:  # noqa: BLE001
+                pass
+
+    return StreamingResponse(
+        event_gen(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no", "Connection": "keep-alive"},
+    )
+
 
 @router.get("/{dataset_id}", response_model=DatasetSchema)
 async def read_dataset(
@@ -578,10 +822,11 @@ async def replace_dataset_file(
                 await db.delete(old_df)
                 await db.commit()
         if old_converted_path:
-            zarr_cache.invalidate(old_converted_path)
+            soma_cache.invalidate(old_converted_path)
 
     if trigger_processing:
-        process_dataset.delay(dataset.id, new_file_path)
+        process_dataset.delay(str(dataset.id), new_file_path)
+        logger.info("Enqueued reconversion for replaced dataset %s", dataset.id)
 
     return dataset
 
@@ -640,21 +885,59 @@ async def get_dataset_usage(
         })
     return usage
 
-@router.get("/trash", response_model=List[DatasetSchema])
+@router.get("/trash", response_model=List[TrashedDataset])
 async def list_trashed_datasets(
     db: AsyncSession = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_user),
 ) -> Any:
     """List the current user's soft-deleted datasets, newest deletions first.
 
+    Each item carries its project linkage and, when orphaned, the date it will
+    be auto-purged. A trashed dataset still linked to a project is retained
+    (``auto_purge_at`` null) so projects never lose their data.
+
     Mounted before the parameterized routes so the literal "trash" path is not
     swallowed by ``/{dataset_id}``.
     """
-    base = select(Dataset).where(Dataset.deleted_at.is_not(None))
+    from datetime import timedelta
+
+    base = (
+        select(Dataset)
+        .options(selectinload(Dataset.projects))
+        .where(Dataset.deleted_at.is_not(None))
+    )
     if not current_user.is_superuser:
         base = base.where(Dataset.owner_id == current_user.id)
-    result = await db.execute(base.order_by(Dataset.deleted_at.desc()))
-    return result.scalars().all()
+    rows = (await db.execute(base.order_by(Dataset.deleted_at.desc()))).scalars().unique().all()
+
+    retention = timedelta(days=settings.TRASH_RETENTION_DAYS)
+    items: list[TrashedDataset] = []
+    for ds in rows:
+        proj_refs = [
+            DatasetProjectRef(id=p.id, name=p.name, visibility=_visibility_value(p.visibility))
+            for p in ds.projects
+        ]
+        # Linked datasets are retained indefinitely; only orphans auto-purge.
+        auto_purge_at = None
+        if not proj_refs and ds.deleted_at is not None:
+            auto_purge_at = ds.deleted_at + retention
+        items.append(
+            TrashedDataset(
+                id=ds.id,
+                name=ds.name,
+                description=ds.description,
+                file_type=ds.file_type,
+                status=ds.status,
+                file_size=ds.file_size,
+                converted_size=ds.converted_size,
+                created_at=ds.created_at,
+                deleted_at=ds.deleted_at,
+                projects=proj_refs,
+                project_count=len(proj_refs),
+                auto_purge_at=auto_purge_at,
+            )
+        )
+    return items
 
 
 @router.delete("/{dataset_id}", response_model=DatasetSchema)
@@ -728,99 +1011,71 @@ async def restore_dataset(
     return dataset
 
 
-@router.delete("/{dataset_id}/purge", response_model=DatasetSchema)
+@router.delete("/{dataset_id}/purge")
 async def purge_dataset(
     dataset_id: UUID,
     db: AsyncSession = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.get_current_active_superuser),
 ) -> Any:
-    """Permanently delete a dataset and its physical files.
+    """Permanently delete a trashed dataset and everything referencing it.
 
-    The dataset must already be in the trash (``deleted_at`` set). This is
-    the irreversible step — once the row and files are gone, nothing can be
-    restored.
+    Admin-only: a purge is irreversible AND may destroy data other users still
+    rely on via their projects, so regular users can only soft-delete (trash) /
+    restore — they must ask an admin for permanent removal. (Orphaned trash is
+    also auto-purged after the retention window by the scheduled task.)
+
+    The dataset must already be in the trash (``deleted_at`` set).
     """
     result = await db.execute(select(Dataset).where(Dataset.id == dataset_id))
     dataset = result.scalars().first()
     if not dataset:
         raise HTTPException(status_code=404, detail="Dataset not found")
 
-    if not current_user.is_superuser and dataset.owner_id != current_user.id:
-        raise HTTPException(status_code=400, detail="Not enough permissions")
     if dataset.deleted_at is None:
         raise HTTPException(
             status_code=400,
             detail="Dataset must be in the trash before it can be purged",
         )
 
-    data_file_id = dataset.data_file_id
-
-    # Capture file paths up-front; we still need them after the row is deleted.
-    legacy_file_path = dataset.file_path
-    legacy_converted_path = dataset.converted_path
     purged_name = dataset.name
     purged_id = dataset.id
 
-    await db.delete(dataset)
+    # Complete purge: row + project links + files + DataFile GC + referencing
+    # sessions/notifications + cache (shared with the admin + auto-expire paths).
+    summary = await purge_dataset_completely(db, dataset)
     await record_audit(
         db,
         actor=current_user,
         action="dataset.purge",
         resource_type="dataset",
         resource_id=purged_id,
-        extra={"name": purged_name},
+        extra={"name": purged_name, **summary},
     )
     await db.commit()
 
-    if data_file_id:
-        ref_count_res = await db.execute(
-            select(func.count(Dataset.id)).where(Dataset.data_file_id == data_file_id)
-        )
-        ref_count = ref_count_res.scalar()
-        if ref_count == 0:
-            df_res = await db.execute(select(DataFile).where(DataFile.id == data_file_id))
-            data_file = df_res.scalars().first()
-            if data_file:
-                if data_file.file_path and os.path.exists(data_file.file_path):
-                    try:
-                        os.remove(data_file.file_path)
-                    except Exception:
-                        logger.exception("Error deleting file %s", data_file.file_path)
-                if data_file.converted_path and os.path.exists(data_file.converted_path):
-                    try:
-                        if os.path.isdir(data_file.converted_path):
-                            shutil.rmtree(data_file.converted_path)
-                        else:
-                            os.remove(data_file.converted_path)
-                    except Exception:
-                        logger.exception(
-                            "Error deleting converted file %s", data_file.converted_path
-                        )
-                await db.delete(data_file)
-                await db.commit()
-    else:
-        # Legacy datasets that predate the DataFile table own their paths
-        # directly. Best-effort cleanup; missing files are not an error.
-        if legacy_file_path and os.path.exists(legacy_file_path):
-            try:
-                os.remove(legacy_file_path)
-            except Exception:
-                logger.exception("Error deleting file %s", legacy_file_path)
-        if legacy_converted_path and os.path.exists(legacy_converted_path):
-            try:
-                if os.path.isdir(legacy_converted_path):
-                    shutil.rmtree(legacy_converted_path)
-                else:
-                    os.remove(legacy_converted_path)
-            except Exception:
-                logger.exception(
-                    "Error deleting converted file %s", legacy_converted_path
-                )
+    return {"status": "purged", "id": str(purged_id), **summary}
 
-    if legacy_converted_path:
-        zarr_cache.invalidate(legacy_converted_path)
+@router.get("/{dataset_id}/debug")
+async def debug_dataset(
+    dataset_id: UUID,
+    x_project_password: Optional[str] = Header(None),
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: Optional[User] = Depends(deps.get_current_user_optional),
+) -> Any:
+    """Diagnostics: what the converted SOMA store + sidecars actually contain
+    (measurements, obsm keys, obs columns, embeddings resolved for the viewer).
+    Useful when the viewer reports 'no embeddings'."""
+    dataset = await check_dataset_access(dataset_id, db, current_user, x_project_password)
+    return {
+        "id": str(dataset.id),
+        "status": dataset.status,
+        "converted_format": getattr(dataset, "converted_format", None),
+        "converted_path": dataset.converted_path,
+        "store": await run_in_threadpool(soma_reader.describe, dataset.converted_path)
+        if dataset.converted_path
+        else None,
+    }
 
-    return dataset
 
 @router.get("/{dataset_id}/metadata")
 async def get_dataset_metadata(
@@ -838,7 +1093,10 @@ async def get_dataset_metadata(
         raise HTTPException(status_code=400, detail="Dataset is not ready")
 
     try:
-        return load_metadata(dataset.converted_path) or {}
+        # soma_reader.load_metadata enriches the SCope MetaData sidecar with
+        # embeddings discovered from obsm, so generic h5ad/loom uploads (which
+        # carry no SCope MetaData blob) still expose embeddings to the viewer.
+        return await run_in_threadpool(soma_reader.load_metadata, dataset.converted_path) or {}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reading metadata: {str(e)}")
 
@@ -859,26 +1117,12 @@ async def get_dataset_embedding(
         raise HTTPException(status_code=400, detail="Dataset is not ready")
         
     try:
-        z = cast(zarr.Group, open_zarr(dataset.converted_path))
-        key = f"X_{embedding_name}"
-        
-        if 'obsm' in cast(MutableMapping, z):
-            obsm_obj = z['obsm']
-            if isinstance(obsm_obj, zarr.Group):
-                # Cast to Any to satisfy mypy for 'in' operator
-                obsm_map: Any = obsm_obj
-                if key in obsm_map:
-                    embedding_arr = cast(zarr.Array, obsm_map[key])
-                    data = cast(np.ndarray, embedding_arr[:])
-                    
-                    # Ensure float32 for frontend compatibility and size reduction
-                    if data.dtype != np.float32:
-                        data = data.astype(np.float32)
-
-                    # Return binary data for performance
-                    return Response(content=data.tobytes(), media_type="application/octet-stream")
-        
-        raise HTTPException(status_code=404, detail=f"Embedding {embedding_name} not found")
+        payload = await run_in_threadpool(soma_reader.read_embedding, dataset.converted_path, embedding_name)
+        if payload is None:
+            raise HTTPException(status_code=404, detail=f"Embedding {embedding_name} not found")
+        return Response(content=payload, media_type="application/octet-stream")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reading embedding: {str(e)}")
 
@@ -900,54 +1144,7 @@ async def search_genes(
         raise HTTPException(status_code=400, detail="Dataset is not ready")
     
     try:
-        z = cast(zarr.Group, open_zarr(dataset.converted_path))
-
-        # Prefer the precomputed gene-name list from the sidecar — avoids a
-        # full var/_index decode on every keystroke of the gene-search bar.
-        cached_index = load_gene_index(dataset.converted_path)
-        if cached_index is not None:
-            all_gene_names = list(cached_index.keys())
-        else:
-            var_obj: Any = z['var'] if 'var' in cast(MutableMapping, z) else None
-            if var_obj is None or '_index' not in var_obj:
-                return []
-            var_group = cast(zarr.Group, var_obj)
-            index_arr = cast(zarr.Array, var_group['_index'])
-            all_genes_arr = cast(np.ndarray, index_arr[:])
-            if all_genes_arr.dtype.kind in ('S', 'U'):
-                all_genes_arr = all_genes_arr.astype(str)
-            all_gene_names = all_genes_arr.tolist()
-
-        if query:
-            q = query.lower()
-            matches = [g for g in all_gene_names if q in g.lower()]
-        else:
-            matches = list(all_gene_names)
-
-        # Search in Regulons (obsm) — they're searchable as gene-like names
-        if 'obsm' in cast(MutableMapping, z):
-            obsm_group = z['obsm']
-            if isinstance(obsm_group, zarr.Group):
-                for reg_key in ["RegulonsAUC", "MotifRegulonsAUC", "TrackRegulonsAUC"]:
-                    if reg_key in obsm_group:
-                        try:
-                            obj = obsm_group[reg_key]
-                            reg_names: list = []
-
-                            if isinstance(obj, zarr.Array) and hasattr(obj.dtype, 'names') and obj.dtype.names:
-                                reg_names = list(obj.dtype.names)
-                            elif isinstance(obj, zarr.Group):
-                                reg_names = [k for k in obj.keys() if k != '_index' and not k.startswith('__')]
-
-                            if reg_names:
-                                if query:
-                                    matches.extend([r for r in reg_names if query in r.lower()])
-                                else:
-                                    matches.extend(reg_names)
-                        except Exception:
-                            logger.exception("Error searching regulons in %s", reg_key)
-
-        return matches[:limit]
+        return await run_in_threadpool(soma_reader.search_genes, dataset.converted_path, query, limit)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error searching genes: {str(e)}")
 
@@ -968,42 +1165,7 @@ async def get_features(
         raise HTTPException(status_code=400, detail="Dataset is not ready")
     
     try:
-        z = cast(zarr.Group, open_zarr(dataset.converted_path))
-        features = []
-        
-        # 1. Standard obs columns
-        if 'obs' in cast(MutableMapping, z):
-            obs_group = cast(zarr.Group, z['obs'])
-            keys = list(obs_group.keys())
-            ignored_keys = {'_index', 'Clusterings', 'RegulonsAUC', 'Embedding', 'Embeddings_X', 'Embeddings_Y'}
-            
-            for k in keys:
-                if k in ignored_keys or k.startswith('__'):
-                    continue
-                
-                obj = obs_group[k]
-                ftype = 'continuous' # Default
-                
-                if isinstance(obj, zarr.Group):
-                    if 'codes' in obj and 'categories' in obj:
-                        ftype = 'categorical'
-                elif hasattr(obj, 'dtype'):
-                    # It's an Array
-                    arr = cast(zarr.Array, obj)
-                    if arr.dtype.kind in ('S', 'U', 'O'):
-                        ftype = 'categorical'
-                
-                features.append({"name": k, "type": ftype})
-            
-            # 3. Regulons - REMOVED to prevent pollution. Now accessible via gene search.
-
-        # 2. Clusterings from MetaData (cached parse)
-        meta_json = load_metadata(dataset.converted_path)
-        if meta_json and 'clusterings' in meta_json:
-            for c in meta_json['clusterings']:
-                features.append({"name": f"Clustering: {c['name']}", "type": "categorical"})
-
-        return features
+        return await run_in_threadpool(soma_reader.list_features, dataset.converted_path)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error listing features: {str(e)}")
 
@@ -1046,7 +1208,7 @@ async def get_gene_expression(
                 headers=headers,
             )
 
-        regulon = await run_in_threadpool(_read_regulon_expression, path, gene)
+        regulon = await run_in_threadpool(soma_reader.read_regulon, path, gene)
         if regulon is not None:
             return Response(
                 content=regulon,
@@ -1086,198 +1248,85 @@ async def get_feature_values(
     if dataset.status != "ready" or not dataset.converted_path:
         raise HTTPException(status_code=400, detail="Dataset is not ready")
 
-    def _numeric_response(values: np.ndarray) -> Response:
-        return Response(
-            content=np.ascontiguousarray(values, dtype=np.float32).tobytes(),
-            media_type="application/octet-stream",
-        )
-
     try:
-        z = cast(zarr.Group, open_zarr(dataset.converted_path))
-        
-        # Handle Library Size
-        if feature == "__library_size__":
-            if 'obs' in cast(MutableMapping, z):
-                obs = z['obs']
-                # Common keys for library size
-                keys_to_check = ['n_counts', 'total_counts', 'TotalUMI', 'nCount_RNA', 'n_genes']
-
-                # Case 1: obs is a group (columns are datasets)
-                if isinstance(obs, zarr.Group):
-                    for key in keys_to_check:
-                        if key in obs:
-                            lib_size_arr = cast(zarr.Array, obs[key])
-                            lib_size = cast(np.ndarray, lib_size_arr[:])
-                            return _numeric_response(lib_size)
-
-                # Case 2: obs is an array (structured array)
-                elif isinstance(obs, zarr.Array):
-                    if obs.dtype.names:
-                        for key in keys_to_check:
-                            if key in obs.dtype.names:
-                                obs_data = cast(np.ndarray, obs[:])
-                                lib_size = cast(np.ndarray, obs_data[key])
-                                return _numeric_response(lib_size)
-
-            raise HTTPException(status_code=404, detail="Library size not found in dataset")
-
-        # Handle Regulons
-        if feature.startswith("Regulon: "):
-            regulon_name = feature.replace("Regulon: ", "")
-            if 'obs' in cast(MutableMapping, z):
-                obs_group = z['obs']
-                if isinstance(obs_group, zarr.Group) and 'RegulonsAUC' in cast(MutableMapping, obs_group):
-                    regulons_arr = cast(zarr.Array, obs_group['RegulonsAUC'])
-                    if regulons_arr.dtype.names and regulon_name in regulons_arr.dtype.names:
-                        regulons_data = cast(np.ndarray, regulons_arr[:])
-                        values = cast(np.ndarray, regulons_data[regulon_name])
-                        return _numeric_response(values)
-                    else:
-                        raise HTTPException(status_code=404, detail=f"Regulon {regulon_name} not found")
-
-            raise HTTPException(status_code=404, detail="Regulons data not found")
-
-        # Handle Clusterings
-        if feature.startswith("Clustering: "):
-            clustering_name = feature.replace("Clustering: ", "")
-
-            meta_json = load_metadata(dataset.converted_path)
-            if not meta_json:
-                raise HTTPException(status_code=404, detail="Metadata not found")
-
-            # Find clustering ID
-            clustering_id = None
-            clusters_map: dict = {}
-            if 'clusterings' in meta_json:
-                for c in meta_json['clusterings']:
-                    if c['name'] == clustering_name:
-                        clustering_id = str(c['id'])
-                        for cluster in c['clusters']:
-                            clusters_map[cluster['id']] = cluster['description']
-                        break
-
-            if clustering_id is None or 'obs' not in cast(MutableMapping, z):
-                raise HTTPException(status_code=404, detail="Clustering data not found")
-
-            obs_group = z['obs']
-            if not (isinstance(obs_group, zarr.Group) and 'Clusterings' in cast(MutableMapping, obs_group)):
-                raise HTTPException(status_code=404, detail="Clustering data not found")
-
-            clusterings_arr = cast(zarr.Array, obs_group['Clusterings'])
-            if not (clusterings_arr.dtype.names and clustering_id in clusterings_arr.dtype.names):
-                raise HTTPException(status_code=404, detail=f"Clustering ID {clustering_id} not found in data")
-
-            clusterings_data = cast(np.ndarray, clusterings_arr[:])
-            codes = cast(np.ndarray, clusterings_data[clustering_id])
-
-            # Vectorised lookup via numpy object array
-            max_id = int(codes.max()) if codes.size else 0
-            lookup = np.empty(max_id + 1, dtype=object)
-            for k, v in clusters_map.items():
-                if 0 <= k <= max_id:
-                    lookup[k] = v
-            values = lookup[codes]
-            return [v if v is not None else "Unknown" for v in values]
-
-        # Handle Genes — translate name → column index using the cached
-        # sidecar when available, falling back to a var/_index scan otherwise.
-        gene_index = find_gene_index(dataset.converted_path, feature)
-
-        if gene_index == -1 and 'var' in cast(MutableMapping, z):
-            # Last-ditch fallback: some legacy stores keep the name list under
-            # var/Gene rather than var/_index.
-            var_group = z['var']
-            if isinstance(var_group, zarr.Group) and 'Gene' in var_group:
-                gene_col = cast(zarr.Array, var_group['Gene'])
-                genes = cast(np.ndarray, gene_col[:])
-                if genes.dtype.kind == 'S':
-                    genes = genes.astype(str)
-                matches = np.where(genes == feature)[0]
-                if len(matches) > 0:
-                    gene_index = int(matches[0])
-
-        if gene_index != -1:
-            # Get expression data
-            if 'X' in cast(MutableMapping, z):
-                x_obj = z['X']
-                if isinstance(x_obj, zarr.Array):
-                    # Dense (cells, genes) — single column read
-                    return _numeric_response(cast(np.ndarray, x_obj[:, gene_index]))
-                elif isinstance(x_obj, zarr.Group):
-                    encoding = x_obj.attrs.get('encoding-type')
-                    if encoding == 'csc_matrix':
-                        indptr = cast(zarr.Array, x_obj['indptr'])
-                        start = int(cast(Any, indptr[gene_index]).item())
-                        end = int(cast(Any, indptr[gene_index + 1]).item())
-
-                        data = cast(zarr.Array, x_obj['data'])
-                        indices = cast(zarr.Array, x_obj['indices'])
-                        col_data = cast(np.ndarray, data[start:end])
-                        col_indices = cast(np.ndarray, indices[start:end])
-
-                        # Determine n_obs from store shape attrs or fall back
-                        n_obs = 0
-                        shape_attr = x_obj.attrs.get('shape')
-                        if shape_attr is not None:
-                            n_obs = int(shape_attr[0])
-                        elif 'n_obs' in z.attrs:
-                            n_obs = int(z.attrs['n_obs'])
-                        elif 'obs' in cast(MutableMapping, z):
-                            obs_group = z['obs']
-                            if isinstance(obs_group, zarr.Group) and 'index' in obs_group:
-                                n_obs = cast(zarr.Array, obs_group['index']).shape[0]
-
-                        res = np.zeros(n_obs, dtype=np.float32)
-                        res[col_indices] = col_data
-                        return _numeric_response(res)
-
-                    elif encoding == 'csr_matrix':
-                        raise HTTPException(status_code=501, detail="CSR matrix slicing for genes not yet optimized")
-
-        # Handle regular features (obs columns)
-        if 'obs' in cast(MutableMapping, z):
-            obs_obj = z['obs']
-            if isinstance(obs_obj, zarr.Group):
-                obs_map = cast(MutableMapping, obs_obj)
-                if feature in obs_map:
-                    obj = obs_map[feature]
-
-                    if isinstance(obj, zarr.Group):
-                        # Categorical (AnnData format)
-                        if 'codes' in cast(MutableMapping, obj) and 'categories' in cast(MutableMapping, obj):
-                            codes_arr = cast(zarr.Array, obj['codes'])
-                            cats_arr = cast(zarr.Array, obj['categories'])
-                            codes = cast(np.ndarray, codes_arr[:])
-                            cats = cast(np.ndarray, cats_arr[:])
-
-                            if cats.dtype.kind == 'S':
-                                cats = cats.astype(str)
-
-                            if codes.min() >= 0:
-                                values = cats[codes]
-                                return values.tolist()
-                            res = np.empty(codes.shape, dtype=object)
-                            mask = codes >= 0
-                            res[mask] = cats[codes[mask]]
-                            res[~mask] = cast(Any, None)
-                            return res.tolist()
-                        return []
-
-                    # Regular array
-                    arr = cast(zarr.Array, obj)
-                    values = cast(np.ndarray, arr[:])
-                    # Numeric → octet-stream; strings → JSON
-                    if values.dtype.kind in ('f', 'i', 'u', 'b'):
-                        return _numeric_response(values)
-                    if values.dtype.kind == 'S':
-                        values = values.astype(str)
-                    return values.tolist()
-
-                raise HTTPException(status_code=404, detail="Feature not found")
-            raise HTTPException(status_code=404, detail="Feature not found")
-        raise HTTPException(status_code=404, detail="Feature not found")
+        return await run_in_threadpool(
+            soma_reader.read_feature, dataset.converted_path, feature
+        )
     except HTTPException:
         raise
     except Exception as e:
         logger.exception("Error reading feature %s", feature)
         raise HTTPException(status_code=500, detail=f"Error reading feature: {str(e)}")
+
+
+@router.get("/{dataset_id}/feature/{feature}/categories")
+async def get_feature_categories(
+    dataset_id: UUID,
+    feature: str,
+    x_project_password: Optional[str] = Header(None),
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: Optional[User] = Depends(deps.get_current_user_optional),
+) -> Any:
+    """List the unique category labels of a categorical feature.
+
+    Powers the viewer's filter-builder autocomplete: returns just the distinct
+    labels (sorted, capped) rather than the full per-cell column. Numeric
+    features yield an empty list. Longer path than ``/feature/{feature}`` so it
+    does not collide with it.
+    """
+    dataset = await check_dataset_access(dataset_id, db, current_user, x_project_password)
+
+    if dataset.status != "ready" or not dataset.converted_path:
+        raise HTTPException(status_code=400, detail="Dataset is not ready")
+
+    try:
+        return await run_in_threadpool(
+            soma_reader.list_categories, dataset.converted_path, feature
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Error listing categories for %s", feature)
+        raise HTTPException(status_code=500, detail=f"Error listing categories: {str(e)}")
+
+
+@router.get("/{dataset_id}/export")
+async def export_dataset_h5ad(
+    dataset_id: UUID,
+    x_project_password: Optional[str] = Header(None),
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: Optional[User] = Depends(deps.get_current_user_optional),
+) -> Any:
+    """Export the converted SOMA store back to an .h5ad download.
+
+    Reuses ``check_dataset_access`` so anyone who can view the dataset can
+    export it. The temp file is streamed back and removed afterwards.
+    """
+    dataset = await check_dataset_access(dataset_id, db, current_user, x_project_password)
+    if dataset.status != "ready" or not dataset.converted_path:
+        raise HTTPException(status_code=400, detail="Dataset is not ready")
+
+    from app.utils.soma_converter import export_soma_to_h5ad
+
+    os.makedirs(os.path.join(UPLOAD_DIR, "exports"), exist_ok=True)
+    out_path = os.path.join(UPLOAD_DIR, "exports", f"{dataset.id}.h5ad")
+    try:
+        await run_in_threadpool(export_soma_to_h5ad, dataset.converted_path, out_path)
+    except Exception as e:
+        logger.exception("Export failed for %s", dataset_id)
+        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
+
+    safe_stem = (dataset.name or "dataset").strip().replace("/", "_").replace("\\", "_").strip(". ") or "dataset"
+
+    def _cleanup(path: str = out_path) -> None:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+
+    return FileResponse(
+        path=out_path,
+        filename=f"{safe_stem}.h5ad",
+        media_type="application/octet-stream",
+        background=BackgroundTask(_cleanup),
+    )

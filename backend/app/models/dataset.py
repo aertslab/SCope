@@ -16,6 +16,10 @@ class Dataset(Base):
     file_size = Column(BigInteger, nullable=True, default=0) # Size in bytes
     converted_path = Column(String, nullable=True)
     converted_size = Column(BigInteger, nullable=True, default=0) # Size in bytes
+    # Storage backend of the converted artefact: "soma" (TileDB-SOMA, new) or
+    # "zarr" (legacy). NULL is treated as "zarr" for rows that predate the
+    # migration, so the serving layer can dual-read during the transition.
+    converted_format = Column(String, nullable=True)
     status = Column(String, default="pending")  # pending, processing, ready, failed
     failure_reason = Column(String, nullable=True)
     owner_id = Column(Uuid(as_uuid=True), ForeignKey("users.id"))

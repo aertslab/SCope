@@ -30,6 +30,11 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./backend:/app
+      # Dataset files / TileDB-SOMA stores live in a Docker-managed volume,
+      # NOT under the bind-mounted source tree. This keeps thousands of SOMA
+      # chunk files out of any host-side file watcher / git working tree, and
+      # is shared with the worker (which writes the conversions the API reads).
+      - uploads:/app/uploads
     env_file:
       - ./backend/.env
     environment:
@@ -42,7 +47,12 @@ services:
     depends_on:
       - db
       - redis
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    # Watch ONLY the source package for hot-reload. Without --reload-dir, uvicorn
+    # recursively watches the whole working dir including ./uploads — and a
+    # TileDB-SOMA store has thousands of files, which exhausts the inotify watch
+    # limit ("Cannot allocate memory (os error 12)") the moment a dataset is
+    # converted. Restricting the watch root keeps reload working at any scale.
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir app
 
   worker:
     build:
@@ -50,6 +60,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./backend:/app
+      - uploads:/app/uploads  # shared with backend (see note above)
     env_file:
       - ./backend/.env
     environment:
@@ -58,7 +69,9 @@ services:
     depends_on:
       - db
       - redis
-    command: celery -A app.worker worker --loglevel=info
+    # -B runs the embedded beat scheduler (daily trash auto-purge). Fine for a
+    # single worker; for multiple replicas run one dedicated `celery beat` instead.
+    command: celery -A app.worker worker --loglevel=info -B
 
   frontend:
     build:
@@ -78,3 +91,4 @@ services:
 
 volumes:
   postgres_data:
+  uploads:

@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Eye, EyeOff, Trash2 } from 'lucide-react'
 import { Selection } from '../types'
 
@@ -47,8 +48,13 @@ export function SelectionOverview({
 }
 
 function SelectionCard({ selection, onUpdate, onDelete, activeColorInfo, rawValues, colours, selectionDetails }: any) {
-    // Calculate stats
-    const stats = calculateStats(selection.indices, activeColorInfo, rawValues, colours, selectionDetails)
+    // Stats are O(n) over the selected cells — memoize so renaming/recoloring a
+    // selection (or any unrelated re-render) doesn't recompute over hundreds of
+    // thousands of cells on every keystroke.
+    const stats = useMemo(
+        () => calculateStats(selection.indices, activeColorInfo, rawValues, colours, selectionDetails),
+        [selection.indices, activeColorInfo, rawValues, colours, selectionDetails],
+    )
 
     return (
         <div className="bg-gray-800 rounded p-3 border border-gray-700 text-sm">
@@ -106,7 +112,7 @@ function SelectionCard({ selection, onUpdate, onDelete, activeColorInfo, rawValu
     )
 }
 
-function calculateStats(indices: number[], activeColorInfo: any, rawValues: any[], colours: any, selectionDetails: any) {
+export function calculateStats(indices: number[], activeColorInfo: any, rawValues: any[], colours: any, selectionDetails: any) {
     if (!indices.length) return {}
 
     if (activeColorInfo?.type === 'feature' && rawValues.length) {
@@ -138,22 +144,29 @@ function calculateStats(indices: number[], activeColorInfo: any, rawValues: any[
 
         const stats = []
 
-        // Check slots 0, 1, 2
+        // Check slots 0, 1, 2. Single pass per channel — never spread the value
+        // array into Math.max (it overflows the arg limit / call stack at scale).
+        const n = indices.length
         for (let i = 0; i < 3; i++) {
             const name = geneNames[i]
-            if (colours[i] && name) {
-                const values = indices.map(idx => colours[i][idx])
-                const sum = values.reduce((a, b) => a + b, 0)
-                const mean = sum / values.length
-                const max = Math.max(...values)
-                const nonZero = values.filter(v => v > 0).length
-                
+            const col = colours[i]
+            if (col && name) {
+                let sum = 0
+                let max = -Infinity
+                let nonZero = 0
+                for (let k = 0; k < n; k++) {
+                    const v = col[indices[k]]
+                    if (v === undefined || v === null) continue
+                    sum += v
+                    if (v > max) max = v
+                    if (v > 0) nonZero++
+                }
                 stats.push({
                     name: name,
                     color: i === 0 ? 'red' : i === 1 ? 'green' : 'blue',
-                    mean,
-                    max,
-                    nonZeroPercent: ((nonZero / values.length) * 100).toFixed(1)
+                    mean: n ? sum / n : 0,
+                    max: max === -Infinity ? 0 : max,
+                    nonZeroPercent: (n ? (nonZero / n) * 100 : 0).toFixed(1)
                 })
             }
         }

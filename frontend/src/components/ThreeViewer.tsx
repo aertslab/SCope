@@ -66,10 +66,13 @@ export function ThreeViewer(props: {
   shape?: number
   selections?: Selection[]
   colorRanges?: Record<string, [number, number]>
+  /** 1 = visible, 0 = hidden by the active filter. Restricts auto colour scaling
+   *  to visible cells so the gradient spans the filtered subset's range. */
+  visibilityMask?: Uint8Array | null
 }) {
   const texture1 = useTexture("/images/real_dot.png")
 
-  const { data, colours: propColours, customColors, size, opacities, selections, colorRanges } = props
+  const { data, colours: propColours, customColors, size, opacities, selections, colorRanges, visibilityMask } = props
   
   // 0: Circle, 1: Square, 2: Hexagon Flat, 3: Hexagon Pointy
   const shape = props.shape !== undefined ? props.shape : (props.shader === 'square' ? 1 : 0)
@@ -105,9 +108,20 @@ export function ThreeViewer(props: {
           if (colorRanges && colorRanges[key]) {
               [min, max] = colorRanges[key]
           } else {
+              // Auto-range over VISIBLE cells only (when a filter is active) so the
+              // gradient uses the filtered subset's dynamic range.
               for(let i=0; i<colData.length; i++) {
+                  if (visibilityMask && !visibilityMask[i]) continue
                   if(colData[i] < min) min = colData[i]
                   if(colData[i] > max) max = colData[i]
+              }
+              // If the filter hid every cell with data, fall back to the global
+              // range so normalization stays finite.
+              if (min === Infinity || max === -Infinity) {
+                  for(let i=0; i<colData.length; i++) {
+                      if(colData[i] < min) min = colData[i]
+                      if(colData[i] > max) max = colData[i]
+                  }
               }
           }
           
@@ -130,13 +144,13 @@ export function ThreeViewer(props: {
           }
         }
       } else {
-          // Default grey
+          // Default (nothing selected): light grey. This used to be seeded as a
+          // grey `customColors` array by ThreeViewerPanel, but that buffer
+          // shadowed the first gene selection (Bug 1). The neutral default now
+          // lives here so an unselected viewer looks identical without the
+          // stale-buffer hazard.
           colors = new Float32Array(count * 3)
-          for(let i=0; i<count; i++) {
-              colors[i*3] = 0.1
-              colors[i*3+1] = 0.1
-              colors[i*3+2] = 0.1
-          }
+          colors.fill(0.8)
       }
 
       // Handle sizes
@@ -156,7 +170,7 @@ export function ThreeViewer(props: {
       }
 
       return { positions, colors, sizeArr, opacityArr }
-  }, [data, propColours, customColors, size, opacities, colorRanges])
+  }, [data, propColours, customColors, size, opacities, colorRanges, visibilityMask])
 
   const geometry = useMemo(() => {
       const bg = new THREE.BufferGeometry()

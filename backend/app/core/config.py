@@ -46,8 +46,17 @@ class Settings(BaseSettings):
     AUTH_COOKIE_SECURE: bool = False
     AUTH_COOKIE_DOMAIN: Optional[str] = None
 
-    # Upload limits (Wave 2)
-    MAX_UPLOAD_BYTES: int = 5 * 1024 * 1024 * 1024  # 5 GiB
+    # Upload size cap, enforced as the body streams to disk. Generous by default
+    # to accommodate large single-cell datasets (100 GB+); override via the
+    # MAX_UPLOAD_BYTES env var. nginx is configured to defer to this rather than
+    # impose its own client_max_body_size.
+    MAX_UPLOAD_BYTES: int = 256 * 1024 * 1024 * 1024  # 256 GiB
+
+    # Root log level for the app's own loggers (uvicorn + Celery emit their own).
+    # Without explicit configuration the root logger defaults to WARNING, which
+    # silently drops every logger.info() — set to INFO so upload/processing
+    # activity is visible. Override via the LOG_LEVEL env var.
+    LOG_LEVEL: str = "INFO"
 
     # SMTP / email. When SMTP_HOST is unset, the email service falls back to a
     # console logger so password reset / verification flows still work in dev.
@@ -64,6 +73,16 @@ class Settings(BaseSettings):
 
     # Set to True ONLY in local development to allow startup with the default secret.
     ALLOW_INSECURE_SECRETS: bool = False
+
+    # Apply Alembic migrations to head automatically on app startup. Convenient
+    # for single-instance / docker-compose deploys. Set to False if you run
+    # migrations as a separate step (e.g. a dedicated init job before rollout).
+    RUN_MIGRATIONS_ON_STARTUP: bool = True
+
+    # Trashed datasets are auto-purged after this many days — but ONLY when they
+    # are no longer linked to any project (linked datasets are retained so a
+    # project never loses its data). A daily Celery-beat task enforces this.
+    TRASH_RETENTION_DAYS: int = 30
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -14,6 +14,7 @@ interface AdminDataset {
     file_size: number | null
     converted_size: number | null
     created_at: string
+    deleted_at: string | null
     owner_email: string | null
     project_count: number
 }
@@ -47,7 +48,9 @@ export default function AdminDatasets() {
     const [data, setData] = useState<ListResponse | null>(null)
     const [page, setPage] = useState(0)
     const [statusFilter, setStatusFilter] = useState<string>('')
+    const [deletedFilter, setDeletedFilter] = useState<string>('') // '', 'true', 'false'
     const [loading, setLoading] = useState(true)
+    const [deletingId, setDeletingId] = useState<string | null>(null)
 
     const fetchPage = useCallback(async () => {
         setLoading(true)
@@ -57,6 +60,7 @@ export default function AdminDatasets() {
                 offset: String(page * PAGE),
             })
             if (statusFilter) params.set('status', statusFilter)
+            if (deletedFilter) params.set('deleted', deletedFilter)
             const res = await api.get<ListResponse>(`/admin/datasets?${params}`)
             setData(res.data)
         } catch (e) {
@@ -64,7 +68,7 @@ export default function AdminDatasets() {
         } finally {
             setLoading(false)
         }
-    }, [page, statusFilter])
+    }, [page, statusFilter, deletedFilter])
 
     useEffect(() => {
         fetchPage()
@@ -81,13 +85,18 @@ export default function AdminDatasets() {
     }
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Delete this dataset? This cannot be undone.')) return
+        if (!confirm('Completely purge this dataset — files on disk, database records, project links, and any share links / sessions / notifications referencing it? This cannot be undone.')) return
+        setDeletingId(id)
         try {
-            await api.delete(`/datasets/${id}`)
-            fetchPage()
-        } catch (e) {
+            // Admin force-delete: hard-deletes regardless of trash state (the
+            // user-facing DELETE /datasets/{id} only soft-deletes).
+            await api.delete(`/admin/datasets/${id}`)
+            await fetchPage()
+        } catch (e: any) {
             console.error(e)
-            alert('Failed to delete')
+            alert(e?.response?.data?.detail || 'Failed to delete')
+        } finally {
+            setDeletingId(null)
         }
     }
 
@@ -109,13 +118,22 @@ export default function AdminDatasets() {
                         <option value="processing">Processing</option>
                         <option value="failed">Failed</option>
                     </select>
+                    <select
+                        value={deletedFilter}
+                        onChange={(e) => { setPage(0); setDeletedFilter(e.target.value) }}
+                        className="border border-gray-300 rounded px-2 py-1 text-sm"
+                    >
+                        <option value="">Active + trashed</option>
+                        <option value="false">Active only</option>
+                        <option value="true">Trashed only</option>
+                    </select>
                     <Button variant="outline" leftIcon={<RefreshCw size={16} />} onClick={fetchPage}>Refresh</Button>
                 </div>
             </PageHeader>
 
             <div className="text-sm text-gray-500">{total.toLocaleString()} dataset(s)</div>
 
-            <div className="bg-white shadow rounded-lg overflow-hidden">
+            <div className="bg-white shadow rounded-lg overflow-x-auto">
                 {loading ? (
                     <LoadingState />
                 ) : !data || data.items.length === 0 ? (
@@ -130,38 +148,57 @@ export default function AdminDatasets() {
                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Size</th>
                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Projects</th>
                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
-                                <th className="px-4 py-2"></th>
+                                <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {data.items.map(ds => (
                                 <tr key={ds.id} className="hover:bg-gray-50">
-                                    <td className="px-4 py-2 text-sm font-medium">{ds.name}</td>
+                                    <td className="px-4 py-2 text-sm font-medium">
+                                        {ds.name}
+                                        {ds.deleted_at && (
+                                            <span className="ml-2 text-[10px] uppercase tracking-wide text-red-500">trashed</span>
+                                        )}
+                                    </td>
                                     <td className="px-4 py-2 text-xs text-gray-500">{ds.owner_email || '—'}</td>
                                     <td className="px-4 py-2"><Badge variant={statusVariant(ds.status)}>{ds.status}</Badge></td>
                                     <td className="px-4 py-2 text-sm">
                                         <div>{formatBytes(ds.file_size)}</div>
                                         <div className="text-xs text-gray-500">{formatBytes(ds.converted_size)} converted</div>
                                     </td>
-                                    <td className="px-4 py-2 text-sm">{ds.project_count}</td>
+                                    <td className="px-4 py-2 text-sm">
+                                        {ds.project_count > 0 ? (
+                                            ds.project_count
+                                        ) : (
+                                            <span className="text-amber-600 text-xs font-medium">Unattached</span>
+                                        )}
+                                    </td>
                                     <td className="px-4 py-2 text-xs text-gray-500">
                                         {new Date(ds.created_at).toLocaleString()}
                                     </td>
-                                    <td className="px-4 py-2 text-right">
-                                        <button
-                                            onClick={() => handleReconvert(ds.id)}
-                                            title="Reconvert"
-                                            className="text-gray-400 hover:text-indigo-600 mr-3"
-                                        >
-                                            <RotateCcw size={16} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(ds.id)}
-                                            title="Delete"
-                                            className="text-gray-400 hover:text-red-500"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                    <td className="px-4 py-2 text-right whitespace-nowrap">
+                                        <div className="flex items-center justify-end gap-1">
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => handleReconvert(ds.id)}
+                                                title="Re-queue conversion"
+                                                leftIcon={<RotateCcw className="h-4 w-4" />}
+                                            >
+                                                Reconvert
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                disabled={deletingId === ds.id}
+                                                onClick={() => handleDelete(ds.id)}
+                                                title="Permanently delete (purge everywhere)"
+                                                leftIcon={<Trash2 className="h-4 w-4" />}
+                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                            >
+                                                Delete
+                                            </Button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

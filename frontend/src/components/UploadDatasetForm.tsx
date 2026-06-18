@@ -1,22 +1,32 @@
-import { useState, ChangeEvent, FormEvent, useRef } from 'react'
+import { useState, ChangeEvent, FormEvent, useRef, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useDatasetStore } from '../store/useDatasetStore'
+import api from '../api/client'
+import { apiUrl } from '../api/config'
+import { Project } from '../types'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card'
-import { Upload } from 'lucide-react'
+import { Upload, Terminal, ChevronDown, ChevronRight, Copy, Check } from 'lucide-react'
 
 interface UploadDatasetFormProps {
     onSuccess?: () => void;
     onCancel?: () => void;
     hideTitle?: boolean;
     className?: string;
+    /** Pre-select (and lock) a project — e.g. when uploading from a project page. */
+    projectId?: string;
 }
 
-export function UploadDatasetForm({ onSuccess, onCancel, hideTitle = false, className }: UploadDatasetFormProps) {
+export function UploadDatasetForm({ onSuccess, onCancel, hideTitle = false, className, projectId }: UploadDatasetFormProps) {
     const { uploadDataset } = useDatasetStore()
     const [uploadProgress, setUploadProgress] = useState(0)
     const [uploadStatus, setUploadStatus] = useState<string>('')
     const [uploadError, setUploadError] = useState<string | null>(null)
+    const [projects, setProjects] = useState<Project[]>([])
+    const [selectedProject, setSelectedProject] = useState<string>(projectId ?? '')
+    const [showApiHelp, setShowApiHelp] = useState(false)
+    const [copied, setCopied] = useState(false)
     const [uploadForm, setUploadForm] = useState({
         name: '',
         description: '',
@@ -24,6 +34,52 @@ export function UploadDatasetForm({ onSuccess, onCancel, hideTitle = false, clas
         file: null as File | null,
     })
     const fileInputRef = useRef<HTMLInputElement>(null)
+
+    // Load the projects the user can add datasets to. A locked projectId means
+    // we're already scoped to one project, so the picker is unnecessary.
+    useEffect(() => {
+        if (projectId) return
+        let cancelled = false
+        api.get<Project[]>('/projects/')
+            .then((res) => { if (!cancelled) setProjects(res.data) })
+            .catch(() => { /* picker is optional; ignore fetch failures */ })
+        return () => { cancelled = true }
+    }, [projectId])
+
+    // Fully-qualified endpoint for the curl snippet. apiUrl() returns a path
+    // when same-origin (the default), so fall back to the live origin so the
+    // example is copy-paste runnable.
+    const endpoint = (() => {
+        const u = apiUrl('/datasets/')
+        if (u.startsWith('http')) return u
+        return (typeof window !== 'undefined' ? window.location.origin : '') + u
+    })()
+
+    const curlSnippet = `# 1. Create a Personal Access Token (see link above), then:
+TOKEN="scope_pat_xxxxxxxxxxxxxxxxxxxxxxxx"
+FILE="my_dataset.h5ad"
+
+# 2. Datasets are de-duplicated by content hash — compute the file's MD5:
+HASH=$(md5sum "$FILE" | cut -d' ' -f1)
+
+# 3. Upload. Metadata goes in the query string; the file is the raw request
+#    body. Use -T (--upload-file) so curl STREAMS from disk — works for very
+#    large files (100 GB+) without buffering them in memory. The dataset is
+#    owned by the token's user.
+curl -X POST -T "$FILE" \\
+  "${endpoint}?name=My%20Dataset&description=Uploaded%20via%20API&file_type=h5ad&file_hash=$HASH" \\
+  -H "Authorization: Bearer $TOKEN" \\
+  -H "Content-Type: application/octet-stream"`
+
+    const copySnippet = async () => {
+        try {
+            await navigator.clipboard.writeText(curlSnippet)
+            setCopied(true)
+            setTimeout(() => setCopied(false), 2000)
+        } catch {
+            /* clipboard unavailable (e.g. non-secure context) — no-op */
+        }
+    }
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -57,7 +113,7 @@ export function UploadDatasetForm({ onSuccess, onCancel, hideTitle = false, clas
         setUploadStatus('starting')
 
         try {
-            await uploadDataset(
+            const created = await uploadDataset(
                 uploadForm.name,
                 uploadForm.description,
                 uploadForm.fileType,
@@ -67,7 +123,19 @@ export function UploadDatasetForm({ onSuccess, onCancel, hideTitle = false, clas
                     setUploadStatus(status)
                 }
             )
+            // Attach to the chosen project after the dataset exists. The upload
+            // itself already succeeded, so a failed attach shouldn't be fatal —
+            // the API client surfaces the error toast; we just keep going.
+            if (selectedProject) {
+                setUploadStatus('linking to project')
+                try {
+                    await api.post(`/projects/${selectedProject}/datasets/${created.id}`)
+                } catch (err) {
+                    console.error('Failed to attach dataset to project', err)
+                }
+            }
             setUploadForm({ name: '', description: '', fileType: 'loom', file: null })
+            setSelectedProject(projectId ?? '')
             setUploadProgress(0)
             setUploadStatus('')
             if (onSuccess) onSuccess()
@@ -168,6 +236,24 @@ export function UploadDatasetForm({ onSuccess, onCancel, hideTitle = false, clas
                         </select>
                     </div>
 
+                    {!projectId && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Add to project <span className="text-gray-400 font-normal">(optional)</span>
+                            </label>
+                            <select
+                                value={selectedProject}
+                                onChange={(e) => setSelectedProject(e.target.value)}
+                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
+                            >
+                                <option value="">— No project —</option>
+                                {projects.map((p) => (
+                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
                     {uploadProgress > 0 && (
                         <div className="w-full mb-4">
                             <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
@@ -192,6 +278,53 @@ export function UploadDatasetForm({ onSuccess, onCancel, hideTitle = false, clas
                         </Button>
                     </div>
                 </form>
+
+                {/* API upload instructions — collapsed by default to keep the
+                    common click-to-upload flow uncluttered. */}
+                <div className="mt-6 border-t border-gray-200 pt-4">
+                    <button
+                        type="button"
+                        onClick={() => setShowApiHelp((v) => !v)}
+                        className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-indigo-600"
+                    >
+                        {showApiHelp ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        <Terminal className="h-4 w-4" />
+                        Upload via the API (curl)
+                    </button>
+
+                    {showApiHelp && (
+                        <div className="mt-3 space-y-3 text-sm text-gray-600">
+                            <p>
+                                Prefer scripting your uploads? Authenticate with a Personal Access Token
+                                instead of a browser session. Manage your tokens on the{' '}
+                                <Link to="/tokens" className="font-medium text-indigo-600 hover:text-indigo-500">
+                                    API Tokens
+                                </Link>{' '}
+                                page — a token is shown once on creation, so copy it somewhere safe.
+                            </p>
+                            <div className="relative">
+                                <pre className="overflow-x-auto rounded-md bg-gray-900 p-4 pr-12 text-xs leading-relaxed text-gray-100">
+{curlSnippet}
+                                </pre>
+                                <button
+                                    type="button"
+                                    onClick={copySnippet}
+                                    className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-gray-700/80 px-2 py-1 text-xs text-gray-100 hover:bg-gray-600"
+                                    title="Copy to clipboard"
+                                >
+                                    {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                                    {copied ? 'Copied' : 'Copy'}
+                                </button>
+                            </div>
+                            <p className="text-xs text-gray-500">
+                                The token authenticates as you, so the uploaded dataset is owned by your
+                                account. To attach it to a project, call{' '}
+                                <code className="rounded bg-gray-100 px-1 py-0.5">POST /api/v1/projects/&#123;project_id&#125;/datasets/&#123;dataset_id&#125;</code>{' '}
+                                with the same token.
+                            </p>
+                        </div>
+                    )}
+                </div>
             </CardContent>
         </Card>
     )

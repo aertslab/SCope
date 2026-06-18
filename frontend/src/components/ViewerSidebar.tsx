@@ -34,7 +34,10 @@ export function ViewerSidebar({ currentDatasetId, currentDataset, isOpen, onTogg
                 if (cancelled) return
                 setIsAuthenticated(true)
                 fetchProjects()
-                fetchDatasets()
+                // The sidebar lists the user's full dataset library, so request
+                // a broad page rather than inheriting MyDatasets' filtered/paged
+                // query from the shared store.
+                fetchDatasets({ limit: 1000, skip: 0, search: undefined, status: undefined, sort_by: 'name', sort_order: 'asc' })
             })
             .catch(() => { if (!cancelled) setIsAuthenticated(false) })
         return () => { cancelled = true }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { Bell, Check, X, Mail, Folder, Database, AlertTriangle, ArrowRightLeft } from 'lucide-react'
 import api from '../api/client'
@@ -59,8 +60,22 @@ export default function NotificationBell() {
   const [items, setItems] = useState<Notification[]>([])
   const [unread, setUnread] = useState(0)
   const [loading, setLoading] = useState(false)
+  // The dropdown is portaled to <body> so it can't be trapped behind stacking
+  // contexts created by other parts of the page (e.g. the viewer's toolbar /
+  // WebGL canvas / react-mosaic). `coords` anchors the fixed-position panel to
+  // the bell button.
+  const [coords, setCoords] = useState<{ top: number; right: number } | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const buttonRef = useRef<HTMLButtonElement | null>(null)
+  const dropdownRef = useRef<HTMLDivElement | null>(null)
   const { addToast } = useToast()
+
+  const updateCoords = () => {
+    const r = buttonRef.current?.getBoundingClientRect()
+    if (r) {
+      setCoords({ top: r.bottom + 8, right: Math.max(8, window.innerWidth - r.right) })
+    }
+  }
 
   // Poll the cheap unread-count endpoint so the badge stays roughly fresh
   // without paying for a full list fetch.
@@ -82,16 +97,30 @@ export default function NotificationBell() {
     }
   }, [])
 
-  // Close on outside click.
+  // Close on outside click. The dropdown lives in a body portal, so a click
+  // inside it is "outside" containerRef — check the dropdown ref too.
   useEffect(() => {
     if (!open) return
     const onClick = (e: MouseEvent) => {
-      if (!containerRef.current?.contains(e.target as Node)) {
+      const target = e.target as Node
+      if (!containerRef.current?.contains(target) && !dropdownRef.current?.contains(target)) {
         setOpen(false)
       }
     }
     document.addEventListener('mousedown', onClick)
     return () => document.removeEventListener('mousedown', onClick)
+  }, [open])
+
+  // Keep the portaled panel anchored to the bell if the viewport changes.
+  useEffect(() => {
+    if (!open) return
+    const onReposition = () => updateCoords()
+    window.addEventListener('resize', onReposition)
+    window.addEventListener('scroll', onReposition, true)
+    return () => {
+      window.removeEventListener('resize', onReposition)
+      window.removeEventListener('scroll', onReposition, true)
+    }
   }, [open])
 
   const loadList = async () => {
@@ -109,6 +138,7 @@ export default function NotificationBell() {
 
   const handleToggle = async () => {
     const next = !open
+    if (next) updateCoords()
     setOpen(next)
     if (next) await loadList()
   }
@@ -165,6 +195,7 @@ export default function NotificationBell() {
   return (
     <div className="relative" ref={containerRef}>
       <button
+        ref={buttonRef}
         type="button"
         onClick={handleToggle}
         aria-label="Notifications"
@@ -179,8 +210,12 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {open && (
-        <div className="absolute right-0 mt-2 w-96 max-w-[90vw] bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
+      {open && coords && createPortal(
+        <div
+          ref={dropdownRef}
+          style={{ position: 'fixed', top: coords.top, right: coords.right }}
+          className="w-96 max-w-[90vw] bg-white border border-gray-200 rounded-lg shadow-lg z-[1000] overflow-hidden"
+        >
           <div className="px-4 py-2 border-b border-gray-200 flex items-center justify-between bg-gray-50">
             <span className="text-sm font-semibold text-gray-700">Notifications</span>
             {items.some((n) => !n.read_at) && (
@@ -269,7 +304,8 @@ export default function NotificationBell() {
               </ul>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

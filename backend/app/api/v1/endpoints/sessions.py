@@ -1,6 +1,6 @@
 import hashlib
 import json
-import random
+import secrets
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,20 +8,16 @@ from sqlalchemy import select
 from app.api.deps import get_db, get_current_active_user, get_current_user_optional
 from app.models.session import Session
 from app.models.user import User
-from app.schemas.session import SessionCreate, Session as SessionSchema
-import uuid
+from app.schemas.session import SessionCreate, Session as SessionSchema, SessionPublic
 
 router = APIRouter()
 
 
-def generate_deterministic_id(data: dict, length=8, attempt=0):
-    data_str = json.dumps(data, sort_keys=True)
-    if attempt > 0:
-        data_str += f":{attempt}"
-    seed_str = hashlib.sha256(data_str.encode()).hexdigest()
-    rng = random.Random(seed_str)
-    alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    return ''.join(rng.choice(alphabet) for _ in range(length))
+def _content_hash(data: dict) -> str:
+    """Stable fingerprint of a session payload, used only for internal dedup."""
+    return hashlib.sha256(
+        json.dumps(data, sort_keys=True, default=str).encode("utf-8")
+    ).hexdigest()
 
 
 @router.post("/", response_model=SessionSchema)
@@ -30,38 +26,33 @@ async def create_session(
     db: AsyncSession = Depends(get_db),
     current_user: Optional[User] = Depends(get_current_user_optional),
 ):
+    """Create (or dedupe to) a shareable session.
+
+    The public URL ``id`` is a long, unguessable random token so share links
+    are not enumerable and are not derivable from the payload. Identical
+    payloads still collapse to one row via the internal ``content_hash`` so
+    re-sharing the same workspace yields a stable link.
+    """
     creator_id = current_user.id if current_user else None
+    chash = _content_hash(session_in.data)
 
-    for attempt in range(10):
-        short_id = generate_deterministic_id(session_in.data, attempt=attempt)
-        existing = await db.get(Session, short_id)
-
-        if existing:
-            if existing.data == session_in.data:
-                # Claim ownership if previously anonymous and we're logged in now
-                if existing.created_by is None and creator_id is not None:
-                    existing.created_by = creator_id
-                    await db.commit()
-                    await db.refresh(existing)
-                return existing
-            # Hash collision on different content; try again with a salt.
-            continue
-        else:
-            db_session = Session(
-                id=short_id,
-                data=session_in.data,
-                created_by=creator_id,
-            )
-            db.add(db_session)
+    existing = (
+        await db.execute(select(Session).where(Session.content_hash == chash))
+    ).scalars().first()
+    if existing and existing.data == session_in.data:
+        # Claim ownership if previously anonymous and we're logged in now.
+        if existing.created_by is None and creator_id is not None:
+            existing.created_by = creator_id
             await db.commit()
-            await db.refresh(db_session)
-            return db_session
+            await db.refresh(existing)
+        return existing
 
-    # Fallback to UUID if collision loop fails
+    # 128 bits of entropy in a url-safe token (~22 chars). Not enumerable.
     db_session = Session(
-        id=str(uuid.uuid4()),
+        id=secrets.token_urlsafe(16),
         data=session_in.data,
         created_by=creator_id,
+        content_hash=chash,
     )
     db.add(db_session)
     await db.commit()
@@ -104,11 +95,15 @@ async def delete_my_session(
     return None
 
 
-@router.get("/{session_id}", response_model=SessionSchema)
+@router.get("/{session_id}", response_model=SessionPublic)
 async def get_session(
     session_id: str,
     db: AsyncSession = Depends(get_db),
 ):
+    """Public share-link resolution. Returns only ``{id, data}`` — never the
+    creator id or timestamps. Any dataset referenced inside ``data`` is still
+    gated by ``check_dataset_access`` when the viewer loads it, so a leaked
+    link to a private dataset still requires the viewer's own permission."""
     session = await db.get(Session, session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")

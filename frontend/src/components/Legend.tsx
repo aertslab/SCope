@@ -10,10 +10,12 @@ interface LegendProps {
   selectedItems: string[]
   onSelect: (label: string) => void
   onClear: () => void
+  /** Preview a category on hover (null when the cursor leaves the entries). */
+  onHover?: (label: string | null) => void
   className?: string
 }
 
-export function Legend({ items, selectedItems, onSelect, onClear, className = '' }: LegendProps) {
+export function Legend({ items, selectedItems, onSelect, onClear, onHover, className = '' }: LegendProps) {
   if (!items || items.length === 0) return null
 
   return (
@@ -26,16 +28,20 @@ export function Legend({ items, selectedItems, onSelect, onClear, className = ''
               </button>
           )}
       </div>
-      <div className="space-y-1 overflow-y-auto flex-1">
+      <div
+        className="space-y-1 overflow-y-auto flex-1"
+        onMouseLeave={() => onHover?.(null)}
+      >
         {items.map((item) => {
           const isSelected = selectedItems.includes(item.label)
           const isDimmed = selectedItems.length > 0 && !isSelected
-          
+
           return (
-          <div 
+          <div
             key={item.label}
             className={`flex items-center gap-3 p-2 rounded cursor-pointer transition-all ${isDimmed ? 'opacity-40 hover:opacity-70' : 'hover:bg-gray-800'}`}
             onClick={() => onSelect(item.label)}
+            onMouseEnter={() => onHover?.(item.label)}
           >
             <div 
               className="w-4 h-4 rounded-full border border-white/20 shadow-sm shrink-0" 

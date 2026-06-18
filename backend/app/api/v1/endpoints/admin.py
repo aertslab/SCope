@@ -25,7 +25,9 @@ from app.models.project import Project
 from app.models.session import Session as DbSession
 from app.models.user import User
 from app.models.audit_log import AuditLog
-from app.utils import zarr_cache
+from app.services.audit import record_audit
+from app.services.dataset_purge import purge_dataset_completely
+from app.utils import soma_cache
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -164,7 +166,7 @@ async def reconvert_dataset(
     # Drop any cached zarr handle for the old conversion so subsequent reads
     # re-open the new artefact.
     if dataset.converted_path:
-        zarr_cache.invalidate(dataset.converted_path)
+        soma_cache.invalidate(dataset.converted_path)
 
     dataset.status = "pending"
     db.add(dataset)
@@ -490,34 +492,49 @@ async def cleanup_sessions(
 
 UPLOAD_DIR = os.path.abspath(os.path.join(os.getcwd(), "uploads"))
 
+# Git/OS placeholder files live in the uploads dir to keep it tracked or
+# non-empty. They are NEVER orphans and must never be offered for deletion.
+IGNORED_ORPHAN_NAMES = {".gitignore", ".gitkeep", ".gitattributes", ".DS_Store", "Thumbs.db"}
+
+
+def _dir_size(path: str) -> int:
+    """Recursively sum file sizes under ``path`` (e.g. a zarr/SOMA store)."""
+    total = 0
+    for root, _dirs, files in os.walk(path):
+        for name in files:
+            try:
+                total += os.path.getsize(os.path.join(root, name))
+            except OSError:
+                continue
+    return total
+
 
 def _scan_uploads() -> list[dict[str, Any]]:
-    """Return all top-level entries in the uploads directory."""
+    """Return top-level entries in the uploads directory.
+
+    Excludes git/OS placeholder files (``.gitignore``/``.gitkeep``/…) and any
+    dotfile so they are never flagged as orphans. Directory sizes are NOT
+    computed here — that recursive walk over thousands of zarr/SOMA chunk files
+    is the dominant cost, so callers compute size only for the (few) entries
+    they actually display. Sizes start as ``None`` for directories.
+    """
     if not os.path.isdir(UPLOAD_DIR):
         return []
     items: list[dict[str, Any]] = []
     with os.scandir(UPLOAD_DIR) as it:
         for entry in it:
+            if entry.name in IGNORED_ORPHAN_NAMES or entry.name.startswith("."):
+                continue
             try:
                 stat = entry.stat()
             except OSError:
                 continue
-            size = stat.st_size
-            if entry.is_dir():
-                # Sum directory contents (zarr stores).
-                size = 0
-                for root, _dirs, files in os.walk(entry.path):
-                    for name in files:
-                        try:
-                            size += os.path.getsize(os.path.join(root, name))
-                        except OSError:
-                            continue
             items.append(
                 {
                     "name": entry.name,
                     "path": os.path.abspath(entry.path),
                     "is_dir": entry.is_dir(),
-                    "size": size,
+                    "size": None if entry.is_dir() else stat.st_size,
                     "modified": stat.st_mtime,
                 }
             )
@@ -581,7 +598,21 @@ async def list_orphan_files(
     """Files in the uploads directory not referenced by any Dataset or DataFile."""
     referenced = await _gather_referenced_paths(db)
     entries = await run_in_threadpool(_scan_uploads_cached)
-    orphans = [e for e in entries if e["path"] not in referenced]
+
+    # Compute the expensive directory size ONLY for the orphan subset — the
+    # referenced stores (the vast majority) never get walked.
+    def _build_orphans() -> list[dict[str, Any]]:
+        out: list[dict[str, Any]] = []
+        for e in entries:
+            if e["path"] in referenced:
+                continue
+            size = e["size"]
+            if size is None and e["is_dir"]:
+                size = _dir_size(e["path"])
+            out.append({**e, "size": size})
+        return out
+
+    orphans = await run_in_threadpool(_build_orphans)
     return {
         "uploads_dir": UPLOAD_DIR,
         "total_files_scanned": len(entries),
@@ -776,15 +807,29 @@ async def list_all_datasets(
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
     status: Optional[str] = Query(None),
+    deleted: Optional[bool] = Query(
+        None, description="true = only trashed, false = only active, omit = all"
+    ),
     db: AsyncSession = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_superuser),
 ) -> Any:
-    """All datasets across the system (admin global view)."""
+    """All datasets across the system (admin global view).
+
+    Shows trashed datasets too (flagged via ``deleted_at``); ``project_count``
+    of 0 means the dataset is not attached to any project. Filter with
+    ``deleted`` to isolate trashed vs active rows.
+    """
     base = select(Dataset).options(selectinload(Dataset.owner), selectinload(Dataset.projects))
     count_q = select(func.count(Dataset.id))
     if status:
         base = base.where(Dataset.status == status)
         count_q = count_q.where(Dataset.status == status)
+    if deleted is True:
+        base = base.where(Dataset.deleted_at.is_not(None))
+        count_q = count_q.where(Dataset.deleted_at.is_not(None))
+    elif deleted is False:
+        base = base.where(Dataset.deleted_at.is_(None))
+        count_q = count_q.where(Dataset.deleted_at.is_(None))
     base = base.order_by(Dataset.created_at.desc()).limit(limit).offset(offset)
 
     total = await db.scalar(count_q)
@@ -797,9 +842,130 @@ async def list_all_datasets(
             "file_size": ds.file_size,
             "converted_size": ds.converted_size,
             "created_at": ds.created_at,
+            "deleted_at": ds.deleted_at,
             "owner_email": ds.owner.email if ds.owner else None,
             "project_count": len(ds.projects),
         }
         for ds in rows
     ]
     return {"total": total or 0, "items": items, "limit": limit, "offset": offset}
+
+
+@router.delete("/datasets/{dataset_id}")
+async def admin_delete_dataset(
+    dataset_id: UUID,
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """Permanently and completely purge ANY dataset (superuser), regardless of
+    trash state.
+
+    Unlike ``DELETE /datasets/{id}`` (which soft-deletes), this removes the
+    dataset everywhere: the row, its project links, the underlying files (and
+    the dedup DataFile when unreferenced), plus any sessions / notifications
+    that referenced it, and cached handles.
+    """
+    dataset = await db.get(Dataset, dataset_id)
+    if not dataset:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+
+    name = dataset.name
+    summary = await purge_dataset_completely(db, dataset)
+    await record_audit(
+        db,
+        actor=current_user,
+        action="dataset.admin_purge",
+        resource_type="dataset",
+        resource_id=dataset_id,
+        extra={"name": name, **summary},
+    )
+    await db.commit()
+
+    return {"status": "deleted", "id": str(dataset_id), **summary}
+
+
+# ---------------------------------------------------------------------------
+# Projects (admin global view)
+# ---------------------------------------------------------------------------
+
+@router.get("/projects")
+async def list_all_projects(
+    limit: int = Query(100, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
+    search: Optional[str] = Query(None),
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """All projects across the system, with owner + dataset/share counts.
+
+    Admins manage an individual project (settings, shares, ownership transfer)
+    from its detail page — superusers already resolve to ADMIN permission there,
+    so every control is available.
+    """
+    base = select(Project).options(
+        selectinload(Project.owner),
+        selectinload(Project.shares),
+        selectinload(Project.datasets),
+    )
+    count_q = select(func.count(Project.id))
+    if search and search.strip():
+        like = f"%{search.strip()}%"
+        cond = or_(Project.name.ilike(like), Project.description.ilike(like))
+        base = base.where(cond)
+        count_q = count_q.where(cond)
+    base = base.order_by(Project.created_at.desc()).limit(limit).offset(offset)
+
+    total = await db.scalar(count_q)
+    rows = (await db.execute(base)).scalars().unique().all()
+    items = [
+        {
+            "id": str(p.id),
+            "name": p.name,
+            "description": p.description,
+            "visibility": getattr(p.visibility, "value", p.visibility),
+            "owner_email": p.owner.email if p.owner else None,
+            "owner_id": str(p.owner_id) if p.owner_id else None,
+            "dataset_count": len(p.datasets),
+            "share_count": len(p.shares),
+            "created_at": p.created_at,
+        }
+        for p in rows
+    ]
+    return {"total": total or 0, "items": items, "limit": limit, "offset": offset}
+
+
+@router.delete("/projects/{project_id}")
+async def admin_delete_project(
+    project_id: UUID,
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """Delete ANY project (superuser). Removes the project, its shares, and its
+    dataset links; the datasets themselves are preserved (only unlinked)."""
+    res = await db.execute(
+        select(Project)
+        .options(
+            selectinload(Project.shares),
+            selectinload(Project.datasets),
+            selectinload(Project.tags),
+        )
+        .where(Project.id == project_id)
+    )
+    project = res.scalars().first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    name = project.name
+    # Relationships are eager-loaded so the ORM cascade (shares delete-orphan,
+    # project_dataset secondary rows) runs without lazy IO under async.
+    await db.delete(project)
+    await record_audit(
+        db,
+        actor=current_user,
+        action="project.admin_delete",
+        resource_type="project",
+        resource_id=project_id,
+        extra={"name": name},
+    )
+    await db.commit()
+    return {"status": "deleted", "id": str(project_id)}

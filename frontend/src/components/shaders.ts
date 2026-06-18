@@ -29,6 +29,10 @@ export const PointMaterial = shaderMaterial(
     varying float vOpacity;
     
   void main(){
+    // Cells hidden by the active filter are sent through at ~0 opacity — drop
+    // them entirely so they write neither colour nor depth.
+    if (vOpacity < 0.01) discard;
+
     vec2 uv = gl_PointCoord - 0.5;
     bool discardPixel = false;
 

@@ -43,6 +43,11 @@ export default function Layout() {
   }
 
   const isViewer = location.pathname.startsWith('/viewer')
+  // The admin panel brings its own sidebar + chrome and is data-heavy, so let
+  // it use the full viewport width (like the viewer) instead of being boxed
+  // into the centered content column.
+  const isAdmin = location.pathname.startsWith('/admin')
+  const isFullBleed = isViewer || isAdmin
   // Hide the banner on auth pages so signup/verify flows aren't cluttered.
   const showVerifyBanner =
     isAuthenticated &&
@@ -69,7 +74,7 @@ export default function Layout() {
   return (
     <div className={`h-screen flex flex-col overflow-hidden ${isViewer ? 'bg-black' : 'bg-gray-50'}`}>
       <header className="bg-white border-b border-gray-200 z-50 relative flex-shrink-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10">
           <div className="flex justify-between h-16">
             <div className="flex">
               <Link to="/" className="flex-shrink-0 flex items-center gap-2">
@@ -161,7 +166,7 @@ export default function Layout() {
       </header>
       {showVerifyBanner && !isViewer && (
         <div className="bg-yellow-50 border-b border-yellow-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-3">
+          <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10 py-2 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-sm text-yellow-800">
               <MailWarning className="h-4 w-4 flex-shrink-0" />
               <span>
@@ -180,10 +185,13 @@ export default function Layout() {
         </div>
       )}
       <main className={`flex-1 flex flex-col ${isViewer ? 'overflow-hidden' : 'overflow-auto'}`}>
-        {isViewer ? (
+        {isFullBleed ? (
+            // Viewer + admin: own chrome, use the full viewport width.
             <Outlet />
         ) : (
-            <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 w-full">
+            // Regular pages: a generous but bounded reading width, with more
+            // horizontal breathing room on large/ultrawide screens.
+            <div className="mx-auto w-full max-w-screen-2xl 2xl:max-w-[1800px] py-8 px-4 sm:px-6 lg:px-8 xl:px-12">
                 <Outlet />
             </div>
         )}

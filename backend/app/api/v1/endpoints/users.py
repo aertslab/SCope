@@ -29,6 +29,7 @@ from app.schemas.personal_access_token import (
 )
 from app.models.personal_access_token import PersonalAccessToken
 from app.api.deps import PAT_PREFIX, _hash_pat
+from app.services.audit import record_audit
 import secrets as _secrets
 from datetime import datetime, timedelta, timezone
 
@@ -37,14 +38,25 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 @router.get("/search", response_model=List[PublicUser])
+@limiter.limit("30/minute")
 async def search_users(
+    request: Request,
     query: str,
     db: AsyncSession = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Search users by email or name. Returns lean public profiles only.
+
+    A minimum query length is enforced so the endpoint can't be used to
+    enumerate the whole user base one character at a time, and the leading
+    wildcard ILIKE is kept cheap by the pg_trgm index on email/full_name.
     """
+    query = (query or "").strip()
+    if len(query) < 3:
+        raise HTTPException(
+            status_code=400, detail="Search query must be at least 3 characters"
+        )
     stmt = select(User).where(
         User.is_active.is_(True),
         (User.email.ilike(f"%{query}%")) | (User.full_name.ilike(f"%{query}%"))
@@ -337,6 +349,12 @@ async def create_personal_access_token(
     db.add(pat)
     await db.commit()
     await db.refresh(pat)
+    await record_audit(
+        db, actor=current_user, action="pat.create",
+        resource_type="personal_access_token", resource_id=pat.id,
+        extra={"name": pat.name, "expires_at": pat.expires_at.isoformat() if pat.expires_at else None},
+    )
+    await db.commit()
 
     return PersonalAccessTokenWithSecret(
         id=pat.id,
@@ -364,7 +382,13 @@ async def revoke_personal_access_token(
     pat = result.scalars().first()
     if not pat:
         raise HTTPException(status_code=404, detail="Token not found")
+    pat_name = pat.name
     await db.delete(pat)
+    await record_audit(
+        db, actor=current_user, action="pat.revoke",
+        resource_type="personal_access_token", resource_id=token_id,
+        extra={"name": pat_name},
+    )
     await db.commit()
     return None
 

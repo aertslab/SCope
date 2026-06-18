@@ -30,9 +30,15 @@ interface Feature {
     type: 'categorical' | 'continuous'
 }
 
+type ColumnKind = 'gene' | 'metric'
+
+// A column assigned to one of the R/G/B channels. It can be a gene OR a
+// continuous metric — both are just a per-cell number[] and blend additively.
+// (Categorical annotations are handled separately via the colormap path.)
 interface SelectedGene {
     name: string
-    slot: number // 0, 1, 2
+    slot: number // 0 = Red, 1 = Green, 2 = Blue
+    kind: ColumnKind
     data: number[]
 }
 
@@ -108,18 +114,28 @@ export function ViewerControls({ datasetId, onColorChange, normalization, initia
                   setLoading(true)
                   try {
                       const newSelectedGenes: SelectedGene[] = []
-                      // Load all genes
+                      // Restore each channel column. Items may be genes OR
+                      // continuous metrics; try the gene path first and fall
+                      // back to the feature endpoint. A column that no longer
+                      // exists is skipped gracefully (no throw, no empty render).
                       for (let i = 0; i < initialSelection.items.length; i++) {
-                          const gene = initialSelection.items[i]
-                          if (!gene) continue
-                          if (i >= 3) break // Max 3
+                          const colName = initialSelection.items[i]
+                          if (!colName) continue
+                          if (i >= 3) break // Max 3 channels
 
-                          const floatArray = await fetchGeneExpression(datasetId, gene, projectPassword)
-                          newSelectedGenes.push({
-                              name: gene,
-                              slot: i,
-                              data: Array.from(floatArray)
-                          })
+                          try {
+                              let kind: ColumnKind = 'gene'
+                              let data: number[]
+                              try {
+                                  data = await fetchColumn(colName, 'gene')
+                              } catch {
+                                  kind = 'metric'
+                                  data = await fetchColumn(colName, 'metric')
+                              }
+                              newSelectedGenes.push({ name: colName, slot: i, kind, data })
+                          } catch (err) {
+                              console.warn('Could not restore channel column', colName, err)
+                          }
                       }
                       setSelectedGenes(newSelectedGenes)
                       updateColors(newSelectedGenes, null, null, null, [], [], initialLegendSelection)
@@ -178,17 +194,22 @@ export function ViewerControls({ datasetId, onColorChange, normalization, initia
 
           genes.forEach(g => {
               let data = g.data
-              if (normalization === 'log') {
-                  data = data.map(v => Math.log1p(v))
-              } else if (normalization === 'log_cpm' || normalization === 'cpm') {
-                  if (librarySize && librarySize.length === data.length) {
-                      data = data.map((v, i) => {
-                          const cpm = (v / (librarySize[i] || 1)) * 1e6
-                          return normalization === 'log_cpm' ? Math.log1p(cpm) : cpm
-                      })
-                  } else {
-                      // Fallback if no library size
-                      if (normalization === 'log_cpm') data = data.map(v => Math.log1p(v))
+              // Normalization only applies to gene expression. Continuous
+              // metrics (n_genes, pseudotime, QC scores, …) carry their own
+              // units and must not be CPM/log-transformed.
+              if (g.kind === 'gene') {
+                  if (normalization === 'log') {
+                      data = data.map(v => Math.log1p(v))
+                  } else if (normalization === 'log_cpm' || normalization === 'cpm') {
+                      if (librarySize && librarySize.length === data.length) {
+                          data = data.map((v, i) => {
+                              const cpm = (v / (librarySize[i] || 1)) * 1e6
+                              return normalization === 'log_cpm' ? Math.log1p(cpm) : cpm
+                          })
+                      } else {
+                          // Fallback if no library size
+                          if (normalization === 'log_cpm') data = data.map(v => Math.log1p(v))
+                      }
                   }
               }
               colors[g.slot] = data
@@ -207,72 +228,91 @@ export function ViewerControls({ datasetId, onColorChange, normalization, initia
       }
   }
 
-  const handleGeneClick = async (gene: string, targetSlot?: number) => {
-    const existingGeneIndex = selectedGenes.findIndex(g => g.name === gene)
+  // Fetch a per-cell numeric column for a gene OR a continuous metric. Genes go
+  // through the cached /expression endpoint; metrics through /feature (which
+  // also returns float32 for numeric obs columns). Used by both live clicks and
+  // session restore so genes and metrics are interchangeable in the channels.
+  const fetchColumn = async (name: string, kind: ColumnKind): Promise<number[]> => {
+      if (kind === 'gene') {
+          const arr = await fetchGeneExpression(datasetId, name, projectPassword)
+          return Array.from(arr)
+      }
+      const res = await api.get(`/datasets/${datasetId}/feature/${encodeURIComponent(name)}`, {
+          headers: projectPassword ? { 'x-project-password': projectPassword } : undefined,
+          responseType: 'arraybuffer' as const,
+      })
+      return Array.from(new Float32Array(res.data as ArrayBuffer))
+  }
 
-    // If clicking the name (no targetSlot)
+  // Assign a gene or continuous metric to an R/G/B channel. `targetSlot`
+  // undefined = toggle into the first free slot (or remove if already present);
+  // a number = pin to that specific channel. This unifies genes and metrics so
+  // metrics can be blended across channels too (Bug 2).
+  const handleColumnClick = async (name: string, kind: ColumnKind, targetSlot?: number) => {
+    const existingIndex = selectedGenes.findIndex(g => g.name === name)
+
     if (targetSlot === undefined) {
-        if (existingGeneIndex !== -1) {
-            removeGene(gene)
+        if (existingIndex !== -1) {
+            removeGene(name)
             return
         }
         if (selectedGenes.length >= 3) {
-            addToast("Maximum 3 genes can be selected", "error")
+            addToast("Maximum 3 channels can be selected", "error")
             return
         }
     } else {
-        // If clicking a color circle
-        // If already in that slot, do nothing
-        if (existingGeneIndex !== -1 && selectedGenes[existingGeneIndex].slot === targetSlot) {
+        // Clicking a colour circle the column already occupies — no-op.
+        if (existingIndex !== -1 && selectedGenes[existingIndex].slot === targetSlot) {
             return
         }
     }
 
     setLoading(true)
     try {
-      // Clear feature if active
+      // A categorical annotation and the channel columns are mutually exclusive.
       if (activeFeature) {
           setActiveFeature(null)
       }
 
-      const floatArray = await fetchGeneExpression(datasetId, gene, projectPassword)
-      
+      const data = await fetchColumn(name, kind)
+
       let slot = targetSlot
       if (slot === undefined) {
-          // Find first available slot
           const usedSlots = selectedGenes.map(g => g.slot)
           slot = 0
           while (usedSlots.includes(slot)) slot++
       }
-      
+
       let newSelected = [...selectedGenes]
-      
-      // Remove if already exists (to handle moving slots)
-      if (existingGeneIndex !== -1) {
-          newSelected = newSelected.filter(g => g.name !== gene)
+      // Remove if already present (moving slots).
+      if (existingIndex !== -1) {
+          newSelected = newSelected.filter(g => g.name !== name)
       }
-      
-      // If target slot is occupied, remove the gene in that slot
+      // If the target slot is occupied, evict its current occupant.
       if (targetSlot !== undefined) {
           newSelected = newSelected.filter(g => g.slot !== targetSlot)
       }
-      
-      const newGene = { name: gene, slot, data: Array.from(floatArray) }
-      newSelected.push(newGene)
-      
+
+      newSelected.push({ name, slot, kind, data })
+
       setSelectedGenes(newSelected)
       updateColors(newSelected, null, null)
-      
-      // Clear search
+
+      // Clear gene search box (no-op for metrics).
       setGeneQuery('')
       setGeneResults([])
-      
+
     } catch (e) {
       console.error(e)
+      addToast(`Failed to load "${name}"`, 'error')
     } finally {
       setLoading(false)
     }
   }
+
+  // Back-compat alias for gene call sites.
+  const handleGeneClick = (gene: string, targetSlot?: number) =>
+      handleColumnClick(gene, 'gene', targetSlot)
 
   const removeGene = (gene: string) => {
       const newSelected = selectedGenes.filter(g => g.name !== gene)
@@ -458,17 +498,45 @@ export function ViewerControls({ datasetId, onColorChange, normalization, initia
           {metrics.length > 0 && (
             <div>
               <div className="text-xs text-gray-400 uppercase font-bold mb-1">Metrics</div>
+              <div className="text-[10px] text-gray-500 mb-1">Click to colour, or pick a channel to blend (R/G/B).</div>
               <div className="space-y-1">
-                {metrics.map(feature => (
-                  <button
-                    key={feature.name}
-                    className={`w-full text-left p-2 rounded text-xs transition-colors ${activeFeature === feature.name ? 'bg-blue-600 text-white' : 'hover:bg-gray-800'}`}
-                    onClick={() => handleFeatureClick(feature)}
-                    disabled={loading}
-                  >
-                    {feature.name}
-                  </button>
-                ))}
+                {metrics.map(feature => {
+                  const sel = selectedGenes.find(g => g.name === feature.name)
+                  return (
+                    <div
+                      key={feature.name}
+                      className={`w-full flex justify-between items-center p-2 rounded text-xs transition-colors ${sel ? 'bg-blue-900/30 text-blue-200' : 'hover:bg-gray-800'}`}
+                    >
+                      <button
+                        className="flex-1 text-left flex items-center gap-2"
+                        onClick={() => handleColumnClick(feature.name, 'metric')}
+                        disabled={loading}
+                      >
+                        {sel && (
+                          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${sel.slot === 0 ? 'bg-red-500' : sel.slot === 1 ? 'bg-green-500' : 'bg-blue-500'}`} />
+                        )}
+                        <span className="truncate">{feature.name}</span>
+                      </button>
+                      <div className="flex gap-1 ml-2">
+                        <button
+                          className="w-3 h-3 rounded-full bg-red-500 hover:scale-125 transition-transform"
+                          onClick={(e) => { e.stopPropagation(); handleColumnClick(feature.name, 'metric', 0); }}
+                          title="Assign to Red"
+                        />
+                        <button
+                          className="w-3 h-3 rounded-full bg-green-500 hover:scale-125 transition-transform"
+                          onClick={(e) => { e.stopPropagation(); handleColumnClick(feature.name, 'metric', 1); }}
+                          title="Assign to Green"
+                        />
+                        <button
+                          className="w-3 h-3 rounded-full bg-blue-500 hover:scale-125 transition-transform"
+                          onClick={(e) => { e.stopPropagation(); handleColumnClick(feature.name, 'metric', 2); }}
+                          title="Assign to Blue"
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )}

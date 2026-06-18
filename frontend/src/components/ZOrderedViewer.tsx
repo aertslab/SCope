@@ -14,7 +14,8 @@ interface ZOrderedViewerProps {
     selectedLegendItems: string[],
     rawValues: any[],
     activeColorInfo: {name: string, type: string} | null,
-    colorRanges?: Record<string, [number, number]>
+    colorRanges?: Record<string, [number, number]>,
+    visibilityMask?: Uint8Array | null
 }
 
 export const ZOrderedViewer = ({ 
@@ -28,7 +29,8 @@ export const ZOrderedViewer = ({
     selectedLegendItems,
     rawValues,
     activeColorInfo,
-    colorRanges
+    colorRanges,
+    visibilityMask
 }: ZOrderedViewerProps) => {
     const zAdjustedData = useMemo(() => {
         if (!settings.zOrdering) return embeddingData;
@@ -111,6 +113,7 @@ export const ZOrderedViewer = ({
             shape={settings.shape}
             selections={selections}
             colorRanges={colorRanges}
+            visibilityMask={visibilityMask}
         />
     );
 };

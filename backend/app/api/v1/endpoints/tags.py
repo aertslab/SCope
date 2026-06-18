@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,6 +18,8 @@ router = APIRouter()
 async def list_tags(
     request: Request,
     public_only: bool = True,
+    limit: int = Query(200, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(deps.get_db),
 ):
     """List tags with project counts.
@@ -46,7 +48,11 @@ async def list_tags(
         return []
 
     tags_res = await db.execute(
-        select(Tag).where(Tag.id.in_(counts.keys())).order_by(Tag.name.asc())
+        select(Tag)
+        .where(Tag.id.in_(counts.keys()))
+        .order_by(Tag.name.asc())
+        .offset(offset)
+        .limit(limit)
     )
     return [
         tag_schema.TagWithCount(

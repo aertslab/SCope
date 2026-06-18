@@ -63,6 +63,11 @@ function App() {
               <Route path="viewer" element={<Viewer />} />
               <Route path="viewer/:datasetId" element={<Viewer />} />
               <Route path="public" element={<PublicProjects />} />
+              {/* Project detail is public-aware: ProjectDetails fetches with an
+                  optional password and handles 401 (private→login) / 403
+                  (password→prompt) itself, so a PUBLIC project must be reachable
+                  without auth. The project *list* stays private below. */}
+              <Route path="projects/:id" element={<ProjectDetails />} />
 
               <Route element={<PrivateRoute />}>
                 <Route path="dashboard" element={<Dashboard />} />
@@ -75,7 +80,6 @@ function App() {
                 <Route path="groups" element={<Groups />} />
                 <Route path="groups/:id" element={<GroupDetails />} />
                 <Route path="projects" element={<Projects />} />
-                <Route path="projects/:id" element={<ProjectDetails />} />
               </Route>
 
               <Route element={<PrivateRoute adminOnly />}>

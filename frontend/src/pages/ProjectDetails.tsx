@@ -235,8 +235,10 @@ export default function ProjectDetails() {
 
   const fetchMyDatasets = async () => {
     try {
-      const res = await api.get('/datasets/')
-      setMyDatasets(res.data)
+      // GET /datasets/ now returns a paginated envelope {items,total}. Request a
+      // large page for the "add existing dataset" picker.
+      const res = await api.get('/datasets/', { params: { limit: 1000, sort_by: 'name', sort_order: 'asc' } })
+      setMyDatasets(Array.isArray(res.data) ? res.data : res.data.items ?? [])
     } catch (err) {
       console.error(err)
     }
@@ -344,7 +346,7 @@ export default function ProjectDetails() {
   if (!project) return <div>Project not found</div>
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="space-y-6">
       <div className="mb-8 flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">{project.name}</h1>

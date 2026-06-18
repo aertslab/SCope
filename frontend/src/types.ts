@@ -52,18 +52,30 @@ export interface ProjectShare {
   group?: Group;
 }
 
+export interface DatasetProjectRef {
+  id: string;
+  name: string;
+  visibility: 'private' | 'public' | 'password';
+}
+
 export interface Dataset {
   id: string;
   name: string;
   description?: string;
   file_type: string;
-  owner_id: string;
+  owner_id?: string;
   status: string;
   failure_reason?: string | null;
   created_at: string;
+  updated_at?: string | null;
   deleted_at?: string | null;
   file_size?: number;
-  projects?: Project[];
+  converted_size?: number;
+  projects?: (Project | DatasetProjectRef)[];
+  // List-view metadata (populated by GET /datasets/): who the dataset is
+  // shared with (via its projects) and its highest visibility.
+  shared_with?: string[];
+  visibility?: 'private' | 'public' | 'password';
 }
 
 export interface Selection {

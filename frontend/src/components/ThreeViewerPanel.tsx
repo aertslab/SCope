@@ -1,4 +1,4 @@
-import { Canvas } from '@react-three/fiber'
+import { Canvas, useThree } from '@react-three/fiber'
 import { OrbitControls, OrthographicCamera, Html } from '@react-three/drei'
 import { useEffect, useState, useRef, useMemo, forwardRef, useImperativeHandle } from 'react'
 import api from '../api/client'
@@ -9,12 +9,15 @@ import { EditDatasetModal } from './EditDatasetModal'
 import { createSession } from '../api/sessions'
 import { useToast } from '../context/ToastContext'
 import { LassoSelection } from './LassoSelection'
+import { FilterBar } from './FilterBar'
+import { useFilterMask } from '../hooks/useFilterMask'
 import { SelectionOverview } from './SelectionOverview'
 import { Selection } from '../types'
 import { compressIndices, decompressIndices } from '../utils/compression'
 import { CameraController } from './CameraController'
 import { ZOrderedViewer } from './ZOrderedViewer'
-import { useViewerStore } from '../store/useViewerStore'
+import { useViewerStore, createViewerStore, ViewerStoreProvider } from '../store/useViewerStore'
+import type { ViewerStore } from '../store/useViewerStore'
 import { ViewerToolbar } from './ViewerToolbar'
 
 interface ThreeViewerPanelProps {
@@ -28,7 +31,20 @@ export interface ThreeViewerPanelHandle {
     getState: () => any
 }
 
-const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProps>(({ datasetId, instanceId = 'default', initialState: propInitialState, onStateChange }, ref) => {
+// Bridges the r3f camera/renderer out to a ref the parent owns, so the lasso
+// overlay (rendered outside the <Canvas>, locked to the viewport) can do
+// screen→world projection against the live camera. Must be a Canvas child to
+// access useThree(); renders nothing.
+function ThreeRefBridge({ target }: { target: { current: { camera: any; gl: any } | null } }) {
+    const camera = useThree((s) => s.camera)
+    const gl = useThree((s) => s.gl)
+    useEffect(() => {
+        target.current = { camera, gl }
+    }, [camera, gl, target])
+    return null
+}
+
+const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProps>(({ datasetId, instanceId = 'default', initialState: propInitialState, onStateChange }, ref) => {
   const { addToast } = useToast()
   
   const {
@@ -39,13 +55,15 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
       error, setError,
       settings, setSettings,
       colours, setColours,
-      customColors, setCustomColors,
+      setCustomColors,
       activeColorInfo, setActiveColorInfo,
       colorRanges, setColorRanges,
       selections, setSelections,
       lassoMode, setLassoMode,
       selectionDetails, setSelectionDetails,
-      selectedLegendItems, setSelectedLegendItems
+      selectedLegendItems, setSelectedLegendItems,
+      filterMask, filterTokens, setFilterTokens,
+      filterEnabled, setFilterEnabled
   } = useViewerStore()
 
   // Merge prop state
@@ -64,7 +82,9 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
                       selection: parsed.selection,
                       legendSelection: parsed.legendSelection,
                       selections: parsed.selections,
-                      colorRanges: parsed.colorRanges
+                      colorRanges: parsed.colorRanges,
+                      filterTokens: parsed.filterTokens,
+                      filterEnabled: parsed.filterEnabled
                   }
               }
           } catch (e) {
@@ -91,12 +111,16 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
   }, [initialState, setSettings, setSelectionDetails, setSelectedLegendItems, setSelections, setColorRanges])
 
   const [pointCount, setPointCount] = useState(0)
-  
+
   // UI State (Local to this viewer instance)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isColorScaleOpen, setIsColorScaleOpen] = useState(false)
   const [isShareOpen, setIsShareOpen] = useState(false)
   const [shareUrl, setShareUrl] = useState<string | null>(null)
+  // The filter bar is hidden behind a toolbar toggle, but stays open whenever a
+  // filter is actually applied so the active state is always visible.
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false)
+  const filterOpen = filterPanelOpen || filterTokens.length > 0
   
   // const [customColors, setCustomColors] = useState<Float32Array | null>(null)
   const [baseCustomColors, setBaseCustomColors] = useState<Float32Array | null>(null)
@@ -108,13 +132,13 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
   // New State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [legendData, setLegendData] = useState<{label: string, color: string}[]>([])
-  
+  // Transient hover-to-preview: which legend category the cursor is over. Not a
+  // committed selection and not persisted — purely a visual spotlight.
+  const [hoveredLegendItem, setHoveredLegendItem] = useState<string | null>(null)
+
   const [rawValues, setRawValues] = useState<any[]>([])
   const [centroids, setCentroids] = useState<{label: string, x: number, y: number, color: string}[]>([])
-  
-  const [opacities, setOpacities] = useState<number | number[]>(1.0)
-  const [sizes, setSizes] = useState<number | number[]>(2)
-  
+
   // Restoration State
   const [isRestoring, setIsRestoring] = useState(!!initialState)
 
@@ -123,14 +147,24 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
   const [projectPassword, setProjectPassword] = useState('')
   const [passwordInput, setPasswordInput] = useState('')
 
+  // Evaluate the active filter (store `filterTokens`) into a per-cell visibility
+  // mask + match count, written back to the store. No-op when no filter is set.
+  useFilterMask(datasetId, pointCount, projectPassword)
+
   const controlsRef = useRef<any>(null)
+  // Live camera/renderer captured from inside the <Canvas> so the lasso overlay
+  // (which lives outside the Canvas, locked to the viewport) can project the
+  // drawn screen polygon back into world space.
+  const lassoThreeRef = useRef<{ camera: any; gl: any } | null>(null)
 
   const latestStateRef = useRef({
       settings,
       selectionDetails,
       selectedLegendItems,
       selections,
-      colorRanges
+      colorRanges,
+      filterTokens,
+      filterEnabled
   })
 
   const isFirstRun = useRef(true);
@@ -155,9 +189,11 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
           selectionDetails,
           selectedLegendItems,
           selections,
-          colorRanges
+          colorRanges,
+          filterTokens,
+          filterEnabled
       }
-      
+
       if (isFirstRun.current) {
           isFirstRun.current = false;
           return;
@@ -183,10 +219,12 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
                   visible: s.visible,
                   compressedIndices: compressIndices(s.indices)
               })),
-              colorRanges
+              colorRanges,
+              filterTokens,
+              filterEnabled
           })
       }
-  }, [settings, selectionDetails, selectedLegendItems, selections, colorRanges, onStateChange])
+  }, [settings, selectionDetails, selectedLegendItems, selections, colorRanges, filterTokens, filterEnabled, onStateChange])
 
   // Expose getState to parent
   useImperativeHandle(ref, () => ({
@@ -203,13 +241,19 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
               camera: cameraState,
               selection: latestStateRef.current.selectionDetails,
               legendSelection: latestStateRef.current.selectedLegendItems,
+              // BUG 4 FIX: colorRanges was tracked in latestStateRef and saved
+              // to sessionStorage but omitted from the share/getState payload,
+              // so custom color scales were lost when restoring a shared session.
+              colorRanges: latestStateRef.current.colorRanges,
               selections: latestStateRef.current.selections.map(s => ({
                   id: s.id,
                   name: s.name,
                   color: s.color,
                   visible: s.visible,
                   compressedIndices: compressIndices(s.indices)
-              }))
+              })),
+              filterTokens: latestStateRef.current.filterTokens,
+              filterEnabled: latestStateRef.current.filterEnabled
           }
       }
   }));
@@ -254,7 +298,7 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
             dimX: 0,
             dimY: 1,
             shape: 0,
-            zOrdering: false
+            zOrdering: true
           })
           setSelections([])
           setSelectionDetails(undefined)
@@ -345,7 +389,9 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
                       visible: s.visible,
                       compressedIndices: compressIndices(s.indices)
                   })),
-                  colorRanges: latestStateRef.current.colorRanges
+                  colorRanges: latestStateRef.current.colorRanges,
+                  filterTokens: latestStateRef.current.filterTokens,
+                  filterEnabled: latestStateRef.current.filterEnabled
               }
               sessionStorage.setItem(`scope_settings_${settingsDatasetIdRef.current}_${instanceId}`, JSON.stringify(sessionData))
           }
@@ -382,8 +428,14 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
           if (initialState.colorRanges) {
               setColorRanges(initialState.colorRanges)
           }
+          if (initialState.filterTokens) {
+              setFilterTokens(initialState.filterTokens)
+          }
+          if (typeof initialState.filterEnabled === 'boolean') {
+              setFilterEnabled(initialState.filterEnabled)
+          }
       }
-  }, [initialState, setColorRanges, setSelectedLegendItems, setSelectionDetails, setSelections, setSettings])
+  }, [initialState, setColorRanges, setSelectedLegendItems, setSelectionDetails, setSelections, setSettings, setFilterTokens, setFilterEnabled])
 
   // Fetch Embedding Data when name changes
   useEffect(() => {
@@ -399,7 +451,7 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
         try {
             setLoading(true)
             const config = projectPassword ? { headers: { 'x-project-password': projectPassword }, responseType: 'arraybuffer' as const } : { responseType: 'arraybuffer' as const }
-            const embRes = await api.get(`/datasets/${datasetId}/embedding/${settings.embeddingName}`, config)
+            const embRes = await api.get(`/datasets/${datasetId}/embedding/${encodeURIComponent(settings.embeddingName)}`, config)
             
             const buffer = embRes.data
             const floatArray = new Float32Array(buffer)
@@ -416,20 +468,20 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
             
             setEmbeddingData({ X, Y, Z })
             
-            // Only reset colors if point count changes
+            // Only reset colors if point count changes (i.e. a new embedding).
+            // BUG 1 FIX: do NOT seed a grey `customColors` array here. Previously
+            // this grey buffer lingered in the store and, because ThreeViewer
+            // prioritises `customColors` over the per-gene `colours` channels,
+            // it shadowed the FIRST gene selection (the viewer stayed grey until
+            // a second selection). Leaving these null lets ThreeViewer fall back
+            // to its own neutral-grey default when nothing is selected, and the
+            // very first gene selection paints immediately.
             setPointCount(prev => {
                 if (prev !== pointCount) {
-                    // Initialize with light grey
-                    const greyColors = new Float32Array(pointCount * 3)
-                    for(let i=0; i<pointCount; i++) {
-                        greyColors[i*3] = 0.8
-                        greyColors[i*3+1] = 0.8
-                        greyColors[i*3+2] = 0.8
-                    }
-                    setCustomColors(greyColors)
-                    setBaseCustomColors(greyColors)
-                    setDefaultColors(greyColors)
-                    setColours({}) 
+                    setCustomColors(null)
+                    setBaseCustomColors(null)
+                    setDefaultColors(null)
+                    setColours({})
                 }
                 return pointCount
             })
@@ -498,47 +550,86 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
 
   }, [embeddingData, rawValues, legendData])
 
-  // Handle Selection Effect
+  // Clear any lingering hover preview when the coloured feature changes — the
+  // cursor may still be over the legend region as a new legend renders, leaving
+  // a stale label that no longer maps to any cell.
   useEffect(() => {
+      setHoveredLegendItem(null)
+  }, [legendData])
+
+  // The set of categories to spotlight in the plot. A committed legend
+  // selection takes precedence; otherwise hovering a legend entry previews that
+  // category (dimming the rest) without committing a selection. Both flow
+  // through the same dimming pipeline below.
+  const activeHighlight = useMemo(
+      () => (selectedLegendItems.length > 0
+          ? selectedLegendItems
+          : hoveredLegendItem !== null ? [hoveredLegendItem] : []),
+      [selectedLegendItems, hoveredLegendItem]
+  )
+
+  // Display buffers (colour / opacity / size) for the categorical view, derived
+  // in ONE memo so the three always update together in a single frame. They used
+  // to be split across the Zustand store (colour) and React state (opacity/size)
+  // and written by an effect; because those two state systems don't batch into
+  // the same render, a highlight change produced a transient frame where a
+  // cell already had the dim-grey colour (0.9) but still the old full opacity
+  // (1.0) — i.e. a bright ~white flash when switching/clearing a legend entry.
+  // Deriving them together makes that intermediate state impossible.
+  const { displayColors, displayOpacities, displaySizes } = useMemo<{
+      displayColors: Float32Array | null
+      displayOpacities: number | number[]
+      displaySizes: number | number[]
+  }>(() => {
+      // 1) Base colour/opacity/size from the colour + legend-highlight logic.
+      let colors: Float32Array | null
+      let opacities: number | number[]
+      let sizes: number | number[]
+
       if (!baseCustomColors) {
-          setSizes(settings.pointSize)
-          setOpacities(1.0)
-          return
-      }
-
-      if (selectedLegendItems.length === 0) {
-          setCustomColors(baseCustomColors)
-          setOpacities(1.0)
-          setSizes(settings.pointSize)
-          return
-      }
-
-      const newColors = new Float32Array(baseCustomColors)
-      const newOpacities = new Array(pointCount).fill(0.1) // Dim non-selected
-      const newSizes = new Array(pointCount).fill(settings.pointSize)
-
-      for (let i = 0; i < rawValues.length; i++) {
-          if (selectedLegendItems.includes(rawValues[i])) {
-              newOpacities[i] = 1.0
-              newSizes[i] = settings.pointSize * 1.5
-          } else {
-              newColors[i*3] = 0.9
-              newColors[i*3+1] = 0.9
-              newColors[i*3+2] = 0.9
+          // No categorical base ⇒ let ThreeViewer fall back to the gene `colours`
+          // channels / neutral default; opacity & size stay uniform.
+          colors = null
+          opacities = 1.0
+          sizes = settings.pointSize
+      } else if (activeHighlight.length === 0) {
+          // Nothing highlighted ⇒ base categorical colours at full opacity/size.
+          colors = baseCustomColors
+          opacities = 1.0
+          sizes = settings.pointSize
+      } else {
+          // Spotlight matching cells; grey-out + dim the rest.
+          const c = new Float32Array(baseCustomColors)
+          const o = new Array(pointCount).fill(0.1) // Dim non-highlighted
+          const s = new Array(pointCount).fill(settings.pointSize)
+          for (let i = 0; i < rawValues.length; i++) {
+              if (activeHighlight.includes(rawValues[i])) {
+                  o[i] = 1.0
+                  s[i] = settings.pointSize * 1.5
+              } else {
+                  c[i*3] = 0.9
+                  c[i*3+1] = 0.9
+                  c[i*3+2] = 0.9
+              }
           }
+          colors = c
+          opacities = o
+          sizes = s
       }
-      setCustomColors(newColors)
-      setOpacities(newOpacities)
-      setSizes(newSizes)
 
-  }, [selectedLegendItems, baseCustomColors, rawValues, settings.pointSize, pointCount, setCustomColors])
-
-  // Update sizes when settings change (if not selecting)
-  useEffect(() => {
-      if (selectedLegendItems.length === 0) {
-          setSizes(settings.pointSize)
+      // 2) Filter gate: a cell hidden by the active filter gets opacity 0,
+      //    regardless of colour mode (the shader discards ~0-opacity points).
+      if (filterMask) {
+          const o = typeof opacities === 'number'
+              ? new Array(pointCount).fill(opacities)
+              : (opacities as number[]).slice()
+          const n = Math.min(pointCount, filterMask.length)
+          for (let i = 0; i < n; i++) if (!filterMask[i]) o[i] = 0
+          opacities = o
       }
-  }, [settings.pointSize, selectedLegendItems])
+
+      return { displayColors: colors, displayOpacities: opacities, displaySizes: sizes }
+  }, [activeHighlight, baseCustomColors, rawValues, settings.pointSize, pointCount, filterMask])
 
   const displayColours = useMemo(() => {
       if (activeColorInfo?.type === 'gene' && selectedLegendItems.length > 0) {
@@ -620,7 +711,7 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
           dimX: 0,
           dimY: 1,
           shape: 0,
-          zOrdering: false
+          zOrdering: true
       })
 
       // Reset Selections
@@ -660,9 +751,11 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
               color: s.color,
               visible: s.visible,
               compressedIndices: compressIndices(s.indices)
-          }))
+          })),
+          filterTokens,
+          filterEnabled
       }
-      
+
       try {
           const session = await createSession(sessionData)
           const url = `${window.location.origin}/s/${session.id}`
@@ -687,12 +780,15 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
 
   // Lasso Handlers
   const handleLassoComplete = (indices: number[]) => {
-      if (indices.length === 0) return
-      
+      // Restrict the lasso to currently-visible cells so selections (and any
+      // gene plotting / stats over them) stay within the active filter.
+      const picked = filterMask ? indices.filter(i => filterMask[i]) : indices
+      if (picked.length === 0) return
+
       const newSelection: Selection = {
           id: Math.random().toString(36).substr(2, 9),
           name: `Selection ${selections.length + 1}`,
-          indices,
+          indices: picked,
           color: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'][selections.length % 6],
           visible: true
       }
@@ -820,6 +916,8 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
               setIsColorScaleOpen(!isColorScaleOpen)
               setIsSettingsOpen(false)
           }}
+          isFilterOpen={filterOpen}
+          onFilterToggle={() => setFilterPanelOpen((o) => !o)}
           onReset={handleReset}
       />
 
@@ -839,19 +937,24 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
 
       {/* Legend */}
       {legendData.length > 0 && (
-          <Legend 
+          <Legend
             items={legendData}
             selectedItems={selectedLegendItems}
             onSelect={handleLegendSelect}
             onClear={() => setSelectedLegendItems([])}
+            onHover={setHoveredLegendItem}
             className={'left-4'}
           />
       )}
 
+      {datasetId && !isRestoring && filterOpen && (
+          <FilterBar datasetId={datasetId} projectPassword={projectPassword} />
+      )}
+
       {datasetId && !isRestoring && (
-          <ViewerControls 
+          <ViewerControls
             key={datasetId}
-            datasetId={datasetId} 
+            datasetId={datasetId}
             onColorChange={handleColorChange}
             normalization={settings.normalization}
             initialSelection={initialState?.selection}
@@ -868,13 +971,20 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
           </div>
       )}
 
+      {/* Lasso overlay — a sibling of the <Canvas>, NOT a child. As a plain DOM
+          element in this position:relative container it stays locked to the
+          viewport instead of drifting/scaling with the plot when panned/zoomed.
+          It reads the live camera/renderer via lassoThreeRef for screen→world. */}
+      <LassoSelection
+          active={lassoMode}
+          onSelectionComplete={handleLassoComplete}
+          data={embeddingData}
+          getThree={() => lassoThreeRef.current}
+      />
+
       <Canvas>
-        <LassoSelection 
-            active={lassoMode} 
-            onSelectionComplete={handleLassoComplete}
-            data={embeddingData}
-        />
-        <CameraController 
+        <ThreeRefBridge target={lassoThreeRef} />
+        <CameraController
             key={datasetId}
             data={embeddingData} 
             controlsRef={controlsRef} 
@@ -893,15 +1003,16 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
             <ZOrderedViewer
                 embeddingData={embeddingData}
                 displayColours={displayColours}
-                customColors={customColors}
-                sizes={sizes}
-                opacities={opacities}
+                customColors={displayColors}
+                sizes={displaySizes}
+                opacities={displayOpacities}
                 settings={settings}
                 selections={selections}
-                selectedLegendItems={selectedLegendItems}
+                selectedLegendItems={activeHighlight}
                 rawValues={rawValues}
                 activeColorInfo={activeColorInfo}
                 colorRanges={colorRanges}
+                visibilityMask={filterMask}
             />
         )}
         
@@ -910,7 +1021,7 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
             <Html key={i} position={[c.x, c.y, 0]} center zIndexRange={[0, 10]}>
                         <div 
                             className={`px-1 py-0.5 rounded text-xs font-bold whitespace-nowrap pointer-events-none transition-opacity duration-200
-                                ${selectedLegendItems.length > 0 && !selectedLegendItems.includes(c.label) ? 'opacity-0' : 'opacity-100'}
+                                ${activeHighlight.length > 0 && !activeHighlight.includes(c.label) ? 'opacity-0' : 'opacity-100'}
                             `}
                             style={{ 
                                 backgroundColor: 'rgba(0,0,0,0.6)', 
@@ -927,6 +1038,23 @@ const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProp
         <OrbitControls ref={controlsRef} enableRotate={false} target={initialTarget} enabled={!lassoMode} />
       </Canvas>
     </div>
+  )
+})
+
+// Outer wrapper: each panel owns an isolated viewer store keyed by its
+// instanceId and provides it to the body + toolbar. This is what makes
+// multiple panels independent (Bug 3) and lets multi-panel workspaces restore
+// without overwriting each other's state (Bug 4). The body reads the store via
+// the context-scoped useViewerStore hook.
+const ThreeViewerPanel = forwardRef<ThreeViewerPanelHandle, ThreeViewerPanelProps>((props, ref) => {
+  const storeRef = useRef<ViewerStore | null>(null)
+  if (!storeRef.current) {
+    storeRef.current = createViewerStore(props.instanceId ?? 'default')
+  }
+  return (
+    <ViewerStoreProvider store={storeRef.current}>
+      <ThreeViewerPanelInner {...props} ref={ref} />
+    </ViewerStoreProvider>
   )
 })
 

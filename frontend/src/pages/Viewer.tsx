@@ -104,7 +104,32 @@ export default function Viewer({ initialState: propInitialState, datasetIdProp }
                 setLayout('main');
             }
         } else if (propInitialState) {
-            // TODO: Restore complex layout from propInitialState
+            // Restore from a workspace/session passed directly as a prop
+            // (mirrors the location.state path above). Previously a no-op TODO,
+            // which silently dropped the entire restored state (Bug 4).
+            if (propInitialState.type === 'workspace' && propInitialState.views && propInitialState.layout) {
+                const restoredViews = { ...propInitialState.views };
+                if (propInitialState.viewStates) {
+                    Object.keys(restoredViews).forEach(id => {
+                        if (propInitialState.viewStates[id]) {
+                            restoredViews[id].initialState = propInitialState.viewStates[id];
+                        }
+                    });
+                }
+                setViews(restoredViews);
+                setLayout(propInitialState.layout);
+            } else if (propInitialState.datasetId) {
+                setViews({
+                    'main': {
+                        type: '3D Viewer',
+                        id: 'main',
+                        title: '3D Viewer',
+                        datasetId: propInitialState.datasetId,
+                        initialState: propInitialState
+                    }
+                });
+                setLayout('main');
+            }
         } else if (datasetId) {
             try {
                 const savedLayout = sessionStorage.getItem(`scope_layout_${datasetId}`);
@@ -463,7 +488,7 @@ export default function Viewer({ initialState: propInitialState, datasetIdProp }
             
             {/* Toolbar */}
             <div className={`h-12 border-b border-gray-800 flex items-center px-4 gap-4 bg-gray-900 z-50 transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-0'}`}>
-                <span className="font-bold text-lg mr-4">SCope</span>
+                <span className="font-bold text-lg mr-4">Viewers</span>
                 
                 <div className="flex items-center gap-2">
                     <div 
@@ -481,7 +506,7 @@ export default function Viewer({ initialState: propInitialState, datasetIdProp }
                     >
                         <Plus size={16} /> 3D Viewer
                     </div>
-                    <div 
+                    {/* <div 
                         draggable={true}
                         onDragStart={(e) => {
                             e.stopPropagation();
@@ -495,7 +520,7 @@ export default function Viewer({ initialState: propInitialState, datasetIdProp }
                         className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded text-sm transition-colors cursor-grab active:cursor-grabbing select-none"
                     >
                         <Plus size={16} /> IGV
-                    </div>
+                    </div> */}
                 </div>
 
                 <div className="flex-1" />

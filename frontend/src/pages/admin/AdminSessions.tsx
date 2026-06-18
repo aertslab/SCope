@@ -95,7 +95,7 @@ export default function AdminSessions() {
                 {total.toLocaleString()} shared session URL{total === 1 ? '' : 's'} stored.
             </div>
 
-            <div className="bg-white shadow overflow-hidden rounded-lg">
+            <div className="bg-white shadow overflow-x-auto rounded-lg">
                 {loading ? (
                     <LoadingState />
                 ) : !data || data.items.length === 0 ? (

@@ -106,7 +106,17 @@ async def create_project(
     db.add(project)
     await db.commit()
     await db.refresh(project)
-    
+
+    await record_audit(
+        db,
+        actor=current_user,
+        action="project.create",
+        resource_type="project",
+        resource_id=project.id,
+        extra={"name": project.name, "visibility": str(project.visibility)},
+    )
+    await db.commit()
+
     # Re-fetch with eager loading
     result = await db.execute(
         select(Project)
@@ -408,11 +418,24 @@ async def add_dataset_to_project(
     current_user: User = Depends(deps.get_current_active_user),
 ):
     await check_project_permission(project_id, current_user, db, [ProjectPermission.EDIT, ProjectPermission.ADMIN])
-    
+
     dataset = await db.get(Dataset, dataset_id)
-    if not dataset:
+    if not dataset or dataset.deleted_at is not None:
         raise HTTPException(status_code=404, detail="Dataset not found")
-        
+
+    # Authorization: project-EDIT alone is NOT enough to attach an arbitrary
+    # dataset — that would let a project collaborator surface ANY dataset by
+    # guessing its UUID, exposing private data. The caller must also be able to
+    # access the dataset itself (owner, superuser, or an existing share/public).
+    from app.api.v1.endpoints.datasets import check_dataset_access  # local: avoid import cycle
+    try:
+        await check_dataset_access(dataset_id, db, current_user)
+    except HTTPException:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this dataset.",
+        )
+
     stmt = insert(project_dataset).values(project_id=project_id, dataset_id=dataset_id)
     try:
         await db.execute(stmt)
@@ -545,8 +568,17 @@ async def read_project_datasets(
         password=x_project_password
     )
     
-    # Fetch datasets with their projects to determine highest visibility
-    query = select(Dataset).options(selectinload(Dataset.projects)).join(project_dataset).where(project_dataset.c.project_id == project_id)
+    # Fetch datasets with their projects to determine highest visibility.
+    # Trashed datasets stay linked (for retention) but are hidden from the view.
+    query = (
+        select(Dataset)
+        .options(selectinload(Dataset.projects))
+        .join(project_dataset)
+        .where(
+            project_dataset.c.project_id == project_id,
+            Dataset.deleted_at.is_(None),
+        )
+    )
     result = await db.execute(query)
     datasets = result.scalars().all()
     

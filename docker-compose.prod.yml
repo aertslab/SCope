@@ -31,6 +31,10 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    volumes:
+      # Persistent, shared dataset storage. MUST be shared with the worker so
+      # the API can read the TileDB-SOMA stores the worker writes.
+      - uploads:/app/uploads
     env_file:
       - ./backend/.env
     environment:
@@ -46,6 +50,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    volumes:
+      - uploads:/app/uploads  # shared with backend
     env_file:
       - ./backend/.env
     environment:
@@ -54,7 +60,10 @@ services:
     depends_on:
       - db
       - redis
-    command: celery -A app.worker worker --loglevel=info
+    # -B embeds the beat scheduler for the daily trash auto-purge. With multiple
+    # worker replicas, drop -B here and run a single dedicated `celery -A
+    # app.worker beat` service instead to avoid duplicate scheduling.
+    command: celery -A app.worker worker --loglevel=info -B
 
   frontend:
     build:
@@ -67,3 +76,4 @@ services:
 
 volumes:
   postgres_data:
+  uploads:

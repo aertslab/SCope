@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_BASE_URL } from './config';
+import { isPublicPath } from './publicRoutes';
 import { emitToast } from '../context/ToastContext';
 
 const api = axios.create({
@@ -73,9 +74,13 @@ api.interceptors.response.use(
     const method: string | undefined = error.config?.method?.toLowerCase();
 
     if (status === 401) {
-      // Avoid redirect loops while already on /login or auth callback pages.
+      // Only force-login on private routes. Public-capable pages (viewer, public
+      // gallery, a public project, share links, home, auth pages) handle the
+      // anonymous case themselves — redirecting there would lock logged-out
+      // users out of content that is explicitly public. (This also avoids the
+      // redirect loop on /login etc., which are in the public set.)
       const path = window.location.pathname;
-      if (!path.startsWith('/login') && !path.startsWith('/auth/callback') && !path.startsWith('/register')) {
+      if (!isPublicPath(path)) {
         window.location.href = '/login';
       }
     } else if (status === 429) {
