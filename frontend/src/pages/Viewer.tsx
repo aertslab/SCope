@@ -48,6 +48,56 @@ export default function Viewer({ initialState: propInitialState, datasetIdProp }
     const location = useLocation();
     const { addToast } = useToast();
     const datasetId = datasetIdProp || params.datasetId;
+
+    // Compute the restored workspace (views + layout) SYNCHRONOUSLY from the
+    // navigation-state session blob (or a workspace prop / saved sessionStorage
+    // layout). This must happen here — not in an effect that runs after the
+    // first paint — so the viewer panel mounts ONCE already carrying its
+    // `initialState`. Previously the panel mounted empty, defaulted to the
+    // dataset's first embedding, fetched it, and was only then patched by the
+    // async restore effect; for a dataset whose first embedding differs from
+    // the saved one (e.g. saved "umap" but first is "pca") the view loaded —
+    // and could stick on — the wrong embedding.
+    const buildRestoredWorkspace = (): { views: Record<string, ViewState>; layout: MosaicNode<string> | null } | null => {
+        const src = location.state?.sessionData || propInitialState;
+        if (src) {
+            if (src.type === 'workspace' && src.views && src.layout) {
+                const restoredViews: Record<string, ViewState> = { ...src.views };
+                if (src.viewStates) {
+                    Object.keys(restoredViews).forEach((id) => {
+                        if (src.viewStates[id]) restoredViews[id].initialState = src.viewStates[id];
+                    });
+                }
+                return { views: restoredViews, layout: src.layout };
+            }
+            if (src.datasetId) {
+                return {
+                    views: {
+                        main: { type: '3D Viewer', id: 'main', title: '3D Viewer', datasetId: src.datasetId, initialState: src },
+                    },
+                    layout: 'main',
+                };
+            }
+        }
+        if (datasetId) {
+            try {
+                const savedLayout = sessionStorage.getItem(`scope_layout_${datasetId}`);
+                if (savedLayout) {
+                    const parsed = JSON.parse(savedLayout);
+                    if (parsed.layout && parsed.views) return { views: parsed.views, layout: parsed.layout };
+                }
+            } catch (e) {
+                console.error('Failed to restore layout', e);
+            }
+        }
+        return null;
+    };
+    // Compute exactly once for the initial mount.
+    const initialWorkspaceRef = useRef<ReturnType<typeof buildRestoredWorkspace> | undefined>(undefined);
+    if (initialWorkspaceRef.current === undefined) {
+        initialWorkspaceRef.current = buildRestoredWorkspace();
+    }
+
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [dragType, setDragType] = useState<'view' | 'dataset' | null>(null);
     
@@ -60,90 +110,38 @@ export default function Viewer({ initialState: propInitialState, datasetIdProp }
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
     // Map of view IDs to their configuration
-    const [views, setViews] = useState<Record<string, ViewState>>({
-        'main': { type: '3D Viewer', id: 'main', title: '3D Viewer', datasetId: datasetId }
-    });
+    const [views, setViews] = useState<Record<string, ViewState>>(
+        () => initialWorkspaceRef.current?.views ?? {
+            'main': { type: '3D Viewer', id: 'main', title: '3D Viewer', datasetId: datasetId }
+        }
+    );
 
     // The layout tree
-    const [layout, setLayout] = useState<MosaicNode<string> | null>('main');
+    const [layout, setLayout] = useState<MosaicNode<string> | null>(
+        () => initialWorkspaceRef.current?.layout ?? 'main'
+    );
 
     // Refs to child components for state extraction
     const viewRefs = useRef<Record<string, ThreeViewerPanelHandle | any>>({});
 
-    // Load initial state
+    // Re-restore on SUBSEQUENT navigation (e.g. opening a different shared
+    // session while the viewer is already mounted). The very first mount is
+    // already restored synchronously via the lazy `useState` initializers
+    // above, so we skip it here to avoid a redundant re-render.
+    const didInitialRestore = useRef(false);
     useEffect(() => {
-        const sessionData = location.state?.sessionData;
-        
-        if (sessionData) {
-            if (sessionData.type === 'workspace') {
-                // Restore full workspace
-                if (sessionData.views && sessionData.layout) {
-                    // Map viewStates back to views' initialState
-                    const restoredViews = { ...sessionData.views };
-                    if (sessionData.viewStates) {
-                        Object.keys(restoredViews).forEach(id => {
-                            if (sessionData.viewStates[id]) {
-                                restoredViews[id].initialState = sessionData.viewStates[id];
-                            }
-                        });
-                    }
-                    setViews(restoredViews);
-                    setLayout(sessionData.layout);
-                }
-            } else {
-                // Legacy/Single view restore
-                setViews({
-                    'main': { 
-                        type: '3D Viewer', 
-                        id: 'main', 
-                        title: '3D Viewer', 
-                        datasetId: sessionData.datasetId,
-                        initialState: sessionData
-                    }
-                });
-                setLayout('main');
-            }
-        } else if (propInitialState) {
-            // Restore from a workspace/session passed directly as a prop
-            // (mirrors the location.state path above). Previously a no-op TODO,
-            // which silently dropped the entire restored state (Bug 4).
-            if (propInitialState.type === 'workspace' && propInitialState.views && propInitialState.layout) {
-                const restoredViews = { ...propInitialState.views };
-                if (propInitialState.viewStates) {
-                    Object.keys(restoredViews).forEach(id => {
-                        if (propInitialState.viewStates[id]) {
-                            restoredViews[id].initialState = propInitialState.viewStates[id];
-                        }
-                    });
-                }
-                setViews(restoredViews);
-                setLayout(propInitialState.layout);
-            } else if (propInitialState.datasetId) {
-                setViews({
-                    'main': {
-                        type: '3D Viewer',
-                        id: 'main',
-                        title: '3D Viewer',
-                        datasetId: propInitialState.datasetId,
-                        initialState: propInitialState
-                    }
-                });
-                setLayout('main');
-            }
-        } else if (datasetId) {
-            try {
-                const savedLayout = sessionStorage.getItem(`scope_layout_${datasetId}`);
-                if (savedLayout) {
-                    const parsed = JSON.parse(savedLayout);
-                    if (parsed.layout && parsed.views) {
-                        setViews(parsed.views);
-                        setLayout(parsed.layout);
-                    }
-                }
-            } catch (e) {
-                console.error("Failed to restore layout", e);
-            }
+        if (!didInitialRestore.current) {
+            didInitialRestore.current = true;
+            return;
         }
+        const restored = buildRestoredWorkspace();
+        if (restored) {
+            setViews(restored.views);
+            setLayout(restored.layout);
+        }
+        // buildRestoredWorkspace closes over the current location/props; the
+        // dependency list re-runs it whenever the source state changes.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [datasetId, propInitialState, location.state]);
 
     // Track unsaved changes

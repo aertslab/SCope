@@ -323,16 +323,34 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
             
             if (initialState && initialState.settings && initialState.settings.embeddingName) {
                  const storedName = initialState.settings.embeddingName;
-                 const isValid = metaRes.data.embeddings.some((e: any) => e.name === storedName);
-                 
+                 // Resolve the stored embedding name against the dataset's current
+                 // embeddings. Prefer an exact match, but fall back to a sanitized
+                 // ("/" -> "_") and then case-insensitive match so a share made
+                 // before an embedding was renamed (e.g. "Scanpy PC1/PC2" ->
+                 // "Scanpy PC1_PC2") still restores instead of silently reverting
+                 // to the first embedding.
+                 const sanitize = (n: string) => n.replace(/\//g, '_');
+                 const resolveName = (name: string): string | null => {
+                     if (!name) return null;
+                     const embs = metaRes.data.embeddings as any[];
+                     const exact = embs.find((e) => e.name === name);
+                     if (exact) return exact.name;
+                     const bySan = embs.find((e) => sanitize(e.name) === sanitize(name));
+                     if (bySan) return bySan.name;
+                     const lower = name.toLowerCase();
+                     const byLower = embs.find((e) => e.name.toLowerCase() === lower);
+                     return byLower ? byLower.name : null;
+                 };
+                 const resolvedStored = resolveName(storedName);
+
                  setSettings(s => {
-                     // If current setting is valid, keep it
+                     // If current setting is already valid, keep it
                      if (s.embeddingName && metaRes.data.embeddings.some((e: any) => e.name === s.embeddingName)) {
                          return s;
                      }
-                     // If stored name is valid (and we haven't set one yet or current is invalid), use it
-                     if (isValid) {
-                         return { ...s, embeddingName: storedName };
+                     // Otherwise restore the (resolved) stored embedding if we found a match
+                     if (resolvedStored) {
+                         return { ...s, embeddingName: resolvedStored };
                      }
                      // Fallback
                      return { ...s, embeddingName: firstEmbedding };
@@ -504,28 +522,47 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
       }
 
       const sums: Record<string, {x: number, y: number, count: number}> = {}
-      
+
       rawValues.forEach((val, i) => {
           if (val === null || val === undefined) return
+          const x = embeddingData.X[i]
+          const y = embeddingData.Y[i]
+          // Skip cells whose coordinates are NaN/Inf in this embedding. Some
+          // embeddings (e.g. a t-SNE run on only a subset of cells) leave the
+          // rest as NaN; including them poisons the centroid average, producing
+          // a NaN position that drei's <Html> can't project — the label then
+          // sticks to a fixed screen spot instead of tracking the data.
+          if (!Number.isFinite(x) || !Number.isFinite(y)) return
           if (!sums[val]) sums[val] = { x: 0, y: 0, count: 0 }
-          sums[val].x += embeddingData.X[i]
-          sums[val].y += embeddingData.Y[i]
+          sums[val].x += x
+          sums[val].y += y
           sums[val].count++
       })
 
-      const newCentroids = Object.entries(sums).map(([label, data]) => {
-          const legendItem = legendData.find(l => l.label === label)
-          return {
-            label,
-            x: data.x / data.count,
-            y: data.y / data.count,
-            color: legendItem ? legendItem.color : '#ffffff'
-          }
-      })
+      const newCentroids = Object.entries(sums)
+          .filter(([, data]) => data.count > 0)
+          .map(([label, data]) => {
+              const legendItem = legendData.find(l => l.label === label)
+              return {
+                label,
+                x: data.x / data.count,
+                y: data.y / data.count,
+                color: legendItem ? legendItem.color : '#ffffff'
+              }
+          })
 
-      // Simple collision resolution
+      // Scale the collision radius to the embedding's extent so labels separate
+      // consistently whether coordinates span ~20 (UMAP) or ~200 (t-SNE).
+      let cMinX = Infinity, cMaxX = -Infinity, cMinY = Infinity, cMaxY = -Infinity
+      for (const c of newCentroids) {
+          if (c.x < cMinX) cMinX = c.x
+          if (c.x > cMaxX) cMaxX = c.x
+          if (c.y < cMinY) cMinY = c.y
+          if (c.y > cMaxY) cMaxY = c.y
+      }
+      const extent = Math.hypot(cMaxX - cMinX, cMaxY - cMinY)
       const ITERATIONS = 20
-      const RADIUS = 3 // Adjust based on scale
+      const RADIUS = Number.isFinite(extent) && extent > 0 ? Math.max(extent * 0.04, 0.5) : 3
       for (let k = 0; k < ITERATIONS; k++) {
         for (let i = 0; i < newCentroids.length; i++) {
             for (let j = i + 1; j < newCentroids.length; j++) {
@@ -745,6 +782,9 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
           camera: cameraState,
           selection: selectionDetails,
           legendSelection: selectedLegendItems,
+          // colorRanges was previously omitted here (only getState/workspace
+          // share carried it), so per-panel shares lost custom colour scales.
+          colorRanges,
           selections: selections.map(s => ({
               id: s.id,
               name: s.name,
