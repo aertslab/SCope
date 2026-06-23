@@ -1,5 +1,5 @@
 import { Canvas, useThree } from '@react-three/fiber'
-import { OrbitControls, OrthographicCamera, Html } from '@react-three/drei'
+import { OrbitControls, OrthographicCamera, Html, GizmoHelper, GizmoViewport } from '@react-three/drei'
 import { useEffect, useState, useRef, useMemo, forwardRef, useImperativeHandle } from 'react'
 import api from '../api/client'
 import { ViewerControls } from './ViewerControls'
@@ -117,11 +117,20 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
   const [isColorScaleOpen, setIsColorScaleOpen] = useState(false)
   const [isShareOpen, setIsShareOpen] = useState(false)
   const [shareUrl, setShareUrl] = useState<string | null>(null)
+  const [isFullscreen, setIsFullscreen] = useState(false)
   // The filter bar is hidden behind a toolbar toggle, but stays open whenever a
   // filter is actually applied so the active state is always visible.
   const [filterPanelOpen, setFilterPanelOpen] = useState(false)
   const filterOpen = filterPanelOpen || filterTokens.length > 0
-  
+
+  // 3D is only "active" when the user enabled it AND the current embedding
+  // actually has >= 3 dimensions — otherwise a stale is3D flag (carried over
+  // from a higher-dimensional embedding) must not let the user rotate a flat
+  // plane. Drives both camera rotation and the embedding fetch's dim count.
+  const currentEmbMeta = metadata?.embeddings?.find((e: any) => e.name === settings.embeddingName)
+  const currentNDims = typeof currentEmbMeta?.n_dims === 'number' ? currentEmbMeta.n_dims : 2
+  const is3DActive = !!settings.is3D && currentNDims >= 3
+
   // const [customColors, setCustomColors] = useState<Float32Array | null>(null)
   const [baseCustomColors, setBaseCustomColors] = useState<Float32Array | null>(null)
   const [defaultColors, setDefaultColors] = useState<Float32Array | null>(null)
@@ -137,7 +146,7 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
   const [hoveredLegendItem, setHoveredLegendItem] = useState<string | null>(null)
 
   const [rawValues, setRawValues] = useState<any[]>([])
-  const [centroids, setCentroids] = useState<{label: string, x: number, y: number, color: string}[]>([])
+  const [centroids, setCentroids] = useState<{label: string, x: number, y: number, z: number, color: string}[]>([])
 
   // Restoration State
   const [isRestoring, setIsRestoring] = useState(!!initialState)
@@ -152,6 +161,9 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
   useFilterMask(datasetId, pointCount, projectPassword)
 
   const controlsRef = useRef<any>(null)
+  // The panel's root element — target for the Fullscreen API so the canvas and
+  // all its overlays (toolbar, legend, filter bar, info) go fullscreen together.
+  const panelRootRef = useRef<HTMLDivElement>(null)
   // Live camera/renderer captured from inside the <Canvas> so the lasso overlay
   // (which lives outside the Canvas, locked to the viewport) can project the
   // drawn screen polygon back into world space.
@@ -160,6 +172,7 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
   const latestStateRef = useRef({
       settings,
       selectionDetails,
+      activeColorInfo,
       selectedLegendItems,
       selections,
       colorRanges,
@@ -168,6 +181,22 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
   })
 
   const isFirstRun = useRef(true);
+
+  // The colour selection to persist in a shared/saved session. `selectionDetails`
+  // is the source of truth, but it has been observed to occasionally be cleared
+  // for categorical features while the cells stay coloured (so `activeColorInfo`
+  // — set in the very same handleColorChange — survives). Fall back to it so an
+  // annotation/feature view is never saved without its selection.
+  const buildSavedSelection = (
+      sel: { type: 'gene' | 'feature'; items: string[] } | undefined,
+      aci: { name: string; type: string } | null,
+  ): { type: 'gene' | 'feature'; items: string[] } | undefined => {
+      if (sel) return sel
+      if (!aci || !aci.name || aci.name === 'None') return undefined
+      if (aci.type === 'feature') return { type: 'feature', items: [aci.name] }
+      if (aci.type === 'gene') return { type: 'gene', items: aci.name.split(' / ') }
+      return undefined
+  }
 
   // Handle Escape key to close menus
   useEffect(() => {
@@ -183,10 +212,34 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
       return () => window.removeEventListener('keydown', handleKeyDown)
   }, [setLassoMode])
 
+  // Keep the fullscreen toggle in sync with the actual document state so the
+  // button icon is correct even when the user exits fullscreen via Escape or
+  // the OS, and when another panel takes over fullscreen.
+  useEffect(() => {
+      const onChange = () => setIsFullscreen(document.fullscreenElement === panelRootRef.current)
+      document.addEventListener('fullscreenchange', onChange)
+      return () => document.removeEventListener('fullscreenchange', onChange)
+  }, [])
+
+  const toggleFullscreen = () => {
+      // Branch on whether THIS panel owns fullscreen, not on global state — with
+      // multiple mosaic panels, requesting fullscreen on a new element while
+      // another is fullscreen transitions directly between them, so clicking a
+      // second panel's button moves fullscreen there instead of just exiting.
+      // (requestFullscreen/exitFullscreen return promises, so .catch() — not a
+      // synchronous try/catch — is what captures a rejection.)
+      if (document.fullscreenElement === panelRootRef.current) {
+          document.exitFullscreen().catch((err) => console.error('Exit fullscreen failed', err))
+      } else if (panelRootRef.current) {
+          panelRootRef.current.requestFullscreen().catch((err) => console.error('Fullscreen request failed', err))
+      }
+  }
+
   useEffect(() => {
       latestStateRef.current = {
           settings,
           selectionDetails,
+          activeColorInfo,
           selectedLegendItems,
           selections,
           colorRanges,
@@ -210,7 +263,7 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
           onStateChange({
               settings,
               camera: cameraState,
-              selection: selectionDetails,
+              selection: buildSavedSelection(selectionDetails, activeColorInfo),
               legendSelection: selectedLegendItems,
               selections: selections.map(s => ({
                   id: s.id,
@@ -224,7 +277,7 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
               filterEnabled
           })
       }
-  }, [settings, selectionDetails, selectedLegendItems, selections, colorRanges, filterTokens, filterEnabled, onStateChange])
+  }, [settings, selectionDetails, activeColorInfo, selectedLegendItems, selections, colorRanges, filterTokens, filterEnabled, onStateChange])
 
   // Expose getState to parent
   useImperativeHandle(ref, () => ({
@@ -239,7 +292,7 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
               datasetId,
               settings: latestStateRef.current.settings,
               camera: cameraState,
-              selection: latestStateRef.current.selectionDetails,
+              selection: buildSavedSelection(latestStateRef.current.selectionDetails, latestStateRef.current.activeColorInfo),
               legendSelection: latestStateRef.current.selectedLegendItems,
               // BUG 4 FIX: colorRanges was tracked in latestStateRef and saved
               // to sessionStorage but omitted from the share/getState payload,
@@ -292,11 +345,14 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
       if (!initialState) {
           setSettings({
             pointSize: 2,
+            labelSize: 12,
             embeddingName: '',
             showLabels: true,
             normalization: 'none',
             dimX: 0,
             dimY: 1,
+            dimZ: 2,
+            is3D: false,
             shape: 0,
             zOrdering: true
           })
@@ -398,7 +454,7 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
                   datasetId: settingsDatasetIdRef.current,
                   settings: latestStateRef.current.settings,
                   camera: cameraState,
-                  selection: latestStateRef.current.selectionDetails,
+                  selection: buildSavedSelection(latestStateRef.current.selectionDetails, latestStateRef.current.activeColorInfo),
                   legendSelection: latestStateRef.current.selectedLegendItems,
                   selections: latestStateRef.current.selections.map(s => ({
                       id: s.id,
@@ -464,26 +520,41 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
         if (!dataset || dataset.id !== datasetId) return
 
         // Verify embedding exists in metadata to prevent fetching invalid embeddings for new dataset
-        if (!metadata?.embeddings?.some((e: any) => e.name === settings.embeddingName)) return
+        const embMeta = metadata?.embeddings?.find((e: any) => e.name === settings.embeddingName)
+        if (!embMeta) return
 
         try {
             setLoading(true)
+
+            // Work out which stored dimensions to plot. A 3D plot needs an
+            // embedding with >= 3 dims; otherwise fall back to 2D. Dimension
+            // indices are clamped to what the embedding actually has (they may be
+            // stale after switching to a lower-dimensional embedding).
+            const nDims = typeof embMeta.n_dims === 'number' ? embMeta.n_dims : 2
+            const clamp = (d: number) => Math.min(Math.max(d | 0, 0), Math.max(nDims - 1, 0))
+            const use3D = !!settings.is3D && nDims >= 3
+            const dims = use3D
+                ? [clamp(settings.dimX), clamp(settings.dimY), clamp(settings.dimZ)]
+                : [clamp(settings.dimX), clamp(settings.dimY)]
+
             const config = projectPassword ? { headers: { 'x-project-password': projectPassword }, responseType: 'arraybuffer' as const } : { responseType: 'arraybuffer' as const }
-            const embRes = await api.get(`/datasets/${datasetId}/embedding/${encodeURIComponent(settings.embeddingName)}`, config)
-            
+            const embRes = await api.get(`/datasets/${datasetId}/embedding/${encodeURIComponent(settings.embeddingName)}?dims=${dims.join(',')}`, config)
+
             const buffer = embRes.data
             const floatArray = new Float32Array(buffer)
-            const pointCount = floatArray.length / 2
-            
+            const stride = dims.length
+            const pointCount = Math.floor(floatArray.length / stride)
+
             const X = new Float32Array(pointCount)
             const Y = new Float32Array(pointCount)
-            const Z = new Float32Array(pointCount) // Initialize with 0s
-            
+            const Z = new Float32Array(pointCount) // stays 0 in 2D
+
             for (let i = 0; i < pointCount; i++) {
-                X[i] = floatArray[i * 2]
-                Y[i] = floatArray[i * 2 + 1]
+                X[i] = floatArray[i * stride]
+                Y[i] = floatArray[i * stride + 1]
+                if (stride > 2) Z[i] = floatArray[i * stride + 2]
             }
-            
+
             setEmbeddingData({ X, Y, Z })
             
             // Only reset colors if point count changes (i.e. a new embedding).
@@ -512,7 +583,7 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
         }
       }
       fetchEmbedding()
-  }, [datasetId, settings.embeddingName, projectPassword, metadata, dataset, setColours, setCustomColors, setEmbeddingData, setError, setLoading])
+  }, [datasetId, settings.embeddingName, settings.dimX, settings.dimY, settings.dimZ, settings.is3D, projectPassword, metadata, dataset, setColours, setCustomColors, setEmbeddingData, setError, setLoading])
 
   // Calculate Centroids with Collision Resolution
   useEffect(() => {
@@ -521,7 +592,7 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
           return
       }
 
-      const sums: Record<string, {x: number, y: number, count: number}> = {}
+      const sums: Record<string, {x: number, y: number, z: number, count: number}> = {}
 
       rawValues.forEach((val, i) => {
           if (val === null || val === undefined) return
@@ -533,9 +604,13 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
           // a NaN position that drei's <Html> can't project — the label then
           // sticks to a fixed screen spot instead of tracking the data.
           if (!Number.isFinite(x) || !Number.isFinite(y)) return
-          if (!sums[val]) sums[val] = { x: 0, y: 0, count: 0 }
+          // Average Z too so labels sit at the true 3D centroid in 3D mode. Z is
+          // all-zero in 2D, so this is a no-op there (labels stay at z=0).
+          const z = embeddingData.Z && Number.isFinite(embeddingData.Z[i]) ? embeddingData.Z[i] : 0
+          if (!sums[val]) sums[val] = { x: 0, y: 0, z: 0, count: 0 }
           sums[val].x += x
           sums[val].y += y
+          sums[val].z += z
           sums[val].count++
       })
 
@@ -547,6 +622,7 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
                 label,
                 x: data.x / data.count,
                 y: data.y / data.count,
+                z: data.z / data.count,
                 color: legendItem ? legendItem.color : '#ffffff'
               }
           })
@@ -742,11 +818,14 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
       // Reset Settings
       setSettings({
           pointSize: 2,
+          labelSize: 12,
           embeddingName: metadata?.embeddings?.[0]?.name || '',
           showLabels: true,
           normalization: 'none',
           dimX: 0,
           dimY: 1,
+          dimZ: 2,
+          is3D: false,
           shape: 0,
           zOrdering: true
       })
@@ -780,7 +859,7 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
           datasetId,
           settings,
           camera: cameraState,
-          selection: selectionDetails,
+          selection: buildSavedSelection(selectionDetails, activeColorInfo),
           legendSelection: selectedLegendItems,
           // colorRanges was previously omitted here (only getState/workspace
           // share carried it), so per-panel shares lost custom colour scales.
@@ -905,7 +984,7 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
   }
 
   return (
-    <div className="h-full w-full bg-black relative flex-1 overflow-hidden">
+    <div ref={panelRootRef} className="h-full w-full bg-black relative flex-1 overflow-hidden">
       {/* Info Overlay */}
       <div className={`absolute top-4 z-20 text-white bg-black/50 backdrop-blur-md p-2 rounded pointer-events-none max-w-xs transition-all duration-300 left-4`}>
         <div className="flex items-center gap-2 pointer-events-auto">
@@ -958,6 +1037,8 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
           }}
           isFilterOpen={filterOpen}
           onFilterToggle={() => setFilterPanelOpen((o) => !o)}
+          isFullscreen={isFullscreen}
+          onFullscreenToggle={toggleFullscreen}
           onReset={handleReset}
       />
 
@@ -1026,16 +1107,21 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
         <ThreeRefBridge target={lassoThreeRef} />
         <CameraController
             key={datasetId}
-            data={embeddingData} 
-            controlsRef={controlsRef} 
+            data={embeddingData}
+            controlsRef={controlsRef}
             initialCamera={initialState?.camera}
+            tilt={is3DActive}
+            fitKey={`${settings.embeddingName}|${settings.dimX},${settings.dimY},${settings.dimZ}|${is3DActive ? '3d' : '2d'}`}
         />
+        {/* Generous symmetric depth slab so that when the camera orbits the data
+            in 3D mode, points never clip at the near/far planes regardless of the
+            embedding's coordinate scale. */}
         <OrthographicCamera
           makeDefault
           position={initialPosition}
-          zoom={initialZoom} 
-          near={0.1}
-          far={1000}
+          zoom={initialZoom}
+          near={-2000}
+          far={2000}
         />
         <ambientLight intensity={0.5} />
         
@@ -1058,13 +1144,15 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
         
         {/* Centroid Labels */}
         {settings.showLabels && centroids.map((c, i) => (
-            <Html key={i} position={[c.x, c.y, 0]} center zIndexRange={[0, 10]}>
-                        <div 
-                            className={`px-1 py-0.5 rounded text-xs font-bold whitespace-nowrap pointer-events-none transition-opacity duration-200
+            <Html key={i} position={[c.x, c.y, c.z ?? 0]} center zIndexRange={[0, 10]}>
+                        <div
+                            className={`px-1 py-0.5 rounded font-bold whitespace-nowrap pointer-events-none transition-opacity duration-200
                                 ${activeHighlight.length > 0 && !activeHighlight.includes(c.label) ? 'opacity-0' : 'opacity-100'}
                             `}
-                            style={{ 
-                                backgroundColor: 'rgba(0,0,0,0.6)', 
+                            style={{
+                                fontSize: `${settings.labelSize ?? 12}px`,
+                                lineHeight: 1.1,
+                                backgroundColor: 'rgba(0,0,0,0.6)',
                                 color: 'white',
                                 textShadow: '0 1px 2px black',
                                 border: `1px solid ${c.color}`
@@ -1075,7 +1163,25 @@ const ThreeViewerPanelInner = forwardRef<ThreeViewerPanelHandle, ThreeViewerPane
                     </Html>
                 ))}
         
-        <OrbitControls ref={controlsRef} enableRotate={false} target={initialTarget} enabled={!lassoMode} />
+        {/* Rotation is enabled only in 3D mode; 2D keeps the pan/zoom-only feel.
+            (The orthographic camera orbits the data so depth from the 3rd
+            dimension becomes visible as you rotate.) makeDefault registers the
+            controls so the orientation gizmo can drive them. */}
+        <OrbitControls makeDefault ref={controlsRef} enableRotate={is3DActive} target={initialTarget} enabled={!lassoMode} />
+
+        {/* Orientation gizmo — only in 3D. Click an axis to snap the view; it
+            also reflects the current rotation. It lives INSIDE the WebGL canvas
+            (so it can drive the camera), which means it renders beneath any DOM
+            overlay on top of it — and z-index can't lift WebGL above a sibling
+            <div>. The top is crowded (toolbar, info, the wide search panel, the
+            settings panel), so we anchor it bottom-center: the one region that
+            stays clear in every state (legend is bottom-left, selections
+            bottom-right). */}
+        {is3DActive && (
+            <GizmoHelper alignment="bottom-center" margin={[80, 90]}>
+                <GizmoViewport axisColors={['#ff3653', '#8adb00', '#2c8fff']} labelColor="white" />
+            </GizmoHelper>
+        )}
       </Canvas>
     </div>
   )

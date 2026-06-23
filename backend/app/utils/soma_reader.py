@@ -14,8 +14,10 @@ all existing (zarr) datasets fully unaffected until then.
 """
 from __future__ import annotations
 
+import json
 import logging
-from typing import Any, List, Optional
+import os
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 
@@ -69,8 +71,19 @@ def _obsm_to_numpy(arr) -> np.ndarray:
         rows = tbl["soma_dim_0"].to_numpy()
         cols = tbl["soma_dim_1"].to_numpy()
         vals = np.asarray(tbl["soma_data"].to_numpy(), dtype=np.float32)
-        nrows = int(rows.max()) + 1 if rows.size else 0
-        ncols = int(cols.max()) + 1 if cols.size else 0
+        # Densify to the array's DECLARED shape, not the max stored index. A COO
+        # table omits zeros, so a trailing all-zero column (or an all-zero last
+        # cell) would otherwise shrink the array: that both misaligns cells
+        # against the full-length feature columns AND makes the column count
+        # disagree with the n_dims that load_metadata reports from .shape —
+        # desyncing the embedding-dimension contract the 3D viewer relies on.
+        try:
+            shp = arr.shape
+            nrows = int(shp[0])
+            ncols = int(shp[1]) if len(shp) > 1 else 1
+        except Exception:  # noqa: BLE001
+            nrows = int(rows.max()) + 1 if rows.size else 0
+            ncols = int(cols.max()) + 1 if cols.size else 0
         out = np.zeros((nrows, ncols), dtype=np.float32)
         if rows.size:
             out[rows, cols] = vals
@@ -125,6 +138,28 @@ def load_metadata(path: str) -> dict:
         except Exception:  # noqa: BLE001
             logger.exception("Failed to enumerate obsm embeddings for %s", path)
         meta["embeddings"] = discovered
+
+    # Enrich each embedding with its dimensionality (a cheap obsm shape lookup —
+    # shape is metadata, no bulk read) so the viewer can offer a 3D mode and
+    # dimension pickers for embeddings that store >= 3 dimensions.
+    try:
+        exp = soma_cache.open_soma(path)
+        obsm = _measurement(exp).obsm
+        keys = list(obsm.keys())
+        for e in meta["embeddings"]:
+            if not isinstance(e, dict) or not e.get("name"):
+                continue
+            key = _resolve_obsm_key(keys, e["name"])
+            n = 2
+            if key is not None:
+                try:
+                    shp = obsm[key].shape
+                    n = int(shp[1]) if len(shp) > 1 else 1
+                except Exception:  # noqa: BLE001
+                    n = 2
+            e["n_dims"] = n
+    except Exception:  # noqa: BLE001
+        logger.exception("Failed to determine embedding dims for %s", path)
 
     final = [e.get("name") for e in (meta.get("embeddings") or []) if isinstance(e, dict)]
     logger.info(
@@ -243,8 +278,15 @@ def _resolve_obsm_key(keys: List[str], name: str) -> Optional[str]:
     return None
 
 
-def read_embedding(path: str, name: str) -> Optional[bytes]:
-    """Read an embedding from obsm → interleaved float32 X,Y bytes."""
+def read_embedding(path: str, name: str, dims: Optional[List[int]] = None) -> Optional[bytes]:
+    """Read an embedding from obsm → interleaved float32 bytes.
+
+    ``dims`` selects which stored dimensions (column indices) to return, in order
+    — e.g. ``[0, 1, 2]`` for a 3D plot. Out-of-range indices are dropped; if none
+    remain valid (or ``dims`` is ``None``) the first two dimensions are returned
+    (the 2D default). The frontend learns each embedding's dimensionality from
+    ``/metadata`` (``n_dims``) and only requests valid indices.
+    """
     exp = soma_cache.open_soma(path)
     try:
         obsm = _measurement(exp).obsm
@@ -253,25 +295,249 @@ def read_embedding(path: str, name: str) -> Optional[bytes]:
         if key is None:
             logger.warning("embedding %r not found in obsm keys %s (%s)", name, keys, path)
             return None
-        data = _obsm_to_numpy(obsm[key])  # (n_obs, dims)
-        data = np.ascontiguousarray(np.asarray(data)[:, :2], dtype=np.float32)
-        return data.tobytes()
+        data = np.asarray(_obsm_to_numpy(obsm[key]))  # (n_obs, dims)
+        n_available = data.shape[1] if data.ndim > 1 else 1
+        sel = [d for d in (dims or []) if 0 <= d < n_available]
+        if not sel:
+            sel = list(range(min(2, n_available)))
+        out = np.ascontiguousarray(data[:, sel], dtype=np.float32)
+        return out.tobytes()
     except Exception:  # noqa: BLE001
         logger.exception("Failed reading embedding %s from %s", name, path)
         return None
 
 
+# Relevance ranking, mirroring SCope v1 (search.py:match_result_cost): lower is
+# a better match. An exact hit beats a case-insensitive hit beats a prefix/suffix
+# beats a substring, so e.g. searching "TH" surfaces the gene "TH" first instead
+# of burying it in an alphabetical list of "TH..."-containing names.
+_NO_MATCH = 1 << 30
+
+
+def _match_cost(term: str, result: str) -> int:
+    if term == result:
+        return 0
+    tl, rl = term.casefold(), result.casefold()
+    if tl == rl:
+        return 1
+    if result.startswith(term) or result.endswith(term):
+        return 2
+    if rl.startswith(tl) or rl.endswith(tl):
+        return 3
+    if term in result:
+        return 4
+    if tl in rl:
+        return 5
+    return _NO_MATCH
+
+
+# Genes/regulons/clusterings are the primary plotting targets, so on an equal
+# match quality they rank above plain annotations/metrics/categories (a
+# tiebreaker only — match quality is always the primary sort key, so exact
+# matches win regardless of type).
+_TYPE_COST = {"gene": 0, "regulon": 0, "clustering": 0, "annotation": 1, "metric": 1, "category": 1}
+
+# Per-feature cap on category VALUES added to the search space. A categorical
+# column with more distinct values than this (cell barcodes, sample IDs, …) is
+# almost certainly an identifier, not a useful search target, so it contributes
+# only its feature name — not every value. Keeps the space small.
+MAX_CATEGORY_VALUES = 500
+
+# Building the full search space enumerates category values, which means reading
+# each categorical obs column — too slow to redo on every debounced keystroke.
+# Cache it per path (in-memory) AND persist it to a JSON sidecar in the store so
+# it survives restarts and only the very first build per dataset is slow. The
+# worker also pre-builds it at conversion time so users normally never wait.
+# Cleared (memory + sidecar) on reconvert via soma_cache.invalidate.
+_SEARCH_SPACE_CACHE: Dict[str, List[dict]] = {}
+SEARCH_SPACE_SIDECAR = "search_space.json"
+_SS_VERSION = 1
+
+
+def _load_search_space_sidecar(path: str) -> Optional[List[dict]]:
+    p = os.path.join(path, SEARCH_SPACE_SIDECAR)
+    if not os.path.exists(p):
+        return None
+    try:
+        with open(p, "r", encoding="utf-8") as fh:
+            blob = json.load(fh)
+        if isinstance(blob, dict) and blob.get("version") == _SS_VERSION and isinstance(blob.get("elements"), list):
+            return blob["elements"]
+    except Exception:  # noqa: BLE001
+        logger.exception("Failed reading search space sidecar for %s", path)
+    return None
+
+
+def _write_search_space_sidecar(path: str, elements: List[dict]) -> None:
+    try:
+        p = os.path.join(path, SEARCH_SPACE_SIDECAR)
+        tmp = f"{p}.{os.getpid()}.tmp"  # write-then-rename so readers never see a partial file
+        with open(tmp, "w", encoding="utf-8") as fh:
+            json.dump({"version": _SS_VERSION, "elements": elements}, fh)
+        os.replace(tmp, p)
+    except Exception:  # noqa: BLE001
+        logger.exception("Failed writing search space sidecar for %s", path)
+
+
 def search_genes(path: str, query: str, limit: int) -> List[str]:
+    """Ranked gene (+regulon) name search. Returns names ordered by relevance."""
     idx = soma_cache.load_gene_index(path) or {}
-    names = list(idx.keys())
     regulons = soma_cache.load_regulon_index(path) or {}
-    pool = names + list(regulons.keys())
-    if query:
-        q = query.lower()
-        matches = [g for g in pool if q in g.lower()]
-    else:
-        matches = pool
-    return matches[:limit]
+    pool = list(idx.keys()) + list(regulons.keys())
+    if not query:
+        return pool[:limit]
+    scored = []
+    for g in pool:
+        c = _match_cost(query, g)
+        if c < _NO_MATCH:
+            scored.append((c, g))
+    scored.sort(key=lambda t: (t[0], t[1].casefold()))
+    return [g for _, g in scored[:limit]]
+
+
+def _search_category_labels(path: str, feature: str, cap: int) -> Optional[List[str]]:
+    """Capped, stringified unique labels of a categorical/clustering feature, for
+    the search space. Returns ``None`` when the column has more than ``cap``
+    distinct values (an identifier-like column — skip indexing its values).
+
+    Unlike ``list_categories`` (which serves the filter builder and returns ``[]``
+    for numeric columns), this:
+      * checks the distinct COUNT *before* the expensive stringify+sort, so a
+        high-cardinality column doesn't pay to materialise/sort millions of
+        strings only to be discarded by the cap; and
+      * stringifies numeric values too, so a numeric-coded clustering (e.g. an
+        integer ``leiden`` column from a non-loom ingest) is indexed with the
+        same "7"-style labels ``read_feature`` returns and the legend displays.
+    """
+    import pandas as pd  # lazy
+
+    exp = soma_cache.open_soma(path)
+    name = feature[len("Clustering: "):] if feature.startswith("Clustering: ") else feature
+    try:
+        vals = _read_obs_column(exp, name)
+    except Exception:  # noqa: BLE001
+        return None
+    s = pd.Series(vals).dropna()
+    if s.empty:
+        return []
+    # .unique() is a single C-level hash pass and does NOT sort — so checking the
+    # count here is cheap even for an ID column with millions of distinct values.
+    uniques = s.unique()
+    if len(uniques) > cap:
+        return None
+    return sorted({str(u) for u in uniques.tolist()})
+
+
+def _build_search_space(path: str) -> List[dict]:
+    """Enumerate every searchable element with a type tag.
+
+    Pools genes, regulons, obs feature names (annotations, metrics, clusterings)
+    AND the category VALUES of each categorical feature — so searching e.g.
+    "male" surfaces the "Sex" feature it belongs to. Enumerating category values
+    reads each categorical column, so the result is cached (``get_search_space``).
+
+    Each element carries:
+      - ``name``: the routable identifier the frontend acts on (clusterings keep
+        their ``"Clustering: "`` prefix so /feature resolves them; for a category
+        value it is the value itself, e.g. "male");
+      - ``type``: gene/regulon/clustering/annotation/metric/category;
+      - ``match``: the string the query is scored against — the *bare* name with
+        any display prefix stripped, so e.g. searching "leiden" exact-matches the
+        clustering "Clustering: leiden" instead of being demoted to a substring;
+      - ``feature`` (category elements only): the parent feature to colour by
+        when the category is selected (e.g. "Sex", or "Clustering: leiden").
+
+    Dedup is keyed on ``(name, type, feature)`` so a metric that happens to share
+    a gene symbol — or the same value across two features — still surfaces under
+    each rather than being silently shadowed.
+    """
+    elements: List[dict] = []
+    seen = set()
+
+    def add(name: str, etype: str, match: Optional[str] = None, feature: Optional[str] = None) -> None:
+        key = (name, etype, feature)
+        if name and key not in seen:
+            seen.add(key)
+            el = {"name": name, "type": etype, "match": match or name}
+            if feature is not None:
+                el["feature"] = feature
+            elements.append(el)
+
+    for g in (soma_cache.load_gene_index(path) or {}):
+        add(g, "gene")
+    for r in (soma_cache.load_regulon_index(path) or {}):
+        add(r, "regulon")
+    for f in list_features(path):
+        name = f["name"]
+        is_categorical = False
+        if name.startswith("Clustering: "):
+            add(name, "clustering", match=name[len("Clustering: "):])
+            is_categorical = True
+        elif f["type"] == "categorical":
+            add(name, "annotation")
+            is_categorical = True
+        else:
+            add(name, "metric")
+        # Index this feature's category values too (capped — high-cardinality
+        # identifier columns return None and are skipped). Uses a search-specific
+        # helper so numeric-coded clusterings are still indexed and the cap is
+        # applied before any costly stringify+sort.
+        if is_categorical:
+            cats = _search_category_labels(path, name, MAX_CATEGORY_VALUES)
+            if cats:
+                for c in cats:
+                    add(c, "category", feature=name)
+    return elements
+
+
+def get_search_space(path: str) -> List[dict]:
+    """Return the search space: in-memory cache → on-disk sidecar → build+persist."""
+    ss = _SEARCH_SPACE_CACHE.get(path)
+    if ss is not None:
+        return ss
+    ss = _load_search_space_sidecar(path)
+    if ss is None:
+        ss = _build_search_space(path)
+        _write_search_space_sidecar(path, ss)
+        logger.info("Built + persisted search space for %s: %d elements", path, len(ss))
+    _SEARCH_SPACE_CACHE[path] = ss
+    return ss
+
+
+def clear_search_space_cache(path: str) -> None:
+    _SEARCH_SPACE_CACHE.pop(path, None)
+    # Drop the persisted sidecar too so a reconvert rebuilds from fresh data.
+    try:
+        p = os.path.join(path, SEARCH_SPACE_SIDECAR)
+        if os.path.exists(p):
+            os.remove(p)
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def search(path: str, query: str, limit: int = 50) -> List[dict]:
+    """Generalised, relevance-ordered search across all plottable element types.
+
+    Returns ``[{"name", "type", "feature"?}]`` ordered so the best matches (exact
+    first) come first regardless of type. ``feature`` is present only for
+    ``category`` results (the parent feature to colour by). Empty query ⇒ ``[]``
+    (use ``list_features`` to browse).
+    """
+    if not query:
+        return []
+    scored = []
+    for el in get_search_space(path):
+        c = _match_cost(query, el["match"])
+        if c < _NO_MATCH:
+            scored.append((c, _TYPE_COST.get(el["type"], 1), el))
+    scored.sort(key=lambda t: (t[0], t[1], t[2]["match"].casefold()))
+    out = []
+    for _, _, el in scored[:limit]:
+        r = {"name": el["name"], "type": el["type"]}
+        if "feature" in el:
+            r["feature"] = el["feature"]
+        out.append(r)
+    return out
 
 
 def list_features(path: str) -> List[dict]:

@@ -260,7 +260,7 @@ export default function MyDatasets() {
                 )}
             </Card>
 
-            <Modal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} title="Upload Dataset">
+            <Modal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} title="Upload Dataset" size="4xl">
                 <UploadDatasetForm
                     onSuccess={() => {
                         setIsUploadModalOpen(false)

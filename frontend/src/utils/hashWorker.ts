@@ -1,13 +1,16 @@
 /**
- * Off-main-thread MD5 hashing of a File using SparkMD5.
+ * Off-main-thread MD5 hashing of a File.
  *
- * The previous implementation read the file in 2 MiB chunks via FileReader on
- * the main thread, which froze the UI on multi-GB datasets. Vite supports the
- * `?worker` import suffix; this module re-exports the SparkMD5 chunk loop so
- * the main thread only posts the File and awaits the digest.
+ * Uses hash-wasm's WASM MD5 (incremental) — markedly faster than the previous
+ * pure-JS SparkMD5 loop on multi-GB datasets, which made the upfront hashing a
+ * long blocking step. Same MD5 values (lowercase hex), so they still match the
+ * server's hashlib.md5 and `md5sum`/`Get-FileHash MD5`. Vite's `?worker` suffix
+ * runs this off the main thread; the caller just posts the File and awaits the
+ * digest. Note: the server independently re-hashes the received bytes, so this
+ * client hash is only a de-dup pre-check, not the authoritative identity.
  */
 /// <reference lib="webworker" />
-import SparkMD5 from 'spark-md5'
+import { createMD5 } from 'hash-wasm'
 
 declare const self: DedicatedWorkerGlobalScope
 
@@ -32,43 +35,31 @@ interface HashError {
 
 export type HashWorkerMessage = HashProgress | HashDone | HashError
 
-const CHUNK_SIZE = 2 * 1024 * 1024 // 2 MiB
+// Bigger than the old 2 MiB FileReader chunks: WASM hashing is fast, so the
+// per-slice read (Blob.arrayBuffer) dominates — larger slices cut overhead.
+const CHUNK_SIZE = 8 * 1024 * 1024 // 8 MiB
 
-self.onmessage = (event: MessageEvent<HashRequest>) => {
+self.onmessage = async (event: MessageEvent<HashRequest>) => {
   const { file } = event.data
-  const chunks = Math.ceil(file.size / CHUNK_SIZE)
-  let currentChunk = 0
-  const spark = new SparkMD5.ArrayBuffer()
-  const reader = new FileReader()
-
-  reader.onload = (e) => {
-    if (!e.target?.result) {
-      self.postMessage({ type: 'error', message: 'Empty chunk' } satisfies HashWorkerMessage)
-      return
+  try {
+    const hasher = await createMD5()
+    hasher.init()
+    let offset = 0
+    while (offset < file.size) {
+      const end = Math.min(offset + CHUNK_SIZE, file.size)
+      const buf = new Uint8Array(await file.slice(offset, end).arrayBuffer())
+      hasher.update(buf)
+      offset = end
+      self.postMessage({
+        type: 'progress',
+        progress: file.size ? Math.round((offset / file.size) * 100) : 100,
+      } satisfies HashWorkerMessage)
     }
-    spark.append(e.target.result as ArrayBuffer)
-    currentChunk += 1
+    self.postMessage({ type: 'done', hash: hasher.digest('hex') } satisfies HashWorkerMessage)
+  } catch (err) {
     self.postMessage({
-      type: 'progress',
-      progress: Math.round((currentChunk / chunks) * 100),
+      type: 'error',
+      message: err instanceof Error ? err.message : String(err),
     } satisfies HashWorkerMessage)
-
-    if (currentChunk < chunks) {
-      loadNext()
-    } else {
-      self.postMessage({ type: 'done', hash: spark.end() } satisfies HashWorkerMessage)
-    }
   }
-
-  reader.onerror = () => {
-    self.postMessage({ type: 'error', message: 'Hash calculation failed' } satisfies HashWorkerMessage)
-  }
-
-  function loadNext() {
-    const start = currentChunk * CHUNK_SIZE
-    const end = start + CHUNK_SIZE >= file.size ? file.size : start + CHUNK_SIZE
-    reader.readAsArrayBuffer(file.slice(start, end))
-  }
-
-  loadNext()
 }

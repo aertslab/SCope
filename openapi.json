@@ -1,1 +1,3181 @@
-{"openapi":"3.1.0","info":{"title":"SCope v2","version":"0.1.0"},"paths":{"/api/v1/login/google":{"get":{"tags":["login"],"summary":"Login Google","operationId":"login_google_api_v1_login_google_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/login/google/callback":{"get":{"tags":["login"],"summary":"Login Google Callback","operationId":"login_google_callback_api_v1_login_google_callback_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/login/orcid":{"get":{"tags":["login"],"summary":"Login Orcid","operationId":"login_orcid_api_v1_login_orcid_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/login/orcid/callback":{"get":{"tags":["login"],"summary":"Login Orcid Callback","operationId":"login_orcid_callback_api_v1_login_orcid_callback_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/login/access-token":{"post":{"tags":["login"],"summary":"Login Access Token","description":"OAuth2 compatible token login, get an access token for future requests","operationId":"login_access_token_api_v1_login_access_token_post","requestBody":{"content":{"application/x-www-form-urlencoded":{"schema":{"$ref":"#/components/schemas/Body_login_access_token_api_v1_login_access_token_post"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Token"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/users/search":{"get":{"tags":["users"],"summary":"Search Users","description":"Search users by email or name.","operationId":"search_users_api_v1_users_search_get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"query","in":"query","required":true,"schema":{"type":"string","title":"Query"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/User"},"title":"Response Search Users Api V1 Users Search Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/users/":{"get":{"tags":["users"],"summary":"Read Users","description":"Retrieve users.","operationId":"read_users_api_v1_users__get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"skip","in":"query","required":false,"schema":{"type":"integer","default":0,"title":"Skip"}},{"name":"limit","in":"query","required":false,"schema":{"type":"integer","default":100,"title":"Limit"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/User"},"title":"Response Read Users Api V1 Users  Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"post":{"tags":["users"],"summary":"Create User","description":"Create new user.","operationId":"create_user_api_v1_users__post","requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/UserCreate"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/User"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/users/me":{"get":{"tags":["users"],"summary":"Read User Me","description":"Get current user.","operationId":"read_user_me_api_v1_users_me_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/User"}}}}},"security":[{"OAuth2PasswordBearer":[]}]}},"/api/v1/datasets/":{"get":{"tags":["datasets"],"summary":"Read Datasets","description":"Retrieve datasets.","operationId":"read_datasets_api_v1_datasets__get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"skip","in":"query","required":false,"schema":{"type":"integer","default":0,"title":"Skip"}},{"name":"limit","in":"query","required":false,"schema":{"type":"integer","default":100,"title":"Limit"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Dataset"},"title":"Response Read Datasets Api V1 Datasets  Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"post":{"tags":["datasets"],"summary":"Create Dataset","description":"Create new dataset and upload file.","operationId":"create_dataset_api_v1_datasets__post","security":[{"OAuth2PasswordBearer":[]}],"requestBody":{"required":true,"content":{"multipart/form-data":{"schema":{"$ref":"#/components/schemas/Body_create_dataset_api_v1_datasets__post"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Dataset"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/datasets/{dataset_id}":{"get":{"tags":["datasets"],"summary":"Read Dataset","description":"Get dataset by ID.","operationId":"read_dataset_api_v1_datasets__dataset_id__get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"dataset_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Dataset Id"}},{"name":"x-project-password","in":"header","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"X-Project-Password"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Dataset"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"put":{"tags":["datasets"],"summary":"Update Dataset","description":"Update dataset.","operationId":"update_dataset_api_v1_datasets__dataset_id__put","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"dataset_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Dataset Id"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/DatasetUpdate"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Dataset"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"delete":{"tags":["datasets"],"summary":"Delete Dataset","description":"Delete dataset.","operationId":"delete_dataset_api_v1_datasets__dataset_id__delete","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"dataset_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Dataset Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Dataset"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/datasets/{dataset_id}/metadata":{"get":{"tags":["datasets"],"summary":"Get Dataset Metadata","description":"Get dataset metadata.","operationId":"get_dataset_metadata_api_v1_datasets__dataset_id__metadata_get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"dataset_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Dataset Id"}},{"name":"x-project-password","in":"header","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"X-Project-Password"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"title":"Response Get Dataset Metadata Api V1 Datasets  Dataset Id  Metadata Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/datasets/{dataset_id}/embedding/{embedding_name}":{"get":{"tags":["datasets"],"summary":"Get Dataset Embedding","description":"Get dataset embedding coordinates.","operationId":"get_dataset_embedding_api_v1_datasets__dataset_id__embedding__embedding_name__get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"dataset_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Dataset Id"}},{"name":"embedding_name","in":"path","required":true,"schema":{"type":"string","title":"Embedding Name"}},{"name":"x-project-password","in":"header","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"X-Project-Password"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"title":"Response Get Dataset Embedding Api V1 Datasets  Dataset Id  Embedding  Embedding Name  Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/datasets/{dataset_id}/genes":{"get":{"tags":["datasets"],"summary":"Search Genes","description":"Search for genes in the dataset.","operationId":"search_genes_api_v1_datasets__dataset_id__genes_get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"dataset_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Dataset Id"}},{"name":"query","in":"query","required":false,"schema":{"type":"string","default":"","title":"Query"}},{"name":"limit","in":"query","required":false,"schema":{"type":"integer","default":10,"title":"Limit"}},{"name":"x-project-password","in":"header","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"X-Project-Password"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"title":"Response Search Genes Api V1 Datasets  Dataset Id  Genes Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/datasets/{dataset_id}/features":{"get":{"tags":["datasets"],"summary":"Get Features","description":"List available cell features (obs columns) with their types.\nReturns list of {name: str, type: str}.","operationId":"get_features_api_v1_datasets__dataset_id__features_get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"dataset_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Dataset Id"}},{"name":"x-project-password","in":"header","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"X-Project-Password"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"title":"Response Get Features Api V1 Datasets  Dataset Id  Features Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/datasets/{dataset_id}/expression/{gene}":{"get":{"tags":["datasets"],"summary":"Get Gene Expression","description":"Get expression values for a specific gene.\nReturns binary float32 array.","operationId":"get_gene_expression_api_v1_datasets__dataset_id__expression__gene__get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"dataset_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Dataset Id"}},{"name":"gene","in":"path","required":true,"schema":{"type":"string","title":"Gene"}},{"name":"x-project-password","in":"header","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"X-Project-Password"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"title":"Response Get Gene Expression Api V1 Datasets  Dataset Id  Expression  Gene  Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/datasets/{dataset_id}/feature/{feature}":{"get":{"tags":["datasets"],"summary":"Get Feature Values","description":"Get values for a specific feature (obs column).\nReturns JSON list (handles strings and numbers).","operationId":"get_feature_values_api_v1_datasets__dataset_id__feature__feature__get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"dataset_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Dataset Id"}},{"name":"feature","in":"path","required":true,"schema":{"type":"string","title":"Feature"}},{"name":"x-project-password","in":"header","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"X-Project-Password"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"title":"Response Get Feature Values Api V1 Datasets  Dataset Id  Feature  Feature  Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/admin/stats":{"get":{"tags":["admin"],"summary":"Read Admin Stats","description":"Get admin statistics.","operationId":"read_admin_stats_api_v1_admin_stats_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"title":"Response Read Admin Stats Api V1 Admin Stats Get"}}}}},"security":[{"OAuth2PasswordBearer":[]}]}},"/api/v1/groups/":{"post":{"tags":["groups"],"summary":"Create Group","operationId":"create_group_api_v1_groups__post","security":[{"OAuth2PasswordBearer":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/GroupCreate"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Group"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"get":{"tags":["groups"],"summary":"Read Groups","operationId":"read_groups_api_v1_groups__get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"skip","in":"query","required":false,"schema":{"type":"integer","default":0,"title":"Skip"}},{"name":"limit","in":"query","required":false,"schema":{"type":"integer","default":100,"title":"Limit"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Group"},"title":"Response Read Groups Api V1 Groups  Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/groups/{group_id}":{"get":{"tags":["groups"],"summary":"Read Group","operationId":"read_group_api_v1_groups__group_id__get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"group_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Group Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Group"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"delete":{"tags":["groups"],"summary":"Delete Group","operationId":"delete_group_api_v1_groups__group_id__delete","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"group_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Group Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/groups/{group_id}/members":{"post":{"tags":["groups"],"summary":"Add Group Member","operationId":"add_group_member_api_v1_groups__group_id__members_post","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"group_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Group Id"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/GroupMemberCreate"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/GroupMember"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"get":{"tags":["groups"],"summary":"Read Group Members","operationId":"read_group_members_api_v1_groups__group_id__members_get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"group_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Group Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/GroupMember"},"title":"Response Read Group Members Api V1 Groups  Group Id  Members Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/groups/{group_id}/members/{user_id}":{"delete":{"tags":["groups"],"summary":"Remove Group Member","operationId":"remove_group_member_api_v1_groups__group_id__members__user_id__delete","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"group_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Group Id"}},{"name":"user_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"User Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"put":{"tags":["groups"],"summary":"Update Group Member Role","operationId":"update_group_member_role_api_v1_groups__group_id__members__user_id__put","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"group_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Group Id"}},{"name":"user_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"User Id"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/GroupMemberUpdate"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/GroupMember"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/groups/{group_id}/transfer-ownership":{"post":{"tags":["groups"],"summary":"Transfer Group Ownership","operationId":"transfer_group_ownership_api_v1_groups__group_id__transfer_ownership_post","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"group_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Group Id"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/GroupTransferOwnership"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Group"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/projects/":{"post":{"tags":["projects"],"summary":"Create Project","operationId":"create_project_api_v1_projects__post","security":[{"OAuth2PasswordBearer":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/ProjectCreate"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Project"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"get":{"tags":["projects"],"summary":"Read Projects","operationId":"read_projects_api_v1_projects__get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"skip","in":"query","required":false,"schema":{"type":"integer","default":0,"title":"Skip"}},{"name":"limit","in":"query","required":false,"schema":{"type":"integer","default":100,"title":"Limit"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Project"},"title":"Response Read Projects Api V1 Projects  Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/projects/{project_id}":{"put":{"tags":["projects"],"summary":"Update Project","operationId":"update_project_api_v1_projects__project_id__put","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"project_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Project Id"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/ProjectUpdate"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Project"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"get":{"tags":["projects"],"summary":"Read Project","operationId":"read_project_api_v1_projects__project_id__get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"project_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Project Id"}},{"name":"x-project-password","in":"header","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"X-Project-Password"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Project"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"delete":{"tags":["projects"],"summary":"Delete Project","operationId":"delete_project_api_v1_projects__project_id__delete","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"project_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Project Id"}},{"name":"delete_orphans","in":"query","required":false,"schema":{"type":"boolean","default":false,"title":"Delete Orphans"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/projects/{project_id}/attach":{"post":{"tags":["projects"],"summary":"Attach Project","operationId":"attach_project_api_v1_projects__project_id__attach_post","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"project_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Project Id"}},{"name":"x-project-password","in":"header","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"X-Project-Password"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"delete":{"tags":["projects"],"summary":"Detach Project","operationId":"detach_project_api_v1_projects__project_id__attach_delete","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"project_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Project Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/projects/{project_id}/datasets/{dataset_id}":{"post":{"tags":["projects"],"summary":"Add Dataset To Project","operationId":"add_dataset_to_project_api_v1_projects__project_id__datasets__dataset_id__post","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"project_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Project Id"}},{"name":"dataset_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Dataset Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"delete":{"tags":["projects"],"summary":"Remove Dataset From Project","operationId":"remove_dataset_from_project_api_v1_projects__project_id__datasets__dataset_id__delete","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"project_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Project Id"}},{"name":"dataset_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Dataset Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/projects/{project_id}/share":{"post":{"tags":["projects"],"summary":"Share Project","operationId":"share_project_api_v1_projects__project_id__share_post","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"project_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Project Id"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/ProjectShareCreate"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ProjectShare"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/projects/{project_id}/datasets":{"get":{"tags":["projects"],"summary":"Read Project Datasets","operationId":"read_project_datasets_api_v1_projects__project_id__datasets_get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"project_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Project Id"}},{"name":"x-project-password","in":"header","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"X-Project-Password"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Dataset"},"title":"Response Read Project Datasets Api V1 Projects  Project Id  Datasets Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/projects/{project_id}/shares":{"get":{"tags":["projects"],"summary":"Read Project Shares","operationId":"read_project_shares_api_v1_projects__project_id__shares_get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"project_id","in":"path","required":true,"schema":{"type":"string","format":"uuid","title":"Project Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/ProjectShare"},"title":"Response Read Project Shares Api V1 Projects  Project Id  Shares Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/sessions/":{"post":{"tags":["sessions"],"summary":"Create Session","operationId":"create_session_api_v1_sessions__post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/SessionCreate"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Session"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/sessions/{session_id}":{"get":{"tags":["sessions"],"summary":"Get Session","operationId":"get_session_api_v1_sessions__session_id__get","parameters":[{"name":"session_id","in":"path","required":true,"schema":{"type":"string","title":"Session Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Session"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/":{"get":{"summary":"Root","operationId":"root__get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}}},"components":{"schemas":{"Body_create_dataset_api_v1_datasets__post":{"properties":{"name":{"type":"string","title":"Name"},"description":{"type":"string","title":"Description"},"file_type":{"type":"string","title":"File Type"},"file":{"type":"string","format":"binary","title":"File"}},"type":"object","required":["name","file_type","file"],"title":"Body_create_dataset_api_v1_datasets__post"},"Body_login_access_token_api_v1_login_access_token_post":{"properties":{"grant_type":{"anyOf":[{"type":"string","pattern":"^password$"},{"type":"null"}],"title":"Grant Type"},"username":{"type":"string","title":"Username"},"password":{"type":"string","format":"password","title":"Password"},"scope":{"type":"string","title":"Scope","default":""},"client_id":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Client Id"},"client_secret":{"anyOf":[{"type":"string"},{"type":"null"}],"format":"password","title":"Client Secret"}},"type":"object","required":["username","password"],"title":"Body_login_access_token_api_v1_login_access_token_post"},"Dataset":{"properties":{"description":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Description"},"id":{"type":"string","format":"uuid","title":"Id"},"name":{"type":"string","title":"Name"},"file_type":{"type":"string","title":"File Type"},"owner_id":{"type":"string","format":"uuid","title":"Owner Id"},"converted_path":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Converted Path"},"status":{"type":"string","title":"Status"},"created_at":{"type":"string","format":"date-time","title":"Created At"},"updated_at":{"anyOf":[{"type":"string","format":"date-time"},{"type":"null"}],"title":"Updated At"},"meta_data":{"anyOf":[{"additionalProperties":true,"type":"object"},{"type":"null"}],"title":"Meta Data"},"highest_visibility":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Highest Visibility"}},"type":"object","required":["id","name","file_type","owner_id","status","created_at"],"title":"Dataset"},"DatasetUpdate":{"properties":{"description":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Description"},"name":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Name"},"file_type":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"File Type"}},"type":"object","title":"DatasetUpdate"},"Group":{"properties":{"description":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Description"},"id":{"type":"string","format":"uuid","title":"Id"},"name":{"type":"string","title":"Name"},"owner_id":{"type":"string","format":"uuid","title":"Owner Id"},"created_at":{"type":"string","format":"date-time","title":"Created At"}},"type":"object","required":["id","name","owner_id","created_at"],"title":"Group"},"GroupCreate":{"properties":{"description":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Description"},"name":{"type":"string","title":"Name"}},"type":"object","required":["name"],"title":"GroupCreate"},"GroupMember":{"properties":{"user_id":{"type":"string","format":"uuid","title":"User Id"},"role":{"$ref":"#/components/schemas/GroupRole"},"created_at":{"type":"string","format":"date-time","title":"Created At"},"user":{"anyOf":[{"$ref":"#/components/schemas/User"},{"type":"null"}]}},"type":"object","required":["user_id","role","created_at"],"title":"GroupMember"},"GroupMemberCreate":{"properties":{"user_id":{"type":"string","format":"uuid","title":"User Id"},"role":{"$ref":"#/components/schemas/GroupRole"}},"type":"object","required":["user_id","role"],"title":"GroupMemberCreate"},"GroupMemberUpdate":{"properties":{"role":{"$ref":"#/components/schemas/GroupRole"}},"type":"object","required":["role"],"title":"GroupMemberUpdate"},"GroupRole":{"type":"string","enum":["owner","admin","member"],"title":"GroupRole"},"GroupTransferOwnership":{"properties":{"new_owner_id":{"type":"string","format":"uuid","title":"New Owner Id"}},"type":"object","required":["new_owner_id"],"title":"GroupTransferOwnership"},"HTTPValidationError":{"properties":{"detail":{"items":{"$ref":"#/components/schemas/ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"},"Project":{"properties":{"description":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Description"},"visibility":{"$ref":"#/components/schemas/ProjectVisibility","default":"private"},"id":{"type":"string","format":"uuid","title":"Id"},"name":{"type":"string","title":"Name"},"owner_id":{"type":"string","format":"uuid","title":"Owner Id"},"created_at":{"type":"string","format":"date-time","title":"Created At"},"shares":{"items":{"$ref":"#/components/schemas/ProjectShare"},"type":"array","title":"Shares","default":[]},"datasets":{"items":{"$ref":"#/components/schemas/Dataset"},"type":"array","title":"Datasets","default":[]}},"type":"object","required":["id","name","owner_id","created_at"],"title":"Project"},"ProjectCreate":{"properties":{"description":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Description"},"visibility":{"$ref":"#/components/schemas/ProjectVisibility","default":"private"},"name":{"type":"string","title":"Name"},"password":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Password"}},"type":"object","required":["name"],"title":"ProjectCreate"},"ProjectPermission":{"type":"string","enum":["view","edit","admin"],"title":"ProjectPermission"},"ProjectShare":{"properties":{"user_id":{"anyOf":[{"type":"string","format":"uuid"},{"type":"null"}],"title":"User Id"},"group_id":{"anyOf":[{"type":"string","format":"uuid"},{"type":"null"}],"title":"Group Id"},"permission":{"$ref":"#/components/schemas/ProjectPermission"},"id":{"type":"string","format":"uuid","title":"Id"},"project_id":{"type":"string","format":"uuid","title":"Project Id"},"created_at":{"type":"string","format":"date-time","title":"Created At"},"user":{"anyOf":[{"$ref":"#/components/schemas/User"},{"type":"null"}]},"group":{"anyOf":[{"$ref":"#/components/schemas/Group"},{"type":"null"}]}},"type":"object","required":["permission","id","project_id","created_at"],"title":"ProjectShare"},"ProjectShareCreate":{"properties":{"user_id":{"anyOf":[{"type":"string","format":"uuid"},{"type":"null"}],"title":"User Id"},"group_id":{"anyOf":[{"type":"string","format":"uuid"},{"type":"null"}],"title":"Group Id"},"permission":{"$ref":"#/components/schemas/ProjectPermission"}},"type":"object","required":["permission"],"title":"ProjectShareCreate"},"ProjectUpdate":{"properties":{"description":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Description"},"visibility":{"$ref":"#/components/schemas/ProjectVisibility","default":"private"},"name":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Name"},"password":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Password"}},"type":"object","title":"ProjectUpdate"},"ProjectVisibility":{"type":"string","enum":["private","public","password"],"title":"ProjectVisibility"},"Session":{"properties":{"data":{"additionalProperties":true,"type":"object","title":"Data"},"id":{"type":"string","title":"Id"},"created_at":{"type":"string","format":"date-time","title":"Created At"}},"type":"object","required":["data","id","created_at"],"title":"Session"},"SessionCreate":{"properties":{"data":{"additionalProperties":true,"type":"object","title":"Data"}},"type":"object","required":["data"],"title":"SessionCreate"},"Token":{"properties":{"access_token":{"type":"string","title":"Access Token"},"token_type":{"type":"string","title":"Token Type"}},"type":"object","required":["access_token","token_type"],"title":"Token"},"User":{"properties":{"email":{"anyOf":[{"type":"string","format":"email"},{"type":"null"}],"title":"Email"},"is_active":{"anyOf":[{"type":"boolean"},{"type":"null"}],"title":"Is Active","default":true},"is_superuser":{"type":"boolean","title":"Is Superuser","default":false},"full_name":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Full Name"},"id":{"anyOf":[{"type":"string","format":"uuid"},{"type":"null"}],"title":"Id"}},"type":"object","title":"User"},"UserCreate":{"properties":{"email":{"type":"string","format":"email","title":"Email"},"is_active":{"anyOf":[{"type":"boolean"},{"type":"null"}],"title":"Is Active","default":true},"is_superuser":{"type":"boolean","title":"Is Superuser","default":false},"full_name":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Full Name"},"password":{"type":"string","title":"Password"}},"type":"object","required":["email","password"],"title":"UserCreate"},"ValidationError":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"}},"securitySchemes":{"OAuth2PasswordBearer":{"type":"oauth2","flows":{"password":{"scopes":{},"tokenUrl":"/api/v1/login/access-token"}}}}}}
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "SCope v2",
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/api/v1/login/google": {
+            "get": {
+                "tags": [
+                    "login"
+                ],
+                "summary": "Login Google",
+                "operationId": "login_google_api_v1_login_google_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/login/google/callback": {
+            "get": {
+                "tags": [
+                    "login"
+                ],
+                "summary": "Login Google Callback",
+                "operationId": "login_google_callback_api_v1_login_google_callback_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/login/orcid": {
+            "get": {
+                "tags": [
+                    "login"
+                ],
+                "summary": "Login Orcid",
+                "operationId": "login_orcid_api_v1_login_orcid_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/login/orcid/callback": {
+            "get": {
+                "tags": [
+                    "login"
+                ],
+                "summary": "Login Orcid Callback",
+                "operationId": "login_orcid_callback_api_v1_login_orcid_callback_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/login/access-token": {
+            "post": {
+                "tags": [
+                    "login"
+                ],
+                "summary": "Login Access Token",
+                "description": "OAuth2 compatible token login, get an access token for future requests",
+                "operationId": "login_access_token_api_v1_login_access_token_post",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Body_login_access_token_api_v1_login_access_token_post"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Token"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/search": {
+            "get": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Search Users",
+                "description": "Search users by email or name.",
+                "operationId": "search_users_api_v1_users_search_get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Query"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/User"
+                                    },
+                                    "title": "Response Search Users Api V1 Users Search Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/": {
+            "get": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Read Users",
+                "description": "Retrieve users.",
+                "operationId": "read_users_api_v1_users__get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "skip",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 0,
+                            "title": "Skip"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 100,
+                            "title": "Limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/User"
+                                    },
+                                    "title": "Response Read Users Api V1 Users  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Create User",
+                "description": "Create new user.",
+                "operationId": "create_user_api_v1_users__post",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/me": {
+            "get": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Read User Me",
+                "description": "Get current user.",
+                "operationId": "read_user_me_api_v1_users_me_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/datasets/": {
+            "get": {
+                "tags": [
+                    "datasets"
+                ],
+                "summary": "Read Datasets",
+                "description": "Retrieve datasets.",
+                "operationId": "read_datasets_api_v1_datasets__get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "skip",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 0,
+                            "title": "Skip"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 100,
+                            "title": "Limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Dataset"
+                                    },
+                                    "title": "Response Read Datasets Api V1 Datasets  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "datasets"
+                ],
+                "summary": "Create Dataset",
+                "description": "Create new dataset and upload file.",
+                "operationId": "create_dataset_api_v1_datasets__post",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Body_create_dataset_api_v1_datasets__post"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Dataset"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/datasets/{dataset_id}": {
+            "get": {
+                "tags": [
+                    "datasets"
+                ],
+                "summary": "Read Dataset",
+                "description": "Get dataset by ID.",
+                "operationId": "read_dataset_api_v1_datasets__dataset_id__get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "dataset_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Dataset Id"
+                        }
+                    },
+                    {
+                        "name": "x-project-password",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Project-Password"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Dataset"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "datasets"
+                ],
+                "summary": "Update Dataset",
+                "description": "Update dataset.",
+                "operationId": "update_dataset_api_v1_datasets__dataset_id__put",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "dataset_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Dataset Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DatasetUpdate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Dataset"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "datasets"
+                ],
+                "summary": "Delete Dataset",
+                "description": "Delete dataset.",
+                "operationId": "delete_dataset_api_v1_datasets__dataset_id__delete",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "dataset_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Dataset Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Dataset"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/datasets/{dataset_id}/metadata": {
+            "get": {
+                "tags": [
+                    "datasets"
+                ],
+                "summary": "Get Dataset Metadata",
+                "description": "Get dataset metadata.",
+                "operationId": "get_dataset_metadata_api_v1_datasets__dataset_id__metadata_get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "dataset_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Dataset Id"
+                        }
+                    },
+                    {
+                        "name": "x-project-password",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Project-Password"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get Dataset Metadata Api V1 Datasets  Dataset Id  Metadata Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/datasets/{dataset_id}/embedding/{embedding_name}": {
+            "get": {
+                "tags": [
+                    "datasets"
+                ],
+                "summary": "Get Dataset Embedding",
+                "description": "Get dataset embedding coordinates.",
+                "operationId": "get_dataset_embedding_api_v1_datasets__dataset_id__embedding__embedding_name__get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "dataset_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Dataset Id"
+                        }
+                    },
+                    {
+                        "name": "embedding_name",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Embedding Name"
+                        }
+                    },
+                    {
+                        "name": "x-project-password",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Project-Password"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get Dataset Embedding Api V1 Datasets  Dataset Id  Embedding  Embedding Name  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/datasets/{dataset_id}/genes": {
+            "get": {
+                "tags": [
+                    "datasets"
+                ],
+                "summary": "Search Genes",
+                "description": "Search for genes in the dataset.",
+                "operationId": "search_genes_api_v1_datasets__dataset_id__genes_get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "dataset_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Dataset Id"
+                        }
+                    },
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "title": "Query"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "title": "Limit"
+                        }
+                    },
+                    {
+                        "name": "x-project-password",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Project-Password"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Search Genes Api V1 Datasets  Dataset Id  Genes Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/datasets/{dataset_id}/features": {
+            "get": {
+                "tags": [
+                    "datasets"
+                ],
+                "summary": "Get Features",
+                "description": "List available cell features (obs columns) with their types.\nReturns list of {name: str, type: str}.",
+                "operationId": "get_features_api_v1_datasets__dataset_id__features_get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "dataset_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Dataset Id"
+                        }
+                    },
+                    {
+                        "name": "x-project-password",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Project-Password"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get Features Api V1 Datasets  Dataset Id  Features Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/datasets/{dataset_id}/expression/{gene}": {
+            "get": {
+                "tags": [
+                    "datasets"
+                ],
+                "summary": "Get Gene Expression",
+                "description": "Get expression values for a specific gene.\nReturns binary float32 array.",
+                "operationId": "get_gene_expression_api_v1_datasets__dataset_id__expression__gene__get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "dataset_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Dataset Id"
+                        }
+                    },
+                    {
+                        "name": "gene",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Gene"
+                        }
+                    },
+                    {
+                        "name": "x-project-password",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Project-Password"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get Gene Expression Api V1 Datasets  Dataset Id  Expression  Gene  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/datasets/{dataset_id}/feature/{feature}": {
+            "get": {
+                "tags": [
+                    "datasets"
+                ],
+                "summary": "Get Feature Values",
+                "description": "Get values for a specific feature (obs column).\nReturns JSON list (handles strings and numbers).",
+                "operationId": "get_feature_values_api_v1_datasets__dataset_id__feature__feature__get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "dataset_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Dataset Id"
+                        }
+                    },
+                    {
+                        "name": "feature",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Feature"
+                        }
+                    },
+                    {
+                        "name": "x-project-password",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Project-Password"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get Feature Values Api V1 Datasets  Dataset Id  Feature  Feature  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/stats": {
+            "get": {
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Read Admin Stats",
+                "description": "Get admin statistics.",
+                "operationId": "read_admin_stats_api_v1_admin_stats_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Read Admin Stats Api V1 Admin Stats Get"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/groups/": {
+            "post": {
+                "tags": [
+                    "groups"
+                ],
+                "summary": "Create Group",
+                "operationId": "create_group_api_v1_groups__post",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GroupCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Group"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "groups"
+                ],
+                "summary": "Read Groups",
+                "operationId": "read_groups_api_v1_groups__get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "skip",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 0,
+                            "title": "Skip"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 100,
+                            "title": "Limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Group"
+                                    },
+                                    "title": "Response Read Groups Api V1 Groups  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/groups/{group_id}": {
+            "get": {
+                "tags": [
+                    "groups"
+                ],
+                "summary": "Read Group",
+                "operationId": "read_group_api_v1_groups__group_id__get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Group Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Group"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "groups"
+                ],
+                "summary": "Delete Group",
+                "operationId": "delete_group_api_v1_groups__group_id__delete",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Group Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/groups/{group_id}/members": {
+            "post": {
+                "tags": [
+                    "groups"
+                ],
+                "summary": "Add Group Member",
+                "operationId": "add_group_member_api_v1_groups__group_id__members_post",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Group Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GroupMemberCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GroupMember"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "groups"
+                ],
+                "summary": "Read Group Members",
+                "operationId": "read_group_members_api_v1_groups__group_id__members_get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Group Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/GroupMember"
+                                    },
+                                    "title": "Response Read Group Members Api V1 Groups  Group Id  Members Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/groups/{group_id}/members/{user_id}": {
+            "delete": {
+                "tags": [
+                    "groups"
+                ],
+                "summary": "Remove Group Member",
+                "operationId": "remove_group_member_api_v1_groups__group_id__members__user_id__delete",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Group Id"
+                        }
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "User Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "groups"
+                ],
+                "summary": "Update Group Member Role",
+                "operationId": "update_group_member_role_api_v1_groups__group_id__members__user_id__put",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Group Id"
+                        }
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "User Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GroupMemberUpdate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GroupMember"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/groups/{group_id}/transfer-ownership": {
+            "post": {
+                "tags": [
+                    "groups"
+                ],
+                "summary": "Transfer Group Ownership",
+                "operationId": "transfer_group_ownership_api_v1_groups__group_id__transfer_ownership_post",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Group Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GroupTransferOwnership"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Group"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/projects/": {
+            "post": {
+                "tags": [
+                    "projects"
+                ],
+                "summary": "Create Project",
+                "operationId": "create_project_api_v1_projects__post",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProjectCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Project"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "projects"
+                ],
+                "summary": "Read Projects",
+                "operationId": "read_projects_api_v1_projects__get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "skip",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 0,
+                            "title": "Skip"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 100,
+                            "title": "Limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Project"
+                                    },
+                                    "title": "Response Read Projects Api V1 Projects  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/projects/{project_id}": {
+            "put": {
+                "tags": [
+                    "projects"
+                ],
+                "summary": "Update Project",
+                "operationId": "update_project_api_v1_projects__project_id__put",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Project Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProjectUpdate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Project"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "projects"
+                ],
+                "summary": "Read Project",
+                "operationId": "read_project_api_v1_projects__project_id__get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Project Id"
+                        }
+                    },
+                    {
+                        "name": "x-project-password",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Project-Password"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Project"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "projects"
+                ],
+                "summary": "Delete Project",
+                "operationId": "delete_project_api_v1_projects__project_id__delete",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Project Id"
+                        }
+                    },
+                    {
+                        "name": "delete_orphans",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false,
+                            "title": "Delete Orphans"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/projects/{project_id}/attach": {
+            "post": {
+                "tags": [
+                    "projects"
+                ],
+                "summary": "Attach Project",
+                "operationId": "attach_project_api_v1_projects__project_id__attach_post",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Project Id"
+                        }
+                    },
+                    {
+                        "name": "x-project-password",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Project-Password"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "projects"
+                ],
+                "summary": "Detach Project",
+                "operationId": "detach_project_api_v1_projects__project_id__attach_delete",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Project Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/projects/{project_id}/datasets/{dataset_id}": {
+            "post": {
+                "tags": [
+                    "projects"
+                ],
+                "summary": "Add Dataset To Project",
+                "operationId": "add_dataset_to_project_api_v1_projects__project_id__datasets__dataset_id__post",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Project Id"
+                        }
+                    },
+                    {
+                        "name": "dataset_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Dataset Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "projects"
+                ],
+                "summary": "Remove Dataset From Project",
+                "operationId": "remove_dataset_from_project_api_v1_projects__project_id__datasets__dataset_id__delete",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Project Id"
+                        }
+                    },
+                    {
+                        "name": "dataset_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Dataset Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/projects/{project_id}/share": {
+            "post": {
+                "tags": [
+                    "projects"
+                ],
+                "summary": "Share Project",
+                "operationId": "share_project_api_v1_projects__project_id__share_post",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Project Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProjectShareCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProjectShare"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/projects/{project_id}/datasets": {
+            "get": {
+                "tags": [
+                    "projects"
+                ],
+                "summary": "Read Project Datasets",
+                "operationId": "read_project_datasets_api_v1_projects__project_id__datasets_get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Project Id"
+                        }
+                    },
+                    {
+                        "name": "x-project-password",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Project-Password"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Dataset"
+                                    },
+                                    "title": "Response Read Project Datasets Api V1 Projects  Project Id  Datasets Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/projects/{project_id}/shares": {
+            "get": {
+                "tags": [
+                    "projects"
+                ],
+                "summary": "Read Project Shares",
+                "operationId": "read_project_shares_api_v1_projects__project_id__shares_get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Project Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ProjectShare"
+                                    },
+                                    "title": "Response Read Project Shares Api V1 Projects  Project Id  Shares Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sessions/": {
+            "post": {
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Create Session",
+                "operationId": "create_session_api_v1_sessions__post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SessionCreate"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Session"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sessions/{session_id}": {
+            "get": {
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Get Session",
+                "operationId": "get_session_api_v1_sessions__session_id__get",
+                "parameters": [
+                    {
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Session Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Session"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/": {
+            "get": {
+                "summary": "Root",
+                "operationId": "root__get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Body_create_dataset_api_v1_datasets__post": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "description": {
+                        "type": "string",
+                        "title": "Description"
+                    },
+                    "file_type": {
+                        "type": "string",
+                        "title": "File Type"
+                    },
+                    "file": {
+                        "type": "string",
+                        "format": "binary",
+                        "title": "File"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "file_type",
+                    "file"
+                ],
+                "title": "Body_create_dataset_api_v1_datasets__post"
+            },
+            "Body_login_access_token_api_v1_login_access_token_post": {
+                "properties": {
+                    "grant_type": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^password$"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Grant Type"
+                    },
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "title": "Password"
+                    },
+                    "scope": {
+                        "type": "string",
+                        "title": "Scope",
+                        "default": ""
+                    },
+                    "client_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Client Id"
+                    },
+                    "client_secret": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "format": "password",
+                        "title": "Client Secret"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "username",
+                    "password"
+                ],
+                "title": "Body_login_access_token_api_v1_login_access_token_post"
+            },
+            "Dataset": {
+                "properties": {
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "file_type": {
+                        "type": "string",
+                        "title": "File Type"
+                    },
+                    "owner_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Owner Id"
+                    },
+                    "converted_path": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Converted Path"
+                    },
+                    "status": {
+                        "type": "string",
+                        "title": "Status"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Updated At"
+                    },
+                    "meta_data": {
+                        "anyOf": [
+                            {
+                                "additionalProperties": true,
+                                "type": "object"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Meta Data"
+                    },
+                    "highest_visibility": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Highest Visibility"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "file_type",
+                    "owner_id",
+                    "status",
+                    "created_at"
+                ],
+                "title": "Dataset"
+            },
+            "DatasetUpdate": {
+                "properties": {
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Name"
+                    },
+                    "file_type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "File Type"
+                    }
+                },
+                "type": "object",
+                "title": "DatasetUpdate"
+            },
+            "Group": {
+                "properties": {
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "owner_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Owner Id"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "owner_id",
+                    "created_at"
+                ],
+                "title": "Group"
+            },
+            "GroupCreate": {
+                "properties": {
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name"
+                ],
+                "title": "GroupCreate"
+            },
+            "GroupMember": {
+                "properties": {
+                    "user_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "User Id"
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/GroupRole"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "user": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/User"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "user_id",
+                    "role",
+                    "created_at"
+                ],
+                "title": "GroupMember"
+            },
+            "GroupMemberCreate": {
+                "properties": {
+                    "user_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "User Id"
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/GroupRole"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "user_id",
+                    "role"
+                ],
+                "title": "GroupMemberCreate"
+            },
+            "GroupMemberUpdate": {
+                "properties": {
+                    "role": {
+                        "$ref": "#/components/schemas/GroupRole"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "role"
+                ],
+                "title": "GroupMemberUpdate"
+            },
+            "GroupRole": {
+                "type": "string",
+                "enum": [
+                    "owner",
+                    "admin",
+                    "member"
+                ],
+                "title": "GroupRole"
+            },
+            "GroupTransferOwnership": {
+                "properties": {
+                    "new_owner_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "New Owner Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "new_owner_id"
+                ],
+                "title": "GroupTransferOwnership"
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "Project": {
+                "properties": {
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "visibility": {
+                        "$ref": "#/components/schemas/ProjectVisibility",
+                        "default": "private"
+                    },
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "owner_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Owner Id"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "shares": {
+                        "items": {
+                            "$ref": "#/components/schemas/ProjectShare"
+                        },
+                        "type": "array",
+                        "title": "Shares",
+                        "default": []
+                    },
+                    "datasets": {
+                        "items": {
+                            "$ref": "#/components/schemas/Dataset"
+                        },
+                        "type": "array",
+                        "title": "Datasets",
+                        "default": []
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "owner_id",
+                    "created_at"
+                ],
+                "title": "Project"
+            },
+            "ProjectCreate": {
+                "properties": {
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "visibility": {
+                        "$ref": "#/components/schemas/ProjectVisibility",
+                        "default": "private"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "password": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Password"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name"
+                ],
+                "title": "ProjectCreate"
+            },
+            "ProjectPermission": {
+                "type": "string",
+                "enum": [
+                    "view",
+                    "edit",
+                    "admin"
+                ],
+                "title": "ProjectPermission"
+            },
+            "ProjectShare": {
+                "properties": {
+                    "user_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "User Id"
+                    },
+                    "group_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Group Id"
+                    },
+                    "permission": {
+                        "$ref": "#/components/schemas/ProjectPermission"
+                    },
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "project_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Project Id"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "user": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/User"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "group": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/Group"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "permission",
+                    "id",
+                    "project_id",
+                    "created_at"
+                ],
+                "title": "ProjectShare"
+            },
+            "ProjectShareCreate": {
+                "properties": {
+                    "user_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "User Id"
+                    },
+                    "group_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Group Id"
+                    },
+                    "permission": {
+                        "$ref": "#/components/schemas/ProjectPermission"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "permission"
+                ],
+                "title": "ProjectShareCreate"
+            },
+            "ProjectUpdate": {
+                "properties": {
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "visibility": {
+                        "$ref": "#/components/schemas/ProjectVisibility",
+                        "default": "private"
+                    },
+                    "name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Name"
+                    },
+                    "password": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Password"
+                    }
+                },
+                "type": "object",
+                "title": "ProjectUpdate"
+            },
+            "ProjectVisibility": {
+                "type": "string",
+                "enum": [
+                    "private",
+                    "public",
+                    "password"
+                ],
+                "title": "ProjectVisibility"
+            },
+            "Session": {
+                "properties": {
+                    "data": {
+                        "additionalProperties": true,
+                        "type": "object",
+                        "title": "Data"
+                    },
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "data",
+                    "id",
+                    "created_at"
+                ],
+                "title": "Session"
+            },
+            "SessionCreate": {
+                "properties": {
+                    "data": {
+                        "additionalProperties": true,
+                        "type": "object",
+                        "title": "Data"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "title": "SessionCreate"
+            },
+            "Token": {
+                "properties": {
+                    "access_token": {
+                        "type": "string",
+                        "title": "Access Token"
+                    },
+                    "token_type": {
+                        "type": "string",
+                        "title": "Token Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "access_token",
+                    "token_type"
+                ],
+                "title": "Token"
+            },
+            "User": {
+                "properties": {
+                    "email": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "email"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Email"
+                    },
+                    "is_active": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Is Active",
+                        "default": true
+                    },
+                    "is_superuser": {
+                        "type": "boolean",
+                        "title": "Is Superuser",
+                        "default": false
+                    },
+                    "full_name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Full Name"
+                    },
+                    "id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Id"
+                    }
+                },
+                "type": "object",
+                "title": "User"
+            },
+            "UserCreate": {
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "title": "Email"
+                    },
+                    "is_active": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Is Active",
+                        "default": true
+                    },
+                    "is_superuser": {
+                        "type": "boolean",
+                        "title": "Is Superuser",
+                        "default": false
+                    },
+                    "full_name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Full Name"
+                    },
+                    "password": {
+                        "type": "string",
+                        "title": "Password"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "title": "UserCreate"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
+        },
+        "securitySchemes": {
+            "OAuth2PasswordBearer": {
+                "type": "oauth2",
+                "flows": {
+                    "password": {
+                        "scopes": {},
+                        "tokenUrl": "/api/v1/login/access-token"
+                    }
+                }
+            }
+        }
+    }
+}

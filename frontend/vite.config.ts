@@ -22,6 +22,9 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['date-fns']
+    // Pre-bundle at server start. Without listing hash-wasm (imported by the MD5
+    // hash web worker), Vite only discovers + optimizes it the first time an
+    // upload runs, which forces a full-page reload mid-hash.
+    include: ['date-fns', 'hash-wasm']
   }
 })

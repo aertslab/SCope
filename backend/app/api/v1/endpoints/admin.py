@@ -145,6 +145,20 @@ async def read_processing_datasets(
     ]
 
 
+@router.get("/uploads")
+async def read_active_uploads(
+    current_user: User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """In-flight dataset uploads (browser or API), from the Redis progress registry.
+
+    Each entry: id, user_email, name, file_type, total_bytes (0 if the client
+    sent no Content-Length), received_bytes, started_at, updated_at (epoch secs).
+    """
+    from app.services import upload_registry
+
+    return await run_in_threadpool(upload_registry.list_active)
+
+
 @router.post("/datasets/{dataset_id}/reconvert")
 async def reconvert_dataset(
     dataset_id: UUID,
@@ -512,8 +526,12 @@ def _dir_size(path: str) -> int:
 def _scan_uploads() -> list[dict[str, Any]]:
     """Return top-level entries in the uploads directory.
 
-    Excludes git/OS placeholder files (``.gitignore``/``.gitkeep``/…) and any
-    dotfile so they are never flagged as orphans. Directory sizes are NOT
+    Excludes git/OS placeholder files (``.gitignore``/``.gitkeep``/…), any
+    dotfile, and in-progress chunked-upload scratch files (``*.part``) so none
+    are ever flagged as orphans. (A ``.part`` belongs to a live upload and is not
+    yet referenced by any DataFile row, so without this it would be offered for
+    deletion mid-transfer. Abandoned ``.part`` files are reclaimed by the
+    ``purge_orphaned_upload_parts`` beat task instead.) Directory sizes are NOT
     computed here — that recursive walk over thousands of zarr/SOMA chunk files
     is the dominant cost, so callers compute size only for the (few) entries
     they actually display. Sizes start as ``None`` for directories.
@@ -523,7 +541,11 @@ def _scan_uploads() -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
     with os.scandir(UPLOAD_DIR) as it:
         for entry in it:
-            if entry.name in IGNORED_ORPHAN_NAMES or entry.name.startswith("."):
+            if (
+                entry.name in IGNORED_ORPHAN_NAMES
+                or entry.name.startswith(".")
+                or entry.name.endswith(".part")
+            ):
                 continue
             try:
                 stat = entry.stat()

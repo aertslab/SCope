@@ -72,11 +72,14 @@ export interface ViewerState {
 
 const defaultSettings: ViewerSettings = {
     pointSize: 2,
+    labelSize: 12,
     embeddingName: '',
     showLabels: true,
     normalization: 'none',
     dimX: 0,
     dimY: 1,
+    dimZ: 2,
+    is3D: false,
     shape: 0,
     zOrdering: true
 };

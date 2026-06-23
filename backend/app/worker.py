@@ -35,7 +35,11 @@ celery_app.conf.beat_schedule = {
     "purge-expired-trash": {
         "task": "purge_expired_trash",
         "schedule": float(24 * 60 * 60),  # once a day
-    }
+    },
+    "purge-orphaned-upload-parts": {
+        "task": "purge_orphaned_upload_parts",
+        "schedule": float(60 * 60),  # hourly
+    },
 }
 
 def _publish_dataset_event(owner_id, payload: dict) -> None:
@@ -282,6 +286,21 @@ def process_dataset(dataset_id: int, file_path: str):
             _reset_conversion_attempts(dataset_id)
             logger.info("Dataset %s status -> ready", dataset_id)
 
+            # Pre-build the search-space sidecar (reads categorical columns once)
+            # so the user's FIRST search is instant instead of triggering a slow
+            # on-demand build. Best-effort — a failure here must not fail the
+            # conversion (the API lazily builds + persists it on first search).
+            try:
+                from app.utils import soma_reader
+                t0 = time.monotonic()
+                ss = soma_reader.get_search_space(output_path)
+                logger.info(
+                    "Built search-space sidecar for dataset %s: %d elements in %.1fs",
+                    dataset_id, len(ss), time.monotonic() - t0,
+                )
+            except Exception:
+                logger.exception("Search-space pre-build failed for %s (non-fatal)", dataset_id)
+
             return True
         except Exception as e:
             logger.exception("process_dataset FAILED: dataset=%s: %s", dataset_id, e)
@@ -338,3 +357,39 @@ def purge_expired_trash():
         return purged
 
     return asyncio.run(run())
+
+
+# Where chunked-upload .part scratch files live (matches datasets.UPLOAD_DIR,
+# resolved against the worker's working dir /app). The max age must be >= the
+# resumable-session TTL (upload_session._TTL_SECONDS = 48h) so a .part a client
+# could still resume is never reclaimed out from under it.
+_UPLOAD_DIR = "uploads"
+_PART_MAX_AGE_SECONDS = 48 * 3600
+
+
+@celery_app.task(name="purge_orphaned_upload_parts")
+def purge_orphaned_upload_parts():
+    """Reclaim abandoned chunked-upload ``.part`` scratch files.
+
+    An active (or resumable) upload rewrites its ``.part`` on every chunk, which
+    refreshes the file's mtime — so anything untouched for longer than the
+    session TTL can't belong to a still-resumable upload and is safe to delete.
+    Runs hourly via Celery beat.
+    """
+    import glob
+
+    cutoff = time.time() - _PART_MAX_AGE_SECONDS
+    removed = 0
+    try:
+        for path in glob.glob(os.path.join(_UPLOAD_DIR, "*.part")):
+            try:
+                if os.path.getmtime(path) < cutoff:
+                    os.remove(path)
+                    removed += 1
+            except OSError:
+                continue
+    except Exception:
+        logger.exception("purge_orphaned_upload_parts scan failed")
+    if removed:
+        logger.info("Purged %d orphaned upload .part file(s)", removed)
+    return removed

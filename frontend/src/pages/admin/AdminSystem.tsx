@@ -18,6 +18,7 @@ import {
     Workflow,
     RefreshCw,
     XOctagon,
+    UploadCloud,
 } from 'lucide-react'
 
 interface ComponentStatus { status: 'ok' | 'error'; detail: string }
@@ -76,6 +77,25 @@ interface SystemConfig {
     oauth: { google_configured: boolean; orcid_configured: boolean }
     cors_origins: string[]
     insecure_secrets_allowed: boolean
+}
+
+interface UploadInfo {
+    id: string
+    user_email: string
+    name: string
+    file_type: string
+    total_bytes: number
+    received_bytes: number
+    started_at: number
+    updated_at: number
+}
+
+function formatElapsed(startedAt?: number) {
+    if (!startedAt) return '—'
+    const secs = Math.max(0, Math.floor(Date.now() / 1000 - startedAt))
+    const m = Math.floor(secs / 60)
+    const s = secs % 60
+    return m > 0 ? `${m}m ${s}s` : `${s}s`
 }
 
 function formatBytes(bytes?: number) {
@@ -147,13 +167,20 @@ export default function AdminSystem() {
         [],
         { pollMs: 30000 },
     )
+    // Polled often so the byte counts move visibly while an upload is in flight.
+    const uploadsRes = useAsyncResource<UploadInfo[]>(
+        () => api.get('/admin/uploads').then(r => r.data),
+        [],
+        { pollMs: 3000 },
+    )
 
     const refreshAll = useCallback(() => {
         health.refetch()
         tasksRes.refetch()
         configRes.refetch()
         activityRes.refetch()
-    }, [health, tasksRes, configRes, activityRes])
+        uploadsRes.refetch()
+    }, [health, tasksRes, configRes, activityRes, uploadsRes])
 
     const handleRevoke = async (taskId: string, terminate = false) => {
         if (!confirm(`Revoke task ${taskId}${terminate ? ' (terminate running task)' : ''}?`)) return
@@ -169,12 +196,13 @@ export default function AdminSystem() {
     const tasks = tasksRes.data
     const config = configRes.data
     const activity = activityRes.data ?? []
+    const uploads = uploadsRes.data ?? []
 
     const flatTasks = (kind: 'active' | 'scheduled' | 'reserved') => {
         if (!tasks) return []
         const out: { worker: string; task: CeleryTaskInfo }[] = []
         Object.entries(tasks[kind] || {}).forEach(([worker, list]) => {
-            ;(list || []).forEach(task => out.push({ worker, task }))
+            (list || []).forEach(task => out.push({ worker, task }))
         })
         return out
     }
@@ -320,6 +348,71 @@ export default function AdminSystem() {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Active uploads (in-flight, browser or API) */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>
+                        <span className="inline-flex items-center gap-2"><UploadCloud size={18} /> Active Uploads ({uploads.length})</span>
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {uploadsRes.loading && !uploadsRes.data ? (
+                        <PanelSkeleton rows={2} />
+                    ) : uploadsRes.error ? (
+                        <div className="text-sm text-red-600">Failed to load uploads: {uploadsRes.error}</div>
+                    ) : uploads.length === 0 ? (
+                        <div className="text-sm text-gray-500 italic">No uploads in progress</div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full text-sm">
+                                <thead className="bg-gray-50 text-xs uppercase text-gray-500">
+                                    <tr>
+                                        <th className="px-3 py-2 text-left">User</th>
+                                        <th className="px-3 py-2 text-left">Dataset</th>
+                                        <th className="px-3 py-2 text-left">Progress</th>
+                                        <th className="px-3 py-2 text-left">Elapsed</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {uploads.map(u => {
+                                        const pct = u.total_bytes > 0
+                                            ? Math.min(100, Math.round((u.received_bytes / u.total_bytes) * 100))
+                                            : null
+                                        return (
+                                            <tr key={u.id} className="border-t">
+                                                <td className="px-3 py-2 truncate">{u.user_email || '—'}</td>
+                                                <td className="px-3 py-2 truncate">
+                                                    {u.name || '—'}{' '}
+                                                    <span className="text-gray-400 text-xs uppercase">{u.file_type}</span>
+                                                </td>
+                                                <td className="px-3 py-2 min-w-[14rem]">
+                                                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                                                        <span>
+                                                            {formatBytes(u.received_bytes)}
+                                                            {u.total_bytes > 0 && <> / {formatBytes(u.total_bytes)}</>}
+                                                        </span>
+                                                        <span>{pct !== null ? `${pct}%` : 'streaming…'}</span>
+                                                    </div>
+                                                    {pct !== null ? (
+                                                        <ProgressBar value={u.received_bytes} max={u.total_bytes} />
+                                                    ) : (
+                                                        // No Content-Length: show an indeterminate bar.
+                                                        <div className="h-2 w-full bg-gray-200 rounded overflow-hidden">
+                                                            <div className="h-2 w-1/3 bg-indigo-400 animate-pulse rounded" />
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td className="px-3 py-2 text-xs text-gray-500 whitespace-nowrap">{formatElapsed(u.started_at)}</td>
+                                            </tr>
+                                        )
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
 
             {/* Tasks */}
             <Card>

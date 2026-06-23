@@ -97,6 +97,13 @@ def invalidate(path: str) -> None:
     _GENE_INDEX_CACHE.pop(path, None)
     _METADATA_CACHE.pop(path, None)
     _REGULON_CACHE.pop(path, None)
+    # Drop the (column-derived) search space so a reconvert rebuilds it.
+    try:
+        from app.utils import soma_reader as _soma_reader
+
+        _soma_reader.clear_search_space_cache(path)
+    except Exception:  # noqa: BLE001
+        pass
     # Notify the expression-bytes cache in the datasets endpoint.
     try:
         from app.api.v1.endpoints import datasets as _datasets

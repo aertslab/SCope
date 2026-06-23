@@ -184,7 +184,7 @@ export default function Dashboard() {
         )}
       </Card>
 
-      <Modal isOpen={isUploadOpen} onClose={() => setIsUploadOpen(false)} title="Upload Dataset">
+      <Modal isOpen={isUploadOpen} onClose={() => setIsUploadOpen(false)} title="Upload Dataset" size="4xl">
         <UploadDatasetForm
           onSuccess={() => { setIsUploadOpen(false); refresh() }}
           onCancel={() => setIsUploadOpen(false)}

@@ -79,55 +79,87 @@ export const useDatasetStore = create<DatasetState>((set, get) => ({
       }));
   },
   uploadDataset: async (name, description, fileType, file, onProgress) => {
-    // 1. Calculate Hash
+    // CHUNKED + RESUMABLE upload. The file is sent as a sequence of short PATCH
+    // requests rather than one long stream, so a dropped connection (or an
+    // intermediary's idle/duration cap) resumes from the server's last offset
+    // instead of restarting. The simple single-shot `POST /datasets/` (curl -T)
+    // path still exists for CLI users; the browser uses this for robustness.
+    const CHUNK_SIZE = 32 * 1024 * 1024; // 32 MiB per request
+    const MAX_RETRIES = 6;
+
+    // 1. Hash off the main thread (also the de-dup key + .part file identity).
     if (onProgress) onProgress(0, 'hashing');
-    const hash = await calculateHash(file, (p) => {
-        if (onProgress) onProgress(p, 'hashing');
-    });
+    const hash = await calculateHash(file, (p) => onProgress?.(p, 'hashing'));
 
-    // 2. Check Hash
-    if (onProgress) onProgress(100, 'checking');
-    const hashFormData = new FormData();
-    hashFormData.append('hash', hash);
-    const checkRes = await api.post('/datasets/check_hash', hashFormData, {
-        headers: {
-            'Content-Type': 'multipart/form-data',
-        }
+    // 2. Init: server de-dups (links instantly if the bytes already exist) or
+    //    returns an upload id + the offset to resume from (>0 if a prior attempt
+    //    at the same file left a partial .part on disk).
+    if (onProgress) onProgress(0, 'starting');
+    const initRes = await api.post('/datasets/upload/init', null, {
+        params: { name, description, file_type: fileType, file_hash: hash, total_size: file.size },
     });
-    const exists = checkRes.data.exists;
-
-    // Metadata travels as query params; the body is the raw file. This streams
-    // the file straight to disk on the server (constant memory, no multipart
-    // temp-spool / double-write), so 100 GB+ uploads are viable. The browser
-    // streams the File from disk via XHR — it isn't loaded into JS memory.
-    const params = { name, description, file_type: fileType, file_hash: hash };
 
     let created: Dataset;
-    if (exists) {
-        // 3a. Link to existing — no body needed.
+    if (initRes.data.deduped) {
         if (onProgress) onProgress(100, 'linking');
-        const res = await api.post<Dataset>('/datasets/', null, { params });
-        created = res.data;
+        created = initRes.data.dataset as Dataset;
     } else {
-        // 3b. Upload new — stream the raw file as the request body.
-        if (onProgress) onProgress(0, 'uploading');
-        const res = await api.post<Dataset>('/datasets/', file, {
-            params,
-            headers: { 'Content-Type': 'application/octet-stream' },
-            onUploadProgress: (progressEvent) => {
-                if (progressEvent.total && onProgress) {
-                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    onProgress(percentCompleted, 'uploading');
+        const uploadId: string = initRes.data.upload_id;
+        let offset: number = initRes.data.offset || 0;
+        if (onProgress) onProgress(file.size ? Math.round((offset * 100) / file.size) : 0, 'uploading');
+
+        // 3. Append chunks until the whole file is on the server. On a transient
+        //    failure, re-sync to the server's authoritative offset and retry.
+        let attempts = 0;
+        while (offset < file.size) {
+            const chunkStart = offset;
+            const blob = file.slice(chunkStart, Math.min(chunkStart + CHUNK_SIZE, file.size));
+            try {
+                const patchRes = await api.patch(`/datasets/upload/${uploadId}`, blob, {
+                    headers: {
+                        'Content-Type': 'application/octet-stream',
+                        'Upload-Offset': String(chunkStart),
+                    },
+                    onUploadProgress: (e) => {
+                        if (onProgress && file.size) {
+                            const sent = chunkStart + (e.loaded || 0);
+                            onProgress(Math.min(100, Math.round((sent * 100) / file.size)), 'uploading');
+                        }
+                    },
+                });
+                offset = patchRes.data.offset;
+                attempts = 0;
+            } catch (err: any) {
+                const status = err?.response?.status;
+                // 409 = offset out of sync → re-sync and retry. Other 4xx (auth,
+                // validation) are fatal — don't spin. 5xx / network drops are
+                // transient → retry with backoff.
+                if (status && status !== 409 && status < 500) throw err;
+                attempts += 1;
+                if (attempts > MAX_RETRIES) throw err;
+                const serverOffset = err?.response?.data?.detail?.offset;
+                if (typeof serverOffset === 'number') {
+                    offset = serverOffset;
+                } else {
+                    try {
+                        const st = await api.get(`/datasets/upload/${uploadId}`);
+                        offset = st.data.offset;
+                    } catch { /* keep current offset and retry */ }
                 }
-            },
-        });
-        created = res.data;
+                await new Promise((r) => setTimeout(r, 1000 * attempts));
+            }
+        }
+
+        // 4. Finalize: server verifies the size, moves the .part into place, and
+        //    creates the DataFile + Dataset (same path as the single-shot upload).
+        if (onProgress) onProgress(100, 'finalizing');
+        const completeRes = await api.post<Dataset>(`/datasets/upload/${uploadId}/complete`);
+        created = completeRes.data;
     }
 
-    // Refresh list
+    // Refresh list. Returned so callers can act on the new dataset (e.g. attach
+    // it to a project chosen in the upload modal).
     await get().fetchDatasets();
-    // Returned so callers can act on the new dataset (e.g. attach it to a
-    // project chosen in the upload modal).
     return created;
   },
   replaceDatasetFile: async (id, file, fileType, onProgress) => {

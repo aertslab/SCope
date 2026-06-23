@@ -7,7 +7,7 @@ import { Project } from '../types'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card'
-import { Upload, Terminal, ChevronDown, ChevronRight, Copy, Check } from 'lucide-react'
+import { Upload, Terminal, Copy, Check } from 'lucide-react'
 
 interface UploadDatasetFormProps {
     onSuccess?: () => void;
@@ -25,7 +25,7 @@ export function UploadDatasetForm({ onSuccess, onCancel, hideTitle = false, clas
     const [uploadError, setUploadError] = useState<string | null>(null)
     const [projects, setProjects] = useState<Project[]>([])
     const [selectedProject, setSelectedProject] = useState<string>(projectId ?? '')
-    const [showApiHelp, setShowApiHelp] = useState(false)
+    const [apiOs, setApiOs] = useState<'unix' | 'windows'>('unix')
     const [copied, setCopied] = useState(false)
     const [uploadForm, setUploadForm] = useState({
         name: '',
@@ -71,9 +71,31 @@ curl -X POST -T "$FILE" \\
   -H "Authorization: Bearer $TOKEN" \\
   -H "Content-Type: application/octet-stream"`
 
+    // Windows / PowerShell equivalent. Uses curl.exe (ships with Windows 10+)
+    // so the file still STREAMS from disk (Invoke-RestMethod/WebRequest buffer
+    // the whole body in memory, which breaks on very large files). The trailing
+    // backtick is PowerShell's line-continuation (escaped here as \` so it isn't
+    // read as the end of this template literal).
+    const psSnippet = `# 1. Create a Personal Access Token (see link above), then (PowerShell):
+$TOKEN = "scope_pat_xxxxxxxxxxxxxxxxxxxxxxxx"
+$FILE  = "my_dataset.h5ad"
+
+# 2. Datasets are de-duplicated by content hash — compute the file's MD5:
+$HASH = (Get-FileHash -Algorithm MD5 -Path $FILE).Hash.ToLower()
+
+# 3. Upload. Use curl.exe explicitly ('curl' is a PowerShell alias for
+#    Invoke-WebRequest); -T (--upload-file) streams the file from disk so very
+#    large files (100 GB+) aren't buffered in memory.
+curl.exe -X POST -T $FILE \`
+  "${endpoint}?name=My%20Dataset&description=Uploaded%20via%20API&file_type=h5ad&file_hash=$HASH" \`
+  -H "Authorization: Bearer $TOKEN" \`
+  -H "Content-Type: application/octet-stream"`
+
+    const activeSnippet = apiOs === 'windows' ? psSnippet : curlSnippet
+
     const copySnippet = async () => {
         try {
-            await navigator.clipboard.writeText(curlSnippet)
+            await navigator.clipboard.writeText(activeSnippet)
             setCopied(true)
             setTimeout(() => setCopied(false), 2000)
         } catch {
@@ -153,8 +175,15 @@ curl -X POST -T "$FILE" \\
                 }
             }
             setUploadError(errorMessage)
+            setUploadProgress(0)
+            setUploadStatus('')
         }
     }
+
+    // Any non-empty status means work is in progress (hashing → uploading →
+    // finalizing). Drives the button's disabled/label state so it reflects the
+    // ACTUAL phase instead of always saying "Uploading" (e.g. while hashing).
+    const isBusy = uploadStatus !== ''
 
     return (
         <Card className={className}>
@@ -184,6 +213,7 @@ curl -X POST -T "$FILE" \\
                         </div>
                     </div>
                 )}
+                <div className="lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
                 <form onSubmit={handleUpload} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">File</label>
@@ -193,10 +223,12 @@ curl -X POST -T "$FILE" \\
                             }`}
                             onClick={() => fileInputRef.current?.click()}
                         >
-                            <div className="space-y-1 text-center">
+                            <div className="space-y-1 text-center w-full min-w-0">
                                 <Upload className={`mx-auto h-12 w-12 ${uploadForm.file ? 'text-indigo-500' : 'text-gray-400'}`} />
-                                <div className="flex text-sm text-gray-600 justify-center">
-                                    <span className="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500">
+                                <div className="text-sm text-gray-600 w-full min-w-0">
+                                    {/* break-all so a long, space-less file name wraps inside the
+                                        dropzone instead of overflowing past its edges. */}
+                                    <span className="cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500 break-all" title={uploadForm.file?.name}>
                                         {uploadForm.file ? uploadForm.file.name : 'Upload a file'}
                                     </span>
                                     <input 
@@ -254,15 +286,6 @@ curl -X POST -T "$FILE" \\
                         </div>
                     )}
 
-                    {uploadProgress > 0 && (
-                        <div className="w-full mb-4">
-                            <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                                <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: `${uploadProgress}%` }}></div>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1">{uploadProgress}% Uploaded</p>
-                        </div>
-                    )}
-
                     <div className="flex justify-end space-x-2">
                         {onCancel && (
                             <Button type="button" variant="secondary" onClick={onCancel}>
@@ -271,59 +294,86 @@ curl -X POST -T "$FILE" \\
                         )}
                         <Button
                             type="submit"
-                            disabled={uploadProgress > 0 && uploadProgress < 100}
-                            isLoading={uploadProgress > 0 && uploadProgress < 100}
+                            disabled={isBusy}
+                            isLoading={isBusy}
                         >
-                            {uploadProgress > 0 && uploadProgress < 100 ? 'Uploading...' : 'Upload'}
+                            {isBusy ? `${uploadStatus.charAt(0).toUpperCase()}${uploadStatus.slice(1)}…` : 'Upload'}
                         </Button>
                     </div>
                 </form>
 
-                {/* API upload instructions — collapsed by default to keep the
-                    common click-to-upload flow uncluttered. */}
-                <div className="mt-6 border-t border-gray-200 pt-4">
-                    <button
-                        type="button"
-                        onClick={() => setShowApiHelp((v) => !v)}
-                        className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-indigo-600"
-                    >
-                        {showApiHelp ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                {/* API upload instructions — always shown (the 2-column layout
+                    leaves this space free). Tabbed by OS: macOS/Linux (curl) and
+                    Windows (PowerShell). */}
+                <div className="mt-6 lg:mt-0 border-t border-gray-200 pt-4 lg:border-t-0 lg:border-l lg:border-gray-200 lg:pt-0 lg:pl-6">
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
                         <Terminal className="h-4 w-4" />
-                        Upload via the API (curl)
-                    </button>
+                        Upload via the API
+                    </div>
 
-                    {showApiHelp && (
-                        <div className="mt-3 space-y-3 text-sm text-gray-600">
-                            <p>
-                                Prefer scripting your uploads? Authenticate with a Personal Access Token
-                                instead of a browser session. Manage your tokens on the{' '}
-                                <Link to="/tokens" className="font-medium text-indigo-600 hover:text-indigo-500">
-                                    API Tokens
-                                </Link>{' '}
-                                page — a token is shown once on creation, so copy it somewhere safe.
-                            </p>
-                            <div className="relative">
-                                <pre className="overflow-x-auto rounded-md bg-gray-900 p-4 pr-12 text-xs leading-relaxed text-gray-100">
-{curlSnippet}
-                                </pre>
+                    <div className="mt-3 space-y-3 text-sm text-gray-600">
+                        <p>
+                            Prefer scripting your uploads? Authenticate with a Personal Access Token
+                            instead of a browser session. Manage your tokens on the{' '}
+                            <Link to="/tokens" className="font-medium text-indigo-600 hover:text-indigo-500">
+                                API Tokens
+                            </Link>{' '}
+                            page — a token is shown once on creation, so copy it somewhere safe.
+                        </p>
+
+                        {/* OS tabs */}
+                        <div className="flex gap-1 border-b border-gray-200">
+                            {([['unix', 'macOS / Linux'], ['windows', 'Windows']] as const).map(([os, label]) => (
                                 <button
+                                    key={os}
                                     type="button"
-                                    onClick={copySnippet}
-                                    className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-gray-700/80 px-2 py-1 text-xs text-gray-100 hover:bg-gray-600"
-                                    title="Copy to clipboard"
+                                    onClick={() => setApiOs(os)}
+                                    className={`px-3 py-1.5 text-xs font-medium border-b-2 -mb-px transition-colors ${
+                                        apiOs === os
+                                            ? 'border-indigo-500 text-indigo-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                                    }`}
                                 >
-                                    {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                                    {copied ? 'Copied' : 'Copy'}
+                                    {label}
                                 </button>
-                            </div>
-                            <p className="text-xs text-gray-500">
-                                The token authenticates as you, so the uploaded dataset is owned by your
-                                account. To attach it to a project, call{' '}
-                                <code className="rounded bg-gray-100 px-1 py-0.5">POST /api/v1/projects/&#123;project_id&#125;/datasets/&#123;dataset_id&#125;</code>{' '}
-                                with the same token.
-                            </p>
+                            ))}
                         </div>
-                    )}
+
+                        <div className="relative">
+                            <pre className="overflow-x-auto rounded-md bg-gray-900 p-4 pr-12 text-xs leading-relaxed text-gray-100">
+{activeSnippet}
+                            </pre>
+                            <button
+                                type="button"
+                                onClick={copySnippet}
+                                className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-gray-700/80 px-2 py-1 text-xs text-gray-100 hover:bg-gray-600"
+                                title="Copy to clipboard"
+                            >
+                                {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                                {copied ? 'Copied' : 'Copy'}
+                            </button>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                            The token authenticates as you, so the uploaded dataset is owned by your
+                            account. To attach it to a project, call{' '}
+                            <code className="rounded bg-gray-100 px-1 py-0.5">POST /api/v1/projects/&#123;project_id&#125;/datasets/&#123;dataset_id&#125;</code>{' '}
+                            with the same token.
+                        </p>
+                        <p className="text-xs text-gray-500">
+                            The <code className="rounded bg-gray-100 px-1 py-0.5">-T</code> example above is the
+                            simple single-shot upload. Uploads from this page are <strong>chunked &amp; resumable</strong>,
+                            and for very large files over a flaky link the CLI helper{' '}
+                            <a
+                                href={apiUrl('/datasets/upload-helper')}
+                                download="upload_local.py"
+                                className="font-medium text-indigo-600 hover:text-indigo-500 underline"
+                            >
+                                scripts/upload_local.py
+                            </a>{' '}
+                            uploads in resumable chunks too (it retries and resumes from the last received offset).
+                        </p>
+                    </div>
+                </div>
                 </div>
             </CardContent>
         </Card>

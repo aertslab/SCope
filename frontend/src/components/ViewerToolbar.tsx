@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Settings as SettingsIcon, Share2, Copy, Check, Lasso, Filter } from 'lucide-react'
+import { Settings as SettingsIcon, Share2, Copy, Check, Lasso, Filter, Maximize, Minimize } from 'lucide-react'
 import { useViewerStore } from '../store/useViewerStore'
 import { ColorScaleControl } from './ColorScaleControl'
 import { SettingsPanel } from './SettingsPanel'
@@ -15,6 +15,8 @@ interface ViewerToolbarProps {
     onColorScaleToggle: () => void
     isFilterOpen: boolean
     onFilterToggle: () => void
+    isFullscreen: boolean
+    onFullscreenToggle: () => void
     onReset: () => void
 }
 
@@ -29,6 +31,8 @@ export function ViewerToolbar({
     onColorScaleToggle,
     isFilterOpen,
     onFilterToggle,
+    isFullscreen,
+    onFullscreenToggle,
     onReset
 }: ViewerToolbarProps) {
     const {
@@ -40,10 +44,21 @@ export function ViewerToolbar({
         setSettings,
         setColorRanges,
         setLassoMode,
-        filterTokens
+        filterTokens,
+        selectionDetails
     } = useViewerStore()
 
     const hasFilter = filterTokens.length > 0
+
+    // Map each colour channel ('0'/'1'/'2') to the gene/metric it currently
+    // shows, so the colour-scale control can reset a channel's slider when its
+    // gene is swapped (not just when an unrelated channel is added).
+    const colourNames: Record<string, string> = {}
+    if (selectionDetails?.type === 'gene') {
+        (selectionDetails.items || []).forEach((name, i) => {
+            if (name) colourNames[String(i)] = name
+        })
+    }
 
     const [isCopied, setIsCopied] = useState(false)
 
@@ -54,7 +69,7 @@ export function ViewerToolbar({
     }
 
     return (
-        <div className="absolute top-4 right-72 z-[200] flex gap-2 items-center">
+        <div className="absolute top-4 right-[30rem] z-[200] flex gap-2 items-center">
             {/* Share Button */}
             <div 
                 className={`flex items-center bg-gray-800 rounded transition-all duration-300 overflow-hidden ${isShareOpen ? 'w-80' : 'w-10'}`}
@@ -114,10 +129,20 @@ export function ViewerToolbar({
                 )}
             </button>
 
+            {/* Fullscreen Button — sends this panel and all its overlays fullscreen. */}
+            <button
+                onClick={onFullscreenToggle}
+                className={`text-white p-2 rounded transition-colors mr-2 ${isFullscreen ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-800 hover:bg-gray-700'}`}
+                title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen this viewer'}
+            >
+                {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+            </button>
+
             {/* Color Scale Control */}
-            <ColorScaleControl 
+            <ColorScaleControl
                 colours={colours}
                 activeColorInfo={activeColorInfo}
+                colourNames={colourNames}
                 onRangeChange={setColorRanges}
                 isOpen={isColorScaleOpen}
                 onToggle={onColorScaleToggle}
@@ -137,7 +162,7 @@ export function ViewerToolbar({
                     onClose={onSettingsToggle}
                     settings={settings}
                     onSettingsChange={setSettings}
-                    availableEmbeddings={metadata?.embeddings?.map((e: any) => e.name) || []}
+                    embeddings={metadata?.embeddings || []}
                     onReset={onReset}
                 />
             </div>

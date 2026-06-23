@@ -79,6 +79,7 @@ if settings.BACKEND_CORS_ORIGINS:
             "Content-Type",
             "X-Project-Password",
             "X-CSRF-Token",
+            "Upload-Offset",  # chunked-upload PATCH sends this; needed for cross-origin preflight
             "Accept",
             "Origin",
             "X-Requested-With",

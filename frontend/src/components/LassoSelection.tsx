@@ -4,7 +4,7 @@ import * as THREE from 'three'
 interface LassoSelectionProps {
     active: boolean
     onSelectionComplete: (indices: number[]) => void
-    data: { X: number[] | Float32Array, Y: number[] | Float32Array } | null
+    data: { X: number[] | Float32Array, Y: number[] | Float32Array, Z?: number[] | Float32Array } | null
     // The lasso overlay lives OUTSIDE the r3f <Canvas> so it stays locked to the
     // viewport. (A drei <Html> is part of the scene graph: it projects a
     // data-space point to the screen every frame, so the SVG drifted/scaled when
@@ -78,69 +78,52 @@ export function LassoSelection({ active, onSelectionComplete, data, getThree }: 
 
         if (points.length > 2 && data && three && svgRect && canvasRect) {
             const camera = three.camera
-            // Calculate offset between the SVG overlay and the WebGL canvas.
-            // They're coincident siblings, so this is ~0, but the math tolerates
-            // any offset.
-            const offsetX = svgRect.left - canvasRect.left
-            const offsetY = svgRect.top - canvasRect.top
+            camera.updateMatrixWorld()
+            ;(camera as { updateProjectionMatrix?: () => void }).updateProjectionMatrix?.()
 
-            // Convert screen points to world points on Z=0 plane
-            const worldPoints = points.map(p => {
-                // Convert SVG point to Canvas point
-                const canvasX = p.x + offsetX
-                const canvasY = p.y + offsetY
+            // Test in SCREEN space: project each cell to the screen and check it
+            // against the drawn polygon. This is "what you see is what you select"
+            // for ANY camera — unlike projecting the polygon onto the Z=0 plane
+            // (the old approach), which only held for a top-down 2D view and
+            // selected the wrong cells once the camera was rotated in 3D.
+            const w = canvasRect.width
+            const h = canvasRect.height
+            // The polygon points are in SVG-local pixels; convert a projected
+            // cell (canvas-local pixels) into the same frame. The SVG and canvas
+            // are coincident siblings so this offset is ~0, but tolerate any.
+            const offsetX = canvasRect.left - svgRect.left
+            const offsetY = canvasRect.top - svgRect.top
 
-                // Normalize using Canvas dimensions
-                const ndcX = (canvasX / canvasRect.width) * 2 - 1
-                const ndcY = -(canvasY / canvasRect.height) * 2 + 1
+            // Polygon bounding box (screen space) for a cheap reject.
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
+            for (const p of points) {
+                if (p.x < minX) minX = p.x
+                if (p.x > maxX) maxX = p.x
+                if (p.y < minY) minY = p.y
+                if (p.y > maxY) maxY = p.y
+            }
 
-                // Create a ray from the camera
-                const raycaster = new THREE.Raycaster()
-                raycaster.setFromCamera(new THREE.Vector2(ndcX, ndcY), camera)
-
-                // Intersect with Z=0 plane
-                const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)
-                const target = new THREE.Vector3()
-                raycaster.ray.intersectPlane(plane, target)
-
-                // If no intersection (parallel), fallback to unproject with z=0 (mid-plane)
-                if (!target) {
-                    const vec = new THREE.Vector3(ndcX, ndcY, 0)
-                    vec.unproject(camera)
-                    return vec
-                }
-
-                return target
-            })
-
-            // Find points inside polygon
             const selectedIndices: number[] = []
             const nPoints = data.X.length
-
-            // Optimization: Bounding box
-            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
-            worldPoints.forEach(p => {
-                minX = Math.min(minX, p.x)
-                maxX = Math.max(maxX, p.x)
-                minY = Math.min(minY, p.y)
-                maxY = Math.max(maxY, p.y)
-            })
+            const Z = data.Z
+            const v = new THREE.Vector3()
 
             for (let i = 0; i < nPoints; i++) {
-                const x = data.X[i]
-                const y = data.Y[i]
+                v.set(data.X[i], data.Y[i], Z && Z[i] ? Z[i] : 0)
+                v.project(camera) // -> normalized device coords
+                const sx = (v.x * 0.5 + 0.5) * w + offsetX
+                const sy = (-v.y * 0.5 + 0.5) * h + offsetY
 
                 // Bounding box check
-                if (x < minX || x > maxX || y < minY || y > maxY) continue
+                if (sx < minX || sx > maxX || sy < minY || sy > maxY) continue
 
-                // Point in polygon (Ray casting)
+                // Point in polygon (ray casting), all in screen pixels.
                 let inside = false
-                for (let j = 0, k = worldPoints.length - 1; j < worldPoints.length; k = j++) {
-                    const xi = worldPoints[j].x, yi = worldPoints[j].y
-                    const xj = worldPoints[k].x, yj = worldPoints[k].y
-
-                    const intersect = ((yi > y) !== (yj > y))
-                        && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)
+                for (let j = 0, k = points.length - 1; j < points.length; k = j++) {
+                    const xi = points[j].x, yi = points[j].y
+                    const xj = points[k].x, yj = points[k].y
+                    const intersect = ((yi > sy) !== (yj > sy))
+                        && (sx < (xj - xi) * (sy - yi) / (yj - yi) + xi)
                     if (intersect) inside = !inside
                 }
 

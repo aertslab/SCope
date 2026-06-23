@@ -42,11 +42,40 @@ interface SelectedGene {
     data: number[]
 }
 
+// A generalised search result. The search box spans every plottable element,
+// not just genes, ordered by relevance (exact matches first). A `category`
+// result is a value *within* a feature (e.g. "male" within "Sex"); `feature`
+// is the parent feature to colour by when it's selected.
+type SearchType = 'gene' | 'metric' | 'annotation' | 'clustering' | 'regulon' | 'category'
+interface SearchResult {
+    name: string
+    type: SearchType
+    feature?: string
+}
+
+// `channel: true` types are numeric and blend into an R/G/B channel; the others
+// are categorical and colour by category (feature mode).
+const TYPE_META: Record<SearchType, { label: string; badge: string; channel: boolean }> = {
+    gene:       { label: 'Gene',       badge: 'bg-blue-900 text-blue-200',     channel: true },
+    metric:     { label: 'Metric',     badge: 'bg-teal-900 text-teal-200',     channel: true },
+    regulon:    { label: 'Regulon',    badge: 'bg-purple-900 text-purple-200', channel: true },
+    annotation: { label: 'Annotation', badge: 'bg-amber-900 text-amber-200',   channel: false },
+    clustering: { label: 'Clustering', badge: 'bg-pink-900 text-pink-200',     channel: false },
+    category:   { label: 'Category',   badge: 'bg-rose-900 text-rose-200',     channel: false },
+}
+
+// Regulons are fetched as a metric via the "Regulon: "-prefixed feature route.
+const resolveColumnName = (r: SearchResult) => (r.type === 'regulon' ? `Regulon: ${r.name}` : r.name)
+
+// Strip the display-only "Clustering: " prefix for showing a feature name.
+const bareFeatureName = (name: string) => name.replace(/^Clustering: /, '')
+
 export function ViewerControls({ datasetId, onColorChange, normalization, initialSelection, onRestoreComplete, initialLegendSelection, projectPassword }: ViewerControlsProps) {
   const { addToast } = useToast()
   const [activeTab, setActiveTab] = useState<'genes' | 'features'>('genes')
   const [geneQuery, setGeneQuery] = useState('')
-  const [geneResults, setGeneResults] = useState<string[]>([])
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [searching, setSearching] = useState(false)
   const [features, setFeatures] = useState<Feature[]>([])
   const [loading, setLoading] = useState(false)
   
@@ -75,19 +104,23 @@ export function ViewerControls({ datasetId, onColorChange, normalization, initia
       }
   }, [normalization, librarySize, datasetId, projectPassword, addToast])
 
-  // Debounce search
+  // Debounced generalised search — genes, metrics, annotations, clusterings,
+  // regulons, ranked by relevance (exact matches first) by the backend.
   useEffect(() => {
     const timer = setTimeout(async () => {
       if (geneQuery.length > 0) {
+        setSearching(true)
         try {
             const config = projectPassword ? { headers: { 'x-project-password': projectPassword } } : {}
-            const res = await api.get(`/datasets/${datasetId}/genes?query=${geneQuery}`, config)
-            setGeneResults(res.data)
+            const res = await api.get<SearchResult[]>(`/datasets/${datasetId}/search?query=${encodeURIComponent(geneQuery)}`, config)
+            setSearchResults(res.data)
         } catch (e) {
             console.error(e)
+        } finally {
+            setSearching(false)
         }
       } else {
-        setGeneResults([])
+        setSearchResults([])
       }
     }, 300)
     return () => clearTimeout(timer)
@@ -300,7 +333,7 @@ export function ViewerControls({ datasetId, onColorChange, normalization, initia
 
       // Clear gene search box (no-op for metrics).
       setGeneQuery('')
-      setGeneResults([])
+      setSearchResults([])
 
     } catch (e) {
       console.error(e)
@@ -310,9 +343,19 @@ export function ViewerControls({ datasetId, onColorChange, normalization, initia
     }
   }
 
-  // Back-compat alias for gene call sites.
-  const handleGeneClick = (gene: string, targetSlot?: number) =>
-      handleColumnClick(gene, 'gene', targetSlot)
+  // Route a generalised search result to the right handler: numeric elements
+  // (genes/metrics/regulons) blend into a colour channel; annotations/clusterings
+  // colour by that feature; a category value colours by its PARENT feature and
+  // highlights the matched value in the legend.
+  const handleResultClick = (r: SearchResult, targetSlot?: number) => {
+      if (r.type === 'category' && r.feature) {
+          handleFeatureClick({ name: r.feature, type: 'categorical' }, [r.name])
+      } else if (TYPE_META[r.type].channel) {
+          handleColumnClick(resolveColumnName(r), r.type === 'gene' ? 'gene' : 'metric', targetSlot)
+      } else {
+          handleFeatureClick({ name: r.name, type: 'categorical' })
+      }
+  }
 
   const removeGene = (gene: string) => {
       const newSelected = selectedGenes.filter(g => g.name !== gene)
@@ -392,13 +435,13 @@ export function ViewerControls({ datasetId, onColorChange, normalization, initia
   const metrics = features.filter(f => f.type === 'continuous')
 
   return (
-    <div className="absolute top-4 right-4 z-10 w-64 bg-black/80 text-white p-4 rounded backdrop-blur-sm max-h-[80vh] overflow-y-auto border border-gray-800">
+    <div className="absolute top-4 right-4 z-10 w-[28rem] max-w-[calc(100%-2rem)] bg-black/80 text-white p-4 rounded backdrop-blur-sm max-h-[80vh] overflow-y-auto border border-gray-800">
       <div className="flex gap-2 mb-4">
         <button
           className={`flex-1 p-2 rounded flex items-center justify-center gap-2 text-sm font-medium transition-colors ${activeTab === 'genes' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
           onClick={() => setActiveTab('genes')}
         >
-          <Search size={14} /> Genes
+          <Search size={14} /> Search
         </button>
         <button
           className={`flex-1 p-2 rounded flex items-center justify-center gap-2 text-sm font-medium transition-colors ${activeTab === 'features' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
@@ -430,48 +473,77 @@ export function ViewerControls({ datasetId, onColorChange, normalization, initia
 
           <input
             type="text"
-            placeholder="Search genes..."
+            placeholder="Search genes, annotations, metrics..."
             className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white text-sm focus:outline-none focus:border-blue-500"
             value={geneQuery}
             onChange={e => setGeneQuery(e.target.value)}
           />
+          {/* Explains the category-search behaviour: a value match resolves to
+              its parent feature (e.g. "male" -> the "Sex" feature). */}
+          <p className="text-[10px] text-gray-500 leading-snug">
+            Tip: searching a category value (e.g. <span className="text-gray-400">male</span>) finds the
+            feature it belongs to (<span className="text-gray-400">Sex</span>) and highlights that value.
+          </p>
           <div className="space-y-1 max-h-60 overflow-y-auto">
-            {geneResults.map(gene => {
-                const isSelected = selectedGenes.some(g => g.name === gene)
+            {searching && (
+                <div className="flex items-center gap-2 text-gray-400 text-xs p-2">
+                    <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-gray-600 border-t-blue-400" />
+                    Searching…{searchResults.length === 0 && <span className="text-gray-600"> (first search builds an index)</span>}
+                </div>
+            )}
+            {searchResults.map((r, idx) => {
+                const meta = TYPE_META[r.type]
+                const colName = resolveColumnName(r)
+                const isCategory = r.type === 'category'
+                const isSelected = meta.channel
+                    ? selectedGenes.some(g => g.name === colName)
+                    : isCategory
+                        ? activeFeature === r.feature
+                        : activeFeature === r.name
+                const displayName = r.type === 'clustering' ? bareFeatureName(r.name) : r.name
                 return (
                     <div
-                        key={gene}
+                        key={`${r.type}:${r.feature || ''}:${r.name}:${idx}`}
                         className={`w-full flex justify-between items-center p-2 rounded text-xs transition-colors ${isSelected ? 'bg-blue-900/30 text-blue-200' : 'hover:bg-gray-800'}`}
                     >
-                        <button 
-                            className="flex-1 text-left"
-                            onClick={() => handleGeneClick(gene)}
+                        <button
+                            className="flex-1 text-left flex items-center gap-2 min-w-0"
+                            onClick={() => handleResultClick(r)}
                             disabled={loading}
+                            title={isCategory ? `${r.name} — in ${bareFeatureName(r.feature || '')}` : r.name}
                         >
-                            {gene}
+                            <span className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${meta.badge}`}>{meta.label}</span>
+                            <span className="truncate">
+                                {displayName}
+                                {isCategory && r.feature && (
+                                    <span className="text-gray-500"> · in {bareFeatureName(r.feature)}</span>
+                                )}
+                            </span>
                         </button>
-                        <div className="flex gap-1 ml-2">
-                            <button 
-                                className="w-3 h-3 rounded-full bg-red-500 hover:scale-125 transition-transform"
-                                onClick={(e) => { e.stopPropagation(); handleGeneClick(gene, 0); }}
-                                title="Assign to Red"
-                            />
-                            <button 
-                                className="w-3 h-3 rounded-full bg-green-500 hover:scale-125 transition-transform"
-                                onClick={(e) => { e.stopPropagation(); handleGeneClick(gene, 1); }}
-                                title="Assign to Green"
-                            />
-                            <button 
-                                className="w-3 h-3 rounded-full bg-blue-500 hover:scale-125 transition-transform"
-                                onClick={(e) => { e.stopPropagation(); handleGeneClick(gene, 2); }}
-                                title="Assign to Blue"
-                            />
-                        </div>
+                        {meta.channel && (
+                            <div className="flex gap-1 ml-2 shrink-0">
+                                <button
+                                    className="w-3 h-3 rounded-full bg-red-500 hover:scale-125 transition-transform"
+                                    onClick={(e) => { e.stopPropagation(); handleResultClick(r, 0); }}
+                                    title="Assign to Red"
+                                />
+                                <button
+                                    className="w-3 h-3 rounded-full bg-green-500 hover:scale-125 transition-transform"
+                                    onClick={(e) => { e.stopPropagation(); handleResultClick(r, 1); }}
+                                    title="Assign to Green"
+                                />
+                                <button
+                                    className="w-3 h-3 rounded-full bg-blue-500 hover:scale-125 transition-transform"
+                                    onClick={(e) => { e.stopPropagation(); handleResultClick(r, 2); }}
+                                    title="Assign to Blue"
+                                />
+                            </div>
+                        )}
                     </div>
                 )
             })}
-            {geneQuery && geneResults.length === 0 && (
-                <div className="text-gray-500 text-xs p-2">No genes found</div>
+            {geneQuery && !searching && searchResults.length === 0 && (
+                <div className="text-gray-500 text-xs p-2">No matches found</div>
             )}
           </div>
         </div>
