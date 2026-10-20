@@ -120,6 +120,46 @@ def _ingest_anndata(adata, output_path: str) -> None:
     )
 
 
+# Values per obsm write block (~32 MB of float32).
+_OBSM_BLOCK_VALUES = 8_000_000
+
+
+def _write_obsm_columnwise(output_path: str, obsm: dict) -> None:
+    """Write each obsm layer as a DenseNDArray tiled one column wide.
+
+    ``from_anndata`` writes obsm as a cell-major SparseNDArray, so reading the
+    2-3 columns the viewer plots scans the whole layer (seconds for a wide
+    latent space). Column-major tiles make a column read touch only that
+    column. Layers are written in column blocks, so an h5py Dataset can be
+    passed and streamed from disk instead of loaded.
+    """
+    import pyarrow as pa
+    import tiledbsoma
+
+    with tiledbsoma.Experiment.open(output_path, mode="w") as exp:
+        ms = exp.ms[MEASUREMENT_NAME]
+        coll = ms["obsm"] if "obsm" in ms else ms.add_new_collection("obsm")
+        for key, src in obsm.items():
+            try:
+                n, m = (int(s) for s in src.shape)
+                dtype = np.dtype(src.dtype)
+                cfg = {"tiledb": {"create": {
+                    "cell_order": "col-major",
+                    "tile_order": "col-major",
+                    "dims": {"soma_dim_0": {"tile": max(1, min(n, 1 << 20))}, "soma_dim_1": {"tile": 1}},
+                }}}
+                with coll.add_new_dense_ndarray(
+                    key, type=pa.from_numpy_dtype(dtype), shape=(n, m), platform_config=cfg
+                ) as arr:
+                    step = max(1, _OBSM_BLOCK_VALUES // max(n, 1))
+                    for c0 in range(0, m, step):
+                        c1 = min(c0 + step, m)
+                        block = np.ascontiguousarray(src[:, c0:c1], dtype=dtype)
+                        arr.write((slice(0, n - 1), slice(c0, c1 - 1)), pa.Tensor.from_numpy(block))
+            except Exception:  # noqa: BLE001
+                logger.warning("Skipping obsm layer %r", key)
+
+
 async def convert_h5ad_to_soma(
     file_path: str,
     output_path: str,
@@ -132,15 +172,16 @@ async def convert_h5ad_to_soma(
     which OOMs on large files (an 80 GB+ h5ad with ~10^9 nonzeros killed the
     worker before it logged a thing). Instead, never load X (or obsp):
 
-      1. read only the small parts (obs/var/obsm/uns) with ``anndata.read_elem``;
+      1. read only the small parts (obs/var/uns) with ``anndata.read_elem``;
       2. write the full SOMA structure via ``from_anndata`` on a *skeleton* whose
-         X is EMPTY — reusing the normal ingest for obs/var/obsm/schema (so the
+         X is EMPTY — reusing the normal ingest for obs/var/schema (so the
          store is exactly the layout the reader expects) and creating the X
          ``SparseNDArray`` at the full (n_obs, n_var) shape;
       3. stream the real X from disk into that array in row-blocks via
          ``anndata.sparse_dataset`` (lazy on-disk slicing) or h5py for a dense X.
 
-    Peak memory ≈ obs/obsm + one block, not the whole matrix.
+    obsm is written separately, column-tiled (``_write_obsm_columnwise``).
+    Peak memory ≈ obs + one block, not the whole matrix.
     """
     import anndata
     import h5py
@@ -172,12 +213,18 @@ async def convert_h5ad_to_soma(
 
         # Embeddings only: obsm. We deliberately SKIP obsp (n×n neighbour graphs),
         # varm, raw and layers — they're unused by the viewer and `obsp` in
-        # particular is what made the backed read blow up.
+        # particular is what made the backed read blow up. Dense layers stay
+        # on disk and are streamed by _write_obsm_columnwise.
         obsm = {}
         if "obsm" in f:
             for key in f["obsm"].keys():
                 try:
-                    obsm[key] = read_elem(f["obsm"][key])
+                    node = f["obsm"][key]
+                    val = node if isinstance(node, h5py.Dataset) else np.asarray(read_elem(node))
+                    if val.ndim == 2 and val.shape[0] == n_obs:
+                        obsm[key] = val
+                    else:
+                        logger.warning("Skipping obsm layer %r with shape %s", key, val.shape)
                 except Exception:  # noqa: BLE001
                     logger.warning("Skipping obsm layer %r", key)
 
@@ -193,13 +240,11 @@ async def convert_h5ad_to_soma(
                 skeleton.uns = dict(uns)
             except Exception:  # noqa: BLE001
                 logger.warning("Could not carry uns into the SOMA store; continuing")
-        for key, val in obsm.items():
-            try:
-                skeleton.obsm[key] = np.asarray(val)
-            except Exception:  # noqa: BLE001
-                logger.warning("Skipping obsm layer %r in skeleton", key)
         tiledbsoma.io.from_anndata(output_path, skeleton, measurement_name=MEASUREMENT_NAME)
-        del skeleton, obs, var, obsm, uns
+        del skeleton, obs, var, uns
+        await _emit(status_callback, "writing embeddings")
+        _write_obsm_columnwise(output_path, obsm)
+        del obsm
 
         # 2) Stream X from disk in row-blocks.
         with tiledbsoma.Experiment.open(output_path) as exp:
@@ -330,13 +375,13 @@ async def convert_loom_to_soma(
                 regulon_block = block if regulon_block is None else np.hstack([regulon_block, block])
 
         adata = anndata.AnnData(X=x, obs=obs, var=var, uns=uns)
-        for k, v in obsm_data.items():
-            adata.obsm[k] = np.asarray(v)
+        obsm = {k: np.asarray(v) for k, v in obsm_data.items()}
         if regulon_block is not None:
-            adata.obsm["RegulonsAUC"] = regulon_block
+            obsm["RegulonsAUC"] = regulon_block
 
     await _emit(status_callback, "ingesting matrix")
     _ingest_anndata(adata, output_path)
+    _write_obsm_columnwise(output_path, obsm)
     await _emit(status_callback, "finalizing")
     _write_sidecars(output_path, np.asarray(var.index), meta_json, regulons or None)
 
@@ -361,12 +406,116 @@ async def convert_to_soma(
         raise ValueError(f"Unsupported file format for SOMA conversion: {file_path}")
 
 
-def export_soma_to_h5ad(soma_path: str, out_path: str) -> str:
-    """Materialize a SOMA Experiment back to an .h5ad file (round-trip export)."""
-    import tiledbsoma
-    import tiledbsoma.io
+# Export row blocks are sized to hold about this many values, so peak memory
+# is one block regardless of dataset size.
+_EXPORT_BLOCK_VALUES = 8_000_000
 
-    with tiledbsoma.Experiment.open(soma_path, "r") as exp:
-        adata = tiledbsoma.io.to_anndata(exp, measurement_name=MEASUREMENT_NAME)
-    adata.write_h5ad(out_path)
+
+def _block_rows(n_rows: int, values_per_row: int) -> int:
+    return max(1, min(max(n_rows, 1), _EXPORT_BLOCK_VALUES // max(1, values_per_row)))
+
+
+def _read_coo_rows(arr, r0: int, r1: int):
+    """(rows relative to r0, cols, data) of rows [r0, r1) of a SparseNDArray."""
+    tbl = arr.read((slice(r0, r1 - 1),)).tables().concat()  # doubly inclusive
+    return (
+        tbl["soma_dim_0"].to_numpy() - r0,
+        tbl["soma_dim_1"].to_numpy(),
+        tbl["soma_data"].to_numpy(),
+    )
+
+
+def _soma_dtype(arr) -> np.dtype:
+    return np.dtype(arr.schema.field("soma_data").type.to_pandas_dtype())
+
+
+def _export_sparse(arr, group, key: str, n_rows: int, n_cols: int) -> None:
+    """Stream a SparseNDArray into ``group[key]`` as CSR, one row block at a time."""
+    from scipy import sparse
+
+    try:  # anndata >= 0.11 canonical location; fall back for older installs
+        from anndata.io import sparse_dataset, write_elem
+    except Exception:  # noqa: BLE001
+        from anndata.experimental import sparse_dataset, write_elem
+
+    dtype = _soma_dtype(arr)
+    step = _block_rows(n_rows, int(arr.nnz) // max(n_rows, 1))
+    # Explicit chunks: h5py sizes them from the empty initial datasets (1-1024
+    # values), and millions of tiny chunks make the appends slow and memory-hungry.
+    write_elem(
+        group, key, sparse.csr_matrix((0, n_cols), dtype=dtype),
+        dataset_kwargs={"chunks": (1 << 20,)},
+    )
+    ds = sparse_dataset(group[key])
+    for r0 in range(0, n_rows, step):
+        r1 = min(r0 + step, n_rows)
+        rows, cols, data = _read_coo_rows(arr, r0, r1)
+        ds.append(sparse.csr_matrix((data, (rows, cols)), shape=(r1 - r0, n_cols), dtype=dtype))
+
+
+def _export_dense(arr, group, key: str, n_rows: int, n_cols: int) -> None:
+    """Stream an obsm/varm layer (dense or sparse in SOMA) into a dense
+    ``group[key]``: sparse layers one row block at a time, dense layers (tiled
+    one column wide, see ``_write_obsm_columnwise``) one column block at a time."""
+    dtype = _soma_dtype(arr)
+    is_sparse = "sparse" in str(arr.soma_type).lower()
+    # Column blocks need chunks of the same width: writing them into a
+    # contiguous (row-major) dataset is ~5x slower than the read.
+    step = _block_rows(n_rows, n_cols) if is_sparse else _block_rows(n_cols, n_rows)
+    chunks = None if is_sparse or not (n_rows and n_cols) else (min(n_rows, 1 << 16), step)
+    ds = group.create_dataset(key, shape=(n_rows, n_cols), dtype=dtype, chunks=chunks)
+    ds.attrs["encoding-type"] = "array"
+    ds.attrs["encoding-version"] = "0.2.0"
+    if is_sparse:
+        for r0 in range(0, n_rows, step):
+            r1 = min(r0 + step, n_rows)
+            block = np.zeros((r1 - r0, n_cols), dtype=dtype)
+            rows, cols, data = _read_coo_rows(arr, r0, r1)
+            block[rows, cols] = data
+            ds[r0:r1] = block
+    else:
+        for c0 in range(0, n_cols, step):
+            c1 = min(c0 + step, n_cols)
+            res = arr.read((slice(0, n_rows - 1), slice(c0, c1 - 1)), result_order="column-major")
+            ds[:, c0:c1] = res.to_numpy().T  # column-major results are (cols, rows)
+
+
+def export_soma_to_h5ad(soma_path: str, out_path: str) -> str:
+    """Write a SOMA Experiment back to an .h5ad file (round-trip export).
+
+    ``tiledbsoma.io.to_anndata`` holds X, every obsm and obsp in memory at
+    once — several times the store's on-disk size. Instead, write obs/var/uns
+    through anndata, then stream X, obsm/varm and obsp/varp into the file in
+    row blocks, so peak memory is obs/var plus one block. The output matches
+    ``to_anndata``: X from the "data" layer as CSR, dense obsm/varm, CSR
+    obsp/varp.
+    """
+    import anndata
+    import h5py
+
+    from app.utils import soma_cache
+    # Private tiledbsoma helpers, so obs/var indexes and uns are restored
+    # exactly as ``to_anndata`` restores them.
+    from tiledbsoma.io.outgest import _extract_uns, _read_dataframe, _resolve_futures
+
+    exp = soma_cache.open_soma(soma_path)
+    ms = exp.ms[MEASUREMENT_NAME]
+    obs = _read_dataframe(exp.obs, None, "obs_id")
+    var = _read_dataframe(ms.var, None, "var_id")
+    uns = _resolve_futures(_extract_uns(ms["uns"]), deep=True) if "uns" in ms else {}
+    n_obs, n_var = len(obs), len(var)
+    anndata.AnnData(obs=obs, var=var, uns=uns).write_h5ad(out_path)
+    del obs, var, uns
+
+    with h5py.File(out_path, "r+") as f:
+        if "data" in ms.X:
+            _export_sparse(ms.X["data"], f, "X", n_obs, n_var)
+        for coll, n_rows in (("obsm", n_obs), ("varm", n_var)):
+            if coll in ms:
+                for key, arr in ms[coll].items():
+                    _export_dense(arr, f[coll], key, n_rows, int(arr.shape[1]))
+        for coll, n in (("obsp", n_obs), ("varp", n_var)):
+            if coll in ms:
+                for key, arr in ms[coll].items():
+                    _export_sparse(arr, f[coll], key, n, n)
     return out_path

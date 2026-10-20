@@ -20,10 +20,32 @@ MEASUREMENT_NAME = "RNA"
 _HANDLE_MAX = 16
 _handles: "OrderedDict[str, Any]" = OrderedDict()
 _handles_lock = Lock()
+_context = None  # one shared SOMATileDBContext for every cached handle
 
 _GENE_INDEX_CACHE: Dict[str, Optional[Dict[str, int]]] = {}
 _METADATA_CACHE: Dict[str, Optional[dict]] = {}
 _REGULON_CACHE: Dict[str, Optional[Dict[str, int]]] = {}
+
+
+def _get_context():
+    """Shared read context with a bounded TileDB memory budget.
+
+    TileDB's default budget (10 GiB) lets a single column read of a large
+    sparse array buffer most of the array. Callers hold ``_handles_lock``.
+    """
+    global _context
+    if _context is None:
+        import tiledbsoma  # lazy
+
+        from app.core.config import settings
+
+        _context = tiledbsoma.SOMATileDBContext(
+            tiledb_config={
+                "sm.mem.total_budget": settings.SOMA_MEMORY_BUDGET_BYTES,
+                "soma.init_buffer_bytes": settings.SOMA_INIT_BUFFER_BYTES,
+            }
+        )
+    return _context
 
 
 def open_soma(path: str):
@@ -35,7 +57,7 @@ def open_soma(path: str):
         if handle is not None:
             _handles.move_to_end(path)
             return handle
-        handle = tiledbsoma.Experiment.open(path, "r")
+        handle = tiledbsoma.Experiment.open(path, "r", context=_get_context())
         _handles[path] = handle
         while len(_handles) > _HANDLE_MAX:
             _, evicted = _handles.popitem(last=False)
