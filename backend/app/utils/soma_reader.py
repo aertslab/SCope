@@ -215,20 +215,32 @@ def describe(path: str) -> dict:
         store["var_count"] = int(_measurement(exp).var.count)
     except Exception as e:  # noqa: BLE001
         store["var_error"] = repr(e)
-    # The resolved embedding list the viewer will actually receive, and a live
-    # read-test of each so we can see exactly which (if any) fail and why.
+    # The resolved embedding list the viewer will actually receive, and the
+    # obsm layer each resolves to. Shapes only: a read-test would scan each
+    # whole sparse obsm (seconds per wide embedding on a large dataset).
     embeddings = [
         e.get("name") for e in (load_metadata(path).get("embeddings") or []) if isinstance(e, dict)
     ]
     store["resolved_embeddings"] = embeddings
-    reads = {}
-    for name in embeddings:
-        try:
-            payload = read_embedding(path, name)
-            reads[name] = {"ok": payload is not None, "bytes": len(payload) if payload else 0}
-        except Exception as e:  # noqa: BLE001
-            reads[name] = {"ok": False, "error": repr(e)}
-    store["embedding_read_test"] = reads
+    shapes = {}
+    try:
+        obsm = _measurement(exp).obsm
+        keys = list(obsm.keys())
+        for name in embeddings:
+            key = _resolve_obsm_key(keys, name)
+            if key is None:
+                shapes[name] = {"ok": False, "error": "no matching obsm layer"}
+                continue
+            arr = obsm[key]
+            shapes[name] = {
+                "ok": True,
+                "obsm_key": key,
+                "shape": [int(s) for s in arr.shape],
+                "soma_type": str(arr.soma_type),
+            }
+    except Exception as e:  # noqa: BLE001
+        store["embedding_shapes_error"] = repr(e)
+    store["embedding_shapes"] = shapes
     return info
 
 
