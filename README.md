@@ -86,6 +86,10 @@ npm install
 npm test
 ```
 
+### Changing backend dependencies
+
+The backend image installs the exact versions in `backend/uv.lock`, and the build fails if the lock is out of date. After editing dependencies in `backend/pyproject.toml`, run `uv lock` in `backend/` (or `uv lock --upgrade` to move everything to the latest versions) and commit both files.
+
 ## Optional configuration
 
 All settings live in `backend/app/core/config.py` and can be overridden in `backend/.env` (see `backend/.env.example`).
