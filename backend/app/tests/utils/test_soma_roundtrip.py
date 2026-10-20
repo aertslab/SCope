@@ -85,7 +85,7 @@ def test_csr_h5ad_roundtrip_stays_sparse(tmp_path, monkeypatch):
     np.testing.assert_allclose(rt.obsm["X_umap"], adata.obsm["X_umap"])
 
 
-def test_wide_embedding_reads_only_requested_dims(tmp_path):
+def test_wide_embedding_reads_only_requested_dims(tmp_path, monkeypatch):
     n_obs = 50
     rng = np.random.default_rng(1)
     wide = rng.random((n_obs, 20)).astype(np.float32)
@@ -101,8 +101,16 @@ def test_wide_embedding_reads_only_requested_dims(tmp_path):
     h5ad_path = str(tmp_path / "in.h5ad")
     adata.write_h5ad(h5ad_path)
     soma_path = str(tmp_path / "out.soma")
+    # A small block size makes the converter write obsm over several column blocks.
+    from app.utils import soma_converter
+
+    monkeypatch.setattr(soma_converter, "_OBSM_BLOCK_VALUES", 100)
     asyncio.run(convert_h5ad_to_soma(h5ad_path, soma_path))
     soma_cache.invalidate(soma_path)
+
+    # obsm is stored dense and column-tiled, not as from_anndata's sparse default.
+    obsm = soma_cache.open_soma(soma_path).ms["RNA"].obsm
+    assert "dense" in str(obsm["X_latent"].soma_type).lower()
 
     # 2-D/3-D embeddings are listed first, so the viewer defaults to umap.
     embs = soma_reader.load_metadata(soma_path)["embeddings"]

@@ -86,9 +86,10 @@ def _read_obsm_columns(arr, cols: List[int]) -> np.ndarray:
             dst = lut[tbl["soma_dim_1"].to_numpy()]
             out[rows, dst] = tbl["soma_data"].to_numpy()
         return out
-    # Dense: one doubly-inclusive column slice per requested column.
+    # Dense: one doubly-inclusive column slice per requested column. Column-major
+    # results match the converter's column tiles (several times faster).
     for i, c in enumerate(cols):
-        res = arr.read((slice(None), slice(c, c)))
+        res = arr.read((slice(None), slice(c, c)), result_order="column-major")
         col = res.to_numpy() if hasattr(res, "to_numpy") else np.asarray(res)
         out[:, i] = np.asarray(col).reshape(-1)
     return out
