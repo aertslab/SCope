@@ -61,42 +61,37 @@ def _obsm_keys(exp) -> List[str]:
         return []
 
 
-def _obsm_to_numpy(arr) -> np.ndarray:
-    """Read an obsm layer into a 2-D ndarray, handling dense OR sparse storage
-    and the differing read APIs (DenseNDArray.read() → Arrow Tensor;
-    SparseNDArray.read().tables() → COO)."""
+# SCope plots 2-D or 3-D embeddings, so an embedding read never needs more
+# than this many obsm columns, however wide the stored embedding is.
+MAX_EMBEDDING_DIMS = 3
+
+
+def _read_obsm_columns(arr, cols: List[int]) -> np.ndarray:
+    """Read only ``cols`` (unique, in range) of an obsm layer into an
+    ``(n_obs, len(cols))`` float32 array.
+
+    Handles dense OR sparse storage. A sparse COO read omits zeros, so the
+    output is preallocated to the array's declared row count and each chunk is
+    scattered into it (never concatenated), keeping cells aligned with the
+    full-length feature columns.
+    """
+    n_obs = int(arr.shape[0])
+    out = np.zeros((n_obs, len(cols)), dtype=np.float32)
     soma_type = str(getattr(arr, "soma_type", "")).lower()
     if "sparse" in soma_type:
-        tbl = arr.read().tables().concat()
-        rows = tbl["soma_dim_0"].to_numpy()
-        cols = tbl["soma_dim_1"].to_numpy()
-        vals = np.asarray(tbl["soma_data"].to_numpy(), dtype=np.float32)
-        # Densify to the array's DECLARED shape, not the max stored index. A COO
-        # table omits zeros, so a trailing all-zero column (or an all-zero last
-        # cell) would otherwise shrink the array: that both misaligns cells
-        # against the full-length feature columns AND makes the column count
-        # disagree with the n_dims that load_metadata reports from .shape —
-        # desyncing the embedding-dimension contract the 3D viewer relies on.
-        try:
-            shp = arr.shape
-            nrows = int(shp[0])
-            ncols = int(shp[1]) if len(shp) > 1 else 1
-        except Exception:  # noqa: BLE001
-            nrows = int(rows.max()) + 1 if rows.size else 0
-            ncols = int(cols.max()) + 1 if cols.size else 0
-        out = np.zeros((nrows, ncols), dtype=np.float32)
-        if rows.size:
-            out[rows, cols] = vals
+        lut = np.full(max(cols) + 1, -1, dtype=np.int64)
+        lut[cols] = np.arange(len(cols))
+        for tbl in arr.read((slice(None), cols)).tables():
+            rows = tbl["soma_dim_0"].to_numpy()
+            dst = lut[tbl["soma_dim_1"].to_numpy()]
+            out[rows, dst] = tbl["soma_data"].to_numpy()
         return out
-    # Dense: read() returns a pyarrow.Tensor (preferred), else an ndarray-ish.
-    try:
-        res = arr.read()
-    except TypeError:
-        # Some versions require explicit full coords for a dense read.
-        res = arr.read((slice(None), slice(None)))
-    if hasattr(res, "to_numpy"):
-        return np.asarray(res.to_numpy())
-    return np.asarray(res)
+    # Dense: one doubly-inclusive column slice per requested column.
+    for i, c in enumerate(cols):
+        res = arr.read((slice(None), slice(c, c)))
+        col = res.to_numpy() if hasattr(res, "to_numpy") else np.asarray(res)
+        out[:, i] = np.asarray(col).reshape(-1)
+    return out
 
 
 def load_metadata(path: str) -> dict:
@@ -161,6 +156,10 @@ def load_metadata(path: str) -> dict:
     except Exception:  # noqa: BLE001
         logger.exception("Failed to determine embedding dims for %s", path)
 
+    # The viewer opens embeddings[0]; list 2-D/3-D embeddings first (stable
+    # sort) so a wide latent space (e.g. a 500-dim X_concord) isn't the default.
+    meta["embeddings"].sort(key=lambda e: 0 if 2 <= e.get("n_dims", 2) <= MAX_EMBEDDING_DIMS else 1)
+
     final = [e.get("name") for e in (meta.get("embeddings") or []) if isinstance(e, dict)]
     logger.info(
         "metadata for %s: sidecar=%s obsm_keys=%s -> embeddings=%s",
@@ -216,20 +215,32 @@ def describe(path: str) -> dict:
         store["var_count"] = int(_measurement(exp).var.count)
     except Exception as e:  # noqa: BLE001
         store["var_error"] = repr(e)
-    # The resolved embedding list the viewer will actually receive, and a live
-    # read-test of each so we can see exactly which (if any) fail and why.
+    # The resolved embedding list the viewer will actually receive, and the
+    # obsm layer each resolves to. Shapes only: a read-test would scan each
+    # whole sparse obsm (seconds per wide embedding on a large dataset).
     embeddings = [
         e.get("name") for e in (load_metadata(path).get("embeddings") or []) if isinstance(e, dict)
     ]
     store["resolved_embeddings"] = embeddings
-    reads = {}
-    for name in embeddings:
-        try:
-            payload = read_embedding(path, name)
-            reads[name] = {"ok": payload is not None, "bytes": len(payload) if payload else 0}
-        except Exception as e:  # noqa: BLE001
-            reads[name] = {"ok": False, "error": repr(e)}
-    store["embedding_read_test"] = reads
+    shapes = {}
+    try:
+        obsm = _measurement(exp).obsm
+        keys = list(obsm.keys())
+        for name in embeddings:
+            key = _resolve_obsm_key(keys, name)
+            if key is None:
+                shapes[name] = {"ok": False, "error": "no matching obsm layer"}
+                continue
+            arr = obsm[key]
+            shapes[name] = {
+                "ok": True,
+                "obsm_key": key,
+                "shape": [int(s) for s in arr.shape],
+                "soma_type": str(arr.soma_type),
+            }
+    except Exception as e:  # noqa: BLE001
+        store["embedding_shapes_error"] = repr(e)
+    store["embedding_shapes"] = shapes
     return info
 
 
@@ -238,11 +249,9 @@ def read_expression_column(path: str, joinid: int) -> bytes:
     exp = soma_cache.open_soma(path)
     n = _n_obs(exp)
     x = _measurement(exp).X["data"]
-    tbl = x.read((slice(None), int(joinid))).tables().concat()
-    rows = tbl["soma_dim_0"].to_numpy()
-    vals = tbl["soma_data"].to_numpy().astype(np.float32, copy=False)
     dense = np.zeros(n, dtype=np.float32)
-    dense[rows] = vals
+    for tbl in x.read((slice(None), int(joinid))).tables():
+        dense[tbl["soma_dim_0"].to_numpy()] = tbl["soma_data"].to_numpy()
     return dense.tobytes()
 
 
@@ -255,8 +264,7 @@ def read_regulon(path: str, name: str) -> Optional[bytes]:
     exp = soma_cache.open_soma(path)
     try:
         arr = _measurement(exp).obsm["RegulonsAUC"]
-        data = _obsm_to_numpy(arr)  # (n_obs, n_regulons)
-        return np.ascontiguousarray(data[:, col], dtype=np.float32).tobytes()
+        return _read_obsm_columns(arr, [int(col)])[:, 0].tobytes()
     except Exception:  # noqa: BLE001
         logger.exception("Failed reading regulon %s from %s", name, path)
         return None
@@ -282,10 +290,11 @@ def read_embedding(path: str, name: str, dims: Optional[List[int]] = None) -> Op
     """Read an embedding from obsm → interleaved float32 bytes.
 
     ``dims`` selects which stored dimensions (column indices) to return, in order
-    — e.g. ``[0, 1, 2]`` for a 3D plot. Out-of-range indices are dropped; if none
-    remain valid (or ``dims`` is ``None``) the first two dimensions are returned
-    (the 2D default). The frontend learns each embedding's dimensionality from
-    ``/metadata`` (``n_dims``) and only requests valid indices.
+    — e.g. ``[0, 1, 2]`` for a 3D plot. Out-of-range indices are dropped and at
+    most ``MAX_EMBEDDING_DIMS`` are kept; if none remain valid (or ``dims`` is
+    ``None``) the first two dimensions are returned (the 2D default). Only the
+    selected columns are read. The frontend learns each embedding's
+    dimensionality from ``/metadata`` (``n_dims``) and only requests valid indices.
     """
     exp = soma_cache.open_soma(path)
     try:
@@ -295,12 +304,15 @@ def read_embedding(path: str, name: str, dims: Optional[List[int]] = None) -> Op
         if key is None:
             logger.warning("embedding %r not found in obsm keys %s (%s)", name, keys, path)
             return None
-        data = np.asarray(_obsm_to_numpy(obsm[key]))  # (n_obs, dims)
-        n_available = data.shape[1] if data.ndim > 1 else 1
-        sel = [d for d in (dims or []) if 0 <= d < n_available]
+        arr = obsm[key]
+        shp = arr.shape
+        n_available = int(shp[1]) if len(shp) > 1 else 1
+        sel = [d for d in (dims or []) if 0 <= d < n_available][:MAX_EMBEDDING_DIMS]
         if not sel:
             sel = list(range(min(2, n_available)))
-        out = np.ascontiguousarray(data[:, sel], dtype=np.float32)
+        uniq = sorted(set(sel))
+        data = _read_obsm_columns(arr, uniq)
+        out = np.ascontiguousarray(data[:, [uniq.index(d) for d in sel]])
         return out.tobytes()
     except Exception:  # noqa: BLE001
         logger.exception("Failed reading embedding %s from %s", name, path)

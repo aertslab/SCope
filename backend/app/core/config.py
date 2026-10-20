@@ -84,6 +84,12 @@ class Settings(BaseSettings):
     # project never loses its data). A daily Celery-beat task enforces this.
     TRASH_RETENTION_DAYS: int = 30
 
+    # TileDB memory budget for reads served by the API. Smaller budgets cap
+    # peak memory per read; in measurements they were not slower, since a
+    # column slice of a sparse array scans every tile regardless.
+    SOMA_MEMORY_BUDGET_BYTES: int = 1024 * 1024 * 1024  # 1 GiB
+    SOMA_INIT_BUFFER_BYTES: int = 128 * 1024 * 1024  # 128 MiB
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

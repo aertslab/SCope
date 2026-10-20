@@ -44,6 +44,9 @@ services:
       # For local dev only, set ALLOW_INSECURE_SECRETS=true in .env.
     ports:
       - "8000:8000"
+    # Cap the API so a runaway read is OOM-killed on its own instead of
+    # starving the worker (conversions can need ~10 GB) and the database.
+    mem_limit: ${BACKEND_MEM_LIMIT:-4g}
     depends_on:
       - db
       - redis
