@@ -9,6 +9,7 @@ This is the modernized version of SCope, featuring a FastAPI backend and a React
 *   Node 20+ (only if running the frontend without Docker)
 
 ## Quick start (development)
+Give the Docker VM (Docker Desktop / OrbStack) enough memory: converting a large dataset in the worker can need 10 GB or more for a dataset with hundreds of thousands of cells, and the worker is killed silently if it runs out.
 
 1.  **Create a backend env file:**
 
@@ -22,7 +23,7 @@ This is the modernized version of SCope, featuring a FastAPI backend and a React
     python -c "import secrets; print(secrets.token_urlsafe(64))"
     ```
 
-    For local development with the placeholder values you can set `ALLOW_INSECURE_SECRETS=true`. Production deployments must leave it `false` (or unset).
+    The example file sets `ALLOW_INSECURE_SECRETS=true`. Production deployments must leave it `false` (or unset). Optional settings (OAuth, SMTP, upload limits) are listed under [Optional configuration](#optional-configuration).
 
 2.  **Start the stack:**
 
@@ -38,28 +39,72 @@ This is the modernized version of SCope, featuring a FastAPI backend and a React
     *   Celery worker
     *   Frontend dev server at <http://localhost:3000>
 
-3.  **Apply database migrations:**
+    Database migrations are applied automatically when the backend starts (`RUN_MIGRATIONS_ON_STARTUP=true`). To run them by hand instead, set it to `false` and use `docker compose exec backend alembic upgrade head`.
 
-    ```bash
-    docker compose exec backend alembic upgrade head
-    ```
-
-4.  **Create a superuser:**
+3.  **Create a superuser:**
 
     ```bash
     docker compose exec backend python -m app.cli create-superuser \
         --email admin@example.com --password 'choose-something-strong'
     ```
 
+4.  **Log in and add a dataset:** open <http://127.0.0.1:3000>, log in, and upload an `.h5ad` or `.loom` file. The Celery worker converts it to a TileDB-SOMA store in the `uploads` volume; the dataset becomes viewable once processing finishes (progress is in `docker compose logs -f worker`).
+
+    For very large files, upload from inside the backend container to avoid the host port-forwarding proxy (see `backend/scripts/upload_local.py` for details; create a personal access token in the UI first):
+
+    ```bash
+    # ./backend is bind-mounted at /app, so ./backend/_tmp/big.h5ad is /app/_tmp/big.h5ad
+    docker compose exec backend python scripts/upload_local.py \
+        --file /app/_tmp/big.h5ad --token scope_pat_xxx --name "My Dataset" --type h5ad
+    ```
+
+    The worker does not hot-reload code changes; run `docker compose restart worker` after editing conversion code.
+
 ### Running the frontend outside Docker
 
 ```bash
 cd frontend
 npm install
-npm run dev   # Vite serves on http://localhost:5173 by default
+npm run dev   # Vite serves on http://localhost:3000 (see vite.config.ts)
 ```
 
-Set `VITE_API_TARGET=http://localhost:8000` if you also run the backend on the host.
+API requests to `/api` are proxied to `VITE_API_TARGET` (default `http://127.0.0.1:8000`).
+
+### Running the tests
+
+The Docker image does not include the test dependencies. Backend (from `backend/`, in a Python 3.13 environment):
+
+```bash
+uv pip install -e '.[dev]'   # or: pip install -e '.[dev]'
+pytest
+```
+
+Frontend (from `frontend/`):
+
+```bash
+npm install
+npm test
+```
+
+### Changing backend dependencies
+
+The backend image installs the exact versions in `backend/uv.lock`, and the build fails if the lock is out of date. After editing dependencies in `backend/pyproject.toml`, run `uv lock` in `backend/` (or `uv lock --upgrade` to move everything to the latest versions) and commit both files.
+
+## Optional configuration
+
+All settings live in `backend/app/core/config.py` and can be overridden in `backend/.env` (see `backend/.env.example`).
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | unset | Enables "Log in with Google". Register `<API origin>/api/v1/login/google/callback` as the redirect URI. |
+| `ORCID_CLIENT_ID` / `ORCID_CLIENT_SECRET` | unset | Enables ORCiD login and account linking. Redirect URI: `<API origin>/api/v1/login/orcid/callback`. |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_TLS`, `SMTP_FROM` | unset / 587 / – / – / `true` / `SMTP_USER` | Email for password reset and verification. Without `SMTP_HOST`, emails (including their links) are written to the backend log. |
+| `MAX_UPLOAD_BYTES` | 256 GiB | Maximum upload size. |
+| `TRASH_RETENTION_DAYS` | 30 | Trashed datasets not linked to a project are purged after this many days (daily beat task in the worker). |
+| `RUN_MIGRATIONS_ON_STARTUP` | `true` | Apply Alembic migrations when the backend starts. |
+| `LOG_LEVEL` | `INFO` | Log level of the app's own loggers. |
+
+A provider is enabled only when both its client id and secret are set. In development the OAuth redirect URI uses `127.0.0.1` rather than `localhost`, so register it that way with the provider.
 
 ## Production deployment
 
@@ -98,7 +143,7 @@ These guard rails exist to make a misconfigured deployment fail loudly instead o
 ```bash
 # 1. populate the env files (see backend/.env.example)
 cp backend/.env.example backend/.env  # then edit
-# 2. populate ./env (POSTGRES_*) — may live alongside the compose file
+# 2. populate ./.env (POSTGRES_*) next to docker-compose.prod.yml
 # 3. build & start
 docker compose -f docker-compose.prod.yml up -d --build
 # 4. apply migrations on first run / after upgrades

@@ -6,7 +6,7 @@ import time
 import asyncio
 import logging
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
@@ -100,12 +100,20 @@ def _requeue_interrupted_conversions(**_kwargs) -> None:
                 rows = (
                     await session.execute(
                         select(Dataset).where(
-                            Dataset.status == "processing",
+                            # Converters append the current phase, e.g.
+                            # "processing (writing structure)".
+                            or_(
+                                Dataset.status == "processing",
+                                Dataset.status.like("processing (%"),
+                            ),
                             Dataset.deleted_at.is_(None),
                         )
                     )
                 ).scalars().all()
-                targets = [(str(d.id), d.file_path) for d in rows if d.file_path]
+                # Datasets sharing a DataFile share one output path; converting
+                # it once updates all linked datasets.
+                by_path = {d.file_path: str(d.id) for d in rows if d.file_path}
+                targets = [(dsid, path) for path, dsid in by_path.items()]
             for dsid, path in targets:
                 logger.info("Recovery: re-enqueuing interrupted conversion for dataset %s", dsid)
                 process_dataset.delay(dsid, path)

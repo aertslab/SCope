@@ -7,7 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.109.0",
     "uvicorn[standard]>=0.27.0",
-    "sqlalchemy>=2.0.25",
+    "sqlalchemy[asyncio]>=2.0.25",
     "alembic>=1.13.1",
     "asyncpg>=0.29.0",
     "pydantic>=2.6.0",
@@ -16,7 +16,7 @@ dependencies = [
     "bcrypt>=4.0.1",
     "python-multipart>=0.0.6",
     "email-validator>=2.1.0.post1",
-    "anndata>=0.10.5",
+    "anndata>=0.10.5,<0.13",
     "zarr>=2.16.1",
     # TileDB-SOMA (CZI CELLxGENE Census standard) — sparse, out-of-core,
     # both-axis random access for 10s of millions of cells. Ships prebuilt

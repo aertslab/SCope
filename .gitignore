@@ -15,6 +15,7 @@ venv/
 env/
 .env
 .env.*
+!.env.example
 *.sqlite3
 *.db
 .pytest_cache/
@@ -36,6 +37,8 @@ pnpm-debug.log*
 # Project Specific - Backend
 backend/uploads/*
 !backend/uploads/.gitkeep
+# Celery beat state (written by the worker into the bind-mounted source tree)
+backend/celerybeat-schedule*
 
 # Project Specific - Data
 *.loom
