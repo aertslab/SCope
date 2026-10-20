@@ -361,12 +361,109 @@ async def convert_to_soma(
         raise ValueError(f"Unsupported file format for SOMA conversion: {file_path}")
 
 
-def export_soma_to_h5ad(soma_path: str, out_path: str) -> str:
-    """Materialize a SOMA Experiment back to an .h5ad file (round-trip export)."""
-    import tiledbsoma
-    import tiledbsoma.io
+# Export row blocks are sized to hold about this many values, so peak memory
+# is one block regardless of dataset size.
+_EXPORT_BLOCK_VALUES = 8_000_000
 
-    with tiledbsoma.Experiment.open(soma_path, "r") as exp:
-        adata = tiledbsoma.io.to_anndata(exp, measurement_name=MEASUREMENT_NAME)
-    adata.write_h5ad(out_path)
+
+def _block_rows(n_rows: int, values_per_row: int) -> int:
+    return max(1, min(max(n_rows, 1), _EXPORT_BLOCK_VALUES // max(1, values_per_row)))
+
+
+def _read_coo_rows(arr, r0: int, r1: int):
+    """(rows relative to r0, cols, data) of rows [r0, r1) of a SparseNDArray."""
+    tbl = arr.read((slice(r0, r1 - 1),)).tables().concat()  # doubly inclusive
+    return (
+        tbl["soma_dim_0"].to_numpy() - r0,
+        tbl["soma_dim_1"].to_numpy(),
+        tbl["soma_data"].to_numpy(),
+    )
+
+
+def _soma_dtype(arr) -> np.dtype:
+    return np.dtype(arr.schema.field("soma_data").type.to_pandas_dtype())
+
+
+def _export_sparse(arr, group, key: str, n_rows: int, n_cols: int) -> None:
+    """Stream a SparseNDArray into ``group[key]`` as CSR, one row block at a time."""
+    from scipy import sparse
+
+    try:  # anndata >= 0.11 canonical location; fall back for older installs
+        from anndata.io import sparse_dataset, write_elem
+    except Exception:  # noqa: BLE001
+        from anndata.experimental import sparse_dataset, write_elem
+
+    dtype = _soma_dtype(arr)
+    step = _block_rows(n_rows, int(arr.nnz) // max(n_rows, 1))
+    # Explicit chunks: h5py sizes them from the empty initial datasets (1-1024
+    # values), and millions of tiny chunks make the appends slow and memory-hungry.
+    write_elem(
+        group, key, sparse.csr_matrix((0, n_cols), dtype=dtype),
+        dataset_kwargs={"chunks": (1 << 20,)},
+    )
+    ds = sparse_dataset(group[key])
+    for r0 in range(0, n_rows, step):
+        r1 = min(r0 + step, n_rows)
+        rows, cols, data = _read_coo_rows(arr, r0, r1)
+        ds.append(sparse.csr_matrix((data, (rows, cols)), shape=(r1 - r0, n_cols), dtype=dtype))
+
+
+def _export_dense(arr, group, key: str, n_rows: int, n_cols: int) -> None:
+    """Stream an obsm/varm layer (dense or sparse in SOMA) into a dense
+    ``group[key]``, one row block at a time."""
+    dtype = _soma_dtype(arr)
+    ds = group.create_dataset(key, shape=(n_rows, n_cols), dtype=dtype)
+    ds.attrs["encoding-type"] = "array"
+    ds.attrs["encoding-version"] = "0.2.0"
+    is_sparse = "sparse" in str(arr.soma_type).lower()
+    step = _block_rows(n_rows, n_cols)
+    for r0 in range(0, n_rows, step):
+        r1 = min(r0 + step, n_rows)
+        if is_sparse:
+            block = np.zeros((r1 - r0, n_cols), dtype=dtype)
+            rows, cols, data = _read_coo_rows(arr, r0, r1)
+            block[rows, cols] = data
+        else:
+            block = arr.read((slice(r0, r1 - 1), slice(0, n_cols - 1))).to_numpy()
+        ds[r0:r1] = block
+
+
+def export_soma_to_h5ad(soma_path: str, out_path: str) -> str:
+    """Write a SOMA Experiment back to an .h5ad file (round-trip export).
+
+    ``tiledbsoma.io.to_anndata`` holds X, every obsm and obsp in memory at
+    once — several times the store's on-disk size. Instead, write obs/var/uns
+    through anndata, then stream X, obsm/varm and obsp/varp into the file in
+    row blocks, so peak memory is obs/var plus one block. The output matches
+    ``to_anndata``: X from the "data" layer as CSR, dense obsm/varm, CSR
+    obsp/varp.
+    """
+    import anndata
+    import h5py
+
+    from app.utils import soma_cache
+    # Private tiledbsoma helpers, so obs/var indexes and uns are restored
+    # exactly as ``to_anndata`` restores them.
+    from tiledbsoma.io.outgest import _extract_uns, _read_dataframe, _resolve_futures
+
+    exp = soma_cache.open_soma(soma_path)
+    ms = exp.ms[MEASUREMENT_NAME]
+    obs = _read_dataframe(exp.obs, None, "obs_id")
+    var = _read_dataframe(ms.var, None, "var_id")
+    uns = _resolve_futures(_extract_uns(ms["uns"]), deep=True) if "uns" in ms else {}
+    n_obs, n_var = len(obs), len(var)
+    anndata.AnnData(obs=obs, var=var, uns=uns).write_h5ad(out_path)
+    del obs, var, uns
+
+    with h5py.File(out_path, "r+") as f:
+        if "data" in ms.X:
+            _export_sparse(ms.X["data"], f, "X", n_obs, n_var)
+        for coll, n_rows in (("obsm", n_obs), ("varm", n_var)):
+            if coll in ms:
+                for key, arr in ms[coll].items():
+                    _export_dense(arr, f[coll], key, n_rows, int(arr.shape[1]))
+        for coll, n in (("obsp", n_obs), ("varp", n_var)):
+            if coll in ms:
+                for key, arr in ms[coll].items():
+                    _export_sparse(arr, f[coll], key, n, n)
     return out_path

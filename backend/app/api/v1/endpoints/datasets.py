@@ -1705,25 +1705,28 @@ async def export_dataset_h5ad(
 
     from app.utils.soma_converter import export_soma_to_h5ad
 
-    os.makedirs(os.path.join(UPLOAD_DIR, "exports"), exist_ok=True)
-    out_path = os.path.join(UPLOAD_DIR, "exports", f"{dataset.id}.h5ad")
-    try:
-        await run_in_threadpool(export_soma_to_h5ad, dataset.converted_path, out_path)
-    except Exception as e:
-        logger.exception("Export failed for %s", dataset_id)
-        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
-
-    safe_stem = (dataset.name or "dataset").strip().replace("/", "_").replace("\\", "_").strip(". ") or "dataset"
-
-    def _cleanup(path: str = out_path) -> None:
+    def _cleanup(path: str) -> None:
         try:
             os.remove(path)
         except OSError:
             pass
 
+    os.makedirs(os.path.join(UPLOAD_DIR, "exports"), exist_ok=True)
+    # Unique per request: a large export now takes minutes, so concurrent
+    # exports of one dataset must not write to the same file.
+    out_path = os.path.join(UPLOAD_DIR, "exports", f"{dataset.id}-{uuid4().hex}.h5ad")
+    try:
+        await run_in_threadpool(export_soma_to_h5ad, dataset.converted_path, out_path)
+    except Exception as e:
+        _cleanup(out_path)
+        logger.exception("Export failed for %s", dataset_id)
+        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
+
+    safe_stem = (dataset.name or "dataset").strip().replace("/", "_").replace("\\", "_").strip(". ") or "dataset"
+
     return FileResponse(
         path=out_path,
         filename=f"{safe_stem}.h5ad",
         media_type="application/octet-stream",
-        background=BackgroundTask(_cleanup),
+        background=BackgroundTask(_cleanup, out_path),
     )
