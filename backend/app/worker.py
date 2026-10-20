@@ -28,6 +28,11 @@ celery_app = Celery(
     backend=settings.REDIS_URL
 )
 
+# A conversion can peak at ~10 GB, and the child process rarely returns that
+# memory to the OS afterwards. Replace a child once its resident memory exceeds
+# this (KiB, checked after each task) so an idle worker doesn't hold it.
+celery_app.conf.worker_max_memory_per_child = 1024 * 1024  # 1 GiB
+
 # Daily auto-purge of expired, orphaned trashed datasets. Requires the worker
 # to run with embedded beat (`celery -A app.worker worker -B`) or a dedicated
 # beat process; see docker-compose.

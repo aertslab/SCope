@@ -1481,6 +1481,11 @@ async def get_dataset_embedding(
             dim_list = [int(d) for d in dims.split(",") if d.strip() != ""]
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid dims parameter")
+        if len(dim_list) > soma_reader.MAX_EMBEDDING_DIMS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"At most {soma_reader.MAX_EMBEDDING_DIMS} dims can be requested",
+            )
 
     try:
         payload = await run_in_threadpool(soma_reader.read_embedding, dataset.converted_path, embedding_name, dim_list)

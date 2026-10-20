@@ -73,3 +73,39 @@ def test_csr_h5ad_roundtrip_stays_sparse(tmp_path):
     export_soma_to_h5ad(soma_path, out_h5ad)
     rt = anndata.read_h5ad(out_h5ad)
     assert rt.shape == (n_obs, n_var)
+
+
+def test_wide_embedding_reads_only_requested_dims(tmp_path):
+    n_obs = 50
+    rng = np.random.default_rng(1)
+    wide = rng.random((n_obs, 20)).astype(np.float32)
+    wide[:, 7] = 0.0  # an all-zero column must still come back as zeros
+    adata = anndata.AnnData(
+        X=sparse.random(n_obs, 5, density=0.3, format="csr", dtype=np.float32, random_state=1),
+        var=pd.DataFrame(index=[f"G{i}" for i in range(5)]),
+        obs=pd.DataFrame(index=[f"c{i}" for i in range(n_obs)]),
+    )
+    # The wide latent space is listed first in obsm, as in a real dataset.
+    adata.obsm["X_latent"] = wide
+    adata.obsm["X_umap"] = rng.random((n_obs, 2)).astype(np.float32)
+    h5ad_path = str(tmp_path / "in.h5ad")
+    adata.write_h5ad(h5ad_path)
+    soma_path = str(tmp_path / "out.soma")
+    asyncio.run(convert_h5ad_to_soma(h5ad_path, soma_path))
+    soma_cache.invalidate(soma_path)
+
+    # 2-D/3-D embeddings are listed first, so the viewer defaults to umap.
+    embs = soma_reader.load_metadata(soma_path)["embeddings"]
+    assert [e["name"] for e in embs] == ["umap", "latent"]
+    assert embs[1]["n_dims"] == 20
+
+    def read(dims):
+        raw = soma_reader.read_embedding(soma_path, "latent", dims)
+        return np.frombuffer(raw, dtype=np.float32).reshape(n_obs, -1)
+
+    np.testing.assert_allclose(read(None), wide[:, [0, 1]])
+    np.testing.assert_allclose(read([12, 7, 3]), wide[:, [12, 7, 3]])
+    np.testing.assert_allclose(read([5, 5]), wide[:, [5, 5]])
+    # Out-of-range dims are dropped; more than 3 are truncated.
+    np.testing.assert_allclose(read([19, 99]), wide[:, [19]])
+    np.testing.assert_allclose(read([0, 1, 2, 3]), wide[:, [0, 1, 2]])
