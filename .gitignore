@@ -15,6 +15,7 @@ venv/
 env/
 .env
 .env.*
+!.env.example
 *.sqlite3
 *.db
 .pytest_cache/
